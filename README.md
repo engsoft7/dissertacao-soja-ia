@@ -1,5 +1,7 @@
 # Aplicação da Inteligência Artificial na Previsão da Produtividade da Soja
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21285918.svg)](https://doi.org/10.5281/zenodo.21285918)
+
 Códigos e dados da dissertação de Mestrado Profissional em Computação Aplicada
 (PPCA/UFPA — Campus de Tucuruí).
 
@@ -156,8 +158,14 @@ licenças de origem; cite as fontes originais ao reutilizá-los.
 
 ---
 
-## Como citar
+## Como citar a dissertação
 
 > SANTOS, M. L. dos. *Aplicação da Inteligência Artificial na previsão da
 > produtividade da soja*. 2026. Dissertação (Mestrado Profissional em Computação
 > Aplicada) — Universidade Federal do Pará, Tucuruí, 2026.
+
+## Como citar o código e os dados
+
+SANTOS, Maycon Lima dos. **Aplicação da Inteligência Artificial na Previsão da
+Produtividade da Soja: códigos e dados**. Zenodo, 2026. Software.
+DOI: 10.5281/zenodo.21285918. Disponível em: https://doi.org/10.5281/zenodo.21285918.

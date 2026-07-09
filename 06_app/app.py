@@ -100,7 +100,7 @@ with dir_:
         size=110, color="#B00020", filled=True
     ).encode(x="ano:O", y=f"{M.ALVO}:Q",
              tooltip=[alt.Tooltip("ano", title="Valor idêntico ao ano anterior")])
-    st.altair_chart(linha + marcas, use_container_width=True)
+    st.altair_chart(linha + marcas, width='stretch')
     st.caption("Pontos em vermelho: safras cuja produtividade repete exatamente o valor do ano anterior.")
 
 st.divider()

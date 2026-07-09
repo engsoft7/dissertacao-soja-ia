@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "Se você utilizar este material, cite-o conforme abaixo."
+type: software
+title: "Aplicação da Inteligência Artificial na Previsão da Produtividade da Soja: códigos e dados"
+authors:
+  - family-names: "Lima dos Santos"
+    given-names: "Maycon"
+    affiliation: "Universidade Federal do Pará (PPCA/UFPA), Campus de Tucuruí"
+repository-code: "https://github.com/engsoft7/dissertacao-soja-ia"
+abstract: >-
+  Códigos e dados da dissertação de Mestrado Profissional em Computação Aplicada.
+  Compara modelos de Aprendizado de Máquina para previsão da produtividade
+  municipal da soja, em recorte nacional e em estudo de caso no Pará, integrando
+  IBGE (PAM), MODIS, CHIRPS, ERA5-Land e a máscara anual do MapBiomas.
+keywords:
+  - aprendizado de máquina
+  - produtividade da soja
+  - sensoriamento remoto
+  - MapBiomas
+  - Amazônia
+version: "1.0.0"
+date-released: "2026-07-09"

@@ -169,3 +169,6 @@ licenças de origem; cite as fontes originais ao reutilizá-los.
 SANTOS, Maycon Lima dos. **Aplicação da Inteligência Artificial na Previsão da
 Produtividade da Soja: códigos e dados**. Zenodo, 2026. Software.
 DOI: 10.5281/zenodo.21285918. Disponível em: https://doi.org/10.5281/zenodo.21285918.
+
+Alternativa: `./run.sh` na raiz do repositório ativa o ambiente virtual
+(`.venv/`) e inicia o painel automaticamente.

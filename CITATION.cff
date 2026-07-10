@@ -7,6 +7,7 @@ authors:
     given-names: "Maycon"
     affiliation: "Universidade Federal do Pará (PPCA/UFPA), Campus de Tucuruí"
 repository-code: "https://github.com/engsoft7/dissertacao-soja-ia"
+doi: 10.5281/zenodo.21286115
 abstract: >-
   Códigos e dados da dissertação de Mestrado Profissional em Computação Aplicada.
   Compara modelos de Aprendizado de Máquina para previsão da produtividade

@@ -3,7 +3,11 @@
 Produto técnico da dissertação *Aplicação da Inteligência Artificial na previsão
 da produtividade da soja* (PPCA/UFPA).
 
-## Executar
+## Acessar
+
+Versão publicada: **<https://soja-para.streamlit.app>**
+
+Para executar localmente:
 
 ```bash
 pip install -r requirements.txt

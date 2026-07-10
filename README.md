@@ -100,6 +100,28 @@ Os scripts de `01_coleta_dados/` foram escritos para o Google Colab. Registre um
 projeto em <https://code.earthengine.google.com>, informe o ID na variável
 `PROJETO_GEE` e execute. A coleta com máscara leva cerca de 20 minutos.
 
+**Painel de estimativa** (produto técnico; ver `06_app/README.md`)
+
+```bash
+pip install -r 06_app/requirements.txt
+streamlit run 06_app/app.py
+```
+
+Alternativa: `./run.sh` na raiz do repositório ativa o ambiente virtual
+(`.venv/`) e inicia o painel automaticamente.
+
+*Publicar na web (Streamlit Community Cloud, gratuito):* acesse
+<https://share.streamlit.io>, entre com a conta do GitHub, clique em
+**Create app → Deploy a public app from GitHub** e informe:
+
+- **Repository:** `engsoft7/dissertacao-soja-ia`
+- **Branch:** `main`
+- **Main file path:** `06_app/app.py`
+
+O serviço instala o `requirements.txt` da raiz e gera um link público
+(`https://<nome-do-app>.streamlit.app`), acessível de qualquer dispositivo —
+no celular, use "Adicionar à tela inicial" para abrir como aplicativo.
+
 **Revisão sistemática**
 
 ```bash
@@ -169,6 +191,3 @@ licenças de origem; cite as fontes originais ao reutilizá-los.
 SANTOS, Maycon Lima dos. **Aplicação da Inteligência Artificial na Previsão da
 Produtividade da Soja: códigos e dados**. Zenodo, 2026. Software.
 DOI: 10.5281/zenodo.21285918. Disponível em: https://doi.org/10.5281/zenodo.21285918.
-
-Alternativa: `./run.sh` na raiz do repositório ativa o ambiente virtual
-(`.venv/`) e inicia o painel automaticamente.

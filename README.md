@@ -1,6 +1,6 @@
 # Aplicação da Inteligência Artificial na Previsão da Produtividade da Soja
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21285918.svg)](https://doi.org/10.5281/zenodo.21285918)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21285918-1682D4?logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.21285918)
 [![Painel online](https://img.shields.io/badge/painel_online-soja--para.streamlit.app-FF4B4B?logo=streamlit&logoColor=white)](https://soja-para.streamlit.app)
 
 Códigos e dados da dissertação de Mestrado Profissional em Computação Aplicada

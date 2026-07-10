@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import model as M
 
 DADOS = Path(__file__).resolve().parents[1] / "dados" / "soja_para_mascarado_2001_2024.csv"
+SACA_KG = 60  # saca de soja
 
 st.set_page_config(page_title="Soja no Pará — estimativa de produtividade",
                    page_icon="🌱", layout="wide")
@@ -38,8 +39,22 @@ st.caption(
     f"{df.ano.min()}–{df.ano.max()} · Fontes: IBGE (PAM), MODIS, CHIRPS, ERA5-Land, MapBiomas"
 )
 
+unidade = st.radio(
+    "Unidade de produtividade", ["kg/ha", "sc/ha"], horizontal=True,
+    help="sc/ha = sacas de 60 kg por hectare. A conversão é apenas de exibição; "
+         "o modelo opera em kg/ha.",
+)
+fator = 1 if unidade == "kg/ha" else 1 / SACA_KG
+
+
+def qtd(v: float, sinal: str = "") -> str:
+    """Formata um valor de produtividade (kg/ha) na unidade escolhida."""
+    casas = 0 if unidade == "kg/ha" else 1
+    return f"{v * fator:{sinal}.{casas}f}"
+
+
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Erro do modelo (RMSE)", f"{metricas['rmse']:.0f} kg/ha",
+c1.metric("Erro do modelo (RMSE)", f"{qtd(metricas['rmse'])} {unidade}",
           help="Validação leave-one-year-out: cada safra é prevista por um modelo treinado sem ela.")
 c2.metric("Erro relativo", f"{metricas['rrmse']:.1f}%")
 c3.metric("R²", f"{metricas['r2']:.3f}")
@@ -67,17 +82,17 @@ with esq:
                                max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
     r = estimador.estimar(municipio, int(ano_alvo))
-    st.metric(f"Estimativa para {ano_alvo}", f"{r['estimativa_kg_ha']:.0f} kg/ha",
-              delta=f"± {r['margem_kg_ha']:.0f} kg/ha", delta_color="off")
+    st.metric(f"Estimativa para {ano_alvo}", f"{qtd(r['estimativa_kg_ha'])} {unidade}",
+              delta=f"± {qtd(r['margem_kg_ha'])} {unidade}", delta_color="off")
     st.caption(
-        f"Intervalo: **{r['intervalo'][0]:.0f} a {r['intervalo'][1]:.0f} kg/ha**. "
+        f"Intervalo: **{qtd(r['intervalo'][0])} a {qtd(r['intervalo'][1])} {unidade}**. "
         f"Variáveis ambientais: {r['origem_das_variaveis']}. "
         "A margem corresponde ao RMSE observado na validação temporal."
     )
 
     with st.expander("Como esta estimativa é composta"):
-        st.write(f"- Referência (histórico + tendência): **{r['baseline_kg_ha']:.0f} kg/ha**")
-        st.write(f"- Correção climática do modelo: **{r['correcao_climatica_kg_ha']:+.0f} kg/ha**")
+        st.write(f"- Referência (histórico + tendência): **{qtd(r['baseline_kg_ha'])} {unidade}**")
+        st.write(f"- Correção climática do modelo: **{qtd(r['correcao_climatica_kg_ha'], '+')} {unidade}**")
         st.caption(
             "Sem dados climáticos da safra corrente, o modelo usa as médias históricas do "
             "município e a correção tende a zero. Para uso operacional, colete o NDVI e o "
@@ -90,17 +105,19 @@ diag = M.diagnostico_pam(df, municipio)
 
 with dir_:
     st.subheader("Produtividade observada (PAM/IBGE)")
+    fmt_grafico = ".0f" if unidade == "kg/ha" else ".1f"
     serie_plot = serie.assign(
+        produtividade=serie[M.ALVO] * fator,
         repetido=serie[M.ALVO].diff().eq(0).fillna(False),
     )
     linha = alt.Chart(serie_plot).mark_line(point=True, color="#2E75B6").encode(
         x=alt.X("ano:O", title="Ano-safra"),
-        y=alt.Y(f"{M.ALVO}:Q", title="kg/ha", scale=alt.Scale(zero=False)),
-        tooltip=["ano", M.ALVO],
+        y=alt.Y("produtividade:Q", title=unidade, scale=alt.Scale(zero=False)),
+        tooltip=["ano", alt.Tooltip("produtividade", title=unidade, format=fmt_grafico)],
     )
     marcas = alt.Chart(serie_plot[serie_plot.repetido]).mark_point(
         size=110, color="#B00020", filled=True
-    ).encode(x="ano:O", y=f"{M.ALVO}:Q",
+    ).encode(x="ano:O", y="produtividade:Q",
              tooltip=[alt.Tooltip("ano", title="Valor idêntico ao ano anterior")])
     st.altair_chart(linha + marcas, width='stretch')
     st.caption("Pontos em vermelho: safras cuja produtividade repete exatamente o valor do ano anterior.")

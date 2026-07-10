@@ -20,6 +20,8 @@ Abre em `http://localhost:8501`.
 
 - Estima a produtividade municipal da soja para a próxima safra, **sempre com a
   margem de erro** (± 416 kg/ha, ou 13,9% da média).
+- Exibe os valores em **kg/ha** ou em **sacas de 60 kg por hectare (sc/ha)**,
+  à escolha do usuário; a conversão é apenas de exibição, o modelo opera em kg/ha.
 - Mostra a série histórica oficial (PAM/IBGE), destacando em vermelho as safras
   cuja produtividade repete exatamente o valor do ano anterior.
 - Alerta quando a série de um município apresenta repetição acima da média

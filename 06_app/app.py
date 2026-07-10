@@ -5,12 +5,14 @@ Painel de estimativa da produtividade da soja nos municípios do Pará.
 Execução:
     streamlit run app.py
 """
+import sys
 from pathlib import Path
 
 import altair as alt
 import pandas as pd
 import streamlit as st
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import model as M
 
 DADOS = Path(__file__).resolve().parents[1] / "dados" / "soja_para_mascarado_2001_2024.csv"

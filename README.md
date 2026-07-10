@@ -110,6 +110,18 @@ streamlit run 06_app/app.py
 Alternativa: `./run.sh` na raiz do repositório ativa o ambiente virtual
 (`.venv/`) e inicia o painel automaticamente.
 
+*Publicar na web (Streamlit Community Cloud, gratuito):* acesse
+<https://share.streamlit.io>, entre com a conta do GitHub, clique em
+**Create app → Deploy a public app from GitHub** e informe:
+
+- **Repository:** `engsoft7/dissertacao-soja-ia`
+- **Branch:** `main`
+- **Main file path:** `06_app/app.py`
+
+O serviço instala o `requirements.txt` da raiz e gera um link público
+(`https://<nome-do-app>.streamlit.app`), acessível de qualquer dispositivo —
+no celular, use "Adicionar à tela inicial" para abrir como aplicativo.
+
 **Revisão sistemática**
 
 ```bash

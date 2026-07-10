@@ -1,9 +1,12 @@
 # Aplicação da Inteligência Artificial na Previsão da Produtividade da Soja
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21285918.svg)](https://doi.org/10.5281/zenodo.21285918)
+[![Painel online](https://img.shields.io/badge/painel_online-soja--para.streamlit.app-FF4B4B?logo=streamlit&logoColor=white)](https://soja-para.streamlit.app)
 
 Códigos e dados da dissertação de Mestrado Profissional em Computação Aplicada
 (PPCA/UFPA — Campus de Tucuruí).
+
+**Painel de estimativa (produto técnico):** <https://soja-para.streamlit.app>
 
 **Autor:** Maycon Lima dos Santos
 **Orientador:** Prof. Dr. Caio Carvalho Moreira
@@ -102,6 +105,13 @@ projeto em <https://code.earthengine.google.com>, informe o ID na variável
 
 **Painel de estimativa** (produto técnico; ver `06_app/README.md`)
 
+Versão publicada: **<https://soja-para.streamlit.app>** — acessível de qualquer
+dispositivo; no celular, use "Adicionar à tela inicial" para abrir como
+aplicativo. No plano gratuito o app hiberna após alguns dias sem acesso:
+basta clicar em "Yes, get this app back up" e aguardar cerca de um minuto.
+
+Para executar localmente:
+
 ```bash
 pip install -r 06_app/requirements.txt
 streamlit run 06_app/app.py
@@ -110,7 +120,7 @@ streamlit run 06_app/app.py
 Alternativa: `./run.sh` na raiz do repositório ativa o ambiente virtual
 (`.venv/`) e inicia o painel automaticamente.
 
-*Publicar na web (Streamlit Community Cloud, gratuito):* acesse
+*Para republicar no Streamlit Community Cloud* (gratuito): acesse
 <https://share.streamlit.io>, entre com a conta do GitHub, clique em
 **Create app → Deploy a public app from GitHub** e informe:
 
@@ -118,9 +128,7 @@ Alternativa: `./run.sh` na raiz do repositório ativa o ambiente virtual
 - **Branch:** `main`
 - **Main file path:** `06_app/app.py`
 
-O serviço instala o `requirements.txt` da raiz e gera um link público
-(`https://<nome-do-app>.streamlit.app`), acessível de qualquer dispositivo —
-no celular, use "Adicionar à tela inicial" para abrir como aplicativo.
+O serviço instala o `requirements.txt` da raiz e gera o link público.
 
 **Revisão sistemática**
 

@@ -28,6 +28,9 @@ Abre em `http://localhost:8501`.
   observado, e o painel explica isso ao usuário em vez de esconder.
 - Mostra a **evolução da área de soja** do município (máscara MapBiomas) e
   oferece **download em CSV** da série do município e da base completa.
+- Traz um **panorama ordenável dos 38 municípios** (produtividade recente, área,
+  repetição na PAM) e um bloco **"Sobre este painel"** com metodologia, autoria,
+  DOI e instrução de citação.
 - Mostra a série histórica oficial (PAM/IBGE), destacando em vermelho as safras
   cuja produtividade repete exatamente o valor do ano anterior.
 - Alerta quando a série de um município apresenta repetição acima da média

@@ -250,6 +250,66 @@ Detalhamento na dissertação, seção 6.4, e no artigo correspondente.
 """
     )
 
+st.divider()
+
+# ------------------------------------------------------ panorama do estado
+st.subheader("Panorama dos municípios")
+ult_ano = int(df.ano.max())
+linhas_pan = []
+for mun, d in df.groupby("municipio"):
+    d = d.sort_values("ano")
+    ult5 = d[d.ano > ult_ano - 5]
+    difs = d[M.ALVO].diff().dropna()
+    linhas_pan.append({
+        "Município": mun,
+        "prod_media": ult5[M.ALVO].mean() * fator,
+        "area_ha": float(d.iloc[-1]["soy_area_ha"]),
+        "repeticao": float((difs == 0).mean() * 100) if len(difs) else 0.0,
+        "safras": len(d),
+    })
+casas_pan = "%.0f" if unidade == "kg/ha" else "%.1f"
+pan = pd.DataFrame(linhas_pan).sort_values("prod_media", ascending=False)
+st.dataframe(
+    pan, hide_index=True, width='stretch',
+    column_config={
+        "prod_media": st.column_config.NumberColumn(
+            f"Produtividade média {ult_ano - 4}–{ult_ano} ({unidade})", format=casas_pan),
+        "area_ha": st.column_config.NumberColumn("Área de soja recente (ha)", format="%.0f"),
+        "repeticao": st.column_config.NumberColumn("Repetição na PAM (%)", format="%.0f%%"),
+        "safras": st.column_config.NumberColumn("Safras na base"),
+    },
+)
+st.caption(
+    "Clique nos cabeçalhos para ordenar. Produtividade média das últimas cinco "
+    "safras disponíveis; área de soja do ano mais recente do município (MapBiomas)."
+)
+
+with st.expander("Sobre este painel"):
+    st.markdown(
+        """
+Produto técnico da dissertação **Aplicação da Inteligência Artificial na
+Previsão da Produtividade da Soja** — Mestrado Profissional em Computação
+Aplicada (PPCA/UFPA, Campus de Tucuruí).
+
+**Autor:** Maycon Lima dos Santos · **Orientador:** Prof. Dr. Caio Carvalho
+Moreira · **Ano:** 2026
+
+**Metodologia, em resumo:** a estimativa combina a média histórica do município
+e a tendência tecnológica com uma correção climática aprendida por rede neural
+(MLP) sobre NDVI/EVI (MODIS), chuva (CHIRPS) e clima (ERA5-Land), restritos à
+área de soja da máscara anual do MapBiomas. A validação é temporal
+(*leave-one-year-out*) e a margem de erro exibida é o RMSE dessa validação.
+Detalhes na seção 6 da dissertação.
+
+**Código e dados:** [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
+· DOI [10.5281/zenodo.21286115](https://doi.org/10.5281/zenodo.21286115)
+
+**Como citar:** SANTOS, Maycon Lima dos. *Aplicação da Inteligência Artificial
+na Previsão da Produtividade da Soja: códigos e dados*. Zenodo, 2026.
+DOI: 10.5281/zenodo.21286115.
+"""
+    )
+
 st.caption(
     "Código e dados: https://github.com/engsoft7/dissertacao-soja-ia · "
     "Este painel não substitui levantamentos de campo."

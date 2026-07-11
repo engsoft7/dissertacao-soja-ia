@@ -33,6 +33,14 @@ import requests
 
 RAIZ = Path(__file__).resolve().parents[1]
 CSV_PAINEL = RAIZ / "dados" / "soja_para_mascarado_2001_2024.csv"
+DATA_ATUALIZACAO = RAIZ / "dados" / "ultima_atualizacao.txt"
+
+
+def marca_atualizacao() -> None:
+    """Registra a data em que a base foi alterada; o painel exibe no cabeçalho."""
+    from datetime import date
+
+    DATA_ATUALIZACAO.write_text(date.today().isoformat() + "\n", encoding="utf-8")
 
 # n6/in n3 15 = todos os municípios da UF 15 (Pará); p/all = todos os anos.
 URL_SIDRA = (
@@ -121,6 +129,7 @@ def main() -> int:
     ano_novo = detecta_ano_novo(base, sidra)
 
     if len(revisoes):
+        marca_atualizacao()
         print(f"{len(revisoes)} revisões aplicadas em {CSV_PAINEL.name}:")
         print(revisoes.to_string(index=False))
     else:

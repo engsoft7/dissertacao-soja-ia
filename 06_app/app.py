@@ -16,7 +16,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import model as M
 
 DADOS = Path(__file__).resolve().parents[1] / "dados" / "soja_para_mascarado_2001_2024.csv"
+DATA_ATUALIZACAO = DADOS.parent / "ultima_atualizacao.txt"
 SACA_KG = 60  # saca de soja
+
+
+def data_atualizacao() -> str | None:
+    """Data da última atualização da base, gravada pela automação (dd/mm/aaaa)."""
+    try:
+        ano, mes, dia = DATA_ATUALIZACAO.read_text().strip().split("-")
+        return f"{dia}/{mes}/{ano}"
+    except (OSError, ValueError):
+        return None
 
 st.set_page_config(page_title="Soja no Pará — estimativa de produtividade",
                    page_icon="🌱", layout="wide")
@@ -34,9 +44,11 @@ df, estimador, metricas = preparar()
 
 # ------------------------------------------------------------------ cabeçalho
 st.title("Estimativa da produtividade da soja — municípios do Pará")
+atualizada_em = data_atualizacao()
 st.caption(
     f"Base de {len(df)} registros município-safra · {df.municipio.nunique()} municípios · "
     f"{df.ano.min()}–{df.ano.max()} · Fontes: IBGE (PAM), MODIS, CHIRPS, ERA5-Land, MapBiomas"
+    + (f" · Dados atualizados em {atualizada_em}" if atualizada_em else "")
 )
 
 unidade = st.radio(

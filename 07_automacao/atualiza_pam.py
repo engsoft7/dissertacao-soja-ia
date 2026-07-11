@@ -48,8 +48,9 @@ def baixa_sidra() -> pd.DataFrame:
     resp.raise_for_status()
     bruto = pd.DataFrame(resp.json())
     bruto = bruto[bruto["V"] != "Valor"]  # descarta a linha de cabeçalho da API
-    t = bruto[["D1C", "D3C", "V"]].rename(
-        columns={"D1C": "cod_ibge7", "D3C": "ano", "V": "rendimento_kg_ha"}
+    t = bruto[["D1C", "D1N", "D3C", "V"]].rename(
+        columns={"D1C": "cod_ibge7", "D1N": "nome_ibge",
+                 "D3C": "ano", "V": "rendimento_kg_ha"}
     )
     t["cod_ibge7"] = pd.to_numeric(t["cod_ibge7"], errors="coerce")
     t["ano"] = pd.to_numeric(t["ano"], errors="coerce")

@@ -1,7 +1,10 @@
-# Atualização automática da base PAM/IBGE.
+# Atualização automática da base PAM/IBGE + coleta GEE de safra nova.
 # Roda todo dia 15 e pode ser disparado manualmente na aba Actions.
 # - Revisões do IBGE em anos já presentes: abre um PR com o CSV atualizado.
-# - Safra nova no SIDRA: abre uma issue pedindo a coleta GEE das variáveis.
+# - Safra nova no SIDRA:
+#     * com o secret GEE_SERVICE_ACCOUNT_JSON configurado, coleta as variáveis
+#       ambientais no Earth Engine e inclui a safra no mesmo PR;
+#     * sem o secret (ou se a coleta falhar), abre uma issue com o passo a passo.
 name: Atualiza base de dados (PAM/IBGE)
 
 on:
@@ -13,6 +16,9 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+
+env:
+  TEM_CHAVE_GEE: ${{ secrets.GEE_SERVICE_ACCOUNT_JSON != '' }}
 
 jobs:
   atualiza:
@@ -33,25 +39,38 @@ jobs:
           RESUMO_MD: /tmp/resumo_pam.md
         run: python 07_automacao/atualiza_pam.py
 
-      - name: Abre PR com as revisões do IBGE
-        if: steps.pam.outputs.csv_alterado == 'true'
+      - name: Coleta a safra nova no Earth Engine
+        id: gee
+        if: steps.pam.outputs.novo_ano != '' && env.TEM_CHAVE_GEE == 'true'
+        env:
+          GEE_SERVICE_ACCOUNT_JSON: ${{ secrets.GEE_SERVICE_ACCOUNT_JSON }}
+          GEE_PROJECT: ${{ vars.GEE_PROJECT }}
+          RESUMO_MD: /tmp/resumo_pam.md
+        run: |
+          pip install --quiet earthengine-api
+          python 07_automacao/coleta_gee_safra.py --ano "${{ steps.pam.outputs.novo_ano }}"
+
+      - name: Abre PR com as mudanças na base
+        if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          branch: automacao/revisao-pam
+          branch: automacao/atualiza-base
           add-paths: dados/*.csv
-          commit-message: "Aplica revisões do IBGE na produtividade oficial (PAM)"
-          title: "Revisões do IBGE na base do painel (PAM/SIDRA)"
+          commit-message: "Atualiza a base do painel com dados oficiais (PAM/SIDRA + GEE)"
+          title: "Atualização automática da base do painel"
           body-path: /tmp/resumo_pam.md
           delete-branch: true
 
-      - name: Abre issue para a safra nova
-        if: steps.pam.outputs.novo_ano != ''
+      - name: Abre issue para a safra nova (sem chave GEE ou coleta falhou)
+        if: always() && steps.pam.outputs.novo_ano != '' && (env.TEM_CHAVE_GEE != 'true' || steps.gee.outcome == 'failure')
         uses: actions/github-script@v7
         env:
           NOVO_ANO: ${{ steps.pam.outputs.novo_ano }}
+          COLETA_FALHOU: ${{ steps.gee.outcome == 'failure' }}
         with:
           script: |
             const ano = process.env.NOVO_ANO;
+            const falhou = process.env.COLETA_FALHOU === "true";
             const titulo = `Safra ${ano} disponível no SIDRA — coletar variáveis no GEE`;
             const abertas = await github.rest.issues.listForRepo({
               owner: context.repo.owner, repo: context.repo.repo,
@@ -61,15 +80,19 @@ jobs:
               core.info("Issue já existe; nada a fazer.");
               return;
             }
-            const fs = require("fs");
+            const execucao = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             let corpo = `O SIDRA já publica o rendimento da soja para a safra ${ano} ` +
               `nos municípios do Pará, mas a base do painel ainda não tem as variáveis ` +
-              `ambientais desse ano.\n\nPara incorporar a safra:\n` +
+              `ambientais desse ano.\n\n`;
+            corpo += falhou
+              ? `A coleta automática no Earth Engine **falhou** — veja o log em ${execucao}.\n\n`
+              : `A coleta automática está desativada (secret \`GEE_SERVICE_ACCOUNT_JSON\` ` +
+                `não configurado; ver seção "Atualização automática dos dados" do README).\n\n`;
+            corpo += `Alternativa manual:\n` +
               `1. Rode \`01_coleta_dados/02_coleta_gee_com_mascara_mapbiomas.py\` no ` +
               `Google Colab com \`ANO_FIM = ${ano}\`.\n` +
               `2. Anexe as linhas novas a \`dados/soja_para_mascarado_2001_2024.csv\`.\n` +
               `3. Abra um PR — o merge atualiza o painel publicado automaticamente.`;
-            try { corpo += "\n\n---\n" + fs.readFileSync("/tmp/resumo_pam.md", "utf8"); } catch {}
             await github.rest.issues.create({
               owner: context.repo.owner, repo: context.repo.repo,
               title: titulo, body: corpo, labels: ["dados"],

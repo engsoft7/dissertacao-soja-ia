@@ -134,6 +134,22 @@ def coleta_features(ano: int) -> tuple[pd.DataFrame, int]:
     return pd.DataFrame(linhas), ano_mascara
 
 
+def testa_conexao() -> int:
+    """Valida a credencial e o acesso aos ativos da coleta, sem tocar na base."""
+    ee = conecta_gee()
+    n = (ee.FeatureCollection("FAO/GAUL/2015/level2")
+         .filter(ee.Filter.eq("ADM0_NAME", "Brazil"))
+         .filter(ee.Filter.inList("ADM1_NAME", ["Pará", "Para"]))
+         .size().getInfo())
+    mb = (ee.ImageCollection("projects/mapbiomas-public/assets/brazil/lulc/v1")
+          .filter(ee.Filter.eq("collection_id", COLL_ID)))
+    anos = sorted(mb.aggregate_array("year").distinct().getInfo())
+    print(f"GAUL: {n} municípios do Pará acessíveis")
+    print(f"MapBiomas Coleção {COLL_ID}: máscaras de {anos[0]} a {anos[-1]}")
+    print("Teste concluído: credencial e ativos do Earth Engine OK.")
+    return 0
+
+
 def monta_linhas(pred: pd.DataFrame, sidra: pd.DataFrame, ano: int,
                  colunas: list[str], existentes: set[tuple[int, int]]) -> pd.DataFrame:
     """Junta preditores e rendimento oficial; devolve só registros novos e completos."""
@@ -166,8 +182,15 @@ def formata_linha(r: pd.Series, colunas: list[str]) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ano", type=int, required=True, help="ano-safra a coletar")
-    ano = ap.parse_args().ano
+    ap.add_argument("--ano", type=int, help="ano-safra a coletar")
+    ap.add_argument("--testar", action="store_true",
+                    help="só autentica no Earth Engine e verifica o acesso aos ativos")
+    args = ap.parse_args()
+    if args.testar:
+        return testa_conexao()
+    if args.ano is None:
+        ap.error("--ano é obrigatório fora do modo --testar")
+    ano = args.ano
 
     texto = CSV_PAINEL.read_text(encoding="utf-8")
     colunas = texto.splitlines()[0].split(",")

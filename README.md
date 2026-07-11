@@ -179,6 +179,10 @@ Com o secret configurado o ciclo fica completo: o SIDRA é vigiado mensalmente e
 tanto revisões quanto safras novas chegam como PR prontos para merge — e o
 merge redeploya o painel publicado.
 
+Para conferir a credencial na hora: **Actions → Atualiza base de dados →
+Run workflow**, marque **"Testar a credencial do Earth Engine"** e rode. O log
+deve terminar com "credencial e ativos do Earth Engine OK", sem alterar nada.
+
 Somente `dados/soja_para_mascarado_2001_2024.csv` (a base do painel) é
 atualizado — o nome do arquivo preserva o recorte original da dissertação, mas
 safras posteriores são acrescentadas a ele pela automação. A base sem máscara

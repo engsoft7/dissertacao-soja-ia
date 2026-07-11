@@ -76,9 +76,19 @@ fator = 1 if unidade == "kg/ha" else 1 / SACA_KG
 
 
 def qtd(v: float, sinal: str = "") -> str:
-    """Formata um valor de produtividade (kg/ha) na unidade escolhida."""
-    casas = 0 if unidade == "kg/ha" else 1
-    return f"{v * fator:{sinal}.{casas}f}"
+    """Formata um valor de produtividade (kg/ha) na unidade escolhida, em pt-BR."""
+    if unidade == "kg/ha":
+        return f"{v * fator:{sinal},.0f}".replace(",", ".")
+    return f"{v * fator:{sinal}.1f}".replace(".", ",")
+
+
+def br(v: float) -> str:
+    """Inteiro com separador de milhar brasileiro (ponto)."""
+    return f"{v:,.0f}".replace(",", ".")
+
+
+# Eixos do Vega-Lite usam o padrão americano; converte o rótulo para pt-BR.
+EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
 
 c1, c2, c3, c4 = st.columns(4)
@@ -169,15 +179,16 @@ diag = M.diagnostico_pam(df, municipio)
 
 with dir_:
     st.subheader("Produtividade observada (PAM/IBGE)")
-    fmt_grafico = ".0f" if unidade == "kg/ha" else ".1f"
     serie_plot = serie.assign(
         produtividade=serie[M.ALVO] * fator,
+        produtividade_rotulo=[qtd(v) for v in serie[M.ALVO]],
+        area_rotulo=[br(a) for a in serie["soy_area_ha"]],
         repetido=serie[M.ALVO].diff().eq(0).fillna(False),
     )
     linha = alt.Chart(serie_plot).mark_line(point=True, color="#2E75B6").encode(
         x=alt.X("ano:O", title="Ano-safra"),
-        y=alt.Y("produtividade:Q", title=unidade, scale=alt.Scale(zero=False)),
-        tooltip=["ano", alt.Tooltip("produtividade", title=unidade, format=fmt_grafico)],
+        y=alt.Y("produtividade:Q", title=unidade, scale=alt.Scale(zero=False), axis=EIXO_BR),
+        tooltip=["ano", alt.Tooltip("produtividade_rotulo:N", title=unidade)],
     )
     marcas = alt.Chart(serie_plot[serie_plot.repetido]).mark_point(
         size=110, color="#B00020", filled=True
@@ -191,8 +202,8 @@ with dir_:
         color="#2E7D32", opacity=0.25, line={"color": "#2E7D32", "strokeWidth": 2},
     ).encode(
         x=alt.X("ano:O", title="Ano-safra"),
-        y=alt.Y("soy_area_ha:Q", title="hectares"),
-        tooltip=["ano", alt.Tooltip("soy_area_ha", title="hectares", format=",.0f")],
+        y=alt.Y("soy_area_ha:Q", title="hectares", axis=EIXO_BR),
+        tooltip=["ano", alt.Tooltip("area_rotulo:N", title="hectares")],
     )
     st.altair_chart(area, width='stretch')
     st.caption("Área com soja identificada pela máscara anual do MapBiomas dentro do município.")
@@ -274,7 +285,7 @@ st.dataframe(
     column_config={
         "prod_media": st.column_config.NumberColumn(
             f"Produtividade média {ult_ano - 4}–{ult_ano} ({unidade})", format=casas_pan),
-        "area_ha": st.column_config.NumberColumn("Área de soja recente (ha)", format="%.0f"),
+        "area_ha": st.column_config.NumberColumn("Área de soja recente (ha)", format="localized"),
         "repeticao": st.column_config.NumberColumn("Repetição na PAM (%)", format="%.0f%%"),
         "safras": st.column_config.NumberColumn("Safras na base"),
     },

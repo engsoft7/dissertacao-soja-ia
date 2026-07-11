@@ -65,6 +65,8 @@ impõe um teto estrutural à acurácia de qualquer modelo calibrado sobre essa b
   model.py                                núcleo do painel (produto técnico)
   app.py                                  interface Streamlit
   README.md                               como executar e limitações
+07_automacao/
+  atualiza_pam.py                         revisões da PAM via SIDRA (GitHub Actions)
 dados/
   soja_para_mascarado_2001_2024.csv       base principal (415 registros)
   soja_para_sem_mascara_2001_2023.csv     base sem máscara (comparação)
@@ -140,6 +142,29 @@ python 02_recupera_autoria_crossref.py  # autoria via DOI
 
 Os resultados variam conforme a data da busca, pois as bases são atualizadas
 continuamente. A busca reportada na dissertação foi executada em 9 de julho de 2026.
+
+---
+
+## Atualização automática dos dados
+
+O workflow `.github/workflows/atualiza-dados.yml` roda todo dia 15 (e pode ser
+disparado manualmente na aba **Actions → Atualiza base de dados → Run workflow**).
+Ele consulta a API do SIDRA/IBGE e:
+
+- **Revisões:** se o IBGE revisou a produtividade de alguma safra já presente na
+  base do painel, abre um **pull request** com o CSV atualizado (somente o campo
+  revisado muda). O merge redeploya o painel publicado automaticamente.
+- **Safra nova:** se o SIDRA já publica um ano que ainda não está na base, abre
+  uma **issue** com o passo a passo — as variáveis ambientais (NDVI, clima,
+  máscara MapBiomas) precisam ser coletadas no Google Earth Engine com as
+  rotinas de `01_coleta_dados/` antes de a safra entrar na base.
+
+Somente `dados/soja_para_mascarado_2001_2024.csv` (a base do painel) é
+atualizado; a base sem máscara permanece congelada como artefato da comparação
+feita na dissertação.
+
+*Atenção:* o GitHub pausa agendamentos de repositórios sem atividade por ~60
+dias e envia um e-mail avisando; basta reativar na aba Actions.
 
 ---
 

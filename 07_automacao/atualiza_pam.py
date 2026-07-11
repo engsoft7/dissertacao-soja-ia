@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import os
 import sys
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -50,10 +51,24 @@ URL_SIDRA = (
 MIN_MUNICIPIOS_ANO_NOVO = 5  # mínimo de municípios com valor para anunciar safra
 
 
-def baixa_sidra() -> pd.DataFrame:
-    """Rendimento médio da soja por município do Pará e ano, via API do SIDRA."""
-    resp = requests.get(URL_SIDRA, timeout=120)
-    resp.raise_for_status()
+def baixa_sidra(tentativas: int = 4, espera_s: int = 60) -> pd.DataFrame:
+    """Rendimento médio da soja por município do Pará e ano, via API do SIDRA.
+
+    A API do IBGE oscila; tenta algumas vezes antes de desistir para que uma
+    instabilidade passageira não derrube a execução mensal.
+    """
+    resp = None
+    for i in range(1, tentativas + 1):
+        try:
+            resp = requests.get(URL_SIDRA, timeout=120)
+            resp.raise_for_status()
+            break
+        except requests.RequestException as err:
+            if i == tentativas:
+                raise
+            print(f"SIDRA indisponível ({type(err).__name__}, tentativa {i}/"
+                  f"{tentativas}); nova tentativa em {espera_s}s")
+            time.sleep(espera_s)
     bruto = pd.DataFrame(resp.json())
     bruto = bruto[bruto["V"] != "Valor"]  # descarta a linha de cabeçalho da API
     t = bruto[["D1C", "D1N", "D3C", "V"]].rename(

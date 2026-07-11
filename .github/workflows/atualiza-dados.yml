@@ -69,6 +69,7 @@ jobs:
           python 07_automacao/coleta_gee_safra.py --ano "${{ steps.pam.outputs.novo_ano }}"
 
       - name: Abre PR com as mudanças na base
+        id: cpr
         if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
@@ -78,6 +79,18 @@ jobs:
           title: "Atualização automática da base do painel"
           body-path: /tmp/resumo_pam.md
           delete-branch: true
+
+      # O PR é mergeado na hora pelo próprio robô: o ciclo é 100% automático e o
+      # PR fica como registro auditável do que mudou. Para voltar ao merge
+      # manual, remova este passo.
+      - name: Mergeia o PR automaticamente
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr merge --squash --delete-branch \
+            "${{ steps.cpr.outputs.pull-request-number }}" \
+            --repo "${{ github.repository }}"
 
       - name: Abre issue para a safra nova (sem chave GEE ou coleta falhou)
         if: always() && steps.pam.outputs.novo_ano != '' && (env.TEM_CHAVE_GEE != 'true' || steps.gee.outcome == 'failure')

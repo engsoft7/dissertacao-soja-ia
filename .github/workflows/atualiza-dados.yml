@@ -11,6 +11,11 @@ on:
   schedule:
     - cron: "0 9 15 * *"
   workflow_dispatch:
+    inputs:
+      testar_gee:
+        description: "Testar a credencial do Earth Engine (não altera a base)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -32,6 +37,19 @@ jobs:
 
       - name: Instala dependências
         run: pip install --quiet pandas requests
+
+      - name: Testa a credencial do Earth Engine
+        if: github.event_name == 'workflow_dispatch' && inputs.testar_gee
+        env:
+          GEE_SERVICE_ACCOUNT_JSON: ${{ secrets.GEE_SERVICE_ACCOUNT_JSON }}
+          GEE_PROJECT: ${{ vars.GEE_PROJECT }}
+        run: |
+          if [ "$TEM_CHAVE_GEE" != "true" ]; then
+            echo "::error::Secret GEE_SERVICE_ACCOUNT_JSON não configurado."
+            exit 1
+          fi
+          pip install --quiet earthengine-api
+          python 07_automacao/coleta_gee_safra.py --testar
 
       - name: Consulta o SIDRA e aplica revisões
         id: pam

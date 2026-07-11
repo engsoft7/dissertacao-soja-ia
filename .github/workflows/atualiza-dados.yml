@@ -74,7 +74,7 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           branch: automacao/atualiza-base
-          add-paths: dados/*.csv
+          add-paths: dados/*
           commit-message: "Atualiza a base do painel com dados oficiais (PAM/SIDRA + GEE)"
           title: "Atualização automática da base do painel"
           body-path: /tmp/resumo_pam.md

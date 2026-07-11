@@ -35,7 +35,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from atualiza_pam import CSV_PAINEL, baixa_sidra, grava_saidas
+from atualiza_pam import CSV_PAINEL, baixa_sidra, grava_saidas, marca_atualizacao
 
 MES_INI, DIA_INI = 11, 1   # plantio ~novembro do ano anterior
 MES_FIM, DIA_FIM = 5, 31   # colheita ~maio do ano da safra
@@ -238,6 +238,7 @@ def main() -> int:
         if not texto.endswith("\n"):
             f.write("\n")
         f.write("\n".join(linhas_txt) + "\n")
+    marca_atualizacao()
     print(f"{len(novas)} linhas da safra {ano} acrescentadas a {CSV_PAINEL.name}")
 
     resumo_md = os.environ.get("RESUMO_MD")

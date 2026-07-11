@@ -22,6 +22,12 @@ Abre em `http://localhost:8501`.
   margem de erro** (± 416 kg/ha, ou 13,9% da média).
 - Exibe os valores em **kg/ha** ou em **sacas de 60 kg por hectare (sc/ha)**,
   à escolha do usuário; a conversão é apenas de exibição, o modelo opera em kg/ha.
+- Permite **simular cenários climáticos** (chuva e temperatura da safra) e ver o
+  efeito sobre a estimativa — que é quase nulo, demonstrando na prática o achado
+  central da dissertação: a produtividade oficial pouco reflete o clima
+  observado, e o painel explica isso ao usuário em vez de esconder.
+- Mostra a **evolução da área de soja** do município (máscara MapBiomas) e
+  oferece **download em CSV** da série do município e da base completa.
 - Mostra a série histórica oficial (PAM/IBGE), destacando em vermelho as safras
   cuja produtividade repete exatamente o valor do ano anterior.
 - Alerta quando a série de um município apresenta repetição acima da média

@@ -68,6 +68,12 @@ jobs:
           pip install --quiet earthengine-api
           python 07_automacao/coleta_gee_safra.py --ano "${{ steps.pam.outputs.novo_ano }}"
 
+      - name: Recalcula as métricas de validação do painel
+        if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true'
+        run: |
+          pip install --quiet scikit-learn
+          python 07_automacao/gera_metricas.py
+
       - name: Abre PR com as mudanças na base
         id: cpr
         if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true'

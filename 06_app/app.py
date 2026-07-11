@@ -5,6 +5,7 @@ Painel de estimativa da produtividade da soja nos municípios do Pará.
 Execução:
     streamlit run app.py
 """
+import json
 import sys
 from pathlib import Path
 
@@ -17,6 +18,7 @@ import model as M
 
 DADOS = Path(__file__).resolve().parents[1] / "dados" / "soja_para_mascarado_2001_2024.csv"
 DATA_ATUALIZACAO = DADOS.parent / "ultima_atualizacao.txt"
+METRICAS_SALVAS = DADOS.parent / "metricas_validacao.json"
 SACA_KG = 60  # saca de soja
 
 
@@ -32,11 +34,25 @@ st.set_page_config(page_title="Soja no Pará — estimativa de produtividade",
                    page_icon="🌱", layout="wide")
 
 
-@st.cache_resource(show_spinner="Treinando e validando o modelo...")
+@st.cache_resource(show_spinner="Preparando o modelo...")
 def preparar():
     df = M.carregar(str(DADOS))
     est = M.Estimador().treinar(df)
-    metricas = est.validar(df)
+
+    # A validação leave-one-year-out é cara (um modelo por ano-safra). A
+    # automação a pré-calcula em dados/metricas_validacao.json; o painel só a
+    # refaz se o arquivo estiver ausente ou defasado em relação ao CSV.
+    metricas = None
+    try:
+        salvas = json.loads(METRICAS_SALVAS.read_text(encoding="utf-8"))
+        if salvas.get("registros") == len(df):
+            est.rmse, est.mae = salvas["rmse"], salvas["mae"]
+            est.r2, est.r2_baseline = salvas["r2"], salvas["r2_baseline"]
+            metricas = salvas
+    except (OSError, ValueError, KeyError):
+        metricas = None
+    if metricas is None:
+        metricas = est.validar(df)
     return df, est, metricas
 
 
@@ -111,6 +127,42 @@ with esq:
             "clima da safra em curso com as rotinas de `01_coleta_dados/`."
         )
 
+    with st.expander("Simular cenário climático para a safra"):
+        chuva = st.slider("Chuva na janela da safra (% da média do município)",
+                          50, 150, 100, step=5)
+        dtemp = st.slider("Temperatura (desvio da média, em °C)",
+                          -2.0, 3.0, 0.0, step=0.5)
+        if chuva == 100 and dtemp == 0.0:
+            st.caption(
+                "Mova os controles para ver o efeito de uma safra mais seca ou "
+                "chuvosa, mais quente ou mais amena, sobre a estimativa."
+            )
+        else:
+            hist = df[df.municipio == municipio]
+            clima = hist[M.FEATURES].mean().to_dict()
+            clima["precip_total"] *= chuva / 100
+            clima["temp_mean"] += dtemp
+            clima["temp_max"] += dtemp
+            clima["balanco_hidrico"] = clima["precip_total"] - clima["etp_total"]
+            cenario = estimador.estimar(municipio, int(ano_alvo), clima=clima)
+            dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
+            st.metric("Estimativa no cenário",
+                      f"{qtd(cenario['estimativa_kg_ha'])} {unidade}",
+                      delta=f"{qtd(dif, '+')} {unidade}")
+            if abs(dif) < 0.1 * r["margem_kg_ha"]:
+                st.info(
+                    "**O efeito é praticamente nulo — e isso é um resultado, não um "
+                    "defeito.** A correção climática que o modelo aprendeu é fraca "
+                    "porque a produtividade oficial (PAM) pouco reflete o clima "
+                    "observado: cerca de 40% dos valores municipais repetem a safra "
+                    "anterior (seção 6.4 da dissertação). O cenário também não altera "
+                    "os índices de vegetação (NDVI/EVI), que numa seca real cairiam."
+                )
+            st.caption(
+                "O cenário altera chuva, temperatura e balanço hídrico; NDVI/EVI "
+                "permanecem nas médias históricas do município."
+            )
+
 # --------------------------------------------------------- série e qualidade
 serie = df[df.municipio == municipio].sort_values("ano")
 diag = M.diagnostico_pam(df, municipio)
@@ -133,6 +185,25 @@ with dir_:
              tooltip=[alt.Tooltip("ano", title="Valor idêntico ao ano anterior")])
     st.altair_chart(linha + marcas, width='stretch')
     st.caption("Pontos em vermelho: safras cuja produtividade repete exatamente o valor do ano anterior.")
+
+    st.subheader("Área de soja mapeada (MapBiomas)")
+    area = alt.Chart(serie_plot).mark_area(
+        color="#2E7D32", opacity=0.25, line={"color": "#2E7D32", "strokeWidth": 2},
+    ).encode(
+        x=alt.X("ano:O", title="Ano-safra"),
+        y=alt.Y("soy_area_ha:Q", title="hectares"),
+        tooltip=["ano", alt.Tooltip("soy_area_ha", title="hectares", format=",.0f")],
+    )
+    st.altair_chart(area, width='stretch')
+    st.caption("Área com soja identificada pela máscara anual do MapBiomas dentro do município.")
+
+    b1, b2 = st.columns(2)
+    b1.download_button("Baixar série do município (CSV)",
+                       serie.to_csv(index=False).encode("utf-8"),
+                       file_name=f"soja_{municipio.lower().replace(' ', '_')}.csv",
+                       mime="text/csv", width='stretch')
+    b2.download_button("Baixar base completa (CSV)", DADOS.read_bytes(),
+                       file_name=DADOS.name, mime="text/csv", width='stretch')
 
 st.divider()
 

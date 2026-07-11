@@ -67,6 +67,7 @@ impõe um teto estrutural à acurácia de qualquer modelo calibrado sobre essa b
   README.md                               como executar e limitações
 07_automacao/
   atualiza_pam.py                         revisões da PAM via SIDRA (GitHub Actions)
+  coleta_gee_safra.py                     coleta headless de safra nova no GEE
 dados/
   soja_para_mascarado_2001_2024.csv       base principal (415 registros)
   soja_para_sem_mascara_2001_2023.csv     base sem máscara (comparação)
@@ -154,14 +155,36 @@ Ele consulta a API do SIDRA/IBGE e:
 - **Revisões:** se o IBGE revisou a produtividade de alguma safra já presente na
   base do painel, abre um **pull request** com o CSV atualizado (somente o campo
   revisado muda). O merge redeploya o painel publicado automaticamente.
-- **Safra nova:** se o SIDRA já publica um ano que ainda não está na base, abre
-  uma **issue** com o passo a passo — as variáveis ambientais (NDVI, clima,
-  máscara MapBiomas) precisam ser coletadas no Google Earth Engine com as
-  rotinas de `01_coleta_dados/` antes de a safra entrar na base.
+- **Safra nova:** quando o SIDRA publica um ano que ainda não está na base:
+  - com a coleta automática ativada (abaixo), o robô coleta as variáveis
+    ambientais no Earth Engine (`07_automacao/coleta_gee_safra.py` — mesmas
+    coleções e janelas de `01_coleta_dados/`) e inclui a safra completa no PR;
+  - sem ela (ou se a coleta falhar), abre uma **issue** com o passo a passo
+    manual via Google Colab.
+
+### Ativar a coleta automática no Earth Engine (configuração única)
+
+1. Crie (ou reuse) um projeto no [Google Cloud](https://console.cloud.google.com)
+   e registre-o para uso não comercial do Earth Engine em
+   <https://code.earthengine.google.com/register> (gratuito para uso acadêmico).
+2. No projeto, ative a API **Google Earth Engine** (APIs & Services → Enable APIs).
+3. Crie uma *service account* (IAM & Admin → Service Accounts → Create service
+   account) com o papel **Earth Engine Resource Writer**.
+4. Gere uma chave JSON para essa conta (aba Keys → Add key → Create new key →
+   JSON) e baixe o arquivo.
+5. No GitHub: **Settings → Secrets and variables → Actions → New repository
+   secret**, nome `GEE_SERVICE_ACCOUNT_JSON`, valor = todo o conteúdo do JSON.
+
+Com o secret configurado o ciclo fica completo: o SIDRA é vigiado mensalmente e
+tanto revisões quanto safras novas chegam como PR prontos para merge — e o
+merge redeploya o painel publicado.
 
 Somente `dados/soja_para_mascarado_2001_2024.csv` (a base do painel) é
-atualizado; a base sem máscara permanece congelada como artefato da comparação
-feita na dissertação.
+atualizado — o nome do arquivo preserva o recorte original da dissertação, mas
+safras posteriores são acrescentadas a ele pela automação. A base sem máscara
+permanece congelada como artefato da comparação feita na dissertação. Se o
+MapBiomas ainda não tiver publicado a máscara do ano-alvo, usa-se a mais
+recente disponível e o PR registra a aproximação.
 
 *Atenção:* o GitHub pausa agendamentos de repositórios sem atividade por ~60
 dias e envia um e-mail avisando; basta reativar na aba Actions.

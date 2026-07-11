@@ -175,9 +175,12 @@ Ele consulta a API do SIDRA/IBGE e:
 5. No GitHub: **Settings → Secrets and variables → Actions → New repository
    secret**, nome `GEE_SERVICE_ACCOUNT_JSON`, valor = todo o conteúdo do JSON.
 
-Com o secret configurado o ciclo fica completo: o SIDRA é vigiado mensalmente e
-tanto revisões quanto safras novas chegam como PR prontos para merge — e o
-merge redeploya o painel publicado.
+Com o secret configurado o ciclo fica completo e **sem intervenção humana**: o
+SIDRA é vigiado mensalmente, revisões e safras novas viram um PR que o próprio
+robô mergeia na sequência, e o merge redeploya o painel publicado. O PR fica
+como registro auditável de cada atualização; para desfazer uma, use
+`git revert` no commit correspondente. Para voltar ao merge manual, remova o
+passo "Mergeia o PR automaticamente" do workflow.
 
 Para conferir a credencial na hora: **Actions → Atualiza base de dados →
 Run workflow**, marque **"Testar a credencial do Earth Engine"** e rode. O log

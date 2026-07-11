@@ -56,12 +56,39 @@ def chave(s: str) -> str:
 
 
 def conecta_gee():
+    """Autentica no Earth Engine SEM jamais ecoar a chave no log.
+
+    As exceções da pilha de autenticação do Google podem embutir o conteúdo da
+    credencial na mensagem — e o log do Actions é público. Por isso a chave é
+    validada antes, e qualquer erro é reduzido a uma mensagem segura.
+    """
     import ee
 
     chave_json = os.environ["GEE_SERVICE_ACCOUNT_JSON"]
-    info = json.loads(chave_json)
-    credencial = ee.ServiceAccountCredentials(info["client_email"], key_data=chave_json)
-    ee.Initialize(credencial, project=os.environ.get("GEE_PROJECT", info.get("project_id")))
+    try:
+        info = json.loads(chave_json)
+    except ValueError:
+        sys.exit("GEE_SERVICE_ACCOUNT_JSON não é um JSON válido. Cole o conteúdo "
+                 "integral do arquivo de chave baixado do Google Cloud, sem editar.")
+    faltando = [c for c in ("client_email", "private_key", "project_id") if c not in info]
+    if faltando:
+        sys.exit(f"GEE_SERVICE_ACCOUNT_JSON sem os campos {faltando}. Gere uma "
+                 "chave JSON da service account e cole o arquivo inteiro.")
+    if not str(info["private_key"]).startswith("-----BEGIN PRIVATE KEY-----"):
+        sys.exit("O campo private_key do secret está corrompido (não começa com "
+                 "'-----BEGIN PRIVATE KEY-----'). Revogue esta chave no Google "
+                 "Cloud, gere uma nova e substitua o secret sem editar o texto.")
+    try:
+        credencial = ee.ServiceAccountCredentials(info["client_email"], key_data=chave_json)
+        ee.Initialize(credencial, project=os.environ.get("GEE_PROJECT", info.get("project_id")))
+    except Exception as err:
+        detalhe = str(err)
+        if "PRIVATE KEY" in detalhe or "private_key" in detalhe or len(detalhe) > 400:
+            detalhe = f"{type(err).__name__} (detalhe omitido para não expor a credencial)"
+        sys.exit(f"Falha ao autenticar no Earth Engine: {detalhe}\n"
+                 "Verifique: service account no MESMO projeto registrado no Earth "
+                 "Engine, papel 'Gravador de recursos do Earth Engine' e API "
+                 "earthengine.googleapis.com ativada.")
     print("Earth Engine conectado como", info["client_email"])
     return ee
 

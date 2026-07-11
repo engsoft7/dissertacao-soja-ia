@@ -1,0 +1,76 @@
+# Atualização automática da base PAM/IBGE.
+# Roda todo dia 15 e pode ser disparado manualmente na aba Actions.
+# - Revisões do IBGE em anos já presentes: abre um PR com o CSV atualizado.
+# - Safra nova no SIDRA: abre uma issue pedindo a coleta GEE das variáveis.
+name: Atualiza base de dados (PAM/IBGE)
+
+on:
+  schedule:
+    - cron: "0 9 15 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  atualiza:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências
+        run: pip install --quiet pandas requests
+
+      - name: Consulta o SIDRA e aplica revisões
+        id: pam
+        env:
+          RESUMO_MD: /tmp/resumo_pam.md
+        run: python 07_automacao/atualiza_pam.py
+
+      - name: Abre PR com as revisões do IBGE
+        if: steps.pam.outputs.csv_alterado == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automacao/revisao-pam
+          add-paths: dados/*.csv
+          commit-message: "Aplica revisões do IBGE na produtividade oficial (PAM)"
+          title: "Revisões do IBGE na base do painel (PAM/SIDRA)"
+          body-path: /tmp/resumo_pam.md
+          delete-branch: true
+
+      - name: Abre issue para a safra nova
+        if: steps.pam.outputs.novo_ano != ''
+        uses: actions/github-script@v7
+        env:
+          NOVO_ANO: ${{ steps.pam.outputs.novo_ano }}
+        with:
+          script: |
+            const ano = process.env.NOVO_ANO;
+            const titulo = `Safra ${ano} disponível no SIDRA — coletar variáveis no GEE`;
+            const abertas = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: "open", per_page: 100,
+            });
+            if (abertas.data.some(i => i.title === titulo)) {
+              core.info("Issue já existe; nada a fazer.");
+              return;
+            }
+            const fs = require("fs");
+            let corpo = `O SIDRA já publica o rendimento da soja para a safra ${ano} ` +
+              `nos municípios do Pará, mas a base do painel ainda não tem as variáveis ` +
+              `ambientais desse ano.\n\nPara incorporar a safra:\n` +
+              `1. Rode \`01_coleta_dados/02_coleta_gee_com_mascara_mapbiomas.py\` no ` +
+              `Google Colab com \`ANO_FIM = ${ano}\`.\n` +
+              `2. Anexe as linhas novas a \`dados/soja_para_mascarado_2001_2024.csv\`.\n` +
+              `3. Abra um PR — o merge atualiza o painel publicado automaticamente.`;
+            try { corpo += "\n\n---\n" + fs.readFileSync("/tmp/resumo_pam.md", "utf8"); } catch {}
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: titulo, body: corpo, labels: ["dados"],
+            });

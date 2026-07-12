@@ -28,13 +28,11 @@ Abre em `http://localhost:8501`.
   observado, e o painel explica isso ao usuário em vez de esconder.
 - Mostra a **evolução da área de soja** do município (máscara MapBiomas) e
   oferece **download em CSV** da série do município e da base completa.
-- Exibe um **mapa interativo do Pará** (Leaflet/`streamlit-folium`) com o
-  contorno do estado (IBGE) e os **principais rios** (Natural Earth): cada
-  município produtor é um círculo **dimensionado pela área plantada** e
-  **colorido pela produtividade média** recente, com o selecionado em anel
-  vermelho. Permite **dar zoom, arrastar e tocar num ponto para ver os dados**
-  (pinça no celular). O mapa é uma visualização pura (não recarrega o app); a
-  seleção do município é feita pelo menu.
+- Exibe um **mapa do Pará** com o contorno do estado (IBGE) e os **principais
+  rios** (Natural Earth): cada município produtor é um ponto **dimensionado pela
+  área plantada** e **colorido pela produtividade média** recente, com o
+  selecionado destacado. O mapa é responsivo (bom no celular) e estático — não
+  arrasta nem dá zoom; a seleção do município é feita pelo menu.
 - Usa a **grafia oficial acentuada** dos nomes de município (IBGE) — a base
   bruta vem do GAUL, sem acentos.
 - Traz um **panorama ordenável dos 38 municípios** (produtividade recente, área,

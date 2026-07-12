@@ -87,6 +87,18 @@ def br(v: float) -> str:
     return f"{v:,.0f}".replace(",", ".")
 
 
+def brl(v: float, dec: int = 0) -> str:
+    """Valor em reais no formato brasileiro (R$ 1.234,56)."""
+    s = f"{v:,.{dec}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return "R$ " + s
+
+
+# Custo de produção da soja — referência CONAB (custos de produção agrícola,
+# safra 2025/26, MATOPIBA). Não há custo específico do Pará; usa-se o cerrado
+# vizinho (Pedro Afonso-TO): R$ 4.248,78 variável + R$ 1.138,87 fixo por hectare.
+CUSTO_HA_REFERENCIA = 5388.0
+
+
 # Eixos do Vega-Lite usam o padrão americano; converte o rótulo para pt-BR.
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
@@ -172,6 +184,42 @@ with esq:
                 "O cenário altera chuva, temperatura e balanço hídrico; NDVI/EVI "
                 "permanecem nas médias históricas do município."
             )
+
+    with st.expander("Análise econômica (margem por hectare)"):
+        area_ha = float(df[df.municipio == municipio].sort_values("ano").iloc[-1]["soy_area_ha"])
+        est_sacas_ha = r["estimativa_kg_ha"] / SACA_KG
+
+        preco = st.number_input(
+            "Preço da soja (R$/saca de 60 kg)", min_value=0.0, value=120.0, step=5.0,
+            help="Informe o preço praticado na sua região. Não há série pública de preço "
+                 "ao produtor específica do Pará, por isso este valor é fornecido por você.",
+        )
+        custo_ha = st.number_input(
+            "Custo de produção (R$/hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0,
+            help="Padrão: referência CONAB para o cerrado vizinho (Pedro Afonso-TO, safra "
+                 "2025/26), pois não há custo específico do Pará. Ajuste para a sua realidade.",
+        )
+
+        receita_ha = est_sacas_ha * preco
+        margem_ha = receita_ha - custo_ha
+
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Receita bruta/ha", brl(receita_ha))
+        m2.metric("Custo/ha", brl(custo_ha))
+        m3.metric("Margem/ha", brl(margem_ha),
+                  delta=(f"{margem_ha / custo_ha * 100:+.0f}% sobre o custo" if custo_ha else None))
+
+        prod_t = r["estimativa_kg_ha"] * area_ha / 1000
+        prod_sacas = r["estimativa_kg_ha"] * area_ha / SACA_KG
+        st.caption(
+            f"**Produção estimada em {municipio} para {ano_alvo}: {br(prod_t)} t "
+            f"({br(prod_sacas)} sacas).** Considera {br(area_ha)} ha da máscara MapBiomas × "
+            f"a produtividade estimada. Margem total ≈ **{brl(margem_ha * area_ha)}**."
+        )
+        st.caption(
+            "Preço informado por você; custo de referência da CONAB (base MATOPIBA). "
+            "Os valores herdam a margem de erro do modelo — trate-os como ordem de grandeza."
+        )
 
 # --------------------------------------------------------- série e qualidade
 serie = df[df.municipio == municipio].sort_values("ano")

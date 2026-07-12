@@ -301,7 +301,8 @@ with esq:
             )
 
     with st.expander("Análise econômica (margem por hectare)"):
-        area_ha = float(df[df.municipio == municipio].sort_values("ano").iloc[-1]["soy_area_ha"])
+        _serie_mun = df[df.municipio == municipio].sort_values("ano")
+        area_ha = float(_serie_mun.iloc[-1]["soy_area_ha"]) if len(_serie_mun) else 0.0
         est_sacas_ha = r["estimativa_kg_ha"] / SACA_KG
 
         preco = st.number_input(

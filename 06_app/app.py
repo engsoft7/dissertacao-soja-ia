@@ -20,7 +20,17 @@ DADOS = Path(__file__).resolve().parents[1] / "dados" / "soja_para_mascarado_200
 DATA_ATUALIZACAO = DADOS.parent / "ultima_atualizacao.txt"
 METRICAS_SALVAS = DADOS.parent / "metricas_validacao.json"
 MUNICIPIOS = DADOS.parent / "municipios_para.csv"
+GEO_PARA = DADOS.parent / "para_geo.json"
 SACA_KG = 60  # saca de soja
+
+
+@st.cache_data
+def carregar_geo():
+    """Contorno do Pará (GeoJSON do IBGE) para o fundo do mapa. None se faltar."""
+    try:
+        return json.loads(GEO_PARA.read_text(encoding="utf-8"))
+    except OSError:
+        return None
 
 
 @st.cache_data
@@ -84,6 +94,42 @@ NOME_EXIBICAO = {m: _nome_por_cod.get(_cod_por_nome.get(m), m) for m in df.munic
 def disp(municipio: str) -> str:
     """Nome do município na grafia oficial acentuada (para exibição)."""
     return NOME_EXIBICAO.get(municipio, municipio)
+
+
+_interno_por_cod = {c: n for n, c in _cod_por_nome.items()}
+
+
+def mapa_para(sel_interno: str):
+    """Mapa desenhado do Pará (Altair): contorno do estado + municípios clicáveis.
+
+    Estático por natureza (não arrasta nem dá zoom), então já fica "travado" no
+    estado. Clicar num ponto emite a seleção lida pelo painel. Devolve None se
+    faltarem os dados de contorno ou de municípios.
+    """
+    geo = carregar_geo()
+    if geo is None or _muni.empty:
+        return None
+    cod_sel = _cod_por_nome.get(sel_interno)
+    pts = _muni.assign(
+        interno=_muni.cod_ibge7.map(_interno_por_cod),
+        nome=_muni.municipio,
+        sel=[1 if c == cod_sel else 0 for c in _muni.cod_ibge7],
+    )
+    fundo = alt.Chart(
+        alt.Data(values=geo, format=alt.DataFormat(property="features", type="json"))
+    ).mark_geoshape(fill="#eaf1ea", stroke="#93b993", strokeWidth=1)
+    clique = alt.selection_point(fields=["interno"], on="click", empty=False, name="clique")
+    pontos = alt.Chart(pts).mark_circle(stroke="white", strokeWidth=0.7).encode(
+        longitude="longitude:Q", latitude="latitude:Q",
+        size=alt.condition("datum.sel == 1", alt.value(260), alt.value(90)),
+        color=alt.condition("datum.sel == 1", alt.value("#B00020"), alt.value("#2E7D32")),
+        order="sel:Q",
+        tooltip=[alt.Tooltip("nome:N", title="Município")],
+    ).add_params(clique)
+    return (
+        (fundo + pontos).project(type="mercator")
+        .properties(height=420).configure_view(strokeOpacity=0)
+    )
 
 
 # ------------------------------------------------------------------ cabeçalho
@@ -153,11 +199,17 @@ st.divider()
 
 # ------------------------------------------------------------------- seleção
 municipios = sorted(df.municipio.unique())
-padrao = municipios.index("Paragominas") if "Paragominas" in municipios else 0
+st.session_state.setdefault(
+    "mun_sel", "Paragominas" if "Paragominas" in municipios else municipios[0])
+# Aplica um clique no mapa capturado no rerun anterior, ANTES de criar o seletor
+# (não se pode alterar a chave de um widget após ele ser instanciado).
+if "_clique_mapa" in st.session_state:
+    st.session_state.mun_sel = st.session_state.pop("_clique_mapa")
+
 esq, dir_ = st.columns([1, 2])
 
 with esq:
-    municipio = st.selectbox("Município", municipios, index=padrao, format_func=disp)
+    municipio = st.selectbox("Município", municipios, key="mun_sel", format_func=disp)
     ano_alvo = st.number_input("Safra a estimar", min_value=int(df.ano.max()) + 1,
                                max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
@@ -258,6 +310,21 @@ serie = df[df.municipio == municipio].sort_values("ano")
 diag = M.diagnostico_pam(df, municipio)
 
 with dir_:
+    grafico_mapa = mapa_para(municipio)
+    if grafico_mapa is not None:
+        st.subheader("Municípios produtores no Pará")
+        evento = st.altair_chart(grafico_mapa, key="mapa", on_select="rerun")
+        sel = getattr(evento, "selection", None)
+        escolhidos = sel.get("clique", []) if sel else []
+        clicado = escolhidos[0]["interno"] if escolhidos else None
+        if clicado is not None and clicado != st.session_state.get("_sel_vista"):
+            st.session_state["_sel_vista"] = clicado
+            if clicado != municipio:
+                st.session_state["_clique_mapa"] = clicado
+                st.rerun()
+        st.caption(f"**Clique num ponto para escolher o município** — em vermelho, "
+                   f"{disp(municipio)}. O mapa fica fixo no Pará.")
+
     st.subheader("Produtividade observada (PAM/IBGE)")
     serie_plot = serie.assign(
         produtividade=serie[M.ALVO] * fator,

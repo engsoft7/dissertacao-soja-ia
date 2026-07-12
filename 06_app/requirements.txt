@@ -1,5 +1,7 @@
 streamlit>=1.49
 altair>=5.0
+folium>=0.16
+streamlit-folium>=0.20
 pandas>=2.0
 numpy>=1.24
 scikit-learn>=1.3

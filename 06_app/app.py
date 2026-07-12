@@ -6,7 +6,6 @@ Execução:
     streamlit run app.py
 """
 import json
-import math
 import sys
 from pathlib import Path
 
@@ -100,37 +99,18 @@ def disp(municipio: str) -> str:
 _interno_por_cod = {c: n for n, c in _cod_por_nome.items()}
 
 
-@st.cache_data
-def _aneis_para():
-    """Contorno do Pará como linhas (lon/lat) para desenho em coordenadas simples.
-
-    Evita a projeção geográfica do Altair, que não compartilha a escala entre o
-    contorno e os pontos — o que amontoava as cidades num ponto só.
-    """
-    geo = carregar_geo()
-    if geo is None:
-        return None
-    g = geo["features"][0]["geometry"]
-    polys = g["coordinates"] if g["type"] == "MultiPolygon" else [g["coordinates"]]
-    linhas, rid = [], 0
-    for poly in polys:
-        for ring in poly:
-            for i, (lon, lat) in enumerate(ring):
-                linhas.append({"lon": lon, "lat": lat, "ring": rid, "order": i})
-            rid += 1
-    return pd.DataFrame(linhas)
-
-
 def mapa_para(sel_interno: str):
     """Mapa desenhado do Pará (Altair): contorno do estado + municípios clicáveis.
 
-    Desenhado em coordenadas lon/lat simples (sem projeção), então contorno e
-    pontos compartilham a mesma escala. Estático por natureza — não arrasta nem
-    dá zoom, já fica fixo no estado. Clicar num ponto emite a seleção lida pelo
-    painel. Devolve None se faltarem os dados de contorno ou de municípios.
+    Usa a projeção `identity` (com reflectY), que encaixa o contorno no quadro
+    preservando a proporção do estado em qualquer largura — o mapa fica
+    responsivo (bom no celular e no desktop) e nunca deforma. Os pontos usam a
+    mesma projeção, então alinham dentro do contorno. Estático por natureza:
+    não arrasta nem dá zoom. Clicar num ponto emite a seleção lida pelo painel.
+    Devolve None se faltarem os dados de contorno ou de municípios.
     """
-    anel = _aneis_para()
-    if anel is None or _muni.empty:
+    geo = carregar_geo()
+    if geo is None or _muni.empty:
         return None
     cod_sel = _cod_por_nome.get(sel_interno)
     pts = _muni.assign(
@@ -138,32 +118,19 @@ def mapa_para(sel_interno: str):
         nome=_muni.municipio,
         sel=[1 if c == cod_sel else 0 for c in _muni.cod_ibge7],
     )
-    dlon = anel.lon.max() - anel.lon.min()
-    dlat = anel.lat.max() - anel.lat.min()
-    padx, pady = dlon * 0.03, dlat * 0.03
-    sx = alt.Scale(domain=[anel.lon.min() - padx, anel.lon.max() + padx])
-    sy = alt.Scale(domain=[anel.lat.min() - pady, anel.lat.max() + pady])
-    # Proporção fixa: 1° de longitude ≈ 1° de latitude em pixels (corrigido pelo
-    # cosseno da latitude média), senão o container largo estica e deforma o mapa.
-    coslat = math.cos(math.radians((anel.lat.min() + anel.lat.max()) / 2))
-    largura = 540
-    altura = round(largura * dlat / (dlon * coslat))
-
-    contorno = alt.Chart(anel).mark_line(color="#8fbf8f", strokeWidth=1.2).encode(
-        x=alt.X("lon:Q", scale=sx, axis=None), y=alt.Y("lat:Q", scale=sy, axis=None),
-        order="order:Q", detail="ring:N",
-    )
+    contorno = alt.Chart(alt.Data(values=geo["features"])).mark_geoshape(
+        fill="#2E7D32", fillOpacity=0.10, stroke="#8fbf8f", strokeWidth=1)
     clique = alt.selection_point(fields=["interno"], on="click", empty=False, name="clique")
     pontos = alt.Chart(pts).mark_circle(stroke="white", strokeWidth=0.7).encode(
-        x=alt.X("longitude:Q", scale=sx, axis=None),
-        y=alt.Y("latitude:Q", scale=sy, axis=None),
-        size=alt.condition("datum.sel == 1", alt.value(260), alt.value(90)),
+        longitude="longitude:Q", latitude="latitude:Q",
+        size=alt.condition("datum.sel == 1", alt.value(240), alt.value(85)),
         color=alt.condition("datum.sel == 1", alt.value("#B00020"), alt.value("#2E7D32")),
         order="sel:Q",
         tooltip=[alt.Tooltip("nome:N", title="Município")],
     ).add_params(clique)
-    return ((contorno + pontos)
-            .properties(width=largura, height=altura)
+    return (alt.layer(contorno, pontos)
+            .project(type="identity", reflectY=True)
+            .properties(width="container", height=420)
             .configure_view(strokeOpacity=0))
 
 
@@ -349,7 +316,7 @@ with dir_:
     if grafico_mapa is not None:
         st.subheader("Municípios produtores no Pará")
         evento = st.altair_chart(grafico_mapa, key="mapa", on_select="rerun",
-                                 width="content")
+                                 width="stretch")
         sel = getattr(evento, "selection", None)
         escolhidos = sel.get("clique", []) if sel else []
         clicado = escolhidos[0]["interno"] if escolhidos else None

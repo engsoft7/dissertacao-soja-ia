@@ -34,7 +34,9 @@ Abre em `http://localhost:8501`.
 - Estima a **produção total** (toneladas e sacas = produtividade × área MapBiomas)
   e faz uma **análise econômica** (receita, custo e **margem por hectare**). O
   preço é informado pelo usuário (não há série pública de preço ao produtor do
-  Pará) e o custo parte de uma referência aberta da CONAB (MATOPIBA), ajustável.
+  Pará) e o custo parte de uma referência aberta da CONAB para o cerrado do
+  Tocantins vizinho (o Pará não integra o MATOPIBA e não tem custo publicado),
+  ajustável.
 - Mostra a série histórica oficial (PAM/IBGE), destacando em vermelho as safras
   cuja produtividade repete exatamente o valor do ano anterior.
 - Alerta quando a série de um município apresenta repetição acima da média

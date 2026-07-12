@@ -94,8 +94,10 @@ def brl(v: float, dec: int = 0) -> str:
 
 
 # Custo de produção da soja — referência CONAB (custos de produção agrícola,
-# safra 2025/26, MATOPIBA). Não há custo específico do Pará; usa-se o cerrado
-# vizinho (Pedro Afonso-TO): R$ 4.248,78 variável + R$ 1.138,87 fixo por hectare.
+# safra 2025/26). A CONAB NÃO publica custo para o Pará; usa-se a referência
+# mais próxima, no cerrado do Tocantins vizinho (Pedro Afonso-TO):
+# R$ 4.248,78 variável + R$ 1.138,87 fixo por hectare. O Pará não integra o
+# MATOPIBA (MA, TO, PI, BA); Tocantins é apenas o vizinho geográfico do sul do PA.
 CUSTO_HA_REFERENCIA = 5388.0
 
 
@@ -196,8 +198,9 @@ with esq:
         )
         custo_ha = st.number_input(
             "Custo de produção (R$/hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0,
-            help="Padrão: referência CONAB para o cerrado vizinho (Pedro Afonso-TO, safra "
-                 "2025/26), pois não há custo específico do Pará. Ajuste para a sua realidade.",
+            help="A CONAB não publica custo de produção para o Pará. Este valor de partida "
+                 "vem da referência mais próxima — o cerrado do Tocantins vizinho (Pedro "
+                 "Afonso-TO, safra 2025/26). Ajuste para a realidade do seu município.",
         )
 
         receita_ha = est_sacas_ha * preco
@@ -217,7 +220,8 @@ with esq:
             f"a produtividade estimada. Margem total ≈ **{brl(margem_ha * area_ha)}**."
         )
         st.caption(
-            "Preço informado por você; custo de referência da CONAB (base MATOPIBA). "
+            "Preço informado por você; custo de referência da CONAB para o cerrado do "
+            "Tocantins vizinho (o Pará não integra o MATOPIBA e não tem custo publicado). "
             "Os valores herdam a margem de erro do modelo — trate-os como ordem de grandeza."
         )
 

@@ -19,7 +19,22 @@ import model as M
 DADOS = Path(__file__).resolve().parents[1] / "dados" / "soja_para_mascarado_2001_2024.csv"
 DATA_ATUALIZACAO = DADOS.parent / "ultima_atualizacao.txt"
 METRICAS_SALVAS = DADOS.parent / "metricas_validacao.json"
+MUNICIPIOS = DADOS.parent / "municipios_para.csv"
 SACA_KG = 60  # saca de soja
+
+
+@st.cache_data
+def carregar_municipios():
+    """Nome oficial acentuado (IBGE) e centroide de cada município, por cod_ibge7.
+
+    A base bruta vem do GAUL, sem acentos; este arquivo (gerado por
+    07_automacao/gera_municipios.py) devolve a grafia oficial e as coordenadas
+    para o mapa. Se faltar, o painel cai para os nomes sem acento e omite o mapa.
+    """
+    try:
+        return pd.read_csv(MUNICIPIOS)
+    except OSError:
+        return pd.DataFrame(columns=["cod_ibge7", "municipio", "latitude", "longitude"])
 
 
 def data_atualizacao() -> str | None:
@@ -57,6 +72,19 @@ def preparar():
 
 
 df, estimador, metricas = preparar()
+
+# Nome acentuado por município (interno = sem acento, vindo do GAUL). O mapa e
+# a exibição usam a grafia oficial; a lógica continua usando o nome interno.
+_muni = carregar_municipios()
+_cod_por_nome = df.drop_duplicates("municipio").set_index("municipio")["cod_ibge7"].to_dict()
+_nome_por_cod = _muni.set_index("cod_ibge7")["municipio"].to_dict()
+NOME_EXIBICAO = {m: _nome_por_cod.get(_cod_por_nome.get(m), m) for m in df.municipio.unique()}
+
+
+def disp(municipio: str) -> str:
+    """Nome do município na grafia oficial acentuada (para exibição)."""
+    return NOME_EXIBICAO.get(municipio, municipio)
+
 
 # ------------------------------------------------------------------ cabeçalho
 st.title("Estimativa da produtividade da soja — municípios do Pará")
@@ -129,7 +157,7 @@ padrao = municipios.index("Paragominas") if "Paragominas" in municipios else 0
 esq, dir_ = st.columns([1, 2])
 
 with esq:
-    municipio = st.selectbox("Município", municipios, index=padrao)
+    municipio = st.selectbox("Município", municipios, index=padrao, format_func=disp)
     ano_alvo = st.number_input("Safra a estimar", min_value=int(df.ano.max()) + 1,
                                max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
@@ -215,7 +243,7 @@ with esq:
         prod_t = r["estimativa_kg_ha"] * area_ha / 1000
         prod_sacas = r["estimativa_kg_ha"] * area_ha / SACA_KG
         st.caption(
-            f"**Produção estimada em {municipio} para {ano_alvo}: {br(prod_t)} t "
+            f"**Produção estimada em {disp(municipio)} para {ano_alvo}: {br(prod_t)} t "
             f"({br(prod_sacas)} sacas).** Considera {br(area_ha)} ha da máscara MapBiomas × "
             f"a produtividade estimada. Margem total ≈ **{brl(margem_ha * area_ha)}**."
         )
@@ -230,6 +258,24 @@ serie = df[df.municipio == municipio].sort_values("ano")
 diag = M.diagnostico_pam(df, municipio)
 
 with dir_:
+    st.subheader("Municípios produtores no Pará")
+    if not _muni.empty:
+        cod_sel = _cod_por_nome.get(municipio)
+        mapa = _muni.assign(
+            selecionado=_muni.cod_ibge7.eq(cod_sel),
+            cor=[("#B00020" if s else "#2E7D32")
+                 for s in _muni.cod_ibge7.eq(cod_sel)],
+            tamanho=[16000 if s else 7000 for s in _muni.cod_ibge7.eq(cod_sel)],
+        )
+        st.map(mapa, latitude="latitude", longitude="longitude",
+               color="cor", size="tamanho")
+        st.caption(
+            f"Cada ponto é um dos {len(_muni)} municípios da base. "
+            f"Em vermelho, **{disp(municipio)}**, o selecionado."
+        )
+    else:
+        st.info("Mapa indisponível: falta `dados/municipios_para.csv`.")
+
     st.subheader("Produtividade observada (PAM/IBGE)")
     serie_plot = serie.assign(
         produtividade=serie[M.ALVO] * fator,
@@ -282,7 +328,7 @@ c.metric("Média do estado", f"{taxa_estado:.1f}%")
 
 if diag["taxa"] >= taxa_estado:
     st.warning(
-        f"**Atenção.** Em {municipio}, {diag['repetidos']} de {diag['pares']} pares de safras "
+        f"**Atenção.** Em {disp(municipio)}, {diag['repetidos']} de {diag['pares']} pares de safras "
         f"consecutivas registram produtividade rigorosamente idêntica "
         f"(anos: {', '.join(map(str, diag['anos_repetidos']))}). "
         "A Produção Agrícola Municipal não mede a produtividade: ela é estimada pelo agente de "
@@ -292,7 +338,7 @@ if diag["taxa"] >= taxa_estado:
     )
 else:
     st.success(
-        f"Em {municipio}, a repetição de valores ({diag['taxa']:.0f}%) está abaixo da média "
+        f"Em {disp(municipio)}, a repetição de valores ({diag['taxa']:.0f}%) está abaixo da média "
         f"estadual ({taxa_estado:.1f}%). A série oficial apresenta variação interanual mais "
         "consistente com a variabilidade agronômica esperada."
     )
@@ -324,7 +370,7 @@ for mun, d in df.groupby("municipio"):
     ult5 = d[d.ano > ult_ano - 5]
     difs = d[M.ALVO].diff().dropna()
     linhas_pan.append({
-        "Município": mun,
+        "Município": disp(mun),
         "prod_media": ult5[M.ALVO].mean() * fator,
         "area_ha": float(d.iloc[-1]["soy_area_ha"]),
         "repeticao": float((difs == 0).mean() * 100) if len(difs) else 0.0,

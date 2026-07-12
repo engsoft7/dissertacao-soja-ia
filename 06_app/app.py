@@ -6,16 +6,12 @@ Execução:
     streamlit run app.py
 """
 import json
-import math
 import sys
 from pathlib import Path
 
 import altair as alt
-import branca.colormap as cm
-import folium
 import pandas as pd
 import streamlit as st
-from streamlit_folium import st_folium
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import model as M
@@ -126,59 +122,53 @@ def _soja_por_municipio():
     return agg.merge(_muni, on="cod_ibge7", how="inner")
 
 
-_VIRIDIS = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"]
+def mapa_para(sel_interno: str):
+    """Mapa do Pará (Altair): contorno + rios + municípios produtores de soja.
 
-
-def construir_mapa(sel_interno: str):
-    """Mapa interativo do Pará (Leaflet/folium): contorno + rios + municípios.
-
-    Permite **dar zoom, arrastar** (pinça no celular) e **tocar num ponto para
-    ver os dados** (popup). Cada município produtor é um círculo dimensionado
-    pela área plantada e colorido pela produtividade média recente; os rios
-    principais dão contexto e o selecionado ganha um anel vermelho. O Leaflet
-    ajusta o enquadramento ao Pará em qualquer tela. É renderizado como
-    visualização pura (sem devolver cliques ao servidor), para não recarregar o
-    app — a seleção do município é feita pelo menu. Devolve (mapa, nomes,
-    (rend_min, rend_max)) ou (None, {}, None) se faltarem os dados.
+    Informativo (a seleção é feita pelo menu): cada município é um ponto
+    dimensionado pela área plantada e colorido pela produtividade média recente;
+    os rios principais dão contexto geográfico e o município selecionado ganha um
+    anel vermelho. Usa a projeção `identity` (reflectY), que encaixa tudo no
+    quadro preservando a proporção do estado em qualquer largura — responsivo
+    (celular e desktop) e sem deformar. Devolve None se faltarem os dados.
     """
     geo = carregar_geo()
     pts = _soja_por_municipio()
     if geo is None or pts.empty:
-        return None, {}, None
+        return None
     cod_sel = _cod_por_nome.get(sel_interno)
-    latmin, latmax = pts.latitude.min(), pts.latitude.max()
-    lonmin, lonmax = pts.longitude.min(), pts.longitude.max()
+    pts = pts.assign(sel=(pts.cod_ibge7 == cod_sel).astype(int),
+                     nome=pts.municipio)
 
-    m = folium.Map(location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
-                   tiles="cartodbpositron", zoom_start=6, control_scale=True)
-    folium.GeoJson(geo, name="Pará", interactive=False, style_function=lambda f: {
-        "fillColor": "#2E7D32", "color": "#6f9f6f", "weight": 1.2,
-        "fillOpacity": 0.06}).add_to(m)
+    contorno = alt.Chart(alt.Data(values=geo["features"])).mark_geoshape(
+        fill="#eef3ec", fillOpacity=1, stroke="#8fbf8f", strokeWidth=1)
+    camadas = [contorno]
+
     rios = carregar_rios()
     if rios is not None and rios.get("features"):
-        folium.GeoJson(rios, name="Rios", interactive=False, style_function=lambda f: {
-            "color": "#4a90d9", "weight": 1.3, "opacity": 0.85}).add_to(m)
+        camadas.append(alt.Chart(alt.Data(values=rios["features"])).mark_geoshape(
+            filled=False, stroke="#5B9BD5", strokeWidth=1.1, strokeOpacity=0.9))
 
-    rmin, rmax = float(pts.rend.min()), float(pts.rend.max())
-    cmap = cm.LinearColormap(_VIRIDIS, vmin=rmin, vmax=rmax)
-    amax = float(pts.area.max())
-    nome_para_interno = {}
-    for r in pts.itertuples():
-        nome = disp(r.municipio)
-        nome_para_interno[nome] = r.municipio
-        selec = r.cod_ibge7 == cod_sel
-        folium.CircleMarker(
-            location=[r.latitude, r.longitude],
-            radius=4 + 14 * math.sqrt(r.area / amax),
-            color="#B00020" if selec else "white",
-            weight=3 if selec else 0.7,
-            fill=True, fill_color=cmap(r.rend), fill_opacity=0.9,
-            tooltip=nome,
-            popup=folium.Popup(f"<b>{nome}</b><br>Área plantada: {r.area:,.0f} ha"
-                               f"<br>Produtividade: {r.rend:,.0f} kg/ha", max_width=220),
-        ).add_to(m)
-    m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
-    return m, nome_para_interno, (rmin, rmax)
+    base = alt.Chart(pts).encode(longitude="longitude:Q", latitude="latitude:Q")
+    cidades = base.mark_circle(stroke="white", strokeWidth=0.8, opacity=0.92).encode(
+        size=alt.Size("area:Q", scale=alt.Scale(range=[30, 700]),
+                      legend=alt.Legend(title="Área plantada (ha)", orient="bottom",
+                                        values=[10000, 50000, 100000], format=",.0f")),
+        color=alt.Color("rend:Q", scale=alt.Scale(scheme="viridis"),
+                        legend=alt.Legend(title="Produtividade (kg/ha)", orient="bottom",
+                                          format=",.0f")),
+        tooltip=[alt.Tooltip("nome:N", title="Município"),
+                 alt.Tooltip("area:Q", title="Área plantada (ha)", format=",.0f"),
+                 alt.Tooltip("rend:Q", title="Produtividade (kg/ha)", format=",.0f")],
+    )
+    destaque = base.transform_filter("datum.sel == 1").mark_point(
+        shape="circle", stroke="#B00020", strokeWidth=3, size=520, fill=None)
+    camadas += [cidades, destaque]
+
+    return (alt.layer(*camadas)
+            .project(type="identity", reflectY=True)
+            .properties(width="container", height=440)
+            .configure_view(strokeOpacity=0))
 
 
 # ------------------------------------------------------------------ cabeçalho
@@ -353,32 +343,14 @@ serie = df[df.municipio == municipio].sort_values("ano")
 diag = M.diagnostico_pam(df, municipio)
 
 with dir_:
-    mapa, _, faixa_rend = construir_mapa(municipio)
-    if mapa is not None:
+    grafico_mapa = mapa_para(municipio)
+    if grafico_mapa is not None:
         st.subheader("Soja no Pará por município")
-        # returned_objects=[] deixa o mapa como visualização pura: dá zoom,
-        # arrasta e mostra o popup ao tocar, sem devolver dados nem forçar rerun
-        # — o clique-recarrega anterior travava o app (issue #27). A seleção do
-        # município fica no menu (rápido e estável).
-        st_folium(mapa, use_container_width=True, height=430,
-                  returned_objects=[], key="mapa")
-        # Legenda de cor em HTML (compacta e responsiva — a do folium estoura no
-        # celular). Gradiente viridis com os extremos de produtividade.
-        grad = ",".join(_VIRIDIS)
-        st.markdown(
-            f"""<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-                 font-size:0.82rem;margin:2px 0 6px">
-              <span style="opacity:.75">Produtividade</span>
-              <span>{br(faixa_rend[0])}</span>
-              <div style="flex:0 1 150px;height:12px;border-radius:3px;
-                   background:linear-gradient(to right,{grad})"></div>
-              <span>{br(faixa_rend[1])} kg/ha</span>
-            </div>""",
-            unsafe_allow_html=True)
-        st.caption(f"**Dê zoom, arraste e toque num ponto** para ver os dados do "
-                   f"município (escolha no menu à esquerda). **Tamanho** = área "
-                   f"plantada, **cor** = produtividade; em azul, os principais "
-                   f"rios; com anel vermelho, **{disp(municipio)}**.")
+        st.altair_chart(grafico_mapa, width="stretch")
+        st.caption(f"Cada ponto é um município produtor: **tamanho** = área "
+                   f"plantada, **cor** = produtividade média (2020+). Em azul, os "
+                   f"principais rios; com anel vermelho, **{disp(municipio)}** "
+                   f"(escolha o município no menu à esquerda).")
 
     st.subheader("Produtividade observada (PAM/IBGE)")
     serie_plot = serie.assign(

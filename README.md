@@ -70,10 +70,12 @@ impõe um teto estrutural à acurácia de qualquer modelo calibrado sobre essa b
   coleta_gee_safra.py                     coleta headless de safra nova no GEE
   gera_metricas.py                        pré-calcula a validação para o painel
   gera_municipios.py                      nomes acentuados (IBGE) + coordenadas
+  gera_geo_para.py                        contorno do Pará (malha do IBGE)
 dados/
   soja_para_mascarado_2001_2024.csv       base principal (415 registros)
   soja_para_sem_mascara_2001_2023.csv     base sem máscara (comparação)
   municipios_para.csv                     nome oficial acentuado e centroide (mapa)
+  para_geo.json                           contorno do estado (fundo do mapa)
 ```
 
 ---

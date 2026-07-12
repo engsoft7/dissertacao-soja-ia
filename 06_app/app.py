@@ -11,7 +11,6 @@ from pathlib import Path
 
 import altair as alt
 import pandas as pd
-import pydeck as pdk
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -21,7 +20,17 @@ DADOS = Path(__file__).resolve().parents[1] / "dados" / "soja_para_mascarado_200
 DATA_ATUALIZACAO = DADOS.parent / "ultima_atualizacao.txt"
 METRICAS_SALVAS = DADOS.parent / "metricas_validacao.json"
 MUNICIPIOS = DADOS.parent / "municipios_para.csv"
+GEO_PARA = DADOS.parent / "para_geo.json"
 SACA_KG = 60  # saca de soja
+
+
+@st.cache_data
+def carregar_geo():
+    """Contorno do Pará (GeoJSON do IBGE) para o fundo do mapa. None se faltar."""
+    try:
+        return json.loads(GEO_PARA.read_text(encoding="utf-8"))
+    except OSError:
+        return None
 
 
 @st.cache_data
@@ -90,31 +99,36 @@ def disp(municipio: str) -> str:
 _interno_por_cod = {c: n for n, c in _cod_por_nome.items()}
 
 
-def deck_mapa(sel_interno: str, travado: bool = True):
-    """Mapa clicável do Pará (pydeck): um ponto por município, o selecionado em destaque.
+def mapa_para(sel_interno: str):
+    """Mapa desenhado do Pará (Altair): contorno do estado + municípios clicáveis.
 
-    Travado (padrão): `controller=False` fixa a vista no estado — sem arrastar
-    nem zoom. O clique nos pontos continua selecionando. Destravado: libera
-    arrastar e dar zoom.
+    Estático por natureza (não arrasta nem dá zoom), então já fica "travado" no
+    estado. Clicar num ponto emite a seleção lida pelo painel. Devolve None se
+    faltarem os dados de contorno ou de municípios.
     """
+    geo = carregar_geo()
+    if geo is None or _muni.empty:
+        return None
     cod_sel = _cod_por_nome.get(sel_interno)
-    d = _muni.assign(
+    pts = _muni.assign(
         interno=_muni.cod_ibge7.map(_interno_por_cod),
         nome=_muni.municipio,
-        cor=[[176, 0, 32] if c == cod_sel else [46, 125, 50] for c in _muni.cod_ibge7],
-        raio=[15000 if c == cod_sel else 9000 for c in _muni.cod_ibge7],
+        sel=[1 if c == cod_sel else 0 for c in _muni.cod_ibge7],
     )
-    camada = pdk.Layer(
-        "ScatterplotLayer", d, id="cidades",
-        get_position=["longitude", "latitude"], get_fill_color="cor",
-        get_radius="raio", pickable=True, radius_min_pixels=4, radius_max_pixels=28,
-    )
-    vista = pdk.ViewState(latitude=-4.8, longitude=-52.5, zoom=4.2)
-    # controller=False (travado) fixa a vista: sem arrastar nem zoom; o clique segue.
-    view = pdk.View(type="MapView", controller=(not travado))
-    return pdk.Deck(
-        layers=[camada], initial_view_state=vista, views=[view],
-        map_provider="carto", map_style="road", tooltip={"text": "{nome}"},
+    fundo = alt.Chart(
+        alt.Data(values=geo, format=alt.DataFormat(property="features", type="json"))
+    ).mark_geoshape(fill="#eaf1ea", stroke="#93b993", strokeWidth=1)
+    clique = alt.selection_point(fields=["interno"], on="click", empty=False, name="clique")
+    pontos = alt.Chart(pts).mark_circle(stroke="white", strokeWidth=0.7).encode(
+        longitude="longitude:Q", latitude="latitude:Q",
+        size=alt.condition("datum.sel == 1", alt.value(260), alt.value(90)),
+        color=alt.condition("datum.sel == 1", alt.value("#B00020"), alt.value("#2E7D32")),
+        order="sel:Q",
+        tooltip=[alt.Tooltip("nome:N", title="Município")],
+    ).add_params(clique)
+    return (
+        (fundo + pontos).project(type="mercator")
+        .properties(height=420).configure_view(strokeOpacity=0)
     )
 
 
@@ -296,33 +310,20 @@ serie = df[df.municipio == municipio].sort_values("ano")
 diag = M.diagnostico_pam(df, municipio)
 
 with dir_:
-    cab, bt = st.columns([3, 1])
-    cab.subheader("Municípios produtores no Pará")
-    destravado = bt.toggle("🔓 Destravar", value=False,
-                           help="Trava a vista no Pará. Destrave para arrastar e dar zoom.")
-    if not _muni.empty:
-        evento = st.pydeck_chart(
-            deck_mapa(municipio, travado=not destravado), key="mapa",
-            on_select="rerun", selection_mode="single-object",
-        )
-        objs = []
+    grafico_mapa = mapa_para(municipio)
+    if grafico_mapa is not None:
+        st.subheader("Municípios produtores no Pará")
+        evento = st.altair_chart(grafico_mapa, key="mapa", on_select="rerun")
         sel = getattr(evento, "selection", None)
-        if sel:
-            objs = sel.get("objects", {}).get("cidades", [])
-        clicado = objs[0]["interno"] if objs else None
-        # Reage só quando a seleção do mapa MUDA de fato — assim uma seleção
-        # remanescente não sobrescreve uma troca feita pelo seletor.
+        escolhidos = sel.get("clique", []) if sel else []
+        clicado = escolhidos[0]["interno"] if escolhidos else None
         if clicado is not None and clicado != st.session_state.get("_sel_vista"):
             st.session_state["_sel_vista"] = clicado
             if clicado != municipio:
                 st.session_state["_clique_mapa"] = clicado
                 st.rerun()
-        st.caption(
-            f"**Clique num ponto para escolher o município.** Cada ponto é um dos "
-            f"{len(_muni)} municípios da base; em vermelho, **{disp(municipio)}**."
-        )
-    else:
-        st.info("Mapa indisponível: falta `dados/municipios_para.csv`.")
+        st.caption(f"**Clique num ponto para escolher o município** — em vermelho, "
+                   f"{disp(municipio)}. O mapa fica fixo no Pará.")
 
     st.subheader("Produtividade observada (PAM/IBGE)")
     serie_plot = serie.assign(

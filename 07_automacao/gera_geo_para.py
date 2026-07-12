@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from pathlib import Path
 
 import requests
@@ -27,10 +28,23 @@ def arredonda(x, casas=3):
     return x
 
 
+def baixa(tentativas: int = 6, espera_s: int = 60) -> dict:
+    """A API de malhas do IBGE oscila; tenta algumas vezes antes de desistir."""
+    for i in range(1, tentativas + 1):
+        try:
+            r = requests.get(URL, timeout=90)
+            r.raise_for_status()
+            return r.json()
+        except requests.RequestException as err:
+            if i == tentativas:
+                raise
+            print(f"IBGE indisponível ({type(err).__name__}, {i}/{tentativas}); "
+                  f"nova tentativa em {espera_s}s")
+            time.sleep(espera_s)
+
+
 def main() -> int:
-    r = requests.get(URL, timeout=90)
-    r.raise_for_status()
-    fc = r.json()
+    fc = baixa()
     for feature in fc.get("features", []):
         feature.pop("properties", None)
         geom = feature.get("geometry", {})

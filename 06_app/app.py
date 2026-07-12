@@ -99,15 +99,37 @@ def disp(municipio: str) -> str:
 _interno_por_cod = {c: n for n, c in _cod_por_nome.items()}
 
 
+@st.cache_data
+def _aneis_para():
+    """Contorno do Pará como linhas (lon/lat) para desenho em coordenadas simples.
+
+    Evita a projeção geográfica do Altair, que não compartilha a escala entre o
+    contorno e os pontos — o que amontoava as cidades num ponto só.
+    """
+    geo = carregar_geo()
+    if geo is None:
+        return None
+    g = geo["features"][0]["geometry"]
+    polys = g["coordinates"] if g["type"] == "MultiPolygon" else [g["coordinates"]]
+    linhas, rid = [], 0
+    for poly in polys:
+        for ring in poly:
+            for i, (lon, lat) in enumerate(ring):
+                linhas.append({"lon": lon, "lat": lat, "ring": rid, "order": i})
+            rid += 1
+    return pd.DataFrame(linhas)
+
+
 def mapa_para(sel_interno: str):
     """Mapa desenhado do Pará (Altair): contorno do estado + municípios clicáveis.
 
-    Estático por natureza (não arrasta nem dá zoom), então já fica "travado" no
-    estado. Clicar num ponto emite a seleção lida pelo painel. Devolve None se
-    faltarem os dados de contorno ou de municípios.
+    Desenhado em coordenadas lon/lat simples (sem projeção), então contorno e
+    pontos compartilham a mesma escala. Estático por natureza — não arrasta nem
+    dá zoom, já fica fixo no estado. Clicar num ponto emite a seleção lida pelo
+    painel. Devolve None se faltarem os dados de contorno ou de municípios.
     """
-    geo = carregar_geo()
-    if geo is None or _muni.empty:
+    anel = _aneis_para()
+    if anel is None or _muni.empty:
         return None
     cod_sel = _cod_por_nome.get(sel_interno)
     pts = _muni.assign(
@@ -115,21 +137,25 @@ def mapa_para(sel_interno: str):
         nome=_muni.municipio,
         sel=[1 if c == cod_sel else 0 for c in _muni.cod_ibge7],
     )
-    fundo = alt.Chart(
-        alt.Data(values=geo, format=alt.DataFormat(property="features", type="json"))
-    ).mark_geoshape(fill="#eaf1ea", stroke="#93b993", strokeWidth=1)
+    padx = (anel.lon.max() - anel.lon.min()) * 0.03
+    pady = (anel.lat.max() - anel.lat.min()) * 0.03
+    sx = alt.Scale(domain=[anel.lon.min() - padx, anel.lon.max() + padx])
+    sy = alt.Scale(domain=[anel.lat.min() - pady, anel.lat.max() + pady])
+
+    contorno = alt.Chart(anel).mark_line(color="#8fbf8f", strokeWidth=1.2).encode(
+        x=alt.X("lon:Q", scale=sx, axis=None), y=alt.Y("lat:Q", scale=sy, axis=None),
+        order="order:Q", detail="ring:N",
+    )
     clique = alt.selection_point(fields=["interno"], on="click", empty=False, name="clique")
     pontos = alt.Chart(pts).mark_circle(stroke="white", strokeWidth=0.7).encode(
-        longitude="longitude:Q", latitude="latitude:Q",
+        x=alt.X("longitude:Q", scale=sx, axis=None),
+        y=alt.Y("latitude:Q", scale=sy, axis=None),
         size=alt.condition("datum.sel == 1", alt.value(260), alt.value(90)),
         color=alt.condition("datum.sel == 1", alt.value("#B00020"), alt.value("#2E7D32")),
         order="sel:Q",
         tooltip=[alt.Tooltip("nome:N", title="Município")],
     ).add_params(clique)
-    return (
-        (fundo + pontos).project(type="mercator")
-        .properties(height=420).configure_view(strokeOpacity=0)
-    )
+    return (contorno + pontos).properties(height=440).configure_view(strokeOpacity=0)
 
 
 # ------------------------------------------------------------------ cabeçalho

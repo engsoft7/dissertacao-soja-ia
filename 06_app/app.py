@@ -90,8 +90,12 @@ def disp(municipio: str) -> str:
 _interno_por_cod = {c: n for n, c in _cod_por_nome.items()}
 
 
-def figura_mapa(sel_interno: str):
-    """Mapa clicável do Pará: um ponto por município, o selecionado em destaque."""
+def figura_mapa(sel_interno: str, travado: bool = True):
+    """Mapa clicável do Pará: um ponto por município, o selecionado em destaque.
+
+    Travado (padrão): sem arrastar; a vista fica fixa no estado. O clique nos
+    pontos continua funcionando. Destravado: permite arrastar e dar zoom.
+    """
     d = _muni.assign(
         interno=_muni.cod_ibge7.map(_interno_por_cod),
         estado=[("Selecionado" if c == _cod_por_nome.get(sel_interno) else "Município")
@@ -107,7 +111,7 @@ def figura_mapa(sel_interno: str):
     fig.update_layout(
         map_style="open-street-map", showlegend=False,
         margin={"l": 0, "r": 0, "t": 0, "b": 0}, height=380,
-        dragmode=False,
+        dragmode=(False if travado else "pan"),
     )
     return fig
 
@@ -290,11 +294,15 @@ serie = df[df.municipio == municipio].sort_values("ano")
 diag = M.diagnostico_pam(df, municipio)
 
 with dir_:
-    st.subheader("Municípios produtores no Pará")
+    cab, bt = st.columns([3, 1])
+    cab.subheader("Municípios produtores no Pará")
+    destravado = bt.toggle("🔓 Destravar", value=False,
+                           help="Trava a vista no Pará. Destrave para arrastar e dar zoom.")
     if not _muni.empty:
         evento = st.plotly_chart(
-            figura_mapa(municipio), key="mapa", on_select="rerun",
-            selection_mode="points", config={"displayModeBar": False},
+            figura_mapa(municipio, travado=not destravado), key="mapa",
+            on_select="rerun", selection_mode="points",
+            config={"displayModeBar": False, "scrollZoom": destravado},
         )
         pontos = evento.selection["points"] if evento and evento.get("selection") else []
         clicado = pontos[0]["customdata"][0] if pontos else None

@@ -8,6 +8,7 @@ requests>=2.31
 # painel (06_app/), também usado no deploy do Streamlit Community Cloud:
 streamlit>=1.49
 altair>=5.0
+plotly>=5.24
 # apenas para os scripts de coleta (Google Colab):
 # earthengine-api
 # sidrapy

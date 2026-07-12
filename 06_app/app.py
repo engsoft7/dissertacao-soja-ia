@@ -21,6 +21,7 @@ DATA_ATUALIZACAO = DADOS.parent / "ultima_atualizacao.txt"
 METRICAS_SALVAS = DADOS.parent / "metricas_validacao.json"
 MUNICIPIOS = DADOS.parent / "municipios_para.csv"
 GEO_PARA = DADOS.parent / "para_geo.json"
+RIOS_PARA = DADOS.parent / "rios_para.json"
 SACA_KG = 60  # saca de soja
 
 
@@ -29,6 +30,15 @@ def carregar_geo():
     """Contorno do Pará (GeoJSON do IBGE) para o fundo do mapa. None se faltar."""
     try:
         return json.loads(GEO_PARA.read_text(encoding="utf-8"))
+    except OSError:
+        return None
+
+
+@st.cache_data
+def carregar_rios():
+    """Principais rios do Pará (Natural Earth, recortado) para o mapa. None se faltar."""
+    try:
+        return json.loads(RIOS_PARA.read_text(encoding="utf-8"))
     except OSError:
         return None
 
@@ -99,38 +109,65 @@ def disp(municipio: str) -> str:
 _interno_por_cod = {c: n for n, c in _cod_por_nome.items()}
 
 
-def mapa_para(sel_interno: str):
-    """Mapa desenhado do Pará (Altair): contorno do estado + municípios clicáveis.
+@st.cache_data
+def _soja_por_municipio():
+    """Área plantada e produtividade médias recentes (2020+) por município, com
+    coordenadas — base dos pontos do mapa. Vazio se faltarem as coordenadas."""
+    if _muni.empty:
+        return pd.DataFrame()
+    recente = df[df.ano >= df.ano.max() - 4]
+    agg = (recente.groupby("cod_ibge7")
+           .agg(area=("soy_area_ha", "mean"), rend=(M.ALVO, "mean"))
+           .reset_index())
+    return agg.merge(_muni, on="cod_ibge7", how="inner")
 
-    Usa a projeção `identity` (com reflectY), que encaixa o contorno no quadro
-    preservando a proporção do estado em qualquer largura — o mapa fica
-    responsivo (bom no celular e no desktop) e nunca deforma. Os pontos usam a
-    mesma projeção, então alinham dentro do contorno. Estático por natureza:
-    não arrasta nem dá zoom. Clicar num ponto emite a seleção lida pelo painel.
-    Devolve None se faltarem os dados de contorno ou de municípios.
+
+def mapa_para(sel_interno: str):
+    """Mapa do Pará (Altair): contorno + rios + municípios produtores de soja.
+
+    Informativo (a seleção é feita pelo menu): cada município é um ponto
+    dimensionado pela área plantada e colorido pela produtividade média recente;
+    os rios principais dão contexto geográfico e o município selecionado ganha um
+    anel vermelho. Usa a projeção `identity` (reflectY), que encaixa tudo no
+    quadro preservando a proporção do estado em qualquer largura — responsivo
+    (celular e desktop) e sem deformar. Devolve None se faltarem os dados.
     """
     geo = carregar_geo()
-    if geo is None or _muni.empty:
+    pts = _soja_por_municipio()
+    if geo is None or pts.empty:
         return None
     cod_sel = _cod_por_nome.get(sel_interno)
-    pts = _muni.assign(
-        interno=_muni.cod_ibge7.map(_interno_por_cod),
-        nome=_muni.municipio,
-        sel=[1 if c == cod_sel else 0 for c in _muni.cod_ibge7],
-    )
+    pts = pts.assign(sel=(pts.cod_ibge7 == cod_sel).astype(int),
+                     nome=pts.municipio)
+
     contorno = alt.Chart(alt.Data(values=geo["features"])).mark_geoshape(
-        fill="#2E7D32", fillOpacity=0.10, stroke="#8fbf8f", strokeWidth=1)
-    clique = alt.selection_point(fields=["interno"], on="click", empty=False, name="clique")
-    pontos = alt.Chart(pts).mark_circle(stroke="white", strokeWidth=0.7).encode(
-        longitude="longitude:Q", latitude="latitude:Q",
-        size=alt.condition("datum.sel == 1", alt.value(240), alt.value(85)),
-        color=alt.condition("datum.sel == 1", alt.value("#B00020"), alt.value("#2E7D32")),
-        order="sel:Q",
-        tooltip=[alt.Tooltip("nome:N", title="Município")],
-    ).add_params(clique)
-    return (alt.layer(contorno, pontos)
+        fill="#eef3ec", fillOpacity=1, stroke="#8fbf8f", strokeWidth=1)
+    camadas = [contorno]
+
+    rios = carregar_rios()
+    if rios is not None and rios.get("features"):
+        camadas.append(alt.Chart(alt.Data(values=rios["features"])).mark_geoshape(
+            filled=False, stroke="#5B9BD5", strokeWidth=1.1, strokeOpacity=0.9))
+
+    base = alt.Chart(pts).encode(longitude="longitude:Q", latitude="latitude:Q")
+    cidades = base.mark_circle(stroke="white", strokeWidth=0.8, opacity=0.92).encode(
+        size=alt.Size("area:Q", scale=alt.Scale(range=[30, 700]),
+                      legend=alt.Legend(title="Área plantada (ha)", orient="bottom",
+                                        values=[10000, 50000, 100000], format=",.0f")),
+        color=alt.Color("rend:Q", scale=alt.Scale(scheme="viridis"),
+                        legend=alt.Legend(title="Produtividade (kg/ha)", orient="bottom",
+                                          format=",.0f")),
+        tooltip=[alt.Tooltip("nome:N", title="Município"),
+                 alt.Tooltip("area:Q", title="Área plantada (ha)", format=",.0f"),
+                 alt.Tooltip("rend:Q", title="Produtividade (kg/ha)", format=",.0f")],
+    )
+    destaque = base.transform_filter("datum.sel == 1").mark_point(
+        shape="circle", stroke="#B00020", strokeWidth=3, size=520, fill=None)
+    camadas += [cidades, destaque]
+
+    return (alt.layer(*camadas)
             .project(type="identity", reflectY=True)
-            .properties(width="container", height=420)
+            .properties(width="container", height=440)
             .configure_view(strokeOpacity=0))
 
 
@@ -201,17 +238,11 @@ st.divider()
 
 # ------------------------------------------------------------------- seleção
 municipios = sorted(df.municipio.unique())
-st.session_state.setdefault(
-    "mun_sel", "Paragominas" if "Paragominas" in municipios else municipios[0])
-# Aplica um clique no mapa capturado no rerun anterior, ANTES de criar o seletor
-# (não se pode alterar a chave de um widget após ele ser instanciado).
-if "_clique_mapa" in st.session_state:
-    st.session_state.mun_sel = st.session_state.pop("_clique_mapa")
-
+padrao = municipios.index("Paragominas") if "Paragominas" in municipios else 0
 esq, dir_ = st.columns([1, 2])
 
 with esq:
-    municipio = st.selectbox("Município", municipios, key="mun_sel", format_func=disp)
+    municipio = st.selectbox("Município", municipios, index=padrao, format_func=disp)
     ano_alvo = st.number_input("Safra a estimar", min_value=int(df.ano.max()) + 1,
                                max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
@@ -314,19 +345,12 @@ diag = M.diagnostico_pam(df, municipio)
 with dir_:
     grafico_mapa = mapa_para(municipio)
     if grafico_mapa is not None:
-        st.subheader("Municípios produtores no Pará")
-        evento = st.altair_chart(grafico_mapa, key="mapa", on_select="rerun",
-                                 width="stretch")
-        sel = getattr(evento, "selection", None)
-        escolhidos = sel.get("clique", []) if sel else []
-        clicado = escolhidos[0]["interno"] if escolhidos else None
-        if clicado is not None and clicado != st.session_state.get("_sel_vista"):
-            st.session_state["_sel_vista"] = clicado
-            if clicado != municipio:
-                st.session_state["_clique_mapa"] = clicado
-                st.rerun()
-        st.caption(f"**Clique num ponto para escolher o município** — em vermelho, "
-                   f"{disp(municipio)}. O mapa fica fixo no Pará.")
+        st.subheader("Soja no Pará por município")
+        st.altair_chart(grafico_mapa, width="stretch")
+        st.caption(f"Cada ponto é um município produtor: **tamanho** = área "
+                   f"plantada, **cor** = produtividade média (2020+). Em azul, os "
+                   f"principais rios; com anel vermelho, **{disp(municipio)}** "
+                   f"(escolha o município no menu à esquerda).")
 
     st.subheader("Produtividade observada (PAM/IBGE)")
     serie_plot = serie.assign(

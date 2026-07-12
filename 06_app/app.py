@@ -6,12 +6,16 @@ Execução:
     streamlit run app.py
 """
 import json
+import math
 import sys
 from pathlib import Path
 
 import altair as alt
+import branca.colormap as cm
+import folium
 import pandas as pd
 import streamlit as st
+from streamlit_folium import st_folium
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import model as M
@@ -122,53 +126,58 @@ def _soja_por_municipio():
     return agg.merge(_muni, on="cod_ibge7", how="inner")
 
 
-def mapa_para(sel_interno: str):
-    """Mapa do Pará (Altair): contorno + rios + municípios produtores de soja.
+_VIRIDIS = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"]
 
-    Informativo (a seleção é feita pelo menu): cada município é um ponto
-    dimensionado pela área plantada e colorido pela produtividade média recente;
-    os rios principais dão contexto geográfico e o município selecionado ganha um
-    anel vermelho. Usa a projeção `identity` (reflectY), que encaixa tudo no
-    quadro preservando a proporção do estado em qualquer largura — responsivo
-    (celular e desktop) e sem deformar. Devolve None se faltarem os dados.
+
+def construir_mapa(sel_interno: str):
+    """Mapa interativo do Pará (Leaflet/folium): contorno + rios + municípios.
+
+    Permite **dar zoom, arrastar e clicar** (pinça no celular) — o zoom facilita
+    acertar o ponto. Cada município produtor é um círculo dimensionado pela área
+    plantada e colorido pela produtividade média recente; os rios principais dão
+    contexto e o selecionado ganha um anel vermelho. O Leaflet ajusta o
+    enquadramento ao Pará em qualquer tela. Devolve (mapa, dict nome→interno,
+    (rend_min, rend_max)) para o clique e a legenda, ou (None, {}, None) se
+    faltarem os dados.
     """
     geo = carregar_geo()
     pts = _soja_por_municipio()
     if geo is None or pts.empty:
-        return None
+        return None, {}, None
     cod_sel = _cod_por_nome.get(sel_interno)
-    pts = pts.assign(sel=(pts.cod_ibge7 == cod_sel).astype(int),
-                     nome=pts.municipio)
+    latmin, latmax = pts.latitude.min(), pts.latitude.max()
+    lonmin, lonmax = pts.longitude.min(), pts.longitude.max()
 
-    contorno = alt.Chart(alt.Data(values=geo["features"])).mark_geoshape(
-        fill="#eef3ec", fillOpacity=1, stroke="#8fbf8f", strokeWidth=1)
-    camadas = [contorno]
-
+    m = folium.Map(location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
+                   tiles="cartodbpositron", zoom_start=6, control_scale=True)
+    folium.GeoJson(geo, name="Pará", interactive=False, style_function=lambda f: {
+        "fillColor": "#2E7D32", "color": "#6f9f6f", "weight": 1.2,
+        "fillOpacity": 0.06}).add_to(m)
     rios = carregar_rios()
     if rios is not None and rios.get("features"):
-        camadas.append(alt.Chart(alt.Data(values=rios["features"])).mark_geoshape(
-            filled=False, stroke="#5B9BD5", strokeWidth=1.1, strokeOpacity=0.9))
+        folium.GeoJson(rios, name="Rios", interactive=False, style_function=lambda f: {
+            "color": "#4a90d9", "weight": 1.3, "opacity": 0.85}).add_to(m)
 
-    base = alt.Chart(pts).encode(longitude="longitude:Q", latitude="latitude:Q")
-    cidades = base.mark_circle(stroke="white", strokeWidth=0.8, opacity=0.92).encode(
-        size=alt.Size("area:Q", scale=alt.Scale(range=[30, 700]),
-                      legend=alt.Legend(title="Área plantada (ha)", orient="bottom",
-                                        values=[10000, 50000, 100000], format=",.0f")),
-        color=alt.Color("rend:Q", scale=alt.Scale(scheme="viridis"),
-                        legend=alt.Legend(title="Produtividade (kg/ha)", orient="bottom",
-                                          format=",.0f")),
-        tooltip=[alt.Tooltip("nome:N", title="Município"),
-                 alt.Tooltip("area:Q", title="Área plantada (ha)", format=",.0f"),
-                 alt.Tooltip("rend:Q", title="Produtividade (kg/ha)", format=",.0f")],
-    )
-    destaque = base.transform_filter("datum.sel == 1").mark_point(
-        shape="circle", stroke="#B00020", strokeWidth=3, size=520, fill=None)
-    camadas += [cidades, destaque]
-
-    return (alt.layer(*camadas)
-            .project(type="identity", reflectY=True)
-            .properties(width="container", height=440)
-            .configure_view(strokeOpacity=0))
+    rmin, rmax = float(pts.rend.min()), float(pts.rend.max())
+    cmap = cm.LinearColormap(_VIRIDIS, vmin=rmin, vmax=rmax)
+    amax = float(pts.area.max())
+    nome_para_interno = {}
+    for r in pts.itertuples():
+        nome = disp(r.municipio)
+        nome_para_interno[nome] = r.municipio
+        selec = r.cod_ibge7 == cod_sel
+        folium.CircleMarker(
+            location=[r.latitude, r.longitude],
+            radius=4 + 14 * math.sqrt(r.area / amax),
+            color="#B00020" if selec else "white",
+            weight=3 if selec else 0.7,
+            fill=True, fill_color=cmap(r.rend), fill_opacity=0.9,
+            tooltip=nome,
+            popup=folium.Popup(f"<b>{nome}</b><br>Área plantada: {r.area:,.0f} ha"
+                               f"<br>Produtividade: {r.rend:,.0f} kg/ha", max_width=220),
+        ).add_to(m)
+    m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
+    return m, nome_para_interno, (rmin, rmax)
 
 
 # ------------------------------------------------------------------ cabeçalho
@@ -238,11 +247,17 @@ st.divider()
 
 # ------------------------------------------------------------------- seleção
 municipios = sorted(df.municipio.unique())
-padrao = municipios.index("Paragominas") if "Paragominas" in municipios else 0
+st.session_state.setdefault(
+    "mun_sel", "Paragominas" if "Paragominas" in municipios else municipios[0])
+# Aplica um clique no mapa capturado no rerun anterior ANTES de criar o seletor
+# (não se pode alterar a chave de um widget depois de instanciá-lo).
+if "_clique_mapa" in st.session_state:
+    st.session_state.mun_sel = st.session_state.pop("_clique_mapa")
+
 esq, dir_ = st.columns([1, 2])
 
 with esq:
-    municipio = st.selectbox("Município", municipios, index=padrao, format_func=disp)
+    municipio = st.selectbox("Município", municipios, key="mun_sel", format_func=disp)
     ano_alvo = st.number_input("Safra a estimar", min_value=int(df.ano.max()) + 1,
                                max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
@@ -343,14 +358,37 @@ serie = df[df.municipio == municipio].sort_values("ano")
 diag = M.diagnostico_pam(df, municipio)
 
 with dir_:
-    grafico_mapa = mapa_para(municipio)
-    if grafico_mapa is not None:
+    mapa, nome_para_interno, faixa_rend = construir_mapa(municipio)
+    if mapa is not None:
         st.subheader("Soja no Pará por município")
-        st.altair_chart(grafico_mapa, width="stretch")
-        st.caption(f"Cada ponto é um município produtor: **tamanho** = área "
-                   f"plantada, **cor** = produtividade média (2020+). Em azul, os "
-                   f"principais rios; com anel vermelho, **{disp(municipio)}** "
-                   f"(escolha o município no menu à esquerda).")
+        saida = st_folium(mapa, use_container_width=True, height=430,
+                          returned_objects=["last_object_clicked_tooltip"],
+                          key="mapa")
+        # Clique num ponto seleciona o município (dá zoom antes para acertar).
+        clicado = (saida or {}).get("last_object_clicked_tooltip")
+        interno = nome_para_interno.get(clicado) if clicado else None
+        if interno and interno != st.session_state.get("_ultimo_clique"):
+            st.session_state["_ultimo_clique"] = interno
+            if interno != municipio:
+                st.session_state["_clique_mapa"] = interno
+                st.rerun()
+        # Legenda de cor em HTML (compacta e responsiva — a do folium estoura no
+        # celular). Gradiente viridis com os extremos de produtividade.
+        grad = ",".join(_VIRIDIS)
+        st.markdown(
+            f"""<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+                 font-size:0.82rem;margin:2px 0 6px">
+              <span style="opacity:.75">Produtividade</span>
+              <span>{br(faixa_rend[0])}</span>
+              <div style="flex:0 1 150px;height:12px;border-radius:3px;
+                   background:linear-gradient(to right,{grad})"></div>
+              <span>{br(faixa_rend[1])} kg/ha</span>
+            </div>""",
+            unsafe_allow_html=True)
+        st.caption(f"**Dê zoom e clique num ponto** para escolher o município "
+                   f"(ou use o menu à esquerda). **Tamanho** = área plantada, "
+                   f"**cor** = produtividade; em azul, os principais rios; com "
+                   f"anel vermelho, **{disp(municipio)}**.")
 
     st.subheader("Produtividade observada (PAM/IBGE)")
     serie_plot = serie.assign(

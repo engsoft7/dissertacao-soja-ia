@@ -1,0 +1,25 @@
+name: GERA RIOS (temporaria)
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/verification-check-d1josi]
+    paths: ['07_automacao/gera_rios_para.py', '.github/workflows/rios.yml']
+jobs:
+  rios:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet requests shapely
+      - run: python 07_automacao/gera_rios_para.py
+      - name: Commita os rios gerados
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dados/rios_para.json
+          git commit -m "TEMP: gera rios do Pará" || echo "sem mudanças"
+          git push

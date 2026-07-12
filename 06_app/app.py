@@ -132,13 +132,14 @@ _VIRIDIS = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"]
 def construir_mapa(sel_interno: str):
     """Mapa interativo do Pará (Leaflet/folium): contorno + rios + municípios.
 
-    Permite **dar zoom, arrastar e clicar** (pinça no celular) — o zoom facilita
-    acertar o ponto. Cada município produtor é um círculo dimensionado pela área
-    plantada e colorido pela produtividade média recente; os rios principais dão
-    contexto e o selecionado ganha um anel vermelho. O Leaflet ajusta o
-    enquadramento ao Pará em qualquer tela. Devolve (mapa, dict nome→interno,
-    (rend_min, rend_max)) para o clique e a legenda, ou (None, {}, None) se
-    faltarem os dados.
+    Permite **dar zoom, arrastar** (pinça no celular) e **tocar num ponto para
+    ver os dados** (popup). Cada município produtor é um círculo dimensionado
+    pela área plantada e colorido pela produtividade média recente; os rios
+    principais dão contexto e o selecionado ganha um anel vermelho. O Leaflet
+    ajusta o enquadramento ao Pará em qualquer tela. É renderizado como
+    visualização pura (sem devolver cliques ao servidor), para não recarregar o
+    app — a seleção do município é feita pelo menu. Devolve (mapa, nomes,
+    (rend_min, rend_max)) ou (None, {}, None) se faltarem os dados.
     """
     geo = carregar_geo()
     pts = _soja_por_municipio()
@@ -247,17 +248,11 @@ st.divider()
 
 # ------------------------------------------------------------------- seleção
 municipios = sorted(df.municipio.unique())
-st.session_state.setdefault(
-    "mun_sel", "Paragominas" if "Paragominas" in municipios else municipios[0])
-# Aplica um clique no mapa capturado no rerun anterior ANTES de criar o seletor
-# (não se pode alterar a chave de um widget depois de instanciá-lo).
-if "_clique_mapa" in st.session_state:
-    st.session_state.mun_sel = st.session_state.pop("_clique_mapa")
-
+padrao = municipios.index("Paragominas") if "Paragominas" in municipios else 0
 esq, dir_ = st.columns([1, 2])
 
 with esq:
-    municipio = st.selectbox("Município", municipios, key="mun_sel", format_func=disp)
+    municipio = st.selectbox("Município", municipios, index=padrao, format_func=disp)
     ano_alvo = st.number_input("Safra a estimar", min_value=int(df.ano.max()) + 1,
                                max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
@@ -358,20 +353,15 @@ serie = df[df.municipio == municipio].sort_values("ano")
 diag = M.diagnostico_pam(df, municipio)
 
 with dir_:
-    mapa, nome_para_interno, faixa_rend = construir_mapa(municipio)
+    mapa, _, faixa_rend = construir_mapa(municipio)
     if mapa is not None:
         st.subheader("Soja no Pará por município")
-        saida = st_folium(mapa, use_container_width=True, height=430,
-                          returned_objects=["last_object_clicked_tooltip"],
-                          key="mapa")
-        # Clique num ponto seleciona o município (dá zoom antes para acertar).
-        clicado = (saida or {}).get("last_object_clicked_tooltip")
-        interno = nome_para_interno.get(clicado) if clicado else None
-        if interno and interno != st.session_state.get("_ultimo_clique"):
-            st.session_state["_ultimo_clique"] = interno
-            if interno != municipio:
-                st.session_state["_clique_mapa"] = interno
-                st.rerun()
+        # returned_objects=[] deixa o mapa como visualização pura: dá zoom,
+        # arrasta e mostra o popup ao tocar, sem devolver dados nem forçar rerun
+        # — o clique-recarrega anterior travava o app (issue #27). A seleção do
+        # município fica no menu (rápido e estável).
+        st_folium(mapa, use_container_width=True, height=430,
+                  returned_objects=[], key="mapa")
         # Legenda de cor em HTML (compacta e responsiva — a do folium estoura no
         # celular). Gradiente viridis com os extremos de produtividade.
         grad = ",".join(_VIRIDIS)
@@ -385,10 +375,10 @@ with dir_:
               <span>{br(faixa_rend[1])} kg/ha</span>
             </div>""",
             unsafe_allow_html=True)
-        st.caption(f"**Dê zoom e clique num ponto** para escolher o município "
-                   f"(ou use o menu à esquerda). **Tamanho** = área plantada, "
-                   f"**cor** = produtividade; em azul, os principais rios; com "
-                   f"anel vermelho, **{disp(municipio)}**.")
+        st.caption(f"**Dê zoom, arraste e toque num ponto** para ver os dados do "
+                   f"município (escolha no menu à esquerda). **Tamanho** = área "
+                   f"plantada, **cor** = produtividade; em azul, os principais "
+                   f"rios; com anel vermelho, **{disp(municipio)}**.")
 
     st.subheader("Produtividade observada (PAM/IBGE)")
     serie_plot = serie.assign(

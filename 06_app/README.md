@@ -32,9 +32,9 @@ Abre em `http://localhost:8501`.
   contorno do estado (IBGE) e os **principais rios** (Natural Earth): cada
   município produtor é um círculo **dimensionado pela área plantada** e
   **colorido pela produtividade média** recente, com o selecionado em anel
-  vermelho. Permite **dar zoom, arrastar e clicar** (pinça no celular) — o zoom
-  facilita acertar o ponto; **clicar num município o seleciona** (o menu também
-  funciona).
+  vermelho. Permite **dar zoom, arrastar e tocar num ponto para ver os dados**
+  (pinça no celular). O mapa é uma visualização pura (não recarrega o app); a
+  seleção do município é feita pelo menu.
 - Usa a **grafia oficial acentuada** dos nomes de município (IBGE) — a base
   bruta vem do GAUL, sem acentos.
 - Traz um **panorama ordenável dos 38 municípios** (produtividade recente, área,

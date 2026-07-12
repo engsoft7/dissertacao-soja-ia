@@ -6,6 +6,7 @@ Execução:
     streamlit run app.py
 """
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -137,10 +138,16 @@ def mapa_para(sel_interno: str):
         nome=_muni.municipio,
         sel=[1 if c == cod_sel else 0 for c in _muni.cod_ibge7],
     )
-    padx = (anel.lon.max() - anel.lon.min()) * 0.03
-    pady = (anel.lat.max() - anel.lat.min()) * 0.03
+    dlon = anel.lon.max() - anel.lon.min()
+    dlat = anel.lat.max() - anel.lat.min()
+    padx, pady = dlon * 0.03, dlat * 0.03
     sx = alt.Scale(domain=[anel.lon.min() - padx, anel.lon.max() + padx])
     sy = alt.Scale(domain=[anel.lat.min() - pady, anel.lat.max() + pady])
+    # Proporção fixa: 1° de longitude ≈ 1° de latitude em pixels (corrigido pelo
+    # cosseno da latitude média), senão o container largo estica e deforma o mapa.
+    coslat = math.cos(math.radians((anel.lat.min() + anel.lat.max()) / 2))
+    largura = 540
+    altura = round(largura * dlat / (dlon * coslat))
 
     contorno = alt.Chart(anel).mark_line(color="#8fbf8f", strokeWidth=1.2).encode(
         x=alt.X("lon:Q", scale=sx, axis=None), y=alt.Y("lat:Q", scale=sy, axis=None),
@@ -155,7 +162,9 @@ def mapa_para(sel_interno: str):
         order="sel:Q",
         tooltip=[alt.Tooltip("nome:N", title="Município")],
     ).add_params(clique)
-    return (contorno + pontos).properties(height=440).configure_view(strokeOpacity=0)
+    return ((contorno + pontos)
+            .properties(width=largura, height=altura)
+            .configure_view(strokeOpacity=0))
 
 
 # ------------------------------------------------------------------ cabeçalho
@@ -339,7 +348,8 @@ with dir_:
     grafico_mapa = mapa_para(municipio)
     if grafico_mapa is not None:
         st.subheader("Municípios produtores no Pará")
-        evento = st.altair_chart(grafico_mapa, key="mapa", on_select="rerun")
+        evento = st.altair_chart(grafico_mapa, key="mapa", on_select="rerun",
+                                 width="content")
         sel = getattr(evento, "selection", None)
         escolhidos = sel.get("clique", []) if sel else []
         clicado = escolhidos[0]["interno"] if escolhidos else None

@@ -11,7 +11,7 @@ from pathlib import Path
 
 import altair as alt
 import pandas as pd
-import plotly.express as px
+import pydeck as pdk
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -90,30 +90,32 @@ def disp(municipio: str) -> str:
 _interno_por_cod = {c: n for n, c in _cod_por_nome.items()}
 
 
-def figura_mapa(sel_interno: str, travado: bool = True):
-    """Mapa clicável do Pará: um ponto por município, o selecionado em destaque.
+def deck_mapa(sel_interno: str, travado: bool = True):
+    """Mapa clicável do Pará (pydeck): um ponto por município, o selecionado em destaque.
 
-    Travado (padrão): sem arrastar; a vista fica fixa no estado. O clique nos
-    pontos continua funcionando. Destravado: permite arrastar e dar zoom.
+    Travado (padrão): `controller=False` fixa a vista no estado — sem arrastar
+    nem zoom. O clique nos pontos continua selecionando. Destravado: libera
+    arrastar e dar zoom.
     """
+    cod_sel = _cod_por_nome.get(sel_interno)
     d = _muni.assign(
         interno=_muni.cod_ibge7.map(_interno_por_cod),
-        estado=[("Selecionado" if c == _cod_por_nome.get(sel_interno) else "Município")
-                for c in _muni.cod_ibge7],
+        nome=_muni.municipio,
+        cor=[[176, 0, 32] if c == cod_sel else [46, 125, 50] for c in _muni.cod_ibge7],
+        raio=[15000 if c == cod_sel else 9000 for c in _muni.cod_ibge7],
     )
-    fig = px.scatter_map(
-        d, lat="latitude", lon="longitude", color="estado",
-        custom_data=["interno"], hover_name="municipio",
-        color_discrete_map={"Selecionado": "#B00020", "Município": "#2E7D32"},
-        zoom=4.2, center={"lat": -4.8, "lon": -52.5},
+    camada = pdk.Layer(
+        "ScatterplotLayer", d, id="cidades",
+        get_position=["longitude", "latitude"], get_fill_color="cor",
+        get_radius="raio", pickable=True, radius_min_pixels=4, radius_max_pixels=28,
     )
-    fig.update_traces(marker={"size": 13})
-    fig.update_layout(
-        map_style="open-street-map", showlegend=False,
-        margin={"l": 0, "r": 0, "t": 0, "b": 0}, height=380,
-        dragmode=(False if travado else "pan"),
+    vista = pdk.ViewState(latitude=-4.8, longitude=-52.5, zoom=4.2)
+    # controller=False (travado) fixa a vista: sem arrastar nem zoom; o clique segue.
+    view = pdk.View(type="MapView", controller=(not travado))
+    return pdk.Deck(
+        layers=[camada], initial_view_state=vista, views=[view],
+        map_provider="carto", map_style="road", tooltip={"text": "{nome}"},
     )
-    return fig
 
 
 # ------------------------------------------------------------------ cabeçalho
@@ -299,13 +301,15 @@ with dir_:
     destravado = bt.toggle("🔓 Destravar", value=False,
                            help="Trava a vista no Pará. Destrave para arrastar e dar zoom.")
     if not _muni.empty:
-        evento = st.plotly_chart(
-            figura_mapa(municipio, travado=not destravado), key="mapa",
-            on_select="rerun", selection_mode="points",
-            config={"displayModeBar": False, "scrollZoom": destravado},
+        evento = st.pydeck_chart(
+            deck_mapa(municipio, travado=not destravado), key="mapa",
+            on_select="rerun", selection_mode="single-object",
         )
-        pontos = evento.selection["points"] if evento and evento.get("selection") else []
-        clicado = pontos[0]["customdata"][0] if pontos else None
+        objs = []
+        sel = getattr(evento, "selection", None)
+        if sel:
+            objs = sel.get("objects", {}).get("cidades", [])
+        clicado = objs[0]["interno"] if objs else None
         # Reage só quando a seleção do mapa MUDA de fato — assim uma seleção
         # remanescente não sobrescreve uma troca feita pelo seletor.
         if clicado is not None and clicado != st.session_state.get("_sel_vista"):

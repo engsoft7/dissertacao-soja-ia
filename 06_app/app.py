@@ -11,6 +11,7 @@ from pathlib import Path
 
 import altair as alt
 import pandas as pd
+import plotly.express as px
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -86,6 +87,31 @@ def disp(municipio: str) -> str:
     return NOME_EXIBICAO.get(municipio, municipio)
 
 
+_interno_por_cod = {c: n for n, c in _cod_por_nome.items()}
+
+
+def figura_mapa(sel_interno: str):
+    """Mapa clicável do Pará: um ponto por município, o selecionado em destaque."""
+    d = _muni.assign(
+        interno=_muni.cod_ibge7.map(_interno_por_cod),
+        estado=[("Selecionado" if c == _cod_por_nome.get(sel_interno) else "Município")
+                for c in _muni.cod_ibge7],
+    )
+    fig = px.scatter_map(
+        d, lat="latitude", lon="longitude", color="estado",
+        custom_data=["interno"], hover_name="municipio",
+        color_discrete_map={"Selecionado": "#B00020", "Município": "#2E7D32"},
+        zoom=4.2, center={"lat": -4.8, "lon": -52.5},
+    )
+    fig.update_traces(marker={"size": 13})
+    fig.update_layout(
+        map_style="open-street-map", showlegend=False,
+        margin={"l": 0, "r": 0, "t": 0, "b": 0}, height=380,
+        dragmode=False,
+    )
+    return fig
+
+
 # ------------------------------------------------------------------ cabeçalho
 st.title("Estimativa da produtividade da soja — municípios do Pará")
 atualizada_em = data_atualizacao()
@@ -153,11 +179,17 @@ st.divider()
 
 # ------------------------------------------------------------------- seleção
 municipios = sorted(df.municipio.unique())
-padrao = municipios.index("Paragominas") if "Paragominas" in municipios else 0
+st.session_state.setdefault(
+    "mun_sel", "Paragominas" if "Paragominas" in municipios else municipios[0])
+# Aplica um clique no mapa capturado no rerun anterior, ANTES de criar o seletor
+# (não se pode alterar a chave de um widget após ele ser instanciado).
+if "_clique_mapa" in st.session_state:
+    st.session_state.mun_sel = st.session_state.pop("_clique_mapa")
+
 esq, dir_ = st.columns([1, 2])
 
 with esq:
-    municipio = st.selectbox("Município", municipios, index=padrao, format_func=disp)
+    municipio = st.selectbox("Município", municipios, key="mun_sel", format_func=disp)
     ano_alvo = st.number_input("Safra a estimar", min_value=int(df.ano.max()) + 1,
                                max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
@@ -260,18 +292,22 @@ diag = M.diagnostico_pam(df, municipio)
 with dir_:
     st.subheader("Municípios produtores no Pará")
     if not _muni.empty:
-        cod_sel = _cod_por_nome.get(municipio)
-        mapa = _muni.assign(
-            selecionado=_muni.cod_ibge7.eq(cod_sel),
-            cor=[("#B00020" if s else "#2E7D32")
-                 for s in _muni.cod_ibge7.eq(cod_sel)],
-            tamanho=[16000 if s else 7000 for s in _muni.cod_ibge7.eq(cod_sel)],
+        evento = st.plotly_chart(
+            figura_mapa(municipio), key="mapa", on_select="rerun",
+            selection_mode="points", config={"displayModeBar": False},
         )
-        st.map(mapa, latitude="latitude", longitude="longitude",
-               color="cor", size="tamanho")
+        pontos = evento.selection["points"] if evento and evento.get("selection") else []
+        clicado = pontos[0]["customdata"][0] if pontos else None
+        # Reage só quando a seleção do mapa MUDA de fato — assim uma seleção
+        # remanescente não sobrescreve uma troca feita pelo seletor.
+        if clicado is not None and clicado != st.session_state.get("_sel_vista"):
+            st.session_state["_sel_vista"] = clicado
+            if clicado != municipio:
+                st.session_state["_clique_mapa"] = clicado
+                st.rerun()
         st.caption(
-            f"Cada ponto é um dos {len(_muni)} municípios da base. "
-            f"Em vermelho, **{disp(municipio)}**, o selecionado."
+            f"**Clique num ponto para escolher o município.** Cada ponto é um dos "
+            f"{len(_muni)} municípios da base; em vermelho, **{disp(municipio)}**."
         )
     else:
         st.info("Mapa indisponível: falta `dados/municipios_para.csv`.")

@@ -8,8 +8,11 @@ requests>=2.31
 # painel (06_app/), também usado no deploy do Streamlit Community Cloud:
 streamlit>=1.49
 altair>=5.0,<7
-# anyio fixado: o bump 4.14.1->4.14.2 (trazido pela instalação do folium)
-# coincidiu com o Segmentation fault no Streamlit Cloud; volta ao que funcionava.
+folium>=0.16
+streamlit-folium>=0.20
+# anyio FIXADO: o bump 4.14.1->4.14.2 (trazido pela instalação do folium)
+# coincidiu com o Segmentation fault no Streamlit Cloud. O folium não depende de
+# anyio, então este pin mantém o mapa interativo sem reintroduzir o crash.
 anyio==4.14.1
 gitpython==3.1.50
 # apenas para os scripts de coleta (Google Colab):

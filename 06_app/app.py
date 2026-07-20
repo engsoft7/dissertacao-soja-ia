@@ -60,18 +60,11 @@ def data_atualizacao() -> str | None:
 
 st.set_page_config(page_title="Soja no Pará — estimativa de produtividade", page_icon="🌱", layout="wide")
 
-# Correção visual otimizada para tablets e telas menores (evita cortes nas métricas)
+# Correção visual otimizada para tablets (Tab S6 Lite e similares)
 st.markdown("""
 <style>
-    [data-testid="stMetric"] {
-        background-color: transparent;
-        border: none;
-    }
-    [data-testid="stHorizontalBlock"] > div {
-        flex: 1 1 auto !important;
-    }
     [data-testid="stMetricLabel"] {
-        font-size: 0.82rem !important;
+        font-size: 0.8rem !important;
         white-space: normal !important;
         overflow: visible !important;
         word-break: break-word !important;
@@ -196,11 +189,11 @@ def brl(v: float, dec: int = 0) -> str:
 CUSTO_HA_REFERENCIA = 5388.0
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
-# --- RESUMO EXECUTIVO PARA O PRODUTOR ---
+# --- RESUMO EXECUTIVO PARA O PRODUTOR (Rótulo otimizado para o Tab S6 Lite) ---
 with st.container(border=True):
     st.markdown("##### 🚜 Indicadores Gerais da Ferramenta")
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Precisão Média (Margem de Erro)", f"± {qtd(metricas['rmse'])} {unidade}")
+    c1.metric("Margem de Erro (Precisão)", f"± {qtd(metricas['rmse'])} {unidade}")
     c2.metric("Variação Média Relativa", f"{metricas['rrmse']:.1f}%")
     c3.metric("Aderência Histórica (R²)", f"{metricas['r2']:.3f}")
     c4.metric("Tendência Base", f"{metricas['r2_baseline']:.3f}")

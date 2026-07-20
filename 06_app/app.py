@@ -136,7 +136,6 @@ def construir_mapa(sel_interno: str, comp_interno: str = None):
         selec_prin = (r.cod_ibge7 == cod_sel)
         selec_comp = (r.cod_ibge7 == cod_comp)
         
-        # Destaca o principal em Vermelho e o secundário em Azul
         cor_borda = "#B00020" if selec_prin else ("#2E75B6" if selec_comp else "white")
         peso_borda = 3.5 if (selec_prin or selec_comp) else 0.7
         
@@ -190,40 +189,30 @@ if abs(metricas["r2"] - metricas["r2_baseline"]) < 0.01:
 st.divider()
 
 # ==============================================================================
-# LÓGICA DE SINCRONIZAÇÃO DO MAPA COM O SELECTBOX 
+# LÓGICA DE SINCRONIZAÇÃO LIMPA E SEM CONFLITOS
 # ==============================================================================
 municipios = sorted(df.municipio.unique())
 
 if "mun_sel" not in st.session_state:
     st.session_state.mun_sel = "Paragominas" if "Paragominas" in municipios else municipios[0]
-if "ultimo_clique_mapa" not in st.session_state:
-    st.session_state.ultimo_clique_mapa = disp(st.session_state.mun_sel)
 
-if "mapa_soja" in st.session_state and st.session_state.mapa_soja:
-    clicado = st.session_state.mapa_soja.get("last_object_clicked_tooltip")
-    if clicado and clicado != st.session_state.ultimo_clique_mapa:
-        interno = EXIBICAO_PARA_INTERNO.get(clicado)
-        if interno:
-            st.session_state.mun_sel = interno
-            st.session_state.ultimo_clique_mapa = clicado
-
-def ao_mudar_dropdown():
-    st.session_state.ultimo_clique_mapa = disp(st.session_state.mun_sel)
-# ==============================================================================
+# Se houver um clique pendente vindo do mapa, aplica no seletor antes dele renderizar
+if "_clique_mapa" in st.session_state:
+    st.session_state.mun_sel = st.session_state.pop("_clique_mapa")
 
 esq, dir_ = st.columns([1, 2])
 
 with esq:
-    municipio = st.selectbox("Município Principal", municipios, key="mun_sel", format_func=disp, on_change=ao_mudar_dropdown)
+    # O on_change conflituoso foi removido. O Selectbox funciona livremente.
+    municipio = st.selectbox("Município Principal", municipios, key="mun_sel", format_func=disp)
     
-    # NOVA FEATURE: Comparação
     comparar = st.toggle("Comparar com outro município", value=False)
     mun_comp = None
     if comparar:
         opcoes_comp = [m for m in municipios if m != municipio]
         mun_comp = st.selectbox("Município Secundário", opcoes_comp, format_func=disp)
     
-    st.write("") # Espaçamento
+    st.write("") 
     ano_alvo = st.number_input("Safra a estimar (Mun. Principal)", min_value=int(df.ano.max()) + 1, max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
     r = estimador.estimar(municipio, int(ano_alvo))
@@ -260,7 +249,6 @@ with esq:
         m3.metric("Margem/ha", brl(margem_ha), delta=(f"{margem_ha / custo_ha * 100:+.0f}% sobre o custo" if custo_ha else None))
 
 
-# PREPARA DADOS DAS SÉRIES (Um ou dois municípios)
 if mun_comp:
     serie = df[df.municipio.isin([municipio, mun_comp])].sort_values(["municipio", "ano"])
 else:
@@ -273,13 +261,23 @@ with dir_:
     if mapa is not None:
         st.subheader("Soja no Pará por município")
         
-        st_folium(
+        saida = st_folium(
             mapa, 
             use_container_width=True, 
             height=430,
             returned_objects=["last_object_clicked_tooltip"],
             key="mapa_soja"
         )
+        
+        # AQUI O SEGREDO: Só atualiza se o mapa tiver gerado um clique NOVO
+        clicado = (saida or {}).get("last_object_clicked_tooltip")
+        if clicado:
+            if clicado != st.session_state.get("last_processed_map_click"):
+                st.session_state["last_processed_map_click"] = clicado
+                interno = nome_para_interno.get(clicado)
+                if interno and interno != st.session_state.mun_sel:
+                    st.session_state["_clique_mapa"] = interno
+                    st.rerun()
         
         grad = ",".join(_VIRIDIS)
         st.markdown(
@@ -292,9 +290,6 @@ with dir_:
             unsafe_allow_html=True)
         st.caption(f"**Clique num ponto** para selecioná-lo como município principal.")
 
-    # ---------------------------------------------------------
-    # SÉRIE HISTÓRICA E GRÁFICOS (COM TENDÊNCIA E CLIMA)
-    # ---------------------------------------------------------
     st.subheader("Produtividade observada (PAM/IBGE)")
     
     serie_plot = serie.assign(
@@ -305,27 +300,28 @@ with dir_:
         Nome=[disp(m) for m in serie["municipio"]]
     )
 
-    # CORREÇÃO PARA O CELULAR: Eixo X como Quantitativo
-    eixo_x_inteligente = alt.X("ano:Q", title="Ano-safra", axis=alt.Axis(format="d", tickMinStep=2))
+    # GRÁFICO CORRIGIDO (O zero=False resolve o bug que espremia tudo na direita)
+    eixo_x_inteligente = alt.X(
+        "ano:Q", 
+        title="Ano-safra", 
+        scale=alt.Scale(zero=False), 
+        axis=alt.Axis(format="d", tickMinStep=2)
+    )
 
-    # Base do Gráfico
     base = alt.Chart(serie_plot).encode(x=eixo_x_inteligente)
     
-    # 1. Linha principal
     linha = base.mark_line(point=True).encode(
         y=alt.Y("produtividade:Q", title=unidade, scale=alt.Scale(zero=False), axis=EIXO_BR),
         color=alt.Color("Nome:N", legend=alt.Legend(title="Município", orient="bottom")),
         tooltip=["ano", "Nome", alt.Tooltip("produtividade_rotulo:N", title=unidade)],
     )
     
-    # 2. Linha de Tendência (Regressão Linear)
     tendencia = base.transform_regression("ano", "produtividade", groupby=["Nome"]).mark_line(
         strokeDash=[5, 5], strokeWidth=2, opacity=0.6
     ).encode(
         color=alt.Color("Nome:N", legend=None)
     )
     
-    # 3. Pontos de repetição de dados (qualidade do IBGE)
     marcas = base.transform_filter(alt.datum.repetido == True).mark_point(
         size=110, filled=True, color="#B00020"
     ).encode(
@@ -333,7 +329,6 @@ with dir_:
         tooltip=[alt.Tooltip("ano", title="Valor idêntico ao ano anterior")]
     )
 
-    # 4. Faixas de El Niño / La Niña
     df_clima = pd.DataFrame([
         {"ano": 2003, "Clima": "El Niño"}, {"ano": 2010, "Clima": "El Niño"},
         {"ano": 2015, "Clima": "El Niño"}, {"ano": 2016, "Clima": "El Niño"}, {"ano": 2024, "Clima": "El Niño"},
@@ -345,7 +340,6 @@ with dir_:
         color=alt.Color("Clima:N", scale=alt.Scale(domain=["El Niño", "La Niña"], range=["#d73027", "#4575b4"]), legend=alt.Legend(title="Eventos Climáticos", orient="bottom"))
     )
 
-    # Junta as 4 camadas em uma só
     grafico_prod = alt.layer(clima_chart, linha, tendencia, marcas).resolve_scale(color='independent')
     st.altair_chart(grafico_prod, use_container_width=True)
     
@@ -366,7 +360,6 @@ with dir_:
 
 st.divider()
 
-# ------------------------------------------------- alerta de qualidade do dado
 st.subheader("Qualidade da variável oficial (Mun. Principal)")
 taxa_estado = M.taxa_repeticao_estadual(df)
 
@@ -382,7 +375,6 @@ else:
 
 st.divider()
 
-# ------------------------------------------------------ panorama do estado
 st.subheader("Panorama dos municípios")
 ult_ano = int(df.ano.max())
 linhas_pan = []

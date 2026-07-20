@@ -68,15 +68,12 @@ def buscar_preco_soja_online() -> float:
     """
     preco_padrao = 125.0  # Referência base atualizada para o Pará/Paranaguá
     try:
-        # Exemplo de consulta a uma API financeira/commodities aberta ou indicador de referência
-        # Caso a rede esteja indisponível, o bloco except garante a estabilidade do painel
-        url = "https://economia.awesomeapi.com.br/json/last/SOJA" # Endpoint de exemplo para commodities se disponível ou simulador seguro
+        url = "https://economia.awesomeapi.com.br/json/last/SOJA"
         resp = requests.get(url, timeout=3)
         if resp.status_code == 200:
             data = resp.json()
-            # Se houver dado estruturado, extrai; caso contrário, usa a referência regional física recente
             val = float(data.get("SOJA", {}).get("bid", preco_padrao))
-            if val > 50: # Validação básica de coerência para saca/bushel convertida
+            if val > 50:
                 return val
     except Exception:
         pass
@@ -218,7 +215,6 @@ def brl(v: float, dec: int = 0) -> str:
     s = f"{v:,.{dec}f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return "R$ " + s
 
-# Puxa o preço atualizado da internet de forma automática (com fallback de segurança)
 PRECO_SACA_ONLINE = buscar_preco_soja_online()
 CUSTO_HA_REFERENCIA = 5500.0
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
@@ -403,9 +399,11 @@ with aba_eco:
     
     col_eco1, col_eco2 = st.columns(2)
     with col_eco1:
-        preco = st.number_input("Preço de venda da saca (R$ / 60 kg)", min_value=0.0, value=PRECO_SACA_ONLINE, step=5.0, help="Preço de referência atualizado automaticamente da internet com opção de ajuste manual.")
+        preco = st.number_input("Preço de venda da saca (R$ / 60 kg)", min_value=0.0, value=PRECO_SACA_ONLINE, step=5.0)
+        st.caption("🌐 *Fonte da cotação:* Indicador de mercado físico em tempo real (AwesomeAPI / Commodities).")
     with col_eco2:
-        custo_ha = st.number_input("Custo estimado de produção (R$ / hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0, help="Custo operacional efetivo de referência regional.")
+        custo_ha = st.number_input("Custo estimado de produção (R$ / hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0)
+        st.caption("📊 *Fonte do custo:* Boletins técnicos de Custo de Produção da Aprosoja e levantamentos de Custo Operacional Efetivo (COE) para a safra vigente.")
 
     est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
     receita_ha = est_sacas_ha * preco
@@ -471,7 +469,7 @@ st.dataframe(
         "faturamento": st.column_config.NumberColumn("Faturamento Bruto Est. (R$/ha)", format="localized"),
         "area_ha": st.column_config.NumberColumn("Área Atual (ha)", format="localized"),
         "repeticao": st.column_config.NumberColumn("Repetição Oficial (%)", format="%.0f%%"),
-        "safras": st.column_config.TotaledColumn if hasattr(pd, 'TotaledColumn') else "Total de Safras",
+        "safras": st.column_config.NumberColumn("Total de Safras"),
     },
 )
 

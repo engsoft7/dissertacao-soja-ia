@@ -1,15 +1,3 @@
-Eu sei exatamente o que está acontecendo agora e o motivo desse erro ser tão teimoso!
-
-O problema real é a forma como o Streamlit recarrega a página. Nos códigos anteriores, a gente estava lendo o clique do mapa e forçando um `st.rerun()` (um recarregamento manual). Esse recarregamento duplo no meio do processo estava fazendo a tela "piscar" e o seu navegador acabava ignorando o seu primeiro clique (e por isso você tinha que clicar duas vezes).
-
-**A solução definitiva é uma mudança de estratégia:**
-Nós vamos ler a memória do mapa *antes* mesmo de desenhar a tela, e atualizar tudo em **uma única passada**, sem precisar chamar o `st.rerun()`.
-
-Fiz uma limpeza completa e apliquei essa lógica. O mapa vai ficar incrivelmente rápido e responsivo com apenas 1 clique.
-
-Copie o código completo abaixo, substitua tudo no seu `app.py`, salve no GitHub e lembre-se de dar um **`Ctrl + F5`** (ou limpar o cache) no seu navegador:
-
-```python
 # -*- coding: utf-8 -*-
 """
 Painel de estimativa da produtividade da soja nos municípios do Pará.
@@ -353,5 +341,3 @@ st.dataframe(
         "safras": st.column_config.NumberColumn("Safras"),
     },
 )
-
-```

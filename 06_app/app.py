@@ -132,14 +132,14 @@ def construir_mapa(sel_interno: str):
         nome_para_interno[nome] = r.municipio
         selec = r.cod_ibge7 == cod_sel
         
-        # AQUI ESTÁ O SEGREDO: Apenas tooltip, ZERO popup!
+        # Removido o popup! Deixando apenas o tooltip para não interceptar o clique.
         folium.CircleMarker(
             location=[r.latitude, r.longitude],
             radius=4 + 14 * math.sqrt(r.area / amax),
             color="#B00020" if selec else "white",
             weight=3 if selec else 0.7,
             fill=True, fill_color=cmap(r.rend), fill_opacity=0.9,
-            tooltip=nome  # O nome simples garante que o Streamlit consiga ler o clique
+            tooltip=nome  
         ).add_to(m)
         
     m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
@@ -178,17 +178,20 @@ c4.metric("R² do baseline", f"{metricas['r2_baseline']:.3f}")
 
 st.divider()
 
-# --- LÓGICA DE SELEÇÃO SIMPLIFICADA ---
+# ------------------------------------------------------------------- seleção
 municipios = sorted(df.municipio.unique())
 
-# Define o município inicial na session_state se não existir
 if "mun_sel" not in st.session_state:
     st.session_state.mun_sel = "Paragominas" if "Paragominas" in municipios else municipios[0]
+
+# Aplica um clique no mapa capturado no rerun anterior ANTES de criar o seletor.
+# Isso previne o StreamlitAPIException!
+if "_clique_mapa" in st.session_state:
+    st.session_state.mun_sel = st.session_state.pop("_clique_mapa")
 
 esq, dir_ = st.columns([1, 2])
 
 with esq:
-    # O widget lê diretamente da session_state
     municipio = st.selectbox("Município", municipios, key="mun_sel", format_func=disp)
     ano_alvo = st.number_input("Safra a estimar", min_value=int(df.ano.max()) + 1, max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
@@ -237,7 +240,6 @@ with dir_:
     if mapa is not None:
         st.subheader("Soja no Pará por município")
         
-        # Chave fixa para o mapa não recarregar inteiro à toa
         saida = st_folium(
             mapa, 
             use_container_width=True, 
@@ -246,13 +248,13 @@ with dir_:
             key="mapa_soja" 
         )
         
-        # Lógica de clique ultra-limpa
+        # Lógica de clique corrigida. Salva na variável temporária em vez de tentar mudar o widget direto.
         clicado = (saida or {}).get("last_object_clicked_tooltip")
         if clicado:
             interno = nome_para_interno.get(clicado)
             if interno and interno != st.session_state.mun_sel:
-                st.session_state.mun_sel = interno  # Atualiza o estado
-                st.rerun()  # Força o recarregamento instantâneo da tela
+                st.session_state["_clique_mapa"] = interno
+                st.rerun()
 
         grad = ",".join(_VIRIDIS)
         st.markdown(

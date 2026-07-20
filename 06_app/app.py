@@ -31,25 +31,20 @@ SACA_KG = 60  # saca de soja
 
 @st.cache_data
 def carregar_geo():
-    """Contorno e malha territorial do Pará (GeoJSON)."""
     try:
         return json.loads(GEO_PARA.read_text(encoding="utf-8"))
     except OSError:
         return None
 
-
 @st.cache_data
 def carregar_rios():
-    """Principais rios do Pará (Natural Earth, recortado) para o mapa."""
     try:
         return json.loads(RIOS_PARA.read_text(encoding="utf-8"))
     except OSError:
         return None
 
-
 @st.cache_data
 def carregar_municipios():
-    """Nome oficial acentuado (IBGE) e centroide de cada município, por cod_ibge7."""
     try:
         return pd.read_csv(MUNICIPIOS)
     except OSError:
@@ -57,7 +52,6 @@ def carregar_municipios():
 
 
 def data_atualizacao() -> str | None:
-    """Data da última atualização da base, gravada pela automação (dd/mm/aaaa)."""
     try:
         ano, mes, dia = DATA_ATUALIZACAO.read_text().strip().split("-")
         return f"{dia}/{mes}/{ano}"
@@ -66,8 +60,7 @@ def data_atualizacao() -> str | None:
 
 st.set_page_config(page_title="Soja no Pará — estimativa de produtividade", page_icon="🌱", layout="wide")
 
-
-@st.cache_resource(show_spinner="Preparando o modelo...")
+@st.cache_resource(show_spinner="Preparando o painel agrícola...")
 def preparar():
     df = M.carregar(str(DADOS))
     est = M.Estimador().treinar(df)
@@ -91,17 +84,13 @@ _cod_por_nome = df.drop_duplicates("municipio").set_index("municipio")["cod_ibge
 _nome_por_cod = _muni.set_index("cod_ibge7")["municipio"].to_dict()
 NOME_EXIBICAO = {m: _nome_por_cod.get(_cod_por_nome.get(m), m) for m in df.municipio.unique()}
 
-
 def disp(municipio: str) -> str:
-    """Nome do município na grafia oficial acentuada (para exibição)."""
     return NOME_EXIBICAO.get(municipio, municipio)
 
 EXIBICAO_PARA_INTERNO = {disp(m): m for m in df.municipio.unique()}
 
-
 @st.cache_data
 def _soja_por_municipio():
-    """Área plantada e produtividade médias recentes (2020+) por município."""
     if _muni.empty:
         return pd.DataFrame()
     recente = df[df.ano >= df.ano.max() - 4]
@@ -110,92 +99,40 @@ def _soja_por_municipio():
            .reset_index())
     return agg.merge(_muni, on="cod_ibge7", how="inner")
 
-
 _VIRIDIS = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"]
 
-
 def construir_mapa(sel_interno: str, comp_interno: str = None):
-    """Mapa coroplético em polígonos reais + rios + municípios selecionados."""
     geo = carregar_geo()
     pts = _soja_por_municipio()
     if geo is None or pts.empty:
         return None, {}, None
-
+    
     cod_sel = _cod_por_nome.get(sel_interno)
     cod_comp = _cod_por_nome.get(comp_interno) if comp_interno else None
-
+    
     latmin, latmax = pts.latitude.min(), pts.latitude.max()
     lonmin, lonmax = pts.longitude.min(), pts.longitude.max()
 
     m = folium.Map(location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
                    tiles="cartodbpositron", zoom_start=6, control_scale=True)
-
-    rmin, rmax = float(pts.rend.min()), float(pts.rend.max())
-    cmap = cm.LinearColormap(_VIRIDIS, vmin=rmin, vmax=rmax)
-    dados_dict = pts.set_index("cod_ibge7").to_dict(orient="index")
-    nome_para_interno = {}
-
-    def estilo_feature(feature):
-        props = feature.get("properties", {})
-        # Tenta capturar o código IBGE por propriedades comuns do GeoJSON
-        cod_ibge = props.get("cod_ibge7") or props.get("id") or props.get("GEOCODIGO") or props.get("CD_MUN")
-        
-        info = None
-        if cod_ibge:
-            try:
-                info = dados_dict.get(int(cod_ibge))
-            except ValueError:
-                pass
-
-        if not info:
-            # Caso a propriedade seja pelo nome
-            nome_feat = props.get("municipio") or props.get("NM_MUN") or props.get("name")
-            if nome_feat and nome_feat in EXIBICAO_PARA_INTERNO:
-                intern = EXIBICAO_PARA_INTERNO[nome_feat]
-                cod = _cod_por_nome.get(intern)
-                info = dados_dict.get(cod)
-
-        if not info:
-            return {"fillColor": "#e0e0e0", "color": "#cccccc", "weight": 0.5, "fillOpacity": 0.25}
-
-        nome_oficial = disp(info["municipio"])
-        nome_para_interno[nome_oficial] = info["municipio"]
-
-        is_sel = (info["cod_ibge7"] == cod_sel)
-        is_comp = (info["cod_ibge7"] == cod_comp) if cod_comp else False
-
-        if is_sel:
-            borda_cor, borda_peso, opac = "#B00020", 3.0, 0.95
-        elif is_comp:
-            borda_cor, borda_peso, opac = "#2E75B6", 3.0, 0.95
-        else:
-            borda_cor, borda_peso, opac = "#ffffff", 0.6, 0.8
-
-        return {
-            "fillColor": cmap(info["rend"]),
-            "color": borda_cor,
-            "weight": borda_peso,
-            "fillOpacity": opac
-        }
-
-    # Camada Poligonal do GeoJSON
-    folium.GeoJson(
-        geo,
-        name="Municípios",
-        style_function=estilo_feature,
-        highlight_function=lambda f: {"weight": 2.5, "color": "#000000", "fillOpacity": 0.95},
-    ).add_to(m)
-
+    folium.GeoJson(geo, name="Pará", interactive=False, style_function=lambda f: {
+        "fillColor": "#2E7D32", "color": "#6f9f6f", "weight": 1.2,
+        "fillOpacity": 0.06}).add_to(m)
+    
     rios = carregar_rios()
     if rios is not None and rios.get("features"):
         folium.GeoJson(rios, name="Rios", interactive=False, style_function=lambda f: {
             "color": "#4a90d9", "weight": 1.3, "opacity": 0.85}).add_to(m)
 
-    # Marcadores de centroide para apoio e interatividade direta de clique
+    rmin, rmax = float(pts.rend.min()), float(pts.rend.max())
+    cmap = cm.LinearColormap(_VIRIDIS, vmin=rmin, vmax=rmax)
     amax = float(pts.area.max())
+    nome_para_interno = {}
+    
     for r in pts.itertuples():
         nome = disp(r.municipio)
         nome_para_interno[nome] = r.municipio
+        
         selec_prin = (r.cod_ibge7 == cod_sel)
         selec_comp = (r.cod_ibge7 == cod_comp)
         
@@ -204,65 +141,54 @@ def construir_mapa(sel_interno: str, comp_interno: str = None):
         
         folium.CircleMarker(
             location=[r.latitude, r.longitude],
-            radius=3 + 12 * math.sqrt(r.area / amax),
+            radius=4 + 14 * math.sqrt(r.area / amax),
             color=cor_borda,
             weight=peso_borda,
             fill=True, fill_color=cmap(r.rend), fill_opacity=0.9,
             tooltip=nome
         ).add_to(m)
-
+        
     m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
     return m, nome_para_interno, (rmin, rmax)
 
 
-# ------------------------------------------------------------------ CABEÇALHO
-st.title("Estimativa da produtividade da soja — municípios do Pará")
+st.title("🌱 Painel de Produtividade e Viabilidade da Soja — Pará")
 atualizada_em = data_atualizacao()
 st.caption(
-    f"Base de {len(df)} registros município-safra · {df.municipio.nunique()} municípios · "
-    f"{df.ano.min()}–{df.ano.max()} · Fontes: IBGE (PAM), MODIS, CHIRPS, ERA5-Land, MapBiomas"
-    + (f" · Dados atualizados em {atualizada_em}" if atualizada_em else "")
+    f"Base com {len(df)} registros · {df.municipio.nunique()} municípios analisados ({df.ano.min()}–{df.ano.max()}) · "
+    f"Fontes: IBGE, MODIS, CHIRPS, ERA5-Land, MapBiomas"
+    + (f" · Atualizado em {atualizada_em}" if atualizada_em else "")
 )
 
-unidade = st.radio("Unidade de produtividade", ["kg/ha", "sc/ha"], horizontal=True)
+unidade = st.radio("Unidade de medida preferida", ["sc/ha", "kg/ha"], horizontal=True)
 fator = 1 if unidade == "kg/ha" else 1 / SACA_KG
 
-
 def qtd(v: float, sinal: str = "") -> str:
-    if unidade == "kg/ha":
-        return f"{v * fator:{sinal},.0f}".replace(",", ".")
+    if unidade == "kg/ha": return f"{v * fator:{sinal},.0f}".replace(",", ".")
     return f"{v * fator:{sinal}.1f}".replace(".", ",")
-
 
 def br(v: float) -> str:
     return f"{v:,.0f}".replace(",", ".")
-
 
 def brl(v: float, dec: int = 0) -> str:
     s = f"{v:,.{dec}f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return "R$ " + s
 
-
 CUSTO_HA_REFERENCIA = 5388.0
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
-# --- CARD DE MÉTRICAS GLOBAIS DE VALIDAÇÃO ---
+# --- RESUMO EXECUTIVO PARA O PRODUTOR ---
 with st.container(border=True):
-    st.markdown("##### 📊 Desempenho Global do Modelo (Validação Temporal)")
+    st.markdown("##### 🚜 Indicadores Gerais da Ferramenta")
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Erro do modelo (RMSE)", f"{qtd(metricas['rmse'])} {unidade}")
-    c2.metric("Erro relativo", f"{metricas['rrmse']:.1f}%")
-    c3.metric("R²", f"{metricas['r2']:.3f}")
-    c4.metric("R² do baseline", f"{metricas['r2_baseline']:.3f}")
-
-if abs(metricas["r2"] - metricas["r2_baseline"]) < 0.01:
-    st.info("**Leitura honesta dos resultados.** As variáveis climáticas não superam o modelo de referência, construído apenas com histórico e tendência.")
+    c1.metric("Precisão Média (Margem de Erro)", f"± {qtd(metricas['rmse'])} {unidade}")
+    c2.metric("Variação Média Relativa", f"{metricas['rrmse']:.1f}%")
+    c3.metric("Aderência Histórica (R²)", f"{metricas['r2']:.3f}")
+    c4.metric("Tendência Base", f"{metricas['r2_baseline']:.3f}")
 
 st.divider()
 
-# ==============================================================================
-# LÓGICA DE SINCRONIZAÇÃO EM PASSO ÚNICO (Sem duplo clique e sem travamento)
-# ==============================================================================
+# Sincronização limpa do mapa
 municipios = sorted(df.municipio.unique())
 
 if "mun_sel" not in st.session_state:
@@ -282,13 +208,12 @@ if "mapa_soja" in st.session_state and st.session_state.mapa_soja:
 def on_dropdown_change():
     if "mapa_soja" in st.session_state and st.session_state.mapa_soja:
         st.session_state.last_map_click = st.session_state.mapa_soja.get("last_object_clicked_tooltip")
-# ==============================================================================
 
-# Definição das Abas da Interface
+# Abas focadas na experiência do produtor
 aba_mapa, aba_graficos, aba_eco = st.tabs([
-    "🗺️ Mapa & Estimativa", 
-    "📈 Séries Históricas & Clima", 
-    "💰 Análise Econômica & Qualidade PAM"
+    "🗺️ Mapa & Estimativa de Safra", 
+    "📈 Histórico & Impacto Climático", 
+    "💰 Contas da Lavoura & Confiabilidade"
 ])
 
 # ==============================================================================
@@ -297,29 +222,23 @@ aba_mapa, aba_graficos, aba_eco = st.tabs([
 with aba_mapa:
     esq, dir_ = st.columns([1, 2])
     with esq:
-        municipio = st.selectbox(
-            "Município Principal", 
-            municipios, 
-            key="mun_sel", 
-            format_func=disp,
-            on_change=on_dropdown_change
-        )
+        municipio = st.selectbox("Escolha o Município", municipios, key="mun_sel", format_func=disp, on_change=on_dropdown_change)
         
         comparar = st.toggle("Comparar com outro município", value=False)
         mun_comp = None
         if comparar:
             opcoes_comp = [m for m in municipios if m != municipio]
-            mun_comp = st.selectbox("Município Secundário", opcoes_comp, format_func=disp)
+            mun_comp = st.selectbox("Município para Comparação", opcoes_comp, format_func=disp)
         
         st.write("") 
-        ano_alvo = st.number_input("Safra a estimar (Mun. Principal)", min_value=int(df.ano.max()) + 1, max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
+        ano_alvo = st.number_input("Safra que deseja estimar", min_value=int(df.ano.max()) + 1, max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
         r = estimador.estimar(municipio, int(ano_alvo))
-        st.metric(f"Estimativa para {ano_alvo}", f"{qtd(r['estimativa_kg_ha'])} {unidade}", delta=f"± {qtd(r['margem_kg_ha'])} {unidade}", delta_color="off")
+        st.metric(f"Previsão para {ano_alvo} ({disp(municipio)})", f"{qtd(r['estimativa_kg_ha'])} {unidade}", delta=f"Margem: ± {qtd(r['margem_kg_ha'])} {unidade}", delta_color="off")
 
-        with st.expander("Simular cenário climático"):
-            chuva = st.slider("Chuva na janela da safra (% da média)", 50, 150, 100, step=5)
-            dtemp = st.slider("Temperatura (desvio da média, em °C)", -2.0, 3.0, 0.0, step=0.5)
+        with st.expander("🌦️ Simular Clima na Safra"):
+            chuva = st.slider("Volume de Chuva (% em relação à média)", 50, 150, 100, step=5)
+            dtemp = st.slider("Desvio de Temperatura (°C)", -2.0, 3.0, 0.0, step=0.5)
             if chuva != 100 or dtemp != 0.0:
                 hist = df[df.municipio == municipio]
                 clima = hist[M.FEATURES].mean().to_dict()
@@ -329,16 +248,16 @@ with aba_mapa:
                 clima["balanco_hidrico"] = clima["precip_total"] - clima["etp_total"]
                 cenario = estimador.estimar(municipio, int(ano_alvo), clima=clima)
                 dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
-                st.metric("Estimativa no cenário", f"{qtd(cenario['estimativa_kg_ha'])} {unidade}", delta=f"{qtd(dif, '+')} {unidade}")
+                st.metric("Previsão Ajustada ao Clima", f"{qtd(cenario['estimativa_kg_ha'])} {unidade}", delta=f"{qtd(dif, '+')} {unidade}")
 
     with dir_:
         mapa, nome_para_interno, faixa_rend = construir_mapa(municipio, mun_comp)
         if mapa is not None:
-            st.subheader("Soja no Pará por Município")
+            st.subheader("Panorama Produtivo no Estado")
             st_folium(
                 mapa, 
                 use_container_width=True, 
-                height=450,
+                height=430,
                 returned_objects=["last_object_clicked_tooltip"],
                 key="mapa_soja"
             )
@@ -347,12 +266,12 @@ with aba_mapa:
             st.markdown(
                 f"""<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap; font-size:0.82rem;margin:2px 0 6px">
                   <span style="opacity:.75">Produtividade</span>
-                  <span>{br(faixa_rend[0])}</span>
+                  <span>{br(faixa_rend[0] * fator)} {unidade}</span>
                   <div style="flex:0 1 150px;height:12px;border-radius:3px; background:linear-gradient(to right,{grad})"></div>
-                  <span>{br(faixa_rend[1])} kg/ha</span>
+                  <span>{br(faixa_rend[1] * fator)} {unidade}</span>
                 </div>""",
                 unsafe_allow_html=True)
-            st.caption(f"**Clique num município** para selecioná-lo (Vermelho = Principal | Azul = Secundário).")
+            st.caption(f"**Dica:** Clique em qualquer bolinha no mapa para alternar o município selecionado (Vermelho = Principal | Azul = Comparação).")
 
 # ==============================================================================
 # ABA 2: SÉRIES HISTÓRICAS & CLIMA
@@ -363,7 +282,7 @@ with aba_graficos:
     else:
         serie = df[df.municipio == municipio].sort_values("ano")
 
-    st.subheader("Produtividade observada (PAM/IBGE)")
+    st.subheader("Evolução da Produtividade ao Longo dos Anos")
     
     serie_plot = serie.assign(
         produtividade=serie[M.ALVO] * fator,
@@ -373,7 +292,6 @@ with aba_graficos:
         Nome=[disp(m) for m in serie["municipio"]]
     )
 
-    # Eixo X com suporte a responsividade mobile (scale zero=False resolve o bug do canto)
     eixo_x_inteligente = alt.X(
         "ano:Q", 
         title="Ano-safra", 
@@ -410,76 +328,74 @@ with aba_graficos:
     ])
     clima_chart = alt.Chart(df_clima).mark_rule(size=8, opacity=0.3).encode(
         x=eixo_x_inteligente,
-        color=alt.Color("Clima:N", scale=alt.Scale(domain=["El Niño", "La Niña"], range=["#d73027", "#4575b4"]), legend=alt.Legend(title="Eventos Climáticos", orient="bottom"))
+        color=alt.Color("Clima:N", scale=alt.Scale(domain=["El Niño", "La Niña"], range=["#d73027", "#4575b4"]), legend=alt.Legend(title="Anos de Forte Influência Climática", orient="bottom"))
     )
 
     grafico_prod = alt.layer(clima_chart, linha, tendencia, marcas).resolve_scale(color='independent')
     st.altair_chart(grafico_prod, use_container_width=True)
-    st.caption("A linha tracejada indica a tendência tecnológica histórica. Faixas verticais marcam anos de fortes fenômenos climáticos. Pontos vermelhos indicam repetição cega de dados do IBGE.")
+    st.caption("A linha tracejada mostra a evolução tecnológica da lavoura. As faixas destacam anos marcados por El Niño ou La Niña.")
 
-    st.subheader("Área de soja mapeada (MapBiomas)")
+    st.subheader("Crescimento da Área Plantada (Hectares)")
     area = alt.Chart(serie_plot).mark_area(opacity=0.4).encode(
         x=eixo_x_inteligente,
-        y=alt.Y("soy_area_ha:Q", title="hectares", axis=EIXO_BR),
+        y=alt.Y("soy_area_ha:Q", title="Hectares", axis=EIXO_BR),
         color=alt.Color("Nome:N", legend=alt.Legend(title="Município", orient="bottom")),
-        tooltip=["ano", "Nome", alt.Tooltip("area_rotulo:N", title="hectares")],
+        tooltip=["ano", "Nome", alt.Tooltip("area_rotulo:N", title="Hectares")],
     )
     st.altair_chart(area, use_container_width=True)
 
     b1, b2 = st.columns(2)
-    b1.download_button("Baixar série do município (CSV)", serie.to_csv(index=False).encode("utf-8"), file_name=f"soja_{municipio.lower().replace(' ', '_')}.csv", mime="text/csv", use_container_width=True)
-    b2.download_button("Baixar base completa (CSV)", DADOS.read_bytes(), file_name=DADOS.name, mime="text/csv", use_container_width=True)
+    b1.download_button("Baixar histórico do município (CSV)", serie.to_csv(index=False).encode("utf-8"), file_name=f"soja_{municipio.lower().replace(' ', '_')}.csv", mime="text/csv", use_container_width=True)
+    b2.download_button("Baixar base geral do estado (CSV)", DADOS.read_bytes(), file_name=DADOS.name, mime="text/csv", use_container_width=True)
 
 # ==============================================================================
 # ABA 3: ANÁLISE ECONÔMICA & QUALIDADE PAM
 # ==============================================================================
 with aba_eco:
-    st.subheader("Análise Econômica (Margem por Hectare)")
+    st.subheader("💰 Viabilidade Econômica por Hectare")
     r_eco = estimador.estimar(municipio, int(df.ano.max()) + 1)
     
     col_eco1, col_eco2 = st.columns(2)
     with col_eco1:
-        preco = st.number_input("Preço da soja (R$/saca de 60 kg)", min_value=0.0, value=120.0, step=5.0)
+        preco = st.number_input("Preço de venda da saca (R$ / 60 kg)", min_value=0.0, value=120.0, step=5.0)
     with col_eco2:
-        custo_ha = st.number_input("Custo de produção (R$/hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0)
+        custo_ha = st.number_input("Custo estimado de produção (R$ / hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0)
 
-    _serie_mun = df[df.municipio == municipio].sort_values("ano")
-    area_ha = float(_serie_mun.iloc[-1]["soy_area_ha"]) if len(_serie_mun) else 0.0
     est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
-
     receita_ha = est_sacas_ha * preco
     margem_ha = receita_ha - custo_ha
 
     m1, m2, m3 = st.columns(3)
-    m1.metric("Receita bruta/ha", brl(receita_ha))
-    m2.metric("Custo/ha", brl(custo_ha))
-    m3.metric("Margem/ha", brl(margem_ha), delta=(f"{margem_ha / custo_ha * 100:+.0f}% sobre o custo" if custo_ha else None))
+    m1.metric("Faturamento Bruto / ha", brl(receita_ha))
+    m2.metric("Custo Total / ha", brl(custo_ha))
+    m3.metric("Margem Líquida / ha", brl(margem_ha), delta=(f"{margem_ha / custo_ha * 100:+.0f}% sobre o custo" if custo_ha else None))
+
+    # Diagnóstico textual amigável para o produtor
+    if margem_ha > 0:
+        st.success(f"**Análise Financeira Prática:** Com base na produtividade estimada de **{qtd(r_eco['estimativa_kg_ha'])} {unidade}**, a lavoura em **{disp(municipio)}** cobre os custos operacionais e gera folga financeira estimada em **{brl(margem_ha)} por hectare**.")
+    else:
+        st.warning(f"**Atenção aos Custos:** No cenário atual de preços e custos informados, a margem para **{disp(municipio)}** fica no vermelho. É recomendado reavaliar negociações de insumos ou travar preços futuros.")
 
     st.divider()
 
-    st.subheader("Qualidade da Variável Oficial (PAM / IBGE)")
+    st.subheader("⚠️ Confiabilidade dos Dados Oficiais da Região")
     diag = M.diagnostico_pam(df, municipio)
     taxa_estado = M.taxa_repeticao_estadual(df)
 
     qa, qb, qc = st.columns(3)
-    qa.metric("Repetição neste município", f"{diag['taxa']:.0f}%", help="Proporção de safras consecutivas com produtividade idêntica.")
-    qb.metric("Maior sequência", f"{diag['maior_sequencia']} anos")
-    qc.metric("Média do estado", f"{taxa_estado:.1f}%")
+    qa.metric("Repetição de dados locais", f"{diag['taxa']:.0f}%", help="Porcentagem de safras em que o órgão oficial repetiu o valor anterior sem variação.")
+    qb.metric("Maior sequência travada", f"{diag['maior_sequencia']} safras")
+    qc.metric("Média de repetição no Pará", f"{taxa_estado:.1f}%")
 
     if diag["taxa"] >= taxa_estado:
-        st.warning(f"**Atenção.** Em {disp(municipio)}, a Produção Agrícola Municipal apresenta forte recondução de valores (repetição de dados). Trate as estimativas históricas com cautela.")
+        st.warning(f"**Aviso Técnico:** Em **{disp(municipio)}**, os relatórios oficiais de órgãos do governo apresentam histórico com forte repetição mecânica de números. Utilize as estimativas com cautela analítica.")
     else:
-        st.success(f"Em {disp(municipio)}, a série oficial apresenta variação interanual consistente e abaixo da média estadual de repetição cega.")
-
-    with st.expander("Por que este alerta existe"):
-        st.markdown(f"""
-Nos municípios paraenses, **{taxa_estado:.1f}%** dos pares de safras consecutivas da PAM/IBGE apresentam produtividade rigorosamente idêntica. Nenhum modelo preditivo recupera variação que não existe no dado de referência.
-""")
+        st.success(f"**Boa Qualidade de Registro:** Em **{disp(municipio)}**, a série oficial apresenta boa variação de safra para safra, ficando abaixo da média estadual de repetição.")
 
 st.divider()
 
-# ------------------------------------------------------ PANORAMA DO ESTADO
-st.subheader("Panorama dos municípios")
+# ------------------------------------------------------ PANORAMA GERAL DO ESTADO
+st.subheader("📋 Panorama Geral dos Polos Produtivos do Pará")
 ult_ano = int(df.ano.max())
 linhas_pan = []
 for mun, d in df.groupby("municipio"):
@@ -498,18 +414,18 @@ pan = pd.DataFrame(linhas_pan).sort_values("prod_media", ascending=False)
 st.dataframe(
     pan, hide_index=True, width='stretch',
     column_config={
-        "prod_media": st.column_config.NumberColumn(f"Produtividade média {ult_ano - 4}–{ult_ano} ({unidade})", format=casas_pan),
-        "area_ha": st.column_config.NumberColumn("Área de soja recente (ha)", format="localized"),
-        "repeticao": st.column_config.NumberColumn("Repetição na PAM (%)", format="%.0f%%"),
-        "safras": st.column_config.NumberColumn("Safras na base"),
+        "prod_media": st.column_config.NumberColumn(f"Média Recente ({ult_ano-4}–{ult_ano}) [{unidade}]", format=casas_pan),
+        "area_ha": st.column_config.NumberColumn("Área Atual (ha)", format="localized"),
+        "repeticao": st.column_config.NumberColumn("Repetição Oficial (%)", format="%.0f%%"),
+        "safras": st.column_config.NumberColumn("Total de Safras"),
     },
 )
 
-with st.expander("Sobre este painel"):
+with st.expander("ℹ️ Sobre o Projeto e Metodologia"):
     st.markdown("""
 Produto técnico da dissertação **Aplicação da Inteligência Artificial na Previsão da Produtividade da Soja** — Mestrado Profissional em Computação Aplicada (PPCA/UFPA).
 
 **Autor:** Maycon Lima dos Santos · **Orientador:** Prof. Dr. Caio Carvalho Moreira · **Ano:** 2026
 
-**Código e dados:** [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
+**Repositório Oficial:** [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
 """)

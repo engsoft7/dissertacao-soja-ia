@@ -60,6 +60,17 @@ def data_atualizacao() -> str | None:
 
 st.set_page_config(page_title="Soja no Pará — estimativa de produtividade", page_icon="🌱", layout="wide")
 
+# Correção visual para evitar texto cortado em tablets e telas menores
+st.markdown("""
+<style>
+    [data-testid="stMetricLabel"] {
+        font-size: 0.85rem !important;
+        white-space: normal !important;
+        overflow: visible !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 @st.cache_resource(show_spinner="Preparando o painel agrícola...")
 def preparar():
     df = M.carregar(str(DADOS))

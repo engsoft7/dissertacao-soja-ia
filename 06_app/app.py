@@ -370,7 +370,6 @@ with aba_eco:
     m2.metric("Custo Total / ha", brl(custo_ha))
     m3.metric("Margem Líquida / ha", brl(margem_ha), delta=(f"{margem_ha / custo_ha * 100:+.0f}% sobre o custo" if custo_ha else None))
 
-    # Diagnóstico textual amigável para o produtor
     if margem_ha > 0:
         st.success(f"**Análise Financeira Prática:** Com base na produtividade estimada de **{qtd(r_eco['estimativa_kg_ha'])} {unidade}**, a lavoura em **{disp(municipio)}** cobre os custos operacionais e gera folga financeira estimada em **{brl(margem_ha)} por hectare**.")
     else:
@@ -394,27 +393,36 @@ with aba_eco:
 
 st.divider()
 
-# ------------------------------------------------------ PANORAMA GERAL DO ESTADO
-st.subheader("📋 Panorama Geral dos Polos Produtivos do Pará")
+# ------------------------------------------------------ PANORAMA GERAL DO ESTADO COM RENTABILIDADE
+st.subheader("📋 Panorama Geral e Ranking de Faturamento dos Polos Produtivos")
+st.caption(f"Calculado com base no preço de referência de **{brl(preco)} por saca** informado na aba econômica.")
+
 ult_ano = int(df.ano.max())
 linhas_pan = []
 for mun, d in df.groupby("municipio"):
     d = d.sort_values("ano")
     ult5 = d[d.ano > ult_ano - 5]
     difs = d[M.ALVO].diff().dropna()
+    prod_med_kg = ult5[M.ALVO].mean()
+    faturamento_bruto = (prod_med_kg / SACA_KG) * preco
+    
     linhas_pan.append({
         "Município": disp(mun),
-        "prod_media": ult5[M.ALVO].mean() * fator,
+        "prod_media": prod_med_kg * fator,
+        "faturamento": faturamento_bruto,
         "area_ha": float(d.iloc[-1]["soy_area_ha"]),
         "repeticao": float((difs == 0).mean() * 100) if len(difs) else 0.0,
         "safras": len(d),
     })
+
 casas_pan = "%.0f" if unidade == "kg/ha" else "%.1f"
-pan = pd.DataFrame(linhas_pan).sort_values("prod_media", ascending=False)
+pan = pd.DataFrame(linhas_pan).sort_values("faturamento", ascending=False)
+
 st.dataframe(
     pan, hide_index=True, width='stretch',
     column_config={
         "prod_media": st.column_config.NumberColumn(f"Média Recente ({ult_ano-4}–{ult_ano}) [{unidade}]", format=casas_pan),
+        "faturamento": st.column_config.NumberColumn("Faturamento Bruto Est. (R$/ha)", format="localized"),
         "area_ha": st.column_config.NumberColumn("Área Atual (ha)", format="localized"),
         "repeticao": st.column_config.NumberColumn("Repetição Oficial (%)", format="%.0f%%"),
         "safras": st.column_config.NumberColumn("Total de Safras"),

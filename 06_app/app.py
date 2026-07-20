@@ -189,22 +189,44 @@ if abs(metricas["r2"] - metricas["r2_baseline"]) < 0.01:
 st.divider()
 
 # ==============================================================================
-# LÓGICA DE SINCRONIZAÇÃO LIMPA E SEM CONFLITOS
+# LÓGICA DE SINCRONIZAÇÃO EM PASSO ÚNICO (Adeus duplo clique e st.rerun!)
 # ==============================================================================
 municipios = sorted(df.municipio.unique())
 
+# 1. Configurações Iniciais
 if "mun_sel" not in st.session_state:
     st.session_state.mun_sel = "Paragominas" if "Paragominas" in municipios else municipios[0]
 
-# Se houver um clique pendente vindo do mapa, aplica no seletor antes dele renderizar
-if "_clique_mapa" in st.session_state:
-    st.session_state.mun_sel = st.session_state.pop("_clique_mapa")
+if "last_map_click" not in st.session_state:
+    st.session_state.last_map_click = None
+
+# 2. Verifica se o mapa foi clicado ANTES de renderizar qualquer coisa na tela
+if "mapa_soja" in st.session_state and st.session_state.mapa_soja:
+    current_map_click = st.session_state.mapa_soja.get("last_object_clicked_tooltip")
+    
+    # Se registrou um clique e ele é diferente do último que processamos:
+    if current_map_click and current_map_click != st.session_state.last_map_click:
+        st.session_state.last_map_click = current_map_click
+        interno = EXIBICAO_PARA_INTERNO.get(current_map_click)
+        if interno and interno != st.session_state.mun_sel:
+            st.session_state.mun_sel = interno
+
+# 3. Impede que a caixa de seleção e o mapa briguem
+def on_dropdown_change():
+    if "mapa_soja" in st.session_state and st.session_state.mapa_soja:
+        st.session_state.last_map_click = st.session_state.mapa_soja.get("last_object_clicked_tooltip")
+# ==============================================================================
 
 esq, dir_ = st.columns([1, 2])
 
 with esq:
-    # O on_change conflituoso foi removido. O Selectbox funciona livremente.
-    municipio = st.selectbox("Município Principal", municipios, key="mun_sel", format_func=disp)
+    municipio = st.selectbox(
+        "Município Principal", 
+        municipios, 
+        key="mun_sel", 
+        format_func=disp,
+        on_change=on_dropdown_change
+    )
     
     comparar = st.toggle("Comparar com outro município", value=False)
     mun_comp = None
@@ -261,23 +283,14 @@ with dir_:
     if mapa is not None:
         st.subheader("Soja no Pará por município")
         
-        saida = st_folium(
+        # Renderização do mapa sem lógicas complexas embaixo. Limpo e síncrono.
+        st_folium(
             mapa, 
             use_container_width=True, 
             height=430,
             returned_objects=["last_object_clicked_tooltip"],
             key="mapa_soja"
         )
-        
-        # AQUI O SEGREDO: Só atualiza se o mapa tiver gerado um clique NOVO
-        clicado = (saida or {}).get("last_object_clicked_tooltip")
-        if clicado:
-            if clicado != st.session_state.get("last_processed_map_click"):
-                st.session_state["last_processed_map_click"] = clicado
-                interno = nome_para_interno.get(clicado)
-                if interno and interno != st.session_state.mun_sel:
-                    st.session_state["_clique_mapa"] = interno
-                    st.rerun()
         
         grad = ",".join(_VIRIDIS)
         st.markdown(
@@ -300,7 +313,6 @@ with dir_:
         Nome=[disp(m) for m in serie["municipio"]]
     )
 
-    # GRÁFICO CORRIGIDO (O zero=False resolve o bug que espremia tudo na direita)
     eixo_x_inteligente = alt.X(
         "ano:Q", 
         title="Ano-safra", 

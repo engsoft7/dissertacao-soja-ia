@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Painel de estimativa da produtividade da soja nos municípios do Pará.
+Painel de Inteligência e Previsão de Safra de Soja — Pará
 
 Execução:
     streamlit run app.py
@@ -80,7 +80,7 @@ def buscar_preco_soja_online() -> float:
     return preco_padrao
 
 
-st.set_page_config(page_title="Soja no Pará — estimativa de produtividade", page_icon="🌱", layout="wide")
+st.set_page_config(page_title="AgroInteligência — Previsão e Viabilidade de Soja no Pará", page_icon="📈", layout="wide")
 
 # Correção visual otimizada para tablets (Tab S6 Lite e similares) e celulares
 st.markdown("""
@@ -101,7 +101,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-@st.cache_resource(show_spinner="Preparando o painel agrícola...")
+@st.cache_resource(show_spinner="Carregando modelos de inteligência de safra...")
 def preparar():
     df = M.carregar(str(DADOS))
     est = M.Estimador().treinar(df)
@@ -193,11 +193,11 @@ def construir_mapa(sel_interno: str, comp_interno: str = None):
     return m, nome_para_interno, (rmin, rmax)
 
 
-st.title("🌱 Painel de Produtividade e Viabilidade da Soja — Pará")
+st.title("📈 AgroInteligência — Previsão e Viabilidade de Safra")
 atualizada_em = data_atualizacao()
 st.caption(
-    f"Base com {len(df)} registros · {df.municipio.nunique()} municípios analisados ({df.ano.min()}–{df.ano.max()}) · "
-    f"Fontes: IBGE, MODIS, CHIRPS, ERA5-Land, MapBiomas"
+    f"Base com {len(df)} registros · {df.municipio.nunique()} municípios monitorados ({df.ano.min()}–{df.ano.max()}) · "
+    f"Fontes: Modelagem Preditiva Avançada, MODIS, CHIRPS, ERA5-Land, MapBiomas"
     + (f" · Atualizado em {atualizada_em}" if atualizada_em else "")
 )
 
@@ -215,23 +215,21 @@ def brl(v: float, dec: int = 0) -> str:
     s = f"{v:,.{dec}f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return "R$ " + s
 
-# Carregamento dinâmico e paramétrico
 PRECO_SACA_ONLINE = buscar_preco_soja_online()
-CUSTO_HA_REF = 4800.0  # Referência metodológica base
+CUSTO_HA_REF = 4800.0  # Referência base de custeio
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
-# --- RESUMO EXECUTIVO PARA O PRODUTOR ---
+# --- PAINEL EXECUTIVO DE INDICADORES ---
 with st.container(border=True):
-    st.markdown("##### 🚜 Indicadores Gerais da Ferramenta")
+    st.markdown("##### 🚀 Indicadores de Desempenho do Modelo Preditivo")
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Margem de Erro (Precisão)", f"± {qtd(metricas['rmse'])} {unidade}")
-    c2.metric("Variação Média Relativa", f"{metricas['rrmse']:.1f}%")
-    c3.metric("Aderência Histórica (R²)", f"{metricas['r2']:.3f}")
-    c4.metric("Tendência Base", f"{metricas['r2_baseline']:.3f}")
+    c1.metric("Margem de Precisão (RMSE)", f"± {qtd(metricas['rmse'])} {unidade}")
+    c2.metric("Variação Relativa", f"{metricas['rrmse']:.1f}%")
+    c3.metric("Aderência Preditiva (R²)", f"{metricas['r2']:.3f}")
+    c4.metric("Benchmark de Tendência", f"{metricas['r2_baseline']:.3f}")
 
 st.divider()
 
-# Sincronização limpa do mapa
 municipios = sorted(df.municipio.unique())
 
 if "mun_sel" not in st.session_state:
@@ -252,20 +250,20 @@ def on_dropdown_change():
     if "mapa_soja" in st.session_state and st.session_state.mapa_soja:
         st.session_state.last_map_click = st.session_state.mapa_soja.get("last_object_clicked_tooltip")
 
-# Abas focadas na experiência do produtor
+# Abas focadas em inteligência comercial e gestão de risco
 aba_mapa, aba_graficos, aba_eco = st.tabs([
-    "🗺️ Mapa & Estimativa de Safra", 
-    "📈 Histórico & Impacto Climático", 
-    "💰 Contas da Lavoura & Confiabilidade"
+    "🗺️ Inteligência Territorial & Previsão", 
+    "📈 Análise Histórica & Clima", 
+    "💰 Viabilidade Comercial & Margens"
 ])
 
 # ==============================================================================
-# ABA 1: MAPA E ESTIMATIVA
+# ABA 1: MAPA E PREVISÃO
 # ==============================================================================
 with aba_mapa:
     esq, dir_ = st.columns([1, 2])
     with esq:
-        municipio = st.selectbox("Escolha o Município", municipios, key="mun_sel", format_func=disp, on_change=on_dropdown_change)
+        municipio = st.selectbox("Selecione o Município / Polo", municipios, key="mun_sel", format_func=disp, on_change=on_dropdown_change)
         
         comparar = st.toggle("Comparar com outro município", value=False)
         mun_comp = None
@@ -274,14 +272,14 @@ with aba_mapa:
             mun_comp = st.selectbox("Município para Comparação", opcoes_comp, format_func=disp)
         
         st.write("") 
-        ano_alvo = st.number_input("Safra que deseja estimar", min_value=int(df.ano.max()) + 1, max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
+        ano_alvo = st.number_input("Safra Alvo para Projeção", min_value=int(df.ano.max()) + 1, max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
         r = estimador.estimar(municipio, int(ano_alvo))
-        st.metric(f"Previsão para {ano_alvo} ({disp(municipio)})", f"{qtd(r['estimativa_kg_ha'])} {unidade}", delta=f"Margem: ± {qtd(r['margem_kg_ha'])} {unidade}", delta_color="off")
+        st.metric(f"Projeção Safra {ano_alvo} ({disp(municipio)})", f"{qtd(r['estimativa_kg_ha'])} {unidade}", delta=f"Intervalo: ± {qtd(r['margem_kg_ha'])} {unidade}", delta_color="off")
 
-        with st.expander("🌦️ Simular Clima na Safra"):
-            chuva = st.slider("Volume de Chuva (% em relação à média)", 50, 150, 100, step=5)
-            dtemp = st.slider("Desvio de Temperatura (°C)", -2.0, 3.0, 0.0, step=0.5)
+        with st.expander("🌦️ Simulação de Cenário Climático"):
+            chuva = st.slider("Volume de Precipitação (% da média)", 50, 150, 100, step=5)
+            dtemp = st.slider("Desvio Térmico (°C)", -2.0, 3.0, 0.0, step=0.5)
             if chuva != 100 or dtemp != 0.0:
                 hist = df[df.municipio == municipio]
                 clima = hist[M.FEATURES].mean().to_dict()
@@ -291,12 +289,12 @@ with aba_mapa:
                 clima["balanco_hidrico"] = clima["precip_total"] - clima["etp_total"]
                 cenario = estimador.estimar(municipio, int(ano_alvo), clima=clima)
                 dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
-                st.metric("Previsão Ajustada ao Clima", f"{qtd(cenario['estimativa_kg_ha'])} {unidade}", delta=f"{qtd(dif, '+')} {unidade}")
+                st.metric("Projeção Ajustada ao Clima", f"{qtd(cenario['estimativa_kg_ha'])} {unidade}", delta=f"{qtd(dif, '+')} {unidade}")
 
     with dir_:
         mapa, nome_para_interno, faixa_rend = construir_mapa(municipio, mun_comp)
         if mapa is not None:
-            st.subheader("Panorama Produtivo no Estado")
+            st.subheader("Panorama Geespacial dos Polos Produtivos")
             st_folium(
                 mapa, 
                 use_container_width=True, 
@@ -314,7 +312,7 @@ with aba_mapa:
                   <span>{br(faixa_rend[1] * fator)} {unidade}</span>
                 </div>""",
                 unsafe_allow_html=True)
-            st.caption(f"**Dica:** Clique em qualquer bolinha no mapa para alternar o município selecionado (Vermelho = Principal | Azul = Comparação).")
+            st.caption(f"**Dica:** Clique em qualquer ponto do mapa para alternar o município selecionado (Vermelho = Principal | Azul = Comparação).")
 
 # ==============================================================================
 # ABA 2: SÉRIES HISTÓRICAS & CLIMA
@@ -325,7 +323,7 @@ with aba_graficos:
     else:
         serie = df[df.municipio == municipio].sort_values("ano")
 
-    st.subheader("Evolução da Produtividade ao Longo dos Anos")
+    st.subheader("Evolução Histórica da Produtividade")
     
     serie_plot = serie.assign(
         produtividade=serie[M.ALVO] * fator,
@@ -376,9 +374,9 @@ with aba_graficos:
 
     grafico_prod = alt.layer(clima_chart, linha, tendencia, marcas).resolve_scale(color='independent')
     st.altair_chart(grafico_prod, use_container_width=True)
-    st.caption("A linha tracejada mostra a evolução tecnológica da lavoura. As faixas destacam anos marcados por El Niño ou La Niña.")
+    st.caption("A linha tracejada indica a tendência tecnológica. As marcações verticais destacam anos de forte impacto de El Niño / La Niña.")
 
-    st.subheader("Crescimento da Área Plantada (Hectares)")
+    st.subheader("Expansão da Área Plantada (Hectares)")
     area = alt.Chart(serie_plot).mark_area(opacity=0.4).encode(
         x=eixo_x_inteligente,
         y=alt.Y("soy_area_ha:Q", title="Hectares", axis=EIXO_BR),
@@ -388,17 +386,17 @@ with aba_graficos:
     st.altair_chart(area, use_container_width=True)
 
     b1, b2 = st.columns(2)
-    b1.download_button("Baixar histórico do município (CSV)", serie.to_csv(index=False).encode("utf-8"), file_name=f"soja_{municipio.lower().replace(' ', '_')}.csv", mime="text/csv", use_container_width=True)
-    b2.download_button("Baixar base geral do estado (CSV)", DADOS.read_bytes(), file_name=DADOS.name, mime="text/csv", use_container_width=True)
+    b1.download_button("Exportar histórico do município (CSV)", serie.to_csv(index=False).encode("utf-8"), file_name=f"soja_{municipio.lower().replace(' ', '_')}.csv", mime="text/csv", use_container_width=True)
+    b2.download_button("Exportar base completa (CSV)", DADOS.read_bytes(), file_name=DADOS.name, mime="text/csv", use_container_width=True)
 
 # ==============================================================================
-# ABA 3: ANÁLISE ECONÔMICA & QUALIDADE PAM
+# ABA 3: ANÁLISE ECONÔMICA & MERCADO
 # ==============================================================================
 with aba_eco:
-    st.subheader("💰 Viabilidade Econômica Integrada à Modelagem")
+    st.subheader("💰 Inteligência de Mercado & Margens por Hectare")
     st.markdown(
-        "Esta seção traduz a produtividade estimada pelo modelo de Inteligência Artificial da dissertação "
-        "em indicadores de retorno financeiro por hectare, fundamentando-se em cotações e custos de referência regional."
+        "Simule cenários financeiros combinando as projeções de produtividade baseadas em IA com dados de preços em tempo real "
+        "e estruturas de custeio operacional."
     )
     
     r_eco = estimador.estimar(municipio, int(df.ano.max()) + 1)
@@ -406,10 +404,10 @@ with aba_eco:
     col_eco1, col_eco2 = st.columns(2)
     with col_eco1:
         preco = st.number_input("Preço de referência da saca (R$ / 60 kg)", min_value=0.0, value=PRECO_SACA_ONLINE, step=5.0)
-        st.caption("🌐 **Fonte da Cotação:** Atualizado automaticamente via API de Indicadores de Mercado / Commodities (AwesomeAPI).")
+        st.caption("🌐 **Fonte da Cotação:** Atualizado via API de Indicadores de Mercado / Commodities (AwesomeAPI).")
     with col_eco2:
         custo_ha = st.number_input("Custo operacional de referência (R$ / hectare)", min_value=0.0, value=CUSTO_HA_REF, step=100.0)
-        st.caption("📊 **Fonte do Custo:** Boletins Técnicos de Custo de Produção (Aprosoja Brasil / Conab - Custo Operacional Efetivo COE).")
+        st.caption("📊 **Fonte do Custo:** Boletins Técnicos de Custo de Produção (Aprosoja Brasil / Conab - COE).")
 
     est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
     receita_ha = est_sacas_ha * preco
@@ -420,28 +418,28 @@ with aba_eco:
     m2.metric("Custo Operacional / ha", brl(custo_ha))
     m3.metric("Margem Líquida / ha", brl(margem_ha), delta=(f"{margem_ha / custo_ha * 100:+.0f}% sobre o custo" if custo_ha else None))
 
-    st.success(f"**Síntese Metodológica:** A projeção de produtividade de **{qtd(r_eco['estimativa_kg_ha'])} {unidade}** gerada pelo estimador para **{disp(municipio)}** resulta em um faturamento bruto estimado em **{brl(receita_ha)}/ha**, assegurando margem positiva frente aos custos operacionais regionais.")
+    st.success(f"**Panorama Comercial:** Com a produtividade estimada de **{qtd(r_eco['estimativa_kg_ha'])} {unidade}** para **{disp(municipio)}**, o faturamento bruto atinge **{brl(receita_ha)}/ha**, garantindo margem operacional positiva nas condições atuais de mercado.")
 
     st.divider()
 
-    st.subheader("⚠️ Análise de Confiabilidade e Inconsistências na Série Oficial (PAM/IBGE)")
+    st.subheader("⚠️ Confiabilidade e Qualidade dos Registros Oficiais")
     diag = M.diagnostico_pam(df, municipio)
     taxa_estado = M.taxa_repeticao_estadual(df)
 
     qa, qb, qc = st.columns(3)
-    qa.metric("Repetição de dados locais", f"{diag['taxa']:.0f}%", help="Porcentagem de safras em que o órgão oficial repetiu o valor anterior sem variação.")
+    qa.metric("Repetição de dados locais", f"{diag['taxa']:.0f}%", help="Porcentagem de safras em que o histórico oficial repetiu o valor anterior.")
     qb.metric("Maior sequência travada", f"{diag['maior_sequencia']} safras")
     qc.metric("Média de repetição no Pará", f"{taxa_estado:.1f}%")
 
     if diag["taxa"] >= taxa_estado:
-        st.warning(f"**Implicações Metodológicas:** O histórico oficial de **{disp(municipio)}** apresenta patamares elevados de repetição de valores entre safras consecutivas, justificando o uso da modelagem baseada em variáveis geoespaciais e climáticas proposta na dissertação para mitigar vieses de levantamento.")
+        st.warning(f"**Nota de Inteligência:** O histórico oficial de **{disp(municipio)}** apresenta alta taxa de repetição estatística interanual, validando o uso de machine learning e dados de satélite para correções de viés e maior precisão comercial.")
     else:
-        st.success(f"**Consistência de Registro:** O município de **{disp(municipio)}** demonstra boa variabilidade interanual na série oficial, alinhando-se favoravelmente às premissas de validação do estimador.")
+        st.success(f"**Qualidade de Dados:** O município de **{disp(municipio)}** apresenta excelente variabilidade histórica nos registros oficiais.")
 
 st.divider()
 
-# ------------------------------------------------------ PANORAMA GERAL DO ESTADO COM RENTABILIDADE
-st.subheader("📋 Panorama Geral e Ranking Econômico dos Polos Produtivos do Pará")
+# ------------------------------------------------------ PANORAMA GERAL DO ESTADO
+st.subheader("📋 Ranking e Panorama Comercial dos Polos Produtivos")
 st.caption(f"Calculado com base na produtividade média recente e na cotação de mercado de **{brl(preco)} por saca**.")
 
 ult_ano = int(df.ano.max())
@@ -476,14 +474,11 @@ st.dataframe(
     },
 )
 
-with st.expander("ℹ️ Sobre o Produto Técnico e Metodologia da Dissertação"):
+with st.expander("ℹ️ Sobre a Tecnologia e Fontes de Dados"):
     st.markdown("""
-Produto técnico desenvolvido no âmbito da dissertação **Aplicação da Inteligência Artificial na Previsão da Produtividade da Soja nos Municípios do Pará** — Programa de Pós-Graduação em Computação Aplicada (PPCA / Universidade Federal do Pará - UFPA).
+**Plataforma de AgroInteligência Preditiva** — Solução baseada em inteligência artificial para previsão de produtividade de soja e monitoramento de safras no Estado do Pará.
 
-* **Autor:** Maycon Lima dos Santos
-* **Orientador:** Prof. Dr. Caio Carvalho Moreira
-* **Ano:** 2026
-* **Fundamentação:** Integração de algoritmos de aprendizado de máquina com dados multitemporais (MODIS, CHIRPS, ERA5-Land, MapBiomas) para suporte à tomada de decisão agrícola e mitigação de incertezas estatísticas regionais.
-
-**Repositório Oficial:** [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
+* **Tecnologia:** Algoritmos de Machine Learning integrados a dados multitemporais de satélite (MODIS, CHIRPS, ERA5-Land, MapBiomas).
+* **Fontes Econômicas:** Indicadores de mercado físico em tempo real (AwesomeAPI) e boletins de custo operacional efetivo (Aprosoja / Conab).
+* **Repositório do Sistema:** [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
 """)

@@ -63,8 +63,15 @@ st.set_page_config(page_title="Soja no Pará — estimativa de produtividade", p
 # Correção visual otimizada para tablets e telas menores (evita cortes nas métricas)
 st.markdown("""
 <style>
+    [data-testid="stMetric"] {
+        background-color: transparent;
+        border: none;
+    }
+    [data-testid="stHorizontalBlock"] > div {
+        flex: 1 1 auto !important;
+    }
     [data-testid="stMetricLabel"] {
-        font-size: 0.78rem !important;
+        font-size: 0.82rem !important;
         white-space: normal !important;
         overflow: visible !important;
         word-break: break-word !important;

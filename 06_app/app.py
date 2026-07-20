@@ -49,12 +49,7 @@ def carregar_rios():
 
 @st.cache_data
 def carregar_municipios():
-    """Nome oficial acentuado (IBGE) e centroide de cada município, por cod_ibge7.
-
-    A base bruta vem do GAUL, sem acentos; este arquivo (gerado por
-    07_automacao/gera_municipios.py) devolve a grafia oficial e as coordenadas
-    para o mapa. Se faltar, o painel cai para os nomes sem acento e omite o mapa.
-    """
+    """Nome oficial acentuado (IBGE) e centroide de cada município, por cod_ibge7."""
     try:
         return pd.read_csv(MUNICIPIOS)
     except OSError:
@@ -73,14 +68,21 @@ st.set_page_config(page_title="Soja no Pará — estimativa de produtividade",
                    page_icon="🌱", layout="wide")
 
 
+# --- CONTROLE DE VERSÃO DO MAPA (NOVO) ---
+# Isso impede o componente st_folium de travar cliques antigos quando mudamos o Selectbox
+if "map_key_version" not in st.session_state:
+    st.session_state.map_key_version = 0
+
+def ao_mudar_selectbox():
+    st.session_state.map_key_version += 1
+# -----------------------------------------
+
+
 @st.cache_resource(show_spinner="Preparando o modelo...")
 def preparar():
     df = M.carregar(str(DADOS))
     est = M.Estimador().treinar(df)
 
-    # A validação leave-one-year-out é cara (um modelo por ano-safra). A
-    # automação a pré-calcula em dados/metricas_validacao.json; o painel só a
-    # refaz se o arquivo estiver ausente ou defasado em relação ao CSV.
     metricas = None
     try:
         salvas = json.loads(METRICAS_SALVAS.read_text(encoding="utf-8"))
@@ -97,8 +99,6 @@ def preparar():
 
 df, estimador, metricas = preparar()
 
-# Nome acentuado por município (interno = sem acento, vindo do GAUL). O mapa e
-# a exibição usam a grafia oficial; a lógica continua usando o nome interno.
 _muni = carregar_municipios()
 _cod_por_nome = df.drop_duplicates("municipio").set_index("municipio")["cod_ibge7"].to_dict()
 _nome_por_cod = _muni.set_index("cod_ibge7")["municipio"].to_dict()
@@ -115,8 +115,7 @@ _interno_por_cod = {c: n for n, c in _cod_por_nome.items()}
 
 @st.cache_data
 def _soja_por_municipio():
-    """Área plantada e produtividade médias recentes (2020+) por município, com
-    coordenadas — base dos pontos do mapa. Vazio se faltarem as coordenadas."""
+    """Área plantada e produtividade médias recentes (2020+) por município."""
     if _muni.empty:
         return pd.DataFrame()
     recente = df[df.ano >= df.ano.max() - 4]
@@ -130,16 +129,7 @@ _VIRIDIS = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"]
 
 
 def construir_mapa(sel_interno: str):
-    """Mapa interativo do Pará (Leaflet/folium): contorno + rios + municípios.
-
-    Permite **dar zoom, arrastar e clicar** (pinça no celular) — o zoom facilita
-    acertar o ponto. Cada município produtor é um círculo dimensionado pela área
-    plantada e colorido pela produtividade média recente; os rios principais dão
-    contexto e o selecionado ganha um anel vermelho. O Leaflet ajusta o
-    enquadramento ao Pará em qualquer tela. Devolve (mapa, dict nome→interno,
-    (rend_min, rend_max)) para o clique e a legenda, ou (None, {}, None) se
-    faltarem os dados.
-    """
+    """Mapa interativo do Pará (Leaflet/folium)."""
     geo = carregar_geo()
     pts = _soja_por_municipio()
     if geo is None or pts.empty:
@@ -166,6 +156,7 @@ def construir_mapa(sel_interno: str):
         nome = disp(r.municipio)
         nome_para_interno[nome] = r.municipio
         selec = r.cod_ibge7 == cod_sel
+        
         folium.CircleMarker(
             location=[r.latitude, r.longitude],
             radius=4 + 14 * math.sqrt(r.area / amax),
@@ -176,6 +167,7 @@ def construir_mapa(sel_interno: str):
             popup=folium.Popup(f"<b>{nome}</b><br>Área plantada: {r.area:,.0f} ha"
                                f"<br>Produtividade: {r.rend:,.0f} kg/ha", max_width=220),
         ).add_to(m)
+        
     m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
     return m, nome_para_interno, (rmin, rmax)
 
@@ -198,66 +190,52 @@ fator = 1 if unidade == "kg/ha" else 1 / SACA_KG
 
 
 def qtd(v: float, sinal: str = "") -> str:
-    """Formata um valor de produtividade (kg/ha) na unidade escolhida, em pt-BR."""
     if unidade == "kg/ha":
         return f"{v * fator:{sinal},.0f}".replace(",", ".")
     return f"{v * fator:{sinal}.1f}".replace(".", ",")
 
 
 def br(v: float) -> str:
-    """Inteiro com separador de milhar brasileiro (ponto)."""
     return f"{v:,.0f}".replace(",", ".")
 
 
 def brl(v: float, dec: int = 0) -> str:
-    """Valor em reais no formato brasileiro (R$ 1.234,56)."""
     s = f"{v:,.{dec}f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return "R$ " + s
 
 
-# Custo de produção da soja — referência CONAB (custos de produção agrícola,
-# safra 2025/26). A CONAB NÃO publica custo para o Pará; usa-se a referência
-# mais próxima, no cerrado do Tocantins vizinho (Pedro Afonso-TO):
-# R$ 4.248,78 variável + R$ 1.138,87 fixo por hectare. O Pará não integra o
-# MATOPIBA (MA, TO, PI, BA); Tocantins é apenas o vizinho geográfico do sul do PA.
 CUSTO_HA_REFERENCIA = 5388.0
-
-
-# Eixos do Vega-Lite usam o padrão americano; converte o rótulo para pt-BR.
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
-
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Erro do modelo (RMSE)", f"{qtd(metricas['rmse'])} {unidade}",
           help="Validação leave-one-year-out: cada safra é prevista por um modelo treinado sem ela.")
 c2.metric("Erro relativo", f"{metricas['rrmse']:.1f}%")
 c3.metric("R²", f"{metricas['r2']:.3f}")
-c4.metric("R² do baseline", f"{metricas['r2_baseline']:.3f}",
-          help="Baseline: média histórica do município + tendência, sem clima nem NDVI.")
+c4.metric("R² do baseline", f"{metricas['r2_baseline']:.3f}")
 
 if abs(metricas["r2"] - metricas["r2_baseline"]) < 0.01:
     st.info(
         "**Leitura honesta dos resultados.** As variáveis climáticas e espectrais não superam "
         "o modelo de referência, construído apenas com o histórico de cada município e a "
-        "tendência temporal. A causa está documentada abaixo: parte expressiva da variação "
-        "interanual da produtividade oficial não é sinal agronômico."
+        "tendência temporal."
     )
 
 st.divider()
 
 # ------------------------------------------------------------------- seleção
 municipios = sorted(df.municipio.unique())
-st.session_state.setdefault(
-    "mun_sel", "Paragominas" if "Paragominas" in municipios else municipios[0])
+st.session_state.setdefault("mun_sel", "Paragominas" if "Paragominas" in municipios else municipios[0])
+
 # Aplica um clique no mapa capturado no rerun anterior ANTES de criar o seletor
-# (não se pode alterar a chave de um widget depois de instanciá-lo).
 if "_clique_mapa" in st.session_state:
     st.session_state.mun_sel = st.session_state.pop("_clique_mapa")
 
 esq, dir_ = st.columns([1, 2])
 
 with esq:
-    municipio = st.selectbox("Município", municipios, key="mun_sel", format_func=disp)
+    # A adição do on_change resolve o travamento lógico do mapa.
+    municipio = st.selectbox("Município", municipios, key="mun_sel", format_func=disp, on_change=ao_mudar_selectbox)
     ano_alvo = st.number_input("Safra a estimar", min_value=int(df.ano.max()) + 1,
                                max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
@@ -267,28 +245,17 @@ with esq:
     st.caption(
         f"Intervalo: **{qtd(r['intervalo'][0])} a {qtd(r['intervalo'][1])} {unidade}**. "
         f"Variáveis ambientais: {r['origem_das_variaveis']}. "
-        "A margem corresponde ao RMSE observado na validação temporal."
     )
 
     with st.expander("Como esta estimativa é composta"):
         st.write(f"- Referência (histórico + tendência): **{qtd(r['baseline_kg_ha'])} {unidade}**")
         st.write(f"- Correção climática do modelo: **{qtd(r['correcao_climatica_kg_ha'], '+')} {unidade}**")
-        st.caption(
-            "Sem dados climáticos da safra corrente, o modelo usa as médias históricas do "
-            "município e a correção tende a zero. Para uso operacional, colete o NDVI e o "
-            "clima da safra em curso com as rotinas de `01_coleta_dados/`."
-        )
 
     with st.expander("Simular cenário climático para a safra"):
-        chuva = st.slider("Chuva na janela da safra (% da média do município)",
-                          50, 150, 100, step=5)
-        dtemp = st.slider("Temperatura (desvio da média, em °C)",
-                          -2.0, 3.0, 0.0, step=0.5)
+        chuva = st.slider("Chuva na janela da safra (% da média do município)", 50, 150, 100, step=5)
+        dtemp = st.slider("Temperatura (desvio da média, em °C)", -2.0, 3.0, 0.0, step=0.5)
         if chuva == 100 and dtemp == 0.0:
-            st.caption(
-                "Mova os controles para ver o efeito de uma safra mais seca ou "
-                "chuvosa, mais quente ou mais amena, sobre a estimativa."
-            )
+            st.caption("Mova os controles para ver o efeito de uma safra diferente.")
         else:
             hist = df[df.municipio == municipio]
             clima = hist[M.FEATURES].mean().to_dict()
@@ -301,36 +268,14 @@ with esq:
             st.metric("Estimativa no cenário",
                       f"{qtd(cenario['estimativa_kg_ha'])} {unidade}",
                       delta=f"{qtd(dif, '+')} {unidade}")
-            if abs(dif) < 0.1 * r["margem_kg_ha"]:
-                st.info(
-                    "**O efeito é praticamente nulo — e isso é um resultado, não um "
-                    "defeito.** A correção climática que o modelo aprendeu é fraca "
-                    "porque a produtividade oficial (PAM) pouco reflete o clima "
-                    "observado: cerca de 40% dos valores municipais repetem a safra "
-                    "anterior (seção 6.4 da dissertação). O cenário também não altera "
-                    "os índices de vegetação (NDVI/EVI), que numa seca real cairiam."
-                )
-            st.caption(
-                "O cenário altera chuva, temperatura e balanço hídrico; NDVI/EVI "
-                "permanecem nas médias históricas do município."
-            )
 
     with st.expander("Análise econômica (margem por hectare)"):
         _serie_mun = df[df.municipio == municipio].sort_values("ano")
         area_ha = float(_serie_mun.iloc[-1]["soy_area_ha"]) if len(_serie_mun) else 0.0
         est_sacas_ha = r["estimativa_kg_ha"] / SACA_KG
 
-        preco = st.number_input(
-            "Preço da soja (R$/saca de 60 kg)", min_value=0.0, value=120.0, step=5.0,
-            help="Informe o preço praticado na sua região. Não há série pública de preço "
-                 "ao produtor específica do Pará, por isso este valor é fornecido por você.",
-        )
-        custo_ha = st.number_input(
-            "Custo de produção (R$/hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0,
-            help="A CONAB não publica custo de produção para o Pará. Este valor de partida "
-                 "vem da referência mais próxima — o cerrado do Tocantins vizinho (Pedro "
-                 "Afonso-TO, safra 2025/26). Ajuste para a realidade do seu município.",
-        )
+        preco = st.number_input("Preço da soja (R$/saca de 60 kg)", min_value=0.0, value=120.0, step=5.0)
+        custo_ha = st.number_input("Custo de produção (R$/hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0)
 
         receita_ha = est_sacas_ha * preco
         margem_ha = receita_ha - custo_ha
@@ -338,21 +283,10 @@ with esq:
         m1, m2, m3 = st.columns(3)
         m1.metric("Receita bruta/ha", brl(receita_ha))
         m2.metric("Custo/ha", brl(custo_ha))
-        m3.metric("Margem/ha", brl(margem_ha),
-                  delta=(f"{margem_ha / custo_ha * 100:+.0f}% sobre o custo" if custo_ha else None))
-
+        m3.metric("Margem/ha", brl(margem_ha), delta=(f"{margem_ha / custo_ha * 100:+.0f}%" if custo_ha else None))
+        
         prod_t = r["estimativa_kg_ha"] * area_ha / 1000
-        prod_sacas = r["estimativa_kg_ha"] * area_ha / SACA_KG
-        st.caption(
-            f"**Produção estimada em {disp(municipio)} para {ano_alvo}: {br(prod_t)} t "
-            f"({br(prod_sacas)} sacas).** Considera {br(area_ha)} ha da máscara MapBiomas × "
-            f"a produtividade estimada. Margem total ≈ **{brl(margem_ha * area_ha)}**."
-        )
-        st.caption(
-            "Preço informado por você; custo de referência da CONAB para o cerrado do "
-            "Tocantins vizinho (o Pará não integra o MATOPIBA e não tem custo publicado). "
-            "Os valores herdam a margem de erro do modelo — trate-os como ordem de grandeza."
-        )
+        st.caption(f"**Produção estimada:** {br(prod_t)} t. Margem total ≈ **{brl(margem_ha * area_ha)}**.")
 
 # --------------------------------------------------------- série e qualidade
 serie = df[df.municipio == municipio].sort_values("ano")
@@ -362,19 +296,23 @@ with dir_:
     mapa, nome_para_interno, faixa_rend = construir_mapa(municipio)
     if mapa is not None:
         st.subheader("Soja no Pará por município")
-        saida = st_folium(mapa, use_container_width=True, height=430,
-                          returned_objects=["last_object_clicked_tooltip"],
-                          key="mapa")
-        # Clique num ponto seleciona o município (dá zoom antes para acertar).
+        
+        saida = st_folium(
+            mapa, 
+            use_container_width=True, 
+            height=430,
+            returned_objects=["last_object_clicked_tooltip"],
+            key=f"mapa_{st.session_state.map_key_version}"  # Chave muda só quando usa o dropdown
+        )
+        
+        # Leitura limpa e sem travas ("_ultimo_clique" removido)
         clicado = (saida or {}).get("last_object_clicked_tooltip")
-        interno = nome_para_interno.get(clicado) if clicado else None
-        if interno and interno != st.session_state.get("_ultimo_clique"):
-            st.session_state["_ultimo_clique"] = interno
-            if interno != municipio:
+        if clicado:
+            interno = nome_para_interno.get(clicado)
+            if interno and interno != municipio:
                 st.session_state["_clique_mapa"] = interno
                 st.rerun()
-        # Legenda de cor em HTML (compacta e responsiva — a do folium estoura no
-        # celular). Gradiente viridis com os extremos de produtividade.
+
         grad = ",".join(_VIRIDIS)
         st.markdown(
             f"""<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;
@@ -386,10 +324,7 @@ with dir_:
               <span>{br(faixa_rend[1])} kg/ha</span>
             </div>""",
             unsafe_allow_html=True)
-        st.caption(f"**Dê zoom e clique num ponto** para escolher o município "
-                   f"(ou use o menu à esquerda). **Tamanho** = área plantada, "
-                   f"**cor** = produtividade; em azul, os principais rios; com "
-                   f"anel vermelho, **{disp(municipio)}**.")
+        st.caption(f"**Clique num ponto** para escolher o município.")
 
     st.subheader("Produtividade observada (PAM/IBGE)")
     serie_plot = serie.assign(
@@ -408,7 +343,6 @@ with dir_:
     ).encode(x="ano:O", y="produtividade:Q",
              tooltip=[alt.Tooltip("ano", title="Valor idêntico ao ano anterior")])
     st.altair_chart(linha + marcas, width='stretch')
-    st.caption("Pontos em vermelho: safras cuja produtividade repete exatamente o valor do ano anterior.")
 
     st.subheader("Área de soja mapeada (MapBiomas)")
     area = alt.Chart(serie_plot).mark_area(
@@ -419,15 +353,6 @@ with dir_:
         tooltip=["ano", alt.Tooltip("area_rotulo:N", title="hectares")],
     )
     st.altair_chart(area, width='stretch')
-    st.caption("Área com soja identificada pela máscara anual do MapBiomas dentro do município.")
-
-    b1, b2 = st.columns(2)
-    b1.download_button("Baixar série do município (CSV)",
-                       serie.to_csv(index=False).encode("utf-8"),
-                       file_name=f"soja_{municipio.lower().replace(' ', '_')}.csv",
-                       mime="text/csv", width='stretch')
-    b2.download_button("Baixar base completa (CSV)", DADOS.read_bytes(),
-                       file_name=DADOS.name, mime="text/csv", width='stretch')
 
 st.divider()
 
@@ -436,43 +361,9 @@ st.subheader("Qualidade da variável oficial")
 taxa_estado = M.taxa_repeticao_estadual(df)
 
 a, b, c = st.columns(3)
-a.metric("Repetição neste município", f"{diag['taxa']:.0f}%",
-         help="Proporção de safras consecutivas com produtividade idêntica.")
+a.metric("Repetição neste município", f"{diag['taxa']:.0f}%")
 b.metric("Maior sequência", f"{diag['maior_sequencia']} anos")
 c.metric("Média do estado", f"{taxa_estado:.1f}%")
-
-if diag["taxa"] >= taxa_estado:
-    st.warning(
-        f"**Atenção.** Em {disp(municipio)}, {diag['repetidos']} de {diag['pares']} pares de safras "
-        f"consecutivas registram produtividade rigorosamente idêntica "
-        f"(anos: {', '.join(map(str, diag['anos_repetidos']))}). "
-        "A Produção Agrícola Municipal não mede a produtividade: ela é estimada pelo agente de "
-        "coleta do IBGE a partir de contatos locais. Onde a rede de informantes é rarefeita, é "
-        "plausível que o valor da safra anterior seja reconduzido. **Trate a estimativa deste "
-        "município com cautela adicional**, pois o modelo é calibrado sobre esses valores."
-    )
-else:
-    st.success(
-        f"Em {disp(municipio)}, a repetição de valores ({diag['taxa']:.0f}%) está abaixo da média "
-        f"estadual ({taxa_estado:.1f}%). A série oficial apresenta variação interanual mais "
-        "consistente com a variabilidade agronômica esperada."
-    )
-
-with st.expander("Por que este alerta existe"):
-    st.markdown(
-        f"""
-Nos municípios paraenses, **{taxa_estado:.1f}%** dos pares de safras consecutivas da PAM/IBGE
-apresentam produtividade rigorosamente idêntica — taxa cerca de três vezes superior à dos
-estados produtores consolidados (12,9%) e situada a 11,8 desvios-padrão do esperado sob
-aleatoriedade.
-
-Nenhum modelo preditivo recupera variação que não existe no dado de referência. Por isso este
-painel exibe a margem de erro em toda estimativa e sinaliza os municípios cuja série oficial
-apresenta maior indício de recondução de valores.
-
-Detalhamento na dissertação, seção 6.4, e no artigo correspondente.
-"""
-    )
 
 st.divider()
 
@@ -496,45 +387,9 @@ pan = pd.DataFrame(linhas_pan).sort_values("prod_media", ascending=False)
 st.dataframe(
     pan, hide_index=True, width='stretch',
     column_config={
-        "prod_media": st.column_config.NumberColumn(
-            f"Produtividade média {ult_ano - 4}–{ult_ano} ({unidade})", format=casas_pan),
-        "area_ha": st.column_config.NumberColumn("Área de soja recente (ha)", format="localized"),
-        "repeticao": st.column_config.NumberColumn("Repetição na PAM (%)", format="%.0f%%"),
-        "safras": st.column_config.NumberColumn("Safras na base"),
+        "prod_media": st.column_config.NumberColumn(f"Média {ult_ano - 4}–{ult_ano}", format=casas_pan),
+        "area_ha": st.column_config.NumberColumn("Área (ha)"),
+        "repeticao": st.column_config.NumberColumn("Repetição (%)", format="%.0f%%"),
+        "safras": st.column_config.NumberColumn("Safras"),
     },
-)
-st.caption(
-    "Clique nos cabeçalhos para ordenar. Produtividade média das últimas cinco "
-    "safras disponíveis; área de soja do ano mais recente do município (MapBiomas)."
-)
-
-with st.expander("Sobre este painel"):
-    st.markdown(
-        """
-Produto técnico da dissertação **Aplicação da Inteligência Artificial na
-Previsão da Produtividade da Soja** — Mestrado Profissional em Computação
-Aplicada (PPCA/UFPA, Campus de Tucuruí).
-
-**Autor:** Maycon Lima dos Santos · **Orientador:** Prof. Dr. Caio Carvalho
-Moreira · **Ano:** 2026
-
-**Metodologia, em resumo:** a estimativa combina a média histórica do município
-e a tendência tecnológica com uma correção climática aprendida por rede neural
-(MLP) sobre NDVI/EVI (MODIS), chuva (CHIRPS) e clima (ERA5-Land), restritos à
-área de soja da máscara anual do MapBiomas. A validação é temporal
-(*leave-one-year-out*) e a margem de erro exibida é o RMSE dessa validação.
-Detalhes na seção 6 da dissertação.
-
-**Código e dados:** [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
-· DOI [10.5281/zenodo.21286115](https://doi.org/10.5281/zenodo.21286115)
-
-**Como citar:** SANTOS, Maycon Lima dos. *Aplicação da Inteligência Artificial
-na Previsão da Produtividade da Soja: códigos e dados*. Zenodo, 2026.
-DOI: 10.5281/zenodo.21286115.
-"""
-    )
-
-st.caption(
-    "Código e dados: https://github.com/engsoft7/dissertacao-soja-ia · "
-    "Este painel não substitui levantamentos de campo."
 )

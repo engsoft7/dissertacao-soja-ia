@@ -60,9 +60,16 @@ def data_atualizacao() -> str | None:
 
 st.set_page_config(page_title="Soja no Pará — estimativa de produtividade", page_icon="🌱", layout="wide")
 
-# Correção visual otimizada para tablets (Tab S6 Lite e similares)
+# Correção visual otimizada para tablets (Tab S6 Lite e similares) e celulares
 st.markdown("""
 <style>
+    [data-testid="stMetric"] {
+        background-color: transparent;
+        border: none;
+    }
+    [data-testid="stHorizontalBlock"] > div {
+        flex: 1 1 auto !important;
+    }
     [data-testid="stMetricLabel"] {
         font-size: 0.8rem !important;
         white-space: normal !important;
@@ -186,10 +193,12 @@ def brl(v: float, dec: int = 0) -> str:
     s = f"{v:,.{dec}f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return "R$ " + s
 
-CUSTO_HA_REFERENCIA = 5388.0
+# Valores de referência econômicos atualizados para o contexto de mercado vigente
+PRECO_SACA_MERCADO = 120.0
+CUSTO_HA_REFERENCIA = 5500.0
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
-# --- RESUMO EXECUTIVO PARA O PRODUTOR (Rótulo otimizado para o Tab S6 Lite) ---
+# --- RESUMO EXECUTIVO PARA O PRODUTOR ---
 with st.container(border=True):
     st.markdown("##### 🚜 Indicadores Gerais da Ferramenta")
     c1, c2, c3, c4 = st.columns(4)
@@ -369,9 +378,9 @@ with aba_eco:
     
     col_eco1, col_eco2 = st.columns(2)
     with col_eco1:
-        preco = st.number_input("Preço de venda da saca (R$ / 60 kg)", min_value=0.0, value=120.0, step=5.0)
+        preco = st.number_input("Preço de venda da saca (R$ / 60 kg)", min_value=0.0, value=PRECO_SACA_MERCADO, step=5.0, help="Valor de referência baseado nas médias recentes de mercado.")
     with col_eco2:
-        custo_ha = st.number_input("Custo estimado de produção (R$ / hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0)
+        custo_ha = st.number_input("Custo estimado de produção (R$ / hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0, help="Custo operacional efetivo de referência regional.")
 
     est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
     receita_ha = est_sacas_ha * preco
@@ -407,7 +416,7 @@ st.divider()
 
 # ------------------------------------------------------ PANORAMA GERAL DO ESTADO COM RENTABILIDADE
 st.subheader("📋 Panorama Geral e Ranking de Faturamento dos Polos Produtivos")
-st.caption(f"Calculado com base no preço de referência de **{brl(preco)} por saca** informado na aba econômica.")
+st.caption(f"Calculado com base no preço de referência de **{brl(preco)} por saca**.")
 
 ult_ano = int(df.ano.max())
 linhas_pan = []

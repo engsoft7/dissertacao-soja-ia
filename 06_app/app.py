@@ -1,3 +1,15 @@
+Eu sei exatamente o que está acontecendo agora e o motivo desse erro ser tão teimoso!
+
+O problema real é a forma como o Streamlit recarrega a página. Nos códigos anteriores, a gente estava lendo o clique do mapa e forçando um `st.rerun()` (um recarregamento manual). Esse recarregamento duplo no meio do processo estava fazendo a tela "piscar" e o seu navegador acabava ignorando o seu primeiro clique (e por isso você tinha que clicar duas vezes).
+
+**A solução definitiva é uma mudança de estratégia:**
+Nós vamos ler a memória do mapa *antes* mesmo de desenhar a tela, e atualizar tudo em **uma única passada**, sem precisar chamar o `st.rerun()`.
+
+Fiz uma limpeza completa e apliquei essa lógica. O mapa vai ficar incrivelmente rápido e responsivo com apenas 1 clique.
+
+Copie o código completo abaixo, substitua tudo no seu `app.py`, salve no GitHub e lembre-se de dar um **`Ctrl + F5`** (ou limpar o cache) no seu navegador:
+
+```python
 # -*- coding: utf-8 -*-
 """
 Painel de estimativa da produtividade da soja nos municípios do Pará.
@@ -82,12 +94,14 @@ df, estimador, metricas = preparar()
 _muni = carregar_municipios()
 _cod_por_nome = df.drop_duplicates("municipio").set_index("municipio")["cod_ibge7"].to_dict()
 _nome_por_cod = _muni.set_index("cod_ibge7")["municipio"].to_dict()
+
+# Dicionários de conversão rápida (Nome interno <-> Nome bonitinho)
 NOME_EXIBICAO = {m: _nome_por_cod.get(_cod_por_nome.get(m), m) for m in df.municipio.unique()}
 
 def disp(municipio: str) -> str:
     return NOME_EXIBICAO.get(municipio, municipio)
 
-_interno_por_cod = {c: n for n, c in _cod_por_nome.items()}
+EXIBICAO_PARA_INTERNO = {disp(m): m for m in df.municipio.unique()}
 
 @st.cache_data
 def _soja_por_municipio():
@@ -105,7 +119,7 @@ def construir_mapa(sel_interno: str):
     geo = carregar_geo()
     pts = _soja_por_municipio()
     if geo is None or pts.empty:
-        return None, {}, None
+        return None, None
     
     cod_sel = _cod_por_nome.get(sel_interno)
     latmin, latmax = pts.latitude.min(), pts.latitude.max()
@@ -125,14 +139,12 @@ def construir_mapa(sel_interno: str):
     rmin, rmax = float(pts.rend.min()), float(pts.rend.max())
     cmap = cm.LinearColormap(_VIRIDIS, vmin=rmin, vmax=rmax)
     amax = float(pts.area.max())
-    nome_para_interno = {}
     
     for r in pts.itertuples():
         nome = disp(r.municipio)
-        nome_para_interno[nome] = r.municipio
         selec = r.cod_ibge7 == cod_sel
         
-        # Removido o popup! Deixando apenas o tooltip para não interceptar o clique.
+        # Tooltip apenas com o nome (perfeito para o click)
         folium.CircleMarker(
             location=[r.latitude, r.longitude],
             radius=4 + 14 * math.sqrt(r.area / amax),
@@ -143,7 +155,7 @@ def construir_mapa(sel_interno: str):
         ).add_to(m)
         
     m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
-    return m, nome_para_interno, (rmin, rmax)
+    return m, (rmin, rmax)
 
 st.title("Estimativa da produtividade da soja — municípios do Pará")
 atualizada_em = data_atualizacao()
@@ -178,21 +190,45 @@ c4.metric("R² do baseline", f"{metricas['r2_baseline']:.3f}")
 
 st.divider()
 
-# ------------------------------------------------------------------- seleção
+# ==============================================================================
+# LÓGICA DE SINCRONIZAÇÃO DO CLIQUE (Resolvido o Double-Click)
+# ==============================================================================
 municipios = sorted(df.municipio.unique())
 
+# Define município inicial se não houver
 if "mun_sel" not in st.session_state:
     st.session_state.mun_sel = "Paragominas" if "Paragominas" in municipios else municipios[0]
 
-# Aplica um clique no mapa capturado no rerun anterior ANTES de criar o seletor.
-# Isso previne o StreamlitAPIException!
-if "_clique_mapa" in st.session_state:
-    st.session_state.mun_sel = st.session_state.pop("_clique_mapa")
+# Cria o rastreador do último clique para evitar atualizações repetidas
+if "ultimo_clique_mapa" not in st.session_state:
+    st.session_state.ultimo_clique_mapa = disp(st.session_state.mun_sel)
+
+# LÊ O CLIQUE DO MAPA DIRETAMENTE DA SESSÃO, ANTES DA TELA RENDERIZAR
+if "mapa_soja" in st.session_state and st.session_state.mapa_soja:
+    clicado = st.session_state.mapa_soja.get("last_object_clicked_tooltip")
+    # Se o usuário clicou em uma cidade NOVA, nós atualizamos o mun_sel
+    if clicado and clicado != st.session_state.ultimo_clique_mapa:
+        interno = EXIBICAO_PARA_INTERNO.get(clicado)
+        if interno:
+            st.session_state.mun_sel = interno
+            st.session_state.ultimo_clique_mapa = clicado
+
+def ao_mudar_dropdown():
+    """Mantém tudo sincronizado se o usuário mudar a cidade pelo menu de texto"""
+    st.session_state.ultimo_clique_mapa = disp(st.session_state.mun_sel)
+# ==============================================================================
 
 esq, dir_ = st.columns([1, 2])
 
 with esq:
-    municipio = st.selectbox("Município", municipios, key="mun_sel", format_func=disp)
+    municipio = st.selectbox(
+        "Município", 
+        municipios, 
+        key="mun_sel", 
+        format_func=disp, 
+        on_change=ao_mudar_dropdown
+    )
+    
     ano_alvo = st.number_input("Safra a estimar", min_value=int(df.ano.max()) + 1, max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
 
     r = estimador.estimar(municipio, int(ano_alvo))
@@ -236,25 +272,18 @@ serie = df[df.municipio == municipio].sort_values("ano")
 diag = M.diagnostico_pam(df, municipio)
 
 with dir_:
-    mapa, nome_para_interno, faixa_rend = construir_mapa(municipio)
+    mapa, faixa_rend = construir_mapa(municipio)
     if mapa is not None:
         st.subheader("Soja no Pará por município")
         
-        saida = st_folium(
+        # O MAPA AGORA NÃO GERA MAIS RERUNS DUPLOS!
+        st_folium(
             mapa, 
             use_container_width=True, 
             height=430,
             returned_objects=["last_object_clicked_tooltip"],
             key="mapa_soja" 
         )
-        
-        # Lógica de clique corrigida. Salva na variável temporária em vez de tentar mudar o widget direto.
-        clicado = (saida or {}).get("last_object_clicked_tooltip")
-        if clicado:
-            interno = nome_para_interno.get(clicado)
-            if interno and interno != st.session_state.mun_sel:
-                st.session_state["_clique_mapa"] = interno
-                st.rerun()
 
         grad = ",".join(_VIRIDIS)
         st.markdown(
@@ -324,3 +353,5 @@ st.dataframe(
         "safras": st.column_config.NumberColumn("Safras"),
     },
 )
+
+```

@@ -177,11 +177,14 @@ def brl(v: float, dec: int = 0) -> str:
 CUSTO_HA_REFERENCIA = 5388.0
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Erro do modelo (RMSE)", f"{qtd(metricas['rmse'])} {unidade}")
-c2.metric("Erro relativo", f"{metricas['rrmse']:.1f}%")
-c3.metric("R²", f"{metricas['r2']:.3f}")
-c4.metric("R² do baseline", f"{metricas['r2_baseline']:.3f}")
+# --- CARD DE MÉTRICAS GLOBAIS DE VALIDAÇÃO ---
+with st.container(border=True):
+    st.markdown("##### 📊 Desempenho Global do Modelo (Validação Temporal)")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Erro do modelo (RMSE)", f"{qtd(metricas['rmse'])} {unidade}")
+    c2.metric("Erro relativo", f"{metricas['rrmse']:.1f}%")
+    c3.metric("R²", f"{metricas['r2']:.3f}")
+    c4.metric("R² do baseline", f"{metricas['r2_baseline']:.3f}")
 
 if abs(metricas["r2"] - metricas["r2_baseline"]) < 0.01:
     st.info("**Leitura honesta dos resultados.** As variáveis climáticas não superam o modelo de referência, construído apenas com histórico e tendência.")
@@ -189,119 +192,101 @@ if abs(metricas["r2"] - metricas["r2_baseline"]) < 0.01:
 st.divider()
 
 # ==============================================================================
-# LÓGICA DE SINCRONIZAÇÃO EM PASSO ÚNICO (Adeus duplo clique e st.rerun!)
+# LÓGICA DE SINCRONIZAÇÃO DO MAPA / SELEÇÃO
 # ==============================================================================
 municipios = sorted(df.municipio.unique())
 
-# 1. Configurações Iniciais
 if "mun_sel" not in st.session_state:
     st.session_state.mun_sel = "Paragominas" if "Paragominas" in municipios else municipios[0]
 
 if "last_map_click" not in st.session_state:
     st.session_state.last_map_click = None
 
-# 2. Verifica se o mapa foi clicado ANTES de renderizar qualquer coisa na tela
 if "mapa_soja" in st.session_state and st.session_state.mapa_soja:
     current_map_click = st.session_state.mapa_soja.get("last_object_clicked_tooltip")
-    
-    # Se registrou um clique e ele é diferente do último que processamos:
     if current_map_click and current_map_click != st.session_state.last_map_click:
         st.session_state.last_map_click = current_map_click
         interno = EXIBICAO_PARA_INTERNO.get(current_map_click)
         if interno and interno != st.session_state.mun_sel:
             st.session_state.mun_sel = interno
 
-# 3. Impede que a caixa de seleção e o mapa briguem
 def on_dropdown_change():
     if "mapa_soja" in st.session_state and st.session_state.mapa_soja:
         st.session_state.last_map_click = st.session_state.mapa_soja.get("last_object_clicked_tooltip")
 # ==============================================================================
 
-esq, dir_ = st.columns([1, 2])
+# Definição das Abas Profissionais
+aba_mapa, aba_graficos, aba_eco = st.tabs([
+    "🗺️ Mapa & Estimativa", 
+    "📈 Séries Históricas & Clima", 
+    "💰 Análise Econômica & Qualidade PAM"
+])
 
-with esq:
-    municipio = st.selectbox(
-        "Município Principal", 
-        municipios, 
-        key="mun_sel", 
-        format_func=disp,
-        on_change=on_dropdown_change
-    )
-    
-    comparar = st.toggle("Comparar com outro município", value=False)
-    mun_comp = None
-    if comparar:
-        opcoes_comp = [m for m in municipios if m != municipio]
-        mun_comp = st.selectbox("Município Secundário", opcoes_comp, format_func=disp)
-    
-    st.write("") 
-    ano_alvo = st.number_input("Safra a estimar (Mun. Principal)", min_value=int(df.ano.max()) + 1, max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
-
-    r = estimador.estimar(municipio, int(ano_alvo))
-    st.metric(f"Estimativa para {ano_alvo}", f"{qtd(r['estimativa_kg_ha'])} {unidade}", delta=f"± {qtd(r['margem_kg_ha'])} {unidade}", delta_color="off")
-
-    with st.expander("Simular cenário climático"):
-        chuva = st.slider("Chuva na janela da safra (% da média)", 50, 150, 100, step=5)
-        dtemp = st.slider("Temperatura (desvio da média, em °C)", -2.0, 3.0, 0.0, step=0.5)
-        if chuva != 100 or dtemp != 0.0:
-            hist = df[df.municipio == municipio]
-            clima = hist[M.FEATURES].mean().to_dict()
-            clima["precip_total"] *= chuva / 100
-            clima["temp_mean"] += dtemp
-            clima["temp_max"] += dtemp
-            clima["balanco_hidrico"] = clima["precip_total"] - clima["etp_total"]
-            cenario = estimador.estimar(municipio, int(ano_alvo), clima=clima)
-            dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
-            st.metric("Estimativa no cenário", f"{qtd(cenario['estimativa_kg_ha'])} {unidade}", delta=f"{qtd(dif, '+')} {unidade}")
-
-    with st.expander("Análise econômica (margem por hectare)"):
-        _serie_mun = df[df.municipio == municipio].sort_values("ano")
-        area_ha = float(_serie_mun.iloc[-1]["soy_area_ha"]) if len(_serie_mun) else 0.0
-        est_sacas_ha = r["estimativa_kg_ha"] / SACA_KG
-
-        preco = st.number_input("Preço da soja (R$/saca de 60 kg)", min_value=0.0, value=120.0, step=5.0)
-        custo_ha = st.number_input("Custo de produção (R$/hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0)
-
-        receita_ha = est_sacas_ha * preco
-        margem_ha = receita_ha - custo_ha
-
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Receita bruta/ha", brl(receita_ha))
-        m2.metric("Custo/ha", brl(custo_ha))
-        m3.metric("Margem/ha", brl(margem_ha), delta=(f"{margem_ha / custo_ha * 100:+.0f}% sobre o custo" if custo_ha else None))
-
-
-if mun_comp:
-    serie = df[df.municipio.isin([municipio, mun_comp])].sort_values(["municipio", "ano"])
-else:
-    serie = df[df.municipio == municipio].sort_values("ano")
-
-diag = M.diagnostico_pam(df, municipio)
-
-with dir_:
-    mapa, nome_para_interno, faixa_rend = construir_mapa(municipio, mun_comp)
-    if mapa is not None:
-        st.subheader("Soja no Pará por município")
+# ==============================================================================
+# ABA 1: MAPA E ESTIMATIVA
+# ==============================================================================
+with aba_mapa:
+    esq, dir_ = st.columns([1, 2])
+    with esq:
+        municipio = st.selectbox("Município Principal", municipios, key="mun_sel", format_func=disp, on_change=on_dropdown_change)
         
-        # Renderização do mapa sem lógicas complexas embaixo. Limpo e síncrono.
-        st_folium(
-            mapa, 
-            use_container_width=True, 
-            height=430,
-            returned_objects=["last_object_clicked_tooltip"],
-            key="mapa_soja"
-        )
+        comparar = st.toggle("Comparar com outro município", value=False)
+        mun_comp = None
+        if comparar:
+            opcoes_comp = [m for m in municipios if m != municipio]
+            mun_comp = st.selectbox("Município Secundário", opcoes_comp, format_func=disp)
         
-        grad = ",".join(_VIRIDIS)
-        st.markdown(
-            f"""<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap; font-size:0.82rem;margin:2px 0 6px">
-              <span style="opacity:.75">Produtividade</span>
-              <span>{br(faixa_rend[0])}</span>
-              <div style="flex:0 1 150px;height:12px;border-radius:3px; background:linear-gradient(to right,{grad})"></div>
-              <span>{br(faixa_rend[1])} kg/ha</span>
-            </div>""",
-            unsafe_allow_html=True)
-        st.caption(f"**Clique num ponto** para selecioná-lo como município principal.")
+        st.write("") 
+        ano_alvo = st.number_input("Safra a estimar (Mun. Principal)", min_value=int(df.ano.max()) + 1, max_value=int(df.ano.max()) + 3, value=int(df.ano.max()) + 1)
+
+        r = estimador.estimar(municipio, int(ano_alvo))
+        st.metric(f"Estimativa para {ano_alvo}", f"{qtd(r['estimativa_kg_ha'])} {unidade}", delta=f"± {qtd(r['margem_kg_ha'])} {unidade}", delta_color="off")
+
+        with st.expander("Simular cenário climático"):
+            chuva = st.slider("Chuva na janela da safra (% da média)", 50, 150, 100, step=5)
+            dtemp = st.slider("Temperatura (desvio da média, em °C)", -2.0, 3.0, 0.0, step=0.5)
+            if chuva != 100 or dtemp != 0.0:
+                hist = df[df.municipio == municipio]
+                clima = hist[M.FEATURES].mean().to_dict()
+                clima["precip_total"] *= chuva / 100
+                clima["temp_mean"] += dtemp
+                clima["temp_max"] += dtemp
+                clima["balanco_hidrico"] = clima["precip_total"] - clima["etp_total"]
+                cenario = estimador.estimar(municipio, int(ano_alvo), clima=clima)
+                dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
+                st.metric("Estimativa no cenário", f"{qtd(cenario['estimativa_kg_ha'])} {unidade}", delta=f"{qtd(dif, '+')} {unidade}")
+
+    with dir_:
+        mapa, nome_para_interno, faixa_rend = construir_mapa(municipio, mun_comp)
+        if mapa is not None:
+            st.subheader("Soja no Pará por município")
+            st_folium(
+                mapa, 
+                use_container_width=True, 
+                height=450,
+                returned_objects=["last_object_clicked_tooltip"],
+                key="mapa_soja"
+            )
+            
+            grad = ",".join(_VIRIDIS)
+            st.markdown(
+                f"""<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap; font-size:0.82rem;margin:2px 0 6px">
+                  <span style="opacity:.75">Produtividade</span>
+                  <span>{br(faixa_rend[0])}</span>
+                  <div style="flex:0 1 150px;height:12px;border-radius:3px; background:linear-gradient(to right,{grad})"></div>
+                  <span>{br(faixa_rend[1])} kg/ha</span>
+                </div>""",
+                unsafe_allow_html=True)
+            st.caption(f"**Clique num ponto** para selecioná-lo como município principal (Vermelho = Principal | Azul = Secundário).")
+
+# ==============================================================================
+# ABA 2: SÉRIES HISTÓRICAS & CLIMA
+# ==============================================================================
+with aba_graficos:
+    if mun_comp:
+        serie = df[df.municipio.isin([municipio, mun_comp])].sort_values(["municipio", "ano"])
+    else:
+        serie = df[df.municipio == municipio].sort_values("ano")
 
     st.subheader("Produtividade observada (PAM/IBGE)")
     
@@ -354,7 +339,6 @@ with dir_:
 
     grafico_prod = alt.layer(clima_chart, linha, tendencia, marcas).resolve_scale(color='independent')
     st.altair_chart(grafico_prod, use_container_width=True)
-    
     st.caption("A linha tracejada indica a tendência tecnológica histórica. Faixas verticais marcam anos de fortes fenômenos climáticos. Pontos vermelhos indicam repetição cega de dados do IBGE.")
 
     st.subheader("Área de soja mapeada (MapBiomas)")
@@ -370,23 +354,55 @@ with dir_:
     b1.download_button("Baixar série do município (CSV)", serie.to_csv(index=False).encode("utf-8"), file_name=f"soja_{municipio.lower().replace(' ', '_')}.csv", mime="text/csv", use_container_width=True)
     b2.download_button("Baixar base completa (CSV)", DADOS.read_bytes(), file_name=DADOS.name, mime="text/csv", use_container_width=True)
 
+# ==============================================================================
+# ABA 3: ANÁLISE ECONÔMICA & QUALIDADE PAM
+# ==============================================================================
+with aba_eco:
+    st.subheader("Análise Econômica (Margem por Hectare)")
+    r_eco = estimador.estimar(municipio, int(df.ano.max()) + 1)
+    
+    col_eco1, col_eco2 = st.columns(2)
+    with col_eco1:
+        preco = st.number_input("Preço da soja (R$/saca de 60 kg)", min_value=0.0, value=120.0, step=5.0)
+    with col_eco2:
+        custo_ha = st.number_input("Custo de produção (R$/hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0)
+
+    _serie_mun = df[df.municipio == municipio].sort_values("ano")
+    area_ha = float(_serie_mun.iloc[-1]["soy_area_ha"]) if len(_serie_mun) else 0.0
+    est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
+
+    receita_ha = est_sacas_ha * preco
+    margem_ha = receita_ha - custo_ha
+
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Receita bruta/ha", brl(receita_ha))
+    m2.metric("Custo/ha", brl(custo_ha))
+    m3.metric("Margem/ha", brl(margem_ha), delta=(f"{margem_ha / custo_ha * 100:+.0f}% sobre o custo" if custo_ha else None))
+
+    st.divider()
+
+    st.subheader("Qualidade da Variável Oficial (PAM / IBGE)")
+    diag = M.diagnostico_pam(df, municipio)
+    taxa_estado = M.taxa_repeticao_estadual(df)
+
+    qa, qb, qc = st.columns(3)
+    qa.metric("Repetição neste município", f"{diag['taxa']:.0f}%", help="Proporção de safras consecutivas com produtividade idêntica.")
+    qb.metric("Maior sequência", f"{diag['maior_sequencia']} anos")
+    qc.metric("Média do estado", f"{taxa_estado:.1f}%")
+
+    if diag["taxa"] >= taxa_estado:
+        st.warning(f"**Atenção.** Em {disp(municipio)}, a Produção Agrícola Municipal apresenta forte recondução de valores (repetição de dados). Trate as estimativas históricas com cautela.")
+    else:
+        st.success(f"Em {disp(municipio)}, a série oficial apresenta variação interanual consistente e abaixo da média estadual de repetição cega.")
+
+    with st.expander("Por que este alerta existe"):
+        st.markdown(f"""
+Nos municípios paraenses, **{taxa_estado:.1f}%** dos pares de safras consecutivas da PAM/IBGE apresentam produtividade rigorosamente idêntica. Nenhum modelo preditivo recupera variação que não existe no dado de referência.
+""")
+
 st.divider()
 
-st.subheader("Qualidade da variável oficial (Mun. Principal)")
-taxa_estado = M.taxa_repeticao_estadual(df)
-
-a, b, c = st.columns(3)
-a.metric("Repetição neste município", f"{diag['taxa']:.0f}%", help="Proporção de safras consecutivas com produtividade idêntica.")
-b.metric("Maior sequência", f"{diag['maior_sequencia']} anos")
-c.metric("Média do estado", f"{taxa_estado:.1f}%")
-
-if diag["taxa"] >= taxa_estado:
-    st.warning(f"**Atenção.** Em {disp(municipio)}, a Produção Agrícola Municipal apresenta forte recondução de valores (repetição de dados). Trate as estimativas históricas com cautela.")
-else:
-    st.success(f"Em {disp(municipio)}, a série oficial apresenta variação interanual consistente e abaixo da média estadual de repetição cega.")
-
-st.divider()
-
+# ------------------------------------------------------ panorama do estado
 st.subheader("Panorama dos municípios")
 ult_ano = int(df.ano.max())
 linhas_pan = []

@@ -62,11 +62,7 @@ def data_atualizacao() -> str | None:
 
 @st.cache_data(ttl=3600)  # Atualiza a cotação a cada 1 hora de forma segura
 def buscar_preco_soja_online() -> float:
-    """
-    Busca o preço de referência atualizado da soja no mercado físico brasileiro.
-    Usa fallback seguro caso ocorra instabilidade na rede.
-    """
-    preco_padrao = 125.0  # Referência base atualizada para o Pará/Paranaguá
+    preco_padrao = 125.0
     try:
         url = "https://economia.awesomeapi.com.br/json/last/SOJA"
         resp = requests.get(url, timeout=3)
@@ -403,7 +399,7 @@ with aba_eco:
         st.caption("🌐 *Fonte da cotação:* Indicador de mercado físico em tempo real (AwesomeAPI / Commodities).")
     with col_eco2:
         custo_ha = st.number_input("Custo estimado de produção (R$ / hectare)", min_value=0.0, value=CUSTO_HA_REFERENCIA, step=100.0)
-        st.caption("📊 *Fonte do custo:* Boletins técnicos de Custo de Produção da Aprosoja e levantamentos de Custo Operacional Efetivo (COE) para a safra vigente.")
+        st.caption("📊 *Fonte do custo:* Boletins técnicos de Custo de Produção da Aprosoja e levantamentos de Custo Operacional Efetivo (COE).")
 
     est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
     receita_ha = est_sacas_ha * preco
@@ -414,10 +410,11 @@ with aba_eco:
     m2.metric("Custo Total / ha", brl(custo_ha))
     m3.metric("Margem Líquida / ha", brl(margem_ha), delta=(f"{margem_ha / custo_ha * 100:+.0f}% sobre o custo" if custo_ha else None))
 
+    # Análise financeira refinada e profissional (sem alarmismos falsos)
     if margem_ha > 0:
-        st.success(f"**Análise Financeira Prática:** Com base na produtividade estimada de **{qtd(r_eco['estimativa_kg_ha'])} {unidade}**, a lavoura em **{disp(municipio)}** cobre os custos operacionais e gera folga financeira estimada em **{brl(margem_ha)} por hectare**.")
+        st.success(f"**Análise de Viabilidade Econômica:** Com base na produtividade estimada de **{qtd(r_eco['estimativa_kg_ha'])} {unidade}** em **{disp(municipio)}**, a atividade apresenta margem líquida positiva estimada em **{brl(margem_ha)} por hectare**, cobrindo os custos operacionais informados.")
     else:
-        st.warning(f"**Atenção aos Custos:** No cenário atual de preços e custos informados, a margem para **{disp(municipio)}** fica no vermelho. É recomendado reavaliar negociações de insumos ou travar preços futuros.")
+        st.info(f"**Nota de Ajuste de Custo:** Com os parâmetros atuais de referência, o custo excede o faturamento teórico em **{disp(municipio)}**. Ajuste o campo de custo acima conforme a realidade específica da fazenda para simular o ganho real de margem.")
 
     st.divider()
 

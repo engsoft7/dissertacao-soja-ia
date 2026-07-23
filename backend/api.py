@@ -94,7 +94,8 @@ def get_kpis_economia():
              "ano_referencia": AppState.last_year
         }
     except Exception as e:
-        print("Erro online KPIs:", e, flush=True)
+        print("Erro online KPIs:", str(e), flush=True)
+        return {"soja_preco_saca": 999.0, "custo_ha": 999.0, "ano_referencia": str(e)}
         return {
              "soja_preco_saca": 120.0,
              "custo_ha": 3500.0,

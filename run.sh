@@ -6,4 +6,4 @@ if [[ ! -f .venv/bin/activate ]]; then
     exit 1
 fi
 source .venv/bin/activate
-exec streamlit run 06_dashboard_web/app.py
+exec streamlit run software/dashboard_web/app.py

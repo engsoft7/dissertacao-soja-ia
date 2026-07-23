@@ -3,8 +3,8 @@ services:
     name: agrointeligencia-api
     env: python
     plan: free
-    buildCommand: "pip install -r requirements.txt && pip install -r 07_api_backend/requirements.txt"
-    startCommand: "cd 07_api_backend && uvicorn api:app --host 0.0.0.0 --port $PORT"
+    buildCommand: "pip install -r requirements.txt && pip install -r software/api_backend/requirements.txt"
+    startCommand: "cd software/api_backend && uvicorn api:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0

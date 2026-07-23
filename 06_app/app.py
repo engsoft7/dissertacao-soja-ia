@@ -93,7 +93,11 @@ st.markdown("""
         flex: 1 1 auto !important;
     }
     [data-testid="stMetricLabel"] {
-        font-size: 0.8rem !important;
+        font-size: 0.74rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        opacity: 0.6;
         white-space: normal !important;
         overflow: visible !important;
         word-break: break-word !important;

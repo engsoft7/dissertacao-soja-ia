@@ -1,0 +1,49 @@
+nohup: ignorando entrada
+INFO:     Started server process [146544]
+INFO:     Waiting for application startup.
+Modelo carregado e treinado com sucesso.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:38014 - "GET /api/previsao/Abel%20Figueiredo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46810 - "GET /api/previsao/Abel%20Figueiredo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36212 - "GET /api/previsao/Acar%C3%A1 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:41242 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:40248 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:40248 - "GET /api/previsao/Abel%20Figueiredo HTTP/1.1" 200 OK
+INFO:     10.0.0.104:40674 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:40674 - "GET /api/previsao/Abel%20Figueiredo HTTP/1.1" 200 OK
+INFO:     10.0.0.104:48618 - "GET /api/previsao/Goianesia%20Do%20Para HTTP/1.1" 200 OK
+INFO:     10.0.0.104:59038 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:59038 - "GET /api/kpis/economia HTTP/1.1" 200 OK
+INFO:     10.0.0.104:59038 - "GET /api/previsao/Abel%20Figueiredo HTTP/1.1" 200 OK
+INFO:     10.0.0.104:47574 - "GET /api/previsao/Paragominas HTTP/1.1" 200 OK
+INFO:     10.0.0.104:47582 - "GET /api/previsao/Agua%20Azul%20Do%20Norte HTTP/1.1" 200 OK
+INFO:     10.0.0.104:47582 - "GET /api/previsao/Goianesia%20Do%20Para HTTP/1.1" 200 OK
+INFO:     10.0.0.104:57464 - "GET /api/previsao/Paragominas HTTP/1.1" 200 OK
+INFO:     10.0.0.104:47824 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:47824 - "GET /api/kpis/economia HTTP/1.1" 200 OK
+INFO:     10.0.0.104:47824 - "GET /api/previsao/Abel%20Figueiredo HTTP/1.1" 200 OK
+INFO:     10.0.0.104:48576 - "GET /api/previsao/Paragominas HTTP/1.1" 200 OK
+INFO:     10.0.0.104:44442 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:44458 - "GET /api/kpis/economia HTTP/1.1" 200 OK
+INFO:     10.0.0.104:45256 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:45256 - "GET /api/kpis/economia HTTP/1.1" 200 OK
+INFO:     10.0.0.104:45256 - "GET /api/previsao/Abel%20Figueiredo HTTP/1.1" 200 OK
+INFO:     10.0.0.104:42052 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:42052 - "GET /api/kpis/economia HTTP/1.1" 200 OK
+INFO:     10.0.0.104:42052 - "GET /api/previsao/Abel%20Figueiredo HTTP/1.1" 200 OK
+INFO:     10.0.0.104:60414 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:60414 - "GET /api/kpis/economia HTTP/1.1" 200 OK
+INFO:     10.0.0.104:60414 - "GET /api/previsao/Abel%20Figueiredo HTTP/1.1" 200 OK
+INFO:     10.0.3.1:34712 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:48016 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:48022 - "GET /api/kpis/economia HTTP/1.1" 200 OK
+INFO:     10.0.0.104:48024 - "GET /api/previsao/Abel%20Figueiredo HTTP/1.1" 200 OK
+INFO:     10.0.0.104:36552 - "GET /api/previsao/Goianesia%20Do%20Para HTTP/1.1" 200 OK
+INFO:     10.0.0.104:37508 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     10.0.0.104:37510 - "GET /api/kpis/economia HTTP/1.1" 200 OK
+INFO:     10.0.0.104:37514 - "GET /api/previsao/Abel%20Figueiredo HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [146544]

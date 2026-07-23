@@ -72,7 +72,7 @@ def list_municipios():
     muns_formatados = sorted([MUNICIPIOS_FORMATADOS.get(m, m) for m in muns])
     return {"municipios": muns_formatados}
 
-@app.get("/api/kpis/economia")
+@app.get("/api/kpis_economia")
 def get_kpis_economia():
     if AppState.df is None:
          raise HTTPException(status_code=503, detail="Modelo não carregado")

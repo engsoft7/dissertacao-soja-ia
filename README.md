@@ -61,11 +61,11 @@ impõe um teto estrutural à acurácia de qualquer modelo calibrado sobre essa b
   02_gera_figuras.py
 05_artigo/
   gera_figuras_artigo.py                  figuras do artigo sobre a PAM
-06_app/
+06_dashboard_web/
   model.py                                núcleo do painel (produto técnico)
   app.py                                  interface Streamlit
   README.md                               como executar e limitações
-07_automacao/
+09_automacao_github/
   atualiza_pam.py                         revisões da PAM via SIDRA (GitHub Actions)
   coleta_gee_safra.py                     coleta headless de safra nova no GEE
   gera_metricas.py                        pré-calcula a validação para o painel
@@ -113,7 +113,7 @@ Os scripts de `01_coleta_dados/` foram escritos para o Google Colab. Registre um
 projeto em <https://code.earthengine.google.com>, informe o ID na variável
 `PROJETO_GEE` e execute. A coleta com máscara leva cerca de 20 minutos.
 
-**Painel de estimativa** (produto técnico; ver `06_app/README.md`)
+**Painel de estimativa** (produto técnico; ver `06_dashboard_web/README.md`)
 
 Versão publicada: **<https://soja-para.streamlit.app>** — acessível de qualquer
 dispositivo; no celular, use "Adicionar à tela inicial" para abrir como
@@ -123,8 +123,8 @@ basta clicar em "Yes, get this app back up" e aguardar cerca de um minuto.
 Para executar localmente:
 
 ```bash
-pip install -r 06_app/requirements.txt
-streamlit run 06_app/app.py
+pip install -r 06_dashboard_web/requirements.txt
+streamlit run 06_dashboard_web/app.py
 ```
 
 Alternativa: `./run.sh` na raiz do repositório ativa o ambiente virtual
@@ -136,7 +136,7 @@ Alternativa: `./run.sh` na raiz do repositório ativa o ambiente virtual
 
 - **Repository:** `engsoft7/dissertacao-soja-ia`
 - **Branch:** `main`
-- **Main file path:** `06_app/app.py`
+- **Main file path:** `06_dashboard_web/app.py`
 
 O serviço instala o `requirements.txt` da raiz e gera o link público.
 
@@ -164,7 +164,7 @@ Ele consulta a API do SIDRA/IBGE e:
   revisado muda). O merge redeploya o painel publicado automaticamente.
 - **Safra nova:** quando o SIDRA publica um ano que ainda não está na base:
   - com a coleta automática ativada (abaixo), o robô coleta as variáveis
-    ambientais no Earth Engine (`07_automacao/coleta_gee_safra.py` — mesmas
+    ambientais no Earth Engine (`09_automacao_github/coleta_gee_safra.py` — mesmas
     coleções e janelas de `01_coleta_dados/`) e inclui a safra completa no PR;
   - sem ela (ou se a coleta falhar), abre uma **issue** com o passo a passo
     manual via Google Colab.

@@ -49,13 +49,13 @@ jobs:
             exit 1
           fi
           pip install --quiet earthengine-api
-          python 07_automacao/coleta_gee_safra.py --testar
+          python 09_automacao_github/coleta_gee_safra.py --testar
 
       - name: Consulta o SIDRA e aplica revisões
         id: pam
         env:
           RESUMO_MD: /tmp/resumo_pam.md
-        run: python 07_automacao/atualiza_pam.py
+        run: python 09_automacao_github/atualiza_pam.py
 
       - name: Coleta a safra nova no Earth Engine
         id: gee
@@ -66,13 +66,13 @@ jobs:
           RESUMO_MD: /tmp/resumo_pam.md
         run: |
           pip install --quiet earthengine-api
-          python 07_automacao/coleta_gee_safra.py --ano "${{ steps.pam.outputs.novo_ano }}"
+          python 09_automacao_github/coleta_gee_safra.py --ano "${{ steps.pam.outputs.novo_ano }}"
 
       - name: Recalcula as métricas de validação do painel
         if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true'
         run: |
           pip install --quiet scikit-learn
-          python 07_automacao/gera_metricas.py
+          python 09_automacao_github/gera_metricas.py
 
       - name: Abre PR com as mudanças na base
         id: cpr

@@ -44,21 +44,21 @@ impõe um teto estrutural à acurácia de qualquer modelo calibrado sobre essa b
 ## Estrutura
 
 ```
-pesquisa/01_coleta_pesquisa/dados/
-  pesquisa/01_coleta_gee_sem_mascara.py            coleta inicial (média do município)
-  pesquisa/02_coleta_gee_com_mascara_mapbiomas.py  versão usada nos resultados
+pesquisa/01_coleta_dados/
+  01_coleta_gee_sem_mascara.py            coleta inicial (média do município)
+  02_coleta_gee_com_mascara_mapbiomas.py  versão usada nos resultados
 pesquisa/02_revisao_sistematica/
-  pesquisa/01_busca_bases_abertas.py               busca em OpenAlex e Crossref (PRISMA)
-  pesquisa/02_recupera_autoria_crossref.py         autoria real via DOI, formato ABNT
+  01_busca_bases_abertas.py               busca em OpenAlex e Crossref (PRISMA)
+  02_recupera_autoria_crossref.py         autoria real via DOI, formato ABNT
   estudos_triados.csv                     70 elegíveis, com decisão e motivo
   referencias_53_estudos_abnt.txt         os 53 incluídos, em ABNT
 pesquisa/03_analise_nacional/
   00_baixa_dados.py                       baixa a base de von Bloh et al. (2023)
-  pesquisa/01_treina_modelos.py                    RF, XGBoost, SVR, MLP
-  pesquisa/02_gera_figuras.py
+  01_treina_modelos.py                    RF, XGBoost, SVR, MLP
+  02_gera_figuras.py
 pesquisa/04_analise_para/
-  pesquisa/01_compara_mascara_e_baseline.py        com/sem máscara vs. baseline
-  pesquisa/02_gera_figuras.py
+  01_compara_mascara_e_baseline.py        com/sem máscara vs. baseline
+  02_gera_figuras.py
 pesquisa/05_artigo/
   gera_figuras_artigo.py                  figuras do artigo sobre a PAM
 software/dashboard_web/
@@ -73,8 +73,8 @@ software/automacao_github/
   gera_geo_para.py                        contorno do Pará (malha do IBGE)
   gera_rios_para.py                       principais rios do Pará (Natural Earth)
 pesquisa/dados/
-  soja_para_mascarado_20pesquisa/01_2024.csv       base principal (415 registros)
-  soja_para_sem_mascara_20pesquisa/01_2023.csv     base sem máscara (comparação)
+  soja_para_mascarado_2001_2024.csv       base principal (415 registros)
+  soja_para_sem_mascara_2001_2023.csv     base sem máscara (comparação)
   municipios_para.csv                     nome oficial acentuado e centroide (mapa)
   para_geo.json                           contorno do estado (fundo do mapa)
   rios_para.json                          principais rios (contexto do mapa)
@@ -95,21 +95,21 @@ pip install pandas numpy scikit-learn xgboost matplotlib openpyxl
 ```bash
 cd pesquisa/03_analise_nacional
 python 00_baixa_dados.py
-python pesquisa/01_treina_modelos.py "Random Forest" "XGBoost" "SVR" "MLP"
-python pesquisa/02_gera_figuras.py
+python 01_treina_modelos.py "Random Forest" "XGBoost" "SVR" "MLP"
+python 02_gera_figuras.py
 ```
 
 **Estudo do Pará** (os dados já estão em `pesquisa/dados/`, não é preciso recoletar)
 
 ```bash
 cd pesquisa/04_analise_para
-python pesquisa/01_compara_mascara_e_baseline.py
-python pesquisa/02_gera_figuras.py
+python 01_compara_mascara_e_baseline.py
+python 02_gera_figuras.py
 ```
 
 **Recoleta dos dados do Pará** (opcional; exige conta no Google Earth Engine)
 
-Os scripts de `pesquisa/01_coleta_pesquisa/dados/` foram escritos para o Google Colab. Registre um
+Os scripts de `pesquisa/01_coleta_dados/` foram escritos para o Google Colab. Registre um
 projeto em <https://code.earthengine.google.com>, informe o ID na variável
 `PROJETO_GEE` e execute. A coleta com máscara leva cerca de 20 minutos.
 
@@ -144,8 +144,8 @@ O serviço instala o `requirements.txt` da raiz e gera o link público.
 
 ```bash
 cd pesquisa/02_revisao_sistematica
-python pesquisa/01_busca_bases_abertas.py        # regenera os números do PRISMA
-python pesquisa/02_recupera_autoria_crossref.py  # autoria via DOI
+python 01_busca_bases_abertas.py        # regenera os números do PRISMA
+python 02_recupera_autoria_crossref.py  # autoria via DOI
 ```
 
 Os resultados variam conforme a data da busca, pois as bases são atualizadas
@@ -165,7 +165,7 @@ Ele consulta a API do SIDRA/IBGE e:
 - **Safra nova:** quando o SIDRA publica um ano que ainda não está na base:
   - com a coleta automática ativada (abaixo), o robô coleta as variáveis
     ambientais no Earth Engine (`software/automacao_github/coleta_gee_safra.py` — mesmas
-    coleções e janelas de `pesquisa/01_coleta_pesquisa/dados/`) e inclui a safra completa no PR;
+    coleções e janelas de `pesquisa/01_coleta_dados/`) e inclui a safra completa no PR;
   - sem ela (ou se a coleta falhar), abre uma **issue** com o passo a passo
     manual via Google Colab.
 
@@ -193,7 +193,7 @@ Para conferir a credencial na hora: **Actions → Atualiza base de dados →
 Run workflow**, marque **"Testar a credencial do Earth Engine"** e rode. O log
 deve terminar com "credencial e ativos do Earth Engine OK", sem alterar nada.
 
-Somente `pesquisa/dados/soja_para_mascarado_20pesquisa/01_2024.csv` (a base do painel) é
+Somente `pesquisa/dados/soja_para_mascarado_2001_2024.csv` (a base do painel) é
 atualizado — o nome do arquivo preserva o recorte original da dissertação, mas
 safras posteriores são acrescentadas a ele pela automação. A base sem máscara
 permanece congelada como artefato da comparação feita na dissertação. Se o

@@ -261,3 +261,8 @@ licenças de origem; cite as fontes originais ao reutilizá-los.
 SANTOS, Maycon Lima dos. **Aplicação da Inteligência Artificial na Previsão da
 Produtividade da Soja: códigos e dados**. Zenodo, 2026. Software.
 DOI: 10.5281/zenodo.21286115. Disponível em: https://doi.org/10.5281/zenodo.21286115.
+
+## Atualizações Recentes (v1.0.2)
+- Integrado cotação em tempo real da Soja (Mercado de Futuros CBOT).
+- Conversão orgânica automática da cotação usando API AwesomeAPI (USD/BRL).
+- Correção de codificação dos nomes das cidades, permitindo exibição correta com acentos (ex: Santarém, Paragominas).

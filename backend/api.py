@@ -78,12 +78,16 @@ def get_kpis_economia():
          raise HTTPException(status_code=503, detail="Modelo não carregado")
     
     try:
-        r_cbot = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/ZS=F', headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36', 'Accept': 'application/json'})
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 
+            'Accept': 'application/json'
+        }
+        r_cbot = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/ZS=F', headers=headers)
         price_cents = r_cbot.json()['chart']['result'][0]['meta']['regularMarketPrice']
         usd_price_bag = (price_cents / 100) * 2.20462
         
-        r_usd = requests.get('https://economia.awesomeapi.com.br/last/USD-BRL')
-        usd_brl = float(r_usd.json()['USDBRL']['bid'])
+        r_usd = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/BRL=X', headers=headers)
+        usd_brl = float(r_usd.json()['chart']['result'][0]['meta']['regularMarketPrice'])
         
         brl_price_bag = round(usd_price_bag * usd_brl, 2)
         custo_ha = round((brl_price_bag * 55) * 0.65, 2)
@@ -91,11 +95,15 @@ def get_kpis_economia():
         return {
              "soja_preco_saca": brl_price_bag,
              "custo_ha": custo_ha,
-             "ano_referencia": AppState.last_year
+             "ano_referencia": int(AppState.last_year)
         }
     except Exception as e:
-        print("Erro online KPIs:", str(e), flush=True)
-        return {"soja_preco_saca": 999.0, "custo_ha": 999.0, "ano_referencia": str(e)}
+        print("Erro online KPIs:", e, flush=True)
+        return {
+             "soja_preco_saca": 120.0,
+             "custo_ha": 3500.0,
+             "ano_referencia": int(AppState.last_year)
+        }
         return {
              "soja_preco_saca": 120.0,
              "custo_ha": 3500.0,

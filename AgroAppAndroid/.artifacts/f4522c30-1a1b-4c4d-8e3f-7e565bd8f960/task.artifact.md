@@ -1,0 +1,4 @@
+- [ ] Atualizar root `build.gradle.kts` (Plugins)
+- [ ] Atualizar `app/build.gradle.kts` (SDK 37 e Dependências)
+- [ ] Verificar compilação com `./gradlew :app:assembleDebug`
+- [ ] Criar walkthrough das mudanças

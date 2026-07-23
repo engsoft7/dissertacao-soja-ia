@@ -1,9 +1,17 @@
 package com.agrointeligencia.app
 
 import android.os.Bundle
+import android.content.Context
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.view.WindowCompat
+import android.app.Activity
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import com.google.gson.Gson
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,15 +32,37 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme(
-                colorScheme = darkColorScheme(
+            val isDark = isSystemInDarkTheme()
+            val colors = if (isDark) {
+                darkColorScheme(
                     background = Color(0xFF0F172A),
                     surface = Color(0xFF1E293B),
                     primary = Color(0xFF10B981),
                     onBackground = Color(0xFFE2E8F0),
                     onSurface = Color(0xFFE2E8F0)
                 )
+            } else {
+                lightColorScheme(
+                    background = Color(0xFFF8FAFC),
+                    surface = Color(0xFFFFFFFF),
+                    primary = Color(0xFF059669),
+                    onBackground = Color(0xFF1E293B),
+                    onSurface = Color(0xFF1E293B)
+                )
+            }
+            MaterialTheme(
+                colorScheme = colors
             ) {
+                val view = LocalView.current
+                if (!view.isInEditMode) {
+                    SideEffect {
+                        val window = (view.context as Activity).window
+                        window.statusBarColor = colors.background.toArgb()
+                        window.navigationBarColor = colors.surface.toArgb()
+                        WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDark
+                        WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !isDark
+                    }
+                }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -56,21 +86,58 @@ fun AgroDashboard() {
     var expanded by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
     var currentTab by remember { mutableStateOf(0) }
+    var isOfflineMode by remember { mutableStateOf(false) }
+    
+    val context = LocalContext.current
+    val sharedPrefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
+    val gson = remember { Gson() }
     
     fun loadData() {
+        errorMsg = null
+        
+        // --- 1. Optimistic Cache Load ---
+        val cachedMunStr = sharedPrefs.getString("municipios", null)
+        val cachedKpiStr = sharedPrefs.getString("kpis", null)
+        
+        if (cachedMunStr != null && cachedKpiStr != null) {
+            val mResponse = gson.fromJson(cachedMunStr, MunicipioResponse::class.java)
+            municipios = mResponse.municipios
+            if (municipios.isNotEmpty() && selectedMunicipio == null) {
+                selectedMunicipio = municipios[0]
+            }
+            kpis = gson.fromJson(cachedKpiStr, KpiEconomiaResponse::class.java)
+            // Do not assume offline yet to avoid flickering
+        } else {
+            isLoading = true // Only show spinner if absolutely no data is available
+        }
+        
+        // --- 2. Background Sync ---
         coroutineScope.launch {
             try {
-                errorMsg = null
-                isLoading = true
                 val response = RetrofitClient.getInstance().getMunicipios()
+                val kpisResponse = RetrofitClient.getInstance().getKpisEconomia()
+                
+                // Update State Silently
                 municipios = response.municipios
-                if (municipios.isNotEmpty()) {
+                if (selectedMunicipio == null && municipios.isNotEmpty()) {
                     selectedMunicipio = municipios[0]
                 }
-                kpis = RetrofitClient.getInstance().getKpisEconomia()
+                kpis = kpisResponse
+                
+                // Save Cache
+                sharedPrefs.edit().apply {
+                    putString("municipios", gson.toJson(response))
+                    putString("kpis", gson.toJson(kpis))
+                    apply()
+                }
+                
+                isOfflineMode = false
+                errorMsg = null
             } catch (e: Exception) {
                 e.printStackTrace()
-                errorMsg = "Erro na API: ${e.message}"
+                if (cachedMunStr == null) {
+                    errorMsg = "Erro na API: ${e.message}"
+                }
             } finally {
                 isLoading = false
             }
@@ -83,13 +150,32 @@ fun AgroDashboard() {
     
     LaunchedEffect(selectedMunicipio) {
         selectedMunicipio?.let { mun ->
-            isLoading = true
-            try {
-                previsao = RetrofitClient.getInstance().getPrevisao(mun)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                isLoading = false
+            // --- 1. Optimistic Cache Load ---
+            val cachedPrevStr = sharedPrefs.getString("previsao_$mun", null)
+            if (cachedPrevStr != null) {
+                previsao = gson.fromJson(cachedPrevStr, PrevisaoResponse::class.java)
+                // Se já carregou do cache, não bloqueamos o app com spinner principal
+            } else {
+                isLoading = true // Apenas mostra o spinner se for o primeiro acesso da cidade
+            }
+            
+            // --- 2. Background Sync ---
+            coroutineScope.launch {
+                try {
+                    val prevResponse = RetrofitClient.getInstance().getPrevisao(mun)
+                    previsao = prevResponse // Atualiza estado silenciosamente
+                    sharedPrefs.edit().putString("previsao_$mun", gson.toJson(prevResponse)).apply()
+                    isOfflineMode = false
+                } catch (e: Exception) {
+                    isOfflineMode = true
+                    e.printStackTrace()
+                    if (cachedPrevStr == null) {
+                        previsao = null
+                        // Optional: show a toast or error state specifically for prevision
+                    }
+                } finally {
+                    isLoading = false
+                }
             }
         }
     }
@@ -135,6 +221,14 @@ fun AgroDashboard() {
                     )
                 }
                 
+                if (isOfflineMode) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
+                        Icon(Icons.Filled.WifiOff, contentDescription = null, tint = Color(0xFFFF9800), modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(text = "Exibindo dados da última vez em que esteve online", fontSize = 12.sp, color = Color(0xFFFF9800), fontWeight = FontWeight.Bold)
+                    }
+                }
+                
                 if (currentTab != 2) {
                     Text(text = "Município Selecionado:", color = MaterialTheme.colorScheme.onBackground)
                     
@@ -177,15 +271,35 @@ fun AgroDashboard() {
             } else if (errorMsg != null) {
                 item {
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF331515)),
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 24.dp)
                     ) {
-                        Text(
-                            text = "🚨 $errorMsg",
-                            color = Color(0xFFff8888),
-                            modifier = Modifier.padding(16.dp),
-                            fontWeight = FontWeight.Bold
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth().padding(24.dp)
+                        ) {
+                            Icon(Icons.Filled.WifiOff, contentDescription = null, tint = Color(0xFFf85149), modifier = Modifier.size(56.dp))
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                text = "Conexão Indisponível",
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp
+                            )
+                            Text(
+                                text = "Não foi possível sincronizar os dados meteorológicos e do mercado futuro. Verifique sua conexão.",
+                                color = Color.Gray,
+                                fontSize = 13.sp,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
+                            )
+                            Button(
+                                onClick = { loadData() },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            ) {
+                                Text("Tentar Novamente", fontWeight = FontWeight.Bold)
+                            }
+                        }
                     }
                 }
             } else {
@@ -273,6 +387,7 @@ fun AgroDashboard() {
 
 @Composable
 fun PrevisaoCard(historico: PrevisaoHistorico, kpis: KpiEconomiaResponse?) {
+    val isDark = isSystemInDarkTheme()
     Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
@@ -290,7 +405,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: KpiEconomiaResponse?) {
                     val scHa = historico.rendimento_predito / 60
                     val receita = scHa * kpis.soja_preco_saca
                     val lucro = receita - kpis.custo_ha
-                    val color = if (lucro > 0) Color(0xFF3fb950) else Color(0xFFf85149)
+                    val color = if (lucro > 0) (if(isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else (if(isDark) Color(0xFFf85149) else Color(0xFFdc2626))
                     Text(
                         text = "Margem Liq.: R$ ${lucro.toInt()}/ha",
                         fontSize = 13.sp,
@@ -317,6 +432,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: KpiEconomiaResponse?) {
 
 @Composable
 fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistorico?) {
+    val isDark = isSystemInDarkTheme()
     Card(
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
         shape = RoundedCornerShape(16.dp),
@@ -341,7 +457,7 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
                 val typeStr = if (ultimoReal.rendimento_real > 0) "Real" else "Est."
                 val diff = projYield - pastYield
                 val diffPct = if (pastYield > 0) (diff / pastYield) * 100 else 0.0
-                val color = if (diff >= 0) Color(0xFF3fb950) else Color(0xFFf85149)
+                val color = if (diff >= 0) (if(isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else (if(isDark) Color(0xFFf85149) else Color(0xFFdc2626))
                 val sign = if (diff >= 0) "+" else ""
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -365,6 +481,7 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
 
 @Composable
 fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: KpiEconomiaResponse) {
+    val isDark = isSystemInDarkTheme()
     var customPreco by remember { mutableStateOf(kpis.soja_preco_saca.toString()) }
     var customCusto by remember { mutableStateOf(kpis.custo_ha.toString()) }
 
@@ -386,8 +503,8 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: KpiEconomiaResponse)
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFF161b22),
-                        unfocusedContainerColor = Color(0xFF161b22)
+                        focusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9),
+                        unfocusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9)
                     )
                 )
                 OutlinedTextField(
@@ -397,8 +514,8 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: KpiEconomiaResponse)
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFF161b22),
-                        unfocusedContainerColor = Color(0xFF161b22)
+                        focusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9),
+                        unfocusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9)
                     )
                 )
             }
@@ -409,12 +526,12 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: KpiEconomiaResponse)
             val receita = scHa * preco
             val lucro = receita - custo
             val roi = if (custo > 0) (lucro / custo) * 100 else 0.0
-            val profitColor = if (lucro >= 0) Color(0xFF3fb950) else Color(0xFFf85149)
+            val profitColor = if (lucro >= 0) (if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else (if (isDark) Color(0xFFf85149) else Color(0xFFdc2626))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
                     Text(text = "Receita Bruta Est.", fontSize = 12.sp, color = Color.Gray)
-                    Text(text = "R$ ${receita.toInt()}/ha", fontSize = 18.sp, color = Color(0xFF58a6ff), fontWeight = FontWeight.Bold)
+                    Text(text = "R$ ${receita.toInt()}/ha", fontSize = 18.sp, color = (if(isDark) Color(0xFF58a6ff) else Color(0xFF2563eb)), fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(text = "Custo Operacional", fontSize = 12.sp, color = Color.Gray)
@@ -446,6 +563,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: KpiEconomiaResponse)
 
 @Composable
 fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
+    val isDark = isSystemInDarkTheme()
     var precipFactor by remember { mutableStateOf(100f) }
     var tempOffset by remember { mutableStateOf(0f) }
     var delta by remember { mutableStateOf(0.0) }
@@ -488,11 +606,11 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                     text = "${simulado.toInt()} kg/ha", 
                     fontSize = 28.sp, 
                     fontWeight = FontWeight.Bold,
-                    color = if (delta < 0) Color(0xFFf85149) else if (delta > 0) Color(0xFF3fb950) else MaterialTheme.colorScheme.primary
+                    color = if (delta < 0) (if(isDark) Color(0xFFf85149) else Color(0xFFdc2626)) else if (delta > 0) (if(isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else MaterialTheme.colorScheme.primary
                 )
                 if (kotlin.math.abs(delta) > 1) {
                     val sign = if (delta >= 0) "+" else ""
-                    val c = if (delta >= 0) Color(0xFF3fb950) else Color(0xFFf85149)
+                    val c = if (delta >= 0) (if(isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else (if(isDark) Color(0xFFf85149) else Color(0xFFdc2626))
                     Text(text = " ($sign${delta.toInt()} kg/ha)", fontSize = 14.sp, color = c, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
                 }
             }
@@ -522,6 +640,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
 
 @Composable
 fun MetodologiaCard() {
+    val isDark = isSystemInDarkTheme()
     Card(
         modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 24.dp),
         shape = RoundedCornerShape(16.dp),
@@ -544,19 +663,30 @@ fun MetodologiaCard() {
             Text(text = "Satélite: MODIS (Resolução 250m)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Clima: CHIRPS (Chuva) & ERA5-Land (Temp.)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Base Territorial: MapBiomas e IBGE (PAM)", fontSize = 12.sp, color = Color.Gray)
+            Text(text = "Mercado Financeiro: CBOT/Yahoo Finance (Soja & Dólar)", fontSize = 12.sp, color = Color.Gray)
             
             Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
                     Text(text = "Aderência Preditiva (R²)", fontSize = 11.sp, color = Color.Gray)
-                    Text(text = "0.963", fontSize = 14.sp, color = Color(0xFFbc8cff), fontWeight = FontWeight.Bold)
+                    Text(text = "0.963", fontSize = 14.sp, color = (if(isDark) Color(0xFFbc8cff) else Color(0xFF7c3aed)), fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(text = "Variação Relativa", fontSize = 11.sp, color = Color.Gray)
-                    Text(text = "± 12.4%", fontSize = 14.sp, color = Color(0xFF58a6ff), fontWeight = FontWeight.Bold)
+                    Text(text = "± 12.4%", fontSize = 14.sp, color = (if(isDark) Color(0xFF58a6ff) else Color(0xFF2563eb)), fontWeight = FontWeight.Bold)
                 }
             }
+            
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = "Aviso Legal: Este é um projeto de pesquisa acadêmica em Inteligência Artificial. As estimativas projetadas pela IA e os valores financeiros não configuram recomendação de investimento ou consultoria agronômica. Consulte profissionais certificados antes de tomar decisões financeiras reais.",
+                fontSize = 12.sp,
+                color = Color.LightGray,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                lineHeight = 16.sp,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Justify
+            )
         }
     }
 }

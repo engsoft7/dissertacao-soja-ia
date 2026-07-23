@@ -8,8 +8,8 @@ import requests
 import sys
 from pathlib import Path
 
-# Add the 06_app to sys path to import model
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "06_app"))
+# Add the dashboard_web to sys path to import model
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "dashboard_web"))
 import model as M
 
 app = FastAPI(title="Agro Inteligência API", description="FastAPI for Soybean Yield Prediction System")
@@ -44,7 +44,8 @@ MUNICIPIOS_FORMATADOS = {
 }
 REV_MUNICIPIOS = {v: k for k, v in MUNICIPIOS_FORMATADOS.items()}
 
-DADOS_PATH = Path(__file__).resolve().parents[1] / "dados" / "soja_para_mascarado_2001_2024.csv"
+ROOT_PATH = Path(__file__).resolve().parents[2]
+DADOS_PATH = ROOT_PATH / "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"
 
 # In-memory cached model
 class AppState:
@@ -104,11 +105,6 @@ def get_kpis_economia():
              "custo_ha": 3500.0,
              "ano_referencia": int(AppState.last_year)
         }
-        return {
-             "soja_preco_saca": 120.0,
-             "custo_ha": 3500.0,
-             "ano_referencia": AppState.last_year
-        }
 
 @app.get("/api/previsao/{municipio}")
 def get_previsao(municipio: str):
@@ -157,7 +153,7 @@ def get_previsao(municipio: str):
 
 @app.get("/api/mapa/geo")
 def get_mapa_geo():
-    geo_path = Path(__file__).resolve().parents[1] / "dados" / "para_geo.json"
+    geo_path = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "para_geo.json"
     try:
         geo = json.loads(geo_path.read_text(encoding="utf-8"))
         return geo
@@ -170,9 +166,9 @@ def render_mapa(municipio: str = None):
     import branca.colormap as cm
     import math
 
-    geo_path = Path(__file__).resolve().parents[1] / "dados" / "para_geo.json"
-    rios_path = Path(__file__).resolve().parents[1] / "dados" / "rios_para.json"
-    mun_path = Path(__file__).resolve().parents[1] / "dados" / "municipios_para.csv"
+    geo_path = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "para_geo.json"
+    rios_path = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "rios_para.json"
+    mun_path = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "municipios_para.csv"
     
     try:
         geo = json.loads(geo_path.read_text(encoding="utf-8"))

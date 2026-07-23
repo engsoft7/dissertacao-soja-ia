@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import json
+import requests
 import sys
 from pathlib import Path
 
@@ -21,6 +22,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+MUNICIPIOS_FORMATADOS = {
+    'Conceicao Do Araguaia': 'Conceição do Araguaia', 'Floresta Do Araguaia': 'Floresta do Araguaia',
+    'Paragominas': 'Paragominas', 'Redencao': 'Redenção', 'Santarem': 'Santarém',
+    'Belterra': 'Belterra', 'Dom Eliseu': 'Dom Eliseu', 'Ulianopolis': 'Ulianópolis',
+    'Santana Do Araguaia': 'Santana do Araguaia', 'Monte Alegre': 'Monte Alegre',
+    'Novo Progresso': 'Novo Progresso', 'Santa Maria Das Barreiras': 'Santa Maria das Barreiras',
+    'Uruara': 'Uruará', 'Agua Azul Do Norte': 'Água Azul do Norte', 'Rondon Do Para': 'Rondon do Pará',
+    'Altamira': 'Altamira', 'Cumaru Do Norte': 'Cumaru do Norte', 'Placas': 'Placas',
+    'Rio Maria': 'Rio Maria', 'Ruropolis': 'Rurópolis', 'Tailandia': 'Tailândia',
+    'Abel Figueiredo': 'Abel Figueiredo', 'Ipixuna Do Para': 'Ipixuna do Pará',
+    'Goianesia Do Para': 'Goianésia do Pará', "Pau D'arco": "Pau D'Arco",
+    'Sao Felix Do Xingu': 'São Félix do Xingu', 'Tucuma': 'Tucumã',
+    'Xinguara': 'Xinguara', 'Brejo Grande Do Araguaia': 'Brejo Grande do Araguaia',
+    'Maraba': 'Marabá', 'Sao Joao Do Araguaia': 'São João do Araguaia',
+    'Breu Branco': 'Breu Branco', 'Curionopolis': 'Curionópolis',
+    'Jacareacanga': 'Jacareacanga', 'Jacunda': 'Jacundá', 'Picarra': 'Piçarra',
+    'Sapucaia': 'Sapucaia', 'Tome-acu': 'Tomé-Açu'
+}
+REV_MUNICIPIOS = {v: k for k, v in MUNICIPIOS_FORMATADOS.items()}
 
 DADOS_PATH = Path(__file__).resolve().parents[1] / "dados" / "soja_para_mascarado_2001_2024.csv"
 
@@ -47,7 +69,8 @@ def list_municipios():
     if AppState.df is None:
         raise HTTPException(status_code=503, detail="Modelo não carregado")
     muns = AppState.df["municipio"].unique().tolist()
-    return {"municipios": muns}
+    muns_formatados = sorted([MUNICIPIOS_FORMATADOS.get(m, m) for m in muns])
+    return {"municipios": muns_formatados}
 
 @app.get("/api/kpis/economia")
 def get_kpis_economia():
@@ -66,7 +89,8 @@ def get_previsao(municipio: str):
     if AppState.df is None:
         raise HTTPException(status_code=503, detail="Modelo não carregado")
     
-    df_mun = AppState.df[AppState.df["municipio"] == municipio].copy()
+    raw_municipio = REV_MUNICIPIOS.get(municipio, municipio)
+    df_mun = AppState.df[AppState.df["municipio"] == raw_municipio].copy()
     if df_mun.empty:
         raise HTTPException(status_code=404, detail="Município não encontrado")
     
@@ -80,7 +104,7 @@ def get_previsao(municipio: str):
             # Simulando o predito no passado apenas como espelho + noise ou rodando modelo referência
             # Mas podemos focar na simulação para o ano futuro, e botar null para "predito" antigo
             # ou mockar o estimar no passado
-            r = AppState.estimador.estimar(municipio, ano)
+            r = AppState.estimador.estimar(raw_municipio, ano)
             pred = float(r["estimativa_kg_ha"])
             resultado.append({
                 "ano": ano,
@@ -93,7 +117,7 @@ def get_previsao(municipio: str):
         ano_max = int(df_mun["ano"].max())
         for delta in range(1, 4):
             ano_futuro = ano_max + delta
-            rf = AppState.estimador.estimar(municipio, ano_futuro)
+            rf = AppState.estimador.estimar(raw_municipio, ano_futuro)
             resultado.append({
                  "ano": ano_futuro,
                  "rendimento_predito": float(rf["estimativa_kg_ha"]),
@@ -173,7 +197,8 @@ def render_mapa(municipio: str = None):
     amax = float(pts["area"].max())
     
     _cod_por_nome = AppState.df.drop_duplicates("municipio").set_index("municipio")["cod_ibge7"].to_dict()
-    cod_sel = _cod_por_nome.get(municipio) if municipio else None
+    raw_municipio = REV_MUNICIPIOS.get(municipio, municipio) if municipio else None
+    cod_sel = _cod_por_nome.get(raw_municipio)
 
     for _, r in pts.iterrows():
         cod = r["cod_ibge7"]
@@ -211,15 +236,16 @@ def simular_cenario(req: SimulacaoRequest):
         raise HTTPException(status_code=503, detail="Modelo não carregado")
     
     ano_alvo = int(AppState.last_year) + 1
+    raw_municipio = REV_MUNICIPIOS.get(req.municipio, req.municipio)
     
-    hist = AppState.df[AppState.df.municipio == req.municipio]
+    hist = AppState.df[AppState.df.municipio == raw_municipio]
     if hist.empty:
         raise HTTPException(status_code=404, detail="Município não encontrado")
         
     clima = hist[M.FEATURES].mean().to_dict()
     
     # Baseline normal (apenas média histórica)
-    result_base = AppState.estimador.estimar(req.municipio, ano_alvo, clima=clima)
+    result_base = AppState.estimador.estimar(raw_municipio, ano_alvo, clima=clima)
     
     # Aplicar modificadores no clima
     clima_novo = clima.copy()
@@ -228,7 +254,7 @@ def simular_cenario(req: SimulacaoRequest):
     clima_novo["temp_max"] += req.temp_offset
     clima_novo["balanco_hidrico"] = clima_novo["precip_total"] - clima_novo["etp_total"]
     
-    result_sim = AppState.estimador.estimar(req.municipio, ano_alvo, clima=clima_novo)
+    result_sim = AppState.estimador.estimar(raw_municipio, ano_alvo, clima=clima_novo)
     
     return {
         "municipio": req.municipio,

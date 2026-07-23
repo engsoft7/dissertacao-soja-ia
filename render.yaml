@@ -2,6 +2,7 @@ services:
   - type: web
     name: agrointeligencia-api
     env: python
+    plan: free
     buildCommand: "pip install -r requirements.txt && pip install -r backend/requirements.txt"
     startCommand: "uvicorn backend.api:app --host 0.0.0.0 --port $PORT"
     envVars:

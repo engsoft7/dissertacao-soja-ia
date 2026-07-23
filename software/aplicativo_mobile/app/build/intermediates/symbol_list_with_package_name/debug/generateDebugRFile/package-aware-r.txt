@@ -1,4 +1,5 @@
 com.agrointeligencia.app
+drawable ic_agro_logo
 drawable ic_launcher_background
 drawable ic_launcher_foreground
 mipmap ic_launcher

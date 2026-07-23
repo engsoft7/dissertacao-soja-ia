@@ -1,27 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.agrointeligencia.app-mergeDebugResources-38:/values-kn/values-kn.xml",
+            "outputFile": "com.agrointeligencia.app-mergeDebugResources-37:/values-kn/values-kn.xml",
             "map": [
                 {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/d841ddbcf2f4e4e67f2a0d0d35796241/transformed/foundation/res/values-kn/values-kn.xml",
-                    "from": {
-                        "startLines": "2,3,4",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "55,158,246",
-                        "endColumns": "102,87,94",
-                        "endOffsets": "153,241,336"
-                    },
-                    "to": {
-                        "startLines": "2,97,98",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "107,10227,10315",
-                        "endColumns": "102,87,94",
-                        "endOffsets": "205,10310,10405"
-                    }
-                },
-                {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/a8f39ad8811b02832f59ea836026b375/transformed/ui/res/values-kn/values-kn.xml",
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/a5a8b50699485682240923b9420d51c1/transformed/ui/res/values-kn/values-kn.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -38,24 +21,7 @@
                     }
                 },
                 {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/8feb8bf558fa4c922382b4c1946fc504/transformed/core-1.16.0/res/values-kn/values-kn.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,153,256,357,463,564,672,800",
-                        "endColumns": "97,102,100,105,100,107,127,100",
-                        "endOffsets": "148,251,352,458,559,667,795,896"
-                    },
-                    "to": {
-                        "startLines": "4,5,6,7,8,9,10,93",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "305,403,506,607,713,814,922,9858",
-                        "endColumns": "97,102,100,105,100,107,127,100",
-                        "endOffsets": "398,501,602,708,809,917,1045,9954"
-                    }
-                },
-                {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/3a86061a8ce7e50cbb562f212fb5e8bf/transformed/material3/res/values-kn/values-kn.xml",
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/c4922f20e9d6b128c1f440ea8221c267/transformed/material3/res/values-kn/values-kn.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -69,6 +35,40 @@
                         "startOffsets": "1693,1817,1941,2063,2186,2285,2383,2498,2655,2785,2937,3023,3129,3225,3327,3443,3576,3687,3826,3961,4094,4272,4396,4514,4635,4762,4859,4956,5078,5216,5322,5431,5537,5676,5821,5931,6040,6116,6216,6316,6432,6545,6657,6744,6833,6924,7035,7137,7217,7323,7407,7507,7615,7715,7816,7903,8016,8118,8223,8344,8424,8562,8690,8800,8897,9006",
                         "endColumns": "123,123,121,122,98,97,114,156,129,151,85,105,95,101,115,132,110,138,134,132,177,123,117,120,126,96,96,121,137,105,108,105,138,144,109,108,75,99,99,115,112,111,86,88,90,110,101,79,105,83,99,107,99,100,86,112,101,104,120,79,137,127,109,96,108,111",
                         "endOffsets": "1812,1936,2058,2181,2280,2378,2493,2650,2780,2932,3018,3124,3220,3322,3438,3571,3682,3821,3956,4089,4267,4391,4509,4630,4757,4854,4951,5073,5211,5317,5426,5532,5671,5816,5926,6035,6111,6211,6311,6427,6540,6652,6739,6828,6919,7030,7132,7212,7318,7402,7502,7610,7710,7811,7898,8011,8113,8218,8339,8419,8557,8685,8795,8892,9001,9113"
+                    }
+                },
+                {
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/7149552568afbbec29979eafad694314/transformed/foundation/res/values-kn/values-kn.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,158,246",
+                        "endColumns": "102,87,94",
+                        "endOffsets": "153,241,336"
+                    },
+                    "to": {
+                        "startLines": "2,97,98",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "107,10227,10315",
+                        "endColumns": "102,87,94",
+                        "endOffsets": "205,10310,10405"
+                    }
+                },
+                {
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/5c82ccad14d9596091353cc42f2c0885/transformed/core-1.19.0/res/values-kn/values-kn.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,153,256,357,463,564,672,800",
+                        "endColumns": "97,102,100,105,100,107,127,100",
+                        "endOffsets": "148,251,352,458,559,667,795,896"
+                    },
+                    "to": {
+                        "startLines": "4,5,6,7,8,9,10,93",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "305,403,506,607,713,814,922,9858",
+                        "endColumns": "97,102,100,105,100,107,127,100",
+                        "endOffsets": "398,501,602,708,809,917,1045,9954"
                     }
                 }
             ]

@@ -1,27 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.agrointeligencia.app-mergeDebugResources-38:/values-zu/values-zu.xml",
+            "outputFile": "com.agrointeligencia.app-mergeDebugResources-37:/values-zu/values-zu.xml",
             "map": [
                 {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/d841ddbcf2f4e4e67f2a0d0d35796241/transformed/foundation/res/values-zu/values-zu.xml",
-                    "from": {
-                        "startLines": "2,3,4",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "55,177,268",
-                        "endColumns": "121,90,91",
-                        "endOffsets": "172,263,355"
-                    },
-                    "to": {
-                        "startLines": "2,97,98",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "107,10220,10311",
-                        "endColumns": "121,90,91",
-                        "endOffsets": "224,10306,10398"
-                    }
-                },
-                {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/a8f39ad8811b02832f59ea836026b375/transformed/ui/res/values-zu/values-zu.xml",
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/a5a8b50699485682240923b9420d51c1/transformed/ui/res/values-zu/values-zu.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -38,24 +21,7 @@
                     }
                 },
                 {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/8feb8bf558fa4c922382b4c1946fc504/transformed/core-1.16.0/res/values-zu/values-zu.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,7,8,9",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,153,257,356,459,565,672,785",
-                        "endColumns": "97,103,98,102,105,106,112,100",
-                        "endOffsets": "148,252,351,454,560,667,780,881"
-                    },
-                    "to": {
-                        "startLines": "4,5,6,7,8,9,10,93",
-                        "startColumns": "4,4,4,4,4,4,4,4",
-                        "startOffsets": "343,441,545,644,747,853,960,9842",
-                        "endColumns": "97,103,98,102,105,106,112,100",
-                        "endOffsets": "436,540,639,742,848,955,1068,9938"
-                    }
-                },
-                {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/3a86061a8ce7e50cbb562f212fb5e8bf/transformed/material3/res/values-zu/values-zu.xml",
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/c4922f20e9d6b128c1f440ea8221c267/transformed/material3/res/values-zu/values-zu.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -69,6 +35,40 @@
                         "startOffsets": "1721,1839,1958,2073,2190,2293,2391,2506,2643,2760,2915,3000,3100,3192,3293,3413,3535,3640,3784,3919,4056,4228,4360,4486,4611,4739,4832,4932,5060,5202,5301,5403,5512,5652,5793,5903,6005,6083,6178,6275,6383,6493,6602,6688,6774,6867,6973,7073,7153,7257,7342,7450,7552,7656,7754,7842,7948,8054,8156,8278,8358,8505,8640,8747,8847,8968",
                         "endColumns": "117,118,114,116,102,97,114,136,116,154,84,99,91,100,119,121,104,143,134,136,171,131,125,124,127,92,99,127,141,98,101,108,139,140,109,101,77,94,96,107,109,108,85,85,92,105,99,79,103,84,107,101,103,97,87,105,105,101,121,79,146,134,106,99,120,124",
                         "endOffsets": "1834,1953,2068,2185,2288,2386,2501,2638,2755,2910,2995,3095,3187,3288,3408,3530,3635,3779,3914,4051,4223,4355,4481,4606,4734,4827,4927,5055,5197,5296,5398,5507,5647,5788,5898,6000,6078,6173,6270,6378,6488,6597,6683,6769,6862,6968,7068,7148,7252,7337,7445,7547,7651,7749,7837,7943,8049,8151,8273,8353,8500,8635,8742,8842,8963,9088"
+                    }
+                },
+                {
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/7149552568afbbec29979eafad694314/transformed/foundation/res/values-zu/values-zu.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,177,268",
+                        "endColumns": "121,90,91",
+                        "endOffsets": "172,263,355"
+                    },
+                    "to": {
+                        "startLines": "2,97,98",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "107,10220,10311",
+                        "endColumns": "121,90,91",
+                        "endOffsets": "224,10306,10398"
+                    }
+                },
+                {
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/5c82ccad14d9596091353cc42f2c0885/transformed/core-1.19.0/res/values-zu/values-zu.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,153,257,356,459,565,672,785",
+                        "endColumns": "97,103,98,102,105,106,112,100",
+                        "endOffsets": "148,252,351,454,560,667,780,881"
+                    },
+                    "to": {
+                        "startLines": "4,5,6,7,8,9,10,93",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "343,441,545,644,747,853,960,9842",
+                        "endColumns": "97,103,98,102,105,106,112,100",
+                        "endOffsets": "436,540,639,742,848,955,1068,9938"
                     }
                 }
             ]

@@ -1,27 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.agrointeligencia.app-mergeDebugResources-38:/values-b+sr+Latn/values-b+sr+Latn.xml",
+            "outputFile": "com.agrointeligencia.app-mergeDebugResources-37:/values-b+sr+Latn/values-b+sr+Latn.xml",
             "map": [
                 {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/d841ddbcf2f4e4e67f2a0d0d35796241/transformed/foundation/res/values-b+sr+Latn/values-b+sr+Latn.xml",
-                    "from": {
-                        "startLines": "2,3,4",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "55,168,258",
-                        "endColumns": "112,89,91",
-                        "endOffsets": "163,253,345"
-                    },
-                    "to": {
-                        "startLines": "2,97,98",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "107,10089,10179",
-                        "endColumns": "112,89,91",
-                        "endOffsets": "215,10174,10266"
-                    }
-                },
-                {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/8feb8bf558fa4c922382b4c1946fc504/transformed/core-1.16.0/res/values-b+sr+Latn/values-b+sr+Latn.xml",
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/5c82ccad14d9596091353cc42f2c0885/transformed/core-1.19.0/res/values-b+sr+Latn/values-b+sr+Latn.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -38,7 +21,24 @@
                     }
                 },
                 {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/a8f39ad8811b02832f59ea836026b375/transformed/ui/res/values-b+sr+Latn/values-b+sr+Latn.xml",
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/7149552568afbbec29979eafad694314/transformed/foundation/res/values-b+sr+Latn/values-b+sr+Latn.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,168,258",
+                        "endColumns": "112,89,91",
+                        "endOffsets": "163,253,345"
+                    },
+                    "to": {
+                        "startLines": "2,97,98",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "107,10089,10179",
+                        "endColumns": "112,89,91",
+                        "endOffsets": "215,10174,10266"
+                    }
+                },
+                {
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/a5a8b50699485682240923b9420d51c1/transformed/ui/res/values-b+sr+Latn/values-b+sr+Latn.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -55,7 +55,7 @@
                     }
                 },
                 {
-                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/3a86061a8ce7e50cbb562f212fb5e8bf/transformed/material3/res/values-b+sr+Latn/values-b+sr+Latn.xml",
+                    "source": "/home/acer/.gradle/caches/9.5.0/transforms/c4922f20e9d6b128c1f440ea8221c267/transformed/material3/res/values-b+sr+Latn/values-b+sr+Latn.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",

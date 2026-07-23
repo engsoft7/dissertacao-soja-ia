@@ -1,18 +1,22 @@
 [
     {
-        "merged": "com.agrointeligencia.app-debug-40:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
-        "source": "com.agrointeligencia.app-main-42:/mipmap-anydpi-v26/ic_launcher_round.xml"
+        "merged": "com.agrointeligencia.app-debug-39:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.agrointeligencia.app-main-41:/mipmap-anydpi-v26/ic_launcher_round.xml"
     },
     {
-        "merged": "com.agrointeligencia.app-debug-40:/mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "com.agrointeligencia.app-main-42:/mipmap-anydpi-v26/ic_launcher.xml"
+        "merged": "com.agrointeligencia.app-debug-39:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.agrointeligencia.app-main-41:/mipmap-anydpi-v26/ic_launcher.xml"
     },
     {
-        "merged": "com.agrointeligencia.app-debug-40:/drawable_ic_launcher_background.xml.flat",
-        "source": "com.agrointeligencia.app-main-42:/drawable/ic_launcher_background.xml"
+        "merged": "com.agrointeligencia.app-debug-39:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.agrointeligencia.app-main-41:/drawable/ic_launcher_background.xml"
     },
     {
-        "merged": "com.agrointeligencia.app-debug-40:/drawable_ic_launcher_foreground.xml.flat",
-        "source": "com.agrointeligencia.app-main-42:/drawable/ic_launcher_foreground.xml"
+        "merged": "com.agrointeligencia.app-debug-39:/drawable_ic_agro_logo.xml.flat",
+        "source": "com.agrointeligencia.app-main-41:/drawable/ic_agro_logo.xml"
+    },
+    {
+        "merged": "com.agrointeligencia.app-debug-39:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.agrointeligencia.app-main-41:/drawable/ic_launcher_foreground.xml"
     }
 ]

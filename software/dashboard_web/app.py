@@ -966,7 +966,7 @@ with aba_graficos:
                 domain=[
                     "El Niño", "La Niña"], range=[
                         "#d73027", "#4575b4"]), legend=alt.Legend(
-                            title="Anos de Forte Influência Climática", orient="bottom")))
+                            title="Anos de Forte Influência Climática", orient="bottom", titleLimit=0)))
 
     grafico_prod = alt.layer(
         clima_chart,

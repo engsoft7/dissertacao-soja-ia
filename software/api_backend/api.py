@@ -221,8 +221,8 @@ def render_mapa(municipio: str = None, theme: str = "dark"):
     _VIRIDIS = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"]
     rmin, rmax = float(pts["rend"].min()), float(pts["rend"].max())
     cmap = cm.LinearColormap(_VIRIDIS, vmin=rmin, vmax=rmax)
-    cmap.caption = "Produtividade Média Recente (kg/ha)"
-    m.add_child(cmap)
+    
+    
     amax = float(pts["area"].max())
     
     _cod_por_nome = AppState.df.drop_duplicates("municipio").set_index("municipio")["cod_ibge7"].to_dict()
@@ -250,12 +250,30 @@ def render_mapa(municipio: str = None, theme: str = "dark"):
             tooltip=nome
         ).add_to(m)
 
+
+    # Custom responsive HTML legend for mobile
+    bg_color = "rgba(0,0,0,0.75)" if theme == "dark" else "rgba(255,255,255,0.85)"
+    text_color = "white" if theme == "dark" else "black"
+    legend_html = f'''
+    <div style="position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); 
+                width: 75%; max-width: 320px; background: {bg_color}; padding: 8px 12px; 
+                border-radius: 8px; z-index: 9999; color: {text_color}; 
+                font-family: Arial, sans-serif; font-size: 13px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+        <div style="text-align: center; margin-bottom: 5px; font-weight: bold; letter-spacing: 0.5px;">PRODUTIVIDADE (KG/HA)</div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-weight: 500;">
+            <span>{int(rmin)}</span>
+            <span>{int((rmin+rmax)/2)}</span>
+            <span>{int(rmax)}</span>
+        </div>
+        <div style="width: 100%; height: 12px; background: linear-gradient(to right, #440154, #3b528b, #21918c, #5ec962, #fde725); border-radius: 4px;"></div>
+    </div>
+    '''
+    m.get_root().html.add_child(folium.Element(legend_html))
     m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
+
     html_content = m.get_root().render()
     
-    # Inject CSS to scale the legend on mobile devices
-    mobile_css = "<style>\n@media (max-width: 600px) {\n  .legend.leaflet-control {\n    transform: scale(0.55);\n    transform-origin: top right;\n  }\n}\n</style>"
-    html_content = html_content.replace('</head>', mobile_css + '\n</head>')
+
     
     return HTMLResponse(content=html_content)
 

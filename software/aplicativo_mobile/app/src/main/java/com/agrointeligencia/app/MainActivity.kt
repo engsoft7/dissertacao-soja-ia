@@ -5,6 +5,12 @@ import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
 
+import android.annotation.SuppressLint
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.material.icons.filled.LocationOn
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -211,6 +217,12 @@ fun AgroDashboard() {
                     icon = { Icon(Icons.Filled.Info, contentDescription = "Sobre") },
                     label = { Text("Sobre") }
                 )
+                NavigationBarItem(
+                    selected = currentTab == 3,
+                    onClick = { currentTab = 3 },
+                    icon = { Icon(Icons.Filled.LocationOn, contentDescription = "Mapa") },
+                    label = { Text("Mapa") }
+                )
             }
         }
     ) { paddingValues ->
@@ -390,6 +402,44 @@ fun AgroDashboard() {
                         2 -> { // Sobre
                             item {
                                 MetodologiaCard()
+                            }
+                        }
+                        3 -> { // Mapa WebView
+                            item {
+                                if (isOfflineMode) {
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth().height(400.dp),
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Icon(Icons.Filled.WifiOff, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(64.dp))
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text("Mapa Satélite Indisponível Offline", fontWeight = FontWeight.Bold, color = Color.Gray, fontSize = 16.sp)
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text("Conecte-se para puxar a cartografia da API.", color = Color.Gray, fontSize = 14.sp)
+                                    }
+                                } else {
+                                    Card(
+                                        modifier = Modifier.fillParentMaxHeight(0.85f).fillMaxWidth().padding(4.dp),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ) {
+                                        val mapUrl = "https://agrointeligencia-api.onrender.com/api/mapa/render" + if (selectedMunicipio != null) "?municipio=${selectedMunicipio}" else ""
+                                        AndroidView(
+                                            factory = { ctx ->
+                                                WebView(ctx).apply {
+                                                    settings.javaScriptEnabled = true
+                                                    settings.domStorageEnabled = true
+                                                    webViewClient = WebViewClient()
+                                                    loadUrl(mapUrl)
+                                                }
+                                            },
+                                            update = { webView ->
+                                                webView.loadUrl(mapUrl)
+                                            },
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

@@ -97,7 +97,26 @@ def buscar_preco_soja_online() -> float:
         pass
     return preco_padrao
 
+def injetar_meta_nativas():
+    """Injeta as tags 'theme-color' diretamente no index.html do Streamlit para o celular ficar nativo"""
+    try:
+        import streamlit, os
+        index_path = os.path.join(os.path.dirname(streamlit.__file__), "static", "index.html")
+        with open(index_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        # Se as tags ainda não estiverem lá, nós as colocamos no topo do <head>
+        if "theme-color" not in html:
+            metas = (
+                '<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">'
+                '<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0e1117">'
+            )
+            html = html.replace("<head>", f"<head>{metas}")
+            with open(index_path, "w", encoding="utf-8") as f:
+                f.write(html)
+    except Exception:
+        pass
 
+injetar_meta_nativas()
 st.set_page_config(
     page_title="AgroInteligência — Previsão e Viabilidade de Soja no Pará",
     page_icon="🌿",
@@ -112,15 +131,15 @@ except Exception:
     is_dark = True
 
 # ── INJEÇÃO DE ESTILOS GLOBAIS PARA MOBILE (BARRAS NATIVAS) ──
-css_mobile = f"""<style>
-    /* Informa ao Chrome (Android) e Safari (iOS) o esquema de cores atual */
-    :root {{
-        color-scheme: {'dark' if is_dark else 'light'} !important;
-    }}
-    /* Garante que o fundo cubra áreas fora do limite (safe-areas e barras) */
-    html, body, .stApp, header {{
-        background-color: {'#0e1117' if is_dark else '#ffffff'} !important;
-    }}
+css_mobile = """<style>
+    @media (prefers-color-scheme: dark) {
+        :root { color-scheme: dark !important; }
+        html, body, .stApp, header { background-color: #0e1117 !important; }
+    }
+    @media (prefers-color-scheme: light) {
+        :root { color-scheme: light !important; }
+        html, body, .stApp, header { background-color: #ffffff !important; }
+    }
 </style>"""
 st.markdown(css_mobile, unsafe_allow_html=True)
 

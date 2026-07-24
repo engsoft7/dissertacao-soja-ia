@@ -251,7 +251,13 @@ def render_mapa(municipio: str = None, theme: str = "dark"):
         ).add_to(m)
 
     m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
-    return HTMLResponse(content=m.get_root().render())
+    html_content = m.get_root().render()
+    
+    # Inject CSS to scale the legend on mobile devices
+    mobile_css = "<style>\n@media (max-width: 600px) {\n  .legend.leaflet-control {\n    transform: scale(0.55);\n    transform-origin: top right;\n  }\n}\n</style>"
+    html_content = html_content.replace('</head>', mobile_css + '\n</head>')
+    
+    return HTMLResponse(content=html_content)
 
 
 class SimulacaoRequest(BaseModel):

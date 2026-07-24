@@ -4,6 +4,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Path
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 
 data class MunicipioResponse(val municipios: List<String>)
 
@@ -58,8 +60,15 @@ object RetrofitClient {
     var currentBaseUrl = "https://agrointeligencia-api.onrender.com/"
 
     fun getInstance(url: String = currentBaseUrl): AgroApiService {
+        val client = OkHttpClient.Builder()
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .build()
+            
         val retrofit = Retrofit.Builder()
             .baseUrl(url)
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         return retrofit.create(AgroApiService::class.java)

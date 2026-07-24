@@ -52,7 +52,7 @@ interface AgroApiService {
     @GET("api/previsao/{municipio}")
     suspend fun getPrevisao(@Path("municipio") municipio: String): PrevisaoResponse
 
-    @GET("api/kpis/economia")
+    @GET("api/kpis_economia")
     suspend fun getKpisEconomia(): KpiEconomiaResponse
 }
 

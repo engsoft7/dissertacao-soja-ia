@@ -1,7 +1,0 @@
-com.agrointeligencia.app-updated_navigation_xml-0 /home/acer/projetos_antgravity/dissertacao-soja-ia/software/aplicativo_mobile/app/build/generated/updated_navigation_xml/debug
-com.agrointeligencia.app-packageDebugResources-1 /home/acer/projetos_antgravity/dissertacao-soja-ia/software/aplicativo_mobile/app/build/intermediates/incremental/debug/packageDebugResources/merged.dir
-com.agrointeligencia.app-packageDebugResources-2 /home/acer/projetos_antgravity/dissertacao-soja-ia/software/aplicativo_mobile/app/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
-com.agrointeligencia.app-debug-3 /home/acer/projetos_antgravity/dissertacao-soja-ia/software/aplicativo_mobile/app/build/intermediates/merged_res/debug/mergeDebugResources
-com.agrointeligencia.app-debug-4 /home/acer/projetos_antgravity/dissertacao-soja-ia/software/aplicativo_mobile/app/src/debug/res
-com.agrointeligencia.app-main-5 /home/acer/projetos_antgravity/dissertacao-soja-ia/software/aplicativo_mobile/app/src/main/res
-gradleHome-0 /home/acer/.gradle

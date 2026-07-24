@@ -36,12 +36,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             // Suffix removed to avoid Android Studio Intent launch mismatch

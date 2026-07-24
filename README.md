@@ -2,13 +2,13 @@
 
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21286115-1682D4?logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.21286115)
 [![Painel online](https://img.shields.io/badge/painel_online-soja--para.streamlit.app-FF4B4B?logo=streamlit&logoColor=white)](https://soja-para.streamlit.app)
-[![Download App (Android)](https://img.shields.io/badge/Download_APK-Android_Nativo-3DDC84?logo=android&logoColor=white)](https://github.com/engsoft7/dissertacao-soja-ia/releases/download/v2.0.0/AgroInteligenciaApp-Oficial.apk)
+[![Download App (Android)](https://img.shields.io/badge/Download_APK-Android_Nativo-3DDC84?logo=android&logoColor=white)](https://github.com/engsoft7/dissertacao-soja-ia/releases/latest)
 
 Códigos e dados da dissertação de Mestrado Profissional em Computação Aplicada
 (PPCA/UFPA — Campus de Tucuruí).
 
 **Painel original na Web:** <https://soja-para.streamlit.app>
-**App Oficial (Versão Definitiva):** [Baixar APK Android (v2.0.0)](https://github.com/engsoft7/dissertacao-soja-ia/releases/download/v2.0.0/AgroInteligenciaApp-Oficial.apk)
+**App Oficial (Versão Definitiva):** [Baixar APK Android (v2.0.0)](https://github.com/engsoft7/dissertacao-soja-ia/releases/latest)
 
 **Autor:** Maycon Lima dos Santos
 **Orientador:** Prof. Dr. Caio Carvalho Moreira

@@ -392,7 +392,7 @@ CSS_ORIGINAL = """<style>
 </style>"""
 
 # ── TEMA E ESTILIZAÇÃO (ÚNICA E ROBUSTA) ──
-CSS_ATUAL = CSS_TERMINAL
+CSS_ATUAL = CSS_GLASS
 st.markdown(CSS_ATUAL, unsafe_allow_html=True)
 
 

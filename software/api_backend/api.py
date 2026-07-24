@@ -166,7 +166,7 @@ def get_mapa_geo():
          raise HTTPException(status_code=500, detail=f"Erro ao carregar mapa: {str(e)}")
 
 @app.get("/api/mapa/render", response_class=HTMLResponse)
-def render_mapa(municipio: str = None):
+def render_mapa(municipio: str = None, theme: str = "dark"):
     import folium
     import branca.colormap as cm
     import math
@@ -196,7 +196,7 @@ def render_mapa(municipio: str = None):
     lonmin, lonmax = pts["longitude"].min(), pts["longitude"].max()
 
     m = folium.Map(location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
-                   tiles="cartodbdark_matter", zoom_start=6, control_scale=True)
+                   tiles="cartodbdark_matter" if theme == "dark" else "cartodbpositron", zoom_start=6, control_scale=True)
                    
     folium.GeoJson(
         geo,
@@ -221,6 +221,8 @@ def render_mapa(municipio: str = None):
     _VIRIDIS = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"]
     rmin, rmax = float(pts["rend"].min()), float(pts["rend"].max())
     cmap = cm.LinearColormap(_VIRIDIS, vmin=rmin, vmax=rmax)
+    cmap.caption = "Produtividade Média Recente (kg/ha)"
+    m.add_child(cmap)
     amax = float(pts["area"].max())
     
     _cod_por_nome = AppState.df.drop_duplicates("municipio").set_index("municipio")["cod_ibge7"].to_dict()

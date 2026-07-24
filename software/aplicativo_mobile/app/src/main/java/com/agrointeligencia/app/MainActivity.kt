@@ -426,7 +426,8 @@ fun AgroDashboard() {
                                         modifier = Modifier.fillParentMaxHeight(0.85f).fillMaxWidth().padding(4.dp),
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
-                                        val mapUrl = "https://agrointeligencia-api.onrender.com/api/mapa/render" + if (selectedMunicipio != null) "?municipio=${URLEncoder.encode(selectedMunicipio, "UTF-8")}" else ""
+                                        val currentTheme = if (isSystemInDarkTheme()) "dark" else "light"
+                                        val mapUrl = "https://agrointeligencia-api.onrender.com/api/mapa/render?theme=${currentTheme}" + if (selectedMunicipio != null) "&municipio=${URLEncoder.encode(selectedMunicipio, "UTF-8")}" else ""
                                         AndroidView(
                                             factory = { ctx ->
                                                 WebView(ctx).apply {

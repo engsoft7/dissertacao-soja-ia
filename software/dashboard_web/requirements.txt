@@ -8,7 +8,7 @@ numpy>=1.24,<2.6
 scikit-learn>=1.3,<2
 folium>=0.16
 streamlit-folium>=0.20
-streamlit-theme>=0.2.0
+st-theme>=1.2.3
 # 'anyio' FIXADO na versão que rodava. O app quebrou (Segmentation fault) no
 # Streamlit Cloud exatamente quando a instalação do folium bumpou anyio
 # 4.14.1 -> 4.14.2 (anyio é o runtime assíncrono do servidor). O folium NÃO

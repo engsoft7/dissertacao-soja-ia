@@ -111,45 +111,18 @@ try:
 except Exception:
     is_dark = True
 
-# ── INJEÇÃO DE COR NO STATUS BAR (MOBILE) ──
-theme_color = "#0e1117" if is_dark else "#ffffff"
-color_scheme = "dark" if is_dark else "light"
-components.html(f"""
-<script>
-    var parent = window.parent.document;
-    
-    // Atualiza a meta tag de theme-color (Android Chrome topo)
-    var meta = parent.querySelector('meta[name="theme-color"]');
-    if (!meta) {{
-        meta = parent.createElement('meta');
-        meta.name = 'theme-color';
-        parent.head.appendChild(meta);
+# ── INJEÇÃO DE ESTILOS GLOBAIS PARA MOBILE (BARRAS NATIVAS) ──
+css_mobile = f"""<style>
+    /* Informa ao Chrome (Android) e Safari (iOS) o esquema de cores atual */
+    :root {{
+        color-scheme: {'dark' if is_dark else 'light'} !important;
     }}
-    meta.setAttribute('content', '{theme_color}');
-    
-    // Atualiza a meta tag de color-scheme (Android Chrome botões inferiores)
-    var meta_cs = parent.querySelector('meta[name="color-scheme"]');
-    if (!meta_cs) {{
-        meta_cs = parent.createElement('meta');
-        meta_cs.name = 'color-scheme';
-        parent.head.appendChild(meta_cs);
+    /* Garante que o fundo cubra áreas fora do limite (safe-areas e barras) */
+    html, body, .stApp, header {{
+        background-color: {'#0e1117' if is_dark else '#ffffff'} !important;
     }}
-    meta_cs.setAttribute('content', '{color_scheme}');
-    
-    // Força a propriedade CSS no HTML raiz para a barra de navegação acompanhar
-    parent.documentElement.style.setProperty('color-scheme', '{color_scheme}');
-    parent.body.style.backgroundColor = '{theme_color}';
-    
-    // Atualiza a meta tag para iOS Safari/PWA
-    var meta_apple = parent.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-    if (!meta_apple) {{
-        meta_apple = parent.createElement('meta');
-        meta_apple.name = 'apple-mobile-web-app-status-bar-style';
-        parent.head.appendChild(meta_apple);
-    }}
-    meta_apple.setAttribute('content', '{ "black-translucent" if is_dark else "default" }');
-</script>
-""", height=0, width=0)
+</style>"""
+st.markdown(css_mobile, unsafe_allow_html=True)
 
 
 # ── TEMA PREMIUM v2 ──

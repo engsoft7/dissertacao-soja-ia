@@ -20,6 +20,7 @@ import streamlit as st  # type: ignore  # pyrefly: ignore[missing-import]
 # type: ignore  # pyrefly: ignore[missing-import]
 # type: ignore  # pyrefly: ignore[missing-import]
 from streamlit_folium import st_folium  # type: ignore  # pyrefly: ignore[missing-import]
+from streamlit_theme import st_theme  # type: ignore
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -94,6 +95,15 @@ st.set_page_config(
     page_title="AgroInteligência — Previsão e Viabilidade de Soja no Pará",
     page_icon="🌿",
     layout="wide")
+
+try:
+    theme_st = st_theme()
+    is_dark = True
+    if theme_st and theme_st.get("base") == "light":
+        is_dark = False
+except Exception:
+    is_dark = True
+
 
 # ── TEMA PREMIUM v2 ──
 CSS_TERMINAL = '''<style>
@@ -437,8 +447,10 @@ def _altair_dark_theme_glass():
         })
 
 
-alt.themes.enable('agro_dark_terminal')
-
+if is_dark:
+    alt.themes.enable('agro_dark_terminal')
+else:
+    alt.themes.enable('default')
 
 @st.cache_resource(show_spinner="Carregando modelos de inteligência de safra...")
 def preparar():
@@ -491,7 +503,7 @@ def _soja_por_municipio():
 _VIRIDIS = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"]
 
 
-def construir_mapa(sel_interno: str, comp_interno: str | None = None):
+def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: bool = True):
     geo = carregar_geo()
     pts = _soja_por_municipio()
     if geo is None or pts.empty:
@@ -503,7 +515,9 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None):
     latmin, latmax = pts.latitude.min(), pts.latitude.max()
     lonmin, lonmax = pts.longitude.min(), pts.longitude.max()
 
-    tiles_map = "cartodbdark_matter"
+    tiles_map = "cartodbdark_matter" if is_dark else "cartodbpositron"
+    fill_color = "#1b2d1b" if is_dark else "#e8f5e9"
+    border_color = "#304a30" if is_dark else "#81c784"
     m = folium.Map(location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
                    tiles=tiles_map, zoom_start=6, control_scale=True)
     folium.GeoJson(
@@ -511,10 +525,10 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None):
         name="Pará",
         interactive=False,
         style_function=lambda f: {
-            "fillColor": "#1b2d1b",
-            "color": "#304a30",
+            "fillColor": fill_color,
+            "color": border_color,
             "weight": 1.0,
-            "fillOpacity": 0.2}).add_to(m)
+            "fillOpacity": 0.2 if is_dark else 0.5}).add_to(m)
 
     rios = carregar_rios()
     if rios is not None and rios.get("features"):
@@ -726,7 +740,7 @@ with aba_mapa:
 
     with dir_:
         mapa, nome_para_interno, faixa_rend = construir_mapa(
-            municipio, mun_comp)
+            municipio, mun_comp, is_dark=is_dark)
         if mapa is not None:
             st.subheader("Panorama Geespacial dos Polos Produtivos")
             st_folium(

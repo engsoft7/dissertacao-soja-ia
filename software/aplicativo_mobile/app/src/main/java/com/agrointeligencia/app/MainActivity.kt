@@ -381,7 +381,7 @@ fun AgroDashboard() {
                             }
                             
                                 item {
-                                    HistoricoProdutividadeChart(historico = historicoOrdenado)
+                                    HistoricoProdutividadeChart(historico = historicoOrdenado, previsao = previsao)
                                 }
                                 items(historicoOrdenado) { hist ->
                                     PrevisaoCard(hist, kpis)
@@ -708,7 +708,7 @@ fun MetodologiaCard() {
 
 
 @Composable
-fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>) {
+fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>, previsao: PrevisaoResponse?) {
     val isDark = isSystemInDarkTheme()
     val lineColorPre = if (isDark) Color(0xFF00E5FF) else Color(0xFF0284C7)
     val lineColorReal = if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
@@ -733,8 +733,8 @@ fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>) {
     
     val yMax = maxYield * 1.15f
     
-    val elNinos = listOf(2003, 2010, 2015, 2016, 2023, 2024)
-    val laNinas = listOf(2008, 2011, 2021, 2022)
+    val elNinos = previsao?.elNinos ?: emptyList()
+    val laNinas = previsao?.laNinas ?: emptyList()
 
     Card(
         modifier = Modifier.fillMaxWidth().height(300.dp).padding(vertical = 8.dp),

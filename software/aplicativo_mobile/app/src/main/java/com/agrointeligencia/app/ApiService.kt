@@ -16,7 +16,9 @@ data class PrevisaoHistorico(
 
 data class PrevisaoResponse(
     val municipio: String,
-    val historico: List<PrevisaoHistorico>
+    val historico: List<PrevisaoHistorico>,
+    val elNinos: List<Int>? = null,
+    val laNinas: List<Int>? = null
 )
 
 data class KpiEconomiaResponse(

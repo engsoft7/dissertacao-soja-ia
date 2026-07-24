@@ -149,7 +149,12 @@ def get_previsao(municipio: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
         
-    return {"municipio": municipio, "historico": resultado}
+    return {
+        "municipio": municipio, 
+        "historico": resultado,
+        "elNinos": [2003, 2010, 2015, 2016, 2023, 2024],
+        "laNinas": [2008, 2011, 2021, 2022]
+    }
 
 @app.get("/api/mapa/geo")
 def get_mapa_geo():

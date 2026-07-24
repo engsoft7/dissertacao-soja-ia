@@ -5,7 +5,10 @@ import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
 
+
+import java.net.URLEncoder
 import android.annotation.SuppressLint
+
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.ui.viewinterop.AndroidView
@@ -423,10 +426,14 @@ fun AgroDashboard() {
                                         modifier = Modifier.fillParentMaxHeight(0.85f).fillMaxWidth().padding(4.dp),
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
-                                        val mapUrl = "https://agrointeligencia-api.onrender.com/api/mapa/render" + if (selectedMunicipio != null) "?municipio=${selectedMunicipio}" else ""
+                                        val mapUrl = "https://agrointeligencia-api.onrender.com/api/mapa/render" + if (selectedMunicipio != null) "?municipio=${URLEncoder.encode(selectedMunicipio, "UTF-8")}" else ""
                                         AndroidView(
                                             factory = { ctx ->
                                                 WebView(ctx).apply {
+                                                    layoutParams = android.view.ViewGroup.LayoutParams(
+                                                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                                                        android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                                                    )
                                                     settings.javaScriptEnabled = true
                                                     settings.domStorageEnabled = true
                                                     webViewClient = WebViewClient()

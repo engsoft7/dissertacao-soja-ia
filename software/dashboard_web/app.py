@@ -74,16 +74,22 @@ def data_atualizacao() -> str | None:
 @st.cache_data(ttl=3600)  # Atualiza a cotação a cada 1 hora de forma segura
 def buscar_preco_soja_online() -> float:
     """
-    Busca o preço de referência atualizado da soja no mercado físico (API de Commodities).
+    Busca o preço de referência atualizado da soja no mercado físico (Notícias Agrícolas).
     Possui fallback seguro para garantir estabilidade offline.
     """
-    preco_padrao = 120.0  # Referência base alinhada aos boletins recentes
+    preco_padrao = 135.0  # Referência base alinhada aos boletins recentes
     try:
-        url = "https://economia.awesomeapi.com.br/json/last/SOJA"
-        resp = requests.get(url, timeout=3)
-        if resp.status_code == 200:
-            data = resp.json()
-            val = float(data.get("SOJA", {}).get("bid", preco_padrao))
+        import urllib.request
+        import re
+        url = "https://www.noticiasagricolas.com.br/cotacoes/soja/"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+        html = urllib.request.urlopen(req, timeout=5).read().decode("utf-8")
+        # Procura a cotação em reais (ex: Paranaguá disponível/futuro)
+        matches = re.findall(r"Paranaguá.*?<td[^>]*>(.*?)</td>", html, re.IGNORECASE | re.DOTALL)
+        if len(matches) >= 4:
+            # O índice 3 costuma ser o valor de venda "150,00"
+            val_str = matches[3].replace(".", "").replace(",", ".")
+            val = float(val_str)
             if val > 50:
                 return val
     except Exception:
@@ -910,7 +916,7 @@ with aba_eco:
             value=PRECO_SACA_ONLINE,
             step=5.0)
         st.caption(
-            "🌐 **Fonte da Cotação:** Atualizado via API de Indicadores de Mercado / Commodities (AwesomeAPI).")
+            "🌐 **Fonte da Cotação:** Cotação interativa em tempo real (Notícias Agrícolas / CEPEA).")
     with col_eco2:
         custo_ha = st.number_input(
             "Custo operacional de referência (R$ / hectare)",
@@ -918,7 +924,7 @@ with aba_eco:
             value=CUSTO_HA_REF,
             step=100.0)
         st.caption(
-            "📊 **Fonte do Custo:** Boletins Técnicos de Custo de Produção (Aprosoja Brasil / Conab - COE).")
+            "📊 **Fonte do Custo (Manual):** Valor de base recomendado. Sinta-se livre para editar com a realidade da sua fazenda.")
 
     est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
     receita_ha = est_sacas_ha * preco

@@ -164,6 +164,20 @@ css_mobile = """<style>
         /* Abas mais enxutas no celular */
         .stTabs [data-baseweb="tab"] { padding: 8px 12px !important; font-size: 0.70rem !important; }
     }
+    
+    /* ── OTIMIZAÇÃO EXTREMA PARA SMARTPHONES PEQUENOS (<480px) ── */
+    @media (max-width: 480px) {
+        .block-container, [data-testid="block-container"] {
+            padding-left: 0.2rem !important;
+            padding-right: 0.2rem !important;
+            padding-top: 1rem !important;
+        }
+        .premium-title { font-size: 1.1rem !important; }
+        .kpi-card, .eco-card { padding: 10px 8px !important; }
+        .kpi-value, .eco-value { font-size: 1.1rem !important; }
+        .kpi-label, .eco-label, [data-testid="stMetricLabel"] { font-size: 0.55rem !important; }
+        .stTabs [data-baseweb="tab"] { padding: 6px 8px !important; font-size: 0.65rem !important; }
+    }
 </style>"""
 st.markdown(css_mobile, unsafe_allow_html=True)
 

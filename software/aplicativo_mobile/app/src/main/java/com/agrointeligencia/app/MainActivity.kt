@@ -26,7 +26,13 @@ import kotlin.math.max
 import androidx.core.view.WindowCompat
 import android.app.Activity
 import androidx.compose.ui.graphics.toArgb
+
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.ui.platform.LocalView
+
 import com.google.gson.Gson
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -204,25 +210,25 @@ fun AgroDashboard() {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 NavigationBarItem(
                     selected = currentTab == 0,
-                    onClick = { currentTab = 0 },
+                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 0 },
                     icon = { Icon(Icons.Filled.Home, contentDescription = "Resumo") },
                     label = { Text("Resumo") }
                 )
                 NavigationBarItem(
                     selected = currentTab == 1,
-                    onClick = { currentTab = 1 },
+                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 1 },
                     icon = { Icon(Icons.Filled.LocationOn, contentDescription = "Mapa") },
                     label = { Text("Mapa") }
                 )
                 NavigationBarItem(
                     selected = currentTab == 2,
-                    onClick = { currentTab = 2 },
+                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 2 },
                     icon = { Icon(Icons.Filled.List, contentDescription = "Histórico") },
                     label = { Text("Histórico") }
                 )
                 NavigationBarItem(
                     selected = currentTab == 3,
-                    onClick = { currentTab = 3 },
+                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 3 },
                     icon = { Icon(Icons.Filled.Info, contentDescription = "Sobre") },
                     label = { Text("Sobre") }
                 )
@@ -462,7 +468,7 @@ fun AgroDashboard() {
 fun PrevisaoCard(historico: PrevisaoHistorico, kpis: KpiEconomiaResponse?) {
     val isDark = isSystemInDarkTheme()
     Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        modifier = Modifier.animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)).fillMaxWidth().padding(vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -507,7 +513,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: KpiEconomiaResponse?) {
 fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistorico?) {
     val isDark = isSystemInDarkTheme()
     Card(
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
+        modifier = Modifier.animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)).fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -559,7 +565,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: KpiEconomiaResponse)
     var customCusto by remember { mutableStateOf(kpis.custo_ha.toString()) }
 
     Card(
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
+        modifier = Modifier.animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)).fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -644,7 +650,9 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
     var isSimulating by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
+    val haptic = LocalHapticFeedback.current
     fun simular() {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         coroutineScope.launch {
             isSimulating = true
             try {

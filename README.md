@@ -7,8 +7,13 @@
 Códigos e dados da dissertação de Mestrado Profissional em Computação Aplicada
 (PPCA/UFPA — Campus de Tucuruí).
 
-**Painel original na Web:** <https://soja-para.streamlit.app>
-**App Oficial (Versão Definitiva):** [Baixar APK Android (v2.0.0)](https://github.com/engsoft7/dissertacao-soja-ia/releases/latest)
+> ### 🚀 Produtos Técnicos (Acesso Direto)
+> 
+> 📱 **Aplicativo Mobile Oficial (v2.0.0):** [Baixar APK Android](https://github.com/engsoft7/dissertacao-soja-ia/releases/latest)  
+> *Versão nativa construída em Kotlin+Jetpack Compose com simulação climática, feedback tátil (haptics) e alta performance offline.*
+> 
+> 🌐 **Painel Original na Web:** [Acessar Dashboard](https://soja-para.streamlit.app)  
+> *Plataforma via navegador projetada usando Streamlit.*
 
 **Autor:** Maycon Lima dos Santos
 **Orientador:** Prof. Dr. Caio Carvalho Moreira
@@ -264,7 +269,9 @@ SANTOS, Maycon Lima dos. **Aplicação da Inteligência Artificial na Previsão 
 Produtividade da Soja: códigos e dados**. Zenodo, 2026. Software.
 DOI: 10.5281/zenodo.21286115. Disponível em: https://doi.org/10.5281/zenodo.21286115.
 
-## Atualizações Recentes (v1.0.2)
-- Integrado cotação em tempo real da Soja (Mercado de Futuros CBOT).
-- Conversão orgânica automática da cotação usando API AwesomeAPI (USD/BRL).
-- Correção de codificação dos nomes das cidades, permitindo exibição correta com acentos (ex: Santarém, Paragominas).
+## 🌟 Lançamento Oficial v2.0.0 (AgroInteligência Mobile)
+- **Migração Cloud-Native:** Lógica de predição isolada em servidor próprio (FastAPI / Render).
+- **Interface Nativa:** Aplicativo Android 100% desenvolvido em Jetpack Compose.
+- **Experiência Sensorial (Haptics):** Física elástica na inferência dos cards (*Spring Animations*) e resposta tátil profunda no processamento usando o `LocalHapticFeedback`.
+- **Geovisualização Integrada:** Mapas dinâmicos da folha do satélite com auto-recorte e isolamento do município focado (*Smart Zoom* Folium-backend).
+- **Offline First:** Cascatas de resiliência UI/UX operando perfeitamente sem conexão com a internet.

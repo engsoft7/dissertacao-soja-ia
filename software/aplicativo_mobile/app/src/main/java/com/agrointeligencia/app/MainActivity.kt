@@ -4,6 +4,16 @@ import android.os.Bundle
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
+import android.graphics.Paint
+import kotlin.math.max
 import androidx.core.view.WindowCompat
 import android.app.Activity
 import androidx.compose.ui.graphics.toArgb
@@ -369,7 +379,9 @@ fun AgroDashboard() {
                                     )
                                 }
                             }
-                            items(historicoOrdenado) { hist ->
+                            
+                                HistoricoProdutividadeChart(historico = historicoOrdenado)
+                                items(historicoOrdenado) { hist ->
                                 PrevisaoCard(hist, kpis)
                             }
                         }
@@ -692,3 +704,108 @@ fun MetodologiaCard() {
 }
 
 
+
+@Composable
+fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>) {
+    val isDark = isSystemInDarkTheme()
+    val lineColorPre = if (isDark) Color(0xFF00E5FF) else Color(0xFF00B0FF)
+    val lineColorReal = if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
+    val elNinoColor = if(isDark) Color(0x33FF5555) else Color(0x22FF0000)
+    val textColor = if (isDark) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
+
+    if (historico.isEmpty()) return
+
+    val minYear = historico.minOf { it.ano }
+    val maxYear = historico.maxOf { it.ano }
+    
+    val maxYield = max(
+        historico.maxOf { it.rendimento_real },
+        historico.maxOf { if (it.rendimento_predito > 0) it.rendimento_predito else 0.0 }
+    ).toFloat()
+    
+    val yMax = maxYield * 1.15f // 15% padding
+    
+    // Anos de El Nino
+    val elNinos = listOf(2003, 2010, 2015, 2016, 2023, 2024)
+
+    Card(
+        modifier = Modifier.fillMaxWidth().height(260.dp).padding(vertical = 8.dp),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text("Evolução Histórica e Projeção (kg/ha)", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+            Canvas(modifier = Modifier.fillMaxSize().padding(end = 16.dp, bottom = 16.dp)) {
+                val w = size.width
+                val h = size.height
+                val yearSpan = maxYear - minYear
+                
+                // Draw El Nino highlights
+                elNinos.filter { it in minYear..maxYear }.forEach { year ->
+                    val x = (year - minYear) * (w / yearSpan)
+                    drawRect(
+                        color = elNinoColor,
+                        topLeft = Offset(x - 8f, 0f),
+                        size = Size(16f, h)
+                    )
+                    drawContext.canvas.nativeCanvas.apply {
+                        val paint = Paint().apply {
+                            color = if(isDark) android.graphics.Color.parseColor("#ff8888") else android.graphics.Color.RED
+                            textSize = 20f
+                            isFakeBoldText = true
+                        }
+                        save()
+                        rotate(-90f, x, h / 2)
+                        drawText("EL NIÑO", x - 30f, (h / 2) - 10f, paint)
+                        restore()
+                    }
+                }
+
+                // Grid and Y labels
+                val gridPaint = Paint().apply { color = textColor; textSize = 24f }
+                for (i in 0..4) {
+                    val yLine = h - (i * (h / 4))
+                    val yieldVal = (i * (yMax / 4)).toInt()
+                    drawLine(color = Color.Gray.copy(alpha = 0.3f), start = Offset(0f, yLine), end = Offset(w, yLine), strokeWidth = 1f)
+                    drawContext.canvas.nativeCanvas.drawText("$yieldVal", 0f, yLine - 5f, gridPaint)
+                }
+                
+                // X labels (cada 5 anos)
+                for (year in minYear..maxYear step 5) {
+                    val x = (year - minYear) * (w / yearSpan)
+                    drawContext.canvas.nativeCanvas.drawText("$year", x, h + 30f, gridPaint)
+                }
+
+                // Draw Real Line
+                val pathReal = Path()
+                var firstReal = true
+                historico.filter { it.rendimento_real > 0 }.sortedBy { it.ano }.forEach { item ->
+                    val x = (item.ano - minYear) * (w / yearSpan)
+                    val y = h - ((item.rendimento_real.toFloat() / yMax) * h)
+                    if (firstReal) { pathReal.moveTo(x, y); firstReal = false } 
+                    else { pathReal.lineTo(x, y) }
+                    drawCircle(color = lineColorReal, radius = 4f, center = Offset(x, y))
+                }
+                drawPath(path = pathReal, color = lineColorReal, style = Stroke(width = 4f))
+
+                // Draw Pred Line
+                val pathPred = Path()
+                var firstPred = true
+                historico.sortedBy { it.ano }.forEach { item ->
+                    if(item.rendimento_predito > 0) {
+                        val x = (item.ano - minYear) * (w / yearSpan)
+                        val y = h - ((item.rendimento_predito.toFloat() / yMax) * h)
+                        if (firstPred) { pathPred.moveTo(x, y); firstPred = false } 
+                        else { pathPred.lineTo(x, y) }
+                    }
+                }
+                drawPath(path = pathPred, color = lineColorPre, style = Stroke(
+                    width = 4f,
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                ))
+            }
+        }
+    }
+}

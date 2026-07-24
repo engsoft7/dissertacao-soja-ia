@@ -140,6 +140,30 @@ css_mobile = """<style>
         :root { color-scheme: light !important; }
         html, body, .stApp, header { background-color: #ffffff !important; }
     }
+    
+    /* ── OTIMIZAÇÃO MAXIMA DE ESPAÇO PARA CELULAR ── */
+    @media (max-width: 768px) {
+        /* Reduz margens abismais nativas do Streamlit no celular */
+        .block-container, [data-testid="block-container"] {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+            max-width: 100% !important;
+        }
+        /* Ajuste de fontes e padding interno dos cards para evitar quebras de texto */
+        .kpi-card { padding: 12px 10px !important; }
+        .eco-card { padding: 14px 10px !important; }
+        .kpi-value, .eco-value { font-size: 1.25rem !important; }
+        .kpi-label, .eco-label { font-size: 0.6rem !important; }
+        
+        /* Títulos e espaçamentos do cabeçalho otimizados */
+        .premium-title { font-size: 1.2rem !important; }
+        .header-container { padding: 8px 0 !important; margin-bottom: 12px !important; }
+        
+        /* Abas mais enxutas no celular */
+        .stTabs [data-baseweb="tab"] { padding: 8px 12px !important; font-size: 0.70rem !important; }
+    }
 </style>"""
 st.markdown(css_mobile, unsafe_allow_html=True)
 

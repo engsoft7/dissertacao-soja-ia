@@ -17,6 +17,7 @@ import folium  # type: ignore  # pyrefly: ignore[missing-import]
 import pandas as pd  # type: ignore  # pyrefly: ignore[missing-import]
 import requests  # type: ignore  # pyrefly: ignore[missing-import]
 import streamlit as st  # type: ignore  # pyrefly: ignore[missing-import]
+import streamlit.components.v1 as components
 # type: ignore  # pyrefly: ignore[missing-import]
 # type: ignore  # pyrefly: ignore[missing-import]
 from streamlit_folium import st_folium  # type: ignore  # pyrefly: ignore[missing-import]
@@ -109,6 +110,46 @@ try:
         is_dark = False
 except Exception:
     is_dark = True
+
+# ── INJEÇÃO DE COR NO STATUS BAR (MOBILE) ──
+theme_color = "#0e1117" if is_dark else "#ffffff"
+color_scheme = "dark" if is_dark else "light"
+components.html(f"""
+<script>
+    var parent = window.parent.document;
+    
+    // Atualiza a meta tag de theme-color (Android Chrome topo)
+    var meta = parent.querySelector('meta[name="theme-color"]');
+    if (!meta) {{
+        meta = parent.createElement('meta');
+        meta.name = 'theme-color';
+        parent.head.appendChild(meta);
+    }}
+    meta.setAttribute('content', '{theme_color}');
+    
+    // Atualiza a meta tag de color-scheme (Android Chrome botões inferiores)
+    var meta_cs = parent.querySelector('meta[name="color-scheme"]');
+    if (!meta_cs) {{
+        meta_cs = parent.createElement('meta');
+        meta_cs.name = 'color-scheme';
+        parent.head.appendChild(meta_cs);
+    }}
+    meta_cs.setAttribute('content', '{color_scheme}');
+    
+    // Força a propriedade CSS no HTML raiz para a barra de navegação acompanhar
+    parent.documentElement.style.setProperty('color-scheme', '{color_scheme}');
+    parent.body.style.backgroundColor = '{theme_color}';
+    
+    // Atualiza a meta tag para iOS Safari/PWA
+    var meta_apple = parent.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (!meta_apple) {{
+        meta_apple = parent.createElement('meta');
+        meta_apple.name = 'apple-mobile-web-app-status-bar-style';
+        parent.head.appendChild(meta_apple);
+    }}
+    meta_apple.setAttribute('content', '{ "black-translucent" if is_dark else "default" }');
+</script>
+""", height=0, width=0)
 
 
 # ── TEMA PREMIUM v2 ──

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from functools import lru_cache
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -165,8 +166,8 @@ def get_mapa_geo():
     except Exception as e:
          raise HTTPException(status_code=500, detail=f"Erro ao carregar mapa: {str(e)}")
 
-@app.get("/api/mapa/render", response_class=HTMLResponse)
-def render_mapa(municipio: str = None, theme: str = "dark"):
+@lru_cache(maxsize=128)
+def _generate_map_html_cached(municipio: str, theme: str) -> str:
     import folium
     import branca.colormap as cm
     import math
@@ -282,7 +283,15 @@ def render_mapa(municipio: str = None, theme: str = "dark"):
     
 
     
-    return HTMLResponse(content=html_content)
+    return html_content
+
+@app.get("/api/mapa/render", response_class=HTMLResponse)
+def render_mapa(municipio: str = None, theme: str = "dark"):
+    try:
+        html = _generate_map_html_cached(municipio, theme)
+        return HTMLResponse(content=html)
+    except Exception as e:
+        return HTMLResponse(f"Erro ao gerar mapa: {str(e)}", status_code=500)
 
 
 class SimulacaoRequest(BaseModel):

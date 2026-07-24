@@ -1,4 +1,4 @@
-#Thu Jul 23 20:22:06 BRT 2026
+#Thu Jul 23 21:34:05 BRT 2026
 base.0=/home/acer/projetos_antgravity/dissertacao-soja-ia/software/aplicativo_mobile/app/build/intermediates/dex/debug/mergeExtDexDebug/classes.dex
 base.1=/home/acer/projetos_antgravity/dissertacao-soja-ia/software/aplicativo_mobile/app/build/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
 base.2=/home/acer/projetos_antgravity/dissertacao-soja-ia/software/aplicativo_mobile/app/build/intermediates/dex/debug/mergeProjectDexDebug/13/classes.dex

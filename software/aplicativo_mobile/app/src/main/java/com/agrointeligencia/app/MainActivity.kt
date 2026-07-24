@@ -710,102 +710,124 @@ fun MetodologiaCard() {
 @Composable
 fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>) {
     val isDark = isSystemInDarkTheme()
-    val lineColorPre = if (isDark) Color(0xFF00E5FF) else Color(0xFF00B0FF)
+    val lineColorPre = if (isDark) Color(0xFF00E5FF) else Color(0xFF0284C7)
     val lineColorReal = if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
-    val elNinoColor = if(isDark) Color(0x33FF5555) else Color(0x22FF0000)
+    val elNinoColor = if(isDark) Color(0x33FF5555) else Color(0x33FF4444)
+    val laNinaColor = if(isDark) Color(0x335555FF) else Color(0x334444FF)
+    
     val textColor = if (isDark) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
+    val alertTextPaint = Paint().apply {
+        textSize = 22f
+        isFakeBoldText = true
+    }
 
     if (historico.isEmpty()) return
 
     val minYear = historico.minOf { it.ano }
     val maxYear = historico.maxOf { it.ano }
     
-    val maxYield = max(
+    val maxYield = kotlin.math.max(
         historico.maxOf { it.rendimento_real },
         historico.maxOf { if (it.rendimento_predito > 0) it.rendimento_predito else 0.0 }
     ).toFloat()
     
-    val yMax = maxYield * 1.15f // 15% padding
+    val yMax = maxYield * 1.15f
     
-    // Anos de El Nino
     val elNinos = listOf(2003, 2010, 2015, 2016, 2023, 2024)
+    val laNinas = listOf(2008, 2011, 2021, 2022)
 
     Card(
-        modifier = Modifier.fillMaxWidth().height(260.dp).padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().height(300.dp).padding(vertical = 8.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text("Evolução Histórica e Projeção (kg/ha)", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Text("Evolução Histórica e Projeção (kg/ha)", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
             Spacer(modifier = Modifier.height(16.dp))
-            Canvas(modifier = Modifier.fillMaxSize().padding(end = 16.dp, bottom = 16.dp)) {
-                val w = size.width
-                val h = size.height
+            Canvas(modifier = Modifier.fillMaxSize().padding(end = 16.dp, bottom = 8.dp)) {
+                val paddingX = 90f // Espaço para os números do eixo Y
+                val paddingY = 60f // Espaço inferior pros anos
+                val w = size.width - paddingX
+                val h = size.height - paddingY
                 val yearSpan = maxYear - minYear
+                if (yearSpan == 0) return@Canvas
                 
-                // Draw El Nino highlights
-                elNinos.filter { it in minYear..maxYear }.forEach { year ->
-                    val x = (year - minYear) * (w / yearSpan)
-                    drawRect(
-                        color = elNinoColor,
-                        topLeft = Offset(x - 8f, 0f),
-                        size = Size(16f, h)
-                    )
-                    drawContext.canvas.nativeCanvas.apply {
-                        val paint = Paint().apply {
-                            color = if(isDark) android.graphics.Color.parseColor("#ff8888") else android.graphics.Color.RED
-                            textSize = 20f
-                            isFakeBoldText = true
+                // Desenhar El Nino e La Nina
+                for (year in minYear..maxYear) {
+                    val x = paddingX + (year - minYear) * (w / yearSpan)
+                    if (year in elNinos) {
+                        drawRect(color = elNinoColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))
+                        drawContext.canvas.nativeCanvas.apply {
+                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor("#ff8888") else android.graphics.Color.parseColor("#cc0000")
+                            save()
+                            rotate(-90f, x, h / 2)
+                            drawText("EL NIÑO", x - 40f, (h / 2) - 15f, alertTextPaint)
+                            restore()
                         }
-                        save()
-                        rotate(-90f, x, h / 2)
-                        drawText("EL NIÑO", x - 30f, (h / 2) - 10f, paint)
-                        restore()
+                    } else if (year in laNinas) {
+                        drawRect(color = laNinaColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))
+                        drawContext.canvas.nativeCanvas.apply {
+                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor("#8888ff") else android.graphics.Color.parseColor("#0000cc")
+                            save()
+                            rotate(-90f, x, h / 2)
+                            drawText("LA NIÑA", x - 40f, (h / 2) - 15f, alertTextPaint)
+                            restore()
+                        }
                     }
                 }
 
-                // Grid and Y labels
+                // Grid Horizontal e Y labels
                 val gridPaint = Paint().apply { color = textColor; textSize = 24f }
                 for (i in 0..4) {
                     val yLine = h - (i * (h / 4))
                     val yieldVal = (i * (yMax / 4)).toInt()
-                    drawLine(color = Color.Gray.copy(alpha = 0.3f), start = Offset(0f, yLine), end = Offset(w, yLine), strokeWidth = 1f)
-                    drawContext.canvas.nativeCanvas.drawText("$yieldVal", 0f, yLine - 5f, gridPaint)
+                    drawLine(color = Color.Gray.copy(alpha = 0.2f), start = Offset(paddingX, yLine), end = Offset(paddingX + w, yLine), strokeWidth = 2f)
+                    drawContext.canvas.nativeCanvas.drawText("$yieldVal", 0f, yLine + 8f, gridPaint)
                 }
                 
-                // X labels (cada 5 anos)
+                // X labels (anos) de 5 em 5
                 for (year in minYear..maxYear step 5) {
-                    val x = (year - minYear) * (w / yearSpan)
-                    drawContext.canvas.nativeCanvas.drawText("$year", x, h + 30f, gridPaint)
+                    val x = paddingX + (year - minYear) * (w / yearSpan)
+                    drawContext.canvas.nativeCanvas.drawText("$year", x - 20f, h + 45f, gridPaint)
                 }
 
-                // Draw Real Line
+                // Separar os dados em Real (passado) vs Predito (futuro)
+                val historicoOrdenado = historico.sortedBy { it.ano }
+                val lastRealItem = historicoOrdenado.lastOrNull { it.rendimento_real > 0 }
+                val startPredYear = lastRealItem?.ano ?: maxYear
+
+                // Desenhar linha REAL (Verde)
                 val pathReal = Path()
                 var firstReal = true
-                historico.filter { it.rendimento_real > 0 }.sortedBy { it.ano }.forEach { item ->
-                    val x = (item.ano - minYear) * (w / yearSpan)
+                historicoOrdenado.filter { it.rendimento_real > 0 }.forEach { item ->
+                    val x = paddingX + (item.ano - minYear) * (w / yearSpan)
                     val y = h - ((item.rendimento_real.toFloat() / yMax) * h)
                     if (firstReal) { pathReal.moveTo(x, y); firstReal = false } 
                     else { pathReal.lineTo(x, y) }
-                    drawCircle(color = lineColorReal, radius = 4f, center = Offset(x, y))
+                    drawCircle(color = lineColorReal, radius = 6f, center = Offset(x, y))
                 }
-                drawPath(path = pathReal, color = lineColorReal, style = Stroke(width = 4f))
+                drawPath(path = pathReal, color = lineColorReal, style = Stroke(width = 6f))
 
-                // Draw Pred Line
+                // Desenhar linha PREDIÇÃO (Azul tracejada), começa no ultimo real e vai pro futuro
                 val pathPred = Path()
                 var firstPred = true
-                historico.sortedBy { it.ano }.forEach { item ->
-                    if(item.rendimento_predito > 0) {
-                        val x = (item.ano - minYear) * (w / yearSpan)
-                        val y = h - ((item.rendimento_predito.toFloat() / yMax) * h)
-                        if (firstPred) { pathPred.moveTo(x, y); firstPred = false } 
-                        else { pathPred.lineTo(x, y) }
+                historicoOrdenado.filter { it.ano >= startPredYear }.forEach { item ->
+                    val x = paddingX + (item.ano - minYear) * (w / yearSpan)
+                    // Se for o ano de pivô (ultim real), plotamos o valor real para a linha azul conectar suavemente
+                    val valPlot = if (item.ano == startPredYear) item.rendimento_real else item.rendimento_predito
+                    val y = h - ((valPlot.toFloat() / yMax) * h)
+                    
+                    if (firstPred) { pathPred.moveTo(x, y); firstPred = false } 
+                    else { pathPred.lineTo(x, y) }
+                    
+                    if (item.ano > startPredYear) {
+                        drawCircle(color = lineColorPre, radius = 6f, center = Offset(x, y))
                     }
                 }
                 drawPath(path = pathPred, color = lineColorPre, style = Stroke(
-                    width = 4f,
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                    width = 6f,
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(15f, 15f), 0f)
                 ))
             }
         }

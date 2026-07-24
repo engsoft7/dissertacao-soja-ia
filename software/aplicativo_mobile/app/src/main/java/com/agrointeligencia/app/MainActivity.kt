@@ -114,6 +114,7 @@ fun AgroDashboard() {
     var isOfflineMode by remember { mutableStateOf(false) }
     
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
     val sharedPrefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
     val gson = remember { Gson() }
     

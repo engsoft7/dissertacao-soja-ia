@@ -11,6 +11,16 @@ android {
     namespace = "com.agrointeligencia.app"
     compileSdk = 37
 
+    
+    signingConfigs {
+        create("release") {
+            storeFile = file("../agro_playstore.jks")
+            storePassword = "Agro@PlayStore2026"
+            keyAlias = "agro_production_key"
+            keyPassword = "Agro@PlayStore2026"
+        }
+    }
+
     defaultConfig {
         applicationId = "com.agrointeligencia.app"
         minSdk = 26

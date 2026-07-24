@@ -380,10 +380,12 @@ fun AgroDashboard() {
                                 }
                             }
                             
-                                HistoricoProdutividadeChart(historico = historicoOrdenado)
+                                item {
+                                    HistoricoProdutividadeChart(historico = historicoOrdenado)
+                                }
                                 items(historicoOrdenado) { hist ->
-                                PrevisaoCard(hist, kpis)
-                            }
+                                    PrevisaoCard(hist, kpis)
+                                }
                         }
                         2 -> { // Sobre
                             item {

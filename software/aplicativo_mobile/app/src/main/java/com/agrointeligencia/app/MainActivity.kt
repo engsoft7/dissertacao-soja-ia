@@ -211,20 +211,20 @@ fun AgroDashboard() {
                 NavigationBarItem(
                     selected = currentTab == 1,
                     onClick = { currentTab = 1 },
-                    icon = { Icon(Icons.Filled.List, contentDescription = "Histórico") },
-                    label = { Text("Histórico") }
+                    icon = { Icon(Icons.Filled.LocationOn, contentDescription = "Mapa") },
+                    label = { Text("Mapa") }
                 )
                 NavigationBarItem(
                     selected = currentTab == 2,
                     onClick = { currentTab = 2 },
-                    icon = { Icon(Icons.Filled.Info, contentDescription = "Sobre") },
-                    label = { Text("Sobre") }
+                    icon = { Icon(Icons.Filled.List, contentDescription = "Histórico") },
+                    label = { Text("Histórico") }
                 )
                 NavigationBarItem(
                     selected = currentTab == 3,
                     onClick = { currentTab = 3 },
-                    icon = { Icon(Icons.Filled.LocationOn, contentDescription = "Mapa") },
-                    label = { Text("Mapa") }
+                    icon = { Icon(Icons.Filled.Info, contentDescription = "Sobre") },
+                    label = { Text("Sobre") }
                 )
             }
         }
@@ -233,7 +233,7 @@ fun AgroDashboard() {
             modifier = Modifier.fillMaxSize().padding(paddingValues),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            userScrollEnabled = currentTab != 3
+            userScrollEnabled = currentTab != 1
         ) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
@@ -382,7 +382,7 @@ fun AgroDashboard() {
                                 }
                             }
                         }
-                        1 -> { // Histórico
+                        2 -> { // Histórico
                             item {
                                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
                                     Icon(Icons.Filled.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
@@ -403,12 +403,12 @@ fun AgroDashboard() {
                                     PrevisaoCard(hist, kpis)
                                 }
                         }
-                        2 -> { // Sobre
+                        3 -> { // Sobre
                             item {
                                 MetodologiaCard()
                             }
                         }
-                        3 -> { // Mapa WebView
+                        1 -> { // Mapa WebView
                             item {
                                 if (isOfflineMode) {
                                     Column(

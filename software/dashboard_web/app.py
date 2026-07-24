@@ -752,11 +752,11 @@ with aba_mapa:
             )
 
             grad = ",".join(_VIRIDIS)
-            bg = "#0d1117"
-            brad = "2px"
-            bord = "1px solid #30363d"
-            col_t = "#8b949e"
-            col_v = "#c9d1d9"
+            bg = "#0d1117" if is_dark else "rgba(128,128,128,0.05)"
+            brad = "6px"
+            bord = "1px solid #30363d" if is_dark else "1px solid rgba(128,128,128,0.2)"
+            col_t = "#8b949e" if is_dark else "rgba(0,0,0,0.6)"
+            col_v = "#c9d1d9" if is_dark else "rgba(0,0,0,0.9)"
             font = "'Roboto Mono', monospace"
 
             html = f"""<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap; font-size:0.75rem;margin:6px 0 8px; padding:8px 12px; background:{bg}; border-radius:{brad}; border:{bord};">

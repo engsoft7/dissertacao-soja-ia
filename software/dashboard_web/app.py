@@ -23,8 +23,8 @@ from streamlit_folium import st_folium  # type: ignore  # pyrefly: ignore[missin
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-DADOS = Path(__file__).resolve().parents[1] / \
-    "dados" / "soja_para_mascarado_2001_2024.csv"
+DADOS = Path(__file__).resolve().parents[2] / \
+    "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"
 DATA_ATUALIZACAO = DADOS.parent / "ultima_atualizacao.txt"
 METRICAS_SALVAS = DADOS.parent / "metricas_validacao.json"
 MUNICIPIOS = DADOS.parent / "municipios_para.csv"

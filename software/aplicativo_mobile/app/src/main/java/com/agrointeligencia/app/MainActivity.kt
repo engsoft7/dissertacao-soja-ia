@@ -232,7 +232,8 @@ fun AgroDashboard() {
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            userScrollEnabled = currentTab != 3
         ) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
@@ -423,7 +424,7 @@ fun AgroDashboard() {
                                     }
                                 } else {
                                     Card(
-                                        modifier = Modifier.fillParentMaxHeight(0.85f).fillMaxWidth().padding(4.dp),
+                                        modifier = Modifier.fillParentMaxHeight(1.0f).fillMaxWidth().padding(1.dp),
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
                                         val currentTheme = if (isSystemInDarkTheme()) "dark" else "light"

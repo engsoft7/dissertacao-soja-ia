@@ -229,10 +229,13 @@ def render_mapa(municipio: str = None, theme: str = "dark"):
     raw_municipio = REV_MUNICIPIOS.get(municipio, municipio) if municipio else None
     cod_sel = _cod_por_nome.get(raw_municipio)
 
+    lat_sel, lon_sel = None, None
     for _, r in pts.iterrows():
         cod = r["cod_ibge7"]
         lat = r["latitude"]
         lon = r["longitude"]
+        if cod == cod_sel:
+            lat_sel, lon_sel = lat, lon
         area = r["area"]
         rend = r["rend"]
         nome = next((k for k, v in _cod_por_nome.items() if v == cod), str(cod))
@@ -269,7 +272,11 @@ def render_mapa(municipio: str = None, theme: str = "dark"):
     </div>
     '''
     m.get_root().html.add_child(folium.Element(legend_html))
-    m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
+    
+    if lat_sel is not None and lon_sel is not None:
+        m.fit_bounds([[lat_sel - 0.7, lon_sel - 0.7], [lat_sel + 0.7, lon_sel + 0.7]])
+    else:
+        m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
 
     html_content = m.get_root().render()
     

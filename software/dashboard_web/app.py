@@ -176,7 +176,7 @@ CSS_TERMINAL = '''<style>
     .kpi-value, .eco-value, [data-testid="stMetricValue"], [data-testid="stDataFrame"], .badge, .stNumberInput input { font-family: 'Roboto Mono', monospace !important; }
 
     [data-testid="stMetric"] { background: var(--secondary-background-color); border: 2px solid rgba(128,128,128,0.25); border-radius: 0px; padding: 12px 16px; border-left: 4px solid var(--primary-color); }
-    [data-testid="stMetricLabel"] { font-size: 0.72rem !important; text-transform: uppercase; color: var(--text-color); opacity: 0.7; letter-spacing: 0.05em; }
+    [data-testid="stMetricLabel"] { font-size: 0.72rem !important; text-transform: uppercase; color: var(--text-color); opacity: 0.7; letter-spacing: 0.05em; white-space: normal !important; overflow: visible !important; }
     [data-testid="stMetricValue"] { color: var(--text-color) !important; font-size: 1.4rem !important; }
 
     .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 10px 0 20px; }
@@ -328,6 +328,10 @@ CSS_GLASS = '''<style>
         text-transform: uppercase;
         letter-spacing: 0.06em;
         opacity: 0.55;
+        white-space: normal !important;
+        overflow: visible !important;
+        word-break: break-word !important;
+        text-overflow: clip !important;
     }
 
     /* TOP GRADIENTS FOR ECO CARDS */

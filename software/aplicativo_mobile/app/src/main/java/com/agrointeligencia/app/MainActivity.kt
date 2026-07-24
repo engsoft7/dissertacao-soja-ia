@@ -424,7 +424,7 @@ fun AgroDashboard() {
                                     }
                                 } else {
                                     Card(
-                                        modifier = Modifier.fillParentMaxHeight(1.0f).fillMaxWidth().padding(1.dp),
+                                        modifier = Modifier.fillParentMaxHeight(0.82f).fillMaxWidth().padding(1.dp),
                                         shape = RoundedCornerShape(12.dp)
                                     ) {
                                         val currentTheme = if (isSystemInDarkTheme()) "dark" else "light"

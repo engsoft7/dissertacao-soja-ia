@@ -33,19 +33,25 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True):
             showlegend=False
         )
 
+    # Constroi o dataframe historico de anomalias climaticas (Hardcoded exatamente como no antigo Altair)
+    df_clima = pd.DataFrame([
+        {"ano": 2003, "Clima": "El Niño"}, {"ano": 2010, "Clima": "El Niño"}, 
+        {"ano": 2015, "Clima": "El Niño"}, {"ano": 2016, "Clima": "El Niño"}, 
+        {"ano": 2024, "Clima": "El Niño"}, {"ano": 2000, "Clima": "La Niña"}, 
+        {"ano": 2008, "Clima": "La Niña"}, {"ano": 2011, "Clima": "La Niña"}, 
+        {"ano": 2021, "Clima": "La Niña"}, {"ano": 2022, "Clima": "La Niña"}
+    ])
+
     # Restaura as faixas climáticas de El Niño e La Niña e injeta de volta na Legenda
-    if "Clima" in serie_plot.columns:
-        # Cores mais sólidas para imitar o mark_rect(opacity=0.3) do Altair
-        el_nino_color = "rgba(215, 48, 39, 0.3)"
-        la_nina_color = "rgba(69, 117, 180, 0.3)"
-        
-        # Filtra anos únicos e plota automaticamente os futuros e passados dinâmicos
-        anos_unicos = serie_plot.dropna(subset=["Clima"])[["ano", "Clima"]].drop_duplicates()
-        
-        has_nino = False
-        has_nina = False
-        
-        for index, row in anos_unicos.iterrows():
+    el_nino_color = "rgba(215, 48, 39, 0.3)"
+    la_nina_color = "rgba(69, 117, 180, 0.3)"
+    
+    anos_unicos = df_clima
+    
+    has_nino = False
+    has_nina = False
+    
+    for index, row in anos_unicos.iterrows():
             # Cria barras verticais estritas em cima do ano, imitando as larguras antigas
             if row["Clima"] == "El Niño":
                 fig.add_vrect(x0=row["ano"]-0.2, x1=row["ano"]+0.2, fillcolor=el_nino_color, line_width=0, layer="below")

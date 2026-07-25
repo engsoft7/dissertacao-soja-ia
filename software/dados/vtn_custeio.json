@@ -1,0 +1,46 @@
+{
+    "PARAGOMINAS": {
+        "custo_ha": 4995,
+        "vtn_ha": 15750
+    },
+    "DOM ELISEU": {
+        "custo_ha": 4944,
+        "vtn_ha": 14700
+    },
+    "ULIANOPOLIS": {
+        "custo_ha": 4964,
+        "vtn_ha": 14910
+    },
+    "RONDON DO PARA": {
+        "custo_ha": 4892,
+        "vtn_ha": 14490
+    },
+    "SANTANA DO ARAGUAIA": {
+        "custo_ha": 4789,
+        "vtn_ha": 13125
+    },
+    "CONCEICAO DO ARAGUAIA": {
+        "custo_ha": 4635,
+        "vtn_ha": 11550
+    },
+    "REDENCAO": {
+        "custo_ha": 4738,
+        "vtn_ha": 12075
+    },
+    "SANTA MARIA DAS BARREIRAS": {
+        "custo_ha": 4686,
+        "vtn_ha": 11025
+    },
+    "GOIANESIA DO PARA": {
+        "custo_ha": 4841,
+        "vtn_ha": 13650
+    },
+    "ITAITUBA": {
+        "custo_ha": 5047,
+        "vtn_ha": 18900
+    },
+    "SANTAREM": {
+        "custo_ha": 4944,
+        "vtn_ha": 16800
+    }
+}

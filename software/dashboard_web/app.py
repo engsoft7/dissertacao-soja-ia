@@ -801,37 +801,47 @@ tela_atual = st.sidebar.radio(
 )
 st.sidebar.divider()
 
+
+st.sidebar.markdown("### Parâmetros Globais")
+municipio = st.sidebar.selectbox(
+    "Polo Científico / Município",
+    municipios,
+    key="mun_sel",
+    format_func=disp,
+    on_change=on_dropdown_change)
+
+comparar = st.sidebar.toggle("Comparar com vizinho", value=False)
+mun_comp = None
+if comparar:
+    opcoes_comp = [m for m in municipios if m != municipio]
+    mun_comp = st.sidebar.selectbox(
+        "Município Paralelo",
+        opcoes_comp,
+        format_func=disp)
+
+ano_alvo = st.sidebar.number_input(
+    "Safra Alvo (Projeção IA)",
+    min_value=int(df.ano.max()) + 1,
+    max_value=int(df.ano.max()) + 3,
+    value=int(df.ano.max()) + 1)
+
+unidade = st.sidebar.radio(
+    "Unidade",
+    options=["Sacadas (60kg)", "Quilos (kg)"],
+    index=0
+)
+
+preco_base = PRECO_SACA_ONLINE
+st.sidebar.divider()
+
 # ==============================================================================
 # ABA 1: MAPA E PREVISÃO
+
 # ==============================================================================
 if tela_atual == "📍 Inteligência Territorial":
     esq, dir_ = st.columns([1, 2])
     with esq:
-        municipio = st.selectbox(
-            "Selecione o Município / Polo",
-            municipios,
-            key="mun_sel",
-            format_func=disp,
-            on_change=on_dropdown_change)
 
-        comparar = st.toggle("Comparar com outro município", value=False)
-        mun_comp: str | None = None
-        if comparar:
-            opcoes_comp = [m for m in municipios if m != municipio]
-            mun_comp = st.selectbox(
-                "Município para Comparação",
-                opcoes_comp,
-                format_func=disp)  # type: ignore
-
-        st.write("")
-        ano_alvo = st.number_input(
-            "Safra Alvo para Projeção",
-            min_value=int(
-                df.ano.max()) + 1,
-            max_value=int(
-                df.ano.max()) + 3,
-            value=int(
-                df.ano.max()) + 1)
 
         with st.spinner(f"Sintetizando predições de IA (XGBoost) para {disp(municipio)}..."):
             r = estimador.estimar(municipio, int(ano_alvo))

@@ -1179,14 +1179,6 @@ st.dataframe(
     },
 )
 
-with st.expander("ℹ️ Sobre a Tecnologia e Fontes de Dados"):
-    st.markdown("""
-**Plataforma de AgroInteligência Preditiva** — Solução baseada em inteligência artificial para previsão de produtividade de soja e monitoramento de safras no Estado do Pará.
-
-* **Tecnologia:** Algoritmos de Machine Learning integrados a dados multitemporais de satélite (MODIS, CHIRPS, ERA5-Land, MapBiomas).
-* **Fontes Econômicas:** Indicadores de mercado físico em tempo real (AwesomeAPI) e boletins de custo operacional efetivo (Aprosoja / Conab).
-* **Repositório do Sistema:** [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
-""")
 
 # ── FOOTER PROFISSIONAL ──
 st.markdown("""

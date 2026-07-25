@@ -52,19 +52,19 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True):
     has_nina = False
     
     for index, row in anos_unicos.iterrows():
-            # Cria barras verticais estritas em cima do ano, imitando as larguras antigas
-            if row["Clima"] == "El Niño":
-                fig.add_vrect(x0=row["ano"]-0.2, x1=row["ano"]+0.2, fillcolor=el_nino_color, line_width=0, layer="below")
-                has_nino = True
-            elif row["Clima"] == "La Niña":
-                fig.add_vrect(x0=row["ano"]-0.2, x1=row["ano"]+0.2, fillcolor=la_nina_color, line_width=0, layer="below")
-                has_nina = True
-                
-        # TRUQUE DO PLOTLY: Adiciona traces vazios apenas para jogar os blocos de clima na Legenda Oficial!
-        if has_nino:
-            fig.add_trace(go.Bar(x=[None], y=[None], marker_color=el_nino_color, name="Histórico El Niño", hoverinfo="none"))
-        if has_nina:
-            fig.add_trace(go.Bar(x=[None], y=[None], marker_color=la_nina_color, name="Histórico La Niña", hoverinfo="none"))
+        # Cria barras verticais estritas em cima do ano, imitando as larguras antigas
+        if row["Clima"] == "El Niño":
+            fig.add_vrect(x0=row["ano"]-0.2, x1=row["ano"]+0.2, fillcolor=el_nino_color, line_width=0, layer="below")
+            has_nino = True
+        elif row["Clima"] == "La Niña":
+            fig.add_vrect(x0=row["ano"]-0.2, x1=row["ano"]+0.2, fillcolor=la_nina_color, line_width=0, layer="below")
+            has_nina = True
+            
+    # TRUQUE DO PLOTLY: Adiciona traces vazios apenas para jogar os blocos de clima na Legenda Oficial!
+    if has_nino:
+        fig.add_trace(go.Bar(x=[None], y=[None], marker_color=el_nino_color, name="Histórico El Niño", hoverinfo="none"))
+    if has_nina:
+        fig.add_trace(go.Bar(x=[None], y=[None], marker_color=la_nina_color, name="Histórico La Niña", hoverinfo="none"))
 
     fig.update_traces(
         line=dict(width=3),

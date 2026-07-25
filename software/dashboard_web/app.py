@@ -1088,53 +1088,53 @@ if tela_atual == "💰 Viabilidade Financeira":
 st.divider()
 
 # ------------------------------------------------------ PANORAMA GERAL DO ESTADO
-st.subheader("📋 Ranking e Panorama Comercial dos Polos Produtivos")
-st.caption(
-    f"Calculado com base na produtividade média recente e na cotação de mercado de **{
-        brl(preco)} por saca**.")
+    st.subheader("📋 Ranking e Panorama Comercial dos Polos Produtivos")
+    st.caption(
+        f"Calculado com base na produtividade média recente e na cotação de mercado de **{
+            brl(preco)} por saca**.")
 
-ult_ano = int(df.ano.max())
-linhas_pan = []
-for mun, d in df.groupby("municipio"):
-    d = d.sort_values("ano")
-    ult5 = d[d.ano > ult_ano - 5]
-    difs = d[M.ALVO].diff().dropna()
-    prod_med_kg = ult5[M.ALVO].mean()
-    faturamento_bruto = (prod_med_kg / SACA_KG) * preco
+    ult_ano = int(df.ano.max())
+    linhas_pan = []
+    for mun, d in df.groupby("municipio"):
+        d = d.sort_values("ano")
+        ult5 = d[d.ano > ult_ano - 5]
+        difs = d[M.ALVO].diff().dropna()
+        prod_med_kg = ult5[M.ALVO].mean()
+        faturamento_bruto = (prod_med_kg / SACA_KG) * preco
 
-    linhas_pan.append({
-        "Município": disp(str(mun)),
-        "prod_media": prod_med_kg * fator,
-        "faturamento": faturamento_bruto,
-        "area_ha": float(d.iloc[-1]["soy_area_ha"]),
-        "repeticao": float((difs == 0).mean() * 100) if len(difs) else 0.0,
-        "safras": len(d),
-    })
+        linhas_pan.append({
+            "Município": disp(str(mun)),
+            "prod_media": prod_med_kg * fator,
+            "faturamento": faturamento_bruto,
+            "area_ha": float(d.iloc[-1]["soy_area_ha"]),
+            "repeticao": float((difs == 0).mean() * 100) if len(difs) else 0.0,
+            "safras": len(d),
+        })
 
-casas_pan = "%.0f" if unidade == "kg/ha" else "%.1f"
-pan = pd.DataFrame(linhas_pan).sort_values("faturamento", ascending=False)
+    casas_pan = "%.0f" if unidade == "kg/ha" else "%.1f"
+    pan = pd.DataFrame(linhas_pan).sort_values("faturamento", ascending=False)
 
-st.dataframe(
-    pan,
-    hide_index=True,
-    width='stretch',
-    column_config={
-        "prod_media": st.column_config.NumberColumn(
-            f"Média Recente ({
-                ult_ano - 4}–{ult_ano}) [{unidade}]",
-            format=casas_pan),
-        "faturamento": st.column_config.NumberColumn(
-            "Faturamento Bruto Est. (R$/ha)",
-            format="localized"),
-        "area_ha": st.column_config.NumberColumn(
-            "Área Atual (ha)",
-            format="localized"),
-        "repeticao": st.column_config.NumberColumn(
-            "Repetição Oficial (%)",
-            format="%.0f%%"),
-        "safras": st.column_config.NumberColumn("Total de Safras"),
-    },
-)
+    st.dataframe(
+        pan,
+        hide_index=True,
+        width='stretch',
+        column_config={
+            "prod_media": st.column_config.NumberColumn(
+                f"Média Recente ({
+                    ult_ano - 4}–{ult_ano}) [{unidade}]",
+                format=casas_pan),
+            "faturamento": st.column_config.NumberColumn(
+                "Faturamento Bruto Est. (R$/ha)",
+                format="localized"),
+            "area_ha": st.column_config.NumberColumn(
+                "Área Atual (ha)",
+                format="localized"),
+            "repeticao": st.column_config.NumberColumn(
+                "Repetição Oficial (%)",
+                format="%.0f%%"),
+            "safras": st.column_config.NumberColumn("Total de Safras"),
+        },
+    )
 
 
 

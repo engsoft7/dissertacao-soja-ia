@@ -16,3 +16,4 @@ st-theme>=1.2.3
 # reintroduzir o crash. NÃO remover.
 anyio==4.14.1
 gitpython==3.1.50
+plotly>=5.0

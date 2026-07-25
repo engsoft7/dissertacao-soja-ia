@@ -680,20 +680,19 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: b
 atualizada_em = data_atualizacao()
 st.markdown(f"""
 <div class="header-container">
-    <div class="premium-title">🌿 AgroInteligência — Previsão e Viabilidade de Safra</div>
-    <div style="font-size:0.82rem; color:var(--text-color); opacity:0.75; margin-top:4px; position:relative; z-index:1;">
-        <span style="color:#66BB6A; font-weight:600;">{len(df)}</span> registros ·
-        <span style="color:#42A5F5; font-weight:600;">{df.municipio.nunique()}</span> municípios monitorados ·
-        <span style="color:#AB47BC; font-weight:600;">{df.ano.min()}–{df.ano.max()}</span>
-        {'· <span style="color:#FFA726; font-weight:600;">Atualizado em ' + atualizada_em + '</span>' if atualizada_em else ''}
+    <div class="premium-title">AgroInteligência — Previsão e Viabilidade de Safra</div>
+    <div style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">
+        <span style="color:var(--text-pure); font-weight:600;">{len(df)}</span> registros ·
+        <span style="color:var(--text-pure); font-weight:600;">{df.municipio.nunique()}</span> municípios ·
+        <span style="color:var(--text-pure); font-weight:600;">{df.ano.min()}–{df.ano.max()}</span>
+        {'· <span style="color:var(--text-pure); font-weight:600;"> ' + atualizada_em + '</span>' if atualizada_em else ''}
     </div>
     <div class="badge-row">
-        <span class="badge green">🛰️ MODIS</span>
-        <span class="badge blue">🌧️ CHIRPS</span>
-        <span class="badge purple">🌡️ ERA5-Land</span>
-        <span class="badge orange">🗺️ MapBiomas</span>
+        <span class="badge">MODIS</span>
+        <span class="badge">CHIRPS</span>
+        <span class="badge">ERA5-Land</span>
+        <span class="badge">MapBiomas</span>
     </div>
-    <div class="header-separator"></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -726,22 +725,22 @@ EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 st.markdown(f"""
 <div class="kpi-grid">
     <div class="kpi-card green">
-        <span class="kpi-icon">🎯</span>
+        
         <div class="kpi-label">Margem de Precisão (RMSE)</div>
         <div class="kpi-value">± {qtd(metricas['rmse'])} {unidade}</div>
     </div>
     <div class="kpi-card blue">
-        <span class="kpi-icon">📊</span>
+        
         <div class="kpi-label">Variação Relativa</div>
         <div class="kpi-value">{metricas['rrmse']:.1f}%</div>
     </div>
     <div class="kpi-card purple">
-        <span class="kpi-icon">🧠</span>
+        
         <div class="kpi-label">Aderência Preditiva (R²)</div>
         <div class="kpi-value">{metricas['r2']:.3f}</div>
     </div>
     <div class="kpi-card orange">
-        <span class="kpi-icon">📈</span>
+        
         <div class="kpi-label">Benchmark de Tendência</div>
         <div class="kpi-value">{metricas['r2_baseline']:.3f}</div>
     </div>
@@ -776,9 +775,9 @@ def on_dropdown_change():
 
 # Abas focadas em inteligência comercial e gestão de risco
 aba_mapa, aba_graficos, aba_eco = st.tabs([
-    "🗺️ Inteligência Territorial & Previsão",
-    "📈 Análise Histórica & Clima",
-    "💰 Viabilidade Comercial & Margens"
+    "Inteligência Territorial",
+    "Análise Histórica",
+    "Viabilidade Financeira"
 ])
 
 # ==============================================================================
@@ -997,7 +996,7 @@ with aba_graficos:
 with aba_eco:
     st.markdown("""
     <div style="margin-bottom:4px">
-        <span style="font-size:1.5rem">💰</span>
+        
         <span style="font-size:1.2rem; font-weight:700; margin-left:6px;">Inteligência de Mercado & Margens por Hectare</span>
     </div>
     <p style="font-size:0.85rem; color:var(--text-color); opacity:0.6; margin-top:0;">
@@ -1143,7 +1142,7 @@ with st.expander("ℹ️ Sobre a Tecnologia e Fontes de Dados"):
 # ── FOOTER PROFISSIONAL ──
 st.markdown("""
 <div class="footer-container">
-    <div class="footer-brand">🌿 AgroInteligência</div>
+    <div class="footer-brand">AgroInteligência</div>
     <div class="footer-text">
         Plataforma de Inteligência Preditiva para Safra de Soja — Estado do Pará<br>
         Machine Learning · Sensoriamento Remoto · Análise de Viabilidade Comercial<br>

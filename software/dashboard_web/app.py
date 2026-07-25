@@ -927,85 +927,14 @@ if tela_atual == "📈 Análise Histórica":
         Nome=[disp(m) for m in serie["municipio"]]
     )
 
-    eixo_x_inteligente = alt.X(
-        "ano:Q",
-        title="Ano-safra",
-        scale=alt.Scale(zero=False),
-        axis=alt.Axis(format="d", tickMinStep=2)
-    )
-
-    base = alt.Chart(serie_plot).encode(x=eixo_x_inteligente)
-
-    linha = base.mark_line(
-        point=True).encode(
-        y=alt.Y(
-            "produtividade:Q", title=unidade, scale=alt.Scale(
-                zero=False), axis=EIXO_BR), color=alt.Color(
-                    "Nome:N", legend=alt.Legend(
-                        title="Município", orient="bottom")), tooltip=[
-                            "ano", "Nome", alt.Tooltip(
-                                "produtividade_rotulo:N", title=unidade)], )
-
-    tendencia = base.transform_regression(
-        "ano",
-        "produtividade",
-        groupby=["Nome"]).mark_line(
-        strokeDash=[
-            5,
-            5],
-        strokeWidth=2,
-        opacity=0.6).encode(
-        color=alt.Color(
-            "Nome:N",
-            legend=None))
-
-    marcas = base.transform_filter(alt.datum.repetido).mark_point(
-        size=110, filled=True, color="#B00020"
-    ).encode(
-        y="produtividade:Q",
-        tooltip=[alt.Tooltip("ano", title="Valor idêntico ao ano anterior")]
-    )
-
-    df_clima = pd.DataFrame(
-        [
-            {
-                "ano": 2003, "Clima": "El Niño"}, {
-                "ano": 2010, "Clima": "El Niño"}, {
-                    "ano": 2015, "Clima": "El Niño"}, {
-                        "ano": 2016, "Clima": "El Niño"}, {
-                            "ano": 2024, "Clima": "El Niño"}, {
-                                "ano": 2008, "Clima": "La Niña"}, {
-                                    "ano": 2011, "Clima": "La Niña"}, {
-                                        "ano": 2021, "Clima": "La Niña"}, {
-                                            "ano": 2022, "Clima": "La Niña"}])
-    clima_chart = alt.Chart(df_clima).mark_rule(
-        size=8, opacity=0.3).encode(
-        x=eixo_x_inteligente, color=alt.Color(
-            "Clima:N", scale=alt.Scale(
-                domain=[
-                    "El Niño", "La Niña"], range=[
-                        "#d73027", "#4575b4"]), legend=alt.Legend(
-                            title="Anos de Forte Influência Climática", orient="bottom", titleLimit=0)))
-
-    grafico_prod = alt.layer(
-        clima_chart,
-        linha,
-        tendencia,
-        marcas).resolve_scale(
-        color='independent')
-    st.altair_chart(grafico_prod, width='stretch')
-    st.caption("A linha tracejada indica a tendência tecnológica. As marcações verticais destacam anos de forte impacto de El Niño / La Niña.")
+    from ui.charts import plot_produtividade, plot_area
+    import plotly.graph_objects as go
+    
+    st.plotly_chart(plot_produtividade(serie_plot, is_dark=is_dark), use_container_width=True)
+    st.caption("Gráfico interativo: arraste para selecionar um período, dois toques para resetar o zoom.")
 
     st.subheader("Expansão da Área Plantada (Hectares)")
-    area = alt.Chart(serie_plot).mark_area(
-        opacity=0.4).encode(
-        x=eixo_x_inteligente, y=alt.Y(
-            "soy_area_ha:Q", title="Hectares", axis=EIXO_BR), color=alt.Color(
-                "Nome:N", legend=alt.Legend(
-                    title="Município", orient="bottom")), tooltip=[
-                        "ano", "Nome", alt.Tooltip(
-                            "area_rotulo:N", title="Hectares")], )
-    st.altair_chart(area, width='stretch')
+    st.plotly_chart(plot_area(serie_plot, is_dark=is_dark), use_container_width=True)
 
     b1, b2 = st.columns(2)
     b1.download_button(

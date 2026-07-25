@@ -295,10 +295,10 @@ __VARS__
 
     /* MINIMALIST LINEAR STYLE CARDS */
     .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 10px 0 20px; }
-    .eco-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .eco-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
     @media (max-width: 1024px) {
         .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-        .eco-grid { grid-template-columns: repeat(1, 1fr); }
+        .eco-grid { grid-template-columns: repeat(2, 1fr); }
     }
     
     [data-testid="stMetric"], .kpi-card, .eco-card, [data-testid="stExpander"] { 
@@ -405,8 +405,8 @@ CSS_ORIGINAL = """<style>
     .kpi-value { font-size: 1.5rem; font-weight: 700; }
 
     /* Eco Grids */
-    .eco-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 16px 0; }
-    @media (max-width: 768px) { .eco-grid { grid-template-columns: 1fr; } }
+    .eco-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 16px 0; }
+    @media (max-width: 768px) { .eco-grid { grid-template-columns: repeat(2, 1fr); } }
     .eco-card { background: var(--secondary-background-color); border: 1px solid rgba(128,128,128,0.15); border-radius: 12px; padding: 22px; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.25s; }
     .eco-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.08); }
     .eco-icon { font-size: 1.8rem; float: right; opacity: 0.85; }
@@ -725,7 +725,24 @@ def brl(v: float, dec: int = 0) -> str:
 
 
 PRECO_SACA_ONLINE = buscar_preco_soja_online()
-CUSTO_HA_REF = 4800.0  # Referência base de custeio
+
+BASE_CUSTO_PA = {
+    "PARAGOMINAS": {"custo_ha": 4850.0, "vtn_ha": 15000.0},
+    "DOM ELISEU": {"custo_ha": 4800.0, "vtn_ha": 14000.0},
+    "ULIANOPOLIS": {"custo_ha": 4820.0, "vtn_ha": 14200.0},
+    "RONDON DO PARA": {"custo_ha": 4750.0, "vtn_ha": 13800.0},
+    "SANTANA DO ARAGUAIA": {"custo_ha": 4650.0, "vtn_ha": 12500.0},
+    "CONCEICAO DO ARAGUAIA": {"custo_ha": 4500.0, "vtn_ha": 11000.0},
+    "REDENCAO": {"custo_ha": 4600.0, "vtn_ha": 11500.0},
+    "SANTA MARIA DAS BARREIRAS": {"custo_ha": 4550.0, "vtn_ha": 10500.0},
+    "GOIANESIA DO PARA": {"custo_ha": 4700.0, "vtn_ha": 13000.0},
+    "ITAITUBA": {"custo_ha": 4900.0, "vtn_ha": 18000.0},
+    "SANTAREM": {"custo_ha": 4950.0, "vtn_ha": 19000.0},
+}
+
+def get_custos_locais(municipio: str):
+    mun = municipio.upper() if municipio else ""
+    return BASE_CUSTO_PA.get(mun, {"custo_ha": 4800.0, "vtn_ha": 12000.0})
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
 # --- PAINEL EXECUTIVO DE INDICADORES ---
@@ -1008,7 +1025,9 @@ with aba_eco:
 
     r_eco = estimador.estimar(municipio, int(df.ano.max()) + 1)
 
-    col_eco1, col_eco2 = st.columns(2)
+    col_eco1, col_eco2, col_eco3 = st.columns(3)
+    custos_locais = get_custos_locais(municipio)
+    
     with col_eco1:
         preco = st.number_input(
             "Preço de referência da saca (R$ / 60 kg)",
@@ -1019,12 +1038,20 @@ with aba_eco:
             "🌐 **Fonte da Cotação:** Cotação interativa em tempo real (Notícias Agrícolas / CEPEA).")
     with col_eco2:
         custo_ha = st.number_input(
-            "Custo operacional de referência (R$ / hectare)",
+            f"Custo Operacional base ({municipio.title()})",
             min_value=0.0,
-            value=CUSTO_HA_REF,
+            value=custos_locais["custo_ha"],
             step=100.0)
         st.caption(
-            "📊 **Fonte do Custo (Manual):** Valor de base recomendado. Sinta-se livre para editar com a realidade da sua fazenda.")
+            "📊 **Fonte do Custo:** Base VTN ajustada. Edite com a realidade da sua fazenda.")
+    with col_eco3:
+        vtn_ha = st.number_input(
+            f"Preço Terra Nua VTN/ha ({municipio.title()})",
+            min_value=0.0,
+            value=custos_locais["vtn_ha"],
+            step=500.0)
+        st.caption(
+            "🗺️ **Fonte da Terra:** Base de referência municipal da Receita Federal (VTN).")
 
     est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
     receita_ha = est_sacas_ha * preco
@@ -1043,6 +1070,11 @@ with aba_eco:
             <div class="eco-icon">📋</div>
             <div class="eco-label">Custo Operacional / ha</div>
             <div class="eco-value">{brl(custo_ha)}</div>
+        </div>
+        <div class="eco-card vtn">
+            <div class="eco-icon">🗺️</div>
+            <div class="eco-label">Valor da Terra Nua / ha</div>
+            <div class="eco-value">{brl(vtn_ha)}</div>
         </div>
         <div class="eco-card margem">
             <div class="eco-icon">📈</div>

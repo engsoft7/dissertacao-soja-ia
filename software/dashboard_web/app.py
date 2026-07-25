@@ -1139,19 +1139,12 @@ with st.expander("ℹ️ Sobre a Tecnologia e Fontes de Dados", expanded=False):
     * **CONAB / Aprosoja:** Tabelas referenciais de Custeio Operacional Efetivo.
     
     *Repositório Acadêmico:* [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
+
+    ---
+    **AgroInteligência** | Plataforma de Inteligência Preditiva para Safra de Soja — Estado do Pará
+    *Machine Learning · Sensoriamento Remoto · Análise de Viabilidade Comercial*
+    
+    Desenvolvido com Streamlit · Dados: IBGE · MODIS · CHIRPS · ERA5 · MapBiomas · AwesomeAPI · Conab
     ''')
 
-# ── FOOTER PROFISSIONAL ──
-st.markdown("""
-<div class="footer-container">
-    <div class="footer-brand">AgroInteligência</div>
-    <div class="footer-text">
-        Plataforma de Inteligência Preditiva para Safra de Soja — Estado do Pará<br>
-        Machine Learning · Sensoriamento Remoto · Análise de Viabilidade Comercial<br>
-        <span style="margin-top:8px; display:inline-block;">
-            <a href="https://github.com/engsoft7/dissertacao-soja-ia" target="_blank">GitHub</a>
-            &nbsp;·&nbsp; Desenvolvido com Streamlit &nbsp;·&nbsp; Dados: IBGE · MODIS · CHIRPS · ERA5 · MapBiomas · AwesomeAPI · Conab
-        </span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+

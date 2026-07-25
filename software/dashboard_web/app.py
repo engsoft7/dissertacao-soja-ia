@@ -1002,6 +1002,18 @@ if tela_atual == "💰 Viabilidade Financeira":
     pct_margem = f"{margem_ha / custo_ha * 100:+.0f}%" if custo_ha else "—"
     cor_delta = '#16a34a' if margem_ha >= 0 else '#EF5350'
 
+    # SÍNTESE LLM (ANÁLISE GENERATIVA)
+    texto_ia = ""
+    if margem_ha > 0:
+        if margem_ha > (custo_ha * 0.3):
+             texto_ia = f"📈 **Alta Viabilidade (Síntese IA):** Cenário projeta lucro operacional robusto. A produtividade estimada de **{est_sacas_ha:.1f} scs/ha** assegura um faturamento de {brl(receita_ha)}/ha, cobrindo com folga o custeio de {brl(custo_ha)}, deixando uma margem excelente."
+        else:
+             texto_ia = f"⚠️ **Alerta de Stress (Síntese IA):** A conta fecha no azul, mas a margem estreita de {brl(margem_ha)}/ha exige cautela. A produtividade predita de **{est_sacas_ha:.1f} scs** não suportará solavancos climáticos intensos sem risco de prejuízo."
+    else:
+        texto_ia = f"🛑 **Risco Operacional Crítico (Síntese IA):** Alerta Vermelho! Com a soja simulada a {brl(preco)} e custo elevado ({brl(custo_ha)}/ha), a IA prevê colapso econômico em {disp(municipio)}. A produtividade de **{est_sacas_ha:.1f} scs/ha** destruiria o capital, com perdas de {brl(abs(margem_ha))} por hectare."
+
+    st.markdown(f'<div style="background:var(--card-bg); padding:16px; border-radius:6px; border-left:4px solid {cor_delta}; margin-bottom: 24px; border-top:1px solid var(--card-border); border-right:1px solid var(--card-border); border-bottom:1px solid var(--card-border); font-size: 0.95rem; line-height: 1.5; font-family: Inter, sans-serif;">{texto_ia}</div>', unsafe_allow_html=True)
+
     st.markdown(f"""
     <div class="eco-grid">
         <div class="eco-card receita">

@@ -246,15 +246,7 @@ CSS_TERMINAL = '''<style>
     .stSlider [data-baseweb="slider"] [role="slider"] { background: var(--text-color) !important; border-radius: 0px; border: 2px solid var(--text-color); }
     .stSlider [data-baseweb="slider"] [data-testid="stTickBar"] > div { background: rgba(128,128,128,0.25) !important; }
 
-    .footer-container { margin-top: 30px; padding: 12px 0; border-top: 2px solid rgba(128,128,128,0.25); text-align: left; }
-    .footer-brand { font-family: 'Inter'; font-size: 0.8rem; font-weight: 700; color: var(--text-color); opacity: 0.7; letter-spacing: 0.05em; text-transform: uppercase; }
-    .footer-text { font-size: 0.7rem; color: var(--text-color); opacity: 0.6; }
-</style>'''
-
-CSS_GLASS = '''<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
-    :root {
+CSS_VARS_LIGHT = """
         --app-bg: #fafafa;
         --card-bg: #ffffff;
         --card-border: #e5e5e5;
@@ -265,21 +257,26 @@ CSS_GLASS = '''<style>
         --accent-purple: #9333ea;
         --accent-orange: #d97706;
         --card-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    }
+"""
+
+CSS_VARS_DARK = """
+        --app-bg: #0a0a0a;
+        --card-bg: #121212;
+        --card-border: #222222;
+        --text-pure: #ededed;
+        --text-muted: #a1a1aa;
+        --accent-green: #22c55e;
+        --accent-blue: #3b82f6;
+        --accent-purple: #a855f7;
+        --accent-orange: #f59e0b;
+        --card-shadow: 0px 4px 12px rgba(0,0,0,0.4);
+"""
+
+CSS_GLASS = '''<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --app-bg: #0a0a0a;
-            --card-bg: #111111;
-            --card-border: #262626;
-            --text-pure: #ededed;
-            --text-muted: #a1a1aa;
-            --accent-green: #22c55e;
-            --accent-blue: #3b82f6;
-            --accent-purple: #a855f7;
-            --accent-orange: #f59e0b;
-            --card-shadow: 0px 4px 12px rgba(0,0,0,0.4);
-        }
+    :root {
+__VARS__
     }
 
     /* GLOBAL CLEANLINESS */
@@ -441,7 +438,7 @@ CSS_ORIGINAL = """<style>
 </style>"""
 
 # ── TEMA E ESTILIZAÇÃO (ÚNICA E ROBUSTA) ──
-CSS_ATUAL = CSS_GLASS
+CSS_ATUAL = CSS_GLASS.replace('__VARS__', CSS_VARS_DARK if is_dark else CSS_VARS_LIGHT)
 st.markdown(CSS_ATUAL, unsafe_allow_html=True)
 
 
@@ -1001,8 +998,7 @@ with aba_graficos:
 with aba_eco:
     st.markdown("""
     <div style="margin-bottom:4px">
-        
-        <span style="font-size:1.2rem; font-weight:700; margin-left:6px;">Inteligência de Mercado & Margens por Hectare</span>
+        <span style="font-size:1.2rem; font-weight:700;">Inteligência de Mercado & Margens por Hectare</span>
     </div>
     <p style="font-size:0.85rem; color:var(--text-color); opacity:0.6; margin-top:0;">
         Simule cenários financeiros combinando projeções de IA com preços em tempo real e custeio operacional.

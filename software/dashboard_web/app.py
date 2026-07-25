@@ -794,16 +794,17 @@ def on_dropdown_change():
 
 
 # Abas focadas em inteligência comercial e gestão de risco
-aba_mapa, aba_graficos, aba_eco = st.tabs([
-    "Inteligência Territorial",
-    "Análise Histórica",
-    "Viabilidade Financeira"
-])
+st.sidebar.markdown("### Navegação Principal")
+tela_atual = st.sidebar.radio(
+    "",
+    ["📍 Inteligência Territorial", "📈 Análise Histórica", "💰 Viabilidade Financeira"]
+)
+st.sidebar.divider()
 
 # ==============================================================================
 # ABA 1: MAPA E PREVISÃO
 # ==============================================================================
-with aba_mapa:
+if tela_atual == "📍 Inteligência Territorial":
     esq, dir_ = st.columns([1, 2])
     with esq:
         municipio = st.selectbox(
@@ -832,7 +833,8 @@ with aba_mapa:
             value=int(
                 df.ano.max()) + 1)
 
-        r = estimador.estimar(municipio, int(ano_alvo))
+        with st.spinner(f"Sintetizando predições de IA (XGBoost) para {disp(municipio)}..."):
+            r = estimador.estimar(municipio, int(ano_alvo))
         st.metric(f"Projeção Safra {ano_alvo} ({disp(municipio)})",
                   f"{qtd(r['estimativa_kg_ha'])} {unidade}",
                   delta=f"Intervalo: ± {qtd(r['margem_kg_ha'])} {unidade}",
@@ -854,8 +856,9 @@ with aba_mapa:
                 clima["temp_max"] += dtemp
                 clima["balanco_hidrico"] = clima["precip_total"] - \
                     clima["etp_total"]
-                cenario = estimador.estimar(
-                    municipio, int(ano_alvo), clima=clima)
+                with st.spinner("Executando simulação de stress climático avançada..."):
+                    cenario = estimador.estimar(
+                        municipio, int(ano_alvo), clima=clima)
                 dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
                 st.metric("Projeção Ajustada ao Clima",
                           f"{qtd(cenario['estimativa_kg_ha'])} {unidade}",
@@ -896,7 +899,7 @@ with aba_mapa:
 # ==============================================================================
 # ABA 2: SÉRIES HISTÓRICAS & CLIMA
 # ==============================================================================
-with aba_graficos:
+if tela_atual == "📈 Análise Histórica":
     if mun_comp:
         serie = df[df.municipio.isin([municipio, mun_comp])].sort_values([
             "municipio", "ano"])  # type: ignore
@@ -1013,7 +1016,7 @@ with aba_graficos:
 # ==============================================================================
 # ABA 3: ANÁLISE ECONÔMICA & MERCADO
 # ==============================================================================
-with aba_eco:
+if tela_atual == "💰 Viabilidade Financeira":
     st.markdown("""
     <div style="margin-bottom:4px">
         <span style="font-size:1.2rem; font-weight:700;">Inteligência de Mercado & Margens por Hectare</span>
@@ -1023,7 +1026,8 @@ with aba_eco:
     </p>
     """, unsafe_allow_html=True)
 
-    r_eco = estimador.estimar(municipio, int(df.ano.max()) + 1)
+    with st.spinner("Processando margem de lucro com IA Georreferenciada..."):
+        r_eco = estimador.estimar(municipio, int(df.ano.max()) + 1)
 
     col_eco1, col_eco2, col_eco3 = st.columns(3)
     custos_locais = get_custos_locais(municipio)

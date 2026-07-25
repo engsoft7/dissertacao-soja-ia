@@ -678,6 +678,8 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: b
 
 
 atualizada_em = data_atualizacao()
+html_atualizacao = f'· <span style="color:var(--text-pure); font-weight:600;"> {atualizada_em}</span>' if atualizada_em else ''
+
 st.markdown(f"""
 <div class="header-container">
     <div class="premium-title">AgroInteligência — Previsão e Viabilidade de Safra</div>
@@ -685,7 +687,7 @@ st.markdown(f"""
         <span style="color:var(--text-pure); font-weight:600;">{len(df)}</span> registros ·
         <span style="color:var(--text-pure); font-weight:600;">{df.municipio.nunique()}</span> municípios ·
         <span style="color:var(--text-pure); font-weight:600;">{df.ano.min()}–{df.ano.max()}</span>
-        {'· <span style="color:var(--text-pure); font-weight:600;"> ' + atualizada_em + '</span>' if atualizada_em else ''}
+        {html_atualizacao}
     </div>
     <div class="badge-row">
         <span class="badge">MODIS</span>
@@ -1028,6 +1030,7 @@ with aba_eco:
     receita_ha = est_sacas_ha * preco
     margem_ha = receita_ha - custo_ha
     pct_margem = f"{margem_ha / custo_ha * 100:+.0f}%" if custo_ha else "—"
+    cor_delta = '#16a34a' if margem_ha >= 0 else '#EF5350'
 
     st.markdown(f"""
     <div class="eco-grid">
@@ -1045,7 +1048,7 @@ with aba_eco:
             <div class="eco-icon">📈</div>
             <div class="eco-label">Margem Líquida / ha</div>
             <div class="eco-value">{brl(margem_ha)}</div>
-            <div class="eco-delta" style="color:{'#66BB6A' if margem_ha >= 0 else '#EF5350'}">{pct_margem} sobre o custo</div>
+            <div class="eco-delta" style="color:{cor_delta}">{pct_margem} sobre o custo</div>
         </div>
     </div>
     """, unsafe_allow_html=True)

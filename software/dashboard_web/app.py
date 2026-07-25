@@ -727,22 +727,18 @@ EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 st.markdown(f"""
 <div class="kpi-grid">
     <div class="kpi-card green">
-        
         <div class="kpi-label">Margem de Precisão (RMSE)</div>
         <div class="kpi-value">± {qtd(metricas['rmse'])} {unidade}</div>
     </div>
     <div class="kpi-card blue">
-        
         <div class="kpi-label">Variação Relativa</div>
         <div class="kpi-value">{metricas['rrmse']:.1f}%</div>
     </div>
     <div class="kpi-card purple">
-        
         <div class="kpi-label">Aderência Preditiva (R²)</div>
         <div class="kpi-value">{metricas['r2']:.3f}</div>
     </div>
     <div class="kpi-card orange">
-        
         <div class="kpi-label">Benchmark de Tendência</div>
         <div class="kpi-value">{metricas['r2_baseline']:.3f}</div>
     </div>

@@ -293,22 +293,23 @@ __VARS__
         background-image: none !important;
     }
 
-    /* MINIMALIST LINEAR STYLE CARDS */
-    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 10px 0 20px; }
-    .eco-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    @media (max-width: 1024px) {
-        .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-        .eco-grid { grid-template-columns: repeat(2, 1fr); }
+    /* MINIMALIST LINEAR STYLE CARDS - FULL RESPONSIVO (AUTO-FIT) */
+    .kpi-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+        gap: 16px; 
+        margin: 10px 0 20px; 
+    }
+    .eco-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+        gap: 16px; 
     }
     
+    /* Escalagem suave de fontes em telas menores */
     @media (max-width: 768px) {
-        .kpi-grid { grid-template-columns: 1fr; }
-        .eco-grid { grid-template-columns: 1fr; }
-        
         .kpi-label, .eco-label, [data-testid="stMetricLabel"] { font-size: 0.85rem !important; }
         .kpi-value, .eco-value, [data-testid="stMetricValue"] { font-size: 1.5rem !important; }
-        
-        /* Oculta excessos e prioriza o scroll no celular */
         .stApp { padding-left: 0 !important; }
     }
     

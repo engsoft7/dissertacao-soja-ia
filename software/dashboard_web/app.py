@@ -245,6 +245,7 @@ CSS_TERMINAL = '''<style>
     hr { background: rgba(128,128,128,0.25) !important; height: 2px !important; margin: 16px 0 !important; }
     .stSlider [data-baseweb="slider"] [role="slider"] { background: var(--text-color) !important; border-radius: 0px; border: 2px solid var(--text-color); }
     .stSlider [data-baseweb="slider"] [data-testid="stTickBar"] > div { background: rgba(128,128,128,0.25) !important; }
+</style>'''
 
 CSS_VARS_LIGHT = """
         --app-bg: #fafafa;

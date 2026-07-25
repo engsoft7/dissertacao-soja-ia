@@ -1121,6 +1121,26 @@ st.dataframe(
 )
 
 
+
+with st.expander("ℹ️ Sobre a Tecnologia e Fontes de Dados", expanded=False):
+    st.markdown('''
+    **Plataforma de AgroInteligência Preditiva** — Solução metodológica baseada em inteligência artificial para previsão de produtividade de soja e monitoramento do agronegócio no Estado do Pará.
+
+    ### Tratamento e Origem dos Dados:
+    * **IBGE (PAM):** Base estrutural de dados oficiais de safra e área plantada histórica para a modelagem alvo.
+    * **Google Earth Engine (GEE):** Plataforma primária de ETL satelital em larga escala.
+      * *MODIS (MOD13Q1 / Terra)*: Séries temporais de Índices de Vegetação (NDVI, EVI).
+      * *CHIRPS*: Malha meteorológica para mensuração de Precipitação e Volume de Chuva.
+      * *ERA5-Land*: Banco climático de temperatura global para extração de Evapotranspiração Potencial e Balanço Hídrico.
+    * **Projeto MapBiomas:** Extração das coberturas de Uso e Ocupação do Solo com foco em áreas exclusivas de soja no Pará (mascaramento de satélite).
+    * **AwesomeAPI / B3:** Ingestão das variações diárias no câmbio livre e bolsas de *commodities*.
+    * **Notícias Agrícolas / CEPEA:** Scraping em tempo real para o Preço da Saca de Soja (Porto/Paranaguá).
+    * **Receita Federal / SIPT:** Valores de referência da Terra Nua (VTN) baseados nas prefeituras do estado.
+    * **CONAB / Aprosoja:** Tabelas referenciais de Custeio Operacional Efetivo.
+    
+    *Repositório Acadêmico:* [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
+    ''')
+
 # ── FOOTER PROFISSIONAL ──
 st.markdown("""
 <div class="footer-container">

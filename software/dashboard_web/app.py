@@ -1189,7 +1189,7 @@ st.markdown("""
         Machine Learning · Sensoriamento Remoto · Análise de Viabilidade Comercial<br>
         <span style="margin-top:8px; display:inline-block;">
             <a href="https://github.com/engsoft7/dissertacao-soja-ia" target="_blank">GitHub</a>
-            &nbsp;·&nbsp; Desenvolvido com Streamlit &nbsp;·&nbsp; Dados: IBGE · MODIS · CHIRPS · ERA5
+            &nbsp;·&nbsp; Desenvolvido com Streamlit &nbsp;·&nbsp; Dados: IBGE · MODIS · CHIRPS · ERA5 · MapBiomas · AwesomeAPI · Conab
         </span>
     </div>
 </div>

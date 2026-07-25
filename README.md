@@ -275,3 +275,9 @@ DOI: 10.5281/zenodo.21286115. Disponível em: https://doi.org/10.5281/zenodo.212
 - **Experiência Sensorial (Haptics):** Física elástica na inferência dos cards (*Spring Animations*) e resposta tátil profunda no processamento usando o `LocalHapticFeedback`.
 - **Geovisualização Integrada:** Mapas dinâmicos da folha do satélite com auto-recorte e isolamento do município focado (*Smart Zoom* Folium-backend).
 - **Offline First:** Cascatas de resiliência UI/UX operando perfeitamente sem conexão com a internet.
+
+## 🌐 AgroInteligência Web v2.0 (Executive SPA Dashboard)
+- **Single Page Application (SPA):** Navegação redesenhada para uma "Sidebar" global, fluida e com responsividade estrita. O encadeamento do painel elimina tabulações e se comporta como um SaaS nativo multi-tenant.
+- **Ecossistema Modular:** Código fonte fragmentado num ecossistema elegante e sustentável, separando roteamento de manipulação do layout via Python e consumo (ETL) da web (Notícias Agrícolas / CEPEA).
+- **Indicadores Econômicos Automatizados:** Injeção simultânea dos bancos de **VTN/ha (Preço da Terra Nua - Receita Federal)** por municípios diretamente nos cálculos operacionais, viabilizado por scripts independentes.
+- **Visibilidade Asynchronous de AI:** Processamento dinâmico do XGBoost encapsulado em "shimmers" / Spinners UX, indicando cálculo simultâneo na simulação de cenários operacionais e previsões em tempo real do Agro-mercado do Pará.

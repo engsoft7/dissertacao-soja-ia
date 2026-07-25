@@ -92,19 +92,14 @@ principais:
 
 ---
 
-## 6. Funcionalidades Principais
-
-1. Previsão de rendimento de soja (kg/ha e sc/ha) por município.
-2. Projeção para até 3 safras futuras.
-3. Simulação climática interativa (What-If: precipitação e temperatura).
-4. Análise de viabilidade financeira (receita, custo, lucro, ROI, ponto de equilíbrio).
-5. Mapa georreferenciado com rendimento e área plantada.
-6. Atualização automática de dados via integração IBGE + Earth Engine.
-7. Acesso multiplataforma: web (Streamlit), mobile (Android) e API REST.
-
----
-
-## 7. Fontes de Dados Utilizadas
+## 6. Funcionalidades Principais\n
+1. **Previsão de Produtividade (Machine Learning):** Treinamento e inferência automática de algorimos de I.A. (XGBoost) para simular o rendimento (kg/ha e scs/ha) baseado em tendências históricas.
+2. **Dashboard Web B2B (Módulo SaaS - Single Page Application):** Sistema executivo moderno projetado sob arquitetura modular, comportando mapas de calor regionais Folium (Inteligência Territorial), laboratórios Climáticos "What-if" e módulos matemáticos interativos gerados por Plotly Analytics para renderização de marcos históricos paramétricos (El Niño/La Niña).
+3. **Módulo de Síntese em Linguagem Natural (IA Heurística):** Agente preditivo (Agente de Síntese BIA) embutido nativamente no Painel Financeiro que reescreve a lógica matemática e projeções logarítmicas de fluxo hídrico num linguajar executivo humano e avaliativo (ex: sentenças de alerta "Alta Viabilidade", "Alerta" ou "Risco Crítico").
+4. **Motor de Captura (Web Scraping & API JSON Autônoma):** Robôs coletores Web Scrapers descentralizados focados no pareamento ativo do Custeio Operacional Básico e Valor da Terra Nua. O algoritmo consegue monitorar remotamente a base contábil fundiária de 144 municípios polo do estado (IBGE), acoplados em tempo real às cotações diárias financeiras do CEPEA (B3).
+5. **Plataforma SDK Integrada:** Aplicação nativa programada em Kotlin/Android (UI baseada em Jetpack Compose) espelhando conectividade remota através de uma API Serverless arquitetada em FastAPI (Render).
+6. **Automação Contínua e Integração:** Rotinas macro estruturadas em nuvem (via arquivos `github.actions.yml` e Streamlit Cloud Instances) garantindo paralelismo autônomo e manutenção perpétua da aplicação de ponta a ponta.
+\n\n## 7. Fontes de Dados Utilizadas
 
 | Fonte | Uso | Licença |
 |---|---|---|

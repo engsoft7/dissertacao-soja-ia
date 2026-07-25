@@ -296,6 +296,13 @@ CSS_GLASS = '''<style>
     }
 
     /* MINIMALIST LINEAR STYLE CARDS */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 10px 0 20px; }
+    .eco-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 1024px) {
+        .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        .eco-grid { grid-template-columns: repeat(1, 1fr); }
+    }
+    
     [data-testid="stMetric"], .kpi-card, .eco-card, [data-testid="stExpander"] { 
         background: var(--card-bg); 
         border: 1px solid var(--card-border); 

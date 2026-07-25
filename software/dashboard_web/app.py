@@ -301,6 +301,17 @@ __VARS__
         .eco-grid { grid-template-columns: repeat(2, 1fr); }
     }
     
+    @media (max-width: 768px) {
+        .kpi-grid { grid-template-columns: 1fr; }
+        .eco-grid { grid-template-columns: 1fr; }
+        
+        .kpi-label, .eco-label, [data-testid="stMetricLabel"] { font-size: 0.85rem !important; }
+        .kpi-value, .eco-value, [data-testid="stMetricValue"] { font-size: 1.5rem !important; }
+        
+        /* Oculta excessos e prioriza o scroll no celular */
+        .stApp { padding-left: 0 !important; }
+    }
+    
     [data-testid="stMetric"], .kpi-card, .eco-card, [data-testid="stExpander"] { 
         background: var(--card-bg); 
         border: 1px solid var(--card-border); 

@@ -17,6 +17,13 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True):
         labels={"ano": "Ano-safra", "produtividade": "Produtividade", "Nome": "Município"}
     )
     
+    fig.update_traces(
+        line=dict(width=3),
+        marker=dict(size=8, symbol="circle-open", line=dict(width=2)),
+        hovertemplate="<b>%{x}</b><br>Produtividade: %{y}<extra></extra>",
+        selector=dict(type="scatter")
+    )
+    
     import numpy as np
     
     # Restaura a Tendência Tecnológica Linear (Regressão OLS simples)
@@ -66,11 +73,7 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True):
     if has_nina:
         fig.add_trace(go.Bar(x=[None], y=[None], marker_color=la_nina_color, name="Histórico La Niña", hoverinfo="none"))
 
-    fig.update_traces(
-        line=dict(width=3),
-        marker=dict(size=8, symbol="circle-open", line=dict(width=2)),
-        hovertemplate="<b>%{x}</b><br>Produtividade: %{y}<extra></extra>"
-    )
+
     
     fig.update_layout(
         plot_bgcolor=bg_color,

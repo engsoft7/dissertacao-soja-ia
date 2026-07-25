@@ -1085,9 +1085,9 @@ if tela_atual == "💰 Viabilidade Financeira":
             f"**Qualidade de Dados:** O município de **{
                 disp(municipio)}** apresenta excelente variabilidade histórica nos registros oficiais.")
 
-st.divider()
+    st.divider()
 
-# ------------------------------------------------------ PANORAMA GERAL DO ESTADO
+    # ------------------------------------------------------ PANORAMA GERAL DO ESTADO
     st.subheader("📋 Ranking e Panorama Comercial dos Polos Produtivos")
     st.caption(
         f"Calculado com base na produtividade média recente e na cotação de mercado de **{

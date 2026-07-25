@@ -33,19 +33,32 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True):
             showlegend=False
         )
 
-    # Restaura as faixas climáticas de El Niño e La Niña com VRects do Plotly
+    # Restaura as faixas climáticas de El Niño e La Niña e injeta de volta na Legenda
     if "Clima" in serie_plot.columns:
-        el_nino_color = "rgba(215, 48, 39, 0.15)"
-        la_nina_color = "rgba(69, 117, 180, 0.15)"
+        # Cores mais sólidas para imitar o mark_rect(opacity=0.3) do Altair
+        el_nino_color = "rgba(215, 48, 39, 0.3)"
+        la_nina_color = "rgba(69, 117, 180, 0.3)"
         
-        # Filtra anos únicos para evitar VRects duplicadas de multiplas cidades
-        anos_unicos = serie_plot[["ano", "Clima"]].drop_duplicates()
+        # Filtra anos únicos e plota automaticamente os futuros e passados dinâmicos
+        anos_unicos = serie_plot.dropna(subset=["Clima"])[["ano", "Clima"]].drop_duplicates()
+        
+        has_nino = False
+        has_nina = False
         
         for index, row in anos_unicos.iterrows():
+            # Cria barras verticais estritas em cima do ano, imitando as larguras antigas
             if row["Clima"] == "El Niño":
-                fig.add_vrect(x0=row["ano"]-0.5, x1=row["ano"]+0.5, fillcolor=el_nino_color, opacity=1, line_width=0, layer="below")
+                fig.add_vrect(x0=row["ano"]-0.2, x1=row["ano"]+0.2, fillcolor=el_nino_color, line_width=0, layer="below")
+                has_nino = True
             elif row["Clima"] == "La Niña":
-                fig.add_vrect(x0=row["ano"]-0.5, x1=row["ano"]+0.5, fillcolor=la_nina_color, opacity=1, line_width=0, layer="below")
+                fig.add_vrect(x0=row["ano"]-0.2, x1=row["ano"]+0.2, fillcolor=la_nina_color, line_width=0, layer="below")
+                has_nina = True
+                
+        # TRUQUE DO PLOTLY: Adiciona traces vazios apenas para jogar os blocos de clima na Legenda Oficial!
+        if has_nino:
+            fig.add_trace(go.Bar(x=[None], y=[None], marker_color=el_nino_color, name="Histórico El Niño", hoverinfo="none"))
+        if has_nina:
+            fig.add_trace(go.Bar(x=[None], y=[None], marker_color=la_nina_color, name="Histórico La Niña", hoverinfo="none"))
 
     fig.update_traces(
         line=dict(width=3),

@@ -850,11 +850,11 @@ if tela_atual == "📍 Inteligência Territorial":
         </div>
         <div class="kpi-card purple">
             <div class="kpi-label">Aderência Preditiva (R²)</div>
-            <div class="kpi-value">{metricas['r2']:.2f}</div>
+            <div class="kpi-value">{metricas['r2']:.3f}</div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Volume do Dataset (Amostras)</div>
-            <div class="kpi-value">{metricas['n_amostras']} safras</div>
+        <div class="kpi-card orange">
+            <div class="kpi-label">Benchmark de Tendência</div>
+            <div class="kpi-value">{metricas['r2_baseline']:.3f}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)

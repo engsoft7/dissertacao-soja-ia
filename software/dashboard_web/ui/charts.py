@@ -13,7 +13,7 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True):
         y="produtividade", 
         color="Nome", 
         markers=True,
-        title="Histórico de Produtividade Agrícola",
+        
         labels={"ano": "Ano-safra", "produtividade": "Produtividade", "Nome": "Município"}
     )
     
@@ -97,7 +97,7 @@ def plot_area(serie_plot: pd.DataFrame, is_dark: bool = True):
         x="ano", 
         y="soy_area_ha", 
         color="Nome",
-        title="Expansão da Área Plantada (Hectares)",
+        
         labels={"ano": "Ano-safra", "soy_area_ha": "Hectares", "Nome": "Município"}
     )
     

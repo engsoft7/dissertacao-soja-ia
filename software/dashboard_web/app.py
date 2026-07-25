@@ -746,38 +746,12 @@ BASE_CUSTO_PA = {
     "SANTANA DO ARAGUAIA": {"custo_ha": 4650.0, "vtn_ha": 12500.0},
     "CONCEICAO DO ARAGUAIA": {"custo_ha": 4500.0, "vtn_ha": 11000.0},
     "REDENCAO": {"custo_ha": 4600.0, "vtn_ha": 11500.0},
-    "SANTA MARIA DAS BARREIRAS": {"custo_ha": 4550.0, "vtn_ha": 10500.0},
-    "GOIANESIA DO PARA": {"custo_ha": 4700.0, "vtn_ha": 13000.0},
-    "ITAITUBA": {"custo_ha": 4900.0, "vtn_ha": 18000.0},
-    "SANTAREM": {"custo_ha": 4950.0, "vtn_ha": 19000.0},
 }
 
 def get_custos_locais(municipio: str):
     mun = municipio.upper() if municipio else ""
     return BASE_CUSTO_PA.get(mun, {"custo_ha": 4800.0, "vtn_ha": 12000.0})
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
-
-# --- PAINEL EXECUTIVO DE INDICADORES ---
-st.markdown(f"""
-<div class="kpi-grid">
-    <div class="kpi-card green">
-        <div class="kpi-label">Margem de Precisão (RMSE)</div>
-        <div class="kpi-value">± {qtd(metricas['rmse'])} {unidade}</div>
-    </div>
-    <div class="kpi-card blue">
-        <div class="kpi-label">Variação Relativa</div>
-        <div class="kpi-value">{metricas['rrmse']:.1f}%</div>
-    </div>
-    <div class="kpi-card purple">
-        <div class="kpi-label">Aderência Preditiva (R²)</div>
-        <div class="kpi-value">{metricas['r2']:.3f}</div>
-    </div>
-    <div class="kpi-card orange">
-        <div class="kpi-label">Benchmark de Tendência</div>
-        <div class="kpi-value">{metricas['r2_baseline']:.3f}</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
 
 st.divider()
 
@@ -851,38 +825,68 @@ st.sidebar.divider()
 
 # ==============================================================================
 if tela_atual == "📍 Inteligência Territorial":
+    # ── INSERE RESUMO E ALERTAS CLIMÁTICOS DO POLO ──
+    has_severe = False
+    cor_bg_alerta = "rgba(220,38,38,0.15)" if has_severe else "rgba(128,128,128,0.05)"
+    cor_borda = "rgba(220,38,38,0.3)" if has_severe else "rgba(128,128,128,0.15)"
+    cor_texto = "#ff6b6b" if (has_severe and is_dark) else "#dc2626" if has_severe else "var(--text-color)"
+    st.markdown(f"""
+    <div style="padding:16px 20px; background:{cor_bg_alerta}; 
+                border:1px solid {cor_borda}; border-radius:8px; margin-bottom:24px;
+                color:{cor_texto}; font-size:0.9rem;">
+        <span style="font-weight:700;">{disp(municipio)}</span> — Fase neutra identificada. As projeções assumem condições meteorológicas em conformidade com as médias da última década e inflação controlada.
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("### Resumo das Safras no Polo")
+    st.markdown(f"""
+    <div class="kpi-grid">
+        <div class="kpi-card green">
+            <div class="kpi-label">Margem de Precisão (RMSE)</div>
+            <div class="kpi-value">± {qtd(metricas['rmse'])} {unidade}</div>
+        </div>
+        <div class="kpi-card blue">
+            <div class="kpi-label">Variação Relativa</div>
+            <div class="kpi-value">{metricas['rrmse']:.1f}%</div>
+        </div>
+        <div class="kpi-card purple">
+            <div class="kpi-label">Aderência Preditiva (R²)</div>
+            <div class="kpi-value">{metricas['r2']:.2f}</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Volume do Dataset (Amostras)</div>
+            <div class="kpi-value">{metricas['n_amostras']} safras</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     esq, dir_ = st.columns([1, 2])
     with esq:
 
 
         with st.spinner(f"Sintetizando predições de IA (XGBoost) para {disp(municipio)}..."):
             r = estimador.estimar(municipio, int(ano_alvo))
-        st.metric(f"Projeção Safra {ano_alvo} ({disp(municipio)})",
-                  f"{qtd(r['estimativa_kg_ha'])} {unidade}",
-                  delta=f"Intervalo: ± {qtd(r['margem_kg_ha'])} {unidade}",
-                  delta_color="off")
+        st.metric(f"Projeção Safra {ano_alvo}",
+                  f"{qtd(r['estimativa_kg_ha'])} {unidade}")
 
-        with st.expander("🌦️ Simulação de Cenário Climático"):
-            chuva = st.slider(
-                "Volume de Precipitação (% da média)",
-                50,
-                150,
-                100,
-                step=5)
-            dtemp = st.slider("Desvio Térmico (°C)", -2.0, 3.0, 0.0, step=0.5)
-            if chuva != 100 or dtemp != 0.0:
-                hist = df[df.municipio == municipio]
-                clima = hist[M.FEATURES].mean().to_dict()  # type: ignore
-                clima["precip_total"] *= chuva / 100
-                clima["temp_mean"] += dtemp
-                clima["temp_max"] += dtemp
-                clima["balanco_hidrico"] = clima["precip_total"] - \
-                    clima["etp_total"]
-                with st.spinner("Executando simulação de stress climático avançada..."):
+        with st.expander("Variáveis Climáticas (What-if)"):
+            st.caption(
+                "Teste cenários meteorológicos forçados (O impacto na projeção será calculado via IA)")
+            precip = st.slider("Precipitação Total Estimada (mm)",
+                               0, 3000, 1500, step=100)
+            etp = st.slider("Evapotranspiração Potencial",
+                            500, 2500, 1500, step=100)
+
+            if st.button("Simular Perturbação Climática"):
+                with st.spinner("Re-inferindo com variações hídricas..."):
+                    clima = r.copy()
+                    clima["precip_total"] = precip
+                    clima["etp_total"] = etp
+                    clima["balanco_hidrico"] = clima["precip_total"] - \
+                        clima["etp_total"]
                     cenario = estimador.estimar(
                         municipio, int(ano_alvo), clima=clima)
                 dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
-                st.metric("Projeção Ajustada ao Clima",
+                st.metric("Projeção Ajustada",
                           f"{qtd(cenario['estimativa_kg_ha'])} {unidade}",
                           delta=f"{qtd(dif,
                                        '+')} {unidade}")

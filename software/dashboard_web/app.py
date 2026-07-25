@@ -831,7 +831,7 @@ unidade = st.sidebar.radio(
     index=0
 )
 
-preco_base = PRECO_SACA_ONLINE
+preco = PRECO_SACA_ONLINE
 st.sidebar.divider()
 
 # ==============================================================================

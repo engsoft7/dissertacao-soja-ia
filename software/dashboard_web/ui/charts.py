@@ -37,7 +37,7 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True):
             name="Tendência Tecnológica",
             line=dict(color="#8b949e" if is_dark else "rgba(0,0,0,0.5)", dash="dash", width=2), 
             hoverinfo="skip",
-            showlegend=False
+            showlegend=True
         )
 
     # Constroi o dataframe historico de anomalias climaticas (Hardcoded exatamente como no antigo Altair)

@@ -575,7 +575,7 @@ else:
     alt.themes.enable('default')
 
 @st.cache_resource(show_spinner="Carregando modelos de inteligência de safra...")
-def preparar():
+def preparar(cache_buster='v3'):
     df = M.carregar(str(DADOS))
     est = M.Estimador().treinar(df)
     metricas = None
@@ -592,7 +592,7 @@ def preparar():
     return df, est, metricas
 
 
-df, estimador, metricas = preparar()
+df, estimador, metricas = preparar(cache_buster='v3')
 
 _muni = carregar_municipios()
 _cod_por_nome = df.drop_duplicates("municipio").set_index("municipio")[

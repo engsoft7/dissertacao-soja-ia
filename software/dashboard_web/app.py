@@ -972,7 +972,7 @@ if tela_atual == "💰 Viabilidade Financeira":
         r_eco = estimador.estimar(municipio, int(df.ano.max()) + 1)
 
     col_eco1, col_eco2, col_eco3 = st.columns(3)
-        import requests
+    import requests
     try:
         r = requests.get(f'http://127.0.0.1:8000/api/financas/{municipio}').json()
         custos_locais = {'custo_ha': r.get('custo_ha', 4800.0), 'vtn_ha': r.get('vtn_ha', 12000.0)}

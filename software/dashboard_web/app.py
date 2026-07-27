@@ -865,7 +865,8 @@ if tela_atual == "📍 Inteligência Territorial":
 
             if st.button("Simular Perturbação Climática"):
                 with st.spinner("Re-inferindo com variações hídricas..."):
-                    clima = r.copy()
+                    hist = df[df["municipio"] == municipio]
+                    clima = hist[M.FEATURES].mean().to_dict() if not hist.empty else df[M.FEATURES].mean().to_dict()
                     clima["precip_total"] = precip
                     clima["etp_total"] = etp
                     clima["balanco_hidrico"] = clima["precip_total"] - \

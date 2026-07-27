@@ -991,11 +991,12 @@ if tela_atual == "💰 Viabilidade Financeira":
         import sys
         from pathlib import Path
         sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
-        from api import get_financas
+        from financas import get_financas
         r = get_financas(municipio)
         custos_locais = {'custo_ha': r.get('custo_ha', 4800.0), 'vtn_ha': r.get('vtn_ha', 12000.0)}
         default_preco = r.get('soja_preco_saca', 120.0)
     except Exception as e:
+        st.error(f"DEBUG ERRO FINANÇAS: {e}")
         custos_locais = {'custo_ha': 4800.0, 'vtn_ha': 12000.0}
         default_preco = 120.0
 

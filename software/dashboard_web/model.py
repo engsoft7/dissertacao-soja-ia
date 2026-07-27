@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.neural_network import MLPRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 
 FEATURES = [
@@ -70,7 +70,7 @@ class Estimador:
 
     def __init__(self) -> None:
         self.scaler: StandardScaler | None = None
-        self.modelo: MLPRegressor | None = None
+        self.modelo: RandomForestRegressor | None = None
         self.df: pd.DataFrame | None = None
         self.rmse: float | None = None
         self.mae: float | None = None
@@ -82,9 +82,8 @@ class Estimador:
         base = _baseline(df, df["municipio"], df["ano"])
         residuo = df[ALVO].values - base
         self.scaler = StandardScaler().fit(df[FEATURES].values)
-        self.modelo = MLPRegressor(
-            hidden_layer_sizes=(64, 32), alpha=1e-2,
-            max_iter=800, early_stopping=True, random_state=42,
+        self.modelo = RandomForestRegressor(
+            n_estimators=120, max_depth=10, min_samples_split=4, random_state=42
         ).fit(self.scaler.transform(df[FEATURES].values), residuo)
         return self
 
@@ -97,8 +96,7 @@ class Estimador:
             b_tr = _baseline(treino, treino["municipio"], treino["ano"])
             b_te = _baseline(treino, teste["municipio"], teste["ano"])
             sc = StandardScaler().fit(treino[FEATURES].values)
-            mdl = MLPRegressor(hidden_layer_sizes=(64, 32), alpha=1e-2,
-                               max_iter=800, early_stopping=True, random_state=42)
+            mdl = RandomForestRegressor(n_estimators=120, max_depth=10, min_samples_split=4, random_state=42)
             mdl.fit(sc.transform(treino[FEATURES].values), treino[ALVO].values - b_tr)
             y_obs += list(teste[ALVO].values)
             y_est += list(b_te + mdl.predict(sc.transform(teste[FEATURES].values)))

@@ -805,6 +805,24 @@ unidade = st.sidebar.radio(
 )
 
 preco = PRECO_SACA_ONLINE
+
+st.sidebar.markdown("### Perfil do Produtor")
+baseline_ibge = estimador.estimar(municipio, int(df.ano.max()) + 1)["baseline_kg_ha"]
+fator_tecnologico = st.sidebar.number_input(
+    "Expectativa Produtiva da Fazenda", 
+    min_value=10.0, max_value=120.0, 
+    value=float(baseline_ibge / 60.0), 
+    step=1.0, 
+    help="O modelo IA usa médias do IBGE. Se sua fazenda possui alta tecnologia (correção de solo/sementes), ajuste a base aqui para prever os ganhos/perdas climáticos em cima da sua realidade."
+)
+st.sidebar.caption("Baseline: Quantas sacas/ha a fazenda colhe em um ano normal?")
+
+def ajustar_r(r_dict):
+    r2 = r_dict.copy()
+    r2["baseline_kg_ha"] = fator_tecnologico * 60.0
+    r2["estimativa_kg_ha"] = r2["baseline_kg_ha"] + r2["correcao_climatica_kg_ha"]
+    return r2
+
 st.sidebar.divider()
 
 # ==============================================================================
@@ -851,7 +869,7 @@ if tela_atual == "📍 Inteligência Territorial":
 
 
         with st.spinner(f"Sintetizando predições de IA (XGBoost) para {disp(municipio)}..."):
-            r = estimador.estimar(municipio, int(ano_alvo))
+            r = ajustar_r(estimador.estimar(municipio, int(ano_alvo)))
         st.metric(f"Projeção Safra {ano_alvo}",
                   f"{qtd(r['estimativa_kg_ha'])} {unidade}")
 
@@ -869,8 +887,7 @@ if tela_atual == "📍 Inteligência Territorial":
             clima["precip_total"] = precip
             clima["etp_total"] = etp
             clima["balanco_hidrico"] = clima["precip_total"] - clima["etp_total"]
-            cenario = estimador.estimar(
-                municipio, int(ano_alvo), clima=clima)
+            cenario = ajustar_r(estimador.estimar(municipio, int(ano_alvo), clima=clima))
             dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
             st.metric("Projeção Ajustada",
                       f"{qtd(cenario['estimativa_kg_ha'])} {unidade}",
@@ -967,7 +984,7 @@ if tela_atual == "💰 Viabilidade Financeira":
     """, unsafe_allow_html=True)
 
     with st.spinner("Processando margem de lucro com IA Georreferenciada..."):
-        r_eco = estimador.estimar(municipio, int(df.ano.max()) + 1)
+        r_eco = ajustar_r(estimador.estimar(municipio, int(df.ano.max()) + 1))
 
     col_eco1, col_eco2, col_eco3 = st.columns(3)
     import requests

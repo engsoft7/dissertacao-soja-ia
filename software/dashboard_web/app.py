@@ -863,21 +863,18 @@ if tela_atual == "📍 Inteligência Territorial":
             etp = st.slider("Evapotranspiração Potencial",
                             500, 2500, 1500, step=100)
 
-            if st.button("Simular Perturbação Climática"):
-                with st.spinner("Re-inferindo com variações hídricas..."):
-                    hist = df[df["municipio"] == municipio]
-                    clima = hist[M.FEATURES].mean().to_dict() if not hist.empty else df[M.FEATURES].mean().to_dict()
-                    clima["precip_total"] = precip
-                    clima["etp_total"] = etp
-                    clima["balanco_hidrico"] = clima["precip_total"] - \
-                        clima["etp_total"]
-                    cenario = estimador.estimar(
-                        municipio, int(ano_alvo), clima=clima)
-                dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
-                st.metric("Projeção Ajustada",
-                          f"{qtd(cenario['estimativa_kg_ha'])} {unidade}",
-                          delta=f"{qtd(dif,
-                                       '+')} {unidade}")
+            st.divider()
+            hist = df[df["municipio"] == municipio]
+            clima = hist[M.FEATURES].mean().to_dict() if not hist.empty else df[M.FEATURES].mean().to_dict()
+            clima["precip_total"] = precip
+            clima["etp_total"] = etp
+            clima["balanco_hidrico"] = clima["precip_total"] - clima["etp_total"]
+            cenario = estimador.estimar(
+                municipio, int(ano_alvo), clima=clima)
+            dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
+            st.metric("Projeção Ajustada",
+                      f"{qtd(cenario['estimativa_kg_ha'])} {unidade}",
+                      delta=f"{qtd(dif, '+')} {unidade}")
 
     with dir_:
         mapa, nome_para_interno, faixa_rend = construir_mapa(

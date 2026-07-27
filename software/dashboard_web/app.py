@@ -800,7 +800,7 @@ ano_alvo = st.sidebar.number_input(
 
 unidade = st.sidebar.radio(
     "Unidade",
-    options=["Sacadas (60kg)", "Quilos (kg)"],
+    options=["Sacas (60kg)", "Quilos (kg)"],
     index=0
 )
 
@@ -883,7 +883,7 @@ if tela_atual == "📍 Inteligência Territorial":
         mapa, nome_para_interno, faixa_rend = construir_mapa(
             municipio, mun_comp, is_dark=is_dark)
         if mapa is not None:
-            st.subheader("Panorama Geespacial dos Polos Produtivos")
+            st.subheader("Panorama Geoespacial dos Polos Produtivos")
             st_folium(
                 mapa,
                 width='stretch',

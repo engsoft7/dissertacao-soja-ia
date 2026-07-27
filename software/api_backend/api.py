@@ -13,6 +13,55 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "dashboard_web"))
 import model as M
 
+
+BASE_CUSTO_PA = {
+    "PARAGOMINAS": {"custo_ha": 4850.0, "vtn_ha": 15000.0},
+    "DOM ELISEU": {"custo_ha": 4800.0, "vtn_ha": 14000.0},
+    "ULIANOPOLIS": {"custo_ha": 4820.0, "vtn_ha": 14200.0},
+    "RONDON DO PARA": {"custo_ha": 4750.0, "vtn_ha": 13800.0},
+    "SANTANA DO ARAGUAIA": {"custo_ha": 4650.0, "vtn_ha": 12500.0},
+    "CONCEICAO DO ARAGUAIA": {"custo_ha": 4500.0, "vtn_ha": 11000.0},
+    "REDENCAO": {"custo_ha": 4600.0, "vtn_ha": 11500.0},
+}
+
+def get_custos_locais(municipio: str):
+    mun = municipio.upper() if municipio else ""
+    return BASE_CUSTO_PA.get(mun, {"custo_ha": 4800.0, "vtn_ha": 12000.0})
+
+@app.get("/api/financas/{municipio}")
+def get_financas(municipio: str):
+    import requests
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    brl_price_bag = 120.0
+    try:
+        r_cbot = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/ZS=F', headers=headers)
+        price_cents = r_cbot.json()['chart']['result'][0]['meta']['regularMarketPrice']
+        usd_price_bag = (price_cents / 100) * 2.20462
+        
+        r_usd = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/BRL=X', headers=headers)
+        usd_brl = float(r_usd.json()['chart']['result'][0]['meta']['regularMarketPrice'])
+        brl_price_bag = round(usd_price_bag * usd_brl, 2)
+    except Exception as e:
+        print("Erro online financas:", e, flush=True)
+        pass
+
+    raw_municipio = REV_MUNICIPIOS.get(municipio, municipio)
+    custos = get_custos_locais(raw_municipio)
+    
+    # Híbrido: Pega a base local (custos["custo_ha"]) e faz uma leve indexacao
+    # Se brl_price_bag for muito diferente de 100, flutua?
+    # Para ser exatamente o hibrido que garanta consistencia, vamos usar custos locais + cbot price real
+    # Custo_ha será apenas o custo do dicionário, assim as duas plataformas convergem com precisão
+    custo_ha = custos["custo_ha"]
+    
+    return {
+        "municipio": municipio,
+        "soja_preco_saca": brl_price_bag,
+        "custo_ha": custo_ha,
+        "vtn_ha": custos["vtn_ha"],
+        "ano_referencia": int(AppState.last_year) if AppState.df is not None else 2024
+    }
+
 app = FastAPI(title="Agro Inteligência API", description="FastAPI for Soybean Yield Prediction System")
 
 # Enable CORS for generic clients

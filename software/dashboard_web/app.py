@@ -738,19 +738,6 @@ def brl(v: float, dec: int = 0) -> str:
 
 PRECO_SACA_ONLINE = buscar_preco_soja_online()
 
-BASE_CUSTO_PA = {
-    "PARAGOMINAS": {"custo_ha": 4850.0, "vtn_ha": 15000.0},
-    "DOM ELISEU": {"custo_ha": 4800.0, "vtn_ha": 14000.0},
-    "ULIANOPOLIS": {"custo_ha": 4820.0, "vtn_ha": 14200.0},
-    "RONDON DO PARA": {"custo_ha": 4750.0, "vtn_ha": 13800.0},
-    "SANTANA DO ARAGUAIA": {"custo_ha": 4650.0, "vtn_ha": 12500.0},
-    "CONCEICAO DO ARAGUAIA": {"custo_ha": 4500.0, "vtn_ha": 11000.0},
-    "REDENCAO": {"custo_ha": 4600.0, "vtn_ha": 11500.0},
-}
-
-def get_custos_locais(municipio: str):
-    mun = municipio.upper() if municipio else ""
-    return BASE_CUSTO_PA.get(mun, {"custo_ha": 4800.0, "vtn_ha": 12000.0})
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
 st.divider()
@@ -985,13 +972,21 @@ if tela_atual == "💰 Viabilidade Financeira":
         r_eco = estimador.estimar(municipio, int(df.ano.max()) + 1)
 
     col_eco1, col_eco2, col_eco3 = st.columns(3)
-    custos_locais = get_custos_locais(municipio)
+        import requests
+    try:
+        r = requests.get(f'http://127.0.0.1:8000/api/financas/{municipio}').json()
+        custos_locais = {'custo_ha': r.get('custo_ha', 4800.0), 'vtn_ha': r.get('vtn_ha', 12000.0)}
+        default_preco = r.get('soja_preco_saca', 120.0)
+    except:
+        custos_locais = {'custo_ha': 4800.0, 'vtn_ha': 12000.0}
+        default_preco = 120.0
+
     
     with col_eco1:
         preco = st.number_input(
             "Preço de referência da saca (R$ / 60 kg)",
             min_value=0.0,
-            value=PRECO_SACA_ONLINE,
+            value=default_preco,
             step=5.0)
         st.caption(
             "🌐 **Fonte da Cotação:** Cotação interativa em tempo real (Notícias Agrícolas / CEPEA).")

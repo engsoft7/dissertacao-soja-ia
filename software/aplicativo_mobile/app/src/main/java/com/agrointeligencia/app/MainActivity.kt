@@ -106,7 +106,7 @@ fun AgroDashboard() {
     var municipios by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedMunicipio by remember { mutableStateOf<String?>(null) }
     var previsao by remember { mutableStateOf<PrevisaoResponse?>(null) }
-    var kpis by remember { mutableStateOf<KpiEconomiaResponse?>(null) }
+    var kpis by remember { mutableStateOf<FinancaResponse?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
@@ -131,7 +131,7 @@ fun AgroDashboard() {
             if (municipios.isNotEmpty() && selectedMunicipio == null) {
                 selectedMunicipio = municipios[0]
             }
-            kpis = gson.fromJson(cachedKpiStr, KpiEconomiaResponse::class.java)
+            kpis = gson.fromJson(cachedKpiStr, FinancaResponse::class.java)
             // Do not assume offline yet to avoid flickering
         } else {
             isLoading = true // Only show spinner if absolutely no data is available
@@ -141,7 +141,7 @@ fun AgroDashboard() {
         coroutineScope.launch {
             try {
                 val response = RetrofitClient.getInstance().getMunicipios()
-                val kpisResponse = RetrofitClient.getInstance().getKpisEconomia()
+                val kpisResponse = RetrofitClient.getInstance().getFinancas("Paragominas")
                 
                 // Update State Silently
                 municipios = response.municipios
@@ -466,7 +466,7 @@ fun AgroDashboard() {
 }
 
 @Composable
-fun PrevisaoCard(historico: PrevisaoHistorico, kpis: KpiEconomiaResponse?) {
+fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
     val isDark = isSystemInDarkTheme()
     Card(
         modifier = Modifier.animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)).fillMaxWidth().padding(vertical = 6.dp),
@@ -560,7 +560,7 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
 }
 
 @Composable
-fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: KpiEconomiaResponse) {
+fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
     val isDark = isSystemInDarkTheme()
     var customPreco by remember { mutableStateOf(kpis.soja_preco_saca.toString()) }
     var customCusto by remember { mutableStateOf(kpis.custo_ha.toString()) }

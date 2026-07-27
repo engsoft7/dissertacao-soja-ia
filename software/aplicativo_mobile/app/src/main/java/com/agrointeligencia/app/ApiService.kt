@@ -23,6 +23,14 @@ data class PrevisaoResponse(
     val laNinas: List<Int>? = null
 )
 
+
+data class FinancaResponse(
+    val soja_preco_saca: Double,
+    val custo_ha: Double,
+    val vtn_ha: Double,
+    val ano_referencia: Int
+)
+
 data class KpiEconomiaResponse(
     val soja_preco_saca: Double,
     val custo_ha: Double,
@@ -52,8 +60,8 @@ interface AgroApiService {
     @GET("api/previsao/{municipio}")
     suspend fun getPrevisao(@Path("municipio") municipio: String): PrevisaoResponse
 
-    @GET("api/kpis_economia")
-    suspend fun getKpisEconomia(): KpiEconomiaResponse
+    @GET("api/financas/{municipio}")
+    suspend fun getFinancas(@Path("municipio") municipio: String): FinancaResponse
 }
 
 object RetrofitClient {

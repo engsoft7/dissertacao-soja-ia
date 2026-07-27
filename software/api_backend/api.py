@@ -1,3 +1,4 @@
+from financas import get_financas, get_custos_locais, REV_MUNICIPIOS, BASE_CUSTO_PA
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from fastapi.responses import HTMLResponse
@@ -14,19 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "dashboard_web"))
 import model as M
 
 
-BASE_CUSTO_PA = {
-    "PARAGOMINAS": {"custo_ha": 4850.0, "vtn_ha": 15000.0},
-    "DOM ELISEU": {"custo_ha": 4800.0, "vtn_ha": 14000.0},
-    "ULIANOPOLIS": {"custo_ha": 4820.0, "vtn_ha": 14200.0},
-    "RONDON DO PARA": {"custo_ha": 4750.0, "vtn_ha": 13800.0},
-    "SANTANA DO ARAGUAIA": {"custo_ha": 4650.0, "vtn_ha": 12500.0},
-    "CONCEICAO DO ARAGUAIA": {"custo_ha": 4500.0, "vtn_ha": 11000.0},
-    "REDENCAO": {"custo_ha": 4600.0, "vtn_ha": 11500.0},
-}
 
-def get_custos_locais(municipio: str):
-    mun = municipio.upper() if municipio else ""
-    return BASE_CUSTO_PA.get(mun, {"custo_ha": 4800.0, "vtn_ha": 12000.0})
 
 @app.get("/api/financas/{municipio}")
 def get_financas(municipio: str):
@@ -92,7 +81,6 @@ MUNICIPIOS_FORMATADOS = {
     'Jacareacanga': 'Jacareacanga', 'Jacunda': 'Jacundá', 'Picarra': 'Piçarra',
     'Sapucaia': 'Sapucaia', 'Tome-acu': 'Tomé-Açu'
 }
-REV_MUNICIPIOS = {v: k for k, v in MUNICIPIOS_FORMATADOS.items()}
 
 ROOT_PATH = Path(__file__).resolve().parents[2]
 DADOS_PATH = ROOT_PATH / "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"

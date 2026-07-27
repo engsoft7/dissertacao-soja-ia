@@ -976,7 +976,7 @@ if tela_atual == "📈 Análise Histórica":
 if tela_atual == "💰 Viabilidade Financeira":
     st.markdown("""
     <div style="margin-bottom:4px">
-        <span style="font-size:1.2rem; font-weight:700;">Inteligência de Mercado & Margens por Hectare</span>
+        <span style="font-size:1.2rem; font-weight:700;">Visão Executiva & Simulador Estratégico (AgTech SaaS)</span>
     </div>
     <p style="font-size:0.85rem; color:var(--text-color); opacity:0.6; margin-top:0;">
         Simule cenários financeiros combinando projeções de IA com preços em tempo real e custeio operacional.
@@ -1044,22 +1044,22 @@ if tela_atual == "💰 Viabilidade Financeira":
     <div class="eco-grid">
         <div class="eco-card receita">
             <div class="eco-icon">💵</div>
-            <div class="eco-label">Faturamento Bruto / ha</div>
+            <div class="eco-label">Receita Bruta Projetada (Revenue / ha)</div>
             <div class="eco-value">{brl(receita_ha)}</div>
         </div>
         <div class="eco-card custo">
             <div class="eco-icon">📋</div>
-            <div class="eco-label">Custo Operacional / ha</div>
+            <div class="eco-label">Despesa Operacional Total (OPEX / ha)</div>
             <div class="eco-value">{brl(custo_ha)}</div>
         </div>
         <div class="eco-card vtn">
             <div class="eco-icon">🗺️</div>
-            <div class="eco-label">Valor da Terra Nua / ha</div>
+            <div class="eco-label">Capital Imobilizado (CAPEX Land / ha)</div>
             <div class="eco-value">{brl(vtn_ha)}</div>
         </div>
         <div class="eco-card margem">
             <div class="eco-icon">📈</div>
-            <div class="eco-label">Margem Líquida / ha</div>
+            <div class="eco-label">Margem Operacional (EBITDA / ha)</div>
             <div class="eco-value">{brl(margem_ha)}</div>
             <div class="eco-delta" style="color:{cor_delta}">{pct_margem} sobre o custo</div>
         </div>
@@ -1067,7 +1067,7 @@ if tela_atual == "💰 Viabilidade Financeira":
     """, unsafe_allow_html=True)
 
     st.success(
-        f"**Panorama Comercial:** Com a produtividade estimada de **{
+        f"**Avaliação de Risco:** Com a produtividade esperada de **{
             qtd(
                 r_eco['estimativa_kg_ha'])} {unidade}** para **{
             disp(municipio)}**, o faturamento bruto atinge **{

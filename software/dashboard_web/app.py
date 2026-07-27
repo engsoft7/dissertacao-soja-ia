@@ -691,6 +691,7 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: b
         ).add_to(m)
 
     m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
+    m.get_root().html.add_child(folium.Element("<style>.leaflet-control-attribution { font-size: 8px !important; transform: scale(0.65); transform-origin: bottom right; opacity: 0.5; background: transparent !important; }</style>"))
     return m, nome_para_interno, (rmin, rmax)
 
 

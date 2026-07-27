@@ -979,7 +979,11 @@ if tela_atual == "💰 Viabilidade Financeira":
         <span style="font-size:1.2rem; font-weight:700;">Visão Executiva & Simulador Estratégico (AgTech SaaS)</span>
     </div>
     <p style="font-size:0.85rem; color:var(--text-color); opacity:0.6; margin-top:0;">
-        Simule cenários financeiros combinando projeções de IA com preços em tempo real e custeio operacional.
+        Simule cenários financeiros corporativos baseados na volatilidade de preços e variações climáticas.
+        <br><br>
+        <span style="color:var(--accent-orange); font-weight: 500;">
+            💡 Dica de Negócio: Os lucros abaixo foram inicializados pela média regional atrasada do IBGE. Para obter uma simulação de risco realista, <u>ajuste obrigatoriamente a "Expectativa Produtiva da Fazenda" na barra lateral esquerda</u> com os verdadeiros dados agronômicos da sua propriedade.
+        </span>
     </p>
     """, unsafe_allow_html=True)
 

@@ -4,8 +4,8 @@
 [![Painel online](https://img.shields.io/badge/painel_online-soja--para.streamlit.app-FF4B4B?logo=streamlit&logoColor=white)](https://soja-para.streamlit.app)
 [![Download App (Android)](https://img.shields.io/badge/Download_APK-Android_Nativo-3DDC84?logo=android&logoColor=white)](https://github.com/engsoft7/dissertacao-soja-ia/releases/latest)
 
-Códigos e dados da dissertação de Mestrado Profissional em Computação Aplicada
-(PPCA/UFPA — Campus de Tucuruí).
+<!--Códigos e dados da dissertação de Mestrado Profissional em Computação Aplicada
+(PPCA/UFPA — Campus de Tucuruí).-->
 
 > ### 🚀 Produtos Técnicos (Acesso Direto)
 > 

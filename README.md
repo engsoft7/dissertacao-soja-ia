@@ -257,11 +257,11 @@ licenças de origem; cite as fontes originais ao reutilizá-los.
 
 ---
 
-## Como citar a dissertação
+<!--## Como citar a dissertação
 
 > SANTOS, M. L. dos. *Aplicação da Inteligência Artificial na previsão da
 > produtividade da soja*. 2026. Dissertação (Mestrado Profissional em Computação
-> Aplicada) — Universidade Federal do Pará, Tucuruí, 2026.
+> Aplicada) — Universidade Federal do Pará, Tucuruí, 2026. -->
 
 ## Como citar o código e os dados
 

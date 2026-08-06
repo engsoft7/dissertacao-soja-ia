@@ -16,7 +16,7 @@ Códigos e dados da dissertação de Mestrado Profissional em Computação Aplic
 > *Plataforma via navegador projetada usando Streamlit.*
 
 **Autor:** Maycon Lima dos Santos
-**Orientador:** Prof. Dr. Caio Carvalho Moreira
+<!--**Orientador:** Prof. Dr. Caio Carvalho Moreira-->
 **Ano:** 2026
 
 ---

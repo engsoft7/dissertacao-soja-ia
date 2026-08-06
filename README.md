@@ -15,9 +15,9 @@
 > 🌐 **Painel Original na Web:** [Acessar Dashboard](https://soja-para.streamlit.app)  
 > *Plataforma via navegador projetada usando Streamlit.*
 
-**Autor:** Maycon Lima dos Santos
-<!--**Orientador:** Prof. Dr. Caio Carvalho Moreira-->
-**Ano:** 2026
+<!--**Autor:** Maycon Lima dos Santos
+**Orientador:** Prof. Dr. Caio Carvalho Moreira
+**Ano:** 2026-->
 
 ---
 

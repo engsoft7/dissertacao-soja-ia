@@ -1,0 +1,1819 @@
+{
+    "$schema" : "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+    "version" : "2.1.0",
+    "runs" : [
+        {
+            "tool": {
+                "driver": {
+                    "name": "Android Lint",
+                    "fullName": "Android Lint (in gradle)",
+                    "version": "9.3.1",
+                    "semanticVersion": "9.3.1",
+                    "organization": "Google",
+                    "informationUri": "https://developer.android.com/studio/write/lint",
+                    "fullDescription": {
+                        "text": "Static analysis originally for Android source code but now performing general analysis"
+                    },
+                    "language": "en-US",
+                    "rules": [
+                        {
+                            "id": "AndroidGradlePluginVersion",
+                            "shortDescription": {
+                                "text": "Obsolete Android Gradle Plugin Version"
+                            },
+                            "fullDescription": {
+                                "text": "This detector looks for usage of the Android Gradle Plugin where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 70
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Correctness"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "AutoboxingStateCreation",
+                            "shortDescription": {
+                                "text": "State<T> will autobox values assigned to this state. Use a specialized state type instead.",
+                                "markdown": "`State<T>` will autobox values assigned to this state. Use a specialized state type instead."
+                            },
+                            "fullDescription": {
+                                "text": "Calling mutableStateOf<T>() when T is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for Int, Long, Float, and Double when the state does not need to track null values and does not override the default SnapshotMutationPolicy. See mutableIntStateOf(), mutableLongStateOf(), mutableFloatStateOf(), and mutableDoubleStateOf() for more information.",
+                                "markdown": "Calling `mutableStateOf<T>()` when `T` is either backed by a primitive type on the JVM or is a value class results in a state implementation that requires all state values to be boxed. This usually causes an additional allocation for each state write, and adds some additional work to auto-unbox values when reading the value of the state. Instead, prefer to use a specialized primitive state implementation for `Int`, `Long`, `Float`, and `Double` when the state does not need to track null values and does not override the default `SnapshotMutationPolicy`. See `mutableIntStateOf()`, `mutableLongStateOf()`, `mutableFloatStateOf()`, and `mutableDoubleStateOf()` for more information."
+                            },
+                            "defaultConfiguration": {
+                                "level": "note",
+                                "rank": 80
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Performance"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "DefaultLocale",
+                            "shortDescription": {
+                                "text": "Implied default locale in case conversion"
+                            },
+                            "fullDescription": {
+                                "text": "Calling String#toLowerCase() or #toUpperCase() without specifying an explicit locale is a common source of bugs. The reason for that is that those methods will use the current locale on the user's device, and even though the code appears to work correctly when you are developing the app, it will fail in some locales. For example, in the Turkish locale, the uppercase replacement for i is not I.\n\nIf you want the methods to just perform ASCII replacement, for example to convert an enum name, call String#toUpperCase(Locale.ROOT) instead. If you really want to use the current locale, call String#toUpperCase(Locale.getDefault()) instead.",
+                                "markdown": "Calling `String#toLowerCase()` or `#toUpperCase()` **without specifying an explicit locale** is a common source of bugs. The reason for that is that those methods will use the current locale on the user's device, and even though the code appears to work correctly when you are developing the app, it will fail in some locales. For example, in the Turkish locale, the uppercase replacement for `i` is **not** `I`.\n\nIf you want the methods to just perform ASCII replacement, for example to convert an enum name, call `String#toUpperCase(Locale.ROOT)` instead. If you really want to use the current locale, call `String#toUpperCase(Locale.getDefault())` instead."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Correctness"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "ObsoleteSdkInt",
+                            "shortDescription": {
+                                "text": "Obsolete SDK_INT Version Check"
+                            },
+                            "fullDescription": {
+                                "text": "This check flags version checks that are not necessary, because the minSdkVersion (or surrounding known API level) is already at least as high as the version checked for.\n\nSimilarly, it also looks for resources in -vNN folders, such as values-v14 where the version qualifier is less than or equal to the minSdkVersion, where the contents should be merged into the best folder.",
+                                "markdown": "This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.\n\nSimilarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Performance"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "RedundantLabel",
+                            "shortDescription": {
+                                "text": "Redundant label on activity"
+                            },
+                            "fullDescription": {
+                                "text": "When an activity does not have a label attribute, it will use the one from the application tag. Since the application has already specified the same label, the label on this activity can be omitted."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 60
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Correctness"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "SetJavaScriptEnabled",
+                            "shortDescription": {
+                                "text": "Using setJavaScriptEnabled",
+                                "markdown": "Using `setJavaScriptEnabled`"
+                            },
+                            "fullDescription": {
+                                "text": "Your code should not invoke setJavaScriptEnabled if you are not sure that your app really requires JavaScript support.",
+                                "markdown": "Your code should not invoke `setJavaScriptEnabled` if you are not sure that your app really requires JavaScript support."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Security"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "UnusedResources",
+                            "shortDescription": {
+                                "text": "Unused resources"
+                            },
+                            "fullDescription": {
+                                "text": "Unused resources make applications larger and slow down builds.\n\n\nThe unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.\n\nYou can include test sources in the unused resource check by setting the system property lint.unused-resources.include-tests=true, and to exclude them (usually for performance reasons), use lint.unused-resources.exclude-tests=true.\n",
+                                "markdown": "Unused resources make applications larger and slow down builds.\n\n\nThe unused resource check can ignore tests. If you want to include resources that are only referenced from tests, consider packaging them in a test source set instead.\n\nYou can include test sources in the unused resource check by setting the system property `lint.unused-resources.include-tests=true`, and to exclude them (usually for performance reasons), use `lint.unused-resources.exclude-tests=true`.\n"
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 80
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Performance"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "UseKtx",
+                            "shortDescription": {
+                                "text": "Use KTX extension function"
+                            },
+                            "fullDescription": {
+                                "text": "The Android KTX libraries decorates the Android platform SDK as well as various libraries with more convenient extension functions available from Kotlin, allowing you to use default parameters, named parameters, and more."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Productivity"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "originalUriBaseIds": {
+                "%SRCROOT%": {
+                    "uri": "file:///home/acer/Projetos/dissertacao-soja-ia/software/aplicativo_mobile/"
+                }
+            },
+            "results": [
+                {
+                    "ruleId": "DefaultLocale",
+                    "ruleIndex": 2,
+                    "message": {
+                        "text": "Implicitly using the default locale is a common source of bugs: Use String.format(Locale, ...) instead",
+                        "markdown": "Implicitly using the default locale is a common source of bugs: Use `String.format(Locale, ...)` instead"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 727,
+                                    "startColumn": 78,
+                                    "endLine": 727,
+                                    "endColumn": 111,
+                                    "charOffset": 37416,
+                                    "charLength": 33,
+                                    "snippet": {
+                                        "text": "String.format(\"%.1f\", tempOffset)"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 725,
+                                    "endLine": 730,
+                                    "snippet": {
+                                        "text": "            )\n            \n            Text(text = \"Desvio Térmico (${if (tempOffset > 0) \"+\" else \"\"}${String.format(\"%.1f\", tempOffset)}°C)\", fontSize = 12.sp, color = Color.LightGray)\n            Slider(\n                value = tempOffset,\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "9421189fb25b8991"
+                    }
+                },
+                {
+                    "ruleId": "RedundantLabel",
+                    "ruleIndex": 4,
+                    "message": {
+                        "text": "Redundant label can be removed"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/AndroidManifest.xml"
+                                },
+                                "region": {
+                                    "startLine": 18,
+                                    "startColumn": 13,
+                                    "endLine": 18,
+                                    "endColumn": 45,
+                                    "charOffset": 770,
+                                    "charLength": 32,
+                                    "snippet": {
+                                        "text": "android:label=\"@string/app_name\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 16,
+                                    "endLine": 21,
+                                    "snippet": {
+                                        "text": "            android:name=\".MainActivity\"\n            android:exported=\"true\"\n            android:label=\"@string/app_name\"\n            android:theme=\"@style/Theme.AgroInteligenciaApp\">\n            <intent-filter>\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Delete label"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/AndroidManifest.xml"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 18,
+                                                "startColumn": 13,
+                                                "charOffset": 770,
+                                                "endLine": 18,
+                                                "endColumn": 45,
+                                                "charLength": 32
+                                            },
+                                            "insertedContent": {
+                                                "text": "\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "6cbfb75bce69a70e"
+                    }
+                },
+                {
+                    "ruleId": "AndroidGradlePluginVersion",
+                    "ruleIndex": 0,
+                    "message": {
+                        "text": "A newer version of Gradle than 9.5.0 is available: 9.7.0"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "gradle/wrapper/gradle-wrapper.properties"
+                                },
+                                "region": {
+                                    "startLine": 3,
+                                    "startColumn": 17,
+                                    "endLine": 3,
+                                    "endColumn": 80,
+                                    "charOffset": 81,
+                                    "charLength": 63,
+                                    "snippet": {
+                                        "text": "https\\://services.gradle.org/distributions/gradle-9.5.0-bin.zip"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 1,
+                                    "endLine": 6,
+                                    "snippet": {
+                                        "text": "distributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-9.5.0-bin.zip\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Update to 9.7.0"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "gradle/wrapper/gradle-wrapper.properties"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 3,
+                                                "startColumn": 67,
+                                                "charOffset": 131,
+                                                "endLine": 3,
+                                                "endColumn": 72,
+                                                "charLength": 5
+                                            },
+                                            "insertedContent": {
+                                                "text": "9.7.0\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "5d4a70e122a4ce3a"
+                    }
+                },
+                {
+                    "ruleId": "SetJavaScriptEnabled",
+                    "ruleIndex": 5,
+                    "message": {
+                        "text": "Using setJavaScriptEnabled can introduce XSS vulnerabilities into your application, review carefully",
+                        "markdown": "Using `setJavaScriptEnabled` can introduce XSS vulnerabilities into your application, review carefully"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 456,
+                                    "startColumn": 53,
+                                    "endLine": 456,
+                                    "endColumn": 86,
+                                    "charOffset": 23138,
+                                    "charLength": 33,
+                                    "snippet": {
+                                        "text": "settings.javaScriptEnabled = true"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 454,
+                                    "endLine": 459,
+                                    "snippet": {
+                                        "text": "                                                        android.view.ViewGroup.LayoutParams.MATCH_PARENT\n                                                    )\n                                                    settings.javaScriptEnabled = true\n                                                    settings.domStorageEnabled = true\n                                                    settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "c8fbd7de9beca927"
+                    }
+                },
+                {
+                    "ruleId": "ObsoleteSdkInt",
+                    "ruleIndex": 3,
+                    "message": {
+                        "text": "This folder configuration (v26) is unnecessary; minSdkVersion is 26. Merge all the resources in this folder into mipmap-anydpi.",
+                        "markdown": "This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-anydpi-v26"
+                                },
+                                "region": {
+                                    "startLine": 1
+                                }                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                    }
+                },
+                {
+                    "ruleId": "AutoboxingStateCreation",
+                    "ruleIndex": 1,
+                    "message": {
+                        "text": "Prefer mutableIntStateOf instead of mutableStateOf",
+                        "markdown": "Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 115,
+                                    "startColumn": 34,
+                                    "endLine": 115,
+                                    "endColumn": 48,
+                                    "charOffset": 4502,
+                                    "charLength": 14,
+                                    "snippet": {
+                                        "text": "mutableStateOf"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 113,
+                                    "endLine": 118,
+                                    "snippet": {
+                                        "text": "    var expanded by remember { mutableStateOf(false) }\n    var errorMsg by remember { mutableStateOf<String?>(null) }\n    var currentTab by remember { mutableStateOf(0) }\n    var isOfflineMode by remember { mutableStateOf(false) }\n    \n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with mutableIntStateOf"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 115,
+                                                "startColumn": 34,
+                                                "charOffset": 4502,
+                                                "endLine": 115,
+                                                "endColumn": 48,
+                                                "charLength": 14
+                                            },
+                                            "insertedContent": {
+                                                "text": "androidx.compose.runtime.mutableIntStateOf\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "3b6a0c2e733f7214"
+                    }
+                },
+                {
+                    "ruleId": "AutoboxingStateCreation",
+                    "ruleIndex": 1,
+                    "message": {
+                        "text": "Prefer mutableFloatStateOf instead of mutableStateOf",
+                        "markdown": "Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 663,
+                                    "startColumn": 36,
+                                    "endLine": 663,
+                                    "endColumn": 50,
+                                    "charOffset": 34279,
+                                    "charLength": 14,
+                                    "snippet": {
+                                        "text": "mutableStateOf"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 661,
+                                    "endLine": 666,
+                                    "snippet": {
+                                        "text": "fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {\n    val isDark = isSystemInDarkTheme()\n    var precipFactor by remember { mutableStateOf(100f) }\n    var tempOffset by remember { mutableStateOf(0f) }\n    var delta by remember { mutableStateOf(0.0) }\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with mutableFloatStateOf"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 663,
+                                                "startColumn": 36,
+                                                "charOffset": 34279,
+                                                "endLine": 663,
+                                                "endColumn": 50,
+                                                "charLength": 14
+                                            },
+                                            "insertedContent": {
+                                                "text": "androidx.compose.runtime.mutableFloatStateOf\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "326e4a44f8206a2b"
+                    }
+                },
+                {
+                    "ruleId": "AutoboxingStateCreation",
+                    "ruleIndex": 1,
+                    "message": {
+                        "text": "Prefer mutableFloatStateOf instead of mutableStateOf",
+                        "markdown": "Prefer `mutableFloatStateOf` instead of `mutableStateOf`"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 664,
+                                    "startColumn": 34,
+                                    "endLine": 664,
+                                    "endColumn": 48,
+                                    "charOffset": 34335,
+                                    "charLength": 14,
+                                    "snippet": {
+                                        "text": "mutableStateOf"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 662,
+                                    "endLine": 667,
+                                    "snippet": {
+                                        "text": "    val isDark = isSystemInDarkTheme()\n    var precipFactor by remember { mutableStateOf(100f) }\n    var tempOffset by remember { mutableStateOf(0f) }\n    var delta by remember { mutableStateOf(0.0) }\n    var simulado by remember { mutableStateOf(baselineRendimento) }\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with mutableFloatStateOf"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 664,
+                                                "startColumn": 34,
+                                                "charOffset": 34335,
+                                                "endLine": 664,
+                                                "endColumn": 48,
+                                                "charLength": 14
+                                            },
+                                            "insertedContent": {
+                                                "text": "androidx.compose.runtime.mutableFloatStateOf\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "dd5fc70a8f0c3457"
+                    }
+                },
+                {
+                    "ruleId": "AutoboxingStateCreation",
+                    "ruleIndex": 1,
+                    "message": {
+                        "text": "Prefer mutableDoubleStateOf instead of mutableStateOf",
+                        "markdown": "Prefer `mutableDoubleStateOf` instead of `mutableStateOf`"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 665,
+                                    "startColumn": 29,
+                                    "endLine": 665,
+                                    "endColumn": 43,
+                                    "charOffset": 34384,
+                                    "charLength": 14,
+                                    "snippet": {
+                                        "text": "mutableStateOf"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 663,
+                                    "endLine": 668,
+                                    "snippet": {
+                                        "text": "    var precipFactor by remember { mutableStateOf(100f) }\n    var tempOffset by remember { mutableStateOf(0f) }\n    var delta by remember { mutableStateOf(0.0) }\n    var simulado by remember { mutableStateOf(baselineRendimento) }\n    var isSimulating by remember { mutableStateOf(false) }\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with mutableDoubleStateOf"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 665,
+                                                "startColumn": 29,
+                                                "charOffset": 34384,
+                                                "endLine": 665,
+                                                "endColumn": 43,
+                                                "charLength": 14
+                                            },
+                                            "insertedContent": {
+                                                "text": "androidx.compose.runtime.mutableDoubleStateOf\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "fdbf3f5bf762f63a"
+                    }
+                },
+                {
+                    "ruleId": "AutoboxingStateCreation",
+                    "ruleIndex": 1,
+                    "message": {
+                        "text": "Prefer mutableDoubleStateOf instead of mutableStateOf",
+                        "markdown": "Prefer `mutableDoubleStateOf` instead of `mutableStateOf`"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 666,
+                                    "startColumn": 32,
+                                    "endLine": 666,
+                                    "endColumn": 46,
+                                    "charOffset": 34437,
+                                    "charLength": 14,
+                                    "snippet": {
+                                        "text": "mutableStateOf"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 664,
+                                    "endLine": 669,
+                                    "snippet": {
+                                        "text": "    var tempOffset by remember { mutableStateOf(0f) }\n    var delta by remember { mutableStateOf(0.0) }\n    var simulado by remember { mutableStateOf(baselineRendimento) }\n    var isSimulating by remember { mutableStateOf(false) }\n    val coroutineScope = rememberCoroutineScope()\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with mutableDoubleStateOf"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 666,
+                                                "startColumn": 32,
+                                                "charOffset": 34437,
+                                                "endLine": 666,
+                                                "endColumn": 46,
+                                                "charLength": 14
+                                            },
+                                            "insertedContent": {
+                                                "text": "androidx.compose.runtime.mutableDoubleStateOf\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "cee5a043e235955e"
+                    }
+                },
+                {
+                    "ruleId": "UnusedResources",
+                    "ruleIndex": 6,
+                    "message": {
+                        "text": "The resource R.mipmap.ic_launcher appears to be unused",
+                        "markdown": "The resource `R.mipmap.ic_launcher` appears to be unused"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml"
+                                },
+                                "region": {
+                                    "startLine": 2,
+                                    "startColumn": 1,
+                                    "endLine": 5,
+                                    "endColumn": 17,
+                                    "charOffset": 39,
+                                    "charLength": 233,
+                                    "snippet": {
+                                        "text": "<adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <background android:drawable=\"@drawable/ic_launcher_background\" />\n    <foreground android:drawable=\"@drawable/ic_launcher_foreground\" />\n</adaptive-icon>"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 1,
+                                    "endLine": 6,
+                                    "snippet": {
+                                        "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <background android:drawable=\"@drawable/ic_launcher_background\" />\n    <foreground android:drawable=\"@drawable/ic_launcher_foreground\" />\n</adaptive-icon>\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "e3addf802514435f"
+                    }
+                },
+                {
+                    "ruleId": "UnusedResources",
+                    "ruleIndex": 6,
+                    "message": {
+                        "text": "The resource R.drawable.ic_launcher_background appears to be unused",
+                        "markdown": "The resource `R.drawable.ic_launcher_background` appears to be unused"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/drawable/ic_launcher_background.xml"
+                                },
+                                "region": {
+                                    "startLine": 2,
+                                    "startColumn": 1,
+                                    "endLine": 10,
+                                    "endColumn": 10,
+                                    "charOffset": 39,
+                                    "charLength": 290,
+                                    "snippet": {
+                                        "text": "<vector xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:width=\"108dp\"\n    android:height=\"108dp\"\n    android:viewportWidth=\"108\"\n    android:viewportHeight=\"108\">\n    <path\n        android:fillColor=\"#3FB950\"\n        android:pathData=\"M0,0h108v108h-108z\" />\n</vector>"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 1,
+                                    "endLine": 11,
+                                    "snippet": {
+                                        "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<vector xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:width=\"108dp\"\n    android:height=\"108dp\"\n    android:viewportWidth=\"108\"\n    android:viewportHeight=\"108\">\n    <path\n        android:fillColor=\"#3FB950\"\n        android:pathData=\"M0,0h108v108h-108z\" />\n</vector>\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "21fcb565d531366f"
+                    }
+                },
+                {
+                    "ruleId": "UnusedResources",
+                    "ruleIndex": 6,
+                    "message": {
+                        "text": "The resource R.drawable.ic_launcher_foreground appears to be unused",
+                        "markdown": "The resource `R.drawable.ic_launcher_foreground` appears to be unused"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/drawable/ic_launcher_foreground.xml"
+                                },
+                                "region": {
+                                    "startLine": 2,
+                                    "startColumn": 1,
+                                    "endLine": 10,
+                                    "endColumn": 10,
+                                    "charOffset": 39,
+                                    "charLength": 469,
+                                    "snippet": {
+                                        "text": "<vector xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:width=\"108dp\"\n    android:height=\"108dp\"\n    android:viewportWidth=\"108\"\n    android:viewportHeight=\"108\">\n    <path\n        android:fillColor=\"#FFFFFF\"\n        android:pathData=\"M54,20 C35.2,20 20,35.2 20,54 C20,72.8 35.2,88 54,88 C72.8,88 88,72.8 88,54 C88,35.2 72.8,20 54,20 M54,78 C40.7,78 30,67.3 30,54 C30,40.7 40.7,30 54,30 C67.3,30 78,40.7 78,54 C78,67.3 67.3,78 54,78\" />\n</vector>"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 1,
+                                    "endLine": 11,
+                                    "snippet": {
+                                        "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<vector xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    android:width=\"108dp\"\n    android:height=\"108dp\"\n    android:viewportWidth=\"108\"\n    android:viewportHeight=\"108\">\n    <path\n        android:fillColor=\"#FFFFFF\"\n        android:pathData=\"M54,20 C35.2,20 20,35.2 20,54 C20,72.8 35.2,88 54,88 C72.8,88 88,72.8 88,54 C88,35.2 72.8,20 54,20 M54,78 C40.7,78 30,67.3 30,54 C30,40.7 40.7,30 54,30 C67.3,30 78,40.7 78,54 C78,67.3 67.3,78 54,78\" />\n</vector>\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "fb1275fc5a389117"
+                    }
+                },
+                {
+                    "ruleId": "UnusedResources",
+                    "ruleIndex": 6,
+                    "message": {
+                        "text": "The resource R.mipmap.ic_launcher_round appears to be unused",
+                        "markdown": "The resource `R.mipmap.ic_launcher_round` appears to be unused"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml"
+                                },
+                                "region": {
+                                    "startLine": 2,
+                                    "startColumn": 1,
+                                    "endLine": 5,
+                                    "endColumn": 17,
+                                    "charOffset": 39,
+                                    "charLength": 233,
+                                    "snippet": {
+                                        "text": "<adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <background android:drawable=\"@drawable/ic_launcher_background\" />\n    <foreground android:drawable=\"@drawable/ic_launcher_foreground\" />\n</adaptive-icon>"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 1,
+                                    "endLine": 6,
+                                    "snippet": {
+                                        "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <background android:drawable=\"@drawable/ic_launcher_background\" />\n    <foreground android:drawable=\"@drawable/ic_launcher_foreground\" />\n</adaptive-icon>\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "e3addf802514435f"
+                    }
+                },
+                {
+                    "ruleId": "UseKtx",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Use the KTX extension function SharedPreferences.edit instead?",
+                        "markdown": "Use the KTX extension function `SharedPreferences.edit` instead?"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 200,
+                                    "startColumn": 21,
+                                    "endLine": 200,
+                                    "endColumn": 39,
+                                    "charOffset": 7914,
+                                    "charLength": 18,
+                                    "snippet": {
+                                        "text": "sharedPrefs.edit()"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 198,
+                                    "endLine": 203,
+                                    "snippet": {
+                                        "text": "                    val prevResponse = RetrofitClient.getInstance().getPrevisao(mun)\n                    previsao = prevResponse // Atualiza estado silenciosamente\n                    sharedPrefs.edit().putString(\"previsao_$mun\", gson.toJson(prevResponse)).apply()\n                    isOfflineMode = false\n                } catch (e: Exception) {\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with the edit extension function"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 200,
+                                                "startColumn": 33,
+                                                "charOffset": 7926,
+                                                "endLine": 200,
+                                                "endColumn": 38,
+                                                "charLength": 5
+                                            },
+                                            "insertedContent": {
+                                                "text": "edit\n"
+                                            }
+                                        },
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 200,
+                                                "startColumn": 38,
+                                                "charOffset": 7931,
+                                                "endLine": 200,
+                                                "endColumn": 39,
+                                                "charLength": 1
+                                            },
+                                            "insertedContent": {
+                                                "text": " {\n"
+                                            }
+                                        },
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 200,
+                                                "startColumn": 39,
+                                                "charOffset": 7932,
+                                                "endLine": 200,
+                                                "endColumn": 40,
+                                                "charLength": 1
+                                            },
+                                            "insertedContent": {
+                                                "text": "\n"
+                                            }
+                                        },
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 200,
+                                                "startColumn": 93,
+                                                "charOffset": 7986,
+                                                "endLine": 200,
+                                                "endColumn": 101,
+                                                "charLength": 8
+                                            },
+                                            "insertedContent": {
+                                                "text": "}\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "00a21db79a3cb9b8"
+                    }
+                },
+                {
+                    "ruleId": "UseKtx",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Use the KTX extension function String.toColorInt instead?",
+                        "markdown": "Use the KTX extension function `String.toColorInt` instead?"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 846,
+                                    "startColumn": 63,
+                                    "endLine": 846,
+                                    "endColumn": 107,
+                                    "charOffset": 43293,
+                                    "charLength": 44,
+                                    "snippet": {
+                                        "text": "android.graphics.Color.parseColor(\"#ff8888\")"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 844,
+                                    "endLine": 849,
+                                    "snippet": {
+                                        "text": "                        drawRect(color = elNinoColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))\n                        drawContext.canvas.nativeCanvas.apply {\n                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor(\"#ff8888\") else android.graphics.Color.parseColor(\"#cc0000\")\n                            save()\n                            rotate(-90f, x, h / 2)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with the toColorInt extension function"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 846,
+                                                "startColumn": 63,
+                                                "charOffset": 43293,
+                                                "endLine": 846,
+                                                "endColumn": 107,
+                                                "charLength": 44
+                                            },
+                                            "insertedContent": {
+                                                "text": "\"#ff8888\".toColorInt()\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "2d51fe27f4c54439"
+                    }
+                },
+                {
+                    "ruleId": "UseKtx",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Use the KTX extension function String.toColorInt instead?",
+                        "markdown": "Use the KTX extension function `String.toColorInt` instead?"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 846,
+                                    "startColumn": 63,
+                                    "endLine": 846,
+                                    "endColumn": 107,
+                                    "charOffset": 43293,
+                                    "charLength": 44,
+                                    "snippet": {
+                                        "text": "android.graphics.Color.parseColor(\"#ff8888\")"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 844,
+                                    "endLine": 849,
+                                    "snippet": {
+                                        "text": "                        drawRect(color = elNinoColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))\n                        drawContext.canvas.nativeCanvas.apply {\n                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor(\"#ff8888\") else android.graphics.Color.parseColor(\"#cc0000\")\n                            save()\n                            rotate(-90f, x, h / 2)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with the toColorInt extension function"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 846,
+                                                "startColumn": 63,
+                                                "charOffset": 43293,
+                                                "endLine": 846,
+                                                "endColumn": 107,
+                                                "charLength": 44
+                                            },
+                                            "insertedContent": {
+                                                "text": "\"#ff8888\".toColorInt()\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "2d51fe27f4c54439"
+                    }
+                },
+                {
+                    "ruleId": "UseKtx",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Use the KTX extension function String.toColorInt instead?",
+                        "markdown": "Use the KTX extension function `String.toColorInt` instead?"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 846,
+                                    "startColumn": 113,
+                                    "endLine": 846,
+                                    "endColumn": 157,
+                                    "charOffset": 43343,
+                                    "charLength": 44,
+                                    "snippet": {
+                                        "text": "android.graphics.Color.parseColor(\"#cc0000\")"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 844,
+                                    "endLine": 849,
+                                    "snippet": {
+                                        "text": "                        drawRect(color = elNinoColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))\n                        drawContext.canvas.nativeCanvas.apply {\n                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor(\"#ff8888\") else android.graphics.Color.parseColor(\"#cc0000\")\n                            save()\n                            rotate(-90f, x, h / 2)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with the toColorInt extension function"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 846,
+                                                "startColumn": 113,
+                                                "charOffset": 43343,
+                                                "endLine": 846,
+                                                "endColumn": 157,
+                                                "charLength": 44
+                                            },
+                                            "insertedContent": {
+                                                "text": "\"#cc0000\".toColorInt()\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "2d51fe27f4c54439"
+                    }
+                },
+                {
+                    "ruleId": "UseKtx",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Use the KTX extension function String.toColorInt instead?",
+                        "markdown": "Use the KTX extension function `String.toColorInt` instead?"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 846,
+                                    "startColumn": 113,
+                                    "endLine": 846,
+                                    "endColumn": 157,
+                                    "charOffset": 43343,
+                                    "charLength": 44,
+                                    "snippet": {
+                                        "text": "android.graphics.Color.parseColor(\"#cc0000\")"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 844,
+                                    "endLine": 849,
+                                    "snippet": {
+                                        "text": "                        drawRect(color = elNinoColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))\n                        drawContext.canvas.nativeCanvas.apply {\n                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor(\"#ff8888\") else android.graphics.Color.parseColor(\"#cc0000\")\n                            save()\n                            rotate(-90f, x, h / 2)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with the toColorInt extension function"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 846,
+                                                "startColumn": 113,
+                                                "charOffset": 43343,
+                                                "endLine": 846,
+                                                "endColumn": 157,
+                                                "charLength": 44
+                                            },
+                                            "insertedContent": {
+                                                "text": "\"#cc0000\".toColorInt()\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "2d51fe27f4c54439"
+                    }
+                },
+                {
+                    "ruleId": "UseKtx",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Use the KTX extension function Canvas.withSave instead?",
+                        "markdown": "Use the KTX extension function `Canvas.withSave` instead?"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 847,
+                                    "startColumn": 29,
+                                    "endLine": 847,
+                                    "endColumn": 35,
+                                    "charOffset": 43416,
+                                    "charLength": 6,
+                                    "snippet": {
+                                        "text": "save()"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 845,
+                                    "endLine": 850,
+                                    "snippet": {
+                                        "text": "                        drawContext.canvas.nativeCanvas.apply {\n                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor(\"#ff8888\") else android.graphics.Color.parseColor(\"#cc0000\")\n                            save()\n                            rotate(-90f, x, h / 2)\n                            drawText(\"EL NIÑO\", x - 40f, (h / 2) - 15f, alertTextPaint)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with the withSave extension function"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 847,
+                                                "startColumn": 29,
+                                                "charOffset": 43416,
+                                                "endLine": 847,
+                                                "endColumn": 34,
+                                                "charLength": 5
+                                            },
+                                            "insertedContent": {
+                                                "text": "withSave\n"
+                                            }
+                                        },
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 847,
+                                                "startColumn": 34,
+                                                "charOffset": 43421,
+                                                "endLine": 847,
+                                                "endColumn": 35,
+                                                "charLength": 1
+                                            },
+                                            "insertedContent": {
+                                                "text": " {\n"
+                                            }
+                                        },
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 850,
+                                                "startColumn": 29,
+                                                "charOffset": 43590,
+                                                "endLine": 850,
+                                                "endColumn": 38,
+                                                "charLength": 9
+                                            },
+                                            "insertedContent": {
+                                                "text": "}\n"
+                                            }
+                                        },
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 848,
+                                                "startColumn": 1,
+                                                "charOffset": 43423
+                                            },
+                                            "insertedContent": {
+                                                "text": "    \n"
+                                            }
+                                        },
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 849,
+                                                "startColumn": 1,
+                                                "charOffset": 43474
+                                            },
+                                            "insertedContent": {
+                                                "text": "    \n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "394c2e7f255b1cb5"
+                    }
+                },
+                {
+                    "ruleId": "UseKtx",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Use the KTX extension function String.toColorInt instead?",
+                        "markdown": "Use the KTX extension function `String.toColorInt` instead?"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 855,
+                                    "startColumn": 63,
+                                    "endLine": 855,
+                                    "endColumn": 107,
+                                    "charOffset": 43908,
+                                    "charLength": 44,
+                                    "snippet": {
+                                        "text": "android.graphics.Color.parseColor(\"#8888ff\")"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 853,
+                                    "endLine": 858,
+                                    "snippet": {
+                                        "text": "                        drawRect(color = laNinaColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))\n                        drawContext.canvas.nativeCanvas.apply {\n                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor(\"#8888ff\") else android.graphics.Color.parseColor(\"#0000cc\")\n                            save()\n                            rotate(-90f, x, h / 2)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with the toColorInt extension function"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 855,
+                                                "startColumn": 63,
+                                                "charOffset": 43908,
+                                                "endLine": 855,
+                                                "endColumn": 107,
+                                                "charLength": 44
+                                            },
+                                            "insertedContent": {
+                                                "text": "\"#8888ff\".toColorInt()\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "aa497657e52baae7"
+                    }
+                },
+                {
+                    "ruleId": "UseKtx",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Use the KTX extension function String.toColorInt instead?",
+                        "markdown": "Use the KTX extension function `String.toColorInt` instead?"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 855,
+                                    "startColumn": 63,
+                                    "endLine": 855,
+                                    "endColumn": 107,
+                                    "charOffset": 43908,
+                                    "charLength": 44,
+                                    "snippet": {
+                                        "text": "android.graphics.Color.parseColor(\"#8888ff\")"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 853,
+                                    "endLine": 858,
+                                    "snippet": {
+                                        "text": "                        drawRect(color = laNinaColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))\n                        drawContext.canvas.nativeCanvas.apply {\n                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor(\"#8888ff\") else android.graphics.Color.parseColor(\"#0000cc\")\n                            save()\n                            rotate(-90f, x, h / 2)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with the toColorInt extension function"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 855,
+                                                "startColumn": 63,
+                                                "charOffset": 43908,
+                                                "endLine": 855,
+                                                "endColumn": 107,
+                                                "charLength": 44
+                                            },
+                                            "insertedContent": {
+                                                "text": "\"#8888ff\".toColorInt()\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "aa497657e52baae7"
+                    }
+                },
+                {
+                    "ruleId": "UseKtx",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Use the KTX extension function String.toColorInt instead?",
+                        "markdown": "Use the KTX extension function `String.toColorInt` instead?"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 855,
+                                    "startColumn": 113,
+                                    "endLine": 855,
+                                    "endColumn": 157,
+                                    "charOffset": 43958,
+                                    "charLength": 44,
+                                    "snippet": {
+                                        "text": "android.graphics.Color.parseColor(\"#0000cc\")"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 853,
+                                    "endLine": 858,
+                                    "snippet": {
+                                        "text": "                        drawRect(color = laNinaColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))\n                        drawContext.canvas.nativeCanvas.apply {\n                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor(\"#8888ff\") else android.graphics.Color.parseColor(\"#0000cc\")\n                            save()\n                            rotate(-90f, x, h / 2)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with the toColorInt extension function"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 855,
+                                                "startColumn": 113,
+                                                "charOffset": 43958,
+                                                "endLine": 855,
+                                                "endColumn": 157,
+                                                "charLength": 44
+                                            },
+                                            "insertedContent": {
+                                                "text": "\"#0000cc\".toColorInt()\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "aa497657e52baae7"
+                    }
+                },
+                {
+                    "ruleId": "UseKtx",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Use the KTX extension function String.toColorInt instead?",
+                        "markdown": "Use the KTX extension function `String.toColorInt` instead?"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 855,
+                                    "startColumn": 113,
+                                    "endLine": 855,
+                                    "endColumn": 157,
+                                    "charOffset": 43958,
+                                    "charLength": 44,
+                                    "snippet": {
+                                        "text": "android.graphics.Color.parseColor(\"#0000cc\")"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 853,
+                                    "endLine": 858,
+                                    "snippet": {
+                                        "text": "                        drawRect(color = laNinaColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))\n                        drawContext.canvas.nativeCanvas.apply {\n                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor(\"#8888ff\") else android.graphics.Color.parseColor(\"#0000cc\")\n                            save()\n                            rotate(-90f, x, h / 2)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with the toColorInt extension function"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 855,
+                                                "startColumn": 113,
+                                                "charOffset": 43958,
+                                                "endLine": 855,
+                                                "endColumn": 157,
+                                                "charLength": 44
+                                            },
+                                            "insertedContent": {
+                                                "text": "\"#0000cc\".toColorInt()\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "aa497657e52baae7"
+                    }
+                },
+                {
+                    "ruleId": "UseKtx",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Use the KTX extension function Canvas.withSave instead?",
+                        "markdown": "Use the KTX extension function `Canvas.withSave` instead?"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 856,
+                                    "startColumn": 29,
+                                    "endLine": 856,
+                                    "endColumn": 35,
+                                    "charOffset": 44031,
+                                    "charLength": 6,
+                                    "snippet": {
+                                        "text": "save()"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 854,
+                                    "endLine": 859,
+                                    "snippet": {
+                                        "text": "                        drawContext.canvas.nativeCanvas.apply {\n                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor(\"#8888ff\") else android.graphics.Color.parseColor(\"#0000cc\")\n                            save()\n                            rotate(-90f, x, h / 2)\n                            drawText(\"LA NIÑA\", x - 40f, (h / 2) - 15f, alertTextPaint)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace with the withSave extension function"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/com/agrointeligencia/app/MainActivity.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 856,
+                                                "startColumn": 29,
+                                                "charOffset": 44031,
+                                                "endLine": 856,
+                                                "endColumn": 34,
+                                                "charLength": 5
+                                            },
+                                            "insertedContent": {
+                                                "text": "withSave\n"
+                                            }
+                                        },
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 856,
+                                                "startColumn": 34,
+                                                "charOffset": 44036,
+                                                "endLine": 856,
+                                                "endColumn": 35,
+                                                "charLength": 1
+                                            },
+                                            "insertedContent": {
+                                                "text": " {\n"
+                                            }
+                                        },
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 859,
+                                                "startColumn": 29,
+                                                "charOffset": 44205,
+                                                "endLine": 859,
+                                                "endColumn": 38,
+                                                "charLength": 9
+                                            },
+                                            "insertedContent": {
+                                                "text": "}\n"
+                                            }
+                                        },
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 857,
+                                                "startColumn": 1,
+                                                "charOffset": 44038
+                                            },
+                                            "insertedContent": {
+                                                "text": "    \n"
+                                            }
+                                        },
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 858,
+                                                "startColumn": 1,
+                                                "charOffset": 44089
+                                            },
+                                            "insertedContent": {
+                                                "text": "    \n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "b6aa17877d73feca"
+                    }
+                }
+            ]
+        }
+    ]
+}

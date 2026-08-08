@@ -1,6 +1,7 @@
 from financas import get_financas, get_custos_locais, BASE_CUSTO_PA
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
+from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -52,9 +53,19 @@ def _get_cached_finance():
     return data
 
 
+@asynccontextmanager
+async def app_lifespan(app: FastAPI):
+    df = M.carregar(str(DADOS_PATH))
+    AppState.df = df
+    AppState.estimador = M.Estimador().treinar(df)
+    AppState.estimador.validar(df)  # Popula métricas de mae e rmse
+    AppState.last_year = int(df["ano"].max())
+    print("Modelo carregado e treinado com sucesso.", flush=True)
+    # Pre-populate finance cache in background
+    threading.Thread(target=_refresh_finance, daemon=True).start()
+    yield
 
-
-app = FastAPI(title="Agro Inteligência API", description="FastAPI for Soybean Yield Prediction System")
+app = FastAPI(title="Agro Inteligência API", description="FastAPI for Soybean Yield Prediction System", lifespan=app_lifespan)
 
 MUNICIPIOS_FORMATADOS = {
     'Conceicao Do Araguaia': 'Conceição do Araguaia', 'Floresta Do Araguaia': 'Floresta do Araguaia',
@@ -113,16 +124,7 @@ class AppState:
     estimador = None
     last_year = None
 
-@app.on_event("startup")
-def load_model():
-    df = M.carregar(str(DADOS_PATH))
-    AppState.df = df
-    AppState.estimador = M.Estimador().treinar(df)
-    AppState.estimador.validar(df)  # Popula métricas de mae e rmse
-    AppState.last_year = int(df["ano"].max())
-    print("Modelo carregado e treinado com sucesso.", flush=True)
-    # Pre-populate finance cache in background
-    threading.Thread(target=_refresh_finance, daemon=True).start()
+# Startup phase handled via lifespan manager in app definition
 
 @app.get("/api/ping")
 def ping():

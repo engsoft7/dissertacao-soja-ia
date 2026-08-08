@@ -54,6 +54,18 @@ def _get_cached_finance():
 
 
 
+app = FastAPI(title="Agro Inteligência API", description="FastAPI for Soybean Yield Prediction System")
+
+# Enable CORS for generic clients
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 @app.get("/api/financas/{municipio}")
 def get_financas(municipio: str):
     fin = _get_cached_finance()
@@ -69,18 +81,7 @@ def get_financas(municipio: str):
         "custo_ha": custo_ha,
         "vtn_ha": custos["vtn_ha"],
         "ano_referencia": int(AppState.last_year) if AppState.df is not None else 2024
-    }
 
-app = FastAPI(title="Agro Inteligência API", description="FastAPI for Soybean Yield Prediction System")
-
-# Enable CORS for generic clients
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 MUNICIPIOS_FORMATADOS = {

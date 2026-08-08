@@ -81,8 +81,7 @@ def get_financas(municipio: str):
         "custo_ha": custo_ha,
         "vtn_ha": custos["vtn_ha"],
         "ano_referencia": int(AppState.last_year) if AppState.df is not None else 2024
-
-
+    }
 
 MUNICIPIOS_FORMATADOS = {
     'Conceicao Do Araguaia': 'Conceição do Araguaia', 'Floresta Do Araguaia': 'Floresta do Araguaia',

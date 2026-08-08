@@ -1,4 +1,4 @@
-from financas import get_financas, get_custos_locais, REV_MUNICIPIOS, BASE_CUSTO_PA
+from financas import get_financas, get_custos_locais, BASE_CUSTO_PA
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from fastapi.responses import HTMLResponse
@@ -56,33 +56,6 @@ def _get_cached_finance():
 
 app = FastAPI(title="Agro Inteligência API", description="FastAPI for Soybean Yield Prediction System")
 
-# Enable CORS for generic clients
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.get("/api/financas/{municipio}")
-def get_financas(municipio: str):
-    fin = _get_cached_finance()
-    brl_price_bag = fin["soja_preco_saca"]
-
-    raw_municipio = REV_MUNICIPIOS.get(municipio, municipio)
-    custos = get_custos_locais(raw_municipio)
-    custo_ha = custos["custo_ha"]
-    
-    return {
-        "municipio": municipio,
-        "soja_preco_saca": brl_price_bag,
-        "custo_ha": custo_ha,
-        "vtn_ha": custos["vtn_ha"],
-        "ano_referencia": int(AppState.last_year) if AppState.df is not None else 2024
-    }
-
 MUNICIPIOS_FORMATADOS = {
     'Conceicao Do Araguaia': 'Conceição do Araguaia', 'Floresta Do Araguaia': 'Floresta do Araguaia',
     'Paragominas': 'Paragominas', 'Redencao': 'Redenção', 'Santarem': 'Santarém',
@@ -101,6 +74,35 @@ MUNICIPIOS_FORMATADOS = {
     'Jacareacanga': 'Jacareacanga', 'Jacunda': 'Jacundá', 'Picarra': 'Piçarra',
     'Sapucaia': 'Sapucaia', 'Tome-acu': 'Tomé-Açu'
 }
+
+REVERSE_FORMATADOS = {v: k for k, v in MUNICIPIOS_FORMATADOS.items()}
+
+# Enable CORS for generic clients
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/api/financas/{municipio}")
+def get_financas(municipio: str):
+    fin = _get_cached_finance()
+    brl_price_bag = fin["soja_preco_saca"]
+
+    raw_municipio = REVERSE_FORMATADOS.get(municipio, municipio)
+    custos = get_custos_locais(raw_municipio)
+    custo_ha = custos["custo_ha"]
+    
+    return {
+        "municipio": municipio,
+        "soja_preco_saca": brl_price_bag,
+        "custo_ha": custo_ha,
+        "vtn_ha": custos["vtn_ha"],
+        "ano_referencia": int(AppState.last_year) if AppState.df is not None else 2024
+    }
 
 ROOT_PATH = Path(__file__).resolve().parents[2]
 DADOS_PATH = ROOT_PATH / "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"
@@ -158,7 +160,7 @@ def get_previsao(municipio: str):
     if AppState.df is None:
         raise HTTPException(status_code=503, detail="Modelo não carregado")
     
-    raw_municipio = REV_MUNICIPIOS.get(municipio, municipio)
+    raw_municipio = REVERSE_FORMATADOS.get(municipio, municipio)
     df_mun = AppState.df[AppState.df["municipio"] == raw_municipio].copy()
     if df_mun.empty:
         raise HTTPException(status_code=404, detail="Município não encontrado")
@@ -273,7 +275,7 @@ def _generate_map_html_cached(municipio: str, theme: str) -> str:
     amax = float(pts["area"].max())
     
     _cod_por_nome = AppState.df.drop_duplicates("municipio").set_index("municipio")["cod_ibge7"].to_dict()
-    raw_municipio = REV_MUNICIPIOS.get(municipio, municipio) if municipio else None
+    raw_municipio = REVERSE_FORMATADOS.get(municipio, municipio) if municipio else None
     cod_sel = _cod_por_nome.get(raw_municipio)
 
     lat_sel, lon_sel = None, None
@@ -351,7 +353,7 @@ def simular_cenario(req: SimulacaoRequest):
         raise HTTPException(status_code=503, detail="Modelo não carregado")
     
     ano_alvo = int(AppState.last_year) + 1
-    raw_municipio = REV_MUNICIPIOS.get(req.municipio, req.municipio)
+    raw_municipio = REVERSE_FORMATADOS.get(req.municipio, req.municipio)
     
     hist = AppState.df[AppState.df.municipio == raw_municipio]
     if hist.empty:

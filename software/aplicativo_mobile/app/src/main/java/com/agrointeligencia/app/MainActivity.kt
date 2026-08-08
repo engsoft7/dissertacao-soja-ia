@@ -453,6 +453,7 @@ fun AgroDashboard() {
                                                     settings.javaScriptEnabled = true
                                                     settings.domStorageEnabled = true
                                                     settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+                                                    setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null)
                                                     webViewClient = WebViewClient()
                                                     loadUrl(mapUrl)
                                                     lastLoadedUrl = mapUrl

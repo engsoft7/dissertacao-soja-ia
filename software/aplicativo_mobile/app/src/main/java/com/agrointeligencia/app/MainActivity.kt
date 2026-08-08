@@ -82,7 +82,9 @@ class MainActivity : ComponentActivity() {
                 if (!view.isInEditMode) {
                     SideEffect {
                         val window = (view.context as Activity).window
+                        @Suppress("DEPRECATION")
                         window.statusBarColor = colors.background.toArgb()
+                        @Suppress("DEPRECATION")
                         window.navigationBarColor = colors.surface.toArgb()
                         WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDark
                         WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !isDark
@@ -226,6 +228,7 @@ fun AgroDashboard() {
                     icon = { Icon(Icons.Filled.LocationOn, contentDescription = "Mapa") },
                     label = { Text("Mapa") }
                 )
+                @Suppress("DEPRECATION")
                 NavigationBarItem(
                     selected = currentTab == 2,
                     onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 2 },
@@ -281,7 +284,7 @@ fun AgroDashboard() {
                             readOnly = true,
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                            modifier = Modifier.menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth()
                         )
                         
                         ExposedDropdownMenu(
@@ -632,7 +635,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                 }
             }
             
-            Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
@@ -760,7 +763,7 @@ fun MetodologiaCard() {
             Text(text = "Base Territorial: MapBiomas e IBGE (PAM)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Mercado Financeiro: CBOT/Yahoo Finance (Soja & Dólar)", fontSize = 12.sp, color = Color.Gray)
             
-            Divider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {

@@ -50,6 +50,8 @@ data class SimulacaoResponse(
     val delta_kg_ha: Double
 )
 
+data class PingResponse(val status: String, val model_loaded: Boolean)
+
 interface AgroApiService {
     @retrofit2.http.POST("api/simulacao")
     suspend fun simularCenario(@retrofit2.http.Body request: SimulacaoRequest): SimulacaoResponse
@@ -62,23 +64,30 @@ interface AgroApiService {
 
     @GET("api/financas/{municipio}")
     suspend fun getFinancas(@Path("municipio") municipio: String): FinancaResponse
+
+    @GET("api/ping")
+    suspend fun ping(): PingResponse
 }
 
 object RetrofitClient {
-    var currentBaseUrl = "https://agrointeligencia-api.onrender.com/"
+    private const val BASE_URL = "https://agrointeligencia-api.onrender.com/"
 
-    fun getInstance(url: String = currentBaseUrl): AgroApiService {
-        val client = OkHttpClient.Builder()
+    private val client: OkHttpClient by lazy {
+        OkHttpClient.Builder()
             .connectTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
             .build()
-            
-        val retrofit = Retrofit.Builder()
-            .baseUrl(url)
+    }
+
+    private val api: AgroApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        return retrofit.create(AgroApiService::class.java)
+            .create(AgroApiService::class.java)
     }
+
+    fun getInstance(): AgroApiService = api
 }

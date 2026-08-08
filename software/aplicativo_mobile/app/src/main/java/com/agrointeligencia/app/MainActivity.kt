@@ -121,6 +121,11 @@ fun AgroDashboard() {
     fun loadData() {
         errorMsg = null
         
+        // --- 0. Proactive Render warm-up (fire-and-forget) ---
+        coroutineScope.launch {
+            try { RetrofitClient.getInstance().ping() } catch (_: Exception) {}
+        }
+        
         // --- 1. Optimistic Cache Load ---
         val cachedMunStr = sharedPrefs.getString("municipios", null)
         val cachedKpiStr = sharedPrefs.getString("kpis", null)
@@ -436,6 +441,8 @@ fun AgroDashboard() {
                                     ) {
                                         val currentTheme = if (isSystemInDarkTheme()) "dark" else "light"
                                         val mapUrl = "https://agrointeligencia-api.onrender.com/api/mapa/render?theme=${currentTheme}" + if (selectedMunicipio != null) "&municipio=${URLEncoder.encode(selectedMunicipio, "UTF-8")}" else ""
+                                        // Remember last loaded URL to avoid redundant reloads on recomposition
+                                        var lastLoadedUrl by remember { mutableStateOf("") }
                                         AndroidView(
                                             factory = { ctx ->
                                                 WebView(ctx).apply {
@@ -445,12 +452,17 @@ fun AgroDashboard() {
                                                     )
                                                     settings.javaScriptEnabled = true
                                                     settings.domStorageEnabled = true
+                                                    settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
                                                     webViewClient = WebViewClient()
                                                     loadUrl(mapUrl)
+                                                    lastLoadedUrl = mapUrl
                                                 }
                                             },
                                             update = { webView ->
-                                                webView.loadUrl(mapUrl)
+                                                if (mapUrl != lastLoadedUrl) {
+                                                    webView.loadUrl(mapUrl)
+                                                    lastLoadedUrl = mapUrl
+                                                }
                                             },
                                             modifier = Modifier.fillMaxSize()
                                         )

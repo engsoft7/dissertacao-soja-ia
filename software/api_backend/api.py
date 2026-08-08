@@ -8,39 +8,59 @@ import pandas as pd
 import json
 import requests
 import sys
+import threading
+import time
 from pathlib import Path
 
 # Add the dashboard_web to sys path to import model
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "dashboard_web"))
 import model as M
 
+# ── Background Yahoo Finance cache ──────────────────────────────────
+_finance_cache = {"soja_preco_saca": 120.0, "usd_brl": 5.50, "ts": 0.0}
+_finance_lock = threading.Lock()
+
+def _refresh_finance():
+    """Fetch CBOT soy + USD/BRL in background, update cache."""
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+               'Accept': 'application/json'}
+    try:
+        r_cbot = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/ZS=F',
+                              headers=headers, timeout=10)
+        price_cents = r_cbot.json()['chart']['result'][0]['meta']['regularMarketPrice']
+        usd_price_bag = (price_cents / 100) * 2.20462
+
+        r_usd = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/BRL=X',
+                             headers=headers, timeout=10)
+        usd_brl = float(r_usd.json()['chart']['result'][0]['meta']['regularMarketPrice'])
+
+        brl_price_bag = round(usd_price_bag * usd_brl, 2)
+        with _finance_lock:
+            _finance_cache["soja_preco_saca"] = brl_price_bag
+            _finance_cache["usd_brl"] = usd_brl
+            _finance_cache["ts"] = time.time()
+        print(f"Finance cache atualizado: R$ {brl_price_bag}/sc", flush=True)
+    except Exception as e:
+        print(f"Finance refresh erro (usando cache): {e}", flush=True)
+
+def _get_cached_finance():
+    """Return cached finance data; refresh in background if stale (>15 min)."""
+    with _finance_lock:
+        data = _finance_cache.copy()
+    if time.time() - data["ts"] > 900:  # 15 min
+        threading.Thread(target=_refresh_finance, daemon=True).start()
+    return data
+
 
 
 
 @app.get("/api/financas/{municipio}")
 def get_financas(municipio: str):
-    import requests
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    brl_price_bag = 120.0
-    try:
-        r_cbot = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/ZS=F', headers=headers)
-        price_cents = r_cbot.json()['chart']['result'][0]['meta']['regularMarketPrice']
-        usd_price_bag = (price_cents / 100) * 2.20462
-        
-        r_usd = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/BRL=X', headers=headers)
-        usd_brl = float(r_usd.json()['chart']['result'][0]['meta']['regularMarketPrice'])
-        brl_price_bag = round(usd_price_bag * usd_brl, 2)
-    except Exception as e:
-        print("Erro online financas:", e, flush=True)
-        pass
+    fin = _get_cached_finance()
+    brl_price_bag = fin["soja_preco_saca"]
 
     raw_municipio = REV_MUNICIPIOS.get(municipio, municipio)
     custos = get_custos_locais(raw_municipio)
-    
-    # Híbrido: Pega a base local (custos["custo_ha"]) e faz uma leve indexacao
-    # Se brl_price_bag for muito diferente de 100, flutua?
-    # Para ser exatamente o hibrido que garanta consistencia, vamos usar custos locais + cbot price real
-    # Custo_ha será apenas o custo do dicionário, assim as duas plataformas convergem com precisão
     custo_ha = custos["custo_ha"]
     
     return {
@@ -99,6 +119,13 @@ def load_model():
     AppState.estimador.validar(df)  # Popula métricas de mae e rmse
     AppState.last_year = int(df["ano"].max())
     print("Modelo carregado e treinado com sucesso.", flush=True)
+    # Pre-populate finance cache in background
+    threading.Thread(target=_refresh_finance, daemon=True).start()
+
+@app.get("/api/ping")
+def ping():
+    """Lightweight health/warm-up endpoint for mobile app cold-start."""
+    return {"status": "ok", "model_loaded": AppState.df is not None}
 
 class PrevisaoRequest(BaseModel):
     municipio: str
@@ -116,33 +143,15 @@ def get_kpis_economia():
     if AppState.df is None:
          raise HTTPException(status_code=503, detail="Modelo não carregado")
     
-    try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 
-            'Accept': 'application/json'
-        }
-        r_cbot = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/ZS=F', headers=headers)
-        price_cents = r_cbot.json()['chart']['result'][0]['meta']['regularMarketPrice']
-        usd_price_bag = (price_cents / 100) * 2.20462
-        
-        r_usd = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/BRL=X', headers=headers)
-        usd_brl = float(r_usd.json()['chart']['result'][0]['meta']['regularMarketPrice'])
-        
-        brl_price_bag = round(usd_price_bag * usd_brl, 2)
-        custo_ha = round((brl_price_bag * 55) * 0.65, 2)
-        
-        return {
-             "soja_preco_saca": brl_price_bag,
-             "custo_ha": custo_ha,
-             "ano_referencia": int(AppState.last_year)
-        }
-    except Exception as e:
-        print("Erro online KPIs:", e, flush=True)
-        return {
-             "soja_preco_saca": 120.0,
-             "custo_ha": 3500.0,
-             "ano_referencia": int(AppState.last_year)
-        }
+    fin = _get_cached_finance()
+    brl_price_bag = fin["soja_preco_saca"]
+    custo_ha = round((brl_price_bag * 55) * 0.65, 2)
+    
+    return {
+         "soja_preco_saca": brl_price_bag,
+         "custo_ha": custo_ha,
+         "ano_referencia": int(AppState.last_year)
+    }
 
 @app.get("/api/previsao/{municipio}")
 def get_previsao(municipio: str):
@@ -350,21 +359,38 @@ def simular_cenario(req: SimulacaoRequest):
         
     clima = hist[M.FEATURES].mean().to_dict()
     
-    # Baseline normal (apenas média histórica)
-    result_base = AppState.estimador.estimar(raw_municipio, ano_alvo, clima=clima)
+    # ── Optimized: compute baseline once, reuse for both scenarios ──
+    from model import _baseline
+    import numpy as np
+    base_val = float(_baseline(
+        AppState.estimador.df,
+        pd.Series([raw_municipio]),
+        pd.Series([ano_alvo])
+    )[0])
     
-    # Aplicar modificadores no clima
+    # Baseline prediction (unmodified climate)
+    x_base = np.array([clima[f] for f in M.FEATURES], dtype=float)
+    corr_base = float(AppState.estimador.modelo.predict(
+        AppState.estimador.scaler.transform(x_base.reshape(1, -1))
+    )[0])
+    est_base = base_val + corr_base
+    
+    # Modified climate scenario
     clima_novo = clima.copy()
     clima_novo["precip_total"] *= req.precip_factor
     clima_novo["temp_mean"] += req.temp_offset
     clima_novo["temp_max"] += req.temp_offset
     clima_novo["balanco_hidrico"] = clima_novo["precip_total"] - clima_novo["etp_total"]
     
-    result_sim = AppState.estimador.estimar(raw_municipio, ano_alvo, clima=clima_novo)
+    x_sim = np.array([clima_novo[f] for f in M.FEATURES], dtype=float)
+    corr_sim = float(AppState.estimador.modelo.predict(
+        AppState.estimador.scaler.transform(x_sim.reshape(1, -1))
+    )[0])
+    est_sim = base_val + corr_sim
     
     return {
         "municipio": req.municipio,
-        "baseline_kg_ha": float(result_base["estimativa_kg_ha"]),
-        "estimativa_kg_ha": float(result_sim["estimativa_kg_ha"]),
-        "delta_kg_ha": float(result_sim["estimativa_kg_ha"] - result_base["estimativa_kg_ha"])
+        "baseline_kg_ha": est_base,
+        "estimativa_kg_ha": est_sim,
+        "delta_kg_ha": est_sim - est_base
     }

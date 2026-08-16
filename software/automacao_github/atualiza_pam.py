@@ -14,7 +14,7 @@ Executado mensalmente pelo GitHub Actions (.github/workflows/atualiza-dados.yml)
    máscara MapBiomas) precisam ser coletadas no Google Earth Engine com as
    rotinas de 01_coleta_dados/ antes de a safra entrar na base.
 
-Apenas dados/soja_para_mascarado_2001_2024.csv (a base do painel) é atualizado.
+Apenas pesquisa/dados/soja_para_mascarado_2001_2024.csv (a base do painel) é atualizado.
 A base sem máscara é artefato histórico da comparação feita na dissertação e
 permanece congelada.
 
@@ -32,9 +32,9 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-RAIZ = Path(__file__).resolve().parents[1]
-CSV_PAINEL = RAIZ / "dados" / "soja_para_mascarado_2001_2024.csv"
-DATA_ATUALIZACAO = RAIZ / "dados" / "ultima_atualizacao.txt"
+RAIZ = Path(__file__).resolve().parents[2]
+CSV_PAINEL = RAIZ / "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"
+DATA_ATUALIZACAO = RAIZ / "pesquisa" / "dados" / "ultima_atualizacao.txt"
 
 
 def marca_atualizacao() -> None:
@@ -161,7 +161,7 @@ def main() -> int:
             linhas += [
                 f"O IBGE revisou o rendimento oficial de {len(revisoes)} "
                 "registro(s) município-safra já presentes na base do painel "
-                "(`dados/soja_para_mascarado_2001_2024.csv`):", "",
+                "(`pesquisa/dados/soja_para_mascarado_2001_2024.csv`):", "",
                 "| Município | Ano | Antes (kg/ha) | Depois (kg/ha) |",
                 "|---|---|---|---|",
             ]

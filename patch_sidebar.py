@@ -13,12 +13,12 @@ municipio = st.sidebar.selectbox(
     format_func=disp,
     on_change=on_dropdown_change)
 
-comparar = st.sidebar.toggle("Comparar com vizinho", value=False)
+comparar = st.sidebar.toggle("Comparar com outro município", value=False)
 mun_comp = None
 if comparar:
     opcoes_comp = [m for m in municipios if m != municipio]
     mun_comp = st.sidebar.selectbox(
-        "Município Paralelo",
+        "Município para Comparação",
         opcoes_comp,
         format_func=disp)
 

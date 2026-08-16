@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Gera dados/para_geo.json: contorno do estado do Pará (malha do IBGE).
+"""Gera pesquisa/dados/para_geo.json: contorno do estado do Pará (malha do IBGE).
 
 Baixa a malha oficial do Pará (API de malhas do IBGE, qualidade mínima) e grava
 um GeoJSON compacto — coordenadas arredondadas a 3 casas (~100 m) — usado como
@@ -15,7 +15,7 @@ from pathlib import Path
 
 import requests
 
-SAIDA = Path(__file__).resolve().parents[1] / "dados" / "para_geo.json"
+SAIDA = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "para_geo.json"
 URL = ("https://servicodados.ibge.gov.br/api/v3/malhas/estados/15"
        "?formato=application/vnd.geo+json&qualidade=minima")
 

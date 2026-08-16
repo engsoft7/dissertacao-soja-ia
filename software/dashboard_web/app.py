@@ -640,16 +640,29 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: b
     tiles_map = "cartodbdark_matter" if is_dark else "cartodbpositron"
     fill_color = "#1b2d1b" if is_dark else "#e8f5e9"
     border_color = "#304a30" if is_dark else "#81c784"
-    m = folium.Map(location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
-                   tiles=tiles_map, zoom_start=6, control_scale=True)
+    m = folium.Map(
+        location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
+        tiles=tiles_map,
+        zoom_start=6,
+        min_zoom=5,
+        max_zoom=12,
+        max_bounds=True,
+        min_lat=-10.5,
+        max_lat=3.5,
+        min_lon=-60.0,
+        max_lon=-45.0,
+        control_scale=True,
+        prefer_canvas=True
+    )
     folium.GeoJson(
         geo,
         name="Pará",
         interactive=False,
+        smooth_factor=1.0,
         style_function=lambda f: {
             "fillColor": fill_color,
             "color": border_color,
-            "weight": 1.0,
+            "weight": 1.2,
             "fillOpacity": 0.2 if is_dark else 0.5}).add_to(m)
 
     rios = carregar_rios()
@@ -658,6 +671,7 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: b
             rios,
             name="Rios",
             interactive=False,
+            smooth_factor=1.0,
             style_function=lambda f: {
                 "color": "#4a90d9",
                 "weight": 1.3,
@@ -681,7 +695,7 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: b
 
         folium.CircleMarker(
             location=[r.latitude, r.longitude],  # type: ignore
-            radius=4 + 14 * math.sqrt(r.area / amax),  # type: ignore
+            radius=3 + 10 * math.sqrt(r.area / amax),  # type: ignore
             color=cor_borda,
             weight=peso_borda,
             # type: ignore

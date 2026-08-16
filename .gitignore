@@ -5,3 +5,7 @@ data/data_cast.csv
 *.pdf
 .venv/
 .agents/
+.gradle/
+*.lock
+*.bin
+build/

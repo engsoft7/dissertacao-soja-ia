@@ -150,6 +150,14 @@ def main() -> int:
     else:
         print("Nenhuma revisão do IBGE nos anos já presentes na base.")
 
+    # Atualiza índice oficial ONI da NOAA para El Niño e La Niña
+    try:
+        import subprocess, sys
+        script_enso = Path(__file__).resolve().parent / "atualiza_enso.py"
+        subprocess.run([sys.executable, str(script_enso)], check=False)
+    except Exception as e:
+        print(f"Aviso ao atualizar índice NOAA ENSO: {e}")
+
     if ano_novo:
         print(f"Safra nova disponível no SIDRA: {ano_novo} "
               "(requer coleta GEE das variáveis ambientais)")

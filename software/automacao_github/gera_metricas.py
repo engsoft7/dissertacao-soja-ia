@@ -17,16 +17,16 @@ import json
 import sys
 from pathlib import Path
 
-RAIZ = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(RAIZ / "06_app"))
+RAIZ = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(RAIZ / "software" / "dashboard_web"))
 
 import model  # noqa: E402  (depende do sys.path acima)
 
-METRICAS_JSON = RAIZ / "dados" / "metricas_validacao.json"
+METRICAS_JSON = RAIZ / "pesquisa" / "dados" / "metricas_validacao.json"
 
 
 def main() -> int:
-    df = model.carregar(str(RAIZ / "dados" / "soja_para_mascarado_2001_2024.csv"))
+    df = model.carregar(str(RAIZ / "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"))
     met = model.Estimador().validar(df)
     met["registros"] = len(df)
     METRICAS_JSON.write_text(

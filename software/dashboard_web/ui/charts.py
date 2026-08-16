@@ -40,14 +40,22 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True):
             showlegend=True
         )
 
-    # Constroi o dataframe historico de anomalias climaticas (Hardcoded exatamente como no antigo Altair)
-    df_clima = pd.DataFrame([
-        {"ano": 2003, "Clima": "El Niño"}, {"ano": 2010, "Clima": "El Niño"}, 
-        {"ano": 2015, "Clima": "El Niño"}, {"ano": 2016, "Clima": "El Niño"}, 
-        {"ano": 2024, "Clima": "El Niño"}, {"ano": 2000, "Clima": "La Niña"}, 
-        {"ano": 2008, "Clima": "La Niña"}, {"ano": 2011, "Clima": "La Niña"}, 
-        {"ano": 2021, "Clima": "La Niña"}, {"ano": 2022, "Clima": "La Niña"}
-    ])
+    # Carrega o histórico oficial de eventos El Niño e La Niña (dinâmico via NOAA)
+    from pathlib import Path
+    import json
+    enso_path = Path(__file__).resolve().parents[3] / "pesquisa" / "dados" / "eventos_enso.json"
+    el_ninos = [2003, 2010, 2015, 2016, 2023, 2024]
+    la_ninas = [2000, 2008, 2011, 2021, 2022]
+    if enso_path.exists():
+        try:
+            d = json.loads(enso_path.read_text(encoding="utf-8"))
+            el_ninos = d.get("el_ninos", el_ninos)
+            la_ninas = d.get("la_ninas", la_ninas)
+        except Exception:
+            pass
+
+    clima_rows = [{"ano": a, "Clima": "El Niño"} for a in el_ninos] + [{"ano": a, "Clima": "La Niña"} for a in la_ninas]
+    df_clima = pd.DataFrame(clima_rows)
 
     # Restaura as faixas climáticas de El Niño e La Niña e injeta de volta na Legenda
     el_nino_color = "rgba(215, 48, 39, 0.3)"

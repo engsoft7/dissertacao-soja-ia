@@ -157,6 +157,19 @@ def get_kpis_economia():
          "ano_referencia": int(AppState.last_year)
     }
 
+def _get_eventos_enso():
+    enso_path = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "eventos_enso.json"
+    if enso_path.exists():
+        try:
+            d = json.loads(enso_path.read_text(encoding="utf-8"))
+            return (
+                d.get("el_ninos", [2003, 2010, 2015, 2016, 2023, 2024]),
+                d.get("la_ninas", [2000, 2008, 2011, 2021, 2022])
+            )
+        except Exception:
+            pass
+    return [2003, 2010, 2015, 2016, 2023, 2024], [2000, 2008, 2011, 2021, 2022]
+
 @app.get("/api/previsao/{municipio}")
 def get_previsao(municipio: str):
     if AppState.df is None:
@@ -174,9 +187,6 @@ def get_previsao(municipio: str):
         for _, row in df_mun.iterrows():
             ano = int(row["ano"])
             real = float(row["rendimento_kg_ha"])
-            # Simulando o predito no passado apenas como espelho + noise ou rodando modelo referência
-            # Mas podemos focar na simulação para o ano futuro, e botar null para "predito" antigo
-            # ou mockar o estimar no passado
             r = AppState.estimador.estimar(raw_municipio, ano)
             pred = float(r["estimativa_kg_ha"])
             resultado.append({
@@ -200,11 +210,12 @@ def get_previsao(municipio: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
         
+    el_ninos, la_ninas = _get_eventos_enso()
     return {
         "municipio": municipio, 
         "historico": resultado,
-        "elNinos": [2003, 2010, 2015, 2016, 2023, 2024],
-        "laNinas": [2008, 2011, 2021, 2022]
+        "elNinos": el_ninos,
+        "laNinas": la_ninas
     }
 
 @app.get("/api/mapa/geo")

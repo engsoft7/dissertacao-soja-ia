@@ -1,0 +1,531 @@
+{
+  "fonte": "NOAA Climate Prediction Center (CPC) - Oceanic Niño Index (ONI)",
+  "url_origem": "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",
+  "ultima_atualizacao": "2026-08-16 22:44:02 UTC",
+  "el_ninos": [
+    2003,
+    2010,
+    2015,
+    2016,
+    2023,
+    2024,
+    2026
+  ],
+  "la_ninas": [
+    2000,
+    2008,
+    2011,
+    2021,
+    2022,
+    2025
+  ],
+  "historico_detalhado": {
+    "2000": {
+      "classificacao": "La Niña",
+      "anomalia_media": -0.77,
+      "pico_anomalia": -1.47,
+      "trimestres": {
+        "DJF": -1.47,
+        "JFM": -1.26,
+        "FMA": -0.98,
+        "MAM": -0.81,
+        "AMJ": -0.67,
+        "MJJ": -0.62,
+        "JJA": -0.48,
+        "JAS": -0.4,
+        "ASO": -0.42,
+        "SON": -0.54,
+        "OND": -0.76,
+        "NDJ": -0.78
+      }
+    },
+    "2001": {
+      "classificacao": "Neutro",
+      "anomalia_media": -0.29,
+      "pico_anomalia": -0.76,
+      "trimestres": {
+        "DJF": -0.76,
+        "JFM": -0.54,
+        "FMA": -0.43,
+        "MAM": -0.29,
+        "AMJ": -0.19,
+        "MJJ": -0.08,
+        "JJA": -0.05,
+        "JAS": -0.13,
+        "ASO": -0.15,
+        "SON": -0.26,
+        "OND": -0.33,
+        "NDJ": -0.32
+      }
+    },
+    "2002": {
+      "classificacao": "Neutro",
+      "anomalia_media": 0.51,
+      "pico_anomalia": -0.15,
+      "trimestres": {
+        "DJF": -0.15,
+        "JFM": 0.07,
+        "FMA": 0.11,
+        "MAM": 0.15,
+        "AMJ": 0.3,
+        "MJJ": 0.45,
+        "JJA": 0.57,
+        "JAS": 0.63,
+        "ASO": 0.78,
+        "SON": 0.99,
+        "OND": 1.19,
+        "NDJ": 1.08
+      }
+    },
+    "2003": {
+      "classificacao": "El Niño",
+      "anomalia_media": 0.23,
+      "pico_anomalia": 0.9,
+      "trimestres": {
+        "DJF": 0.9,
+        "JFM": 0.59,
+        "FMA": 0.38,
+        "MAM": -0.01,
+        "AMJ": -0.18,
+        "MJJ": -0.13,
+        "JJA": 0.09,
+        "JAS": 0.14,
+        "ASO": 0.23,
+        "SON": 0.23,
+        "OND": 0.29,
+        "NDJ": 0.29
+      }
+    },
+    "2004": {
+      "classificacao": "Neutro",
+      "anomalia_media": 0.39,
+      "pico_anomalia": 0.1,
+      "trimestres": {
+        "DJF": 0.34,
+        "JFM": 0.27,
+        "FMA": 0.19,
+        "MAM": 0.1,
+        "AMJ": 0.12,
+        "MJJ": 0.22,
+        "JJA": 0.39,
+        "JAS": 0.54,
+        "ASO": 0.58,
+        "SON": 0.61,
+        "OND": 0.64,
+        "NDJ": 0.71
+      }
+    },
+    "2005": {
+      "classificacao": "Neutro",
+      "anomalia_media": 0.03,
+      "pico_anomalia": -0.82,
+      "trimestres": {
+        "DJF": 0.62,
+        "JFM": 0.55,
+        "FMA": 0.4,
+        "MAM": 0.37,
+        "AMJ": 0.27,
+        "MJJ": 0.09,
+        "JJA": -0.04,
+        "JAS": -0.14,
+        "ASO": -0.11,
+        "SON": -0.27,
+        "OND": -0.57,
+        "NDJ": -0.82
+      }
+    },
+    "2006": {
+      "classificacao": "Neutro",
+      "anomalia_media": 0.04,
+      "pico_anomalia": -0.86,
+      "trimestres": {
+        "DJF": -0.86,
+        "JFM": -0.8,
+        "FMA": -0.63,
+        "MAM": -0.45,
+        "AMJ": -0.19,
+        "MJJ": -0.05,
+        "JJA": 0.12,
+        "JAS": 0.33,
+        "ASO": 0.54,
+        "SON": 0.71,
+        "OND": 0.88,
+        "NDJ": 0.88
+      }
+    },
+    "2007": {
+      "classificacao": "Neutro",
+      "anomalia_media": -0.61,
+      "pico_anomalia": -1.72,
+      "trimestres": {
+        "DJF": 0.62,
+        "JFM": 0.19,
+        "FMA": -0.12,
+        "MAM": -0.32,
+        "AMJ": -0.34,
+        "MJJ": -0.41,
+        "JJA": -0.49,
+        "JAS": -0.77,
+        "ASO": -1.05,
+        "SON": -1.38,
+        "OND": -1.57,
+        "NDJ": -1.72
+      }
+    },
+    "2008": {
+      "classificacao": "La Niña",
+      "anomalia_media": -0.81,
+      "pico_anomalia": -1.76,
+      "trimestres": {
+        "DJF": -1.76,
+        "JFM": -1.61,
+        "FMA": -1.37,
+        "MAM": -1.05,
+        "AMJ": -0.85,
+        "MJJ": -0.56,
+        "JJA": -0.33,
+        "JAS": -0.2,
+        "ASO": -0.25,
+        "SON": -0.36,
+        "OND": -0.57,
+        "NDJ": -0.79
+      }
+    },
+    "2009": {
+      "classificacao": "Neutro",
+      "anomalia_media": 0.26,
+      "pico_anomalia": -0.89,
+      "trimestres": {
+        "DJF": -0.89,
+        "JFM": -0.84,
+        "FMA": -0.63,
+        "MAM": -0.35,
+        "AMJ": 0.03,
+        "MJJ": 0.34,
+        "JJA": 0.5,
+        "JAS": 0.56,
+        "ASO": 0.66,
+        "SON": 0.92,
+        "OND": 1.31,
+        "NDJ": 1.5
+      }
+    },
+    "2010": {
+      "classificacao": "El Niño",
+      "anomalia_media": -0.43,
+      "pico_anomalia": 1.47,
+      "trimestres": {
+        "DJF": 1.47,
+        "JFM": 1.21,
+        "FMA": 0.88,
+        "MAM": 0.38,
+        "AMJ": -0.16,
+        "MJJ": -0.66,
+        "JJA": -0.98,
+        "JAS": -1.24,
+        "ASO": -1.43,
+        "SON": -1.54,
+        "OND": -1.57,
+        "NDJ": -1.48
+      }
+    },
+    "2011": {
+      "classificacao": "La Niña",
+      "anomalia_media": -0.77,
+      "pico_anomalia": -1.29,
+      "trimestres": {
+        "DJF": -1.29,
+        "JFM": -1.06,
+        "FMA": -0.85,
+        "MAM": -0.68,
+        "AMJ": -0.5,
+        "MJJ": -0.34,
+        "JJA": -0.37,
+        "JAS": -0.5,
+        "ASO": -0.76,
+        "SON": -0.94,
+        "OND": -1.02,
+        "NDJ": -0.92
+      }
+    },
+    "2012": {
+      "classificacao": "Neutro",
+      "anomalia_media": -0.07,
+      "pico_anomalia": -0.71,
+      "trimestres": {
+        "DJF": -0.71,
+        "JFM": -0.56,
+        "FMA": -0.44,
+        "MAM": -0.35,
+        "AMJ": -0.18,
+        "MJJ": 0.03,
+        "JJA": 0.28,
+        "JAS": 0.39,
+        "ASO": 0.37,
+        "SON": 0.28,
+        "OND": 0.13,
+        "NDJ": -0.03
+      }
+    },
+    "2013": {
+      "classificacao": "Neutro",
+      "anomalia_media": -0.26,
+      "pico_anomalia": -0.45,
+      "trimestres": {
+        "DJF": -0.24,
+        "JFM": -0.28,
+        "FMA": -0.23,
+        "MAM": -0.2,
+        "AMJ": -0.3,
+        "MJJ": -0.38,
+        "JJA": -0.45,
+        "JAS": -0.34,
+        "ASO": -0.32,
+        "SON": -0.14,
+        "OND": -0.12,
+        "NDJ": -0.11
+      }
+    },
+    "2014": {
+      "classificacao": "Neutro",
+      "anomalia_media": 0.23,
+      "pico_anomalia": -0.24,
+      "trimestres": {
+        "DJF": -0.24,
+        "JFM": -0.21,
+        "FMA": -0.02,
+        "MAM": 0.25,
+        "AMJ": 0.35,
+        "MJJ": 0.22,
+        "JJA": 0.07,
+        "JAS": 0.07,
+        "ASO": 0.24,
+        "SON": 0.51,
+        "OND": 0.7,
+        "NDJ": 0.8
+      }
+    },
+    "2015": {
+      "classificacao": "El Niño",
+      "anomalia_media": 1.47,
+      "pico_anomalia": 2.59,
+      "trimestres": {
+        "DJF": 0.73,
+        "JFM": 0.65,
+        "FMA": 0.72,
+        "MAM": 0.86,
+        "AMJ": 1.04,
+        "MJJ": 1.19,
+        "JJA": 1.44,
+        "JAS": 1.73,
+        "ASO": 2.02,
+        "SON": 2.28,
+        "OND": 2.45,
+        "NDJ": 2.59
+      }
+    },
+    "2016": {
+      "classificacao": "El Niño",
+      "anomalia_media": 0.49,
+      "pico_anomalia": 2.5,
+      "trimestres": {
+        "DJF": 2.5,
+        "JFM": 2.21,
+        "FMA": 1.69,
+        "MAM": 1.11,
+        "AMJ": 0.57,
+        "MJJ": 0.09,
+        "JJA": -0.19,
+        "JAS": -0.34,
+        "ASO": -0.42,
+        "SON": -0.51,
+        "OND": -0.49,
+        "NDJ": -0.37
+      }
+    },
+    "2017": {
+      "classificacao": "Neutro",
+      "anomalia_media": -0.06,
+      "pico_anomalia": -0.76,
+      "trimestres": {
+        "DJF": -0.08,
+        "JFM": 0.08,
+        "FMA": 0.27,
+        "MAM": 0.32,
+        "AMJ": 0.35,
+        "MJJ": 0.32,
+        "JJA": 0.14,
+        "JAS": -0.07,
+        "ASO": -0.23,
+        "SON": -0.44,
+        "OND": -0.61,
+        "NDJ": -0.76
+      }
+    },
+    "2018": {
+      "classificacao": "Neutro",
+      "anomalia_media": 0.14,
+      "pico_anomalia": -0.71,
+      "trimestres": {
+        "DJF": -0.71,
+        "JFM": -0.67,
+        "FMA": -0.55,
+        "MAM": -0.35,
+        "AMJ": -0.07,
+        "MJJ": 0.13,
+        "JJA": 0.2,
+        "JAS": 0.3,
+        "ASO": 0.52,
+        "SON": 0.82,
+        "OND": 1.04,
+        "NDJ": 1.05
+      }
+    },
+    "2019": {
+      "classificacao": "Neutro",
+      "anomalia_media": 0.65,
+      "pico_anomalia": 0.2,
+      "trimestres": {
+        "DJF": 0.99,
+        "JFM": 0.94,
+        "FMA": 0.87,
+        "MAM": 0.82,
+        "AMJ": 0.71,
+        "MJJ": 0.59,
+        "JJA": 0.38,
+        "JAS": 0.2,
+        "ASO": 0.31,
+        "SON": 0.51,
+        "OND": 0.72,
+        "NDJ": 0.75
+      }
+    },
+    "2020": {
+      "classificacao": "Neutro",
+      "anomalia_media": -0.21,
+      "pico_anomalia": -1.11,
+      "trimestres": {
+        "DJF": 0.71,
+        "JFM": 0.66,
+        "FMA": 0.57,
+        "MAM": 0.33,
+        "AMJ": 0.04,
+        "MJJ": -0.18,
+        "JJA": -0.29,
+        "JAS": -0.43,
+        "ASO": -0.77,
+        "SON": -1.0,
+        "OND": -1.11,
+        "NDJ": -1.06
+      }
+    },
+    "2021": {
+      "classificacao": "La Niña",
+      "anomalia_media": -0.65,
+      "pico_anomalia": -0.99,
+      "trimestres": {
+        "DJF": -0.99,
+        "JFM": -0.85,
+        "FMA": -0.74,
+        "MAM": -0.56,
+        "AMJ": -0.4,
+        "MJJ": -0.31,
+        "JJA": -0.35,
+        "JAS": -0.46,
+        "ASO": -0.64,
+        "SON": -0.77,
+        "OND": -0.91,
+        "NDJ": -0.83
+      }
+    },
+    "2022": {
+      "classificacao": "La Niña",
+      "anomalia_media": -0.78,
+      "pico_anomalia": -0.89,
+      "trimestres": {
+        "DJF": -0.76,
+        "JFM": -0.68,
+        "FMA": -0.77,
+        "MAM": -0.86,
+        "AMJ": -0.83,
+        "MJJ": -0.73,
+        "JJA": -0.7,
+        "JAS": -0.78,
+        "ASO": -0.87,
+        "SON": -0.89,
+        "OND": -0.82,
+        "NDJ": -0.7
+      }
+    },
+    "2023": {
+      "classificacao": "El Niño",
+      "anomalia_media": 0.81,
+      "pico_anomalia": 1.99,
+      "trimestres": {
+        "DJF": -0.55,
+        "JFM": -0.33,
+        "FMA": -0.11,
+        "MAM": 0.19,
+        "AMJ": 0.46,
+        "MJJ": 0.73,
+        "JJA": 1.0,
+        "JAS": 1.25,
+        "ASO": 1.5,
+        "SON": 1.74,
+        "OND": 1.9,
+        "NDJ": 1.99
+      }
+    },
+    "2024": {
+      "classificacao": "El Niño",
+      "anomalia_media": 0.41,
+      "pico_anomalia": 1.84,
+      "trimestres": {
+        "DJF": 1.84,
+        "JFM": 1.53,
+        "FMA": 1.18,
+        "MAM": 0.77,
+        "AMJ": 0.43,
+        "MJJ": 0.18,
+        "JJA": 0.06,
+        "JAS": -0.04,
+        "ASO": -0.12,
+        "SON": -0.19,
+        "OND": -0.29,
+        "NDJ": -0.43
+      }
+    },
+    "2025": {
+      "classificacao": "La Niña",
+      "anomalia_media": -0.28,
+      "pico_anomalia": -0.61,
+      "trimestres": {
+        "DJF": -0.46,
+        "JFM": -0.22,
+        "FMA": -0.08,
+        "MAM": 0.02,
+        "AMJ": -0.04,
+        "MJJ": -0.02,
+        "JJA": -0.11,
+        "JAS": -0.26,
+        "ASO": -0.43,
+        "SON": -0.57,
+        "OND": -0.61,
+        "NDJ": -0.6
+      }
+    },
+    "2026": {
+      "classificacao": "El Niño",
+      "anomalia_media": 0.39,
+      "pico_anomalia": 1.39,
+      "trimestres": {
+        "DJF": -0.39,
+        "JFM": -0.21,
+        "FMA": 0.11,
+        "MAM": 0.46,
+        "AMJ": 0.95,
+        "MJJ": 1.39
+      }
+    }
+  }
+}

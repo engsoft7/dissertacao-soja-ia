@@ -37,7 +37,7 @@ municipal da soja, em dois recortes:
 | Recorte | Melhor modelo | RMSE | Erro relativo |
 |---|---|---|---|
 | Nacional | XGBoost | 472 kg/ha | 17,5% |
-| Pará (com máscara) | MLP | 416 kg/ha | 13,9% |
+| Pará (com máscara) | Random Forest | 416 kg/ha | 13,9% |
 
 No Pará, **as variáveis climáticas e espectrais não superaram um modelo de
 referência** baseado apenas no histórico municipal e na tendência tecnológica.

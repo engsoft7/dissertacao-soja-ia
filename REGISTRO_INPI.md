@@ -63,7 +63,9 @@ sensoriamento remoto (MODIS, CHIRPS, ERA5-Land), máscara de uso do solo
 principais:
 
 ### 5.1 Módulo de Aprendizado de Máquina (Backend)
-- Núcleo preditivo baseado em modelos MLP (Multi-Layer Perceptron) e XGBoost.
+- Núcleo preditivo baseado em modelo Random Forest (sklearn), com baseline
+  de referência (média histórica + tendência tecnológica) e correção climática
+  aprendida sobre o resíduo.
 - Treinamento com validação *leave-one-year-out* para evitar vazamento temporal.
 - Decomposição produtividade = tendência tecnológica + anomalia climática.
 - API REST (FastAPI) hospedada na nuvem (Render) para consumo por clientes.
@@ -94,7 +96,7 @@ principais:
 
 ## 6. Funcionalidades Principais
 
-1. **Previsão de Produtividade (Machine Learning):** Treinamento e inferência automática de algoritmos de I.A. (XGBoost) para simular o rendimento (kg/ha e scs/ha) baseado em tendências históricas.
+1. **Previsão de Produtividade (Machine Learning):** Treinamento e inferência automática de algoritmos de I.A. (Random Forest) para simular o rendimento (kg/ha e scs/ha) baseado em tendências históricas.
 2. **Dashboard Web B2B (Módulo SaaS - Single Page Application):** Sistema executivo moderno projetado sob arquitetura modular, comportando mapas de calor regionais Folium (Inteligência Territorial), laboratórios Climáticos "What-if" e módulos matemáticos interativos gerados por Plotly Analytics para renderização de marcos históricos paramétricos (El Niño/La Niña).
 3. **Módulo de Síntese em Linguagem Natural (IA Heurística):** Agente preditivo (Agente de Síntese BIA) embutido nativamente no Painel Financeiro que reescreve a lógica matemática e projeções logarítmicas de fluxo hídrico num linguajar executivo humano e avaliativo (ex: sentenças de alerta "Alta Viabilidade", "Alerta" ou "Risco Crítico").
 4. **Motor de Captura (Web Scraping & API JSON Autônoma):** Robôs coletores Web Scrapers descentralizados focados no pareamento ativo do Custeio Operacional Básico e Valor da Terra Nua. O algoritmo consegue monitorar remotamente a base contábil fundiária de 144 municípios polo do estado (IBGE), acoplados em tempo real às cotações diárias financeiras do CEPEA (B3).
@@ -170,7 +172,7 @@ find . \( -name '*.py' -o -name '*.kt' -o -name '*.kts' \) \
 
 **Hash global gerado em 19/08/2026:**
 ```
-3e95754b4f7405fb22892b4cb021c2ac9954c783195f8043f396e82a69e7afe6
+7eca3e90aadcd5d0eaa765b92a8ad7e55083f90846a78fdc1854525fffa94e6b
 ```
 
 > **Hashes anteriores:**
@@ -243,7 +245,7 @@ O hash acima corresponde ao estado exato do repositório no commit:
 | 32 | `software/automacao_github/gera_municipios.py` | `fd32f02773c3233d27495b5d9cfdff73dfbdd0e6bb37a57a0d53467c6f89e23d` |
 | 33 | `software/automacao_github/gera_rios_para.py` | `841ee7066f723e177809a7117857b0f02e6b6912dabaa863c4909d2189ad9330` |
 | 34 | `software/automacao_github/test_atualiza_pam_paths.py` | `4e6d1ef84e95529ff8ae8f7e9333f77d38654c310b3c1d095b2f64f417babb7d` |
-| 35 | `software/dashboard_web/app.py` | `69054429542f542368738ca9ab1175834c19223d88caa55605d18c2ba8fe6348` |
+| 35 | `software/dashboard_web/app.py` | `6df428294dce11cd64920315bf1298cad2f6ee4ae1efc03a87e9b9994fa9859d` |
 | 36 | `software/dashboard_web/components/__init__.py` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 | 37 | `software/dashboard_web/data/__init__.py` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 | 38 | `software/dashboard_web/data/loaders.py` | `ca709168e26548b5098207e93f9ca3461578010a5133baca5d7a9b62a5d5a3bc` |
@@ -281,7 +283,7 @@ estes passos:
 
 3. **Resultado esperado:**
    ```
-   3e95754b4f7405fb22892b4cb021c2ac9954c783195f8043f396e82a69e7afe6  -
+   7eca3e90aadcd5d0eaa765b92a8ad7e55083f90846a78fdc1854525fffa94e6b  -
    ```
 
 4. **Verificação cruzada:** O mesmo código está arquivado permanentemente no

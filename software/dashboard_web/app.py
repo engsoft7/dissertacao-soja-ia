@@ -883,7 +883,7 @@ if tela_atual == "📍 Inteligência Territorial":
     with esq:
 
 
-        with st.spinner(f"Sintetizando predições de IA (XGBoost) para {disp(municipio)}..."):
+        with st.spinner(f"Sintetizando predições de IA para {disp(municipio)}..."):
             r = ajustar_r(estimador.estimar(municipio, int(ano_alvo)))
         st.metric(f"Projeção Safra {ano_alvo}",
                   f"{qtd(r['estimativa_kg_ha'])} {unidade}")

@@ -9,3 +9,5 @@ data/data_cast.csv
 *.lock
 *.bin
 build/
+keystore.properties
+*.jks

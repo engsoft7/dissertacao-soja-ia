@@ -12,12 +12,16 @@ android {
     compileSdk = 37
 
     
+    val keystoreFile = rootProject.file("keystore.properties")
+    val keystoreProps = java.util.Properties()
+    if (keystoreFile.exists()) keystoreProps.load(keystoreFile.inputStream())
+
     signingConfigs {
         create("release") {
-            storeFile = file("../agro_playstore.jks")
-            storePassword = "Agro@PlayStore2026"
-            keyAlias = "agro_production_key"
-            keyPassword = "Agro@PlayStore2026"
+            storeFile = file(keystoreProps.getProperty("storeFile", "../agro_playstore.jks"))
+            storePassword = keystoreProps.getProperty("storePassword", "")
+            keyAlias = keystoreProps.getProperty("keyAlias", "")
+            keyPassword = keystoreProps.getProperty("keyPassword", "")
         }
     }
 
@@ -25,8 +29,8 @@ android {
         applicationId = "com.agrointeligencia.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 8
+        versionName = "2.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

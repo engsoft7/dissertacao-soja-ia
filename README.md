@@ -9,7 +9,7 @@
 
 > ### 🚀 Produtos Técnicos (Acesso Direto)
 > 
-> 📱 **Aplicativo Mobile Oficial (v2.0.0):** [Baixar APK Android](https://github.com/engsoft7/dissertacao-soja-ia/releases/latest)  
+> 📱 **Aplicativo Mobile Oficial (v2.1.1):** [Baixar APK Android](https://github.com/engsoft7/dissertacao-soja-ia/releases/latest)  
 > *Versão nativa construída em Kotlin+Jetpack Compose com simulação climática, feedback tátil (haptics) e alta performance offline.*
 > 
 > 🌐 **Painel Original na Web:** [Acessar Dashboard](https://soja-para.streamlit.app)  
@@ -68,23 +68,36 @@ pesquisa/04_analise_para/
   02_gera_figuras.py
 pesquisa/05_artigo/
   gera_figuras_artigo.py                  figuras do artigo sobre a PAM
-software/dashboard_web/
-  model.py                                núcleo do painel (produto técnico)
-  app.py                                  interface Streamlit
-  README.md                               como executar e limitações
-software/automacao_github/
-  atualiza_pam.py                         revisões da PAM via SIDRA (GitHub Actions)
-  coleta_gee_safra.py                     coleta headless de safra nova no GEE
-  gera_metricas.py                        pré-calcula a validação para o painel
-  gera_municipios.py                      nomes acentuados (IBGE) + coordenadas
-  gera_geo_para.py                        contorno do Pará (malha do IBGE)
-  gera_rios_para.py                       principais rios do Pará (Natural Earth)
 pesquisa/dados/
-  soja_para_mascarado_2001_2024.csv       base principal (415 registros)
+  soja_para_mascarado_2001_2024.csv       base principal (atualizada por automação)
   soja_para_sem_mascara_2001_2023.csv     base sem máscara (comparação)
   municipios_para.csv                     nome oficial acentuado e centroide (mapa)
   para_geo.json                           contorno do estado (fundo do mapa)
   rios_para.json                          principais rios (contexto do mapa)
+  eventos_enso.json                       períodos históricos de El Niño/La Niña
+  metricas_validacao.json                 métricas pré-calculadas para o painel
+software/api_backend/
+  api.py                                  API REST (FastAPI) para clientes
+  financas.py                             cálculos financeiros (VTN, custos)
+software/dashboard_web/
+  app.py                                  interface Streamlit (SPA)
+  model.py                                núcleo preditivo (produto técnico)
+  ui/                                     componentes visuais (charts, themes)
+  data/                                   carregadores de dados
+  README.md                               como executar e limitações
+software/aplicativo_mobile/
+  app/.../MainActivity.kt                 app Android (Jetpack Compose)
+  app/.../ApiService.kt                   cliente Retrofit da API
+  app/build.gradle.kts                    configuração de build
+software/automacao_github/
+  atualiza_pam.py                         revisões da PAM via SIDRA (GitHub Actions)
+  atualiza_enso.py                        atualização automática NOAA ONI
+  coleta_gee_safra.py                     coleta headless de safra nova no GEE
+  bot_agente_vtn.py                       coleta VTN de 144 municípios
+  gera_metricas.py                        pré-calcula a validação para o painel
+  gera_municipios.py                      nomes acentuados (IBGE) + coordenadas
+  gera_geo_para.py                        contorno do Pará (malha do IBGE)
+  gera_rios_para.py                       principais rios do Pará (Natural Earth)
 ```
 
 ---
@@ -269,7 +282,7 @@ SANTOS, Maycon Lima dos. **Aplicação da Inteligência Artificial na Previsão 
 Produtividade da Soja: códigos e dados**. Zenodo, 2026. Software.
 DOI: 10.5281/zenodo.21286115. Disponível em: https://doi.org/10.5281/zenodo.21286115.
 
-## 🌟 Lançamento Oficial v2.0.0 (AgroInteligência Mobile)
+## 🌟 Lançamento Oficial v2.1.1 (AgroInteligência Mobile)
 - **Migração Cloud-Native:** Lógica de predição isolada em servidor próprio (FastAPI / Render).
 - **Interface Nativa:** Aplicativo Android 100% desenvolvido em Jetpack Compose.
 - **Experiência Sensorial (Haptics):** Física elástica na inferência dos cards (*Spring Animations*) e resposta tátil profunda no processamento usando o `LocalHapticFeedback`.

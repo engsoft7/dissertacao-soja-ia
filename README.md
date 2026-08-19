@@ -37,7 +37,9 @@ municipal da soja, em dois recortes:
 | Recorte | Melhor modelo | RMSE | Erro relativo |
 |---|---|---|---|
 | Nacional | XGBoost | 472 kg/ha | 17,5% |
-| Pará (com máscara) | Random Forest | 416 kg/ha | 13,9% |
+| Pará (com máscara) | MLP | 416 kg/ha | 13,9% |
+
+*Nota de Engenharia:* Embora o **MLP** tenha empatado como o melhor modelo matemático puro, o **Random Forest** foi a arquitetura escolhida para integração no Produto Técnico (Dashboard e App Mobile) devido à sua alta explicabilidade (Feature Importance) e menor custo computacional em implantações de nuvem.
 
 No Pará, **as variáveis climáticas e espectrais não superaram um modelo de
 referência** baseado apenas no histórico municipal e na tendência tecnológica.

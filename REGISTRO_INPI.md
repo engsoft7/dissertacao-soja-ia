@@ -185,9 +185,9 @@ O hash acima corresponde ao estado exato do repositório no commit:
 
 | Campo | Valor |
 |---|---|
-| **Commit SHA-1 (Git)** | `0f170bf9ed20196b8d91d894921cc58f1635daf9` |
-| **Data do commit** | 16/08/2026 — 19:44:48 (UTC-3) |
-| **Mensagem** | feat(enso): integra atualização automática do NOAA ONI ao fluxo de dados PAM/SIDRA |
+| **Commit SHA-1 (Git)** | `d958137287931c4103c5864552417f33d656137b` |
+| **Data do commit** | 19/08/2026 — 15:29:36 (UTC-3) |
+| **Mensagem** | docs: auditoria de consistência — corrige versões, markdown, typos e credenciais expostas |
 | **Repositório** | https://github.com/engsoft7/dissertacao-soja-ia |
 | **Branch** | `main` |
 | **DOI (Zenodo)** | [10.5281/zenodo.21286115](https://doi.org/10.5281/zenodo.21286115) |
@@ -268,7 +268,7 @@ estes passos:
    ```bash
    git clone https://github.com/engsoft7/dissertacao-soja-ia.git
    cd dissertacao-soja-ia
-   git checkout 0f170bf9ed20196b8d91d894921cc58f1635daf9
+   git checkout d958137287931c4103c5864552417f33d656137b
    ```
 
 2. **Executar o comando de hash:**
@@ -281,7 +281,7 @@ estes passos:
 
 3. **Resultado esperado:**
    ```
-   1b5773b994ccd6f147e40271aa3a17557f50849b1da190a4f7ded66d0b7e1095  -
+   3e95754b4f7405fb22892b4cb021c2ac9954c783195f8043f396e82a69e7afe6  -
    ```
 
 4. **Verificação cruzada:** O mesmo código está arquivado permanentemente no

@@ -187,9 +187,9 @@ O hash acima corresponde ao estado exato do repositório no commit:
 
 | Campo | Valor |
 |---|---|
-| **Commit SHA-1 (Git)** | `d958137287931c4103c5864552417f33d656137b` |
-| **Data do commit** | 19/08/2026 — 15:29:36 (UTC-3) |
-| **Mensagem** | docs: auditoria de consistência — corrige versões, markdown, typos e credenciais expostas |
+| **Commit SHA-1 (Git)** | `7b8375df14ca031355c4b9c87fd42942bffec6ae` |
+| **Data do commit** | 19/08/2026 — 15:41:31 (UTC-3) |
+| **Mensagem** | docs: corrige menções a XGBoost para Random Forest (modelo real de produção) |
 | **Repositório** | https://github.com/engsoft7/dissertacao-soja-ia |
 | **Branch** | `main` |
 | **DOI (Zenodo)** | [10.5281/zenodo.21286115](https://doi.org/10.5281/zenodo.21286115) |
@@ -270,7 +270,7 @@ estes passos:
    ```bash
    git clone https://github.com/engsoft7/dissertacao-soja-ia.git
    cd dissertacao-soja-ia
-   git checkout d958137287931c4103c5864552417f33d656137b
+   git checkout 7b8375df14ca031355c4b9c87fd42942bffec6ae
    ```
 
 2. **Executar o comando de hash:**

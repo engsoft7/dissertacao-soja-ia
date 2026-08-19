@@ -321,7 +321,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 ## 12. Referências
 
 - **Dissertação:** SANTOS, M. L. dos. *Aplicação da Inteligência Artificial na
-  previsão da produtividade da soja*. 2026. Dissertação (PPCA/UFPA), Tucuruí.
+  previsão da produtividade da soja*. 2026. Dissertação (Em andamento) (PPCA/UFPA), Tucuruí.
 - **Repositório:** https://github.com/engsoft7/dissertacao-soja-ia
 - **DOI:** 10.5281/zenodo.21286115
 - **Painel Web:** https://soja-para.streamlit.app

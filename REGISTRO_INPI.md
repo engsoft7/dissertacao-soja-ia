@@ -24,9 +24,9 @@
 |---|---|
 | **Nome completo** | Maycon Lima dos Santos |
 | **Nacionalidade** | Brasileiro |
-| **CPF** | *(preencher)* |
-| **Endereço** | *(preencher)* |
-| **E-mail** | *(preencher)* |
+| **CPF** | *-* |
+| **Endereço** | *-* |
+| **E-mail** | *-* |
 
 > **Nota:** Se o programa foi desenvolvido no âmbito da UFPA, verificar se há
 > cláusula de cessão de direitos na política de propriedade intelectual da

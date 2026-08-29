@@ -1,0 +1,133 @@
+{
+  "amostra": {
+    "sem_mascara_arquivo": {
+      "n": 493,
+      "mun": 44,
+      "anos": [
+        2001,
+        2023
+      ]
+    },
+    "com_mascara_arquivo": {
+      "n": 415,
+      "mun": 38,
+      "anos": [
+        2001,
+        2024
+      ]
+    },
+    "controlada": {
+      "n": 379,
+      "mun": 32,
+      "anos": [
+        2001,
+        2023
+      ]
+    }
+  },
+  "verificacao_baseline": {
+    "diferenca_RMSE_kg_ha": 0.0,
+    "diferenca_R2": 0.0,
+    "tolerancia_kg_ha": 0.1,
+    "aprovada": true
+  },
+  "sem_mascara": {
+    "n": 379,
+    "mun": 32,
+    "anos": [
+      2001,
+      2023
+    ],
+    "n_dobras": 23,
+    "ymean": 2962.6,
+    "baseline": {
+      "RMSE": 405.8,
+      "MAE": 286.5,
+      "R2": 0.221,
+      "rRMSE": 13.7
+    },
+    "Random Forest": {
+      "RMSE": 420.0,
+      "MAE": 288.9,
+      "R2": 0.165,
+      "rRMSE": 14.2,
+      "ganho_RMSE_sobre_baseline": -14.3
+    },
+    "XGBoost": {
+      "RMSE": 431.2,
+      "MAE": 301.2,
+      "R2": 0.12,
+      "rRMSE": 14.6,
+      "ganho_RMSE_sobre_baseline": -25.4
+    },
+    "SVR": {
+      "RMSE": 405.1,
+      "MAE": 282.4,
+      "R2": 0.223,
+      "rRMSE": 13.7,
+      "ganho_RMSE_sobre_baseline": 0.7
+    },
+    "MLP": {
+      "RMSE": 405.7,
+      "MAE": 286.5,
+      "R2": 0.221,
+      "rRMSE": 13.7,
+      "ganho_RMSE_sobre_baseline": 0.0
+    },
+    "melhor": "SVR",
+    "algum_supera_baseline": true
+  },
+  "com_mascara": {
+    "n": 379,
+    "mun": 32,
+    "anos": [
+      2001,
+      2023
+    ],
+    "n_dobras": 23,
+    "ymean": 2962.6,
+    "baseline": {
+      "RMSE": 405.8,
+      "MAE": 286.5,
+      "R2": 0.221,
+      "rRMSE": 13.7
+    },
+    "Random Forest": {
+      "RMSE": 416.3,
+      "MAE": 294.0,
+      "R2": 0.179,
+      "rRMSE": 14.1,
+      "ganho_RMSE_sobre_baseline": -10.6
+    },
+    "XGBoost": {
+      "RMSE": 423.8,
+      "MAE": 304.8,
+      "R2": 0.15,
+      "rRMSE": 14.3,
+      "ganho_RMSE_sobre_baseline": -18.1
+    },
+    "SVR": {
+      "RMSE": 405.8,
+      "MAE": 286.0,
+      "R2": 0.22,
+      "rRMSE": 13.7,
+      "ganho_RMSE_sobre_baseline": -0.1
+    },
+    "MLP": {
+      "RMSE": 405.8,
+      "MAE": 286.5,
+      "R2": 0.221,
+      "rRMSE": 13.7,
+      "ganho_RMSE_sobre_baseline": -0.0
+    },
+    "melhor": "SVR",
+    "algum_supera_baseline": false
+  },
+  "efeito_mascara_RMSE_kg_ha": {
+    "Random Forest": -3.7,
+    "XGBoost": -7.4,
+    "SVR": 0.7,
+    "MLP": 0.1
+  },
+  "algum_modelo_supera_baseline": true
+}

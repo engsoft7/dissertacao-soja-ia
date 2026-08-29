@@ -1,4 +1,36 @@
 # -*- coding: utf-8 -*-
+# =============================================================================
+# SCRIPT DEPRECADO -- MANTIDO APENAS COMO REGISTRO HISTORICO. NAO USAR.
+#
+# Substituido por: 01_compara_mascara_controlada.py
+#
+# Por que foi deprecado
+# ---------------------
+# Este script compara os cenarios "com mascara" e "sem mascara" sobre arquivos
+# diferentes, e nao sobre a mesma amostra:
+#
+#     soja_para_sem_mascara_2001_2023.csv   493 registros, 44 municipios, ate 2023
+#     soja_para_mascarado_2001_2024.csv     415 registros, 38 municipios, ate 2024
+#
+# O desenho e confundido: o baseline nao usa nenhuma variavel ambiental -- so o
+# historico do municipio e a tendencia tecnologica --, entao ele deveria dar
+# exatamente o mesmo resultado nos dois cenarios. Aqui ele da
+#
+#     427,4 kg/ha (sem mascara)   contra   415,6 kg/ha (com mascara)
+#
+# Essa diferenca de ~12 kg/ha nao pode vir da mascara, porque o baseline nao a
+# enxerga: ela vem da amostra. Ou seja, o contraste com/sem mascara produzido
+# por este script mistura o efeito da mascara com o efeito de estar comparando
+# conjuntos distintos de municipios e safras, e nao e interpretavel.
+#
+# O substituto roda os dois cenarios sobre os 379 registros comuns as duas
+# bases e traz uma verificacao embutida que aborta a execucao se os baselines
+# divergirem. Sob esse controle o efeito real da mascara e de -0,1 a -7,4 kg/ha
+# conforme o modelo -- bem menor do que este script sugeria.
+#
+# Os resultados da dissertacao (Tabela 5 e Figura 5) vem do script controlado.
+# =============================================================================
+
 import numpy as np, pandas as pd, json, warnings, os
 warnings.filterwarnings('ignore')
 from sklearn.ensemble import RandomForestRegressor

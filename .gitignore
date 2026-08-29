@@ -11,3 +11,9 @@ data/data_cast.csv
 build/
 keystore.properties
 *.jks
+
+# Artefatos de IDE e de build que chegaram a ser versionados por engano
+.idea/
+.artifacts/
+*.log
+temp_out.json

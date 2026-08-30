@@ -44,9 +44,11 @@ Abre em `http://localhost:8501`.
   o futuro de Chicago como reserva, já que não há série pública de preço ao
   produtor do Pará. O custo vem do levantamento da CONAB para Pedro Afonso
   (TO), de março de 2026, porque o Pará não integra o MATOPIBA e não tem custo
-  publicado. O Valor da Terra Nua vem da tabela da Receita Federal de 2026,
-  classe lavoura de aptidão boa, disponível para 13 dos 38 municípios. Os três
-  são editáveis.
+  publicado. Preço e custo são editáveis, porque entram na margem. O Valor da
+  Terra Nua vem da tabela da Receita Federal de 2026, classe lavoura de aptidão
+  boa, disponível para 13 dos 38 municípios; é exibido como nota de contexto e
+  não como campo editável, por ser referência fiscal (base de cálculo do ITR) e
+  não preço de mercado — não entra na margem.
 - Mostra a série histórica oficial (PAM/IBGE), destacando em vermelho as safras
   cuja produtividade repete exatamente o valor do ano anterior.
 - Alerta quando a série de um município apresenta repetição acima da média

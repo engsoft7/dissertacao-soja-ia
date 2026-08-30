@@ -746,6 +746,11 @@ def br(v: float) -> str:
     return f"{v:,.0f}".replace(",", ".")
 
 
+def dec(v: float, casas: int = 1) -> str:
+    """Número decimal com vírgula, como o resto da interface."""
+    return f"{v:.{casas}f}".replace(".", ",")
+
+
 def brl(v: float, dec: int = 0) -> str:
     s = f"{v:,.{dec}f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return "R$ " + s
@@ -866,15 +871,15 @@ if tela_atual == "📍 Inteligência Territorial":
         </div>
         <div class="kpi-card blue">
             <div class="kpi-label">Variação Relativa</div>
-            <div class="kpi-value">{metricas['rrmse']:.1f}%</div>
+            <div class="kpi-value">{dec(metricas['rrmse'])}%</div>
         </div>
         <div class="kpi-card purple">
             <div class="kpi-label">Aderência Preditiva (R²)</div>
-            <div class="kpi-value">{metricas['r2']:.3f}</div>
+            <div class="kpi-value">{dec(metricas['r2'], 3)}</div>
         </div>
         <div class="kpi-card orange">
             <div class="kpi-label">Benchmark de Tendência</div>
-            <div class="kpi-value">{metricas['r2_baseline']:.3f}</div>
+            <div class="kpi-value">{dec(metricas['r2_baseline'], 3)}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1100,7 +1105,7 @@ if tela_atual == "💰 Viabilidade Financeira":
               f"{diag['taxa']:.0f}%",
               help="Porcentagem de safras em que o histórico oficial repetiu o valor anterior.")
     qb.metric("Maior sequência travada", f"{diag['maior_sequencia']} safras")
-    qc.metric("Média de repetição no Pará", f"{taxa_estado:.1f}%")
+    qc.metric("Média de repetição no Pará", f"{dec(taxa_estado)}%")
 
     if diag["taxa"] >= taxa_estado:
         st.warning(

@@ -11,37 +11,54 @@ REV_MUNICIPIOS = {
     "Redencao": "REDENCAO",
 }
 
-# Tabela estática de referência, não é consulta a nenhuma fonte externa.
+# ── CUSTO DE PRODUÇÃO ────────────────────────────────────────────────────────
+# Fonte: CONAB, Custos de Produção — Soja, município de Pedro Afonso (TO),
+# levantamento de março de 2026. É o ponto de coleta da CONAB no cerrado do
+# Tocantins. O Pará não integra o MATOPIBA e não tem custo de soja levantado,
+# por isso adota-se o cerrado vizinho como referência, conforme registrado em
+# software/dashboard_web/README.md e na subseção 4.9 da dissertação.
 #
-# Nível base: o Pará não integra o MATOPIBA e não tem custo de produção de soja
-# publicado pela CONAB, então a referência vem do cerrado do Tocantins vizinho,
-# como registra software/dashboard_web/README.md. É uma aproximação assumida,
-# não custo medido no Pará.
+# A CONAB publica o custo por saca comercializada. A conversão para hectare usa
+# a produtividade de referência do próprio levantamento, 2.880 kg/ha (48 sc/ha):
 #
-# Variação entre municípios: não documentada em lugar nenhum e sem base
-# agronômica. As duas colunas têm correlação de 0,985 entre si
-# (custo_ha ~= 0,0855 * vtn_ha + 3586, resíduos abaixo de R$ 31), ou seja, o
-# custo foi escalonado a partir do valor da terra. Custeio de lavoura (semente,
-# fertilizante, defensivo, combustível, hora-máquina) não varia com o preço do
-# hectare: fertilizante custa o mesmo em Redenção e em Paragominas. Trate os
-# 7,8% de diferença entre o menor e o maior como ruído.
+#   custo variável (custeio)      R$  85,03/sc  ->  R$ 4.081,44/ha
+#   custo fixo                    R$  24,91/sc  ->  R$ 1.195,68/ha
+#   custo operacional (var+fixo)  R$ 109,94/sc  ->  R$ 5.277,12/ha   <- usado
+#   renda de fatores              R$   9,12/sc  ->  R$   437,76/ha
+#   custo total                   R$ 119,06/sc  ->  R$ 5.714,88/ha
 #
-# Ao substituir por um levantamento real, registrar fonte, safra e data, e
-# preferir a linha de custo variável (custeio) à de custo total, que é o que o
-# campo "Custo Operacional" do painel representa.
-BASE_CUSTO_PA = {
-    "PARAGOMINAS": {"custo_ha": 4850.0, "vtn_ha": 15000.0},
-    "DOM ELISEU": {"custo_ha": 4800.0, "vtn_ha": 14000.0},
-    "ULIANOPOLIS": {"custo_ha": 4820.0, "vtn_ha": 14200.0},
-    "RONDON DO PARA": {"custo_ha": 4750.0, "vtn_ha": 13800.0},
-    "SANTANA DO ARAGUAIA": {"custo_ha": 4650.0, "vtn_ha": 12500.0},
-    "CONCEICAO DO ARAGUAIA": {"custo_ha": 4500.0, "vtn_ha": 11000.0},
-    "REDENCAO": {"custo_ha": 4600.0, "vtn_ha": 11500.0},
+# Usa-se o custo OPERACIONAL porque é o que a CONAB define como variável mais
+# fixo, e é o que o campo "Custo Operacional" do painel representa. Para simular
+# apenas o desembolso de custeio, trocar por CUSTO_VARIAVEL_HA.
+#
+# Valor único para todos os municípios: a tabela anterior trazia sete valores
+# escalonados a partir do preço da terra (correlação de 0,985 com o VTN), o que
+# não tem base agronômica — fertilizante e defensivo não custam mais onde o
+# hectare é mais caro.
+CUSTO_VARIAVEL_HA   = 4081.44
+CUSTO_OPERACIONAL_HA = 5277.12
+CUSTO_TOTAL_HA      = 5714.88
+CUSTO_REFERENCIA_HA = CUSTO_OPERACIONAL_HA
+
+# ── VALOR DA TERRA NUA ───────────────────────────────────────────────────────
+# Continua sem fonte apurada: são referências fixas por município, mantidas do
+# levantamento anterior e editáveis na interface. Não entram no cálculo da
+# margem, apenas informam o capital imobilizado.
+VTN_POR_MUNICIPIO = {
+    "PARAGOMINAS": 15000.0,
+    "DOM ELISEU": 14000.0,
+    "ULIANOPOLIS": 14200.0,
+    "RONDON DO PARA": 13800.0,
+    "SANTANA DO ARAGUAIA": 12500.0,
+    "CONCEICAO DO ARAGUAIA": 11000.0,
+    "REDENCAO": 11500.0,
 }
+VTN_PADRAO_HA = 12000.0
 
 def get_custos_locais(municipio: str):
     mun = REV_MUNICIPIOS.get(municipio, municipio).upper()
-    return BASE_CUSTO_PA.get(mun, {"custo_ha": 4800.0, "vtn_ha": 12000.0})
+    return {"custo_ha": CUSTO_REFERENCIA_HA,
+            "vtn_ha": VTN_POR_MUNICIPIO.get(mun, VTN_PADRAO_HA)}
 
 def get_financas(municipio: str):
     headers = {'User-Agent': 'Mozilla/5.0'}

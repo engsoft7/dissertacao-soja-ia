@@ -1106,7 +1106,8 @@ if tela_atual == "💰 Viabilidade Financeira":
             value=default_preco,
             step=5.0)
         st.caption(
-            "**Fonte da cotação:** Cotação interativa em tempo real (Notícias Agrícolas / CEPEA).")
+            "**Cotação:** contrato futuro de soja em Chicago (CBOT), convertido para "
+            "reais por saca. O preço recebido no Pará é menor.")
     with col_eco2:
         custo_ha = st.number_input(
             f"Custo Operacional base ({municipio.title()})",
@@ -1114,7 +1115,8 @@ if tela_atual == "💰 Viabilidade Financeira":
             value=int(custos_locais["custo_ha"]),
             step=100)
         st.caption(
-            "**Fonte do custo:** Base VTN ajustada. Edite com a realidade da sua fazenda.")
+            "**Custo:** referência regional fixa, escalonada a partir do valor da terra. "
+            "Não vem de boletim de custeio — edite com os números da sua fazenda.")
     with col_eco3:
         vtn_ha = st.number_input(
             f"Preço Terra Nua VTN/ha ({municipio.title()})",
@@ -1122,7 +1124,7 @@ if tela_atual == "💰 Viabilidade Financeira":
             value=int(custos_locais["vtn_ha"]),
             step=500)
         st.caption(
-            "**Fonte da terra:** Base de referência municipal da Receita Federal (VTN).")
+            "**Terra:** valor de referência municipal fixo, embutido no código.")
 
     est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
     receita_ha = est_sacas_ha * preco
@@ -1157,7 +1159,7 @@ if tela_atual == "💰 Viabilidade Financeira":
             <div class="eco-label">Custo operacional (R$/ha)</div>
             <div class="eco-value">{brl(custo_ha)}</div>
         </div>
-        <div class="eco-card vtn" title="Valor da Terra Nua de referência da Receita Federal. É patrimônio, não entra na margem.">
+        <div class="eco-card vtn" title="Valor de referência da terra nua, fixo no código. É patrimônio e não entra na margem.">
             <div class="eco-label">Valor da terra nua (R$/ha)</div>
             <div class="eco-value">{brl(vtn_ha)}</div>
         </div>
@@ -1223,13 +1225,16 @@ if tela_atual == "💰 Viabilidade Financeira":
             "Município": disp(str(mun)),
             "prod_media": prod_med_kg * fator,
             "faturamento": faturamento_bruto,
-            "area_ha": float(d.iloc[-1]["soy_area_ha"]),
+            "area_ha": round(float(d.iloc[-1]["soy_area_ha"])),
             "repeticao": float((difs == 0).mean() * 100) if len(difs) else 0.0,
             "safras": len(d),
         })
 
-    casas_pan = "%.0f" if unidade == "kg/ha" else "%.1f"
+    # Arredonda no dado e deixa o Streamlit formatar pelo idioma do navegador,
+    # para a coluna não destoar das vizinhas com ponto decimal.
+    casas_pan = 0 if unidade == "kg/ha" else 1
     pan = pd.DataFrame(linhas_pan).sort_values("faturamento", ascending=False)
+    pan["prod_media"] = pan["prod_media"].round(casas_pan)
 
     st.dataframe(
         pan,
@@ -1238,7 +1243,7 @@ if tela_atual == "💰 Viabilidade Financeira":
         column_config={
             "prod_media": st.column_config.NumberColumn(
                 f"Média Recente ({ult_ano - 4}–{ult_ano}) [{unidade}]",
-                format=casas_pan),
+                format="localized"),
             "faturamento": st.column_config.NumberColumn(
                 "Faturamento Bruto Est. (R$/ha)",
                 format="localized"),
@@ -1265,10 +1270,17 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
       * *CHIRPS*: Malha meteorológica para mensuração de Precipitação e Volume de Chuva.
       * *ERA5-Land*: Banco climático de temperatura global para extração de Evapotranspiração Potencial e Balanço Hídrico.
     * **Projeto MapBiomas:** Extração das coberturas de Uso e Ocupação do Solo com foco em áreas exclusivas de soja no Pará (mascaramento de satélite).
-    * **AwesomeAPI / B3:** Ingestão das variações diárias no câmbio livre e bolsas de *commodities*.
-    * **Notícias Agrícolas / CEPEA:** Scraping em tempo real para o Preço da Saca de Soja (Porto/Paranaguá).
-    * **Receita Federal / SIPT:** Valores de referência da Terra Nua (VTN) baseados nas prefeituras do estado.
-    * **CONAB / Aprosoja:** Tabelas referenciais de Custeio Operacional Efetivo.
+
+    ### Dados econômicos do simulador
+    * **Yahoo Finance (CBOT `ZS=F` e `BRL=X`):** única cotação consultada em
+      tempo real. É o contrato futuro de soja em Chicago, convertido para reais
+      por saca de 60 kg. O preço recebido no Pará é menor que o de Chicago, por
+      isso o campo é editável.
+    * **Custo operacional e Valor da Terra Nua:** tabela estática por município,
+      embutida em `software/api_backend/financas.py`. Os valores de custo foram
+      escalonados a partir do VTN (correlação de 0,99 entre as duas colunas) e
+      **não** são consulta a CONAB, Aprosoja ou Receita Federal. Servem apenas
+      de ponto de partida: ajuste os campos com os números da sua propriedade.
     
     *Repositório Acadêmico:* [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
 
@@ -1276,7 +1288,7 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
     **AgroInteligência** | Plataforma de Inteligência Preditiva para Safra de Soja — Estado do Pará
     *Machine Learning · Sensoriamento Remoto · Análise de Viabilidade Comercial*
     
-    Desenvolvido com Streamlit · Dados: IBGE · MODIS · CHIRPS · ERA5 · MapBiomas · AwesomeAPI · Conab
+    Desenvolvido com Streamlit · Dados: IBGE · MODIS · CHIRPS · ERA5-Land · MapBiomas
     ''')
 
 

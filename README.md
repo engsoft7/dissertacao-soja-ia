@@ -9,7 +9,7 @@
 
 > ### 🚀 Produtos Técnicos (Acesso Direto)
 > 
-> 📱 **Aplicativo Mobile Oficial (v2.1.1):** [Baixar APK Android](https://github.com/engsoft7/dissertacao-soja-ia/releases/latest)  
+> 📱 **Aplicativo Mobile Oficial (v2.2.0):** [Baixar APK Android](https://github.com/engsoft7/dissertacao-soja-ia/releases/latest)  
 > *Versão nativa construída em Kotlin+Jetpack Compose com simulação climática, feedback tátil (haptics) e alta performance offline.*
 > 
 > 🌐 **Painel Original na Web:** [Acessar Dashboard](https://soja-para.streamlit.app)  

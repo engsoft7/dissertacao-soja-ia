@@ -807,6 +807,16 @@ def dec(v: float, casas: int = 1) -> str:
     return f"{v:.{casas}f}".replace(".", ",")
 
 
+def brl_md(v: float, dec: int = 0) -> str:
+    """brl() para markdown puro.
+
+    O Streamlit trata $...$ como LaTeX, então dois valores em reais na mesma
+    string viram uma fórmula com o texto do meio em monoespaçado. Dentro de
+    HTML (unsafe_allow_html) isso não acontece e brl() serve direto.
+    """
+    return brl(v, dec).replace("$", r"\$")
+
+
 def brl(v: float, dec: int = 0) -> str:
     """Sinal antes do símbolo, como se escreve em português, e sem
     produzir "-R$ 0" para um valor que arredonda a zero."""
@@ -1158,6 +1168,17 @@ if tela_atual == "💰 Viabilidade Financeira":
     pct_margem = f"{margem_ha / custo_ha * 100:+.0f}%" if custo_ha else "—"
     cor_delta = 'var(--positivo)' if margem_ha >= 0 else 'var(--negativo)'
 
+    # O painel anuncia o erro típico do modelo lá em cima e depois apresentava
+    # a receita como número exato. A mesma margem de erro, convertida em
+    # dinheiro, é o que separa um cenário viável de um duvidoso.
+    erro_sacas = metricas["rmse"] / SACA_KG
+    erro_reais = erro_sacas * preco
+    receita_min, receita_max = receita_ha - erro_reais, receita_ha + erro_reais
+    margem_min, margem_max = margem_ha - erro_reais, margem_ha + erro_reais
+    faixa_receita = f"{brl(receita_min)} a {brl(receita_max)}"
+    faixa_margem = f"{brl(margem_min)} a {brl(margem_max)}"
+    margem_incerta = margem_min < 0 < margem_max
+
     # SÍNTESE LLM (ANÁLISE GENERATIVA)
     texto_ia = ""
     if margem_ha > 0:
@@ -1180,6 +1201,7 @@ if tela_atual == "💰 Viabilidade Financeira":
         <div class="eco-card receita" title="Produtividade projetada multiplicada pelo preço da saca.">
             <div class="eco-label">Receita bruta projetada (R$/ha)</div>
             <div class="eco-value">{brl(receita_ha)}</div>
+            <div class="eco-delta">{faixa_receita}</div>
         </div>
         <div class="eco-card custo" title="Custo de custeio da lavoura por hectare, editável acima.">
             <div class="eco-label">Custo operacional (R$/ha)</div>
@@ -1193,13 +1215,28 @@ if tela_atual == "💰 Viabilidade Financeira":
             <div class="eco-label">Margem operacional (R$/ha)</div>
             <div class="eco-value" style="color:{cor_delta}">{brl(margem_ha)}</div>
             <div class="eco-delta" style="color:{cor_delta}">{pct_margem} sobre o custo</div>
+            <div class="eco-delta">{faixa_margem}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     st.caption(
-        "O valor da terra nua é patrimônio e não entra no cálculo da margem, "
-        "que é apenas receita bruta menos custo operacional.")
+        f"As faixas vêm do erro típico do modelo (± {dec(erro_sacas)} sc/ha, "
+        f"o mesmo do cartão de validação), convertido a {brl_md(preco)} por saca: "
+        f"± {brl_md(erro_reais)}/ha. O valor da terra nua é patrimônio e não entra "
+        f"no cálculo da margem, que é apenas receita bruta menos custo "
+        f"operacional.")
+    if margem_incerta:
+        st.markdown(
+            f'<div style="background:var(--card-bg); border:1px solid var(--card-border);'
+            f' border-left:3px solid #d97706; border-radius:var(--raio);'
+            f' padding:15px 18px; margin-top:14px; font-size:0.88rem; line-height:1.6;'
+            f' color:var(--text-muted);"><b style="color:var(--text-pure);">'
+            f'A margem não sobrevive à margem de erro.</b> Dentro do erro típico do '
+            f'modelo o resultado vai de {brl(margem_min)} a {brl(margem_max)} por '
+            f'hectare, ou seja, muda de sinal. O cenário não permite concluir se a '
+            f'lavoura fecha no azul ou no vermelho.</div>',
+            unsafe_allow_html=True)
 
     st.divider()
 

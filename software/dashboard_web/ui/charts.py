@@ -7,8 +7,9 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True,
     """`unidade` rotula o eixo e o hover; sem ela o gráfico não diz se os
     valores estão em sacas ou em quilos, que o usuário alterna no topo."""
     bg_color = "rgba(0,0,0,0)"
-    font_color = "#c9d1d9" if is_dark else "#333333"
-    grid_color = "#30363d" if is_dark else "#e5e5e5"
+    # Mesmos tons de --text-muted e --card-border do tema do painel.
+    font_color = "#a1a1a6" if is_dark else "#6e6e73"
+    grid_color = "rgba(255,255,255,0.09)" if is_dark else "rgba(0,0,0,0.08)"
     
     fig = px.line(
         serie_plot, 
@@ -111,8 +112,9 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True,
 
 def plot_area(serie_plot: pd.DataFrame, is_dark: bool = True):
     bg_color = "rgba(0,0,0,0)"
-    font_color = "#c9d1d9" if is_dark else "#333333"
-    grid_color = "#30363d" if is_dark else "#e5e5e5"
+    # Mesmos tons de --text-muted e --card-border do tema do painel.
+    font_color = "#a1a1a6" if is_dark else "#6e6e73"
+    grid_color = "rgba(255,255,255,0.09)" if is_dark else "rgba(0,0,0,0.08)"
     
     fig = px.area(
         serie_plot, 

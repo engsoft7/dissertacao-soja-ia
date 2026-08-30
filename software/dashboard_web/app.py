@@ -211,7 +211,7 @@ CSS_VARS_LIGHT = """
         --card-border-forte: rgba(0,0,0,0.16);
         --text-pure: #1d1d1f;
         --text-muted: #6e6e73;
-        --text-faint: #9a9aa0;
+        --text-faint: #6e6e73;   /* 5,07:1 sobre branco */
         --accent: #1a7f37;
         --accent-suave: rgba(26,127,55,0.10);
         --positivo: #1a7f37;
@@ -227,7 +227,7 @@ CSS_VARS_DARK = """
         --card-border-forte: rgba(255,255,255,0.20);
         --text-pure: #f5f5f7;
         --text-muted: #a1a1a6;
-        --text-faint: #6e6e73;
+        --text-faint: #98989d;   /* 6,41:1 sobre o cartão */
         --accent: #30d158;
         --accent-suave: rgba(48,209,88,0.14);
         --positivo: #30d158;
@@ -323,6 +323,10 @@ __VARS__
     .eco-delta {
         font-size: 0.75rem; font-weight: 500;
         margin-top: 8px; display: block; color: var(--text-muted);
+    }
+    .kpi-hint {
+        font-size: 0.72rem; line-height: 1.45; color: var(--text-muted);
+        margin-top: 10px;
     }
 
     /* ── NÚMERO PRINCIPAL ────────────────────────────────────────────── */
@@ -874,8 +878,16 @@ fator_tecnologico = st.sidebar.number_input(
 st.sidebar.caption("Baseline: Quantas sacas/ha a fazenda colhe em um ano normal?")
 
 def ajustar_r(r_dict):
+    """Troca a média do IBGE pela expectativa que o produtor informou.
+
+    A expectativa é declarada para uma safra normal, e `baseline_ibge` é a
+    do mesmo ano de referência. A tendência tecnológica que o modelo projeta
+    daquele ano até a safra alvo continua valendo em cima dela — sem isso, o
+    seletor de Safra Alvo mudava o rótulo e devolvia sempre o mesmo número.
+    """
     r2 = r_dict.copy()
-    r2["baseline_kg_ha"] = fator_tecnologico * 60.0
+    deriva_da_tendencia = r_dict["baseline_kg_ha"] - baseline_ibge
+    r2["baseline_kg_ha"] = fator_tecnologico * 60.0 + deriva_da_tendencia
     r2["estimativa_kg_ha"] = r2["baseline_kg_ha"] + r2["correcao_climatica_kg_ha"]
     return r2
 
@@ -915,25 +927,28 @@ if tela_atual == "📍 Inteligência Territorial":
     st.markdown("### Qualidade do modelo de previsão")
     st.caption(
         f"Validação temporal deixando um ano de fora por vez, sobre "
-        f"{metricas['n']} safras de {df.municipio.nunique()} municípios. "
-        f"Passe o mouse sobre cada cartão para ver o que ele mede.")
+        f"{metricas['n']} safras de {df.municipio.nunique()} municípios.")
     st.markdown(f"""
     <div class="kpi-grid">
         <div class="kpi-card" title="Erro típico da previsão, na mesma unidade da produtividade. Quanto menor, melhor.">
             <div class="kpi-label">Erro típico (RMSE)</div>
             <div class="kpi-value">± {qtd(metricas['rmse'])} {unidade}</div>
+            <div class="kpi-hint">margem de erro usual da previsão</div>
         </div>
         <div class="kpi-card" title="O mesmo erro expresso como porcentagem da produtividade média (rRMSE).">
             <div class="kpi-label">Erro relativo (rRMSE)</div>
             <div class="kpi-value">{dec(metricas['rrmse'])}%</div>
+            <div class="kpi-hint">o mesmo erro, em % da produtividade média</div>
         </div>
         <div class="kpi-card" title="Quanto da variação entre safras o modelo consegue explicar. 1,000 seria uma previsão perfeita.">
             <div class="kpi-label">R² do modelo</div>
             <div class="kpi-value">{dec(metricas['r2'], 3)}</div>
+            <div class="kpi-hint">quanto da variação entre safras ele explica</div>
         </div>
         <div class="kpi-card" title="O mesmo cálculo para a tendência histórica sozinha, sem satélite nem clima. Se os dois R² empatam, o modelo não superou a tendência.">
             <div class="kpi-label">R² da tendência (referência)</div>
             <div class="kpi-value">{dec(metricas['r2_baseline'], 3)}</div>
+            <div class="kpi-hint">o mesmo cálculo só com a tendência histórica</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -1153,6 +1168,10 @@ if tela_atual == "💰 Viabilidade Financeira":
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+    st.caption(
+        "O valor da terra nua é patrimônio e não entra no cálculo da margem, "
+        "que é apenas receita bruta menos custo operacional.")
 
     st.divider()
 

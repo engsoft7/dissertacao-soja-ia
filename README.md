@@ -208,13 +208,26 @@ isso o `requirements.txt` fixa `scikit-learn>=1.3,<1.9`. Verificado de ponta a
 ponta: rodando `04_avalia_ajustado.py` com scikit-learn 1.8.0, três das quatro
 linhas da Tabela 3 — SVR, Random Forest e MLP — saem idênticas às registradas.
 
-**XGBoost — divergência em aberto.** A linha do XGBoost sai 479,3 kg/ha em vez
-dos 480,6 registrados, e isso *não* é versão: 1.6.2, 1.7.6, 2.0.3, 2.1.4, 3.0.5,
-3.1.1 e 3.2.0 foram testadas, e nenhuma reproduz 480,6 (as 2.x e 3.x dão todas
-479,3; as 1.x, 479,0). Também não é contagem de threads — `n_jobs` de 1 a 16 dá
-sempre o mesmo valor. A diferença aparece espalhada pelas cinco safras, com
-sinais alternados, o que indica um ajuste de modelo genuinamente distinto e não
-um desvio sistemático. Quem reproduzir deve esperar 479,3 nessa linha, e apenas
+**XGBoost — divergência em aberto, de 1,3 kg/ha.** A linha do XGBoost sai 479,3
+em vez dos 480,6 registrados. Foram testadas vinte versões, e o valor de fato
+muda entre elas — mas nenhuma chega a 480,6:
+
+| versão do XGBoost | RMSE |
+|---|---|
+| 1.5.0, 1.5.2, 1.6.2, 1.7.6 | 479,0 |
+| 2.0.0, 2.0.1, 2.0.2, 2.0.3 | 479,3 |
+| 2.1.0, 2.1.1, 2.1.2 | 476,5 |
+| 2.1.3, 2.1.4 | 479,3 |
+| 3.0.0, 3.0.2, 3.0.5, 3.1.0, 3.1.1, 3.2.0 | 479,3 |
+
+Também não é contagem de threads: `n_jobs` de 1 a 16 devolve sempre o mesmo
+valor. A diferença aparece espalhada pelas cinco safras com sinais alternados
+(−7,8 a +2,6 kg/ha), o que indica um ajuste de modelo distinto e não um desvio
+sistemático. A hipótese que resta é a do ambiente de compilação: a ordem de
+redução em ponto flutuante na construção do histograma depende do conjunto de
+instruções da CPU, e isso não se reproduz noutra máquina.
+
+Quem reproduzir deve esperar um valor entre 476,5 e 479,3 nessa linha, e apenas
 nela. A conclusão do capítulo não muda: o XGBoost é o terceiro colocado nos dois
 casos, atrás de SVR e Random Forest.
 

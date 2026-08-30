@@ -197,18 +197,26 @@ sua máquina produz com o que está no texto, sem sobrescrever o registro.
 
 **Sobre reproduzir os números exatos.** O SVR e o MLP reproduzem os valores da
 dissertação dígito a dígito, safra a safra, e a importância por permutação da
-Figura 4 sai idêntica até a casa decimal. Já o Random Forest e o XGBoost saem
-2 a 3 kg/ha melhores (473,7 e 479,3, contra 476,0 e 480,6 registrados): na
-Tabela 3, na Tabela 5 e na Tabela 6.
+Figura 4 sai idêntica até a casa decimal. Três dos quatro modelos, portanto, não
+dependem do ambiente. O Random Forest depende, e o XGBoost fica em aberto.
 
-A diferença **não é do código**. Rodando o próprio `04_avalia_ajustado.py` deste
-repositório com scikit-learn 1.9.0 e XGBoost 3.2.0, obtém-se 473,7 e 479,3 —
-enquanto o JSON versionado, gerado no ambiente da pesquisa, traz 476,0 e 480,6.
-Random Forest e XGBoost não são estáveis entre versões dessas bibliotecas mesmo
-com semente fixa (muda o sorteio interno do *bootstrap* e a discretização do
-histograma), ao passo que o SVR (libsvm) e o MLP são. Como o `requirements.txt`
-usa faixas abertas, quem reproduzir hoje deve esperar essa margem nas duas
-linhas de árvore — e apenas nelas.
+**Random Forest — resolvido pelo pin.** A partir do scikit-learn 1.9 o Random
+Forest muda de resultado mesmo com `random_state` fixo, e a linha da Tabela 3 cai
+de 476,0 para 473,7 kg/ha. As versões 1.3.2, 1.4.2, 1.5.0, 1.5.2 e 1.8.0 foram
+testadas e todas devolvem 476,0 / 353,5 / 0,387, exatamente o registrado. Por
+isso o `requirements.txt` fixa `scikit-learn>=1.3,<1.9`. Verificado de ponta a
+ponta: rodando `04_avalia_ajustado.py` com scikit-learn 1.8.0, três das quatro
+linhas da Tabela 3 — SVR, Random Forest e MLP — saem idênticas às registradas.
+
+**XGBoost — divergência em aberto.** A linha do XGBoost sai 479,3 kg/ha em vez
+dos 480,6 registrados, e isso *não* é versão: 1.6.2, 1.7.6, 2.0.3, 2.1.4, 3.0.5,
+3.1.1 e 3.2.0 foram testadas, e nenhuma reproduz 480,6 (as 2.x e 3.x dão todas
+479,3; as 1.x, 479,0). Também não é contagem de threads — `n_jobs` de 1 a 16 dá
+sempre o mesmo valor. A diferença aparece espalhada pelas cinco safras, com
+sinais alternados, o que indica um ajuste de modelo genuinamente distinto e não
+um desvio sistemático. Quem reproduzir deve esperar 479,3 nessa linha, e apenas
+nela. A conclusão do capítulo não muda: o XGBoost é o terceiro colocado nos dois
+casos, atrás de SVR e Random Forest.
 
 A busca de hiperparâmetros é aleatória: reexecutá-la tende a eleger uma
 configuração diferente, sem que a conclusão mude. O que ela decide com segurança

@@ -41,24 +41,39 @@ CUSTO_TOTAL_HA      = 5714.88
 CUSTO_REFERENCIA_HA = CUSTO_OPERACIONAL_HA
 
 # ── VALOR DA TERRA NUA ───────────────────────────────────────────────────────
-# Continua sem fonte apurada: são referências fixas por município, mantidas do
-# levantamento anterior e editáveis na interface. Não entram no cálculo da
-# margem, apenas informam o capital imobilizado.
-VTN_POR_MUNICIPIO = {
-    "PARAGOMINAS": 15000.0,
-    "DOM ELISEU": 14000.0,
-    "ULIANOPOLIS": 14200.0,
-    "RONDON DO PARA": 13800.0,
-    "SANTANA DO ARAGUAIA": 12500.0,
-    "CONCEICAO DO ARAGUAIA": 11000.0,
-    "REDENCAO": 11500.0,
+# Fonte: Receita Federal, Tabela de Valores de Terra Nua do exercício 2026,
+# publicada em 07/08/2026 e reenviada corrigida em 21/08/2026. O PDF nacional e
+# a extração dos municípios paraenses estão em pesquisa/dados/receita_federal/.
+#
+# A tabela publica seis valores por município, por classe de aptidão agrícola.
+# Usa-se "Lavoura — Aptidão Boa", que é a classe da soja. As demais (aptidão
+# regular e restrita, pastagem, silvicultura, preservação) são menores e não
+# descrevem área de lavoura tecnificada.
+#
+# A Receita Federal publica VTN para 13 dos 38 municípios da base. Para os
+# demais não há valor oficial, e a interface informa isso em vez de estimar.
+VTN_LAVOURA_APTIDAO_BOA = {
+    "ALTAMIRA": 6552.64,
+    "BREU BRANCO": 17500.00,
+    "CUMARU DO NORTE": 6519.09,
+    "FLORESTA DO ARAGUAIA": 6947.65,
+    "MARABA": 8900.00,
+    "NOVO PROGRESSO": 3693.95,
+    "PARAGOMINAS": 4564.00,
+    "REDENCAO": 8672.24,
+    "RIO MARIA": 5076.41,
+    "SANTANA DO ARAGUAIA": 7061.84,
+    "SAO FELIX DO XINGU": 5930.09,
+    "ULIANOPOLIS": 4006.79,
+    "XINGUARA": 7438.01,
 }
-VTN_PADRAO_HA = 12000.0
 
 def get_custos_locais(municipio: str):
+    """VTN vem como None quando a Receita Federal não publica o município,
+    para a interface dizer isso em vez de exibir número estimado."""
     mun = REV_MUNICIPIOS.get(municipio, municipio).upper()
     return {"custo_ha": CUSTO_REFERENCIA_HA,
-            "vtn_ha": VTN_POR_MUNICIPIO.get(mun, VTN_PADRAO_HA)}
+            "vtn_ha": VTN_LAVOURA_APTIDAO_BOA.get(mun)}
 
 def get_financas(municipio: str):
     headers = {'User-Agent': 'Mozilla/5.0'}

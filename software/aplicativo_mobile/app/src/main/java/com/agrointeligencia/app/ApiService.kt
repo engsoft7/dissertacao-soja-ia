@@ -27,7 +27,8 @@ data class PrevisaoResponse(
 data class FinancaResponse(
     val soja_preco_saca: Double,
     val custo_ha: Double,
-    val vtn_ha: Double,
+    // Nulo quando a Receita Federal não publica VTN para o município.
+    val vtn_ha: Double? = null,
     val ano_referencia: Int
 )
 

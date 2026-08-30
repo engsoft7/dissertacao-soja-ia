@@ -1114,15 +1114,15 @@ if tela_atual == "💰 Viabilidade Financeira":
         import sys
         from pathlib import Path
         sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
-        from financas import get_financas
+        from financas import get_financas, CUSTO_REFERENCIA_HA
         r = get_financas(municipio)
-        custos_locais = {'custo_ha': r.get('custo_ha', 4800.0), 'vtn_ha': r.get('vtn_ha', 12000.0)}
+        custos_locais = {'custo_ha': r.get('custo_ha'), 'vtn_ha': r.get('vtn_ha')}
         preco_chicago = r.get('soja_preco_saca', 120.0)
     except Exception:
         st.caption(
             "Base de custos indisponível no momento: os campos abaixo vêm de "
             "referências regionais e podem ser editados.")
-        custos_locais = {'custo_ha': 4800.0, 'vtn_ha': 12000.0}
+        custos_locais = {'custo_ha': CUSTO_REFERENCIA_HA, 'vtn_ha': None}
         preco_chicago = 120.0
 
     if PRECO_SACA_ONLINE is not None:
@@ -1154,13 +1154,30 @@ if tela_atual == "💰 Viabilidade Financeira":
             "levantamento de março de 2026, convertido pela produtividade de "
             "referência de 2.880 kg/ha. O Pará não tem levantamento próprio.")
     with col_eco3:
-        vtn_ha = st.number_input(
-            f"Preço Terra Nua VTN/ha ({municipio.title()})",
-            min_value=0,
-            value=int(custos_locais["vtn_ha"]),
-            step=500)
-        st.caption(
-            "**Terra:** valor de referência municipal fixo, embutido no código.")
+        vtn_publicado = custos_locais["vtn_ha"]
+        if vtn_publicado is None:
+            # A Receita Federal publica VTN para 13 dos 38 municípios da base.
+            # Onde não publica, o painel diz isso em vez de estimar um valor.
+            vtn_ha = None
+            st.markdown(
+                f"**Preço Terra Nua VTN/ha ({municipio.title()})**")
+            st.markdown(
+                '<div style="padding:9px 12px; border:1px dashed var(--card-border);'
+                ' border-radius:var(--raio-pequeno); color:var(--text-muted);'
+                ' font-size:0.88rem;">não publicado</div>',
+                unsafe_allow_html=True)
+            st.caption(
+                "**Terra:** a Receita Federal não publica VTN para este "
+                "município na tabela de 2026.")
+        else:
+            vtn_ha = st.number_input(
+                f"Preço Terra Nua VTN/ha ({municipio.title()})",
+                min_value=0,
+                value=int(vtn_publicado),
+                step=500)
+            st.caption(
+                "**Terra:** Receita Federal, Tabela de VTN 2026, classe "
+                "lavoura de aptidão boa.")
 
     est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
     receita_ha = est_sacas_ha * preco
@@ -1207,9 +1224,9 @@ if tela_atual == "💰 Viabilidade Financeira":
             <div class="eco-label">Custo operacional (R$/ha)</div>
             <div class="eco-value">{brl(custo_ha)}</div>
         </div>
-        <div class="eco-card vtn" title="Valor de referência da terra nua, fixo no código. É patrimônio e não entra na margem.">
+        <div class="eco-card vtn" title="Valor da Terra Nua da Receita Federal, classe lavoura de aptidão boa. É patrimônio e não entra na margem.">
             <div class="eco-label">Valor da terra nua (R$/ha)</div>
-            <div class="eco-value">{brl(vtn_ha)}</div>
+            <div class="eco-value">{brl(vtn_ha) if vtn_ha is not None else "—"}</div>
         </div>
         <div class="eco-card margem" title="Receita bruta menos custo operacional. Não desconta terra, impostos nem financiamento.">
             <div class="eco-label">Margem operacional (R$/ha)</div>
@@ -1353,9 +1370,14 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
       custo variável (R$ 4.081,44/ha) com o custo fixo (R$ 1.195,68/ha). É um
       valor de referência embutido no código, igual para todos os municípios, e
       editável no campo acima.
-    * **Valor da Terra Nua:** referência fixa por município no mesmo arquivo,
-      sem fonte apurada e sem consulta em tempo real à Receita Federal. Não
-      entra no cálculo da margem.
+    * **Valor da Terra Nua (Receita Federal):** Tabela de Valores de Terra Nua do
+      exercício 2026, publicada em 07/08/2026 e reenviada corrigida em
+      21/08/2026. A tabela traz seis valores por município, por classe de
+      aptidão agrícola; usa-se "Lavoura — Aptidão Boa", que é a classe da soja.
+      A Receita Federal publica VTN para 13 dos 38 municípios da base — nos
+      demais o painel informa que não há valor oficial, em vez de estimar. É
+      patrimônio e não entra no cálculo da margem. O PDF nacional e a extração
+      dos municípios paraenses estão em `pesquisa/dados/receita_federal/`.
     
     *Repositório Acadêmico:* [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
 

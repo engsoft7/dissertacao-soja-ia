@@ -2,7 +2,10 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True):
+def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True,
+                       unidade: str = ""):
+    """`unidade` rotula o eixo e o hover; sem ela o gráfico não diz se os
+    valores estão em sacas ou em quilos, que o usuário alterna no topo."""
     bg_color = "rgba(0,0,0,0)"
     font_color = "#c9d1d9" if is_dark else "#333333"
     grid_color = "#30363d" if is_dark else "#e5e5e5"
@@ -14,13 +17,16 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True):
         color="Nome", 
         markers=True,
         
-        labels={"ano": "Ano-safra", "produtividade": "Produtividade", "Nome": "Município"}
+        labels={"ano": "Ano-safra",
+                "produtividade": f"Produtividade ({unidade})" if unidade else "Produtividade",
+                "Nome": "Município"}
     )
     
     fig.update_traces(
         line=dict(width=3),
         marker=dict(size=8, symbol="circle-open", line=dict(width=2)),
-        hovertemplate="<b>%{x}</b><br>Produtividade: %{y}<extra></extra>",
+        hovertemplate="<b>%{x}</b><br>Produtividade: %{y}"
+                      + (f" {unidade}" if unidade else "") + "<extra></extra>",
         selector=dict(type="scatter")
     )
     
@@ -53,6 +59,13 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True):
             la_ninas = d.get("la_ninas", la_ninas)
         except Exception:
             pass
+
+    # O arquivo da NOAA vai além da última safra publicada pelo IBGE. Sem
+    # recortar, o gráfico ganharia faixas de anos sem nenhum ponto plotado.
+    if not serie_plot.empty:
+        ano_min, ano_max = int(serie_plot["ano"].min()), int(serie_plot["ano"].max())
+        el_ninos = [a for a in el_ninos if ano_min <= a <= ano_max]
+        la_ninas = [a for a in la_ninas if ano_min <= a <= ano_max]
 
     clima_rows = [{"ano": a, "Clima": "El Niño"} for a in el_ninos] + [{"ano": a, "Clima": "La Niña"} for a in la_ninas]
     df_clima = pd.DataFrame(clima_rows)

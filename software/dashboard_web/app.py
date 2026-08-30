@@ -818,12 +818,6 @@ ano_alvo = st.sidebar.number_input(
     max_value=int(df.ano.max()) + 3,
     value=int(df.ano.max()) + 1)
 
-unidade = st.sidebar.radio(
-    "Unidade",
-    options=["Sacas (60kg)", "Quilos (kg)"],
-    index=0
-)
-
 preco = PRECO_SACA_ONLINE
 
 st.sidebar.markdown("### Perfil do Produtor")
@@ -832,7 +826,8 @@ fator_tecnologico = st.sidebar.number_input(
     "Expectativa Produtiva da Fazenda", 
     min_value=10.0, max_value=120.0, 
     value=float(baseline_ibge / 60.0), 
-    step=1.0, 
+    step=1.0,
+    format="%.1f",
     help="O modelo IA usa médias do IBGE. Se sua fazenda possui alta tecnologia (correção de solo/sementes), ajuste a base aqui para prever os ganhos/perdas climáticos em cima da sua realidade."
 )
 st.sidebar.caption("Baseline: Quantas sacas/ha a fazenda colhe em um ano normal?")
@@ -878,7 +873,7 @@ if tela_atual == "📍 Inteligência Territorial":
             <div class="kpi-value">{dec(metricas['r2'], 3)}</div>
         </div>
         <div class="kpi-card orange">
-            <div class="kpi-label">Benchmark de Tendência</div>
+            <div class="kpi-label">Benchmark de Tendência (R² do baseline)</div>
             <div class="kpi-value">{dec(metricas['r2_baseline'], 3)}</div>
         </div>
     </div>
@@ -968,7 +963,9 @@ if tela_atual == "📈 Análise Histórica":
     from ui.charts import plot_produtividade, plot_area
     import plotly.graph_objects as go
     
-    st.plotly_chart(plot_produtividade(serie_plot, is_dark=is_dark), use_container_width=True)
+    st.plotly_chart(
+        plot_produtividade(serie_plot, is_dark=is_dark, unidade=unidade),
+        use_container_width=True)
     st.caption("Gráfico interativo: arraste para selecionar um período, dois toques para resetar o zoom.")
 
     st.subheader("Expansão da Área Plantada (Hectares)")
@@ -1033,17 +1030,17 @@ if tela_atual == "💰 Viabilidade Financeira":
     with col_eco2:
         custo_ha = st.number_input(
             f"Custo Operacional base ({municipio.title()})",
-            min_value=0.0,
-            value=custos_locais["custo_ha"],
-            step=100.0)
+            min_value=0,
+            value=int(custos_locais["custo_ha"]),
+            step=100)
         st.caption(
             "📊 **Fonte do Custo:** Base VTN ajustada. Edite com a realidade da sua fazenda.")
     with col_eco3:
         vtn_ha = st.number_input(
             f"Preço Terra Nua VTN/ha ({municipio.title()})",
-            min_value=0.0,
-            value=custos_locais["vtn_ha"],
-            step=500.0)
+            min_value=0,
+            value=int(custos_locais["vtn_ha"]),
+            step=500)
         st.caption(
             "🗺️ **Fonte da Terra:** Base de referência municipal da Receita Federal (VTN).")
 
@@ -1057,11 +1054,11 @@ if tela_atual == "💰 Viabilidade Financeira":
     texto_ia = ""
     if margem_ha > 0:
         if margem_ha > (custo_ha * 0.3):
-             texto_ia = f"📈 <b>Alta Viabilidade (Síntese IA):</b> Cenário projeta lucro operacional robusto. A produtividade estimada de <b>{est_sacas_ha:.1f} scs/ha</b> assegura um faturamento de {brl(receita_ha)}/ha, cobrindo com folga o custeio de {brl(custo_ha)}, deixando uma margem excelente."
+             texto_ia = f"📈 <b>Alta Viabilidade (Síntese IA):</b> Cenário projeta lucro operacional robusto. A produtividade estimada de <b>{dec(est_sacas_ha)} sc/ha</b> assegura um faturamento de {brl(receita_ha)}/ha, cobrindo com folga o custeio de {brl(custo_ha)}, deixando uma margem excelente."
         else:
-             texto_ia = f"⚠️ <b>Alerta de Stress (Síntese IA):</b> A conta fecha no azul, mas a margem estreita de {brl(margem_ha)}/ha exige cautela. A produtividade predita de <b>{est_sacas_ha:.1f} scs</b> não suportará solavancos climáticos intensos sem risco de prejuízo."
+             texto_ia = f"⚠️ <b>Alerta de Stress (Síntese IA):</b> A conta fecha no azul, mas a margem estreita de {brl(margem_ha)}/ha exige cautela. A produtividade predita de <b>{dec(est_sacas_ha)} sc/ha</b> não suportará solavancos climáticos intensos sem risco de prejuízo."
     else:
-        texto_ia = f"🛑 <b>Risco Operacional Crítico (Síntese IA):</b> Alerta Vermelho! Com a soja simulada a {brl(preco)} e custo elevado ({brl(custo_ha)}/ha), a IA prevê colapso econômico em {disp(municipio)}. A produtividade de <b>{est_sacas_ha:.1f} scs/ha</b> destruiria o capital, com perdas de {brl(abs(margem_ha))} por hectare."
+        texto_ia = f"🛑 <b>Risco Operacional Crítico (Síntese IA):</b> Alerta Vermelho! Com a soja simulada a {brl(preco)} e custo elevado ({brl(custo_ha)}/ha), a IA prevê colapso econômico em {disp(municipio)}. A produtividade de <b>{dec(est_sacas_ha)} sc/ha</b> destruiria o capital, com perdas de {brl(abs(margem_ha))} por hectare."
 
     st.markdown(f'<div style="background:var(--card-bg); padding:16px; border-radius:6px; border-left:4px solid {cor_delta}; margin-bottom: 24px; border-top:1px solid var(--card-border); border-right:1px solid var(--card-border); border-bottom:1px solid var(--card-border); font-size: 0.95rem; line-height: 1.5; font-family: Inter, sans-serif;">{texto_ia}</div>', unsafe_allow_html=True)
 

@@ -9,15 +9,19 @@ authors:
 repository-code: "https://github.com/engsoft7/dissertacao-soja-ia"
 doi: 10.5281/zenodo.21286115
 abstract: >-
-  Códigos e dados da dissertação de Mestrado Profissional em Computação Aplicada.
-  Compara modelos de Aprendizado de Máquina para previsão da produtividade
-  municipal da soja, em recorte nacional e em estudo de caso no Pará, integrando
-  IBGE (PAM), MODIS, CHIRPS, ERA5-Land e a máscara anual do MapBiomas.
+  Códigos e dados da dissertação de Mestrado Profissional em Computação Aplicada
+  (PPCA/UFPA). Compara modelos de Aprendizado de Máquina para previsão da
+  produtividade municipal da soja, em recorte nacional e em estudo de caso no
+  Pará, integrando IBGE (PAM), MODIS, CHIRPS, ERA5-Land e a máscara anual do
+  MapBiomas. Inclui os produtos técnicos derivados da pesquisa: painel web,
+  aplicativo Android e API de previsão.
 keywords:
   - aprendizado de máquina
   - produtividade da soja
   - sensoriamento remoto
   - MapBiomas
   - Amazônia
+  - Pará
+license: MIT
 version: "2.2.0"
 date-released: "2026-08-30"

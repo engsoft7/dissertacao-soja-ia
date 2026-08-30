@@ -1,0 +1,280 @@
+{
+  "protocolo": {
+    "anos_teste": [
+      2016,
+      2017,
+      2018,
+      2019,
+      2020
+    ],
+    "sub_treino": 7000,
+    "svr_max_treino": 5000,
+    "n_registros": 24860,
+    "n_variaveis": 121,
+    "produtividade_media_kg_ha": 2693.4,
+    "origem_hiperparametros": "03_busca_hiperparametros.py (janela 2001-2015)"
+  },
+  "modelos": {
+    "Random Forest": {
+      "params": {
+        "bootstrap": true,
+        "ccp_alpha": 0.0,
+        "criterion": "squared_error",
+        "max_depth": 10,
+        "max_features": "sqrt",
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0,
+        "min_samples_leaf": 2,
+        "min_samples_split": 2,
+        "min_weight_fraction_leaf": 0.0,
+        "monotonic_cst": null,
+        "n_estimators": 100,
+        "n_jobs": -1,
+        "oob_score": false,
+        "random_state": 42,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "per_year": {
+        "2016": {
+          "rmse": 517.5,
+          "mae": 375.2,
+          "r2": -0.054
+        },
+        "2017": {
+          "rmse": 397.8,
+          "mae": 303.7,
+          "r2": 0.202
+        },
+        "2018": {
+          "rmse": 397.8,
+          "mae": 301.2,
+          "r2": 0.24
+        },
+        "2019": {
+          "rmse": 445.9,
+          "mae": 338.4,
+          "r2": 0.314
+        },
+        "2020": {
+          "rmse": 582.2,
+          "mae": 440.0,
+          "r2": 0.557
+        }
+      },
+      "RMSE_mean": 468.2,
+      "RMSE_std": 71.9,
+      "MAE_mean": 351.7,
+      "MAE_std": 51.7,
+      "R2_mean": 0.252,
+      "R2_std": 0.197,
+      "RMSE_pool": 473.7,
+      "MAE_pool": 351.7,
+      "R2_pool": 0.392,
+      "rRMSE_pool": 17.6
+    },
+    "XGBoost": {
+      "params": {
+        "objective": "reg:squarederror",
+        "base_score": null,
+        "booster": null,
+        "callbacks": null,
+        "colsample_bylevel": null,
+        "colsample_bynode": null,
+        "colsample_bytree": 1.0,
+        "device": null,
+        "early_stopping_rounds": null,
+        "enable_categorical": false,
+        "eval_metric": null,
+        "feature_types": null,
+        "feature_weights": null,
+        "gamma": null,
+        "grow_policy": null,
+        "importance_type": null,
+        "interaction_constraints": null,
+        "learning_rate": 0.02,
+        "max_bin": null,
+        "max_cat_threshold": null,
+        "max_cat_to_onehot": null,
+        "max_delta_step": null,
+        "max_depth": 6,
+        "max_leaves": null,
+        "min_child_weight": 3,
+        "missing": NaN,
+        "monotone_constraints": null,
+        "multi_strategy": null,
+        "n_estimators": 400,
+        "n_jobs": -1,
+        "num_parallel_tree": null,
+        "random_state": 42,
+        "reg_alpha": null,
+        "reg_lambda": 5,
+        "sampling_method": null,
+        "scale_pos_weight": null,
+        "subsample": 0.7,
+        "tree_method": "hist",
+        "validate_parameters": null,
+        "verbosity": 0
+      },
+      "per_year": {
+        "2016": {
+          "rmse": 493.4,
+          "mae": 359.0,
+          "r2": 0.042
+        },
+        "2017": {
+          "rmse": 394.2,
+          "mae": 301.6,
+          "r2": 0.216
+        },
+        "2018": {
+          "rmse": 395.6,
+          "mae": 302.6,
+          "r2": 0.249
+        },
+        "2019": {
+          "rmse": 427.6,
+          "mae": 323.2,
+          "r2": 0.369
+        },
+        "2020": {
+          "rmse": 640.8,
+          "mae": 472.1,
+          "r2": 0.464
+        }
+      },
+      "RMSE_mean": 470.3,
+      "RMSE_std": 92.5,
+      "MAE_mean": 351.7,
+      "MAE_std": 63.7,
+      "R2_mean": 0.268,
+      "R2_std": 0.143,
+      "RMSE_pool": 479.3,
+      "MAE_pool": 351.7,
+      "R2_pool": 0.378,
+      "rRMSE_pool": 17.8
+    },
+    "SVR": {
+      "params": {
+        "C": 100,
+        "cache_size": 200,
+        "coef0": 0.0,
+        "degree": 3,
+        "epsilon": 0.05,
+        "gamma": 0.005,
+        "kernel": "rbf",
+        "max_iter": -1,
+        "shrinking": true,
+        "tol": 0.001,
+        "verbose": false
+      },
+      "per_year": {
+        "2016": {
+          "rmse": 484.2,
+          "mae": 347.1,
+          "r2": 0.077
+        },
+        "2017": {
+          "rmse": 380.1,
+          "mae": 281.8,
+          "r2": 0.271
+        },
+        "2018": {
+          "rmse": 401.9,
+          "mae": 306.3,
+          "r2": 0.224
+        },
+        "2019": {
+          "rmse": 421.0,
+          "mae": 320.4,
+          "r2": 0.388
+        },
+        "2020": {
+          "rmse": 585.9,
+          "mae": 442.6,
+          "r2": 0.552
+        }
+      },
+      "RMSE_mean": 454.6,
+      "RMSE_std": 74.3,
+      "MAE_mean": 339.6,
+      "MAE_std": 55.6,
+      "R2_mean": 0.302,
+      "R2_std": 0.16,
+      "RMSE_pool": 460.7,
+      "MAE_pool": 339.6,
+      "R2_pool": 0.425,
+      "rRMSE_pool": 17.1
+    },
+    "MLP": {
+      "params": {
+        "activation": "relu",
+        "alpha": 0.001,
+        "batch_size": "auto",
+        "beta_1": 0.9,
+        "beta_2": 0.999,
+        "early_stopping": true,
+        "epsilon": 1e-08,
+        "hidden_layer_sizes": [
+          64,
+          32
+        ],
+        "learning_rate": "constant",
+        "learning_rate_init": 0.003,
+        "loss": "squared_error",
+        "max_fun": 15000,
+        "max_iter": 250,
+        "momentum": 0.9,
+        "n_iter_no_change": 10,
+        "nesterovs_momentum": true,
+        "power_t": 0.5,
+        "random_state": 42,
+        "shuffle": true,
+        "solver": "adam",
+        "tol": 0.0001,
+        "validation_fraction": 0.1,
+        "verbose": false,
+        "warm_start": false
+      },
+      "per_year": {
+        "2016": {
+          "rmse": 605.5,
+          "mae": 467.5,
+          "r2": -0.443
+        },
+        "2017": {
+          "rmse": 433.1,
+          "mae": 327.2,
+          "r2": 0.054
+        },
+        "2018": {
+          "rmse": 418.1,
+          "mae": 321.0,
+          "r2": 0.16
+        },
+        "2019": {
+          "rmse": 460.5,
+          "mae": 358.4,
+          "r2": 0.268
+        },
+        "2020": {
+          "rmse": 754.3,
+          "mae": 574.0,
+          "r2": 0.257
+        }
+      },
+      "RMSE_mean": 534.3,
+      "RMSE_std": 128.6,
+      "MAE_mean": 409.6,
+      "MAE_std": 97.6,
+      "R2_mean": 0.059,
+      "R2_std": 0.263,
+      "RMSE_pool": 549.6,
+      "MAE_pool": 409.6,
+      "R2_pool": 0.182,
+      "rRMSE_pool": 20.4
+    }
+  },
+  "melhor": "SVR"
+}

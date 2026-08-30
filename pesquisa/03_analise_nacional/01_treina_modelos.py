@@ -1,7 +1,27 @@
 # -*- coding: utf-8 -*-
 """Previsao de produtividade da soja: modelos preveem a ANOMALIA climatica
 (YIELD_TREND_CORRECTED); reconstroi-se YIELD = anomalia_prevista + tendencia.
-Validacao leave-one-year-out. Metricas na produtividade reconstruida (kg/ha)."""
+Validacao leave-one-year-out. Metricas na produtividade reconstruida (kg/ha).
+
+ATENCAO -- ESTE SCRIPT E O REGISTRO DA VERSAO SEM AJUSTE DE HIPERPARAMETROS.
+Os hiperparametros abaixo sao os usados ANTES da busca descrita na dissertacao,
+e foram preservados de proposito: eles documentam o ponto de partida contra o
+qual o ganho do ajuste e medido.
+
+NAO use este script para reproduzir a Tabela 3. A Tabela 3 vem de
+04_avalia_ajustado.py, que aplica as configuracoes vencedoras de
+03_busca_hiperparametros.py sob exatamente o mesmo protocolo (mesmas dobras,
+mesmas subamostras, mesmas metricas), de modo que a unica diferenca entre os
+dois resultados seja o hiperparametro.
+
+Ordem de execucao do estudo nacional:
+    00_baixa_dados.py            baixa a base de von Bloh et al. (2023)
+    01_treina_modelos.py         (este) linha de base sem ajuste
+    03_busca_hiperparametros.py  busca aleatoria na janela 2001-2015
+    06_confirma_busca.py         reavalia o topo do ranking com 7.000 registros
+    04_avalia_ajustado.py        avaliacao final em 2016-2020 -> Tabela 3
+    05_gera_figuras_ajustado.py  Figuras 2, 3 e 4
+"""
 import sys, json, os, time, numpy as np, pandas as pd, warnings
 warnings.filterwarnings('ignore')
 from sklearn.preprocessing import StandardScaler

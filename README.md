@@ -34,15 +34,46 @@ municipal da soja, em dois recortes:
 
 ### Principais resultados
 
-| Recorte | Melhor modelo | RMSE | Erro relativo |
-|---|---|---|---|
-| Nacional | XGBoost | 472 kg/ha | 17,5% |
-| Pará (com máscara) | MLP | 416 kg/ha | 13,9% |
+| Recorte | Melhor modelo | RMSE | R² | Erro relativo |
+|---|---|---|---|---|
+| Nacional | **SVR** (ajustado) | **461 kg/ha** | 0,425 | **17,1%** |
+| Pará (com máscara) | MLP | 416 kg/ha | 0,216 | 13,9% |
+
+No recorte nacional os números acima são os da **busca de hiperparâmetros**
+(`03_busca_hiperparametros.py` → `04_avalia_ajustado.py`). Depois do ajuste o
+SVR passa a ser o melhor modelo, à frente do XGBoost, que liderava na versão
+sem ajuste. O script `01_treina_modelos.py` foi preservado como registro dessa
+versão anterior e **não reproduz a Tabela 3** — quem quiser os números da
+dissertação deve rodar `04_avalia_ajustado.py`.
 
 *Nota de Engenharia:* Embora o **MLP** tenha empatado como o melhor modelo matemático puro, o **Random Forest** foi a arquitetura escolhida para integração no Produto Técnico (Dashboard e App Mobile) devido à sua alta explicabilidade (Feature Importance) e menor custo computacional em implantações de nuvem.
 
 No Pará, **as variáveis climáticas e espectrais não superaram um modelo de
 referência** baseado apenas no histórico municipal e na tendência tecnológica.
+Esse resultado se sustenta sob dois controles adicionais:
+
+- **A máscara de soja foi avaliada em amostra controlada.** As duas bases do
+  Pará têm tamanhos diferentes (493 registros sem máscara, 415 com máscara), e
+  compará-las diretamente confunde o efeito da máscara com o efeito de estar
+  olhando conjuntos distintos de municípios e safras. O script
+  `01_compara_mascara_controlada.py` roda os dois cenários sobre os **379
+  registros comuns** às duas bases e traz uma verificação embutida: como o
+  baseline não usa variável ambiental alguma, ele tem de dar exatamente o mesmo
+  resultado nos dois cenários, e o script aborta se não der. Sob esse controle os
+  baselines coincidem (405,8 kg/ha nos dois) e o efeito real da máscara aparece:
+  −3,7 kg/ha no Random Forest, −7,4 no XGBoost, +0,7 no SVR e +0,1 no MLP. O
+  desenho anterior, que comparava as duas bases inteiras, sugeria uma diferença
+  bem maior — mas ela vinha da amostra, não da máscara.
+- **Nenhum modelo supera o baseline mesmo após busca aninhada.** Uma objeção
+  natural é que os modelos poderiam vencer se fossem melhor ajustados.
+  `03_busca_hiperparametros.py` responde com validação cruzada aninhada: os
+  hiperparâmetros são escolhidos dentro de cada dobra, sem jamais ver a safra
+  avaliada. O baseline continua à frente de todos (415,6 kg/ha, contra 418,0 do
+  MLP, 419,6 do SVR, 426,5 do XGBoost e 427,2 do Random Forest). A configuração
+  vencedora só se repete em 4% a 21% das dobras: a validação interna não encontra
+  um ótimo consistente, o que se espera quando as variáveis ambientais não
+  carregam sinal sobre o alvo.
+
 A investigação da variável-alvo revelou que **40,1% dos pares de safras
 consecutivas da PAM/IBGE nos municípios paraenses apresentam produtividade
 rigorosamente idêntica**, o que indica imputação nos levantamentos oficiais e
@@ -63,11 +94,25 @@ pesquisa/02_revisao_sistematica/
   referencias_53_estudos_abnt.txt         os 53 incluídos, em ABNT
 pesquisa/03_analise_nacional/
   00_baixa_dados.py                       baixa a base de von Bloh et al. (2023)
-  01_treina_modelos.py                    RF, XGBoost, SVR, MLP
-  02_gera_figuras.py
+  01_treina_modelos.py                    RF, XGBoost, SVR, MLP — SEM ajuste (registro)
+  02_gera_figuras.py                      figuras da versão sem ajuste
+  03_busca_hiperparametros.py             busca aleatória na janela 2001–2015
+  06_confirma_busca.py                    reavalia o topo do ranking com 7.000 registros
+  04_avalia_ajustado.py                   avaliação em 2016–2020 → Tabela 3
+  05_gera_figuras_ajustado.py             Figuras 2, 3 e 4 (importância por permutação)
+  resultados_busca.json                   ranking completo da busca
+  confirmacao_7000.json                   confirmação do topo do ranking
+  resultados_ajustados.json               métricas da Tabela 3
 pesquisa/04_analise_para/
-  01_compara_mascara_e_baseline.py        com/sem máscara vs. baseline
+  01_compara_mascara_controlada.py        com/sem máscara na amostra comum → Tabela 5, Figura 5
   02_gera_figuras.py
+  03_busca_hiperparametros.py             busca aninhada → Tabela 6
+  04_gera_fig6_aninhada.py                Figura 6
+  comparacao_controlada.json              métricas da Tabela 5
+  resultados_busca_aninhada.json          métricas da Tabela 6
+  01_compara_mascara_e_baseline_DEPRECADO.py
+                                          desenho anterior, confundido; mantido
+                                          como registro histórico (não usar)
 pesquisa/05_artigo/
   gera_figuras_artigo.py                  figuras do artigo sobre a PAM
 pesquisa/dados/
@@ -112,11 +157,33 @@ Requisitos: Python 3.10+.
 pip install pandas numpy scikit-learn xgboost matplotlib openpyxl
 ```
 
-**Estudo nacional**
+**Estudo nacional** — os números da dissertação (Tabela 3) vêm dos scripts
+`03`/`06`/`04`, nesta ordem:
 
 ```bash
 cd pesquisa/03_analise_nacional
-python 00_baixa_dados.py
+python 00_baixa_dados.py                 # baixa a base de von Bloh et al. (2023)
+python 03_busca_hiperparametros.py       # busca em 2001–2015 → resultados_busca.json
+python 06_confirma_busca.py              # confirma o topo com 7.000 registros
+python 04_avalia_ajustado.py             # avalia em 2016–2020 → Tabela 3
+python 05_gera_figuras_ajustado.py       # Figuras 2, 3 e 4
+```
+
+A busca é a etapa cara (cerca de uma hora em uma máquina comum). Os JSONs
+versionados aqui já trazem os resultados dela, então `04_avalia_ajustado.py` e
+`05_gera_figuras_ajustado.py` podem ser rodados isoladamente — as configurações
+da dissertação estão escritas no próprio `04_avalia_ajustado.py`.
+
+A busca é aleatória: reexecutá-la tende a eleger uma configuração diferente,
+sem que a Tabela 3 mude de conclusão. O que ela decide com segurança é **qual
+modelo vence**; a configuração exata, não — `06_confirma_busca.py` mostra que o
+topo do ranking é um platô de 1,4 a 17,7 kg/ha, dentro do qual a ordem troca com
+qualquer mudança de subamostra.
+
+Para reproduzir a versão **sem** ajuste de hiperparâmetros (o ponto de partida
+contra o qual o ganho é medido, não os números da Tabela 3):
+
+```bash
 python 01_treina_modelos.py "Random Forest" "XGBoost" "SVR" "MLP"
 python 02_gera_figuras.py
 ```
@@ -125,9 +192,15 @@ python 02_gera_figuras.py
 
 ```bash
 cd pesquisa/04_analise_para
-python 01_compara_mascara_e_baseline.py
+python 01_compara_mascara_controlada.py  # Tabela 5 e Figura 5
 python 02_gera_figuras.py
+python 03_busca_hiperparametros.py       # busca aninhada → Tabela 6
+python 04_gera_fig6_aninhada.py          # Figura 6
 ```
+
+`01_compara_mascara_controlada.py` aborta com mensagem explícita se os baselines
+dos dois cenários divergirem — isso indicaria que o controle da amostra falhou e
+que o resultado não deve ser publicado.
 
 **Recoleta dos dados do Pará** (opcional; exige conta no Google Earth Engine)
 

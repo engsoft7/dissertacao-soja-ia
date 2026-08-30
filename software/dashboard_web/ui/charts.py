@@ -25,7 +25,7 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True,
     fig.update_traces(
         line=dict(width=3),
         marker=dict(size=8, symbol="circle-open", line=dict(width=2)),
-        hovertemplate="<b>%{x}</b><br>Produtividade: %{y}"
+        hovertemplate="<b>%{x}</b><br>Produtividade: %{y:.1f}"
                       + (f" {unidade}" if unidade else "") + "<extra></extra>",
         selector=dict(type="scatter")
     )
@@ -103,6 +103,7 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True,
         xaxis=dict(showgrid=True, gridwidth=1, gridcolor=grid_color, tickmode="linear", dtick=2),
         yaxis=dict(showgrid=True, gridwidth=1, gridcolor=grid_color),
         hovermode="x unified",
+        separators=",.",  # decimal com vírgula, milhar com ponto
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     
@@ -124,7 +125,7 @@ def plot_area(serie_plot: pd.DataFrame, is_dark: bool = True):
     
     fig.update_traces(
         line=dict(width=2),
-        hovertemplate="<b>%{x}</b><br>Área: %{y} ha<extra></extra>"
+        hovertemplate="<b>%{x}</b><br>Área: %{y:,.0f} ha<extra></extra>"
     )
     
     fig.update_layout(
@@ -132,8 +133,10 @@ def plot_area(serie_plot: pd.DataFrame, is_dark: bool = True):
         paper_bgcolor=bg_color,
         font=dict(family="Inter, sans-serif", color=font_color),
         xaxis=dict(showgrid=False, tickmode="linear", dtick=2),
-        yaxis=dict(showgrid=True, gridwidth=1, gridcolor=grid_color),
+        yaxis=dict(showgrid=True, gridwidth=1, gridcolor=grid_color,
+                   tickformat=",.0f"),
         hovermode="x unified",
+        separators=",.",  # decimal com vírgula, milhar com ponto
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     

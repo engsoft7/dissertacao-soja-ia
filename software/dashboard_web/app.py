@@ -32,6 +32,7 @@ METRICAS_SALVAS = DADOS.parent / "metricas_validacao.json"
 MUNICIPIOS = DADOS.parent / "municipios_para.csv"
 GEO_PARA = DADOS.parent / "para_geo.json"
 RIOS_PARA = DADOS.parent / "rios_para.json"
+EVENTOS_ENSO = DADOS.parent / "eventos_enso.json"
 SACA_KG = 60  # saca de soja
 
 
@@ -62,6 +63,24 @@ def carregar_municipios():
                 "municipio",
                 "latitude",
                 "longitude"])  # type: ignore
+
+
+@st.cache_data
+def fase_enso(ano: int) -> str:
+    """Fase do ENSO para a safra, pelo Oceanic Niño Index da NOAA.
+
+    É o mesmo arquivo que pinta as faixas do gráfico histórico. Devolve
+    "El Niño", "La Niña" ou "neutra" — e "neutra" também quando o arquivo
+    não está disponível, que é a hipótese conservadora."""
+    try:
+        d = json.loads(EVENTOS_ENSO.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return "neutra"
+    if ano in d.get("el_ninos", []):
+        return "El Niño"
+    if ano in d.get("la_ninas", []):
+        return "La Niña"
+    return "neutra"
 
 
 def data_atualizacao() -> str | None:
@@ -182,71 +201,6 @@ css_mobile = """<style>
 st.markdown(css_mobile, unsafe_allow_html=True)
 
 
-# ── TEMA PREMIUM v2 ──
-CSS_TERMINAL = '''<style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap');
-
-    html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
-    .kpi-value, .eco-value, [data-testid="stMetricValue"], [data-testid="stDataFrame"], .badge, .stNumberInput input { font-family: 'Roboto Mono', monospace !important; }
-
-    [data-testid="stMetric"] { background: var(--secondary-background-color); border: 2px solid rgba(128,128,128,0.25); border-radius: 0px; padding: 12px 16px; border-left: 4px solid var(--primary-color); }
-    [data-testid="stMetricLabel"] { font-size: 0.72rem !important; text-transform: uppercase; color: var(--text-color); opacity: 0.7; letter-spacing: 0.05em; white-space: normal !important; overflow: visible !important; }
-    [data-testid="stMetricValue"] { color: var(--text-color) !important; font-size: 1.4rem !important; }
-
-    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 10px 0 20px; }
-    @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-    .kpi-card { background: var(--secondary-background-color); border: 2px solid rgba(128,128,128,0.25); border-radius: 0px; padding: 16px; text-align: left; transition: border-color 0.2s; }
-    .kpi-card:hover { border-color: var(--text-color); }
-    .kpi-card.green  { border-left: 4px solid #3fb950; }
-    .kpi-card.blue   { border-left: 4px solid #58a6ff; }
-    .kpi-card.purple { border-left: 4px solid #bc8cff; }
-    .kpi-card.orange { border-left: 4px solid #d29922; }
-    .kpi-icon { font-size: 1.2rem; margin-bottom: 8px; color: var(--text-color); opacity: 0.8; display: block; }
-    .kpi-label { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--text-color); opacity: 0.7; margin-bottom: 5px; }
-    .kpi-value { font-size: 1.4rem; font-weight: 700; color: var(--text-color); }
-
-    .eco-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 15px 0; }
-    @media (max-width: 768px) { .eco-grid { grid-template-columns: 1fr; } }
-    .eco-card { background: var(--secondary-background-color); border: 2px solid rgba(128,128,128,0.25); border-radius: 0px; padding: 18px; position: relative; }
-    .eco-card:hover { border-color: var(--text-color); }
-    .eco-card.receita { border-left: 4px solid #3fb950; border-top: 2px solid rgba(128,128,128,0.25); }
-    .eco-card.custo   { border-left: 4px solid #f85149; border-top: 2px solid rgba(128,128,128,0.25); }
-    .eco-card.margem  { border-left: 4px solid #58a6ff; border-top: 2px solid rgba(128,128,128,0.25); }
-    .eco-icon { font-size: 1.4rem; color: var(--text-color); opacity: 0.8; float: right; }
-    .eco-label { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; color: var(--text-color); opacity: 0.7; margin-bottom: 8px; clear: left; }
-    .eco-value { font-size: 1.5rem; font-weight: 700; }
-    .eco-card.receita .eco-value { color: #3fb950; }
-    .eco-card.custo .eco-value   { color: #f85149; }
-    .eco-card.margem .eco-value  { color: #58a6ff; }
-    .eco-delta { font-size: 0.75rem; margin-top: 6px; display: inline-block; font-family: 'Roboto Mono', monospace; }
-
-    .header-container { border-bottom: 2px solid rgba(128,128,128,0.25); padding-bottom: 12px; margin-bottom: 16px; }
-    .premium-title { font-family: 'Inter'; font-weight: 700; font-size: 1.4rem; color: var(--text-color); margin: 0; text-transform: uppercase; letter-spacing: 0.05em; }
-    .badge-row { display: flex; gap: 6px; margin-top: 8px; }
-    .badge { font-size: 0.7rem; border-radius: 0px; padding: 2px 6px; font-weight: 600; }
-    .badge.green  { color: #3fb950; border: 1px solid #3fb950; background: rgba(63, 185, 80, 0.1); }
-    .badge.blue   { color: #58a6ff; border: 1px solid #58a6ff; background: rgba(88, 166, 255, 0.1); }
-    .badge.purple { color: #bc8cff; border: 1px solid #bc8cff; background: rgba(188, 140, 255, 0.1); }
-    .badge.orange { color: #d29922; border: 1px solid #d29922; background: rgba(210, 153, 34, 0.1); }
-
-    .stTabs [data-baseweb="tab-list"] { background: var(--secondary-background-color); border: 2px solid rgba(128,128,128,0.25); border-radius: 0px; padding: 0; gap: 0; }
-    .stTabs [data-baseweb="tab"] { border-radius: 0; padding: 10px 20px; font-size: 0.8rem; text-transform: uppercase; color: var(--text-color); opacity: 0.7; margin:0; border-right: 2px solid rgba(128,128,128,0.25); }
-    .stTabs [aria-selected="true"] { background: var(--background-color) !important; border-bottom: none !important; color: var(--text-color) !important; opacity: 1 !important; border-top: 3px solid #58a6ff !important; box-shadow: none; }
-    .stSelectbox > div > div, .stNumberInput > div > div > input { border-radius: 0px !important; border: 2px solid rgba(128,128,128,0.25) !important; background: var(--secondary-background-color) !important; color: var(--text-color) !important; }
-    .stSelectbox > div > div:focus-within, .stNumberInput > div > div > input:focus { border-color: #58a6ff !important; box-shadow: none !important; }
-    .stRadio > div { background: var(--secondary-background-color); border: 2px solid rgba(128,128,128,0.25); border-radius: 0px; padding: 4px 8px; }
-
-    .stDownloadButton > button { background: var(--secondary-background-color) !important; border: 2px solid rgba(128,128,128,0.25) !important; border-radius: 0px !important; color: var(--text-color) !important; text-transform: uppercase; font-size: 0.75rem !important; padding: 6px 16px !important; }
-    .stDownloadButton > button:hover { border-color: var(--text-color) !important; }
-    [data-testid="stExpander"] { background: var(--secondary-background-color); border: 2px solid rgba(128,128,128,0.25); border-radius: 0px; }
-    div[data-testid="stVerticalBlockBorderWrapper"] > div:has(> [data-testid="stVerticalBlock"]) { border-radius: 0px !important; border-width: 2px !important; border-color: rgba(128,128,128,0.25) !important; background: transparent !important; }
-    iframe { border-radius: 0px !important; border: 2px solid rgba(128,128,128,0.25) !important; }
-    [data-testid="stDataFrame"] { border: 2px solid rgba(128,128,128,0.25) !important; border-radius: 0px !important; }
-    hr { background: rgba(128,128,128,0.25) !important; height: 2px !important; margin: 16px 0 !important; }
-    .stSlider [data-baseweb="slider"] [role="slider"] { background: var(--text-color) !important; border-radius: 0px; border: 2px solid var(--text-color); }
-    .stSlider [data-baseweb="slider"] [data-testid="stTickBar"] > div { background: rgba(128,128,128,0.25) !important; }
-</style>'''
-
 CSS_VARS_LIGHT = """
         --app-bg: #fafafa;
         --card-bg: #ffffff;
@@ -302,14 +256,14 @@ __VARS__
     }
     .eco-grid { 
         display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); 
         gap: 16px; 
     }
     
     /* Escalagem suave de fontes em telas menores */
     @media (max-width: 768px) {
         .kpi-label, .eco-label, [data-testid="stMetricLabel"] { font-size: 0.85rem !important; }
-        .kpi-value, .eco-value, [data-testid="stMetricValue"] { font-size: 1.5rem !important; }
+        .kpi-value, .eco-value, [data-testid="stMetricValue"] { font-size: 1.3rem !important; }
         .stApp { padding-left: 0 !important; }
     }
     
@@ -330,6 +284,8 @@ __VARS__
     .kpi-value, .eco-value, [data-testid="stMetricValue"] {
         font-family: 'Inter', sans-serif !important;
         font-weight: 600 !important;
+        font-size: 1.5rem !important;
+        line-height: 1.25 !important;
         letter-spacing: -0.03em !important;
         color: var(--text-pure);
     }
@@ -345,10 +301,34 @@ __VARS__
         text-overflow: clip !important;
     }
 
-    /* ECO DELTA INDICATOR MINIMALISM */
+    /* ACENTOS SEMÂNTICOS
+       O markup pede .green/.blue/.purple/.orange nos cartões de métrica e
+       .receita/.custo/.vtn/.margem nos financeiros. Sem estas regras os oito
+       ficavam cinza idênticos e a leitura dependia só de ler o rótulo. */
+    .kpi-card { border-left: 3px solid var(--card-border); }
+    .kpi-card.green  { border-left-color: var(--accent-green); }
+    .kpi-card.blue   { border-left-color: var(--accent-blue); }
+    .kpi-card.purple { border-left-color: var(--accent-purple); }
+    .kpi-card.orange { border-left-color: var(--accent-orange); }
+
+    .eco-card { border-top: 3px solid var(--card-border); }
+    .eco-card.receita { border-top-color: var(--accent-green); }
+    .eco-card.custo   { border-top-color: var(--accent-orange); }
+    .eco-card.vtn     { border-top-color: var(--accent-purple); }
+    .eco-card.margem  { border-top-color: var(--accent-blue); }
+
+    /* O emoji é decoração: fica no canto, fora do caminho da leitura. */
+    .kpi-icon, .eco-icon {
+        position: absolute; top: 18px; right: 20px;
+        font-size: 1.1rem; opacity: 0.55; line-height: 1;
+    }
+    .kpi-label, .eco-label { padding-right: 28px; }
+    .kpi-value, .eco-value { display: block; margin-top: 6px; }
+
     .eco-card.receita .eco-delta { color: var(--accent-green); }
     .eco-card.custo .eco-delta   { color: var(--accent-orange); }
     .eco-card.margem .eco-delta  { color: var(--accent-blue); }
+    .eco-delta { font-size: 0.75rem; font-weight: 500; margin-top: 8px; display: block; }
 
     /* COMPONENT POLISH (TABS, BUTTONS, INPUTS) */
     .stTabs [data-baseweb="tab-list"] { 
@@ -395,60 +375,6 @@ __VARS__
     ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 </style>'''
 
-
-CSS_ORIGINAL = """<style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-    html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
-
-    /* Base Metric */
-    [data-testid="stMetric"] { background-color: var(--secondary-background-color); border: 1px solid rgba(128,128,128,0.15); border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s, box-shadow 0.2s; }
-    [data-testid="stMetric"]:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.08); border-color: var(--primary-color); }
-    [data-testid="stMetricLabel"] { font-size: 0.75rem !important; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600 !important; }
-    [data-testid="stMetricValue"] { font-weight: 700 !important; font-size: 1.7rem !important; }
-
-    /* KPI Grids */
-    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 16px 0; }
-    @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-    .kpi-card { background: var(--secondary-background-color); border: 1px solid rgba(128,128,128,0.15); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.25s; }
-    .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.08); border-color: var(--primary-color); }
-    .kpi-icon { font-size: 1.5rem; margin-bottom: 10px; display: block; opacity: 0.9; }
-    .kpi-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; opacity: 0.6; letter-spacing: 0.05em; }
-    .kpi-value { font-size: 1.5rem; font-weight: 700; }
-
-    /* Eco Grids */
-    .eco-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 16px 0; }
-    @media (max-width: 768px) { .eco-grid { grid-template-columns: repeat(2, 1fr); } }
-    .eco-card { background: var(--secondary-background-color); border: 1px solid rgba(128,128,128,0.15); border-radius: 12px; padding: 22px; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.25s; }
-    .eco-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.08); }
-    .eco-icon { font-size: 1.8rem; float: right; opacity: 0.85; }
-    .eco-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; opacity: 0.6; letter-spacing: 0.05em; clear: left; }
-    .eco-value { font-size: 1.7rem; font-weight: 800; }
-    .eco-delta { font-size: 0.75rem; margin-top: 10px; display: inline-block; font-weight: 600; opacity: 0.9; }
-
-    /* Semantic Colors for Elegant Theme */
-    .eco-card.receita { border-top: 3px solid #10B981; }
-    .eco-card.custo { border-top: 3px solid #EF4444; }
-    .eco-card.margem { border-top: 3px solid #3B82F6; }
-    .eco-card.receita .eco-value { color: #10B981; }
-    .eco-card.custo .eco-value { color: #EF4444; }
-    .eco-card.margem .eco-value { color: #3B82F6; }
-
-    .header-container { padding-bottom: 16px; margin-bottom: 24px; border-bottom: 1px solid rgba(128,128,128,0.15); }
-    .premium-title { font-weight: 700; font-size: 1.6rem; margin: 0; letter-spacing: -0.01em; }
-    .badge-row { display: flex; gap: 8px; margin-top: 12px; }
-    .badge { font-size: 0.65rem; border-radius: 6px; padding: 4px 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(128,128,128,0.25); background: rgba(128,128,128,0.08); opacity: 0.85; }
-
-    .footer-container { margin-top: 40px; padding: 20px 0; border-top: 1px solid rgba(128,128,128,0.15); text-align: center; opacity: 0.8; }
-    .footer-brand { font-size: 0.9rem; font-weight: 700; margin-bottom: 6px; }
-    .footer-text { font-size: 0.75rem; opacity: 0.7; }
-
-    /* Clean layout elements */
-    [data-testid="stExpander"] { border: 1px solid rgba(128,128,128,0.15); border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
-    [data-testid="stDataFrame"] { border: 1px solid rgba(128,128,128,0.15) !important; border-radius: 12px !important; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
-    iframe { border-radius: 12px !important; border: 1px solid rgba(128,128,128,0.15) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; }
-    hr { background: rgba(128,128,128,0.15) !important; height: 1px !important; margin: 24px 0 !important; }
-</style>"""
 
 # ── TEMA E ESTILIZAÇÃO (ÚNICA E ROBUSTA) ──
 CSS_ATUAL = CSS_GLASS.replace('__VARS__', CSS_VARS_DARK if is_dark else CSS_VARS_LIGHT)
@@ -730,12 +656,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-unidade = st.radio(
-    "Unidade de medida preferida", [
-        "sc/ha", "kg/ha"], horizontal=True)
-fator = 1 if unidade == "kg/ha" else 1 / SACA_KG
-
-
 def qtd(v: float, sinal: str = "") -> str:
     if unidade == "kg/ha":
         return f"{v * fator:{sinal},.0f}".replace(",", ".")
@@ -752,15 +672,16 @@ def dec(v: float, casas: int = 1) -> str:
 
 
 def brl(v: float, dec: int = 0) -> str:
-    s = f"{v:,.{dec}f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    return "R$ " + s
+    """Sinal antes do símbolo, como se escreve em português, e sem
+    produzir "-R$ 0" para um valor que arredonda a zero."""
+    s = f"{abs(v):,.{dec}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    negativo = v < 0 and float(f"{abs(v):.{dec}f}") > 0
+    return f"{'-' if negativo else ''}R$ {s}"
 
 
 PRECO_SACA_ONLINE = buscar_preco_soja_online()
 
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
-
-st.divider()
 
 municipios = sorted(df.municipio.unique())
 
@@ -789,9 +710,9 @@ def on_dropdown_change():
 # Abas focadas em inteligência comercial e gestão de risco
 st.sidebar.markdown("### Navegação Principal")
 tela_atual = st.sidebar.radio(
-    "",
-    ["📍 Inteligência Territorial", "📈 Análise Histórica", "💰 Viabilidade Financeira"]
-)
+    "Tela",
+    ["📍 Inteligência Territorial", "📈 Análise Histórica", "💰 Viabilidade Financeira"],
+    label_visibility="collapsed")
 st.sidebar.divider()
 
 
@@ -817,6 +738,13 @@ ano_alvo = st.sidebar.number_input(
     min_value=int(df.ano.max()) + 1,
     max_value=int(df.ano.max()) + 3,
     value=int(df.ano.max()) + 1)
+
+unidade = st.sidebar.radio(
+    "Unidade de medida",
+    ["sc/ha", "kg/ha"],
+    horizontal=True,
+    help="Vale para todos os números do painel: cartões, gráficos e tabelas.")
+fator = 1 if unidade == "kg/ha" else 1 / SACA_KG
 
 preco = PRECO_SACA_ONLINE
 
@@ -845,35 +773,53 @@ st.sidebar.divider()
 
 # ==============================================================================
 if tela_atual == "📍 Inteligência Territorial":
-    # ── INSERE RESUMO E ALERTAS CLIMÁTICOS DO POLO ──
-    has_severe = False
-    cor_bg_alerta = "rgba(220,38,38,0.15)" if has_severe else "rgba(128,128,128,0.05)"
-    cor_borda = "rgba(220,38,38,0.3)" if has_severe else "rgba(128,128,128,0.15)"
-    cor_texto = "#ff6b6b" if (has_severe and is_dark) else "#dc2626" if has_severe else "var(--text-color)"
+    # ── FASE CLIMÁTICA DA SAFRA ALVO ──
+    # Antes este bloco tinha has_severe fixo em False e anunciava "fase neutra"
+    # em qualquer safra. Agora consulta o mesmo índice da NOAA que pinta as
+    # faixas do gráfico histórico.
+    fase = fase_enso(int(ano_alvo))
+    if fase == "El Niño":
+        cor_faixa, texto_fase = "#d97706", (
+            "safra classificada como <b>El Niño</b> pelo Oceanic Niño Index (NOAA). "
+            "No histórico do Pará, anos de El Niño concentram as maiores quebras.")
+    elif fase == "La Niña":
+        cor_faixa, texto_fase = "#2563eb", (
+            "safra classificada como <b>La Niña</b> pelo Oceanic Niño Index (NOAA). "
+            "A projeção abaixo já considera o clima observado, não a fase em si.")
+    else:
+        cor_faixa, texto_fase = "#737373", (
+            "safra sem El Niño ou La Niña registrado pelo Oceanic Niño Index (NOAA). "
+            "A projeção assume condições próximas das médias da última década.")
     st.markdown(f"""
-    <div style="padding:16px 20px; background:{cor_bg_alerta}; 
-                border:1px solid {cor_borda}; border-radius:8px; margin-bottom:24px;
-                color:{cor_texto}; font-size:0.9rem;">
-        <span style="font-weight:700;">{disp(municipio)}</span> — Fase neutra identificada. As projeções assumem condições meteorológicas em conformidade com as médias da última década e inflação controlada.
+    <div style="padding:14px 18px; background:var(--card-bg);
+                border:1px solid var(--card-border); border-left:3px solid {cor_faixa};
+                border-radius:6px; margin-bottom:24px; font-size:0.9rem;
+                color:var(--text-pure);">
+        <b>{disp(municipio)}</b>, {ano_alvo} — {texto_fase}
     </div>
     """, unsafe_allow_html=True)
-    st.markdown("### Resumo das Safras no Polo")
+
+    st.markdown("### Qualidade do modelo de previsão")
+    st.caption(
+        f"Validação temporal deixando um ano de fora por vez, sobre "
+        f"{metricas['n']} safras de {df.municipio.nunique()} municípios. "
+        f"Passe o mouse sobre cada cartão para ver o que ele mede.")
     st.markdown(f"""
     <div class="kpi-grid">
-        <div class="kpi-card green">
-            <div class="kpi-label">Margem de Precisão (RMSE)</div>
+        <div class="kpi-card green" title="Erro típico da previsão, na mesma unidade da produtividade. Quanto menor, melhor.">
+            <div class="kpi-label">Erro típico (RMSE)</div>
             <div class="kpi-value">± {qtd(metricas['rmse'])} {unidade}</div>
         </div>
-        <div class="kpi-card blue">
-            <div class="kpi-label">Variação Relativa</div>
+        <div class="kpi-card blue" title="O mesmo erro expresso como porcentagem da produtividade média (rRMSE).">
+            <div class="kpi-label">Erro relativo (rRMSE)</div>
             <div class="kpi-value">{dec(metricas['rrmse'])}%</div>
         </div>
-        <div class="kpi-card purple">
-            <div class="kpi-label">Aderência Preditiva (R²)</div>
+        <div class="kpi-card purple" title="Quanto da variação entre safras o modelo consegue explicar. 1,000 seria uma previsão perfeita.">
+            <div class="kpi-label">R² do modelo</div>
             <div class="kpi-value">{dec(metricas['r2'], 3)}</div>
         </div>
-        <div class="kpi-card orange">
-            <div class="kpi-label">Benchmark de Tendência (R² do baseline)</div>
+        <div class="kpi-card orange" title="O mesmo cálculo para a tendência histórica sozinha, sem satélite nem clima. Se os dois R² empatam, o modelo não superou a tendência.">
+            <div class="kpi-label">R² da tendência (referência)</div>
             <div class="kpi-value">{dec(metricas['r2_baseline'], 3)}</div>
         </div>
     </div>
@@ -988,18 +934,12 @@ if tela_atual == "📈 Análise Histórica":
 # ABA 3: ANÁLISE ECONÔMICA & MERCADO
 # ==============================================================================
 if tela_atual == "💰 Viabilidade Financeira":
-    st.markdown("""
-    <div style="margin-bottom:4px">
-        <span style="font-size:1.2rem; font-weight:700;">Visão Executiva & Simulador Estratégico (AgTech SaaS)</span>
-    </div>
-    <p style="font-size:0.85rem; color:var(--text-color); opacity:0.6; margin-top:0;">
-        Simule cenários financeiros corporativos baseados na volatilidade de preços e variações climáticas.
-        <br><br>
-        <span style="color:var(--accent-orange); font-weight: 500;">
-            💡 Dica de Negócio: Os lucros abaixo foram inicializados pela média regional atrasada do IBGE. Para obter uma simulação de risco realista, <u>ajuste obrigatoriamente a "Expectativa Produtiva da Fazenda" na barra lateral esquerda</u> com os verdadeiros dados agronômicos da sua propriedade.
-        </span>
-    </p>
-    """, unsafe_allow_html=True)
+    st.markdown("### Simulador de viabilidade financeira")
+    st.caption(
+        "Os três campos abaixo partem de referências regionais e podem ser "
+        "editados. Para um cenário realista, ajuste também a "
+        "**Expectativa Produtiva da Fazenda**, na barra lateral, com a "
+        "produtividade que a sua propriedade colhe em um ano normal.")
 
     with st.spinner("Processando margem de lucro com IA Georreferenciada..."):
         r_eco = ajustar_r(estimador.estimar(municipio, int(df.ano.max()) + 1))
@@ -1013,8 +953,10 @@ if tela_atual == "💰 Viabilidade Financeira":
         r = get_financas(municipio)
         custos_locais = {'custo_ha': r.get('custo_ha', 4800.0), 'vtn_ha': r.get('vtn_ha', 12000.0)}
         default_preco = r.get('soja_preco_saca', 120.0)
-    except Exception as e:
-        st.error(f"DEBUG ERRO FINANÇAS: {e}")
+    except Exception:
+        st.caption(
+            "Base de custos indisponível no momento: os campos abaixo vêm de "
+            "referências regionais e podem ser editados.")
         custos_locais = {'custo_ha': 4800.0, 'vtn_ha': 12000.0}
         default_preco = 120.0
 
@@ -1064,36 +1006,33 @@ if tela_atual == "💰 Viabilidade Financeira":
 
     st.markdown(f"""
     <div class="eco-grid">
-        <div class="eco-card receita">
+        <div class="eco-card receita" title="Produtividade projetada multiplicada pelo preço da saca.">
             <div class="eco-icon">💵</div>
-            <div class="eco-label">Receita Bruta Projetada (Revenue / ha)</div>
+            <div class="eco-label">Receita bruta projetada (R$/ha)</div>
             <div class="eco-value">{brl(receita_ha)}</div>
         </div>
-        <div class="eco-card custo">
+        <div class="eco-card custo" title="Custo de custeio da lavoura por hectare, editável acima.">
             <div class="eco-icon">📋</div>
-            <div class="eco-label">Despesa Operacional Total (OPEX / ha)</div>
+            <div class="eco-label">Custo operacional (R$/ha)</div>
             <div class="eco-value">{brl(custo_ha)}</div>
         </div>
-        <div class="eco-card vtn">
+        <div class="eco-card vtn" title="Valor da Terra Nua de referência da Receita Federal. É patrimônio, não entra na margem.">
             <div class="eco-icon">🗺️</div>
-            <div class="eco-label">Capital Imobilizado (CAPEX Land / ha)</div>
+            <div class="eco-label">Valor da terra nua (R$/ha)</div>
             <div class="eco-value">{brl(vtn_ha)}</div>
         </div>
-        <div class="eco-card margem">
+        <div class="eco-card margem" title="Receita bruta menos custo operacional. Não desconta terra, impostos nem financiamento.">
             <div class="eco-icon">📈</div>
-            <div class="eco-label">Margem Operacional (EBITDA / ha)</div>
-            <div class="eco-value">{brl(margem_ha)}</div>
+            <div class="eco-label">Margem operacional (R$/ha)</div>
+            <div class="eco-value" style="color:{cor_delta}">{brl(margem_ha)}</div>
             <div class="eco-delta" style="color:{cor_delta}">{pct_margem} sobre o custo</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.success(
-        f"**Avaliação de Risco:** Com a produtividade esperada de **{qtd(r_eco['estimativa_kg_ha'])} {unidade}** para **{disp(municipio)}**, o faturamento bruto atinge **{brl(receita_ha)}/ha**, garantindo margem operacional positiva nas condições atuais de mercado.")
-
     st.divider()
 
-    st.subheader("⚠️ Confiabilidade e Qualidade dos Registros Oficiais")
+    st.subheader("Confiabilidade dos registros oficiais")
     diag = M.diagnostico_pam(df, municipio)
     taxa_estado = M.taxa_repeticao_estadual(df)
 
@@ -1114,7 +1053,7 @@ if tela_atual == "💰 Viabilidade Financeira":
     st.divider()
 
     # ------------------------------------------------------ PANORAMA GERAL DO ESTADO
-    st.subheader("📋 Ranking e Panorama Comercial dos Polos Produtivos")
+    st.subheader("Ranking dos polos produtivos")
     st.caption(
         f"Calculado com base na produtividade média recente e na cotação de mercado de **{brl(preco)} por saca**.")
 

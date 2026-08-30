@@ -974,10 +974,7 @@ if tela_atual == "📈 Análise Histórica":
         "Exportar histórico do município (CSV)",
         serie.to_csv(
             index=False).encode("utf-8"),
-        file_name=f"soja_{
-            municipio.lower().replace(
-                ' ',
-                '_')}.csv",
+        file_name=f"soja_{municipio.lower().replace(' ', '_')}.csv",
         mime="text/csv")
     b2.download_button(
         "Exportar base completa (CSV)",
@@ -1090,11 +1087,7 @@ if tela_atual == "💰 Viabilidade Financeira":
     """, unsafe_allow_html=True)
 
     st.success(
-        f"**Avaliação de Risco:** Com a produtividade esperada de **{
-            qtd(
-                r_eco['estimativa_kg_ha'])} {unidade}** para **{
-            disp(municipio)}**, o faturamento bruto atinge **{
-                    brl(receita_ha)}/ha**, garantindo margem operacional positiva nas condições atuais de mercado.")
+        f"**Avaliação de Risco:** Com a produtividade esperada de **{qtd(r_eco['estimativa_kg_ha'])} {unidade}** para **{disp(municipio)}**, o faturamento bruto atinge **{brl(receita_ha)}/ha**, garantindo margem operacional positiva nas condições atuais de mercado.")
 
     st.divider()
 
@@ -1111,20 +1104,17 @@ if tela_atual == "💰 Viabilidade Financeira":
 
     if diag["taxa"] >= taxa_estado:
         st.warning(
-            f"**Nota de Inteligência:** O histórico oficial de **{
-                disp(municipio)}** apresenta alta taxa de repetição estatística interanual, validando o uso de machine learning e dados de satélite para correções de viés e maior precisão comercial.")
+            f"**Nota de Inteligência:** O histórico oficial de **{disp(municipio)}** apresenta alta taxa de repetição estatística interanual, validando o uso de machine learning e dados de satélite para correções de viés e maior precisão comercial.")
     else:
         st.success(
-            f"**Qualidade de Dados:** O município de **{
-                disp(municipio)}** apresenta excelente variabilidade histórica nos registros oficiais.")
+            f"**Qualidade de Dados:** O município de **{disp(municipio)}** apresenta excelente variabilidade histórica nos registros oficiais.")
 
     st.divider()
 
     # ------------------------------------------------------ PANORAMA GERAL DO ESTADO
     st.subheader("📋 Ranking e Panorama Comercial dos Polos Produtivos")
     st.caption(
-        f"Calculado com base na produtividade média recente e na cotação de mercado de **{
-            brl(preco)} por saca**.")
+        f"Calculado com base na produtividade média recente e na cotação de mercado de **{brl(preco)} por saca**.")
 
     ult_ano = int(df.ano.max())
     linhas_pan = []
@@ -1153,8 +1143,7 @@ if tela_atual == "💰 Viabilidade Financeira":
         width='stretch',
         column_config={
             "prod_media": st.column_config.NumberColumn(
-                f"Média Recente ({
-                    ult_ano - 4}–{ult_ano}) [{unidade}]",
+                f"Média Recente ({ult_ano - 4}–{ult_ano}) [{unidade}]",
                 format=casas_pan),
             "faturamento": st.column_config.NumberColumn(
                 "Faturamento Bruto Est. (R$/ha)",

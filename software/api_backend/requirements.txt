@@ -1,6 +1,8 @@
 fastapi>=0.100.0
 uvicorn>=0.23.0
 pandas
-scikit-learn
+# Mesmo limite dos demais requirements: a partir da 1.9 o Random Forest muda
+# de resultado com a mesma semente, e o modelo servido pela API é Random Forest.
+scikit-learn>=1.3,<1.9
 pydantic
 requests

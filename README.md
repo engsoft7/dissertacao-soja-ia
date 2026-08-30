@@ -294,9 +294,12 @@ O serviço instala o `requirements.txt` da raiz e gera o link público.
 
 ```bash
 cd pesquisa/02_revisao_sistematica
-python 01_busca_bases_abertas.py        # regenera os números do PRISMA
 python 02_recupera_autoria_crossref.py  # autoria via DOI
 ```
+
+`01_busca_bases_abertas.py`, que regenera os números do PRISMA, foi escrito para
+o **Google Colab** e começa com `!pip install` — não roda com `python` direto.
+Cole-o em uma célula do Colab, como os scripts de `pesquisa/01_coleta_dados/`.
 
 Os resultados variam conforme a data da busca, pois as bases são atualizadas
 continuamente. A busca reportada na dissertação foi executada em 9 de julho de 2026.

@@ -1,89 +1,47 @@
 # -*- coding: utf-8 -*-
-"""Figura 6 - resultado da busca aninhada de hiperparametros no Para.
-
-Painel (a): RMSE de cada modelo ajustado dobra a dobra, contra o baseline.
-            Barras acima da linha vermelha erram MAIS que a media historica do
-            municipio somada a tendencia tecnologica.
-Painel (b): estabilidade da escolha. Para cada modelo, a fracao das dobras
-            externas em que a configuracao mais escolhida foi selecionada.
-            Escolha instavel de dobra para dobra indica que a validacao interna
-            nao encontra um otimo consistente -- o que se espera quando as
-            variaveis ambientais nao carregam sinal sobre o alvo.
-
-Entrada: resultados_busca_aninhada.json (de 03_busca_hiperparametros.py)
-Saida:   results/fig6_busca_aninhada.png
-Uso:     python 04_gera_fig6_aninhada.py
-"""
-import json, os
-from collections import Counter
-import numpy as np
+"""Regera a Figura 6 a partir das previsões do MLP com busca aninhada (Tabela 6)."""
+import warnings, numpy as np, pandas as pd
+warnings.filterwarnings('ignore')
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from sklearn.metrics import mean_squared_error, r2_score
+import importlib.util
+spec=importlib.util.spec_from_file_location('busca','03_busca_hiperparametros.py')
+b=importlib.util.module_from_spec(spec)
+import sys; sys.argv=['x','baseline']; spec.loader.exec_module.__self__ if False else None
+# reexecuta a lógica sem chamar main()
+src=open('03_busca_hiperparametros.py',encoding='utf-8').read().split("def main()")[0]
+ns={}; exec(src, ns)
 
-plt.rcParams.update({'font.family': 'DejaVu Serif', 'font.size': 10,
-                     'axes.grid': True, 'grid.alpha': 0.3})
-os.makedirs('results', exist_ok=True)
-B1 = '#1F4E79'; B2 = '#2E75B6'; RED = '#B00020'
+df=ns['carrega']()
+y=df.rendimento_kg_ha.values.astype(float)
+anos, mun, X = df.ano.values, df.municipio.values, df[ns['FEATURES']].values
+safras=[a for a in sorted(set(anos)) if (anos==a).sum()>=ns['MIN_MUN']]
+cands=[ns['ATUAL']['MLP']]+ns['amostra']('MLP',15,np.random.default_rng(ns['SEED']))
+obs, prev = [], []
+for ty in safras:
+    tr=anos!=ty
+    internas=[a for a in safras if a!=ty][-ns['N_INTERNAS']:]
+    melhor, mr = None, np.inf
+    for cfg in cands:
+        e=[np.sqrt(mean_squared_error(y[anos==vi], ns['preve']('MLP',cfg,X,y,anos,mun,tr&(anos!=vi),anos==vi)))
+           for vi in internas if (anos==vi).sum()>=ns['MIN_MUN']]
+        r=float(np.mean(e)) if e else np.inf
+        if r<mr: melhor, mr = cfg, r
+    obs+=list(y[anos==ty]); prev+=list(ns['preve']('MLP',melhor,X,y,anos,mun,tr,anos==ty))
+yt, yp = np.array(obs), np.array(prev)
+rmse=np.sqrt(mean_squared_error(yt,yp)); rr=rmse/y.mean()*100
+print(f'MLP aninhado: RMSE={rmse:.1f} R2={r2_score(yt,yp):.3f} rRMSE={rr:.1f}%  (n={len(yt)})')
 
-r = json.load(open('resultados_busca_aninhada.json'))
-base = r['baseline']['RMSE']
-MODELS = list(r['modelos'].keys())
-rmse = [r['modelos'][m]['RMSE'] for m in MODELS]
-
-fig, ax = plt.subplots(1, 2, figsize=(9.8, 3.9))
-x = np.arange(len(MODELS))
-
-# (a) RMSE contra o baseline. Dentro da tolerancia de empate o modelo nao
-# "vence" nem "perde" do baseline: empata, e a cor precisa dizer isso.
-TOL = r.get('tolerancia_empate_kg_ha', 2.0)
-CINZA = '#8C8C8C'
-def cor_de(v):
-    if abs(base - v) <= TOL: return CINZA      # empate tecnico
-    return B1 if v < base else B2
-cor = [cor_de(v) for v in rmse]
-ax[0].bar(x, rmse, color=cor, width=0.6)
-ax[0].axhline(base, ls='--', color=RED, lw=1.4,
-              label=f'Baseline ({base:.0f} kg/ha)')
-ax[0].axhspan(base - TOL, base + TOL, color=CINZA, alpha=0.25, lw=0,
-              label=f'Empate técnico (±{TOL:.0f} kg/ha)')
-ax[0].set_xticks(x); ax[0].set_xticklabels(MODELS, rotation=15, fontsize=8.5)
-ax[0].set_ylabel('RMSE (kg/ha)')
-ax[0].set_title(f'(a) Busca aninhada — {r["protocolo"]["dobras_externas"]} dobras\n'
-                f'({r["protocolo"]["n"]} registros, '
-                f'{r["protocolo"]["configuracoes_por_modelo_por_dobra"]} '
-                f'configurações por dobra)', fontsize=9.5)
-ax[0].legend(fontsize=7.5)
-lo, hi = min(rmse + [base]), max(rmse + [base])
-ax[0].set_ylim(lo - (hi - lo) * 0.5, hi + (hi - lo) * 0.28)
-for i, v in enumerate(rmse):
-    ax[0].text(i, v + (hi - lo) * 0.04, f'{v:.0f}', ha='center', fontsize=8.5)
-
-# (b) estabilidade da configuracao escolhida
-frac = []
-for m in MODELS:
-    esc = [json.dumps(e['params'], sort_keys=True, default=str)
-           for e in r['modelos'][m]['escolhas_por_dobra']]
-    frac.append(Counter(esc).most_common(1)[0][1] / len(esc) * 100 if esc else 0)
-ax[1].bar(x, frac, color=B2, width=0.6)
-ax[1].set_xticks(x); ax[1].set_xticklabels(MODELS, rotation=15, fontsize=8.5)
-ax[1].set_ylabel('% das dobras com a mesma configuração')
-ax[1].set_title('(b) Estabilidade da configuração escolhida\n'
-                '(baixo = a validação interna não converge)', fontsize=9.5)
-ax[1].set_ylim(0, 100)
-for i, v in enumerate(frac):
-    ax[1].text(i, v + 2, f'{v:.0f}%', ha='center', fontsize=8.5)
-
-plt.tight_layout()
-plt.savefig('results/fig6_busca_aninhada.png', dpi=200,
-            bbox_inches='tight', facecolor='white')
-plt.close()
-
-print('OK: results/fig6_busca_aninhada.png')
-print(f'  baseline: {base:.1f} kg/ha')
-for m, v, f in zip(MODELS, rmse, frac):
-    situacao = ('empata' if abs(base - v) <= TOL
-                else 'supera' if v < base else 'perde para')
-    print(f'  {m:14s} RMSE={v:6.1f}  ({v-base:+.1f}: {situacao} o baseline)  '
-          f'config mais escolhida em {f:.0f}% das dobras')
-print('  algum supera o baseline:',
-      'SIM' if r['algum_supera_baseline'] else 'NAO')
+plt.rcParams.update({'font.family':'DejaVu Serif','font.size':11,'axes.grid':True,'grid.alpha':0.3})
+B2, RED = '#2E75B6', '#B00020'
+fig, ax = plt.subplots(figsize=(5.4,5.2))
+ax.scatter(yt,yp,s=16,alpha=0.45,color=B2,edgecolors='none')
+lim=[min(yt.min(),yp.min())*0.97, max(yt.max(),yp.max())*1.03]
+ax.plot(lim,lim,'--',color=RED,lw=1.4,label='Linha 1:1')
+ax.set_xlim(lim); ax.set_ylim(lim)
+ax.set_xlabel('Produtividade observada (kg/ha)'); ax.set_ylabel('Produtividade prevista (kg/ha)')
+ax.set_title(f'Previsto vs. observado — Pará (MLP)\n(RMSE={rmse:.0f} kg/ha; rRMSE={rr:.1f}%)',fontsize=10)
+ax.legend(fontsize=8.5)
+plt.tight_layout(); plt.savefig('results/fig_pa_scatter_aninhada.png',dpi=200,bbox_inches='tight',facecolor='white')
+print('figura gravada')

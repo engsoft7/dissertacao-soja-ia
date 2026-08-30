@@ -60,21 +60,22 @@ Esse resultado se sustenta sob dois controles adicionais:
   registros comuns** às duas bases e traz uma verificação embutida: como o
   baseline não usa variável ambiental alguma, ele tem de dar exatamente o mesmo
   resultado nos dois cenários, e o script aborta se não der. Sob esse controle os
-  baselines coincidem (405,8 kg/ha nos dois) e o efeito real da máscara aparece:
-  −3,7 kg/ha no Random Forest, −7,4 no XGBoost, +0,7 no SVR e +0,1 no MLP. O
-  desenho anterior, que comparava as duas bases inteiras, sugeria uma diferença
-  bem maior — mas ela vinha da amostra, não da máscara.
+  baselines coincidem (406 kg/ha nos dois) e o efeito real da máscara aparece,
+  concentrado nos métodos de árvore: o XGBoost sobe de R² 0,102 para 0,162 e o
+  Random Forest, de 0,165 para 0,179, enquanto SVR e MLP ficam estáveis. É
+  agronomicamente coerente: a máscara restringe o sinal espectral à lavoura
+  efetiva, e os modelos de árvore são os que mais se beneficiam de preditores
+  menos ruidosos.
 - **Nenhum modelo supera o baseline mesmo após busca aninhada.** Uma objeção
   natural é que os modelos poderiam vencer se fossem melhor ajustados.
   `03_busca_hiperparametros.py` responde com validação cruzada aninhada: os
   hiperparâmetros são escolhidos dentro de cada dobra, sem jamais ver a safra
-  avaliada. Nenhum modelo supera o baseline (415,6 kg/ha): o MLP e o SVR **empatam**
-  com ele (415,4 e 416,0 kg/ha — diferenças dentro do ruído), e os métodos de
-  árvore ficam atrás (Random Forest 425,4 e XGBoost 428,6). Um modelo que empata
-  com o baseline aprendeu a prever resíduo aproximadamente nulo: as variáveis
-  ambientais não o moveram. A configuração vencedora só se repete em 8% a 25% das
-  dobras — a validação interna não encontra um ótimo consistente, o que se espera
-  quando não há sinal a encontrar.
+  avaliada. Nenhum modelo supera o baseline (416 kg/ha, R² 0,216): o MLP **iguala**
+  o baseline (416 kg/ha, R² 0,216 — aprende a prever resíduo aproximadamente
+  nulo), o SVR fica logo atrás (418, R² 0,208) e os métodos de árvore degradam o
+  desempenho (Random Forest 432, XGBoost 440). As variáveis ambientais não
+  acrescentam capacidade preditiva à informação já contida no histórico do
+  município somado à tendência.
 
 A investigação da variável-alvo revelou que **40,1% dos pares de safras
 consecutivas da PAM/IBGE nos municípios paraenses apresentam produtividade
@@ -164,42 +165,55 @@ pip install pandas numpy scikit-learn xgboost matplotlib openpyxl
 
 ```bash
 cd pesquisa/03_analise_nacional
-python 00_baixa_dados.py                 # baixa a base de von Bloh et al. (2023)
-python 03_busca_hiperparametros.py       # busca em 2001–2015 → resultados_busca.json
-python 06_confirma_busca.py              # confirma o topo com 7.000 registros
+python 00_baixa_dados.py                            # base de von Bloh et al. (2023)
+python 01_treina_modelos.py "Random Forest" "XGBoost" "SVR" "MLP"   # versão sem ajuste
+
+# a busca recebe um modelo por vez (o 2º argumento é o nº de configurações, padrão 15)
+python 03_busca_hiperparametros.py "Random Forest"
+python 03_busca_hiperparametros.py "XGBoost"
+python 03_busca_hiperparametros.py "SVR"
+python 03_busca_hiperparametros.py "MLP"
+
+python 06_confirma_busca.py              # reavalia o topo com 7.000 registros
 python 04_avalia_ajustado.py             # avalia em 2016–2020 → Tabela 3
 python 05_gera_figuras_ajustado.py       # Figuras 2, 3 e 4
 ```
+
+`04_avalia_ajustado.py` fecha com um comparativo entre a versão sem ajuste e a
+ajustada, que depende de `01_treina_modelos.py` ter rodado antes — é ele quem
+gera `results/all_results.json`. Sem esse arquivo o comparativo é omitido, e os
+resultados ajustados são gravados do mesmo jeito.
 
 A busca é a etapa cara (cerca de uma hora em uma máquina comum). Os JSONs
 versionados aqui já trazem os resultados dela, então `04_avalia_ajustado.py` e
 `05_gera_figuras_ajustado.py` podem ser rodados isoladamente — as configurações
 da dissertação estão escritas no próprio `04_avalia_ajustado.py`.
 
-**Sobre reproduzir os números exatos da Tabela 3.** O SVR e o MLP reproduzem os
-valores da dissertação dígito a dígito, safra a safra. O Random Forest e o
-XGBoost saem 2 a 3 kg/ha melhores (474 e 479, contra 476 e 481 no texto), com os
-mesmos hiperparâmetros do Quadro 6 e o mesmo protocolo. A diferença é de versão
-de biblioteca: esses dois modelos não são estáveis entre versões do
-scikit-learn e do XGBoost mesmo com semente fixa — o sorteio interno do
-*bootstrap* e a discretização do histograma mudam —, ao passo que o SVR
-(libsvm) e o MLP são. Os JSONs versionados registram as versões com que foram
-gerados, no campo `ambiente`. Como o `requirements.txt` usa faixas abertas, quem
-reproduzir hoje deve esperar essa margem nas duas linhas de árvore.
+Os JSONs versionados ao lado dos scripts (`resultados_busca.json`,
+`confirmacao_7000.json`, `resultados_ajustados.json`) são o **registro** dos
+resultados que a dissertação reporta. Os scripts escrevem a saída de uma nova
+execução em `results/`, que não é versionado — assim dá para comparar o que a
+sua máquina produz com o que está no texto, sem sobrescrever o registro.
 
-A busca é aleatória: reexecutá-la tende a eleger uma configuração diferente,
-sem que a Tabela 3 mude de conclusão. O que ela decide com segurança é **qual
-modelo vence**; a configuração exata, não — `06_confirma_busca.py` mostra que o
-topo do ranking é um platô de 1,4 a 17,7 kg/ha, dentro do qual a ordem troca com
-qualquer mudança de subamostra.
+**Sobre reproduzir os números exatos.** O SVR e o MLP reproduzem os valores da
+dissertação dígito a dígito, safra a safra, e a importância por permutação da
+Figura 4 sai idêntica até a casa decimal. Já o Random Forest e o XGBoost saem
+2 a 3 kg/ha melhores (473,7 e 479,3, contra 476,0 e 480,6 registrados): na
+Tabela 3, na Tabela 5 e na Tabela 6.
 
-Para reproduzir a versão **sem** ajuste de hiperparâmetros (o ponto de partida
-contra o qual o ganho é medido, não os números da Tabela 3):
+A diferença **não é do código**. Rodando o próprio `04_avalia_ajustado.py` deste
+repositório com scikit-learn 1.9.0 e XGBoost 3.2.0, obtém-se 473,7 e 479,3 —
+enquanto o JSON versionado, gerado no ambiente da pesquisa, traz 476,0 e 480,6.
+Random Forest e XGBoost não são estáveis entre versões dessas bibliotecas mesmo
+com semente fixa (muda o sorteio interno do *bootstrap* e a discretização do
+histograma), ao passo que o SVR (libsvm) e o MLP são. Como o `requirements.txt`
+usa faixas abertas, quem reproduzir hoje deve esperar essa margem nas duas
+linhas de árvore — e apenas nelas.
 
-```bash
-python 01_treina_modelos.py "Random Forest" "XGBoost" "SVR" "MLP"
-python 02_gera_figuras.py
-```
+A busca de hiperparâmetros é aleatória: reexecutá-la tende a eleger uma
+configuração diferente, sem que a conclusão mude. O que ela decide com segurança
+é **qual modelo vence**; a configuração exata, não — `06_confirma_busca.py`
+reavalia o topo do ranking com 7.000 registros justamente para mostrar isso.
 
 **Estudo do Pará** (os dados já estão em `pesquisa/dados/`, não é preciso recoletar)
 
@@ -207,7 +221,14 @@ python 02_gera_figuras.py
 cd pesquisa/04_analise_para
 python 01_compara_mascara_controlada.py  # Tabela 5 e Figura 5
 python 02_gera_figuras.py
-python 03_busca_hiperparametros.py       # busca aninhada → Tabela 6
+
+# a busca aninhada também recebe um alvo por vez
+python 03_busca_hiperparametros.py baseline
+python 03_busca_hiperparametros.py "Random Forest"
+python 03_busca_hiperparametros.py "XGBoost"
+python 03_busca_hiperparametros.py "SVR"
+python 03_busca_hiperparametros.py "MLP"
+
 python 04_gera_fig6_aninhada.py          # Figura 6
 ```
 

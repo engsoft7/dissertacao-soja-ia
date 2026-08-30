@@ -36,6 +36,13 @@ RIOS_PARA = DADOS.parent / "rios_para.json"
 EVENTOS_ENSO = DADOS.parent / "eventos_enso.json"
 SACA_KG = 60  # saca de soja
 
+# Custo operacional da CONAB (Pedro Afonso-TO, levantamento de março de 2026),
+# repetido aqui como literal de emergência. A fonte da verdade é
+# CUSTO_REFERENCIA_HA em software/api_backend/financas.py; esta cópia só é
+# usada quando aquele módulo não pode ser importado, para o painel abrir com
+# um número correto em vez de quebrar. Ao atualizar a CONAB, mudar nos dois.
+CUSTO_OPERACIONAL_PADRAO_HA = 5277.12
+
 
 @st.cache_data
 def carregar_geo():
@@ -1118,11 +1125,16 @@ if tela_atual == "💰 Viabilidade Financeira":
         r = get_financas(municipio)
         custos_locais = {'custo_ha': r.get('custo_ha'), 'vtn_ha': r.get('vtn_ha')}
         preco_chicago = r.get('soja_preco_saca', 120.0)
-    except Exception:
+    except Exception as e:
+        # O nome importado no try não existe aqui: o fallback usa a constante de
+        # módulo. Foi exatamente isso que derrubou o app publicado em 30/08/2026.
+        print(f"[painel] base de custos indisponivel: {type(e).__name__}: {e}",
+              flush=True)
         st.caption(
-            "Base de custos indisponível no momento: os campos abaixo vêm de "
-            "referências regionais e podem ser editados.")
-        custos_locais = {'custo_ha': CUSTO_REFERENCIA_HA, 'vtn_ha': None}
+            "A base de custos não pôde ser consultada agora. O custo abaixo é a "
+            "referência da CONAB adotada pelo produto, o VTN não é exibido e "
+            "todos os campos continuam editáveis.")
+        custos_locais = {'custo_ha': CUSTO_OPERACIONAL_PADRAO_HA, 'vtn_ha': None}
         preco_chicago = 120.0
 
     if PRECO_SACA_ONLINE is not None:

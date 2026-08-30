@@ -79,11 +79,13 @@ def get_financas(municipio: str):
     headers = {'User-Agent': 'Mozilla/5.0'}
     brl_price_bag = 120.0
     try:
-        r_cbot = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/ZS=F', headers=headers)
+        r_cbot = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/ZS=F',
+                              headers=headers, timeout=8)
         price_cents = r_cbot.json()['chart']['result'][0]['meta']['regularMarketPrice']
         usd_price_bag = (price_cents / 100) * 2.20462
         
-        r_usd = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/BRL=X', headers=headers)
+        r_usd = requests.get('https://query1.finance.yahoo.com/v8/finance/chart/BRL=X',
+                             headers=headers, timeout=8)
         usd_brl = float(r_usd.json()['chart']['result'][0]['meta']['regularMarketPrice'])
         brl_price_bag = round(usd_price_bag * usd_brl, 2)
     except Exception as e:

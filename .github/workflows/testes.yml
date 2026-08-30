@@ -1,0 +1,28 @@
+# Testes automáticos do produto. Rodam a cada push e a cada pull request.
+#
+# Existem porque um erro no tratamento de exceção do painel derrubou o app
+# publicado no Streamlit Cloud em 30/08/2026: a tela financeira caiu inteira
+# quando a base de custos ficou indisponível. Os testes de robustez em
+# software/dashboard_web/test_robustez_painel.py reprovam aquele código.
+name: Testes
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências
+        run: pip install --quiet pytest pandas requests
+
+      - name: Roda os testes
+        run: python -m pytest software -q

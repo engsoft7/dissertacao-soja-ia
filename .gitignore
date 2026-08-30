@@ -3,6 +3,9 @@ __pycache__/
 results/
 data/data_cast.csv
 *.pdf
+# ...menos os documentos-fonte de números citados, que precisam ficar
+# auditáveis junto do dado extraído deles.
+!pesquisa/dados/receita_federal/*.pdf
 .venv/
 .agents/
 .gradle/

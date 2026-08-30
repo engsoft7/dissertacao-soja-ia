@@ -320,6 +320,11 @@ Ele consulta a API do SIDRA/IBGE e:
     coleções e janelas de `pesquisa/01_coleta_dados/`) e inclui a safra completa no PR;
   - sem ela (ou se a coleta falhar), abre uma **issue** com o passo a passo
     manual via Google Colab.
+- **Classificação climática:** consulta o Oceanic Niño Index do Climate
+  Prediction Center (NOAA) e atualiza `pesquisa/dados/eventos_enso.json`, que o
+  painel usa para a faixa de fase climática da safra alvo e para as barras de
+  El Niño e La Niña do gráfico histórico. Se a NOAA não responder, o arquivo
+  existente é preservado e nenhum PR é aberto por isso.
 
 ### Ativar a coleta automática no Earth Engine (configuração única)
 

@@ -12,7 +12,14 @@
     "n_registros": 24860,
     "n_variaveis": 121,
     "produtividade_media_kg_ha": 2693.4,
-    "origem_hiperparametros": "03_busca_hiperparametros.py (janela 2001-2015)"
+    "origem_hiperparametros": "Quadro 6 da dissertacao (busca na janela 2001-2015)"
+  },
+  "ambiente": {
+    "python": "3.11.15",
+    "scikit_learn": "1.9.0",
+    "xgboost": "3.2.0",
+    "numpy": "2.4.6",
+    "pandas": "3.0.5"
   },
   "modelos": {
     "Random Forest": {

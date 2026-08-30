@@ -14,6 +14,15 @@ mede quanto o erro do modelo piora quando os valores de uma variavel sao
 embaralhados, o que funciona para qualquer estimador e e medido na propria
 metrica de interesse (RMSE na produtividade reconstruida).
 
+Por que agregar as cinco safras
+-------------------------------
+A permutacao e calculada em TODAS as safras de teste e somada, e nao em uma
+safra so. A diferenca nao e cosmetica: medida apenas em 2020 -- safra atipica,
+de maior dispersao --, a ordem das duas familias dominantes se INVERTE, e o
+grupo hidrico aparece a frente dos indices espectrais. Agregando as cinco, os
+indices espectrais lideram, como reporta a subsecao 5.3. Uma safra isolada nao
+sustenta a leitura de importancia.
+
 Entrada: resultados_ajustados.json (de 04_avalia_ajustado.py) e data/data_cast.csv
 Saida:   results/fig2_modelos_ajustados.png
          results/fig3_scatter_ajustado.png
@@ -36,9 +45,9 @@ from xgboost import XGBRegressor
 plt.rcParams.update({'font.family': 'DejaVu Serif', 'font.size': 11,
                      'axes.grid': True, 'grid.alpha': 0.3})
 OUT = 'results'; os.makedirs(OUT, exist_ok=True)
+TEST_YEARS = [2016, 2017, 2018, 2019, 2020]
 BLUE = '#1F4E79'; BLUE2 = '#2E75B6'; RED = '#B00020'
-ANO_IMP = 2020        # safra usada como conjunto de permutacao
-N_REPEATS = 5
+N_REPEATS = 5         # repeticoes de embaralhamento por variavel e por safra
 SUB = 7000; SVR_MAX = 5000
 NEEDS_SCALE = {'SVR', 'MLP'}
 
@@ -111,32 +120,39 @@ TREND = df['YIELD_TREND'].values.astype(float)
 ANOM = df['YIELD_TREND_CORRECTED'].values.astype(float)
 yr = df['HARVESTED'].values
 
-# Mesma dobra de 04_avalia_ajustado.py para a safra ANO_IMP: o modelo nunca
-# viu a safra sobre a qual as variaveis sao embaralhadas.
-idx = np.random.RandomState(1000 + ANO_IMP).choice(
-    np.where(yr != ANO_IMP)[0], min(SUB, int((yr != ANO_IMP).sum())), replace=False)
-te = yr == ANO_IMP
-Xtr, Xte, atr = X.iloc[idx].values, X[te].values, ANOM[idx]
-if best in NEEDS_SCALE:
-    sc = StandardScaler().fit(Xtr)
-    Xtr, Xte = sc.transform(Xtr), sc.transform(Xte)
-    if best == 'SVR':
-        Xtr, atr = Xtr[:SVR_MAX], atr[:SVR_MAX]
-mdl = build(best).fit(Xtr, atr)
-
-# A permutacao mede a piora do RMSE na PRODUTIVIDADE reconstruida, nao na
-# anomalia: e a metrica que o trabalho reporta.
-trend_te = TREND[te]; yreal = YIELD[te]
-def score_prod(estimator, Xm, _):
-    return -float(np.sqrt(mean_squared_error(yreal, estimator.predict(Xm) + trend_te)))
-
-print(f'Importancia por permutacao ({best}, safra {ANO_IMP}, '
+# Uma dobra por safra de teste, identica a de 04_avalia_ajustado.py: o modelo
+# nunca viu a safra sobre a qual as variaveis sao embaralhadas.
+print(f'Importancia por permutacao ({best}, {len(TEST_YEARS)} safras de teste, '
       f'{N_REPEATS} repeticoes, {len(feat)} variaveis)...', flush=True)
-pi = permutation_importance(mdl, Xte, ANOM[te], scoring=score_prod,
-                            n_repeats=N_REPEATS, random_state=42, n_jobs=1)
-imp = pd.Series(pi.importances_mean, index=feat)
-imp_sd = pd.Series(pi.importances_std, index=feat)
-imp = imp.clip(lower=0)          # piora negativa = variavel sem informacao
+soma = pd.Series(0.0, index=feat)
+soma_sd = pd.Series(0.0, index=feat)
+for ano in TEST_YEARS:
+    idx = np.random.RandomState(1000 + ano).choice(
+        np.where(yr != ano)[0], min(SUB, int((yr != ano).sum())), replace=False)
+    te = yr == ano
+    Xtr, Xte, atr = X.iloc[idx].values, X[te].values, ANOM[idx]
+    if best in NEEDS_SCALE:
+        sc = StandardScaler().fit(Xtr)
+        Xtr, Xte = sc.transform(Xtr), sc.transform(Xte)
+        if best == 'SVR':
+            Xtr, atr = Xtr[:SVR_MAX], atr[:SVR_MAX]
+    mdl = build(best).fit(Xtr, atr)
+
+    # A permutacao mede a piora do RMSE na PRODUTIVIDADE reconstruida, nao na
+    # anomalia: e a metrica que o trabalho reporta.
+    trend_te = TREND[te]; yreal = YIELD[te]
+    def score_prod(estimator, Xm, _, _t=trend_te, _y=yreal):
+        return -float(np.sqrt(mean_squared_error(_y, estimator.predict(Xm) + _t)))
+
+    pi = permutation_importance(mdl, Xte, ANOM[te], scoring=score_prod,
+                                n_repeats=N_REPEATS, random_state=42, n_jobs=1)
+    # piora negativa = variavel sem informacao naquela safra
+    soma += pd.Series(pi.importances_mean, index=feat).clip(lower=0)
+    soma_sd += pd.Series(pi.importances_std, index=feat)
+    print(f'  safra {ano} concluida', flush=True)
+imp = soma
+imp_sd = soma_sd / len(TEST_YEARS)
+pi_mean = soma.values
 
 GROUPS = {'NDVI': 'NDVI (vigor vegetativo)', 'EVI': 'EVI (vigor vegetativo)',
           'GLI': 'Índices espectrais (outros)', 'CVI': 'Índices espectrais (outros)',
@@ -155,9 +171,9 @@ def grp(c):
     return 'Outros'
 
 pd.DataFrame({'variavel': feat, 'grupo': [grp(c) for c in feat],
-              'piora_rmse_kg_ha': pi.importances_mean.round(3),
-              'desvio': imp_sd.values.round(3)}
-             ).sort_values('piora_rmse_kg_ha', ascending=False
+              'piora_rmse_kg_ha_somada': pi_mean.round(3),
+              'desvio_medio': imp_sd.values.round(3)}
+             ).sort_values('piora_rmse_kg_ha_somada', ascending=False
              ).to_csv(f'{OUT}/importancia_permutacao.csv', index=False)
 
 g = imp.groupby(imp.index.map(grp)).sum().sort_values(ascending=False)
@@ -169,7 +185,9 @@ fig, ax = plt.subplots(figsize=(8, 4.6))
 gg = g.head(10)[::-1]
 ax.barh(gg.index, gg.values, color=BLUE2)
 ax.set_xlabel('Importância relativa (%)')
-ax.set_title(f'Importância por permutação — {best} ajustado (safra {ANO_IMP})')
+ax.set_title(f'Importância por permutação — {best} ajustado\n'
+             f'(agregada nas safras de {TEST_YEARS[0]} a {TEST_YEARS[-1]})',
+             fontsize=11)
 for i, v in enumerate(gg.values): ax.text(v + 0.3, i, f'{v:.1f}%', va='center', fontsize=9)
 ax.set_xlim(0, gg.values.max() * 1.15)
 plt.tight_layout()

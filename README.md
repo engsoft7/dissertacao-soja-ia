@@ -176,6 +176,17 @@ versionados aqui já trazem os resultados dela, então `04_avalia_ajustado.py` e
 `05_gera_figuras_ajustado.py` podem ser rodados isoladamente — as configurações
 da dissertação estão escritas no próprio `04_avalia_ajustado.py`.
 
+**Sobre reproduzir os números exatos da Tabela 3.** O SVR e o MLP reproduzem os
+valores da dissertação dígito a dígito, safra a safra. O Random Forest e o
+XGBoost saem 2 a 3 kg/ha melhores (474 e 479, contra 476 e 481 no texto), com os
+mesmos hiperparâmetros do Quadro 6 e o mesmo protocolo. A diferença é de versão
+de biblioteca: esses dois modelos não são estáveis entre versões do
+scikit-learn e do XGBoost mesmo com semente fixa — o sorteio interno do
+*bootstrap* e a discretização do histograma mudam —, ao passo que o SVR
+(libsvm) e o MLP são. Os JSONs versionados registram as versões com que foram
+gerados, no campo `ambiente`. Como o `requirements.txt` usa faixas abertas, quem
+reproduzir hoje deve esperar essa margem nas duas linhas de árvore.
+
 A busca é aleatória: reexecutá-la tende a eleger uma configuração diferente,
 sem que a Tabela 3 mude de conclusão. O que ela decide com segurança é **qual
 modelo vence**; a configuração exata, não — `06_confirma_busca.py` mostra que o

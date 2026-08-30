@@ -43,8 +43,9 @@ hiperparametro:
 Saida: resultados_ajustados.json  e  results/pred_ajustado_<modelo>.csv
 Uso:   python 04_avalia_ajustado.py ["Random Forest" "XGBoost" "SVR" "MLP"]
 """
-import json, os, sys, time, numpy as np, pandas as pd, warnings
+import json, os, sys, time, platform, numpy as np, pandas as pd, warnings
 warnings.filterwarnings('ignore')
+import sklearn, xgboost
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
@@ -100,12 +101,26 @@ subidx = {ty: np.random.RandomState(1000 + ty).choice(
 
 resfile = 'resultados_ajustados.json'
 allres = json.load(open(resfile)) if os.path.exists(resfile) else {}
-allres.setdefault('protocolo', {
+# 'protocolo' descreve ESTA execucao: sempre reescrito, nunca herdado de um
+# JSON anterior (so os resultados por modelo se acumulam entre chamadas).
+allres['protocolo'] = {
     'anos_teste': TEST_YEARS, 'sub_treino': SUB, 'svr_max_treino': SVR_MAX,
     'n_registros': int(len(df)), 'n_variaveis': len(feat),
     'produtividade_media_kg_ha': round(ymean, 1),
-    'origem_hiperparametros': '03_busca_hiperparametros.py (janela 2001-2015)',
-})
+    'origem_hiperparametros': 'Quadro 6 da dissertacao (busca na janela 2001-2015)',
+}
+# Procedencia: o Random Forest e o XGBoost mudam de resultado entre versoes das
+# bibliotecas, mesmo com random_state fixo e os mesmos hiperparametros -- o
+# sorteio interno e a discretizacao do histograma nao sao estaveis entre
+# versoes. O SVR (libsvm) e o MLP sao estaveis. Registrar as versoes torna a
+# diferenca rastreavel em vez de misteriosa.
+allres['ambiente'] = {
+    'python': platform.python_version(),
+    'scikit_learn': sklearn.__version__,
+    'xgboost': xgboost.__version__,
+    'numpy': np.__version__,
+    'pandas': pd.__version__,
+}
 allres.setdefault('modelos', {})
 
 for name in MODELOS:

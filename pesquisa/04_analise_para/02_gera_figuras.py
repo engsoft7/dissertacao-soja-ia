@@ -3,6 +3,31 @@ import json, numpy as np, pandas as pd, warnings
 warnings.filterwarnings('ignore')
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
+# --- ABNT: separador decimal com vírgula, nos rótulos e nos eixos --------------
+from matplotlib.ticker import FuncFormatter as _FuncFormatter
+
+
+def vg(x, fmt='.1f'):
+    """Número com vírgula decimal, como pede a ABNT."""
+    return format(x, fmt).replace('.', ',')
+
+
+_VIRGULA = _FuncFormatter(lambda v, _pos: f'{v:g}'.replace('.', ','))
+
+
+def eixos_virgula(*eixos, x=False, y=True):
+    """Aplica vírgula decimal aos rótulos dos eixos informados.
+
+    Só ao eixo Y por padrão: aplicar ao X estragaria rótulos categóricos
+    (nomes de modelos) e anos, que não levam separador decimal.
+    """
+    for e in eixos:
+        if y:
+            e.yaxis.set_major_formatter(_VIRGULA)
+        if x:
+            e.xaxis.set_major_formatter(_VIRGULA)
+# ------------------------------------------------------------------------------
 from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler
@@ -10,28 +35,41 @@ plt.rcParams.update({'font.family':'DejaVu Serif','font.size':10,'axes.grid':Tru
 OUT='results'
 B1='#1F4E79'; B2='#2E75B6'; RED='#B00020'
 
-cmp = json.load(open(f'{OUT}/comparacao.json'))
 m = pd.read_csv('../dados/soja_para_mascarado_2001_2024.csv')
 
+# A primeira figura deste script vem de results/comparacao.json, produzido pelo
+# 01_compara_mascara_e_baseline_DEPRECADO.py -- o desenho confundido, que
+# comparava as duas bases inteiras. Ela foi superada pela Figura 5, gerada por
+# 01_compara_mascara_controlada.py sobre a amostra comum. Se o JSON antigo nao
+# estiver presente, esta figura e simplesmente pulada; as demais nao dependem
+# dele.
+import os
+cmp = (json.load(open(f'{OUT}/comparacao.json', encoding='utf-8'))
+       if os.path.exists(f'{OUT}/comparacao.json') else None)
+
 # ---- FIG A: sem mascara vs com mascara (RMSE e rRMSE) ----
-fig,ax=plt.subplots(1,2,figsize=(9.6,3.8))
-labs=['Random Forest','XGBoost','SVR','MLP']
-sem=[cmp['sem_mascara'][k]['RMSE'] for k in labs]
-com=[cmp['com_mascara'][k]['RMSE'] for k in labs]
-x=np.arange(len(labs)); w=0.36
-ax[0].bar(x-w/2,sem,w,label='Município inteiro',color=B2)
-ax[0].bar(x+w/2,com,w,label='Máscara de soja',color=B1)
-ax[0].axhline(cmp['com_mascara']['baseline']['RMSE'],ls='--',color=RED,lw=1.3,label='Baseline (sem clima)')
-ax[0].set_xticks(x); ax[0].set_xticklabels(labs,rotation=15,fontsize=8.5)
-ax[0].set_ylabel('RMSE (kg/ha)'); ax[0].set_title('(a) Erro por modelo'); ax[0].legend(fontsize=7.5)
-ax[0].set_ylim(380,460)
-r2s=[cmp['com_mascara'][k]['R2'] for k in labs]
-ax[1].bar(x,r2s,color=B2)
-ax[1].axhline(cmp['com_mascara']['baseline']['R2'],ls='--',color=RED,lw=1.3,label='Baseline (R²=0,221)')
-ax[1].set_xticks(x); ax[1].set_xticklabels(labs,rotation=15,fontsize=8.5)
-ax[1].set_ylabel('R² (agregado)'); ax[1].set_title('(b) R² não supera a baseline'); ax[1].legend(fontsize=7.5)
-ax[1].set_ylim(0,0.30)
-plt.tight_layout(); plt.savefig(f'{OUT}/fig_pa_modelos.png',dpi=200,bbox_inches='tight',facecolor='white'); plt.close()
+if cmp is None:
+    print('results/comparacao.json ausente: figura do desenho antigo pulada '
+          '(use 01_compara_mascara_controlada.py para a Figura 5).')
+else:
+    fig,ax=plt.subplots(1,2,figsize=(9.6,3.8))
+    labs=['Random Forest','XGBoost','SVR','MLP']
+    sem=[cmp['sem_mascara'][k]['RMSE'] for k in labs]
+    com=[cmp['com_mascara'][k]['RMSE'] for k in labs]
+    x=np.arange(len(labs)); w=0.36
+    ax[0].bar(x-w/2,sem,w,label='Município inteiro',color=B2)
+    ax[0].bar(x+w/2,com,w,label='Máscara de soja',color=B1)
+    ax[0].axhline(cmp['com_mascara']['baseline']['RMSE'],ls='--',color=RED,lw=1.3,label='Baseline (sem clima)')
+    ax[0].set_xticks(x); ax[0].set_xticklabels(labs,rotation=15,fontsize=8.5)
+    ax[0].set_ylabel('RMSE (kg/ha)'); ax[0].set_title('(a) Erro por modelo'); ax[0].legend(fontsize=7.5)
+    ax[0].set_ylim(380,460)
+    r2s=[cmp['com_mascara'][k]['R2'] for k in labs]
+    ax[1].bar(x,r2s,color=B2)
+    ax[1].axhline(cmp['com_mascara']['baseline']['R2'],ls='--',color=RED,lw=1.3,label='Baseline (R²=0,221)')
+    ax[1].set_xticks(x); ax[1].set_xticklabels(labs,rotation=15,fontsize=8.5)
+    ax[1].set_ylabel('R² (agregado)'); ax[1].set_title('(b) R² não supera a baseline'); ax[1].legend(fontsize=7.5)
+    ax[1].set_ylim(0,0.30)
+    plt.tight_layout(); plt.savefig(f'{OUT}/fig_pa_modelos.png',dpi=200,bbox_inches='tight',facecolor='white'); plt.close()
 
 # ---- FIG B: valores repetidos (o achado) ----
 rep=0; tot=0; per_year={}
@@ -51,11 +89,13 @@ for mun,d in mm.groupby('municipio'):
 anos=sorted(tot_year); pct=[per_year.get(y,0)/tot_year[y]*100 for y in anos]
 
 fig,ax=plt.subplots(1,2,figsize=(9.6,3.6))
-ax[0].pie([rep,tot-rep],labels=[f'Repetido\n{rep/tot*100:.1f}%',f'Variou\n{(tot-rep)/tot*100:.1f}%'],
+ax[0].pie([rep,tot-rep],labels=[f'Repetido\n'+vg(rep/tot*100)+'%',f'Variou\n'+vg((tot-rep)/tot*100)+'%'],
           colors=[RED,B2],autopct='',startangle=90,textprops={'fontsize':9})
-ax[0].set_title('(a) Rendimento idêntico ao ano anterior\n(municípios do Pará, 2001–2023)',fontsize=9.5)
-ax[1].bar(anos,pct,color=B2); ax[1].axhline(rep/tot*100,ls='--',color=RED,lw=1.2,label=f'média {rep/tot*100:.1f}%')
+ax[0].set_title('(a) Rendimento idêntico ao ano anterior\n'
+                f'(municípios do Pará, {min(anos)}–{max(anos)})',fontsize=9.5)
+ax[1].bar(anos,pct,color=B2); ax[1].axhline(rep/tot*100,ls='--',color=RED,lw=1.2,label='média '+vg(rep/tot*100)+'%')
 ax[1].set_xlabel('Ano'); ax[1].set_ylabel('% de municípios'); ax[1].set_title('(b) Proporção por safra',fontsize=9.5)
+eixos_virgula(ax[1])
 ax[1].legend(fontsize=8)
 plt.tight_layout(); plt.savefig(f'{OUT}/fig_pa_repetidos.png',dpi=200,bbox_inches='tight',facecolor='white'); plt.close()
 
@@ -87,7 +127,27 @@ ax.legend(fontsize=8.5)
 plt.tight_layout(); plt.savefig(f'{OUT}/fig_pa_scatter.png',dpi=200,bbox_inches='tight',facecolor='white'); plt.close()
 
 # ---- FIG D: importancia ----
-imp=pd.read_csv(f'{OUT}/importance_mask.csv',index_col=0).iloc[:,0]
+# results/importance_mask.csv era produzido pelo script hoje aposentado
+# (01_compara_mascara_e_baseline_DEPRECADO.py). Para nao depender dele, a
+# importancia e recalculada aqui quando o arquivo nao existe -- mesmo modelo,
+# mesmas variaveis e mesma semente, de modo que o resultado e identico.
+if os.path.exists(f'{OUT}/importance_mask.csv'):
+    imp=pd.read_csv(f'{OUT}/importance_mask.csv',index_col=0).iloc[:,0]
+else:
+    from sklearn.ensemble import RandomForestRegressor
+    FE_MASK=['NDVI_mean','NDVI_max','EVI_mean','EVI_max','precip_total','etp_total',
+             'balanco_hidrico','temp_mean','temp_max','srad_mean','log_area']
+    _d=pd.read_csv('../dados/soja_para_mascarado_2001_2024.csv')
+    _d['balanco_hidrico']=_d.precip_total-_d.etp_total
+    _d['log_area']=np.log1p(_d.soy_area_ha)
+    _y=_d.rendimento_kg_ha.values.astype(float); _yr=_d.ano.values
+    _lin=LinearRegression().fit(_yr.reshape(-1,1),_y)
+    _anom=_y-_lin.predict(_yr.reshape(-1,1))
+    _rf=RandomForestRegressor(n_estimators=400,max_depth=10,min_samples_leaf=4,
+                              n_jobs=-1,random_state=42).fit(_d[FE_MASK].values,_anom)
+    imp=pd.Series(_rf.feature_importances_,index=FE_MASK).sort_values(ascending=False)
+    imp.to_csv(f'{OUT}/importance_mask.csv')
+    print('importance_mask.csv recalculado (o script aposentado nao e mais necessario)')
 NOMES={'EVI_max':'EVI máximo','log_area':'Área de soja (log)','NDVI_max':'NDVI máximo','srad_mean':'Radiação solar',
  'precip_total':'Precipitação total','etp_total':'Evapotranspiração','EVI_mean':'EVI médio','temp_mean':'Temperatura média',
  'NDVI_mean':'NDVI médio','temp_max':'Temperatura máxima','balanco_hidrico':'Balanço hídrico'}
@@ -96,7 +156,8 @@ g=(imp*100).sort_values()
 fig,ax=plt.subplots(figsize=(7.4,4.2))
 ax.barh(g.index,g.values,color=B2)
 ax.set_xlabel('Importância relativa (%)'); ax.set_title('Importância das variáveis — Pará (Random Forest)',fontsize=10)
-for i,v in enumerate(g.values): ax.text(v+0.25,i,f'{v:.1f}%',va='center',fontsize=8)
+eixos_virgula(ax, x=True, y=False)
+for i,v in enumerate(g.values): ax.text(v+0.25,i,vg(v)+'%',va='center',fontsize=8)
 ax.set_xlim(0,g.values.max()*1.16)
 plt.tight_layout(); plt.savefig(f'{OUT}/fig_pa_importancia.png',dpi=200,bbox_inches='tight',facecolor='white'); plt.close()
 

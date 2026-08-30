@@ -11,6 +11,13 @@ REV_MUNICIPIOS = {
     "Redencao": "REDENCAO",
 }
 
+# Tabela estática de referência, não é consulta a nenhuma fonte externa.
+# As duas colunas têm correlação de 0,99 entre si (custo_ha ~= 0,0855 * vtn_ha
+# + 3586), ou seja, o custo foi escalonado a partir do valor da terra. Custeio
+# de lavoura (semente, fertilizante, defensivo, combustível, hora-máquina) não
+# varia com o preço do hectare, então esses números servem só como ponto de
+# partida editável na interface. Para uso sério, substituir pelos boletins de
+# custo de produção da CONAB para a soja no Pará, registrando safra e data.
 BASE_CUSTO_PA = {
     "PARAGOMINAS": {"custo_ha": 4850.0, "vtn_ha": 15000.0},
     "DOM ELISEU": {"custo_ha": 4800.0, "vtn_ha": 14000.0},

@@ -1140,8 +1140,9 @@ if tela_atual == "💰 Viabilidade Financeira":
             value=int(custos_locais["custo_ha"]),
             step=100)
         st.caption(
-            "**Custo:** referência regional fixa, escalonada a partir do valor da terra. "
-            "Não vem de boletim de custeio — edite com os números da sua fazenda.")
+            "**Custo:** o Pará não integra o MATOPIBA e não tem custo de "
+            "produção publicado, então a referência vem do cerrado vizinho "
+            "(Tocantins). Edite com os números da sua fazenda.")
     with col_eco3:
         vtn_ha = st.number_input(
             f"Preço Terra Nua VTN/ha ({municipio.title()})",
@@ -1305,11 +1306,16 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
       físico não responde. É o contrato futuro de Chicago convertido para reais
       por saca de 60 kg, e fica acima do preço físico brasileiro — a legenda do
       campo avisa quando é essa a origem do valor.
-    * **Custo operacional e Valor da Terra Nua:** tabela estática por município,
-      embutida em `software/api_backend/financas.py`. Os valores de custo foram
-      escalonados a partir do VTN (correlação de 0,99 entre as duas colunas) e
-      **não** são consulta a CONAB, Aprosoja ou Receita Federal. Servem apenas
-      de ponto de partida: ajuste os campos com os números da sua propriedade.
+    * **Custo operacional:** o Pará não integra o MATOPIBA e não tem custo de
+      produção de soja publicado pela CONAB, então a referência vem do cerrado
+      do Tocantins vizinho. É uma tabela estática em
+      `software/api_backend/financas.py`, não uma consulta em tempo real, e a
+      variação entre municípios foi escalonada a partir do valor da terra —
+      custeio de lavoura não varia com o preço do hectare, então trate a
+      diferença entre municípios como ruído e ajuste o campo com os números da
+      sua propriedade.
+    * **Valor da Terra Nua:** tabela estática no mesmo arquivo, também sem
+      consulta em tempo real à Receita Federal.
     
     *Repositório Acadêmico:* [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
 

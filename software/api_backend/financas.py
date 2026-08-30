@@ -12,12 +12,23 @@ REV_MUNICIPIOS = {
 }
 
 # Tabela estática de referência, não é consulta a nenhuma fonte externa.
-# As duas colunas têm correlação de 0,99 entre si (custo_ha ~= 0,0855 * vtn_ha
-# + 3586), ou seja, o custo foi escalonado a partir do valor da terra. Custeio
-# de lavoura (semente, fertilizante, defensivo, combustível, hora-máquina) não
-# varia com o preço do hectare, então esses números servem só como ponto de
-# partida editável na interface. Para uso sério, substituir pelos boletins de
-# custo de produção da CONAB para a soja no Pará, registrando safra e data.
+#
+# Nível base: o Pará não integra o MATOPIBA e não tem custo de produção de soja
+# publicado pela CONAB, então a referência vem do cerrado do Tocantins vizinho,
+# como registra software/dashboard_web/README.md. É uma aproximação assumida,
+# não custo medido no Pará.
+#
+# Variação entre municípios: não documentada em lugar nenhum e sem base
+# agronômica. As duas colunas têm correlação de 0,985 entre si
+# (custo_ha ~= 0,0855 * vtn_ha + 3586, resíduos abaixo de R$ 31), ou seja, o
+# custo foi escalonado a partir do valor da terra. Custeio de lavoura (semente,
+# fertilizante, defensivo, combustível, hora-máquina) não varia com o preço do
+# hectare: fertilizante custa o mesmo em Redenção e em Paragominas. Trate os
+# 7,8% de diferença entre o menor e o maior como ruído.
+#
+# Ao substituir por um levantamento real, registrar fonte, safra e data, e
+# preferir a linha de custo variável (custeio) à de custo total, que é o que o
+# campo "Custo Operacional" do painel representa.
 BASE_CUSTO_PA = {
     "PARAGOMINAS": {"custo_ha": 4850.0, "vtn_ha": 15000.0},
     "DOM ELISEU": {"custo_ha": 4800.0, "vtn_ha": 14000.0},

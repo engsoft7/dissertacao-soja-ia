@@ -27,6 +27,7 @@ Saida: resultados_busca_aninhada.json
 Uso:   python 03_busca_hiperparametros.py [n_configuracoes_por_modelo]
 """
 import json, os, sys, time, numpy as np, pandas as pd, warnings
+from collections import Counter
 warnings.filterwarnings('ignore')
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
@@ -43,12 +44,20 @@ MIN_MUN = 4          # minimo de municipios para uma safra virar dobra
 VAL_INNER = 4        # safras de validacao dentro de cada dobra externa
 N_INNER = int(sys.argv[1]) if len(sys.argv) > 1 else 8
 SEMENTE = 20260709
+# Diferencas menores que isto sao empate tecnico: em 415 registros, 1 kg/ha de
+# RMSE nao distingue dois modelos. A dissertacao trata o MLP e o baseline como
+# equivalentes exatamente nessa faixa.
+TOL_EMPATE = 2.0     # kg/ha
 FE = ['NDVI_mean', 'NDVI_max', 'EVI_mean', 'EVI_max', 'precip_total',
       'etp_total', 'balanco_hidrico', 'temp_mean', 'temp_max', 'srad_mean']
+# A Tabela 6 roda sobre a base completa COM a area de soja como preditora
+# (subsecao 6.1: a mascara do MapBiomas permite derivar a area plantada).
+FE_COM_AREA = FE + ['log_area']
 
+# Espaco de busca do Quadro 8 da dissertacao.
 ESPACO = {
     'Random Forest': {
-        'n_estimators':     [100, 200, 300, 500],
+        'n_estimators':     [100, 150, 200, 300],
         'max_depth':        [3, 5, 8, 10, None],
         'min_samples_leaf': [1, 2, 4, 8],
         'max_features':     ['sqrt', 0.5, 1.0],
@@ -56,21 +65,21 @@ ESPACO = {
     'XGBoost': {
         'n_estimators':     [100, 200, 400],
         'max_depth':        [2, 3, 4, 6],
-        'learning_rate':    [0.01, 0.03, 0.05, 0.1],
-        'subsample':        [0.6, 0.8, 1.0],
+        'learning_rate':    [0.02, 0.05, 0.1],
+        'subsample':        [0.7, 0.8, 1.0],
         'colsample_bytree': [0.6, 0.8, 1.0],
         'reg_lambda':       [1, 2, 5, 10],
     },
     'SVR': {
-        'C':       [1, 10, 50, 100],
-        'gamma':   [0.005, 0.01, 0.05, 'scale'],
-        'epsilon': [0.01, 0.05, 0.1, 0.2],
+        'C':       [1, 3, 10, 30, 100],
+        'epsilon': [0.05, 0.1, 0.2],
+        'gamma':   ['scale', 'auto', 0.05],
     },
     'MLP': {
-        'hidden_layer_sizes': [(32,), (64, 32), (100, 50)],
+        'hidden_layer_sizes': [(32,), (64, 32), (100, 50), (32, 16)],
         'alpha':              [1e-3, 1e-2, 1e-1],
-        'learning_rate_init': [1e-3, 3e-3, 1e-2],
-        'max_iter':           [300],
+        'learning_rate_init': [1e-3, 3e-3],
+        'max_iter':           [500, 800],
     },
 }
 
@@ -99,9 +108,10 @@ def M(yt, yp):
 # --------------------------------------------------------------- dados
 d = pd.read_csv(BASE)
 d['balanco_hidrico'] = d['precip_total'] - d['etp_total']
-d = d.dropna(subset=FE + ['rendimento_kg_ha']).reset_index(drop=True)
+d['log_area'] = np.log1p(d['soy_area_ha'])
+d = d.dropna(subset=FE_COM_AREA + ['rendimento_kg_ha']).reset_index(drop=True)
 y = d.rendimento_kg_ha.values.astype(float)
-yr = d.ano.values; mun = d.cod_ibge7.values; X = d[FE].values
+yr = d.ano.values; mun = d.cod_ibge7.values; X = d[FE_COM_AREA].values
 ymean = float(y.mean())
 ANOS = [t for t in sorted(set(yr)) if (yr == t).sum() >= MIN_MUN]
 print(f'{len(d)} registros, {d.cod_ibge7.nunique()} municipios, '
@@ -175,7 +185,7 @@ saida = {'protocolo': {
     'safras_validacao_interna': VAL_INNER,
     'configuracoes_por_modelo_por_dobra': N_INNER,
     'produtividade_media_kg_ha': round(ymean, 1),
-    'variaveis': FE},
+    'variaveis': FE_COM_AREA},
     'baseline': {'RMSE': round(br[0], 1), 'MAE': round(br[1], 1),
                  'R2': round(br[2], 3), 'rRMSE': round(br[0] / ymean * 100, 1)},
     'modelos': {}}
@@ -189,27 +199,44 @@ print(f'{"Baseline":16s}{br[0]:9.1f}{br[1]:9.1f}{br[2]:9.3f}'
 for nome in MODELS:
     r = M(np.array(res[nome]['yt']), np.array(res[nome]['yp']))
     ganho = br[0] - r[0]
+    # Configuracao modal entre as dobras externas: e o que o Quadro 8 reporta.
+    chaves = [json.dumps(e['params'], sort_keys=True, default=str)
+              for e in res[nome]['escolhas']]
+    modal_chave, modal_freq = Counter(chaves).most_common(1)[0]
     saida['modelos'][nome] = {
         'RMSE': round(r[0], 1), 'MAE': round(r[1], 1), 'R2': round(r[2], 3),
         'rRMSE': round(r[0] / ymean * 100, 1),
         'ganho_RMSE_sobre_baseline': round(ganho, 1),
-        'supera_baseline': bool(r[0] < br[0]),
+        'supera_baseline': bool(ganho > TOL_EMPATE),
+        'empata_com_baseline': bool(abs(ganho) <= TOL_EMPATE),
+        'config_modal': json.loads(modal_chave),
+        'config_modal_frequencia': f'{modal_freq} de {len(chaves)}',
         'escolhas_por_dobra': res[nome]['escolhas']}
     print(f'{nome:16s}{r[0]:9.1f}{r[1]:9.1f}{r[2]:9.3f}'
           f'{r[0]/ymean*100:8.1f}%{ganho:+13.1f}')
 
 melhor = min(MODELS, key=lambda n: saida['modelos'][n]['RMSE'])
 saida['melhor_modelo'] = melhor
+saida['tolerancia_empate_kg_ha'] = TOL_EMPATE
 saida['algum_supera_baseline'] = any(saida['modelos'][n]['supera_baseline'] for n in MODELS)
-print('\n(vs baseline em kg/ha; positivo = o modelo erra menos que o baseline)')
+print(f'\n(vs baseline em kg/ha; diferencas de ate {TOL_EMPATE:.0f} kg/ha sao empate tecnico)')
 print(f'\nMelhor modelo: {melhor} '
       f'(RMSE {saida["modelos"][melhor]["RMSE"]:.1f} kg/ha, '
       f'baseline {br[0]:.1f} kg/ha)')
 print('Algum modelo supera o baseline?',
       'SIM' if saida['algum_supera_baseline'] else 'NAO')
+print('\nConfiguracao modal por modelo (comparavel ao Quadro 8):')
+for nome in MODELS:
+    v = saida['modelos'][nome]
+    print(f'  {nome:16s}{v["config_modal_frequencia"]:>10s}  {v["config_modal"]}')
 if not saida['algum_supera_baseline']:
     print('\nMesmo com hiperparametros escolhidos dobra a dobra, as variaveis')
     print('ambientais nao adicionam informacao sobre o historico do municipio.')
+    empatam = [n for n in MODELS if saida['modelos'][n]['empata_com_baseline']]
+    if empatam:
+        print('Empatam com o baseline (dentro da tolerancia): ' + ', '.join(empatam) + '.')
+        print('Um modelo que empata com o baseline aprendeu a prever residuo')
+        print('aproximadamente nulo: as variaveis ambientais nao o moveram.')
 
 json.dump(saida, open('resultados_busca_aninhada.json', 'w'), indent=2, ensure_ascii=False)
 print(f'\nOK: resultados_busca_aninhada.json ({time.time()-t0:.0f}s)')

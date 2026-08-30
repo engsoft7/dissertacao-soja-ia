@@ -21,7 +21,8 @@
       "balanco_hidrico",
       "temp_mean",
       "temp_max",
-      "srad_mean"
+      "srad_mean",
+      "log_area"
     ]
   },
   "baseline": {
@@ -32,12 +33,20 @@
   },
   "modelos": {
     "Random Forest": {
-      "RMSE": 427.2,
-      "MAE": 301.4,
-      "R2": 0.172,
-      "rRMSE": 14.3,
-      "ganho_RMSE_sobre_baseline": -11.6,
+      "RMSE": 425.4,
+      "MAE": 301.6,
+      "R2": 0.178,
+      "rRMSE": 14.2,
+      "ganho_RMSE_sobre_baseline": -9.8,
       "supera_baseline": false,
+      "empata_com_baseline": false,
+      "config_modal": {
+        "max_depth": null,
+        "max_features": "sqrt",
+        "min_samples_leaf": 2,
+        "n_estimators": 150
+      },
+      "config_modal_frequencia": "2 de 24",
       "escolhas_por_dobra": [
         {
           "ano_teste": 2001,
@@ -47,17 +56,17 @@
             "min_samples_leaf": 1,
             "n_estimators": 100
           },
-          "rmse_validacao_interna": 456.2
+          "rmse_validacao_interna": 453.8
         },
         {
           "ano_teste": 2002,
           "params": {
-            "max_depth": 3,
+            "max_depth": null,
             "max_features": "sqrt",
-            "min_samples_leaf": 4,
+            "min_samples_leaf": 1,
             "n_estimators": 300
           },
-          "rmse_validacao_interna": 453.8
+          "rmse_validacao_interna": 450.5
         },
         {
           "ano_teste": 2003,
@@ -67,17 +76,17 @@
             "min_samples_leaf": 8,
             "n_estimators": 100
           },
-          "rmse_validacao_interna": 454.9
+          "rmse_validacao_interna": 451.4
         },
         {
           "ano_teste": 2004,
           "params": {
-            "max_depth": 3,
-            "max_features": 1.0,
-            "min_samples_leaf": 8,
-            "n_estimators": 100
+            "max_depth": null,
+            "max_features": "sqrt",
+            "min_samples_leaf": 2,
+            "n_estimators": 150
           },
-          "rmse_validacao_interna": 457.5
+          "rmse_validacao_interna": 450.5
         },
         {
           "ano_teste": 2005,
@@ -87,7 +96,7 @@
             "min_samples_leaf": 8,
             "n_estimators": 100
           },
-          "rmse_validacao_interna": 450.9
+          "rmse_validacao_interna": 449.2
         },
         {
           "ano_teste": 2006,
@@ -95,29 +104,29 @@
             "max_depth": null,
             "max_features": "sqrt",
             "min_samples_leaf": 8,
-            "n_estimators": 500
+            "n_estimators": 300
           },
-          "rmse_validacao_interna": 456.5
+          "rmse_validacao_interna": 449.6
         },
         {
           "ano_teste": 2007,
           "params": {
             "max_depth": 10,
             "max_features": 0.5,
-            "min_samples_leaf": 8,
-            "n_estimators": 100
+            "min_samples_leaf": 2,
+            "n_estimators": 150
           },
-          "rmse_validacao_interna": 457.0
+          "rmse_validacao_interna": 448.7
         },
         {
           "ano_teste": 2008,
           "params": {
-            "max_depth": 3,
-            "max_features": 0.5,
-            "min_samples_leaf": 8,
+            "max_depth": 10,
+            "max_features": "sqrt",
+            "min_samples_leaf": 4,
             "n_estimators": 300
           },
-          "rmse_validacao_interna": 455.6
+          "rmse_validacao_interna": 451.2
         },
         {
           "ano_teste": 2009,
@@ -127,17 +136,17 @@
             "min_samples_leaf": 4,
             "n_estimators": 100
           },
-          "rmse_validacao_interna": 448.7
+          "rmse_validacao_interna": 447.8
         },
         {
           "ano_teste": 2010,
           "params": {
-            "max_depth": 3,
+            "max_depth": null,
             "max_features": "sqrt",
-            "min_samples_leaf": 4,
-            "n_estimators": 100
+            "min_samples_leaf": 2,
+            "n_estimators": 150
           },
-          "rmse_validacao_interna": 451.1
+          "rmse_validacao_interna": 451.3
         },
         {
           "ano_teste": 2011,
@@ -145,59 +154,59 @@
             "max_depth": 3,
             "max_features": 0.5,
             "min_samples_leaf": 4,
-            "n_estimators": 500
+            "n_estimators": 300
           },
-          "rmse_validacao_interna": 454.3
+          "rmse_validacao_interna": 451.5
         },
         {
           "ano_teste": 2012,
           "params": {
-            "max_depth": 3,
-            "max_features": 0.5,
-            "min_samples_leaf": 8,
-            "n_estimators": 500
+            "max_depth": 10,
+            "max_features": "sqrt",
+            "min_samples_leaf": 4,
+            "n_estimators": 300
           },
-          "rmse_validacao_interna": 453.6
+          "rmse_validacao_interna": 446.6
         },
         {
           "ano_teste": 2013,
           "params": {
-            "max_depth": 5,
+            "max_depth": 10,
             "max_features": "sqrt",
-            "min_samples_leaf": 4,
-            "n_estimators": 100
+            "min_samples_leaf": 8,
+            "n_estimators": 200
           },
-          "rmse_validacao_interna": 457.8
+          "rmse_validacao_interna": 450.0
         },
         {
           "ano_teste": 2014,
           "params": {
-            "max_depth": 5,
-            "max_features": 0.5,
+            "max_depth": 8,
+            "max_features": "sqrt",
             "min_samples_leaf": 8,
-            "n_estimators": 500
+            "n_estimators": 300
           },
-          "rmse_validacao_interna": 458.9
+          "rmse_validacao_interna": 452.8
         },
         {
           "ano_teste": 2015,
           "params": {
-            "max_depth": null,
+            "max_depth": 10,
             "max_features": "sqrt",
-            "min_samples_leaf": 4,
-            "n_estimators": 100
+            "min_samples_leaf": 1,
+            "n_estimators": 300
           },
-          "rmse_validacao_interna": 467.1
+          "rmse_validacao_interna": 454.8
         },
         {
           "ano_teste": 2016,
           "params": {
-            "max_depth": 5,
-            "max_features": "sqrt",
-            "min_samples_leaf": 4,
+            "max_depth": null,
+            "max_features": 0.5,
+            "min_samples_leaf": 8,
             "n_estimators": 200
           },
-          "rmse_validacao_interna": 465.3
+          "rmse_validacao_interna": 457.2
         },
         {
           "ano_teste": 2017,
@@ -205,9 +214,9 @@
             "max_depth": 3,
             "max_features": "sqrt",
             "min_samples_leaf": 2,
-            "n_estimators": 500
+            "n_estimators": 300
           },
-          "rmse_validacao_interna": 439.1
+          "rmse_validacao_interna": 437.4
         },
         {
           "ano_teste": 2018,
@@ -215,19 +224,19 @@
             "max_depth": 3,
             "max_features": 0.5,
             "min_samples_leaf": 8,
-            "n_estimators": 200
+            "n_estimators": 150
           },
-          "rmse_validacao_interna": 447.7
+          "rmse_validacao_interna": 444.1
         },
         {
           "ano_teste": 2019,
           "params": {
-            "max_depth": 3,
+            "max_depth": 8,
             "max_features": "sqrt",
-            "min_samples_leaf": 4,
-            "n_estimators": 100
+            "min_samples_leaf": 2,
+            "n_estimators": 300
           },
-          "rmse_validacao_interna": 440.7
+          "rmse_validacao_interna": 442.6
         },
         {
           "ano_teste": 2020,
@@ -237,7 +246,7 @@
             "min_samples_leaf": 2,
             "n_estimators": 100
           },
-          "rmse_validacao_interna": 460.8
+          "rmse_validacao_interna": 450.7
         },
         {
           "ano_teste": 2021,
@@ -247,7 +256,7 @@
             "min_samples_leaf": 4,
             "n_estimators": 100
           },
-          "rmse_validacao_interna": 433.8
+          "rmse_validacao_interna": 434.9
         },
         {
           "ano_teste": 2022,
@@ -255,9 +264,9 @@
             "max_depth": 3,
             "max_features": "sqrt",
             "min_samples_leaf": 8,
-            "n_estimators": 200
+            "n_estimators": 150
           },
-          "rmse_validacao_interna": 462.7
+          "rmse_validacao_interna": 460.4
         },
         {
           "ano_teste": 2023,
@@ -265,9 +274,9 @@
             "max_depth": 3,
             "max_features": 0.5,
             "min_samples_leaf": 8,
-            "n_estimators": 300
+            "n_estimators": 200
           },
-          "rmse_validacao_interna": 486.8
+          "rmse_validacao_interna": 484.4
         },
         {
           "ano_teste": 2024,
@@ -277,173 +286,183 @@
             "min_samples_leaf": 4,
             "n_estimators": 100
           },
-          "rmse_validacao_interna": 393.5
+          "rmse_validacao_interna": 396.2
         }
       ]
     },
     "XGBoost": {
-      "RMSE": 426.5,
-      "MAE": 304.6,
-      "R2": 0.174,
-      "rRMSE": 14.2,
-      "ganho_RMSE_sobre_baseline": -10.9,
+      "RMSE": 428.6,
+      "MAE": 305.9,
+      "R2": 0.166,
+      "rRMSE": 14.3,
+      "ganho_RMSE_sobre_baseline": -13.0,
       "supera_baseline": false,
+      "empata_com_baseline": false,
+      "config_modal": {
+        "colsample_bytree": 1.0,
+        "learning_rate": 0.02,
+        "max_depth": 6,
+        "n_estimators": 400,
+        "reg_lambda": 5,
+        "subsample": 0.7
+      },
+      "config_modal_frequencia": "2 de 24",
       "escolhas_por_dobra": [
         {
           "ano_teste": 2001,
           "params": {
             "colsample_bytree": 0.8,
-            "learning_rate": 0.01,
-            "max_depth": 4,
-            "n_estimators": 100,
-            "reg_lambda": 5,
-            "subsample": 0.6
+            "learning_rate": 0.02,
+            "max_depth": 6,
+            "n_estimators": 400,
+            "reg_lambda": 10,
+            "subsample": 0.8
           },
-          "rmse_validacao_interna": 445.6
+          "rmse_validacao_interna": 444.7
         },
         {
           "ano_teste": 2002,
           "params": {
-            "colsample_bytree": 0.8,
-            "learning_rate": 0.01,
-            "max_depth": 4,
+            "colsample_bytree": 0.6,
+            "learning_rate": 0.1,
+            "max_depth": 6,
             "n_estimators": 100,
-            "reg_lambda": 1,
-            "subsample": 0.6
+            "reg_lambda": 5,
+            "subsample": 0.7
           },
-          "rmse_validacao_interna": 449.0
+          "rmse_validacao_interna": 439.9
         },
         {
           "ano_teste": 2003,
           "params": {
-            "colsample_bytree": 0.8,
-            "learning_rate": 0.01,
-            "max_depth": 2,
-            "n_estimators": 200,
+            "colsample_bytree": 1.0,
+            "learning_rate": 0.02,
+            "max_depth": 6,
+            "n_estimators": 400,
             "reg_lambda": 5,
-            "subsample": 0.6
+            "subsample": 0.7
           },
-          "rmse_validacao_interna": 447.8
+          "rmse_validacao_interna": 442.8
         },
         {
           "ano_teste": 2004,
           "params": {
             "colsample_bytree": 0.8,
-            "learning_rate": 0.01,
+            "learning_rate": 0.02,
             "max_depth": 2,
             "n_estimators": 100,
             "reg_lambda": 10,
             "subsample": 0.8
           },
-          "rmse_validacao_interna": 441.4
+          "rmse_validacao_interna": 443.5
         },
         {
           "ano_teste": 2005,
           "params": {
             "colsample_bytree": 1.0,
-            "learning_rate": 0.01,
-            "max_depth": 2,
+            "learning_rate": 0.05,
+            "max_depth": 6,
             "n_estimators": 100,
-            "reg_lambda": 10,
+            "reg_lambda": 1,
             "subsample": 0.8
           },
-          "rmse_validacao_interna": 441.3
+          "rmse_validacao_interna": 435.6
         },
         {
           "ano_teste": 2006,
           "params": {
             "colsample_bytree": 1.0,
-            "learning_rate": 0.01,
-            "max_depth": 2,
+            "learning_rate": 0.02,
+            "max_depth": 4,
             "n_estimators": 200,
-            "reg_lambda": 5,
-            "subsample": 0.6
+            "reg_lambda": 10,
+            "subsample": 0.8
           },
-          "rmse_validacao_interna": 448.0
+          "rmse_validacao_interna": 445.2
         },
         {
           "ano_teste": 2007,
           "params": {
-            "colsample_bytree": 0.6,
-            "learning_rate": 0.01,
+            "colsample_bytree": 1.0,
+            "learning_rate": 0.1,
+            "max_depth": 4,
+            "n_estimators": 400,
+            "reg_lambda": 5,
+            "subsample": 0.8
+          },
+          "rmse_validacao_interna": 428.1
+        },
+        {
+          "ano_teste": 2008,
+          "params": {
+            "colsample_bytree": 1.0,
+            "learning_rate": 0.1,
             "max_depth": 4,
             "n_estimators": 100,
             "reg_lambda": 1,
             "subsample": 0.8
           },
-          "rmse_validacao_interna": 439.4
-        },
-        {
-          "ano_teste": 2008,
-          "params": {
-            "colsample_bytree": 0.6,
-            "learning_rate": 0.01,
-            "max_depth": 2,
-            "n_estimators": 400,
-            "reg_lambda": 2,
-            "subsample": 0.6
-          },
-          "rmse_validacao_interna": 453.4
+          "rmse_validacao_interna": 439.6
         },
         {
           "ano_teste": 2009,
           "params": {
-            "colsample_bytree": 0.8,
-            "learning_rate": 0.01,
-            "max_depth": 3,
-            "n_estimators": 100,
-            "reg_lambda": 10,
-            "subsample": 0.6
+            "colsample_bytree": 1.0,
+            "learning_rate": 0.1,
+            "max_depth": 4,
+            "n_estimators": 400,
+            "reg_lambda": 5,
+            "subsample": 0.8
           },
-          "rmse_validacao_interna": 440.4
+          "rmse_validacao_interna": 435.0
         },
         {
           "ano_teste": 2010,
           "params": {
             "colsample_bytree": 1.0,
-            "learning_rate": 0.01,
+            "learning_rate": 0.02,
             "max_depth": 3,
             "n_estimators": 100,
             "reg_lambda": 5,
-            "subsample": 0.6
+            "subsample": 0.7
           },
-          "rmse_validacao_interna": 444.2
+          "rmse_validacao_interna": 441.4
         },
         {
           "ano_teste": 2011,
           "params": {
             "colsample_bytree": 1.0,
-            "learning_rate": 0.03,
+            "learning_rate": 0.02,
             "max_depth": 6,
             "n_estimators": 400,
             "reg_lambda": 5,
-            "subsample": 0.6
+            "subsample": 0.7
           },
-          "rmse_validacao_interna": 452.8
+          "rmse_validacao_interna": 436.3
         },
         {
           "ano_teste": 2012,
           "params": {
-            "colsample_bytree": 0.6,
-            "learning_rate": 0.01,
+            "colsample_bytree": 1.0,
+            "learning_rate": 0.1,
             "max_depth": 6,
             "n_estimators": 400,
-            "reg_lambda": 5,
-            "subsample": 0.6
+            "reg_lambda": 1,
+            "subsample": 1.0
           },
-          "rmse_validacao_interna": 449.9
+          "rmse_validacao_interna": 439.7
         },
         {
           "ano_teste": 2013,
           "params": {
             "colsample_bytree": 0.8,
-            "learning_rate": 0.01,
+            "learning_rate": 0.02,
             "max_depth": 6,
             "n_estimators": 100,
             "reg_lambda": 10,
             "subsample": 0.8
           },
-          "rmse_validacao_interna": 443.0
+          "rmse_validacao_interna": 440.9
         },
         {
           "ano_teste": 2014,
@@ -455,572 +474,597 @@
             "reg_lambda": 10,
             "subsample": 1.0
           },
-          "rmse_validacao_interna": 452.7
+          "rmse_validacao_interna": 435.4
         },
         {
           "ano_teste": 2015,
           "params": {
-            "colsample_bytree": 1.0,
-            "learning_rate": 0.01,
-            "max_depth": 2,
-            "n_estimators": 400,
-            "reg_lambda": 10,
-            "subsample": 0.6
-          },
-          "rmse_validacao_interna": 454.6
-        },
-        {
-          "ano_teste": 2016,
-          "params": {
-            "colsample_bytree": 0.6,
-            "learning_rate": 0.01,
+            "colsample_bytree": 0.8,
+            "learning_rate": 0.1,
             "max_depth": 4,
-            "n_estimators": 200,
-            "reg_lambda": 10,
-            "subsample": 1.0
-          },
-          "rmse_validacao_interna": 450.6
-        },
-        {
-          "ano_teste": 2017,
-          "params": {
-            "colsample_bytree": 0.8,
-            "learning_rate": 0.01,
-            "max_depth": 2,
-            "n_estimators": 100,
-            "reg_lambda": 2,
-            "subsample": 0.6
-          },
-          "rmse_validacao_interna": 433.2
-        },
-        {
-          "ano_teste": 2018,
-          "params": {
-            "colsample_bytree": 1.0,
-            "learning_rate": 0.01,
-            "max_depth": 3,
-            "n_estimators": 200,
-            "reg_lambda": 10,
-            "subsample": 0.6
-          },
-          "rmse_validacao_interna": 440.2
-        },
-        {
-          "ano_teste": 2019,
-          "params": {
-            "colsample_bytree": 0.8,
-            "learning_rate": 0.01,
-            "max_depth": 6,
-            "n_estimators": 200,
-            "reg_lambda": 10,
-            "subsample": 1.0
-          },
-          "rmse_validacao_interna": 429.1
-        },
-        {
-          "ano_teste": 2020,
-          "params": {
-            "colsample_bytree": 0.6,
-            "learning_rate": 0.01,
-            "max_depth": 2,
-            "n_estimators": 200,
-            "reg_lambda": 1,
-            "subsample": 1.0
-          },
-          "rmse_validacao_interna": 450.9
-        },
-        {
-          "ano_teste": 2021,
-          "params": {
-            "colsample_bytree": 1.0,
-            "learning_rate": 0.01,
-            "max_depth": 2,
-            "n_estimators": 200,
-            "reg_lambda": 1,
-            "subsample": 0.8
-          },
-          "rmse_validacao_interna": 428.6
-        },
-        {
-          "ano_teste": 2022,
-          "params": {
-            "colsample_bytree": 0.6,
-            "learning_rate": 0.01,
-            "max_depth": 6,
-            "n_estimators": 200,
-            "reg_lambda": 2,
-            "subsample": 0.8
-          },
-          "rmse_validacao_interna": 465.4
-        },
-        {
-          "ano_teste": 2023,
-          "params": {
-            "colsample_bytree": 0.6,
-            "learning_rate": 0.01,
-            "max_depth": 2,
-            "n_estimators": 100,
+            "n_estimators": 400,
             "reg_lambda": 5,
             "subsample": 1.0
           },
-          "rmse_validacao_interna": 471.5
-        },
-        {
-          "ano_teste": 2024,
-          "params": {
-            "colsample_bytree": 1.0,
-            "learning_rate": 0.03,
-            "max_depth": 6,
-            "n_estimators": 100,
-            "reg_lambda": 5,
-            "subsample": 0.6
-          },
-          "rmse_validacao_interna": 394.6
-        }
-      ]
-    },
-    "SVR": {
-      "RMSE": 419.6,
-      "MAE": 296.2,
-      "R2": 0.201,
-      "rRMSE": 14.0,
-      "ganho_RMSE_sobre_baseline": -4.0,
-      "supera_baseline": false,
-      "escolhas_por_dobra": [
-        {
-          "ano_teste": 2001,
-          "params": {
-            "C": 50,
-            "epsilon": 0.01,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 429.1
-        },
-        {
-          "ano_teste": 2002,
-          "params": {
-            "C": 50,
-            "epsilon": 0.01,
-            "gamma": 0.05
-          },
-          "rmse_validacao_interna": 426.7
-        },
-        {
-          "ano_teste": 2003,
-          "params": {
-            "C": 100,
-            "epsilon": 0.01,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 430.0
-        },
-        {
-          "ano_teste": 2004,
-          "params": {
-            "C": 50,
-            "epsilon": 0.05,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 425.8
-        },
-        {
-          "ano_teste": 2005,
-          "params": {
-            "C": 10,
-            "epsilon": 0.05,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 432.0
-        },
-        {
-          "ano_teste": 2006,
-          "params": {
-            "C": 100,
-            "epsilon": 0.05,
-            "gamma": 0.05
-          },
-          "rmse_validacao_interna": 425.3
-        },
-        {
-          "ano_teste": 2007,
-          "params": {
-            "C": 50,
-            "epsilon": 0.1,
-            "gamma": 0.05
-          },
-          "rmse_validacao_interna": 429.1
-        },
-        {
-          "ano_teste": 2008,
-          "params": {
-            "C": 50,
-            "epsilon": 0.1,
-            "gamma": 0.05
-          },
-          "rmse_validacao_interna": 425.8
-        },
-        {
-          "ano_teste": 2009,
-          "params": {
-            "C": 10,
-            "epsilon": 0.1,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 431.8
-        },
-        {
-          "ano_teste": 2010,
-          "params": {
-            "C": 50,
-            "epsilon": 0.01,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 428.6
-        },
-        {
-          "ano_teste": 2011,
-          "params": {
-            "C": 50,
-            "epsilon": 0.1,
-            "gamma": 0.05
-          },
-          "rmse_validacao_interna": 424.7
-        },
-        {
-          "ano_teste": 2012,
-          "params": {
-            "C": 50,
-            "epsilon": 0.2,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 422.9
-        },
-        {
-          "ano_teste": 2013,
-          "params": {
-            "C": 50,
-            "epsilon": 0.01,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 426.9
-        },
-        {
-          "ano_teste": 2014,
-          "params": {
-            "C": 100,
-            "epsilon": 0.1,
-            "gamma": 0.05
-          },
-          "rmse_validacao_interna": 428.3
-        },
-        {
-          "ano_teste": 2015,
-          "params": {
-            "C": 50,
-            "epsilon": 0.01,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 433.7
+          "rmse_validacao_interna": 445.3
         },
         {
           "ano_teste": 2016,
           "params": {
-            "C": 100,
-            "epsilon": 0.05,
-            "gamma": "scale"
+            "colsample_bytree": 0.8,
+            "learning_rate": 0.1,
+            "max_depth": 6,
+            "n_estimators": 100,
+            "reg_lambda": 10,
+            "subsample": 1.0
           },
-          "rmse_validacao_interna": 410.9
+          "rmse_validacao_interna": 444.6
         },
         {
           "ano_teste": 2017,
           "params": {
-            "C": 100,
-            "epsilon": 0.1,
-            "gamma": 0.05
-          },
-          "rmse_validacao_interna": 417.1
-        },
-        {
-          "ano_teste": 2018,
-          "params": {
-            "C": 50,
-            "epsilon": 0.01,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 418.4
-        },
-        {
-          "ano_teste": 2019,
-          "params": {
-            "C": 50,
-            "epsilon": 0.2,
-            "gamma": 0.05
-          },
-          "rmse_validacao_interna": 416.8
-        },
-        {
-          "ano_teste": 2020,
-          "params": {
-            "C": 50,
-            "epsilon": 0.2,
-            "gamma": 0.05
-          },
-          "rmse_validacao_interna": 430.3
-        },
-        {
-          "ano_teste": 2021,
-          "params": {
-            "C": 10,
-            "epsilon": 0.01,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 424.5
-        },
-        {
-          "ano_teste": 2022,
-          "params": {
-            "C": 50,
-            "epsilon": 0.01,
-            "gamma": 0.05
-          },
-          "rmse_validacao_interna": 438.0
-        },
-        {
-          "ano_teste": 2023,
-          "params": {
-            "C": 50,
-            "epsilon": 0.1,
-            "gamma": 0.05
-          },
-          "rmse_validacao_interna": 458.1
-        },
-        {
-          "ano_teste": 2024,
-          "params": {
-            "C": 100,
-            "epsilon": 0.05,
-            "gamma": "scale"
-          },
-          "rmse_validacao_interna": 383.4
-        }
-      ]
-    },
-    "MLP": {
-      "RMSE": 418.0,
-      "MAE": 298.7,
-      "R2": 0.207,
-      "rRMSE": 14.0,
-      "ganho_RMSE_sobre_baseline": -2.4,
-      "supera_baseline": false,
-      "escolhas_por_dobra": [
-        {
-          "ano_teste": 2001,
-          "params": {
-            "alpha": 0.001,
-            "hidden_layer_sizes": [
-              100,
-              50
-            ],
-            "learning_rate_init": 0.01,
-            "max_iter": 300
+            "colsample_bytree": 0.8,
+            "learning_rate": 0.02,
+            "max_depth": 2,
+            "n_estimators": 100,
+            "reg_lambda": 2,
+            "subsample": 0.7
           },
           "rmse_validacao_interna": 434.2
         },
         {
+          "ano_teste": 2018,
+          "params": {
+            "colsample_bytree": 1.0,
+            "learning_rate": 0.02,
+            "max_depth": 3,
+            "n_estimators": 200,
+            "reg_lambda": 10,
+            "subsample": 0.7
+          },
+          "rmse_validacao_interna": 441.8
+        },
+        {
+          "ano_teste": 2019,
+          "params": {
+            "colsample_bytree": 0.8,
+            "learning_rate": 0.02,
+            "max_depth": 6,
+            "n_estimators": 200,
+            "reg_lambda": 10,
+            "subsample": 1.0
+          },
+          "rmse_validacao_interna": 423.1
+        },
+        {
+          "ano_teste": 2020,
+          "params": {
+            "colsample_bytree": 0.6,
+            "learning_rate": 0.1,
+            "max_depth": 6,
+            "n_estimators": 400,
+            "reg_lambda": 2,
+            "subsample": 0.8
+          },
+          "rmse_validacao_interna": 433.1
+        },
+        {
+          "ano_teste": 2021,
+          "params": {
+            "colsample_bytree": 1.0,
+            "learning_rate": 0.02,
+            "max_depth": 2,
+            "n_estimators": 200,
+            "reg_lambda": 1,
+            "subsample": 0.8
+          },
+          "rmse_validacao_interna": 435.4
+        },
+        {
+          "ano_teste": 2022,
+          "params": {
+            "colsample_bytree": 0.6,
+            "learning_rate": 0.02,
+            "max_depth": 4,
+            "n_estimators": 100,
+            "reg_lambda": 5,
+            "subsample": 0.8
+          },
+          "rmse_validacao_interna": 460.7
+        },
+        {
+          "ano_teste": 2023,
+          "params": {
+            "colsample_bytree": 0.6,
+            "learning_rate": 0.02,
+            "max_depth": 2,
+            "n_estimators": 100,
+            "reg_lambda": 5,
+            "subsample": 1.0
+          },
+          "rmse_validacao_interna": 479.0
+        },
+        {
+          "ano_teste": 2024,
+          "params": {
+            "colsample_bytree": 1.0,
+            "learning_rate": 0.05,
+            "max_depth": 6,
+            "n_estimators": 100,
+            "reg_lambda": 5,
+            "subsample": 0.7
+          },
+          "rmse_validacao_interna": 384.9
+        }
+      ]
+    },
+    "SVR": {
+      "RMSE": 416.0,
+      "MAE": 293.2,
+      "R2": 0.214,
+      "rRMSE": 13.9,
+      "ganho_RMSE_sobre_baseline": -0.4,
+      "supera_baseline": false,
+      "empata_com_baseline": true,
+      "config_modal": {
+        "C": 30,
+        "epsilon": 0.2,
+        "gamma": "auto"
+      },
+      "config_modal_frequencia": "6 de 24",
+      "escolhas_por_dobra": [
+        {
+          "ano_teste": 2001,
+          "params": {
+            "C": 30,
+            "epsilon": 0.05,
+            "gamma": "auto"
+          },
+          "rmse_validacao_interna": 427.8
+        },
+        {
           "ano_teste": 2002,
           "params": {
-            "alpha": 0.001,
-            "hidden_layer_sizes": [
-              32
-            ],
-            "learning_rate_init": 0.001,
-            "max_iter": 300
+            "C": 30,
+            "epsilon": 0.2,
+            "gamma": "scale"
           },
-          "rmse_validacao_interna": 437.6
+          "rmse_validacao_interna": 425.9
         },
         {
           "ano_teste": 2003,
           "params": {
-            "alpha": 0.1,
-            "hidden_layer_sizes": [
-              64,
-              32
-            ],
-            "learning_rate_init": 0.001,
-            "max_iter": 300
+            "C": 100,
+            "epsilon": 0.05,
+            "gamma": 0.05
+          },
+          "rmse_validacao_interna": 426.1
+        },
+        {
+          "ano_teste": 2004,
+          "params": {
+            "C": 100,
+            "epsilon": 0.2,
+            "gamma": "scale"
+          },
+          "rmse_validacao_interna": 425.4
+        },
+        {
+          "ano_teste": 2005,
+          "params": {
+            "C": 30,
+            "epsilon": 0.2,
+            "gamma": "auto"
+          },
+          "rmse_validacao_interna": 425.6
+        },
+        {
+          "ano_teste": 2006,
+          "params": {
+            "C": 30,
+            "epsilon": 0.2,
+            "gamma": "auto"
+          },
+          "rmse_validacao_interna": 424.6
+        },
+        {
+          "ano_teste": 2007,
+          "params": {
+            "C": 30,
+            "epsilon": 0.1,
+            "gamma": "scale"
+          },
+          "rmse_validacao_interna": 427.7
+        },
+        {
+          "ano_teste": 2008,
+          "params": {
+            "C": 30,
+            "epsilon": 0.2,
+            "gamma": "auto"
+          },
+          "rmse_validacao_interna": 424.2
+        },
+        {
+          "ano_teste": 2009,
+          "params": {
+            "C": 30,
+            "epsilon": 0.1,
+            "gamma": "auto"
+          },
+          "rmse_validacao_interna": 425.3
+        },
+        {
+          "ano_teste": 2010,
+          "params": {
+            "C": 30,
+            "epsilon": 0.2,
+            "gamma": 0.05
+          },
+          "rmse_validacao_interna": 427.0
+        },
+        {
+          "ano_teste": 2011,
+          "params": {
+            "C": 30,
+            "epsilon": 0.05,
+            "gamma": "scale"
+          },
+          "rmse_validacao_interna": 423.8
+        },
+        {
+          "ano_teste": 2012,
+          "params": {
+            "C": 100,
+            "epsilon": 0.05,
+            "gamma": 0.05
+          },
+          "rmse_validacao_interna": 423.2
+        },
+        {
+          "ano_teste": 2013,
+          "params": {
+            "C": 30,
+            "epsilon": 0.2,
+            "gamma": "auto"
+          },
+          "rmse_validacao_interna": 425.0
+        },
+        {
+          "ano_teste": 2014,
+          "params": {
+            "C": 100,
+            "epsilon": 0.2,
+            "gamma": 0.05
+          },
+          "rmse_validacao_interna": 424.8
+        },
+        {
+          "ano_teste": 2015,
+          "params": {
+            "C": 100,
+            "epsilon": 0.2,
+            "gamma": 0.05
+          },
+          "rmse_validacao_interna": 432.1
+        },
+        {
+          "ano_teste": 2016,
+          "params": {
+            "C": 100,
+            "epsilon": 0.05,
+            "gamma": "auto"
+          },
+          "rmse_validacao_interna": 407.6
+        },
+        {
+          "ano_teste": 2017,
+          "params": {
+            "C": 100,
+            "epsilon": 0.1,
+            "gamma": "auto"
+          },
+          "rmse_validacao_interna": 411.6
+        },
+        {
+          "ano_teste": 2018,
+          "params": {
+            "C": 30,
+            "epsilon": 0.05,
+            "gamma": "auto"
+          },
+          "rmse_validacao_interna": 418.0
+        },
+        {
+          "ano_teste": 2019,
+          "params": {
+            "C": 30,
+            "epsilon": 0.2,
+            "gamma": "auto"
+          },
+          "rmse_validacao_interna": 415.7
+        },
+        {
+          "ano_teste": 2020,
+          "params": {
+            "C": 30,
+            "epsilon": 0.2,
+            "gamma": "auto"
+          },
+          "rmse_validacao_interna": 427.3
+        },
+        {
+          "ano_teste": 2021,
+          "params": {
+            "C": 100,
+            "epsilon": 0.1,
+            "gamma": 0.05
+          },
+          "rmse_validacao_interna": 425.5
+        },
+        {
+          "ano_teste": 2022,
+          "params": {
+            "C": 30,
+            "epsilon": 0.1,
+            "gamma": "auto"
           },
           "rmse_validacao_interna": 437.3
         },
         {
-          "ano_teste": 2004,
+          "ano_teste": 2023,
+          "params": {
+            "C": 30,
+            "epsilon": 0.05,
+            "gamma": "scale"
+          },
+          "rmse_validacao_interna": 461.1
+        },
+        {
+          "ano_teste": 2024,
+          "params": {
+            "C": 100,
+            "epsilon": 0.1,
+            "gamma": 0.05
+          },
+          "rmse_validacao_interna": 383.8
+        }
+      ]
+    },
+    "MLP": {
+      "RMSE": 415.4,
+      "MAE": 297.8,
+      "R2": 0.217,
+      "rRMSE": 13.9,
+      "ganho_RMSE_sobre_baseline": 0.2,
+      "supera_baseline": false,
+      "empata_com_baseline": true,
+      "config_modal": {
+        "alpha": 0.001,
+        "hidden_layer_sizes": [
+          64,
+          32
+        ],
+        "learning_rate_init": 0.003,
+        "max_iter": 800
+      },
+      "config_modal_frequencia": "3 de 24",
+      "escolhas_por_dobra": [
+        {
+          "ano_teste": 2001,
           "params": {
             "alpha": 0.001,
             "hidden_layer_sizes": [
               64,
               32
             ],
-            "learning_rate_init": 0.01,
-            "max_iter": 300
+            "learning_rate_init": 0.003,
+            "max_iter": 800
           },
-          "rmse_validacao_interna": 436.0
+          "rmse_validacao_interna": 438.8
         },
         {
-          "ano_teste": 2005,
+          "ano_teste": 2002,
           "params": {
             "alpha": 0.01,
             "hidden_layer_sizes": [
-              64,
               32
             ],
             "learning_rate_init": 0.001,
-            "max_iter": 300
+            "max_iter": 800
           },
-          "rmse_validacao_interna": 435.2
+          "rmse_validacao_interna": 437.4
         },
         {
-          "ano_teste": 2006,
+          "ano_teste": 2003,
+          "params": {
+            "alpha": 0.01,
+            "hidden_layer_sizes": [
+              32
+            ],
+            "learning_rate_init": 0.003,
+            "max_iter": 500
+          },
+          "rmse_validacao_interna": 437.2
+        },
+        {
+          "ano_teste": 2004,
+          "params": {
+            "alpha": 0.01,
+            "hidden_layer_sizes": [
+              32
+            ],
+            "learning_rate_init": 0.001,
+            "max_iter": 500
+          },
+          "rmse_validacao_interna": 436.6
+        },
+        {
+          "ano_teste": 2005,
           "params": {
             "alpha": 0.1,
             "hidden_layer_sizes": [
               100,
               50
             ],
-            "learning_rate_init": 0.001,
-            "max_iter": 300
+            "learning_rate_init": 0.003,
+            "max_iter": 500
           },
-          "rmse_validacao_interna": 435.9
+          "rmse_validacao_interna": 431.6
+        },
+        {
+          "ano_teste": 2006,
+          "params": {
+            "alpha": 0.001,
+            "hidden_layer_sizes": [
+              100,
+              50
+            ],
+            "learning_rate_init": 0.003,
+            "max_iter": 500
+          },
+          "rmse_validacao_interna": 435.6
         },
         {
           "ano_teste": 2007,
           "params": {
             "alpha": 0.01,
             "hidden_layer_sizes": [
-              64,
-              32
+              100,
+              50
             ],
-            "learning_rate_init": 0.01,
-            "max_iter": 300
+            "learning_rate_init": 0.003,
+            "max_iter": 500
           },
-          "rmse_validacao_interna": 435.7
+          "rmse_validacao_interna": 433.9
         },
         {
           "ano_teste": 2008,
           "params": {
             "alpha": 0.001,
             "hidden_layer_sizes": [
-              64,
-              32
+              100,
+              50
             ],
-            "learning_rate_init": 0.01,
-            "max_iter": 300
+            "learning_rate_init": 0.003,
+            "max_iter": 800
           },
-          "rmse_validacao_interna": 436.6
+          "rmse_validacao_interna": 434.9
         },
         {
           "ano_teste": 2009,
           "params": {
-            "alpha": 0.01,
+            "alpha": 0.001,
             "hidden_layer_sizes": [
-              64,
               32
             ],
-            "learning_rate_init": 0.01,
-            "max_iter": 300
+            "learning_rate_init": 0.003,
+            "max_iter": 500
           },
-          "rmse_validacao_interna": 429.6
+          "rmse_validacao_interna": 436.2
         },
         {
           "ano_teste": 2010,
           "params": {
             "alpha": 0.1,
             "hidden_layer_sizes": [
-              64,
               32
             ],
-            "learning_rate_init": 0.01,
-            "max_iter": 300
+            "learning_rate_init": 0.001,
+            "max_iter": 500
           },
-          "rmse_validacao_interna": 435.9
+          "rmse_validacao_interna": 435.8
         },
         {
           "ano_teste": 2011,
           "params": {
-            "alpha": 0.1,
+            "alpha": 0.01,
             "hidden_layer_sizes": [
-              64,
-              32
+              100,
+              50
             ],
-            "learning_rate_init": 0.001,
-            "max_iter": 300
+            "learning_rate_init": 0.003,
+            "max_iter": 800
           },
-          "rmse_validacao_interna": 436.2
+          "rmse_validacao_interna": 435.1
         },
         {
           "ano_teste": 2012,
           "params": {
             "alpha": 0.01,
             "hidden_layer_sizes": [
-              64,
               32
             ],
             "learning_rate_init": 0.001,
-            "max_iter": 300
+            "max_iter": 500
           },
-          "rmse_validacao_interna": 436.4
+          "rmse_validacao_interna": 436.3
         },
         {
           "ano_teste": 2013,
           "params": {
-            "alpha": 0.1,
+            "alpha": 0.01,
             "hidden_layer_sizes": [
               64,
               32
             ],
-            "learning_rate_init": 0.01,
-            "max_iter": 300
+            "learning_rate_init": 0.003,
+            "max_iter": 800
           },
-          "rmse_validacao_interna": 432.4
+          "rmse_validacao_interna": 435.5
         },
         {
           "ano_teste": 2014,
           "params": {
-            "alpha": 0.001,
+            "alpha": 0.1,
             "hidden_layer_sizes": [
-              32
+              32,
+              16
             ],
-            "learning_rate_init": 0.01,
-            "max_iter": 300
+            "learning_rate_init": 0.001,
+            "max_iter": 500
           },
-          "rmse_validacao_interna": 429.1
+          "rmse_validacao_interna": 436.6
         },
         {
           "ano_teste": 2015,
           "params": {
+            "alpha": 0.1,
+            "hidden_layer_sizes": [
+              32
+            ],
+            "learning_rate_init": 0.001,
+            "max_iter": 800
+          },
+          "rmse_validacao_interna": 441.8
+        },
+        {
+          "ano_teste": 2016,
+          "params": {
+            "alpha": 0.001,
+            "hidden_layer_sizes": [
+              32
+            ],
+            "learning_rate_init": 0.003,
+            "max_iter": 500
+          },
+          "rmse_validacao_interna": 427.4
+        },
+        {
+          "ano_teste": 2017,
+          "params": {
             "alpha": 0.001,
             "hidden_layer_sizes": [
               64,
               32
             ],
-            "learning_rate_init": 0.001,
-            "max_iter": 300
+            "learning_rate_init": 0.003,
+            "max_iter": 800
           },
-          "rmse_validacao_interna": 442.0
+          "rmse_validacao_interna": 424.9
         },
         {
-          "ano_teste": 2016,
-          "params": {
-            "alpha": 0.1,
-            "hidden_layer_sizes": [
-              64,
-              32
-            ],
-            "learning_rate_init": 0.01,
-            "max_iter": 300
-          },
-          "rmse_validacao_interna": 430.4
-        },
-        {
-          "ano_teste": 2017,
+          "ano_teste": 2018,
           "params": {
             "alpha": 0.1,
             "hidden_layer_sizes": [
@@ -1028,102 +1072,88 @@
               32
             ],
             "learning_rate_init": 0.003,
-            "max_iter": 300
+            "max_iter": 500
           },
-          "rmse_validacao_interna": 425.3
-        },
-        {
-          "ano_teste": 2018,
-          "params": {
-            "alpha": 0.001,
-            "hidden_layer_sizes": [
-              32
-            ],
-            "learning_rate_init": 0.001,
-            "max_iter": 300
-          },
-          "rmse_validacao_interna": 429.1
+          "rmse_validacao_interna": 420.5
         },
         {
           "ano_teste": 2019,
           "params": {
             "alpha": 0.01,
             "hidden_layer_sizes": [
-              64,
               32
             ],
             "learning_rate_init": 0.001,
-            "max_iter": 300
+            "max_iter": 800
           },
-          "rmse_validacao_interna": 425.0
+          "rmse_validacao_interna": 424.9
         },
         {
           "ano_teste": 2020,
           "params": {
-            "alpha": 0.1,
+            "alpha": 0.001,
             "hidden_layer_sizes": [
-              64,
               32
             ],
             "learning_rate_init": 0.001,
-            "max_iter": 300
+            "max_iter": 500
           },
-          "rmse_validacao_interna": 438.0
+          "rmse_validacao_interna": 437.8
         },
         {
           "ano_teste": 2021,
           "params": {
-            "alpha": 0.01,
+            "alpha": 0.1,
             "hidden_layer_sizes": [
-              64,
               32
             ],
-            "learning_rate_init": 0.003,
-            "max_iter": 300
+            "learning_rate_init": 0.001,
+            "max_iter": 500
           },
-          "rmse_validacao_interna": 427.1
+          "rmse_validacao_interna": 426.9
         },
         {
           "ano_teste": 2022,
           "params": {
             "alpha": 0.1,
             "hidden_layer_sizes": [
-              64,
-              32
+              100,
+              50
             ],
             "learning_rate_init": 0.003,
-            "max_iter": 300
+            "max_iter": 800
           },
-          "rmse_validacao_interna": 441.8
+          "rmse_validacao_interna": 439.5
         },
         {
           "ano_teste": 2023,
           "params": {
-            "alpha": 0.001,
+            "alpha": 0.01,
             "hidden_layer_sizes": [
-              64,
               32
             ],
-            "learning_rate_init": 0.01,
-            "max_iter": 300
+            "learning_rate_init": 0.003,
+            "max_iter": 500
           },
-          "rmse_validacao_interna": 462.1
+          "rmse_validacao_interna": 462.0
         },
         {
           "ano_teste": 2024,
           "params": {
             "alpha": 0.001,
             "hidden_layer_sizes": [
+              64,
               32
             ],
             "learning_rate_init": 0.003,
-            "max_iter": 300
+            "max_iter": 800
           },
-          "rmse_validacao_interna": 398.5
+          "rmse_validacao_interna": 394.7
         }
       ]
     }
   },
   "melhor_modelo": "MLP",
+  "tolerancia_empate_kg_ha": 2.0,
   "algum_supera_baseline": false
 }

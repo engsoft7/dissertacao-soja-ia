@@ -33,11 +33,19 @@ rmse = [r['modelos'][m]['RMSE'] for m in MODELS]
 fig, ax = plt.subplots(1, 2, figsize=(9.8, 3.9))
 x = np.arange(len(MODELS))
 
-# (a) RMSE contra o baseline
-cor = [B1 if v < base else B2 for v in rmse]
+# (a) RMSE contra o baseline. Dentro da tolerancia de empate o modelo nao
+# "vence" nem "perde" do baseline: empata, e a cor precisa dizer isso.
+TOL = r.get('tolerancia_empate_kg_ha', 2.0)
+CINZA = '#8C8C8C'
+def cor_de(v):
+    if abs(base - v) <= TOL: return CINZA      # empate tecnico
+    return B1 if v < base else B2
+cor = [cor_de(v) for v in rmse]
 ax[0].bar(x, rmse, color=cor, width=0.6)
 ax[0].axhline(base, ls='--', color=RED, lw=1.4,
               label=f'Baseline ({base:.0f} kg/ha)')
+ax[0].axhspan(base - TOL, base + TOL, color=CINZA, alpha=0.25, lw=0,
+              label=f'Empate técnico (±{TOL:.0f} kg/ha)')
 ax[0].set_xticks(x); ax[0].set_xticklabels(MODELS, rotation=15, fontsize=8.5)
 ax[0].set_ylabel('RMSE (kg/ha)')
 ax[0].set_title(f'(a) Busca aninhada — {r["protocolo"]["dobras_externas"]} dobras\n'
@@ -73,7 +81,9 @@ plt.close()
 print('OK: results/fig6_busca_aninhada.png')
 print(f'  baseline: {base:.1f} kg/ha')
 for m, v, f in zip(MODELS, rmse, frac):
-    print(f'  {m:14s} RMSE={v:6.1f}  ({v-base:+.1f} vs baseline)  '
+    situacao = ('empata' if abs(base - v) <= TOL
+                else 'supera' if v < base else 'perde para')
+    print(f'  {m:14s} RMSE={v:6.1f}  ({v-base:+.1f}: {situacao} o baseline)  '
           f'config mais escolhida em {f:.0f}% das dobras')
 print('  algum supera o baseline:',
       'SIM' if r['algum_supera_baseline'] else 'NAO')

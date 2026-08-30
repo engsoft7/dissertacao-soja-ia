@@ -68,11 +68,13 @@ Esse resultado se sustenta sob dois controles adicionais:
   natural é que os modelos poderiam vencer se fossem melhor ajustados.
   `03_busca_hiperparametros.py` responde com validação cruzada aninhada: os
   hiperparâmetros são escolhidos dentro de cada dobra, sem jamais ver a safra
-  avaliada. O baseline continua à frente de todos (415,6 kg/ha, contra 418,0 do
-  MLP, 419,6 do SVR, 426,5 do XGBoost e 427,2 do Random Forest). A configuração
-  vencedora só se repete em 4% a 21% das dobras: a validação interna não encontra
-  um ótimo consistente, o que se espera quando as variáveis ambientais não
-  carregam sinal sobre o alvo.
+  avaliada. Nenhum modelo supera o baseline (415,6 kg/ha): o MLP e o SVR **empatam**
+  com ele (415,4 e 416,0 kg/ha — diferenças dentro do ruído), e os métodos de
+  árvore ficam atrás (Random Forest 425,4 e XGBoost 428,6). Um modelo que empata
+  com o baseline aprendeu a prever resíduo aproximadamente nulo: as variáveis
+  ambientais não o moveram. A configuração vencedora só se repete em 8% a 25% das
+  dobras — a validação interna não encontra um ótimo consistente, o que se espera
+  quando não há sinal a encontrar.
 
 A investigação da variável-alvo revelou que **40,1% dos pares de safras
 consecutivas da PAM/IBGE nos municípios paraenses apresentam produtividade

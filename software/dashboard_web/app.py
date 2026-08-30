@@ -390,7 +390,6 @@ __VARS__
     }
     .eco-card.receita .eco-label::before { background: var(--positivo); }
     .eco-card.custo   .eco-label::before { background: #d97706; }
-    .eco-card.vtn     .eco-label::before { background: #8e8e93; }
     .eco-card.margem  .eco-label::before { background: var(--text-pure); }
 
 
@@ -1108,7 +1107,7 @@ if tela_atual == "📈 Análise Histórica":
 if tela_atual == "💰 Viabilidade Financeira":
     st.markdown("### Simulador de viabilidade financeira")
     st.caption(
-        "Os três campos abaixo partem de referências regionais e podem ser "
+        "Os dois campos abaixo partem de referências regionais e podem ser "
         "editados. Para um cenário realista, ajuste também a "
         "**Expectativa Produtiva da Fazenda**, na barra lateral, com a "
         "produtividade que a sua propriedade colhe em um ano normal.")
@@ -1116,7 +1115,7 @@ if tela_atual == "💰 Viabilidade Financeira":
     with st.spinner("Processando margem de lucro com IA Georreferenciada..."):
         r_eco = ajustar_r(estimador.estimar(municipio, int(df.ano.max()) + 1))
 
-    col_eco1, col_eco2, col_eco3 = st.columns(3)
+    col_eco1, col_eco2 = st.columns(2)
     try:
         import sys
         from pathlib import Path
@@ -1165,31 +1164,12 @@ if tela_atual == "💰 Viabilidade Financeira":
             "**Custo:** CONAB, custo operacional da soja em Pedro Afonso (TO), "
             "levantamento de março de 2026, convertido pela produtividade de "
             "referência de 2.880 kg/ha. O Pará não tem levantamento próprio.")
-    with col_eco3:
-        vtn_publicado = custos_locais["vtn_ha"]
-        if vtn_publicado is None:
-            # A Receita Federal publica VTN para 13 dos 38 municípios da base.
-            # Onde não publica, o painel diz isso em vez de estimar um valor.
-            vtn_ha = None
-            st.markdown(
-                f"**Preço Terra Nua VTN/ha ({municipio.title()})**")
-            st.markdown(
-                '<div style="padding:9px 12px; border:1px dashed var(--card-border);'
-                ' border-radius:var(--raio-pequeno); color:var(--text-muted);'
-                ' font-size:0.88rem;">não publicado</div>',
-                unsafe_allow_html=True)
-            st.caption(
-                "**Terra:** a Receita Federal não publica VTN para este "
-                "município na tabela de 2026.")
-        else:
-            vtn_ha = st.number_input(
-                f"Preço Terra Nua VTN/ha ({municipio.title()})",
-                min_value=0,
-                value=int(vtn_publicado),
-                step=500)
-            st.caption(
-                "**Terra:** Receita Federal, Tabela de VTN 2026, classe "
-                "lavoura de aptidão boa.")
+    # O Valor da Terra Nua sai dos campos editáveis e do grid de resultados.
+    # Era um campo que o usuário podia alterar sem que nada na tela mudasse,
+    # porque o VTN não entra em cálculo nenhum, e um cartão de patrimônio no
+    # meio de três cartões de fluxo por safra, todos rotulados "R$/ha". Passa a
+    # ser nota de contexto, abaixo, com o que ele de fato é: referência fiscal.
+    vtn_publicado = custos_locais["vtn_ha"]
 
     est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
     receita_ha = est_sacas_ha * preco
@@ -1236,10 +1216,6 @@ if tela_atual == "💰 Viabilidade Financeira":
             <div class="eco-label">Custo operacional (R$/ha)</div>
             <div class="eco-value">{brl(custo_ha)}</div>
         </div>
-        <div class="eco-card vtn" title="Valor da Terra Nua da Receita Federal, classe lavoura de aptidão boa. É patrimônio e não entra na margem.">
-            <div class="eco-label">Valor da terra nua (R$/ha)</div>
-            <div class="eco-value">{brl(vtn_ha) if vtn_ha is not None else "—"}</div>
-        </div>
         <div class="eco-card margem" title="Receita bruta menos custo operacional. Não desconta terra, impostos nem financiamento.">
             <div class="eco-label">Margem operacional (R$/ha)</div>
             <div class="eco-value" style="color:{cor_delta}">{brl(margem_ha)}</div>
@@ -1252,9 +1228,8 @@ if tela_atual == "💰 Viabilidade Financeira":
     st.caption(
         f"As faixas vêm do erro típico do modelo (± {dec(erro_sacas)} sc/ha, "
         f"o mesmo do cartão de validação), convertido a {brl_md(preco)} por saca: "
-        f"± {brl_md(erro_reais)}/ha. O valor da terra nua é patrimônio e não entra "
-        f"no cálculo da margem, que é apenas receita bruta menos custo "
-        f"operacional.")
+        f"± {brl_md(erro_reais)}/ha. A margem é receita bruta menos custo "
+        f"operacional: não desconta terra, impostos nem financiamento.")
     if margem_incerta:
         st.markdown(
             f'<div style="background:var(--card-bg); border:1px solid var(--card-border);'
@@ -1266,6 +1241,21 @@ if tela_atual == "💰 Viabilidade Financeira":
             f'hectare, ou seja, muda de sinal. O cenário não permite concluir se a '
             f'lavoura fecha no azul ou no vermelho.</div>',
             unsafe_allow_html=True)
+
+    if vtn_publicado is None:
+        st.caption(
+            f"**Valor da Terra Nua ({disp(municipio)}):** a Receita Federal não "
+            f"publica VTN para este município na tabela do exercício 2026. O "
+            f"painel informa isso em vez de estimar um valor.")
+    else:
+        st.caption(
+            # duas casas: a Receita publica o VTN ao centavo e a nota existe para ser
+            # conferida contra a tabela oficial
+            f"**Valor da Terra Nua ({disp(municipio)}):** {brl_md(vtn_publicado, 2)}"
+            f"/ha — Receita Federal, tabela do exercício 2026, classe lavoura de "
+            f"aptidão boa. É referência fiscal, base de cálculo do ITR, e não "
+            f"preço de mercado. É patrimônio: não entra na margem e não é campo "
+            f"de simulação.")
 
     st.divider()
 
@@ -1388,8 +1378,10 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
       aptidão agrícola; usa-se "Lavoura — Aptidão Boa", que é a classe da soja.
       A Receita Federal publica VTN para 13 dos 38 municípios da base — nos
       demais o painel informa que não há valor oficial, em vez de estimar. É
-      patrimônio e não entra no cálculo da margem. O PDF nacional e a extração
-      dos municípios paraenses estão em `pesquisa/dados/receita_federal/`.
+      referência fiscal, base de cálculo do ITR, e não preço de mercado: por
+      isso aparece como nota de contexto, não é campo de simulação e não entra
+      no cálculo da margem. O PDF nacional e a extração dos municípios
+      paraenses estão em `pesquisa/dados/receita_federal/`.
     
     *Repositório Acadêmico:* [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
 

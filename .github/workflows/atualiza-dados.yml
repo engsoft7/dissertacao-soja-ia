@@ -72,9 +72,15 @@ jobs:
         id: enso
         if: ${{ !inputs.testar_gee }}
         run: |
+          ANTES=$(python -c "import json;d=json.load(open('pesquisa/dados/eventos_enso.json'));print(d['el_ninos'],d['la_ninas'])" 2>/dev/null || echo "")
           python software/automacao_github/atualiza_enso.py
-          if git diff --quiet -- pesquisa/dados/eventos_enso.json; then
+          DEPOIS=$(python -c "import json;d=json.load(open('pesquisa/dados/eventos_enso.json'));print(d['el_ninos'],d['la_ninas'])")
+          # Compara a classificação, não o arquivo: o script reescreve o campo
+          # ultima_atualizacao a cada execução, e um git diff acusaria mudança
+          # todo mês, abrindo PR só para trocar um carimbo de data.
+          if [ "$ANTES" = "$DEPOIS" ]; then
             echo "alterado=false" >> "$GITHUB_OUTPUT"
+            git checkout -- pesquisa/dados/eventos_enso.json 2>/dev/null || true
           else
             echo "alterado=true" >> "$GITHUB_OUTPUT"
             echo "" >> "${RESUMO_MD:-/tmp/resumo_pam.md}"
@@ -98,7 +104,11 @@ jobs:
       - name: Recalcula as métricas de validação do painel
         if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true' || steps.enso.outputs.alterado == 'true'
         run: |
-          pip install --quiet scikit-learn
+          # Sem o pino o CI instala a versão mais recente, e a partir da 1.9 o
+          # Random Forest muda de resultado com a mesma semente: a validação
+          # devolveu 440,3 kg/ha contra os 415,6 do ambiente fixado. Lê o pino
+          # do requirements.txt para não haver duas fontes de verdade.
+          pip install --quiet "$(grep -m1 '^scikit-learn' requirements.txt)"
           python software/automacao_github/gera_metricas.py
 
       - name: Abre PR com as mudanças na base

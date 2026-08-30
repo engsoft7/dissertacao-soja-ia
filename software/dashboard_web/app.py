@@ -201,178 +201,291 @@ css_mobile = """<style>
 st.markdown(css_mobile, unsafe_allow_html=True)
 
 
+# Paleta enxuta: cinzas neutros para quase tudo e cor só onde ela significa
+# alguma coisa (sinal da margem, fase climática, marca). Quatro matizes
+# concorrendo em quatro cartões de validação era ruído, não hierarquia.
 CSS_VARS_LIGHT = """
-        --app-bg: #fafafa;
+        --app-bg: #fbfbfd;
         --card-bg: #ffffff;
-        --card-border: #e5e5e5;
-        --text-pure: #171717;
-        --text-muted: #737373;
-        --accent-green: #16a34a;
-        --accent-blue: #2563eb;
-        --accent-purple: #9333ea;
-        --accent-orange: #d97706;
-        --card-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        --card-border: rgba(0,0,0,0.08);
+        --card-border-forte: rgba(0,0,0,0.16);
+        --text-pure: #1d1d1f;
+        --text-muted: #6e6e73;
+        --text-faint: #9a9aa0;
+        --accent: #1a7f37;
+        --accent-suave: rgba(26,127,55,0.10);
+        --positivo: #1a7f37;
+        --negativo: #c9252d;
+        --card-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        --card-shadow-hover: 0 4px 16px rgba(0,0,0,0.08);
 """
 
 CSS_VARS_DARK = """
-        --app-bg: #0a0a0a;
-        --card-bg: #121212;
-        --card-border: #222222;
-        --text-pure: #ededed;
-        --text-muted: #a1a1aa;
-        --accent-green: #22c55e;
-        --accent-blue: #3b82f6;
-        --accent-purple: #a855f7;
-        --accent-orange: #f59e0b;
-        --card-shadow: 0px 4px 12px rgba(0,0,0,0.4);
+        --app-bg: #000000;
+        --card-bg: #141416;
+        --card-border: rgba(255,255,255,0.09);
+        --card-border-forte: rgba(255,255,255,0.20);
+        --text-pure: #f5f5f7;
+        --text-muted: #a1a1a6;
+        --text-faint: #6e6e73;
+        --accent: #30d158;
+        --accent-suave: rgba(48,209,88,0.14);
+        --positivo: #30d158;
+        --negativo: #ff453a;
+        --card-shadow: none;
+        --card-shadow-hover: 0 4px 20px rgba(0,0,0,0.6);
 """
 
 CSS_GLASS = '''<style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
+
     :root {
 __VARS__
+        --raio: 12px;
+        --raio-pequeno: 9px;
     }
 
-    /* GLOBAL CLEANLINESS */
-    html, body, [class*="css"], .stApp { 
-        font-family: 'Inter', sans-serif !important;
+    /* ── BASE ────────────────────────────────────────────────────────── */
+    html, body, [class*="css"], .stApp {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
         -webkit-font-smoothing: antialiased !important;
         -moz-osx-font-smoothing: grayscale !important;
         text-rendering: optimizeLegibility !important;
         background-color: var(--app-bg) !important;
+        color: var(--text-pure);
     }
     [data-testid="stAppViewContainer"] {
         background-color: var(--app-bg) !important;
         background-image: none !important;
     }
+    /* O Streamlit reserva um vão enorme no topo antes do primeiro elemento. */
+    .block-container { padding-top: 2.5rem !important; max-width: 1180px; }
+    [data-testid="stAppDeployButton"] { display: none; }
+    [data-testid="stHeader"] { background: transparent !important; }
 
-    /* MINIMALIST LINEAR STYLE CARDS - FULL RESPONSIVO (AUTO-FIT) */
-    .kpi-grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
-        gap: 16px; 
-        margin: 10px 0 20px; 
+    /* Números alinham coluna a coluna, como em planilha. */
+    .kpi-value, .eco-value, [data-testid="stMetricValue"],
+    [data-testid="stDataFrame"], .stNumberInput input {
+        font-variant-numeric: tabular-nums !important;
+        font-feature-settings: "tnum" 1 !important;
     }
-    .eco-grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); 
-        gap: 16px; 
+
+    /* ── CARTÕES ─────────────────────────────────────────────────────── */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+        margin: 16px 0 28px;
     }
-    
-    /* Escalagem suave de fontes em telas menores */
-    @media (max-width: 768px) {
-        .kpi-label, .eco-label, [data-testid="stMetricLabel"] { font-size: 0.85rem !important; }
-        .kpi-value, .eco-value, [data-testid="stMetricValue"] { font-size: 1.3rem !important; }
-        .stApp { padding-left: 0 !important; }
+    .eco-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+        margin-bottom: 8px;
     }
-    
-    [data-testid="stMetric"], .kpi-card, .eco-card, [data-testid="stExpander"] { 
-        background: var(--card-bg); 
-        border: 1px solid var(--card-border); 
-        border-radius: 6px; 
+
+    [data-testid="stMetric"], .kpi-card, .eco-card, [data-testid="stExpander"] {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--raio);
         box-shadow: var(--card-shadow);
-        transition: all 0.2s ease; 
+        transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
     }
-    
-    .kpi-card, .eco-card { padding: 24px; position: relative; }
-    .kpi-card:hover, .eco-card:hover { 
-        border-color: var(--text-muted); 
+    .kpi-card, .eco-card { padding: 20px 22px 22px; position: relative; }
+    .kpi-card:hover, .eco-card:hover, [data-testid="stMetric"]:hover {
+        border-color: var(--card-border-forte);
+        box-shadow: var(--card-shadow-hover);
+        transform: translateY(-1px);
     }
 
-    /* TYPOGRAPHY POLISH */
-    .kpi-value, .eco-value, [data-testid="stMetricValue"] {
-        font-family: 'Inter', sans-serif !important;
-        font-weight: 600 !important;
-        font-size: 1.5rem !important;
-        line-height: 1.25 !important;
-        letter-spacing: -0.03em !important;
-        color: var(--text-pure);
-    }
+    /* ── TIPOGRAFIA DOS CARTÕES ──────────────────────────────────────── */
     .kpi-label, .eco-label, [data-testid="stMetricLabel"] {
         font-size: 0.75rem !important;
         font-weight: 500 !important;
-        color: var(--text-muted);
-        text-transform: none;
-        letter-spacing: 0em;
+        color: var(--text-muted) !important;
+        letter-spacing: 0 !important;
+        line-height: 1.4 !important;
         white-space: normal !important;
         overflow: visible !important;
-        word-break: break-word !important;
         text-overflow: clip !important;
     }
-
-    /* ACENTOS SEMÂNTICOS
-       O markup pede .green/.blue/.purple/.orange nos cartões de métrica e
-       .receita/.custo/.vtn/.margem nos financeiros. Sem estas regras os oito
-       ficavam cinza idênticos e a leitura dependia só de ler o rótulo. */
-    .kpi-card { border-left: 3px solid var(--card-border); }
-    .kpi-card.green  { border-left-color: var(--accent-green); }
-    .kpi-card.blue   { border-left-color: var(--accent-blue); }
-    .kpi-card.purple { border-left-color: var(--accent-purple); }
-    .kpi-card.orange { border-left-color: var(--accent-orange); }
-
-    .eco-card { border-top: 3px solid var(--card-border); }
-    .eco-card.receita { border-top-color: var(--accent-green); }
-    .eco-card.custo   { border-top-color: var(--accent-orange); }
-    .eco-card.vtn     { border-top-color: var(--accent-purple); }
-    .eco-card.margem  { border-top-color: var(--accent-blue); }
-
-    /* O emoji é decoração: fica no canto, fora do caminho da leitura. */
-    .kpi-icon, .eco-icon {
-        position: absolute; top: 18px; right: 20px;
-        font-size: 1.1rem; opacity: 0.55; line-height: 1;
+    [data-testid="stMetricLabel"] p { font-size: 0.75rem !important; }
+    .kpi-value, .eco-value, [data-testid="stMetricValue"] {
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 1.75rem !important;
+        line-height: 1.15 !important;
+        letter-spacing: -0.025em !important;
+        color: var(--text-pure) !important;
+        display: block;
+        margin-top: 10px;
     }
-    .kpi-label, .eco-label { padding-right: 28px; }
-    .kpi-value, .eco-value { display: block; margin-top: 6px; }
-
-    .eco-card.receita .eco-delta { color: var(--accent-green); }
-    .eco-card.custo .eco-delta   { color: var(--accent-orange); }
-    .eco-card.margem .eco-delta  { color: var(--accent-blue); }
-    .eco-delta { font-size: 0.75rem; font-weight: 500; margin-top: 8px; display: block; }
-
-    /* COMPONENT POLISH (TABS, BUTTONS, INPUTS) */
-    .stTabs [data-baseweb="tab-list"] { 
-        gap: 24px; background: transparent; border-bottom: 1px solid var(--card-border); 
-        padding: 0; box-shadow: none; border-radius: 0; margin-bottom: 16px;
-    }
-    .stTabs [data-baseweb="tab"] { 
-        padding: 10px 4px; font-weight: 500; font-size: 0.85rem; color: var(--text-muted) !important;
-        border-bottom: 2px solid transparent !important; background: transparent !important; border-radius: 0; margin: 0;
-    }
-    .stTabs [aria-selected="true"] { 
-        color: var(--text-pure) !important; border-bottom: 2px solid var(--text-pure) !important; 
-        box-shadow: none !important;
-    }
-    
-    .stSelectbox > div > div, .stNumberInput > div > div > input { 
-        background: var(--app-bg) !important; border: 1px solid var(--card-border) !important; 
-        border-radius: 6px !important; color: var(--text-pure) !important; font-weight: 400;
-        box-shadow: none !important; transition: border-color 0.15s ease;
-    }
-    .stSelectbox > div > div:focus-within, .stNumberInput > div > div > input:focus { 
-        border-color: var(--text-pure) !important; box-shadow: 0 0 0 1px var(--card-border) !important; 
+    .eco-delta {
+        font-size: 0.75rem; font-weight: 500;
+        margin-top: 8px; display: block; color: var(--text-muted);
     }
 
-    /* PREMIUM HEADER */
-    .header-container { padding: 12px 0 20px; border-bottom: 1px solid var(--card-border); margin-bottom: 24px; }
-    .premium-title { 
-        font-size: 1.6rem; font-weight: 600; color: var(--text-pure); letter-spacing: -0.03em;
-        margin-bottom: 6px; background: none; -webkit-text-fill-color: initial;
+    /* ── NÚMERO PRINCIPAL ────────────────────────────────────────────── */
+    .hero-card {
+        background: var(--card-bg); border: 1px solid var(--card-border);
+        border-radius: var(--raio); box-shadow: var(--card-shadow);
+        padding: 24px 26px 22px; margin-bottom: 14px;
+    }
+    .hero-label {
+        font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
+        text-transform: uppercase; color: var(--text-faint);
+    }
+    .hero-value {
+        font-size: 3.1rem; font-weight: 600; letter-spacing: -0.04em;
+        line-height: 1.05; color: var(--text-pure); margin-top: 10px;
+        font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
+    }
+    .hero-unit {
+        font-size: 1.1rem; font-weight: 500; letter-spacing: -0.01em;
+        color: var(--text-muted); margin-left: 8px;
+    }
+    .hero-foot {
+        font-size: 0.78rem; color: var(--text-muted); margin-top: 12px;
+        padding-top: 12px; border-top: 1px solid var(--card-border);
+    }
+
+    /* Ponto de cor no rótulo: identifica o cartão sem pintar uma barra
+       inteira. Nas métricas de validação não há cor nenhuma — verde ou roxo
+       não querem dizer nada a respeito de um RMSE. */
+    .eco-label::before {
+        content: ""; display: inline-block;
+        width: 6px; height: 6px; border-radius: 50%;
+        margin-right: 7px; vertical-align: middle;
+        background: var(--text-faint);
+    }
+    .eco-card.receita .eco-label::before { background: var(--positivo); }
+    .eco-card.custo   .eco-label::before { background: #d97706; }
+    .eco-card.vtn     .eco-label::before { background: #8e8e93; }
+    .eco-card.margem  .eco-label::before { background: var(--text-pure); }
+
+
+    /* ── CABEÇALHO ───────────────────────────────────────────────────── */
+    .header-container {
+        padding: 0 0 22px; border-bottom: 1px solid var(--card-border);
+        margin-bottom: 28px;
+    }
+    .premium-title {
+        font-size: 2rem; font-weight: 600; color: var(--text-pure);
+        letter-spacing: -0.035em; line-height: 1.15; margin-bottom: 10px;
+        background: none; -webkit-text-fill-color: initial;
     }
     .header-separator { display: none; }
-    
-    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
-    .badge { border-radius: 4px; border: 1px solid var(--card-border); padding: 4px 8px; font-size: 0.65rem; background: var(--card-bg); color: var(--text-pure); font-weight: 500; }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 14px; }
+    .badge {
+        border-radius: 999px; border: 1px solid var(--card-border);
+        padding: 3px 10px; font-size: 0.68rem; background: transparent;
+        color: var(--text-muted); font-weight: 500; letter-spacing: 0.01em;
+    }
 
-    /* CHARTS AND IFRAMES */
-    iframe { border-radius: 6px !important; border: 1px solid var(--card-border) !important; box-shadow: none !important; }
-    [data-testid="stDataFrame"] { border-radius: 6px; border: 1px solid var(--card-border) !important;}
-    
-    /* SCROLLBARS LUXURY */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    /* ── TÍTULOS DE SEÇÃO ────────────────────────────────────────────── */
+    h3, [data-testid="stHeading"] h3 {
+        font-size: 1.3rem !important; font-weight: 600 !important;
+        letter-spacing: -0.02em !important; color: var(--text-pure) !important;
+        margin-top: 8px !important;
+    }
+    [data-testid="stCaptionContainer"] p {
+        color: var(--text-muted) !important; font-size: 0.82rem !important;
+        line-height: 1.5 !important;
+    }
+
+    /* ── BARRA LATERAL ───────────────────────────────────────────────── */
+    [data-testid="stSidebar"] {
+        background: var(--card-bg) !important;
+        border-right: 1px solid var(--card-border);
+    }
+    [data-testid="stSidebar"] h3 {
+        font-size: 0.72rem !important; font-weight: 600 !important;
+        text-transform: uppercase !important; letter-spacing: 0.07em !important;
+        color: var(--text-faint) !important; margin-bottom: 4px !important;
+    }
+    [data-testid="stSidebar"] label { font-size: 0.8rem !important; }
+
+    /* ── CONTROLES ───────────────────────────────────────────────────── */
+    .stSelectbox > div > div,
+    .stNumberInput > div > div > input,
+    .stTextInput > div > div > input {
+        background: var(--app-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: var(--raio-pequeno) !important;
+        color: var(--text-pure) !important; font-weight: 400;
+        box-shadow: none !important; transition: border-color .15s ease;
+    }
+    .stSelectbox > div > div:focus-within,
+    .stNumberInput > div > div > input:focus {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 3px var(--accent-suave) !important;
+    }
+    .stButton > button, [data-testid="stDownloadButton"] > button {
+        border-radius: var(--raio-pequeno) !important;
+        border: 1px solid var(--card-border) !important;
+        background: var(--card-bg) !important; color: var(--text-pure) !important;
+        font-weight: 500 !important; font-size: 0.84rem !important;
+        padding: 8px 16px !important; transition: all .15s ease;
+    }
+    .stButton > button:hover, [data-testid="stDownloadButton"] > button:hover {
+        border-color: var(--card-border-forte) !important;
+        background: var(--app-bg) !important;
+    }
+    [data-baseweb="radio"] { font-size: 0.85rem; }
+
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 24px; background: transparent; border-bottom: 1px solid var(--card-border);
+        padding: 0; box-shadow: none; border-radius: 0; margin-bottom: 16px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        padding: 10px 4px; font-weight: 500; font-size: 0.85rem; color: var(--text-muted) !important;
+        border-bottom: 2px solid transparent !important; background: transparent !important;
+        border-radius: 0; margin: 0;
+    }
+    .stTabs [aria-selected="true"] {
+        color: var(--text-pure) !important; border-bottom: 2px solid var(--text-pure) !important;
+        box-shadow: none !important;
+    }
+
+    /* ── SUPERFÍCIES ─────────────────────────────────────────────────── */
+    iframe { border-radius: var(--raio) !important; border: 1px solid var(--card-border) !important; box-shadow: none !important; }
+    /* O detector de tema é um iframe de 2px de altura; com borda ele virava
+       um risco atravessando a página logo acima do título. */
+    iframe[title="streamlit_theme.st_theme"] { border: none !important; }
+    [data-testid="stDataFrame"] { border-radius: var(--raio); border: 1px solid var(--card-border) !important; }
+    [data-testid="stExpander"] summary { font-size: 0.85rem !important; font-weight: 500 !important; }
+    [data-testid="stExpander"] details { border: none !important; }
+    hr { border-color: var(--card-border) !important; margin: 32px 0 !important; }
+
+    /* O st.metric nativo herdava o cartão sem padding nenhum e o rótulo
+       encostava na borda de cima. */
+    [data-testid="stMetric"] { padding: 18px 20px 20px !important; }
+
+    /* Alertas nativos no mesmo idioma visual dos demais avisos: sem bloco
+       de cor chapada, só uma barra lateral. */
+    [data-testid="stAlert"] {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: var(--raio) !important;
+        color: var(--text-muted) !important;
+        padding: 14px 18px !important;
+    }
+    [data-testid="stAlert"] p { font-size: 0.88rem !important; line-height: 1.6 !important; }
+    [data-testid="stAlertContainer"] { background: transparent !important; }
+
+    /* ── TELAS ESTREITAS ─────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+        .premium-title { font-size: 1.5rem; }
+        .kpi-value, .eco-value, [data-testid="stMetricValue"] { font-size: 1.45rem !important; }
+        .kpi-card, .eco-card { padding: 16px 18px 18px; }
+        .stApp { padding-left: 0 !important; }
+    }
+
+    /* ── ROLAGEM ─────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 9px; height: 9px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 8px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    ::-webkit-scrollbar-thumb { background: var(--card-border-forte); border-radius: 9px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
 </style>'''
 
 
@@ -791,11 +904,11 @@ if tela_atual == "📍 Inteligência Territorial":
             "safra sem El Niño ou La Niña registrado pelo Oceanic Niño Index (NOAA). "
             "A projeção assume condições próximas das médias da última década.")
     st.markdown(f"""
-    <div style="padding:14px 18px; background:var(--card-bg);
+    <div style="padding:15px 18px; background:var(--card-bg);
                 border:1px solid var(--card-border); border-left:3px solid {cor_faixa};
-                border-radius:6px; margin-bottom:24px; font-size:0.9rem;
-                color:var(--text-pure);">
-        <b>{disp(municipio)}</b>, {ano_alvo} — {texto_fase}
+                border-radius:var(--raio); margin-bottom:30px; font-size:0.88rem;
+                line-height:1.55; color:var(--text-muted);">
+        <b style="color:var(--text-pure);">{disp(municipio)}</b>, {ano_alvo} — {texto_fase}
     </div>
     """, unsafe_allow_html=True)
 
@@ -806,19 +919,19 @@ if tela_atual == "📍 Inteligência Territorial":
         f"Passe o mouse sobre cada cartão para ver o que ele mede.")
     st.markdown(f"""
     <div class="kpi-grid">
-        <div class="kpi-card green" title="Erro típico da previsão, na mesma unidade da produtividade. Quanto menor, melhor.">
+        <div class="kpi-card" title="Erro típico da previsão, na mesma unidade da produtividade. Quanto menor, melhor.">
             <div class="kpi-label">Erro típico (RMSE)</div>
             <div class="kpi-value">± {qtd(metricas['rmse'])} {unidade}</div>
         </div>
-        <div class="kpi-card blue" title="O mesmo erro expresso como porcentagem da produtividade média (rRMSE).">
+        <div class="kpi-card" title="O mesmo erro expresso como porcentagem da produtividade média (rRMSE).">
             <div class="kpi-label">Erro relativo (rRMSE)</div>
             <div class="kpi-value">{dec(metricas['rrmse'])}%</div>
         </div>
-        <div class="kpi-card purple" title="Quanto da variação entre safras o modelo consegue explicar. 1,000 seria uma previsão perfeita.">
+        <div class="kpi-card" title="Quanto da variação entre safras o modelo consegue explicar. 1,000 seria uma previsão perfeita.">
             <div class="kpi-label">R² do modelo</div>
             <div class="kpi-value">{dec(metricas['r2'], 3)}</div>
         </div>
-        <div class="kpi-card orange" title="O mesmo cálculo para a tendência histórica sozinha, sem satélite nem clima. Se os dois R² empatam, o modelo não superou a tendência.">
+        <div class="kpi-card" title="O mesmo cálculo para a tendência histórica sozinha, sem satélite nem clima. Se os dois R² empatam, o modelo não superou a tendência.">
             <div class="kpi-label">R² da tendência (referência)</div>
             <div class="kpi-value">{dec(metricas['r2_baseline'], 3)}</div>
         </div>
@@ -829,12 +942,21 @@ if tela_atual == "📍 Inteligência Territorial":
     with esq:
 
 
-        with st.spinner(f"Sintetizando predições de IA para {disp(municipio)}..."):
+        with st.spinner(f"Calculando a projeção para {disp(municipio)}..."):
             r = ajustar_r(estimador.estimar(municipio, int(ano_alvo)))
-        st.metric(f"Projeção Safra {ano_alvo}",
-                  f"{qtd(r['estimativa_kg_ha'])} {unidade}")
+        # É o número principal da tela; até aqui saía do mesmo tamanho de um
+        # cartão de validação qualquer.
+        st.markdown(f"""
+        <div class="hero-card">
+            <div class="hero-label">Projeção · safra {ano_alvo}</div>
+            <div class="hero-value">{qtd(r['estimativa_kg_ha'])}<span
+                 class="hero-unit">{unidade}</span></div>
+            <div class="hero-foot">{disp(municipio)} · erro típico de
+                ± {qtd(metricas['rmse'])} {unidade}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-        with st.expander("Variáveis Climáticas (What-if)"):
+        with st.expander("Simular outro cenário climático"):
             st.caption(
                 "Teste cenários meteorológicos forçados (O impacto na projeção será calculado via IA)")
             precip = st.slider("Precipitação Total Estimada (mm)",
@@ -858,7 +980,7 @@ if tela_atual == "📍 Inteligência Territorial":
         mapa, nome_para_interno, faixa_rend = construir_mapa(
             municipio, mun_comp, is_dark=is_dark)
         if mapa is not None:
-            st.subheader("Panorama Geoespacial dos Polos Produtivos")
+            st.subheader("Panorama geoespacial")
             st_folium(
                 mapa,
                 width='stretch',
@@ -868,18 +990,19 @@ if tela_atual == "📍 Inteligência Territorial":
             )
 
             grad = ",".join(_VIRIDIS)
-            bg = "#0d1117" if is_dark else "rgba(128,128,128,0.05)"
-            brad = "6px"
-            bord = "1px solid #30363d" if is_dark else "1px solid rgba(128,128,128,0.2)"
-            col_t = "#8b949e" if is_dark else "rgba(0,0,0,0.6)"
-            col_v = "#c9d1d9" if is_dark else "rgba(0,0,0,0.9)"
-            font = "'Roboto Mono', monospace"
-
-            html = f"""<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap; font-size:0.75rem;margin:6px 0 8px; padding:8px 12px; background:{bg}; border-radius:{brad}; border:{bord};">
-                  <span style="color:{col_t}; font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">Produtividade</span>
-                  <span style="font-family:{font}; font-weight:600; color:{col_v};">{br(faixa_rend[0] * fator) if faixa_rend else 0} {unidade}</span>
-                  <div style="flex:0 1 180px;height:8px;border-radius:{brad}; background:linear-gradient(to right,{grad}); border:none;"></div>
-                  <span style="font-family:{font}; font-weight:600; color:{col_v};">{br(faixa_rend[1] * fator) if faixa_rend else 0} {unidade}</span>
+            html = f"""<div style="display:flex; align-items:center; gap:12px;
+                        flex-wrap:wrap; font-size:0.75rem; margin:12px 0 6px;
+                        padding:10px 14px; background:var(--card-bg);
+                        border:1px solid var(--card-border); border-radius:var(--raio);">
+                  <span style="color:var(--text-faint); font-weight:600;
+                               text-transform:uppercase; letter-spacing:0.06em;">Produtividade</span>
+                  <span style="font-weight:600; color:var(--text-pure);
+                               font-variant-numeric:tabular-nums;">{br(faixa_rend[0] * fator) if faixa_rend else 0}</span>
+                  <div style="flex:1 1 160px; height:6px; border-radius:999px;
+                              background:linear-gradient(to right,{grad});"></div>
+                  <span style="font-weight:600; color:var(--text-pure);
+                               font-variant-numeric:tabular-nums;">{br(faixa_rend[1] * fator) if faixa_rend else 0}</span>
+                  <span style="color:var(--text-muted);">{unidade}</span>
                 </div>"""
             st.markdown(html, unsafe_allow_html=True)
             st.caption(
@@ -896,7 +1019,7 @@ if tela_atual == "📈 Análise Histórica":
         serie = df[df.municipio == municipio].sort_values(
             "ano")  # type: ignore
 
-    st.subheader("Evolução Histórica da Produtividade")
+    st.subheader("Evolução histórica da produtividade")
 
     serie_plot = serie.assign(
         produtividade=serie[M.ALVO] * fator,
@@ -914,7 +1037,7 @@ if tela_atual == "📈 Análise Histórica":
         use_container_width=True)
     st.caption("Gráfico interativo: arraste para selecionar um período, dois toques para resetar o zoom.")
 
-    st.subheader("Expansão da Área Plantada (Hectares)")
+    st.subheader("Expansão da área plantada")
     st.plotly_chart(plot_area(serie_plot, is_dark=is_dark), use_container_width=True)
 
     b1, b2 = st.columns(2)
@@ -968,7 +1091,7 @@ if tela_atual == "💰 Viabilidade Financeira":
             value=default_preco,
             step=5.0)
         st.caption(
-            "🌐 **Fonte da Cotação:** Cotação interativa em tempo real (Notícias Agrícolas / CEPEA).")
+            "**Fonte da cotação:** Cotação interativa em tempo real (Notícias Agrícolas / CEPEA).")
     with col_eco2:
         custo_ha = st.number_input(
             f"Custo Operacional base ({municipio.title()})",
@@ -976,7 +1099,7 @@ if tela_atual == "💰 Viabilidade Financeira":
             value=int(custos_locais["custo_ha"]),
             step=100)
         st.caption(
-            "📊 **Fonte do Custo:** Base VTN ajustada. Edite com a realidade da sua fazenda.")
+            "**Fonte do custo:** Base VTN ajustada. Edite com a realidade da sua fazenda.")
     with col_eco3:
         vtn_ha = st.number_input(
             f"Preço Terra Nua VTN/ha ({municipio.title()})",
@@ -984,45 +1107,46 @@ if tela_atual == "💰 Viabilidade Financeira":
             value=int(custos_locais["vtn_ha"]),
             step=500)
         st.caption(
-            "🗺️ **Fonte da Terra:** Base de referência municipal da Receita Federal (VTN).")
+            "**Fonte da terra:** Base de referência municipal da Receita Federal (VTN).")
 
     est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
     receita_ha = est_sacas_ha * preco
     margem_ha = receita_ha - custo_ha
     pct_margem = f"{margem_ha / custo_ha * 100:+.0f}%" if custo_ha else "—"
-    cor_delta = '#16a34a' if margem_ha >= 0 else '#EF5350'
+    cor_delta = 'var(--positivo)' if margem_ha >= 0 else 'var(--negativo)'
 
     # SÍNTESE LLM (ANÁLISE GENERATIVA)
     texto_ia = ""
     if margem_ha > 0:
         if margem_ha > (custo_ha * 0.3):
-             texto_ia = f"📈 <b>Alta Viabilidade (Síntese IA):</b> Cenário projeta lucro operacional robusto. A produtividade estimada de <b>{dec(est_sacas_ha)} sc/ha</b> assegura um faturamento de {brl(receita_ha)}/ha, cobrindo com folga o custeio de {brl(custo_ha)}, deixando uma margem excelente."
+             texto_ia = f"<b>Alta Viabilidade (Síntese IA):</b> Cenário projeta lucro operacional robusto. A produtividade estimada de <b>{dec(est_sacas_ha)} sc/ha</b> assegura um faturamento de {brl(receita_ha)}/ha, cobrindo com folga o custeio de {brl(custo_ha)}, deixando uma margem excelente."
         else:
-             texto_ia = f"⚠️ <b>Alerta de Stress (Síntese IA):</b> A conta fecha no azul, mas a margem estreita de {brl(margem_ha)}/ha exige cautela. A produtividade predita de <b>{dec(est_sacas_ha)} sc/ha</b> não suportará solavancos climáticos intensos sem risco de prejuízo."
+             texto_ia = f"<b>Alerta de Stress (Síntese IA):</b> A conta fecha no azul, mas a margem estreita de {brl(margem_ha)}/ha exige cautela. A produtividade predita de <b>{dec(est_sacas_ha)} sc/ha</b> não suportará solavancos climáticos intensos sem risco de prejuízo."
     else:
-        texto_ia = f"🛑 <b>Risco Operacional Crítico (Síntese IA):</b> Alerta Vermelho! Com a soja simulada a {brl(preco)} e custo elevado ({brl(custo_ha)}/ha), a IA prevê colapso econômico em {disp(municipio)}. A produtividade de <b>{dec(est_sacas_ha)} sc/ha</b> destruiria o capital, com perdas de {brl(abs(margem_ha))} por hectare."
+        texto_ia = f"<b>Risco Operacional Crítico (Síntese IA):</b> Alerta Vermelho! Com a soja simulada a {brl(preco)} e custo elevado ({brl(custo_ha)}/ha), a IA prevê colapso econômico em {disp(municipio)}. A produtividade de <b>{dec(est_sacas_ha)} sc/ha</b> destruiria o capital, com perdas de {brl(abs(margem_ha))} por hectare."
 
-    st.markdown(f'<div style="background:var(--card-bg); padding:16px; border-radius:6px; border-left:4px solid {cor_delta}; margin-bottom: 24px; border-top:1px solid var(--card-border); border-right:1px solid var(--card-border); border-bottom:1px solid var(--card-border); font-size: 0.95rem; line-height: 1.5; font-family: Inter, sans-serif;">{texto_ia}</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div style="background:var(--card-bg); border:1px solid var(--card-border);'
+        f' border-left:3px solid {cor_delta}; border-radius:var(--raio);'
+        f' padding:16px 18px; margin:22px 0 18px; font-size:0.9rem;'
+        f' line-height:1.6; color:var(--text-muted);">{texto_ia}</div>',
+        unsafe_allow_html=True)
 
     st.markdown(f"""
     <div class="eco-grid">
         <div class="eco-card receita" title="Produtividade projetada multiplicada pelo preço da saca.">
-            <div class="eco-icon">💵</div>
             <div class="eco-label">Receita bruta projetada (R$/ha)</div>
             <div class="eco-value">{brl(receita_ha)}</div>
         </div>
         <div class="eco-card custo" title="Custo de custeio da lavoura por hectare, editável acima.">
-            <div class="eco-icon">📋</div>
             <div class="eco-label">Custo operacional (R$/ha)</div>
             <div class="eco-value">{brl(custo_ha)}</div>
         </div>
         <div class="eco-card vtn" title="Valor da Terra Nua de referência da Receita Federal. É patrimônio, não entra na margem.">
-            <div class="eco-icon">🗺️</div>
             <div class="eco-label">Valor da terra nua (R$/ha)</div>
             <div class="eco-value">{brl(vtn_ha)}</div>
         </div>
         <div class="eco-card margem" title="Receita bruta menos custo operacional. Não desconta terra, impostos nem financiamento.">
-            <div class="eco-icon">📈</div>
             <div class="eco-label">Margem operacional (R$/ha)</div>
             <div class="eco-value" style="color:{cor_delta}">{brl(margem_ha)}</div>
             <div class="eco-delta" style="color:{cor_delta}">{pct_margem} sobre o custo</div>
@@ -1044,11 +1168,21 @@ if tela_atual == "💰 Viabilidade Financeira":
     qc.metric("Média de repetição no Pará", f"{dec(taxa_estado)}%")
 
     if diag["taxa"] >= taxa_estado:
-        st.warning(
-            f"**Nota de Inteligência:** O histórico oficial de **{disp(municipio)}** apresenta alta taxa de repetição estatística interanual, validando o uso de machine learning e dados de satélite para correções de viés e maior precisão comercial.")
+        cor_qa, texto_qa = "#d97706", (
+            f"<b>Repetição acima da média do estado.</b> O histórico oficial de "
+            f"{disp(municipio)} repete o valor da safra anterior com frequência "
+            f"maior que a média do Pará, o que reforça a necessidade de corrigir "
+            f"viés com satélite e clima.")
     else:
-        st.success(
-            f"**Qualidade de Dados:** O município de **{disp(municipio)}** apresenta excelente variabilidade histórica nos registros oficiais.")
+        cor_qa, texto_qa = "var(--positivo)", (
+            f"<b>Repetição abaixo da média do estado.</b> O histórico oficial de "
+            f"{disp(municipio)} varia mais entre safras que a média do Pará.")
+    st.markdown(
+        f'<div style="background:var(--card-bg); border:1px solid var(--card-border);'
+        f' border-left:3px solid {cor_qa}; border-radius:var(--raio);'
+        f' padding:15px 18px; margin-top:6px; font-size:0.88rem; line-height:1.6;'
+        f' color:var(--text-muted);">{texto_qa}</div>',
+        unsafe_allow_html=True)
 
     st.divider()
 
@@ -1101,7 +1235,7 @@ if tela_atual == "💰 Viabilidade Financeira":
 
 
 
-with st.expander("ℹ️ Sobre a Tecnologia e Fontes de Dados", expanded=False):
+with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
     st.markdown('''
     **Plataforma de AgroInteligência Preditiva** — Solução metodológica baseada em inteligência artificial para previsão de produtividade de soja e monitoramento do agronegócio no Estado do Pará.
 

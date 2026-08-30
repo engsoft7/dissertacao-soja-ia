@@ -143,7 +143,6 @@ software/automacao_github/
   atualiza_pam.py                         revisões da PAM via SIDRA (GitHub Actions)
   atualiza_enso.py                        atualização automática NOAA ONI
   coleta_gee_safra.py                     coleta headless de safra nova no GEE
-  bot_agente_vtn.py                       coleta VTN de 144 municípios
   gera_metricas.py                        pré-calcula a validação para o painel
   gera_municipios.py                      nomes acentuados (IBGE) + coordenadas
   gera_geo_para.py                        contorno do Pará (malha do IBGE)
@@ -424,9 +423,8 @@ DOI: 10.5281/zenodo.21286115. Disponível em: https://doi.org/10.5281/zenodo.212
 
 ## 🌐 AgroInteligência Web v2.0 (Executive SPA Dashboard)
 - **Single Page Application (SPA):** Navegação redesenhada para uma "Sidebar" global, fluida e com responsividade estrita. O encadeamento do painel elimina tabulações e se comporta como um SaaS nativo multi-tenant.
-- **Ecossistema Modular:** Código fonte fragmentado num ecossistema elegante e sustentável, separando roteamento de manipulação do layout via Python e consumo (ETL) da web (Notícias Agrícolas / CEPEA).
-- **Indicadores Econômicos Automatizados:** Injeção simultânea dos bancos de **VTN/ha (Preço da Terra Nua - Receita Federal)** por municípios diretamente nos cálculos operacionais, viabilizado por scripts independentes.
+- **Ecossistema Modular:** Código fonte fragmentado num ecossistema elegante e sustentável, separando roteamento de manipulação do layout via Python e consumo (ETL) da cotação física em Paranaguá (Notícias Agrícolas).
+- **Parâmetros econômicos com fonte declarada:** o custo operacional vem do levantamento da CONAB para Pedro Afonso (TO), de março de 2026, e o Valor da Terra Nua da tabela da Receita Federal do exercício 2026, classe lavoura de aptidão boa. São tabelas estáticas versionadas em `pesquisa/dados/`, não coleta em tempo real, e todas editáveis na interface. A Receita Federal publica VTN para 13 dos 38 municípios; nos demais o painel informa que não há valor oficial.
 - **Visibilidade Asynchronous de AI:** Processamento dinâmico do Random Forest encapsulado em "shimmers" / Spinners UX, indicando cálculo simultâneo na simulação de cenários operacionais e previsões em tempo real do Agro-mercado do Pará.
 - **Plotly Analytics (Fintech Interactivity):** Upgrade massivo das engines gráficas do Altair para o *Plotly.js*. Anotação autônoma de Zonas de Risco Climático (El Niño e La Niña Históricos mapeados via *VRects*) e regressões lineares paramétricas sobrepondo a série cronológica de produtividade, além de Full-Zoom Crosshairs.
 - **Agente de Linguagem Natural (LLM Heurístico):** Um sintetizador inteligente lê as matrizes de cálculo e o fluxo de caixa final simulado, formulando sentenças interpretativas em parágrafos para o produtor. Ele transcreve a matemática dura para relatórios humanos como *"Alto risco crítico projetado"* ou *"Viabilidade Econômica Robusta de Safra"*.
-- **Cobertura Autônoma de 144 Cidades (Bot VTN):** Desenvolvimento de um ecossistema JSON descentralizado em pareamento direto com o IBGE. A planta injeta o chão financeiro paramétrico de modo autônomo e transparente em 100% dos limites territoriais do Estado do Pará.

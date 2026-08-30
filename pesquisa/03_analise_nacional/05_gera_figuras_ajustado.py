@@ -22,6 +22,31 @@ import matplotlib
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
+# --- ABNT: separador decimal com vírgula, nos rótulos e nos eixos --------------
+from matplotlib.ticker import FuncFormatter as _FuncFormatter
+
+
+def vg(x, fmt='.1f'):
+    """Número com vírgula decimal, como pede a ABNT."""
+    return format(x, fmt).replace('.', ',')
+
+
+_VIRGULA = _FuncFormatter(lambda v, _pos: f'{v:g}'.replace('.', ','))
+
+
+def eixos_virgula(*eixos, x=False, y=True):
+    """Aplica vírgula decimal aos rótulos dos eixos informados.
+
+    Só ao eixo Y por padrão: aplicar ao X estragaria rótulos categóricos
+    (nomes de modelos) e anos, que não levam separador decimal.
+    """
+    for e in eixos:
+        if y:
+            e.yaxis.set_major_formatter(_VIRGULA)
+        if x:
+            e.xaxis.set_major_formatter(_VIRGULA)
+# ------------------------------------------------------------------------------
 from sklearn.inspection import permutation_importance
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
@@ -88,15 +113,16 @@ ax[0].set_ylabel('R² (agregado)')
 ax[0].set_title('(a) Coeficiente de determinação R²')
 ax[0].set_ylim(0, max(r2) * 1.25)
 for i, v in enumerate(r2):
-    ax[0].text(i, v + 0.008, f'{v:.3f}', ha='center', fontsize=9)
+    ax[0].text(i, v + 0.008, vg(v, '.3f'), ha='center', fontsize=9)
 ax[1].bar(ordem, rmse, color=cor)
 ax[1].set_ylabel('RMSE (kg/ha)')
 ax[1].set_title('(b) Raiz do erro quadrático médio')
 ax[1].set_ylim(0, max(rmse) * 1.18)
 for i, v in enumerate(rmse):
-    ax[1].text(i, v + 5, f'{v:.0f}', ha='center', fontsize=9)
+    ax[1].text(i, v + 5, vg(v, '.0f'), ha='center', fontsize=9)
 for a in ax:
     a.tick_params(axis='x', rotation=15)
+eixos_virgula(*ax)
 plt.tight_layout()
 plt.savefig(f'{OUT}/fig_modelos_ajustado.png', dpi=200, bbox_inches='tight', facecolor='white')
 plt.close()
@@ -109,8 +135,10 @@ ax.plot(lim, lim, '--', color='#B00020', lw=1.5, label='Linha 1:1 (previsão per
 ax.set_xlabel('Produtividade observada (kg/ha)')
 ax.set_ylabel('Produtividade prevista (kg/ha)')
 ax.set_title(f'Previsto vs. observado — {melhor}\n'
-             f'(R²={res[melhor]["R2_pool"]:.3f}; RMSE={res[melhor]["RMSE_pool"]:.0f} kg/ha)')
+             f'(R²={vg(res[melhor]["R2_pool"], ".3f")}; '
+             f'RMSE={vg(res[melhor]["RMSE_pool"], ".0f")} kg/ha)')
 ax.legend(fontsize=9)
+eixos_virgula(ax, x=True)
 plt.tight_layout()
 plt.savefig(f'{OUT}/fig_scatter_ajustado.png', dpi=200, bbox_inches='tight', facecolor='white')
 plt.close()
@@ -122,7 +150,8 @@ ax.barh(top.index[-1:], top.values[-1:], color=AZUL)
 ax.set_xlabel('Importância relativa (%)')
 ax.set_title(f'Importância por permutação, agrupada — {melhor} ajustado')
 for i, v in enumerate(top.values):
-    ax.text(v + 0.4, i, f'{v:.1f}%', va='center', fontsize=9)
+    ax.text(v + 0.4, i, vg(v, '.1f') + '%', va='center', fontsize=9)
+eixos_virgula(ax, x=True, y=False)
 plt.tight_layout()
 plt.savefig(f'{OUT}/fig_importancia_ajustado.png', dpi=200, bbox_inches='tight', facecolor='white')
 plt.close()

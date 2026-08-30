@@ -141,6 +141,12 @@ def figura(sem, com, caminho):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
+    from matplotlib.ticker import FuncFormatter
+
+    # ABNT: separador decimal com vírgula, nos rótulos e nos eixos
+    def vg(v, fmt='.1f'):
+        return format(v, fmt).replace('.', ',')
+    virgula = FuncFormatter(lambda v, _p: f'{v:g}'.replace('.', ','))
 
     CLARO, ESCURO, VERM = '#3A7CBE', '#1F4E79', '#C00000'
     x, w = np.arange(len(MODELOS)), 0.38
@@ -153,7 +159,8 @@ def figura(sem, com, caminho):
         eixo.bar(x + w / 2, [com[m][chave] for m in MODELOS], w, color=ESCURO, label='Máscara de soja')
         base = sem['Baseline (sem clima)'][chave]
         eixo.axhline(base, color=VERM, ls='--', lw=2,
-                     label=f'Baseline ({base})' if chave == 'R2' else 'Baseline (sem clima), idêntico nos dois')
+                     label=(f'Baseline (R²={vg(base, ".3f")})' if chave == 'R2'
+                            else 'Baseline (sem clima), idêntico nos dois'))
         eixo.set_ylabel(rotulo, fontsize=11)
         eixo.set_title(titulo, fontsize=13)
         eixo.legend(fontsize=8.5, loc='upper right')
@@ -161,6 +168,7 @@ def figura(sem, com, caminho):
         eixo.set_xticklabels(MODELOS, rotation=20, ha='right', fontsize=10)
         eixo.grid(axis='y', alpha=0.3)
         eixo.set_axisbelow(True)
+        eixo.yaxis.set_major_formatter(virgula)
         for lado in ('top', 'right'):
             eixo.spines[lado].set_visible(False)
 

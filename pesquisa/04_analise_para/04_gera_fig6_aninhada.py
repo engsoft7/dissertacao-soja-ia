@@ -4,6 +4,31 @@ import warnings, numpy as np, pandas as pd
 warnings.filterwarnings('ignore')
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
+# --- ABNT: separador decimal com vírgula, nos rótulos e nos eixos --------------
+from matplotlib.ticker import FuncFormatter as _FuncFormatter
+
+
+def vg(x, fmt='.1f'):
+    """Número com vírgula decimal, como pede a ABNT."""
+    return format(x, fmt).replace('.', ',')
+
+
+_VIRGULA = _FuncFormatter(lambda v, _pos: f'{v:g}'.replace('.', ','))
+
+
+def eixos_virgula(*eixos, x=False, y=True):
+    """Aplica vírgula decimal aos rótulos dos eixos informados.
+
+    Só ao eixo Y por padrão: aplicar ao X estragaria rótulos categóricos
+    (nomes de modelos) e anos, que não levam separador decimal.
+    """
+    for e in eixos:
+        if y:
+            e.yaxis.set_major_formatter(_VIRGULA)
+        if x:
+            e.xaxis.set_major_formatter(_VIRGULA)
+# ------------------------------------------------------------------------------
 from sklearn.metrics import mean_squared_error, r2_score
 import importlib.util
 spec=importlib.util.spec_from_file_location('busca','03_busca_hiperparametros.py')
@@ -41,7 +66,9 @@ lim=[min(yt.min(),yp.min())*0.97, max(yt.max(),yp.max())*1.03]
 ax.plot(lim,lim,'--',color=RED,lw=1.4,label='Linha 1:1')
 ax.set_xlim(lim); ax.set_ylim(lim)
 ax.set_xlabel('Produtividade observada (kg/ha)'); ax.set_ylabel('Produtividade prevista (kg/ha)')
-ax.set_title(f'Previsto vs. observado — Pará (MLP)\n(RMSE={rmse:.0f} kg/ha; rRMSE={rr:.1f}%)',fontsize=10)
+ax.set_title('Previsto vs. observado — Pará (MLP)\n'
+             f'(RMSE={vg(rmse,".0f")} kg/ha; rRMSE={vg(rr)}%)',fontsize=10)
+eixos_virgula(ax, x=True)
 ax.legend(fontsize=8.5)
 plt.tight_layout(); plt.savefig('results/fig_pa_scatter_aninhada.png',dpi=200,bbox_inches='tight',facecolor='white')
 print('figura gravada')

@@ -1,7 +1,0 @@
-com.agrointeligencia.app-updated_navigation_xml-0 /home/acer/Projetos/dissertacao-soja-ia/software/aplicativo_mobile/app/build/generated/updated_navigation_xml/release
-com.agrointeligencia.app-packageReleaseResources-1 /home/acer/Projetos/dissertacao-soja-ia/software/aplicativo_mobile/app/build/intermediates/incremental/release/packageReleaseResources/merged.dir
-com.agrointeligencia.app-packageReleaseResources-2 /home/acer/Projetos/dissertacao-soja-ia/software/aplicativo_mobile/app/build/intermediates/incremental/release/packageReleaseResources/stripped.dir
-com.agrointeligencia.app-release-3 /home/acer/Projetos/dissertacao-soja-ia/software/aplicativo_mobile/app/build/intermediates/merged_res/release/mergeReleaseResources
-com.agrointeligencia.app-main-4 /home/acer/Projetos/dissertacao-soja-ia/software/aplicativo_mobile/app/src/main/res
-com.agrointeligencia.app-release-5 /home/acer/Projetos/dissertacao-soja-ia/software/aplicativo_mobile/app/src/release/res
-gradleHome-0 /home/acer/.gradle

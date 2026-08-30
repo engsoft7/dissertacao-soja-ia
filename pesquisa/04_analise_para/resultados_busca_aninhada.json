@@ -1,0 +1,69 @@
+{
+  "Baseline (sem clima)": {
+    "RMSE": 415.6,
+    "MAE": 296.1,
+    "R2": 0.216,
+    "rRMSE_%": 13.9
+  },
+  "SVR": {
+    "RMSE": 417.6,
+    "MAE": 294.8,
+    "R2": 0.208,
+    "rRMSE_%": 13.9,
+    "config_modal": {
+      "C": "100",
+      "epsilon": "0.1",
+      "gamma": "0.05"
+    },
+    "freq_modal": "9/24",
+    "n_configs": 16,
+    "segundos": 23
+  },
+  "XGBoost": {
+    "RMSE": 439.5,
+    "MAE": 314.5,
+    "R2": 0.123,
+    "rRMSE_%": 14.7,
+    "config_modal": {
+      "colsample_bytree": "0.8",
+      "learning_rate": "0.05",
+      "max_depth": "6",
+      "n_estimators": "100",
+      "reg_lambda": "10",
+      "subsample": "0.8"
+    },
+    "freq_modal": "6/24",
+    "n_configs": 16,
+    "segundos": 224
+  },
+  "MLP": {
+    "RMSE": 415.6,
+    "MAE": 297.4,
+    "R2": 0.216,
+    "rRMSE_%": 13.9,
+    "config_modal": {
+      "alpha": "0.001",
+      "hidden_layer_sizes": "(64, 32)",
+      "learning_rate_init": "0.003",
+      "max_iter": "500"
+    },
+    "freq_modal": "10/24",
+    "n_configs": 16,
+    "segundos": 69
+  },
+  "Random Forest": {
+    "RMSE": 431.9,
+    "MAE": 308.6,
+    "R2": 0.153,
+    "rRMSE_%": 14.4,
+    "config_modal": {
+      "max_depth": "8",
+      "max_features": "sqrt",
+      "min_samples_leaf": "2",
+      "n_estimators": "200"
+    },
+    "freq_modal": "5/24",
+    "n_configs": 10,
+    "segundos": 265
+  }
+}

@@ -348,7 +348,21 @@ passo "Mergeia o PR automaticamente" do workflow.
 
 Para conferir a credencial na hora: **Actions → Atualiza base de dados →
 Run workflow**, marque **"Testar a credencial do Earth Engine"** e rode. O log
-deve terminar com "credencial e ativos do Earth Engine OK", sem alterar nada.
+deve terminar com "credencial e ativos do Earth Engine OK", sem alterar nada —
+nesse modo os passos que consultam o SIDRA e a NOAA ficam desligados, para o
+teste não abrir PR nem tocar na base.
+
+### A base evolui; a dissertação não
+
+O ciclo acima mantém `pesquisa/dados/` acompanhando as revisões do IBGE. Isso
+significa que o `main` deste repositório pode divergir dos números impressos na
+dissertação: se o IBGE revisar uma safra, a base muda e as métricas do painel
+são recalculadas, enquanto as tabelas do texto continuam reportando o
+levantamento vigente na época da escrita.
+
+Para reproduzir exatamente os valores das tabelas da dissertação, use a
+**versão arquivada no Zenodo** indicada pelo DOI, e não o `main`. O DOI aponta
+para um instantâneo imutável; o `main` é a versão viva do produto técnico.
 
 Somente `pesquisa/dados/soja_para_mascarado_2001_2024.csv` (a base do painel) é
 atualizado — o nome do arquivo preserva o recorte original da dissertação, mas

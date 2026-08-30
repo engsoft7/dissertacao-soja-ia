@@ -51,8 +51,12 @@ jobs:
           pip install --quiet earthengine-api
           python software/automacao_github/coleta_gee_safra.py --testar
 
+      # O teste de credencial é anunciado no README como "sem alterar nada".
+      # Sem esta guarda ele seguiria para o SIDRA e poderia abrir e mergear um
+      # PR na base — que é a mesma que produz os números da dissertação.
       - name: Consulta o SIDRA e aplica revisões
         id: pam
+        if: ${{ !inputs.testar_gee }}
         env:
           RESUMO_MD: /tmp/resumo_pam.md
         run: python software/automacao_github/atualiza_pam.py
@@ -62,6 +66,7 @@ jobs:
       # as barras do gráfico histórico, então vale manter atualizado.
       - name: Atualiza a classificação El Niño / La Niña (NOAA ONI)
         id: enso
+        if: ${{ !inputs.testar_gee }}
         run: |
           python software/automacao_github/atualiza_enso.py
           if git diff --quiet -- pesquisa/dados/eventos_enso.json; then

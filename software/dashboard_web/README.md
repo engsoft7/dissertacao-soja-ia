@@ -40,10 +40,13 @@ Abre em `http://localhost:8501`.
   DOI e instrução de citação.
 - Estima a **produção total** (toneladas e sacas = produtividade × área MapBiomas)
   e faz uma **análise econômica** (receita, custo e **margem por hectare**). O
-  preço é informado pelo usuário (não há série pública de preço ao produtor do
-  Pará) e o custo parte de uma referência aberta da CONAB para o cerrado do
-  Tocantins vizinho (o Pará não integra o MATOPIBA e não tem custo publicado),
-  ajustável.
+  preço parte da cotação física da saca em Paranaguá (Notícias Agrícolas), com
+  o futuro de Chicago como reserva, já que não há série pública de preço ao
+  produtor do Pará. O custo vem do levantamento da CONAB para Pedro Afonso
+  (TO), de março de 2026, porque o Pará não integra o MATOPIBA e não tem custo
+  publicado. O Valor da Terra Nua vem da tabela da Receita Federal de 2026,
+  classe lavoura de aptidão boa, disponível para 13 dos 38 municípios. Os três
+  são editáveis.
 - Mostra a série histórica oficial (PAM/IBGE), destacando em vermelho as safras
   cuja produtividade repete exatamente o valor do ano anterior.
 - Alerta quando a série de um município apresenta repetição acima da média

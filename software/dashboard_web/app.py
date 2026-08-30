@@ -8,6 +8,7 @@ Execução:
 import model as M
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -91,30 +92,48 @@ def data_atualizacao() -> str | None:
         return None
 
 
+# Faixa plausível para a saca de 60 kg. Serve para uma falha de parsing não
+# entrar na simulação disfarçada de cotação.
+PRECO_SACA_MIN, PRECO_SACA_MAX = 60.0, 400.0
+
+
+def extrair_preco_paranagua(html: str) -> float | None:
+    """Tira da página o preço físico da saca em Paranaguá.
+
+    A tabela da fonte muda de formato de tempos em tempos, então em vez de
+    confiar numa posição fixa de coluna, varre as células da linha e aceita
+    o primeiro número que se pareça com preço em reais e caia na faixa
+    plausível. Assim uma coluna de variação ("-2,15") ou um total em
+    milhares não entram no lugar da cotação.
+    """
+    for achado_nome in re.finditer("Paranaguá", html, re.IGNORECASE):
+        linha = html[achado_nome.end():achado_nome.end() + 800].split("</tr>")[0]
+        for celula in re.findall(r"<td[^>]*>(.*?)</td>", linha, re.DOTALL):
+            texto = re.sub(r"<[^>]+>", " ", celula)
+            for numero in re.findall(r"\d{1,3}(?:\.\d{3})*,\d{2}", texto):
+                valor = float(numero.replace(".", "").replace(",", "."))
+                if PRECO_SACA_MIN <= valor <= PRECO_SACA_MAX:
+                    return valor
+    return None
+
+
 @st.cache_data(ttl=3600)  # Atualiza a cotação a cada 1 hora de forma segura
-def buscar_preco_soja_online() -> float:
+def buscar_preco_soja_online() -> float | None:
+    """Preço físico da saca em Paranaguá (Notícias Agrícolas).
+
+    Devolve None quando não consegue um número plausível, para quem chama
+    poder recorrer à cotação seguinte em vez de exibir um valor inventado
+    como se fosse cotação do dia.
     """
-    Busca o preço de referência atualizado da soja no mercado físico (Notícias Agrícolas).
-    Possui fallback seguro para garantir estabilidade offline.
-    """
-    preco_padrao = 135.0  # Referência base alinhada aos boletins recentes
     try:
         import urllib.request
-        import re
         url = "https://www.noticiasagricolas.com.br/cotacoes/soja/"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
         html = urllib.request.urlopen(req, timeout=5).read().decode("utf-8")
-        # Procura a cotação em reais (ex: Paranaguá disponível/futuro)
-        matches = re.findall(r"Paranaguá.*?<td[^>]*>(.*?)</td>", html, re.IGNORECASE | re.DOTALL)
-        if len(matches) >= 4:
-            # O índice 3 costuma ser o valor de venda "150,00"
-            val_str = matches[3].replace(".", "").replace(",", ".")
-            val = float(val_str)
-            if val > 50:
-                return val
     except Exception:
-        pass
-    return preco_padrao
+        return None
+    return extrair_preco_paranagua(html)
 
 def injetar_meta_nativas():
     """Injeta as tags 'theme-color' diretamente no index.html do Streamlit para o celular ficar nativo"""
@@ -863,8 +882,6 @@ unidade = st.sidebar.radio(
     help="Vale para todos os números do painel: cartões, gráficos e tabelas.")
 fator = 1 if unidade == "kg/ha" else 1 / SACA_KG
 
-preco = PRECO_SACA_ONLINE
-
 st.sidebar.markdown("### Perfil do Produtor")
 baseline_ibge = estimador.estimar(municipio, int(df.ano.max()) + 1)["baseline_kg_ha"]
 fator_tecnologico = st.sidebar.number_input(
@@ -1090,13 +1107,23 @@ if tela_atual == "💰 Viabilidade Financeira":
         from financas import get_financas
         r = get_financas(municipio)
         custos_locais = {'custo_ha': r.get('custo_ha', 4800.0), 'vtn_ha': r.get('vtn_ha', 12000.0)}
-        default_preco = r.get('soja_preco_saca', 120.0)
+        preco_chicago = r.get('soja_preco_saca', 120.0)
     except Exception:
         st.caption(
             "Base de custos indisponível no momento: os campos abaixo vêm de "
             "referências regionais e podem ser editados.")
         custos_locais = {'custo_ha': 4800.0, 'vtn_ha': 12000.0}
-        default_preco = 120.0
+        preco_chicago = 120.0
+
+    if PRECO_SACA_ONLINE is not None:
+        default_preco = PRECO_SACA_ONLINE
+        fonte_preco = ("**Cotação:** preço físico da saca em Paranaguá "
+                       "(Notícias Agrícolas), relido a cada hora.")
+    else:
+        default_preco = preco_chicago
+        fonte_preco = ("**Cotação:** o preço físico não pôde ser consultado agora, "
+                       "então o campo traz o futuro de soja em Chicago (CBOT) "
+                       "convertido para reais — acima do que se recebe no Pará.")
 
     
     with col_eco1:
@@ -1105,9 +1132,7 @@ if tela_atual == "💰 Viabilidade Financeira":
             min_value=0.0,
             value=default_preco,
             step=5.0)
-        st.caption(
-            "**Cotação:** contrato futuro de soja em Chicago (CBOT), convertido para "
-            "reais por saca. O preço recebido no Pará é menor.")
+        st.caption(fonte_preco)
     with col_eco2:
         custo_ha = st.number_input(
             f"Custo Operacional base ({municipio.title()})",
@@ -1272,10 +1297,14 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
     * **Projeto MapBiomas:** Extração das coberturas de Uso e Ocupação do Solo com foco em áreas exclusivas de soja no Pará (mascaramento de satélite).
 
     ### Dados econômicos do simulador
-    * **Yahoo Finance (CBOT `ZS=F` e `BRL=X`):** única cotação consultada em
-      tempo real. É o contrato futuro de soja em Chicago, convertido para reais
-      por saca de 60 kg. O preço recebido no Pará é menor que o de Chicago, por
-      isso o campo é editável.
+    * **Notícias Agrícolas:** preço físico da saca de soja em Paranaguá, relido
+      a cada hora. É a cotação que o simulador usa por padrão, por ser mercado
+      físico brasileiro. O produtor no Pará recebe menos que em Paranaguá, por
+      causa do frete, então o campo é editável.
+    * **Yahoo Finance (CBOT `ZS=F` e `BRL=X`):** reserva usada quando o preço
+      físico não responde. É o contrato futuro de Chicago convertido para reais
+      por saca de 60 kg, e fica acima do preço físico brasileiro — a legenda do
+      campo avisa quando é essa a origem do valor.
     * **Custo operacional e Valor da Terra Nua:** tabela estática por município,
       embutida em `software/api_backend/financas.py`. Os valores de custo foram
       escalonados a partir do VTN (correlação de 0,99 entre as duas colunas) e

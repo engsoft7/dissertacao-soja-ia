@@ -16,6 +16,10 @@ on:
         description: "Testar a credencial do Earth Engine (não altera a base)"
         type: boolean
         default: false
+      simular:
+        description: "Simular o ciclo completo: consulta as fontes e relata o que mudaria, sem abrir PR"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -99,7 +103,7 @@ jobs:
 
       - name: Abre PR com as mudanças na base
         id: cpr
-        if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true' || steps.enso.outputs.alterado == 'true'
+        if: ${{ (steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true' || steps.enso.outputs.alterado == 'true') && !inputs.simular }}
         uses: peter-evans/create-pull-request@v7
         with:
           branch: automacao/atualiza-base
@@ -121,8 +125,32 @@ jobs:
             "${{ steps.cpr.outputs.pull-request-number }}" \
             --repo "${{ github.repository }}"
 
+      # Em simulação, o job termina dizendo o que teria mudado. Serve para
+      # provar que o ciclo funciona sem tocar na base que a dissertação cita.
+      - name: Relata o que a simulação encontrou
+        if: ${{ inputs.simular }}
+        run: |
+          {
+            echo "## Simulação do ciclo de atualização"
+            echo ""
+            echo "| etapa | resultado |"
+            echo "|---|---|"
+            echo "| SIDRA consultado | ${{ steps.pam.outcome }} |"
+            echo "| revisão na base | ${{ steps.pam.outputs.csv_alterado || 'false' }} |"
+            echo "| safra nova encontrada | ${{ steps.pam.outputs.novo_ano || 'nenhuma' }} |"
+            echo "| classificação ENSO | ${{ steps.enso.outcome }} (alterada: ${{ steps.enso.outputs.alterado || 'false' }}) |"
+            echo "| coleta no Earth Engine | ${{ steps.gee.outcome }} |"
+            echo ""
+            echo "Arquivos que teriam entrado no PR:"
+            echo ""
+            echo '```'
+            git status --porcelain -- pesquisa/dados/ || echo "(nenhum)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          git checkout -- pesquisa/dados/ 2>/dev/null || true
+
       - name: Abre issue para a safra nova (sem chave GEE ou coleta falhou)
-        if: always() && steps.pam.outputs.novo_ano != '' && (env.TEM_CHAVE_GEE != 'true' || steps.gee.outcome == 'failure')
+        if: ${{ always() && steps.pam.outputs.novo_ano != '' && !inputs.simular && (env.TEM_CHAVE_GEE != 'true' || steps.gee.outcome == 'failure') }}
         uses: actions/github-script@v7
         env:
           NOVO_ANO: ${{ steps.pam.outputs.novo_ano }}

@@ -57,6 +57,24 @@ jobs:
           RESUMO_MD: /tmp/resumo_pam.md
         run: python software/automacao_github/atualiza_pam.py
 
+      # O README listava atualiza_enso.py como automático, mas nenhum workflow o
+      # executava. O painel lê eventos_enso.json para a faixa climática e para
+      # as barras do gráfico histórico, então vale manter atualizado.
+      - name: Atualiza a classificação El Niño / La Niña (NOAA ONI)
+        id: enso
+        run: |
+          python software/automacao_github/atualiza_enso.py
+          if git diff --quiet -- pesquisa/dados/eventos_enso.json; then
+            echo "alterado=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "alterado=true" >> "$GITHUB_OUTPUT"
+            echo "" >> "${RESUMO_MD:-/tmp/resumo_pam.md}"
+            echo "Classificação ENSO atualizada pelo Oceanic Niño Index da NOAA." \
+              >> "${RESUMO_MD:-/tmp/resumo_pam.md}"
+          fi
+        env:
+          RESUMO_MD: /tmp/resumo_pam.md
+
       - name: Coleta a safra nova no Earth Engine
         id: gee
         if: steps.pam.outputs.novo_ano != '' && env.TEM_CHAVE_GEE == 'true'
@@ -69,14 +87,14 @@ jobs:
           python software/automacao_github/coleta_gee_safra.py --ano "${{ steps.pam.outputs.novo_ano }}"
 
       - name: Recalcula as métricas de validação do painel
-        if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true'
+        if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true' || steps.enso.outputs.alterado == 'true'
         run: |
           pip install --quiet scikit-learn
           python software/automacao_github/gera_metricas.py
 
       - name: Abre PR com as mudanças na base
         id: cpr
-        if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true'
+        if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true' || steps.enso.outputs.alterado == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           branch: automacao/atualiza-base

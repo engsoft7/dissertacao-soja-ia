@@ -1150,9 +1150,9 @@ if tela_atual == "💰 Viabilidade Financeira":
             value=int(custos_locais["custo_ha"]),
             step=100)
         st.caption(
-            "**Custo:** o Pará não integra o MATOPIBA e não tem custo de "
-            "produção publicado, então a referência vem do cerrado vizinho "
-            "(Tocantins). Edite com os números da sua fazenda.")
+            "**Custo:** CONAB, custo operacional da soja em Pedro Afonso (TO), "
+            "levantamento de março de 2026, convertido pela produtividade de "
+            "referência de 2.880 kg/ha. O Pará não tem levantamento próprio.")
     with col_eco3:
         vtn_ha = st.number_input(
             f"Preço Terra Nua VTN/ha ({municipio.title()})",
@@ -1343,16 +1343,19 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
       físico não responde. É o contrato futuro de Chicago convertido para reais
       por saca de 60 kg, e fica acima do preço físico brasileiro — a legenda do
       campo avisa quando é essa a origem do valor.
-    * **Custo operacional:** o Pará não integra o MATOPIBA e não tem custo de
-      produção de soja publicado pela CONAB, então a referência vem do cerrado
-      do Tocantins vizinho. É uma tabela estática em
-      `software/api_backend/financas.py`, não uma consulta em tempo real, e a
-      variação entre municípios foi escalonada a partir do valor da terra —
-      custeio de lavoura não varia com o preço do hectare, então trate a
-      diferença entre municípios como ruído e ajuste o campo com os números da
-      sua propriedade.
-    * **Valor da Terra Nua:** tabela estática no mesmo arquivo, também sem
-      consulta em tempo real à Receita Federal.
+    * **Custo operacional (CONAB):** levantamento de custos de produção da soja
+      no município de Pedro Afonso (TO), de março de 2026 — ponto de coleta da
+      CONAB no cerrado do Tocantins. O Pará não integra o MATOPIBA e não tem
+      custo de soja levantado, por isso adota-se o cerrado vizinho. A CONAB
+      publica o custo por saca; a conversão para hectare usa a produtividade de
+      referência do próprio levantamento, de 2.880 kg/ha. O valor empregado é o
+      custo operacional, R$ 109,94 por saca ou R$ 5.277,12 por hectare, soma do
+      custo variável (R$ 4.081,44/ha) com o custo fixo (R$ 1.195,68/ha). É um
+      valor de referência embutido no código, igual para todos os municípios, e
+      editável no campo acima.
+    * **Valor da Terra Nua:** referência fixa por município no mesmo arquivo,
+      sem fonte apurada e sem consulta em tempo real à Receita Federal. Não
+      entra no cálculo da margem.
     
     *Repositório Acadêmico:* [github.com/engsoft7/dissertacao-soja-ia](https://github.com/engsoft7/dissertacao-soja-ia)
 

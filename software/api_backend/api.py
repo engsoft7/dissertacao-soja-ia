@@ -1,4 +1,4 @@
-from financas import get_financas, get_custos_locais, BASE_CUSTO_PA
+from financas import get_financas, get_custos_locais, CUSTO_REFERENCIA_HA
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -149,8 +149,11 @@ def get_kpis_economia():
     
     fin = _get_cached_finance()
     brl_price_bag = fin["soja_preco_saca"]
-    custo_ha = round((brl_price_bag * 55) * 0.65, 2)
-    
+    # Antes: custo_ha = preço da saca * 55 * 0,65, fórmula sem origem que fazia
+    # o custo variar com a cotação. Custeio de lavoura não acompanha o preço de
+    # venda. Passa a usar a referência da CONAB, a mesma do painel web.
+    custo_ha = CUSTO_REFERENCIA_HA
+
     return {
          "soja_preco_saca": brl_price_bag,
          "custo_ha": custo_ha,

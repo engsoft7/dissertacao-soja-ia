@@ -175,7 +175,7 @@ Para conferir o estado exato de um commit ou versão, sem alterar a cópia de
 trabalho:
 
 ```bash
-git worktree add --detach /tmp/conferencia 7b8375df   # ou: v2.3.0
+git worktree add --detach /tmp/conferencia 7b8375df   # ou: v2.3.1
 cd /tmp/conferencia && <comando acima>
 ```
 
@@ -183,11 +183,14 @@ cd /tmp/conferencia && <comando acima>
 
 | Estado | Arquivos | Linhas | SHA-256 do conjunto |
 |---|---|---|---|
-| Commit-âncora `7b8375df` (19/08/2026) — código depositado | 45 | 5.505 | `5a93dfca9511fcab534c76da4618e670e5c6ed6d33d48ac2a557963a5ef9f11d` |
-| Tag `v2.3.0` (30/08/2026) — versão da defesa | 47 | 6.822 | `47f50a1e28486d618d8ab92e0507d984a26c0138bc863ce2c0c31cd62884c775` |
+| Commit-âncora `7b8375df` (19/08/2026) — código depositado no INPI | 45 | 5.505 | `5a93dfca9511fcab534c76da4618e670e5c6ed6d33d48ac2a557963a5ef9f11d` |
+| Tag `v2.3.0` (30/08/2026) | 47 | 6.822 | `47f50a1e28486d618d8ab92e0507d984a26c0138bc863ce2c0c31cd62884c775` |
+| Tag `v2.3.1` (31/08/2026) — versão da defesa | 47 | 6.927 | `dd2219ca6885ae934dc31fc3bc44834a2916a372f63651af1214bea7258d5ae2` |
 
-Ambos foram recalculados em 31/08/2026 a partir de cópias limpas dos
-respectivos commits e conferem em execuções repetidas.
+Os três foram recalculados a partir de cópias limpas dos respectivos commits e
+conferem em execuções repetidas. A tag da defesa é a `v2.3.1`: a `v2.3.0` fica
+registrada por ter sido publicada antes das correções do simulador financeiro
+e do ranking de municípios.
 
 > **Sobre o agregado publicado em 19/08/2026.** A versão anterior desta seção
 > trazia `7eca3e90aadcd5d0eaa765b92a8ad7e55083f90846a78fdc1854525fffa94e6b`

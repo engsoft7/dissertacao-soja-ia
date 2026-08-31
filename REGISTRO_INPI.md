@@ -155,35 +155,65 @@ principais:
 
 ### 9.1 Hash Global do Código-Fonte
 
-O resumo criptográfico SHA-256 abaixo abrange **todos os 45 arquivos-fonte**
-(Python `.py`, Kotlin `.kt` e Gradle `.kts`) do repositório, totalizando
-**5.505 linhas de código**. O hash é gerado de forma determinística: a lista
-de arquivos é ordenada alfabeticamente, cada arquivo recebe seu SHA-256
-individual e, em seguida, o conjunto de hashes é resumido em um único hash
-final (hash-of-hashes).
+Os resumos criptográficos SHA-256 abaixo abrangem **todos os arquivos-fonte**
+(Python `.py`, Kotlin `.kt` e Gradle `.kts`) do repositório — 45 arquivos e
+5.505 linhas no commit registrado no INPI. O hash é gerado de forma
+determinística: a lista de arquivos é ordenada alfabeticamente, cada arquivo
+recebe seu SHA-256 individual e, em seguida, o conjunto de hashes é resumido
+em um único hash final (hash-of-hashes).
 
 ```bash
-# Comando para reproduzir o hash — executar na raiz do repositório
-find . \( -name '*.py' -o -name '*.kt' -o -name '*.kts' \) \
+# Comando para reproduzir o hash — executar na raiz do repositório.
+# LC_ALL=C fixa a ordenação, que de outro modo varia com o idioma do sistema.
+LC_ALL=C find . \( -name '*.py' -o -name '*.kt' -o -name '*.kts' \) \
   -not -path './.git/*' -not -path '*/build/*' \
   -not -path '*__pycache__*' -not -path '*/.gradle/*' \
-  | sort | xargs sha256sum | sha256sum
+  | LC_ALL=C sort | xargs sha256sum | sha256sum
 ```
 
-**Hash global gerado em 19/08/2026:**
+Para conferir o estado exato de um commit ou versão, sem alterar a cópia de
+trabalho:
+
+```bash
+git worktree add --detach /tmp/conferencia 7b8375df   # ou: v2.3.0
+cd /tmp/conferencia && <comando acima>
 ```
-7eca3e90aadcd5d0eaa765b92a8ad7e55083f90846a78fdc1854525fffa94e6b
-```
+
+**Hashes globais verificados:**
+
+| Estado | Arquivos | Linhas | SHA-256 do conjunto |
+|---|---|---|---|
+| Commit-âncora `7b8375df` (19/08/2026) — código depositado | 45 | 5.505 | `5a93dfca9511fcab534c76da4618e670e5c6ed6d33d48ac2a557963a5ef9f11d` |
+| Tag `v2.3.0` (30/08/2026) — versão da defesa | 47 | 6.822 | `47f50a1e28486d618d8ab92e0507d984a26c0138bc863ce2c0c31cd62884c775` |
+
+Ambos foram recalculados em 31/08/2026 a partir de cópias limpas dos
+respectivos commits e conferem em execuções repetidas.
+
+> **Sobre o agregado publicado em 19/08/2026.** A versão anterior desta seção
+> trazia `7eca3e90aadcd5d0eaa765b92a8ad7e55083f90846a78fdc1854525fffa94e6b`
+> como hash global. Esse valor **não se regenera** pelo comando acima no
+> commit-âncora, nem por variações do procedimento (ordenação por outros
+> locales, resumo só dos dígitos, dígitos concatenados, conteúdo concatenado,
+> caminhos sem o prefixo `./`). A contagem de arquivos e de linhas declarada
+> na época — 45 arquivos e 5.505 linhas — confere exatamente, o que indica
+> divergência na etapa de agregação, e não no conjunto de arquivos. A tabela
+> da seção 9.3 foi reconferida arquivo a arquivo contra o commit-âncora:
+> **os 45 hashes individuais conferem, nenhum difere**. A prova de integridade
+> do código depositado permanece, portanto, sustentada pelos hashes
+> individuais e pelo SHA-1 do commit; o agregado acima substitui o anterior
+> por ser reproduzível.
 
 > **Hashes anteriores:**
 > - 23/07/2026: `2fca0acd8026bef2810b72f825943ebcca4cc9e89e2659a79964f3e02226deec`
 > - 19/08/2026 (pré-auditoria): `1b5773b994ccd6f147e40271aa3a17557f50849b1da190a4f7ded66d0b7e1095`
+> - 19/08/2026 (publicado, não reproduzível): `7eca3e90aadcd5d0eaa765b92a8ad7e55083f90846a78fdc1854525fffa94e6b`
 
 ---
 
 ### 9.2 Âncora no Controle de Versão (Git)
 
-O hash acima corresponde ao estado exato do repositório no commit:
+O primeiro hash da tabela acima, `5a93dfca…`, corresponde ao estado exato
+do repositório no commit:
 
 | Campo | Valor |
 |---|---|

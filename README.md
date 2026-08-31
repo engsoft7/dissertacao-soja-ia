@@ -376,6 +376,28 @@ dias e envia um e-mail avisando; basta reativar na aba Actions.
 
 ---
 
+## Testes automáticos
+
+O workflow `.github/workflows/testes.yml` roda `pytest` a cada push e a cada
+pull request. Para rodar localmente, da raiz do repositório:
+
+```bash
+pip install pytest pandas requests
+python -m pytest software -q
+```
+
+Os testes são poucos e específicos, cada um preso a um erro que já aconteceu:
+
+- `software/automacao_github/test_atualiza_pam_paths.py` — os caminhos que a
+  automação escreve são os que o painel lê.
+- `software/dashboard_web/test_robustez_painel.py` — nenhum bloco `except` lê
+  um nome que só o `try` cria (esse defeito derrubou o app publicado uma vez);
+  a cópia do custo de referência no painel bate com a fonte da verdade em
+  `financas.py`; e o `requirements.txt` do painel declara o que `financas.py`
+  importa, em vez de depender de dependência transitiva.
+
+---
+
 ## Metodologia, em resumo
 
 - **Alvo:** produtividade municipal da soja (kg/ha), da PAM/IBGE (tabela 5457).

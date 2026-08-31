@@ -705,12 +705,18 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: b
     latmin, latmax = pts.latitude.min(), pts.latitude.max()
     lonmin, lonmax = pts.longitude.min(), pts.longitude.max()
 
-    tiles_map = "cartodbdark_matter" if is_dark else "cartodbpositron"
-    fill_color = "#1b2d1b" if is_dark else "#e8f5e9"
-    border_color = "#304a30" if is_dark else "#81c784"
+    # Sem basemap de terceiro: o mapa é desenhado só com as geometrias que já
+    # estão versionadas no repositório (contorno do Pará e rios). Os tiles do
+    # CartoDB passaram a responder "API key required" e derrubaram o mapa do app
+    # publicado; qualquer outro provedor gratuito é a mesma aposta, sujeita à
+    # mudança de política de quem hospeda. Sem tiles, o painel não depende de
+    # serviço externo em tempo de execução para desenhar o panorama.
+    fundo_mapa = "#12151a" if is_dark else "#eef1f4"
+    fill_color = "#1b2d1b" if is_dark else "#e3efe4"
+    border_color = "#3f5f3f" if is_dark else "#7cb17f"
     m = folium.Map(
         location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
-        tiles=tiles_map,
+        tiles=None,
         zoom_start=6,
         min_zoom=5,
         max_zoom=12,
@@ -730,8 +736,8 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: b
         style_function=lambda f: {
             "fillColor": fill_color,
             "color": border_color,
-            "weight": 1.2,
-            "fillOpacity": 0.2 if is_dark else 0.5}).add_to(m)
+            "weight": 1.4,
+            "fillOpacity": 1.0}).add_to(m)
 
     rios = carregar_rios()
     if rios is not None and rios.get("features"):
@@ -773,7 +779,13 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: b
         ).add_to(m)
 
     m.fit_bounds([[latmin, lonmin], [latmax, lonmax]])
-    m.get_root().html.add_child(folium.Element("<style>.leaflet-control-attribution { font-size: 8px !important; transform: scale(0.65); transform-origin: bottom right; opacity: 0.5; background: transparent !important; }</style>"))
+    m.get_root().html.add_child(folium.Element(
+        "<style>"
+        ".leaflet-control-attribution { font-size: 8px !important;"
+        " transform: scale(0.65); transform-origin: bottom right;"
+        " opacity: 0.5; background: transparent !important; }"
+        f".leaflet-container {{ background: {fundo_mapa} !important; }}"
+        "</style>"))
     return m, nome_para_interno, (rmin, rmax)
 
 
@@ -1055,6 +1067,10 @@ if tela_atual == "📍 Inteligência Territorial":
             st.markdown(html, unsafe_allow_html=True)
             st.caption(
                 "**Dica:** Clique em qualquer ponto do mapa para alternar o município selecionado (Vermelho = Principal | Azul = Comparação).")
+            st.caption(
+                "**Geometrias:** contorno do estado da malha municipal do IBGE e "
+                "rios do Natural Earth, ambos versionados em `pesquisa/dados/`. "
+                "O mapa não usa camada de terceiros em tempo de execução.")
 
 # ==============================================================================
 # ABA 2: SÉRIES HISTÓRICAS & CLIMA

@@ -1334,7 +1334,12 @@ if tela_atual == "💰 Viabilidade Financeira":
     # ------------------------------------------------------ PANORAMA GERAL DO ESTADO
     st.subheader("Ranking dos polos produtivos")
     st.caption(
-        f"Calculado com base na produtividade média recente e na cotação de mercado de **{brl(preco)} por saca**.")
+        f"Calculado com base na produtividade média recente e na cotação de "
+        f"**{brl_md(preco)} por saca**. A ordenação é por faturamento, então "
+        f"compare sempre com a coluna **Total de Safras**: parte dos municípios "
+        f"do topo tem uma ou duas safras no histórico oficial, e ali a \"média "
+        f"recente\" é um único registro do IBGE, não uma média. Nesses casos a "
+        f"repetição aparece como traço, porque não há série para medir.")
 
     ult_ano = int(df.ano.max())
     linhas_pan = []
@@ -1350,7 +1355,16 @@ if tela_atual == "💰 Viabilidade Financeira":
             "prod_media": prod_med_kg * fator,
             "faturamento": faturamento_bruto,
             "area_ha": round(float(d.iloc[-1]["soy_area_ha"])),
-            "repeticao": float((difs == 0).mean() * 100) if len(difs) else 0.0,
+            # Sem pelo menos duas safras não há diferença para medir. Antes isso
+            # virava 0%, indistinguível de uma série que de fato varia — e o
+            # município ia para o topo do ranking parecendo o mais confiável.
+            # Texto pronto, não número: verificou-se que o NumberColumn desta
+            # versão do Streamlit desenha nulo como a palavra "None" na célula,
+            # com ou sem 'format'. Só o TextColumn deixa a célula limpa. Sem pelo
+            # menos duas safras não há diferença entre safras para medir, e o
+            # traço diz isso — antes virava 0%, indistinguível de uma série que
+            # de fato varia, e o município subia ao topo parecendo confiável.
+            "repeticao": (f"{(difs == 0).mean() * 100:.0f}%" if len(difs) else "—"),
             "safras": len(d),
         })
 
@@ -1359,6 +1373,9 @@ if tela_atual == "💰 Viabilidade Financeira":
     casas_pan = 0 if unidade == "kg/ha" else 1
     pan = pd.DataFrame(linhas_pan).sort_values("faturamento", ascending=False)
     pan["prod_media"] = pan["prod_media"].round(casas_pan)
+    # Sem isso a coluna mostrava frações de centavo (6.204,163). Só não aparecia
+    # antes porque o preço padrão era redondo e os produtos davam inteiros.
+    pan["faturamento"] = pan["faturamento"].round(0)
 
     st.dataframe(
         pan,
@@ -1374,9 +1391,10 @@ if tela_atual == "💰 Viabilidade Financeira":
             "area_ha": st.column_config.NumberColumn(
                 "Área Atual (ha)",
                 format="localized"),
-            "repeticao": st.column_config.NumberColumn(
-                "Repetição Oficial (%)",
-                format="%.0f%%"),
+            "repeticao": st.column_config.TextColumn(
+                "Repetição Oficial",
+                help="Traço quando o município tem menos de duas safras: não há "
+                     "diferença entre safras para medir."),
             "safras": st.column_config.NumberColumn("Total de Safras"),
         },
     )

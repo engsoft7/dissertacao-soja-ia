@@ -75,6 +75,12 @@ def test_custo_de_emergencia_igual_ao_oficial():
         _constante(FINANCAS, "CUSTO_OPERACIONAL_HA")
 
 
+def test_preco_de_emergencia_igual_ao_oficial():
+    """Mesma regra do custo, para o preço de referência da CONAB."""
+    assert _constante(APP, "PRECO_RECEBIDO_CONAB_PADRAO_SACA") == \
+        _constante(FINANCAS, "PRECO_RECEBIDO_CONAB_SACA")
+
+
 def test_requisitos_declaram_o_que_financas_importa():
     """O painel importa financas.py; o que financas.py usa precisa estar no
     requirements.txt do painel, e não só como dependência transitiva."""

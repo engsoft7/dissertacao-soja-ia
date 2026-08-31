@@ -48,6 +48,14 @@ PRECO_RECEBIDO_CONAB_PADRAO_SACA = 105.09
 # Produtividade de referência do levantamento da CONAB, base da conversão do
 # custo por saca para custo por hectare. O custo por hectare está preso a ela.
 PRODUTIVIDADE_REFERENCIA_CONAB_SC = 48.0
+# Custo total da CONAB = operacional + renda de fatores (a parcela que remunera
+# terra e capital). Cópia literal; a fonte da verdade é CUSTO_TOTAL_HA em
+# financas.py. A diferença entre os dois é o que a margem operacional não cobre.
+CUSTO_TOTAL_PADRAO_HA = 5714.88
+# Preço e custo operacional POR SACA na praça de referência, para a interface
+# poder mostrar o resultado que o próprio levantamento apurou.
+PRECO_RECEBIDO_CONAB_SACA_REF = 105.09
+CUSTO_OPERACIONAL_CONAB_SACA_REF = 109.94
 
 
 @st.cache_data
@@ -1284,6 +1292,28 @@ if tela_atual == "💰 Viabilidade Financeira":
         f"prática pesam mais. A margem é receita bruta menos custo operacional: "
         f"não desconta terra, impostos nem financiamento, e o custo por hectare "
         f"não cresce junto com a produtividade projetada.")
+
+    # Duas leituras que o número principal não entrega sozinho: quanto sobra
+    # depois de remunerar terra e capital, e o que o próprio levantamento de
+    # referência apurou. Sem elas a margem operacional é fácil de ler como lucro.
+    renda_fatores_ha = CUSTO_TOTAL_PADRAO_HA - CUSTO_OPERACIONAL_PADRAO_HA
+    margem_total = margem_ha - renda_fatores_ha
+    st.caption(
+        f"**A custo total:** a margem acima é operacional e não remunera o "
+        f"patrimônio empregado. Descontando também a renda de fatores da CONAB "
+        f"({brl_md(renda_fatores_ha, 2)}/ha, que remunera terra e capital), "
+        f"sobram {brl_md(margem_total)}/ha.")
+    resultado_ref = (PRECO_RECEBIDO_CONAB_SACA_REF
+                     - CUSTO_OPERACIONAL_CONAB_SACA_REF) * PRODUTIVIDADE_REFERENCIA_CONAB_SC
+    st.caption(
+        f"**Na praça de referência:** no mesmo levantamento da CONAB, em Pedro "
+        f"Afonso (TO), o preço recebido ({brl_md(PRECO_RECEBIDO_CONAB_SACA_REF, 2)}"
+        f"/sc) ficou abaixo do custo operacional "
+        f"({brl_md(CUSTO_OPERACIONAL_CONAB_SACA_REF, 2)}/sc): a lavoura apurou "
+        f"{brl_md(resultado_ref)}/ha ali. O resultado positivo aqui depende de a "
+        f"produtividade projetada ({dec(est_sacas_ha)} sc/ha) superar a de "
+        f"referência do levantamento ({PRODUTIVIDADE_REFERENCIA_CONAB_SC:.0f} sc/ha), "
+        f"já que o custo por hectare não acompanha essa diferença.")
     if vtn_publicado is None:
         st.caption(
             f"**Valor da Terra Nua ({disp(municipio)}):** a Receita Federal não "

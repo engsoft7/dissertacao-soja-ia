@@ -42,6 +42,12 @@ SACA_KG = 60  # saca de soja
 # usada quando aquele módulo não pode ser importado, para o painel abrir com
 # um número correto em vez de quebrar. Ao atualizar a CONAB, mudar nos dois.
 CUSTO_OPERACIONAL_PADRAO_HA = 5277.12
+# Preço recebido pelo produtor no mesmo levantamento da CONAB. Também é cópia
+# literal: a fonte da verdade é PRECO_RECEBIDO_CONAB_SACA em financas.py.
+PRECO_RECEBIDO_CONAB_PADRAO_SACA = 105.09
+# Produtividade de referência do levantamento da CONAB, base da conversão do
+# custo por saca para custo por hectare. O custo por hectare está preso a ela.
+PRODUTIVIDADE_REFERENCIA_CONAB_SC = 48.0
 
 
 @st.cache_data
@@ -1139,7 +1145,9 @@ if tela_atual == "💰 Viabilidade Financeira":
         from financas import get_financas, CUSTO_REFERENCIA_HA
         r = get_financas(municipio)
         custos_locais = {'custo_ha': r.get('custo_ha'), 'vtn_ha': r.get('vtn_ha')}
-        preco_chicago = r.get('soja_preco_saca', 120.0)
+        preco_referencia = r.get('soja_preco_saca',
+                                 PRECO_RECEBIDO_CONAB_PADRAO_SACA)
+        preco_cbot = r.get('soja_preco_cbot_saca')
     except Exception as e:
         # O nome importado no try não existe aqui: o fallback usa a constante de
         # módulo. Foi exatamente isso que derrubou o app publicado em 30/08/2026.
@@ -1150,17 +1158,25 @@ if tela_atual == "💰 Viabilidade Financeira":
             "referência da CONAB adotada pelo produto, o VTN não é exibido e "
             "todos os campos continuam editáveis.")
         custos_locais = {'custo_ha': CUSTO_OPERACIONAL_PADRAO_HA, 'vtn_ha': None}
-        preco_chicago = 120.0
+        preco_referencia = PRECO_RECEBIDO_CONAB_PADRAO_SACA
+        preco_cbot = None
 
+    # O padrão é preço de PORTEIRA, da mesma praça de onde vem o custo, para a
+    # margem não sair inflada. Paranaguá (porto) e CBOT (bolsa) ficam como
+    # comparação: os dois estão acima do que se recebe no Pará.
+    default_preco = float(preco_referencia)
+    comparacoes = []
     if PRECO_SACA_ONLINE is not None:
-        default_preco = PRECO_SACA_ONLINE
-        fonte_preco = ("**Cotação:** preço físico da saca em Paranaguá "
-                       "(Notícias Agrícolas), relido a cada hora.")
-    else:
-        default_preco = preco_chicago
-        fonte_preco = ("**Cotação:** o preço físico não pôde ser consultado agora, "
-                       "então o campo traz o futuro de soja em Chicago (CBOT) "
-                       "convertido para reais — acima do que se recebe no Pará.")
+        comparacoes.append(f"físico em Paranaguá hoje, {brl_md(PRECO_SACA_ONLINE, 2)}")
+    if preco_cbot:
+        comparacoes.append(f"futuro em Chicago convertido, {brl_md(preco_cbot, 2)}")
+    fonte_preco = ("**Cotação:** CONAB, preço recebido pelo produtor em Pedro "
+                   "Afonso (TO), levantamento de março de 2026 — preço de "
+                   "porteira, e da mesma praça de onde vem o custo abaixo.")
+    if comparacoes:
+        fonte_preco += (" Para comparação: " + "; ".join(comparacoes) +
+                        ". São preços de porto e de bolsa, acima do que se "
+                        "recebe na porteira no Pará.")
 
     
     with col_eco1:
@@ -1179,7 +1195,11 @@ if tela_atual == "💰 Viabilidade Financeira":
         st.caption(
             "**Custo:** CONAB, custo operacional da soja em Pedro Afonso (TO), "
             "levantamento de março de 2026, convertido pela produtividade de "
-            "referência de 2.880 kg/ha. O Pará não tem levantamento próprio.")
+            "referência de 2.880 kg/ha (48 sc/ha). O Pará não tem levantamento "
+            "próprio. **Atenção:** este é um custo por hectare fixo, preso à "
+            "produtividade de referência — ele não cresce junto com a "
+            "produtividade projetada, então parte da colheita, secagem e frete "
+            "das sacas acima de 48 sc/ha não está sendo cobrada.")
     # O Valor da Terra Nua sai dos campos editáveis e do grid de resultados.
     # Era um campo que o usuário podia alterar sem que nada na tela mudasse,
     # porque o VTN não entra em cálculo nenhum, e um cartão de patrimônio no
@@ -1192,6 +1212,7 @@ if tela_atual == "💰 Viabilidade Financeira":
     margem_ha = receita_ha - custo_ha
     pct_margem = f"{margem_ha / custo_ha * 100:+.0f}%" if custo_ha else "—"
     cor_delta = 'var(--positivo)' if margem_ha >= 0 else 'var(--negativo)'
+    # 'margem_incerta' é definida logo abaixo e reajusta esta cor.
 
     # O painel anuncia o erro típico do modelo lá em cima e depois apresentava
     # a receita como número exato. A mesma margem de erro, convertida em
@@ -1205,8 +1226,22 @@ if tela_atual == "💰 Viabilidade Financeira":
     margem_incerta = margem_min < 0 < margem_max
 
     # SÍNTESE LLM (ANÁLISE GENERATIVA)
+    # Quando o resultado muda de sinal dentro do erro do modelo, a síntese não
+    # pode afirmar que a conta fecha no azul — era o que ela fazia, contradizendo
+    # o próprio aviso logo abaixo.
+    if margem_incerta:
+        cor_delta = '#d97706'
     texto_ia = ""
-    if margem_ha > 0:
+    if margem_incerta:
+        texto_ia = (
+            f"<b>Resultado inconclusivo (Síntese IA):</b> a projeção central é de "
+            f"{brl(margem_ha)}/ha, mas o erro típico do modelo leva o resultado de "
+            f"{brl(margem_min)} a {brl(margem_max)} por hectare — a margem muda de "
+            f"sinal. Com a produtividade predita de <b>{dec(est_sacas_ha)} sc/ha</b>, "
+            f"o cenário não permite afirmar se a lavoura fecha no azul ou no "
+            f"vermelho. Ajuste preço, custo ou a expectativa produtiva da fazenda "
+            f"para um cenário conclusivo.")
+    elif margem_ha > 0:
         if margem_ha > (custo_ha * 0.3):
              texto_ia = f"<b>Alta Viabilidade (Síntese IA):</b> Cenário projeta lucro operacional robusto. A produtividade estimada de <b>{dec(est_sacas_ha)} sc/ha</b> assegura um faturamento de {brl(receita_ha)}/ha, cobrindo com folga o custeio de {brl(custo_ha)}, deixando uma margem excelente."
         else:
@@ -1244,20 +1279,11 @@ if tela_atual == "💰 Viabilidade Financeira":
     st.caption(
         f"As faixas vêm do erro típico do modelo (± {dec(erro_sacas)} sc/ha, "
         f"o mesmo do cartão de validação), convertido a {brl_md(preco)} por saca: "
-        f"± {brl_md(erro_reais)}/ha. A margem é receita bruta menos custo "
-        f"operacional: não desconta terra, impostos nem financiamento.")
-    if margem_incerta:
-        st.markdown(
-            f'<div style="background:var(--card-bg); border:1px solid var(--card-border);'
-            f' border-left:3px solid #d97706; border-radius:var(--raio);'
-            f' padding:15px 18px; margin-top:14px; font-size:0.88rem; line-height:1.6;'
-            f' color:var(--text-muted);"><b style="color:var(--text-pure);">'
-            f'A margem não sobrevive à margem de erro.</b> Dentro do erro típico do '
-            f'modelo o resultado vai de {brl(margem_min)} a {brl(margem_max)} por '
-            f'hectare, ou seja, muda de sinal. O cenário não permite concluir se a '
-            f'lavoura fecha no azul ou no vermelho.</div>',
-            unsafe_allow_html=True)
-
+        f"± {brl_md(erro_reais)}/ha. A faixa cobre só o erro do modelo na "
+        f"produtividade — não cobre variação de preço nem de custo, que na "
+        f"prática pesam mais. A margem é receita bruta menos custo operacional: "
+        f"não desconta terra, impostos nem financiamento, e o custo por hectare "
+        f"não cresce junto com a produtividade projetada.")
     if vtn_publicado is None:
         st.caption(
             f"**Valor da Terra Nua ({disp(municipio)}):** a Receita Federal não "
@@ -1370,14 +1396,17 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
     * **Projeto MapBiomas:** Extração das coberturas de Uso e Ocupação do Solo com foco em áreas exclusivas de soja no Pará (mascaramento de satélite).
 
     ### Dados econômicos do simulador
-    * **Notícias Agrícolas:** preço físico da saca de soja em Paranaguá, relido
-      a cada hora. É a cotação que o simulador usa por padrão, por ser mercado
-      físico brasileiro. O produtor no Pará recebe menos que em Paranaguá, por
-      causa do frete, então o campo é editável.
-    * **Yahoo Finance (CBOT `ZS=F` e `BRL=X`):** reserva usada quando o preço
-      físico não responde. É o contrato futuro de Chicago convertido para reais
-      por saca de 60 kg, e fica acima do preço físico brasileiro — a legenda do
-      campo avisa quando é essa a origem do valor.
+    * **Preço recebido pelo produtor (CONAB):** R$ 105,09 por saca no
+      levantamento de Pedro Afonso (TO), de março de 2026. É a cotação que o
+      simulador usa por padrão, por ser preço de porteira e por vir da mesma
+      praça de onde sai o custo — receita e custo passam a nascer do mesmo
+      levantamento. O campo é editável.
+    * **Notícias Agrícolas:** preço físico da saca em Paranaguá, relido a cada
+      hora, exibido como comparação. É preço de porto, no Paraná: o produtor no
+      Pará recebe menos, por causa de frete e base.
+    * **Yahoo Finance (CBOT `ZS=F` e `BRL=X`):** contrato futuro de Chicago
+      convertido para reais por saca de 60 kg, também exibido como comparação.
+      É cotação de bolsa e fica acima do preço físico brasileiro.
     * **Custo operacional (CONAB):** levantamento de custos de produção da soja
       no município de Pedro Afonso (TO), de março de 2026 — ponto de coleta da
       CONAB no cerrado do Tocantins. O Pará não integra o MATOPIBA e não tem

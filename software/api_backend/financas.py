@@ -40,6 +40,19 @@ CUSTO_OPERACIONAL_HA = 5277.12
 CUSTO_TOTAL_HA      = 5714.88
 CUSTO_REFERENCIA_HA = CUSTO_OPERACIONAL_HA
 
+# ── PREÇO RECEBIDO PELO PRODUTOR ─────────────────────────────────────────────
+# Mesmo levantamento da CONAB, coluna "preço recebido" de Pedro Afonso (TO):
+# R$ 105,09 por saca. É preço de PORTEIRA, que é o que entra na conta da margem.
+#
+# Não se usa Paranaguá nem Chicago como referência: Paranaguá é preço de porto
+# no Paraná e o CBOT é bolsa em dólar; ambos ficam acima do que o produtor
+# recebe no Pará, onde ainda se descontam frete e base. Os dois continuam sendo
+# consultados e exibidos como comparação, nunca como padrão da simulação.
+#
+# Usar o preço da mesma praça de onde vem o custo mantém a conta internamente
+# consistente: receita e custo passam a sair do mesmo levantamento.
+PRECO_RECEBIDO_CONAB_SACA = 105.09
+
 # ── VALOR DA TERRA NUA ───────────────────────────────────────────────────────
 # Fonte: Receita Federal, Tabela de Valores de Terra Nua do exercício 2026,
 # publicada em 07/08/2026 e reenviada corrigida em 21/08/2026. O PDF nacional e
@@ -98,7 +111,10 @@ def get_financas(municipio: str):
     custo_ha = custos["custo_ha"]
     
     return {
-        "soja_preco_saca": brl_price_bag,
+        # referência da simulação: preço de porteira da CONAB
+        "soja_preco_saca": PRECO_RECEBIDO_CONAB_SACA,
+        # cotação de bolsa, só para comparação na interface
+        "soja_preco_cbot_saca": brl_price_bag,
         "custo_ha": custo_ha,
         "vtn_ha": custos["vtn_ha"],
         "margem_ebitda_estimada": 0.0,

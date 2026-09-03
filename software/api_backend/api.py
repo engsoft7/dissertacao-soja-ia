@@ -420,7 +420,13 @@ def simular_cenario(req: SimulacaoRequest):
     clima_novo["temp_mean"] += req.temp_offset
     clima_novo["temp_max"] += req.temp_offset
     clima_novo["balanco_hidrico"] = clima_novo["precip_total"] - clima_novo["etp_total"]
-    
+
+    # A floresta aleatória não extrapola. Sem prender o cenário à faixa vista no
+    # treino, chuva zero devolvia colheita acima da média e +3 °C dava o mesmo
+    # número que +6 °C. O cenário é limitado, e a interface avisa quando isso
+    # acontece — o modelo só tem o que dizer onde ele viu dado.
+    clima_novo, fora_da_faixa = AppState.estimador.limitar_clima(clima_novo)
+
     x_sim = np.array([clima_novo[f] for f in M.FEATURES], dtype=float)
     corr_sim = float(AppState.estimador.modelo.predict(
         AppState.estimador.scaler.transform(x_sim.reshape(1, -1))
@@ -431,5 +437,6 @@ def simular_cenario(req: SimulacaoRequest):
         "municipio": req.municipio,
         "baseline_kg_ha": est_base,
         "estimativa_kg_ha": est_sim,
+        "fora_da_faixa": fora_da_faixa,
         "delta_kg_ha": est_sim - est_base
     }

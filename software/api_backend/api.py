@@ -384,6 +384,14 @@ class SimulacaoRequest(BaseModel):
     precip_factor: float
     temp_offset: float
 
+@lru_cache(maxsize=1)
+def _sensibilidade_clima():
+    """Associação chuva-rendimento na base, calculada uma vez por processo."""
+    if AppState.df is None:
+        return None
+    return M.sensibilidade_climatica(AppState.df)
+
+
 @app.post("/api/simulacao")
 def simular_cenario(req: SimulacaoRequest):
     if AppState.df is None:
@@ -438,5 +446,10 @@ def simular_cenario(req: SimulacaoRequest):
         "baseline_kg_ha": est_base,
         "estimativa_kg_ha": est_sim,
         "fora_da_faixa": fora_da_faixa,
-        "delta_kg_ha": est_sim - est_base
+        "delta_kg_ha": est_sim - est_base,
+        # Para a interface poder dizer o que o cenário significa: a margem do
+        # modelo e a força da associação medida na base. Sem isso o usuário lê
+        # uma variação de dezenas de quilos como se fosse resposta agronômica.
+        "margem_kg_ha": AppState.estimador.rmse,
+        "sensibilidade": _sensibilidade_clima(),
     }

@@ -173,6 +173,29 @@ class Estimador:
 
 
 # ---------------------------------------------- qualidade do dado oficial
+def sensibilidade_climatica(df: pd.DataFrame, variavel: str = "precip_total") -> dict:
+    """Associação entre um preditor climático e a produtividade observada.
+
+    Serve para a interface do simulador dizer o que o modelo pode prometer.
+    É calculado da base, e não fixado em código, porque a base se atualiza
+    mensalmente e um valor digitado envelheceria sem avisar.
+    """
+    from scipy import stats
+
+    x, y = df[variavel].values, df[ALVO].values
+    r, p = stats.pearsonr(x, y)
+    tercos = pd.qcut(df[variavel], 3, labels=["menor", "medio", "maior"])
+    desvio = (df[ALVO].values - _baseline(df, df["municipio"], df["ano"]))
+    por_terco = pd.Series(desvio).groupby(tercos.values, observed=True).mean()
+    return {
+        "variavel": variavel,
+        "r": float(r),
+        "p": float(p),
+        "n": int(len(df)),
+        "amplitude_kg_ha": float(por_terco.max() - por_terco.min()),
+    }
+
+
 def diagnostico_pam(df: pd.DataFrame, municipio: str) -> dict:
     """Detecta repetição de valores na série oficial de um município."""
     serie = df[df["municipio"] == municipio].sort_values("ano")

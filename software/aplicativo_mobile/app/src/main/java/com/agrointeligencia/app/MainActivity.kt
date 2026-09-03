@@ -687,6 +687,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
     var delta by remember { mutableStateOf(0.0) }
     var simulado by remember { mutableStateOf(baselineRendimento) }
     var isSimulating by remember { mutableStateOf(false) }
+    var resposta by remember { mutableStateOf<SimulacaoResponse?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
     val haptic = LocalHapticFeedback.current
@@ -699,6 +700,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                 val resp = RetrofitClient.getInstance().simularCenario(req)
                 simulado = resp.estimativa_kg_ha
                 delta = resp.delta_kg_ha
+                resposta = resp
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -754,6 +756,36 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                 valueRange = -2f..3f,
                 steps = 9
             )
+
+            // O simulador precisa declarar o que pode prometer. A associação
+            // entre chuva e produtividade nesta base não é distinguível de
+            // zero, e a variação que ele produz cabe dentro da margem de erro
+            // do modelo. Sem isso o usuário lê ruído como resposta agronômica.
+            resposta?.sensibilidade?.let { sens ->
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "O que este número vale: a associação entre chuva e " +
+                           "produtividade nesta base não é distinguível de zero " +
+                           "(r = ${String.format("%.3f", sens.r).replace('.', ',')}; " +
+                           "p = ${String.format("%.3f", sens.p).replace('.', ',')}; " +
+                           "n = ${sens.n})." +
+                           (resposta?.margem_kg_ha?.let {
+                               " A variação acima cabe dentro da margem de erro do " +
+                               "modelo, de ± ${it.toInt()} kg/ha."
+                           } ?: ""),
+                    fontSize = 11.sp, color = Color.Gray, lineHeight = 15.sp
+                )
+            }
+            resposta?.fora_da_faixa?.takeIf { it.isNotEmpty() }?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Cenário fora da faixa observada na base; o resultado foi " +
+                           "preso ao limite do que o modelo viu.",
+                    fontSize = 11.sp,
+                    color = if (isDark) Color(0xFFd29922) else Color(0xFF9a6700),
+                    lineHeight = 15.sp
+                )
+            }
         }
     }
 }

@@ -44,11 +44,23 @@ data class SimulacaoRequest(
     val temp_offset: Double
 )
 
+data class Sensibilidade(
+    val variavel: String,
+    val r: Double,
+    val p: Double,
+    val n: Int,
+    val amplitude_kg_ha: Double
+)
+
 data class SimulacaoResponse(
     val municipio: String,
     val baseline_kg_ha: Double,
     val estimativa_kg_ha: Double,
-    val delta_kg_ha: Double
+    val delta_kg_ha: Double,
+    // Opcionais para a versão antiga da API continuar sendo lida.
+    val fora_da_faixa: List<String>? = null,
+    val margem_kg_ha: Double? = null,
+    val sensibilidade: Sensibilidade? = null
 )
 
 data class PingResponse(val status: String, val model_loaded: Boolean)

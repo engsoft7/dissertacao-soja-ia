@@ -1031,24 +1031,46 @@ if tela_atual == "📍 Inteligência Territorial":
         """, unsafe_allow_html=True)
 
         with st.expander("Simular outro cenário climático"):
+            # Os limites saem da faixa observada na base. Fora dela a floresta
+            # aleatória não extrapola: devolve o valor da folha extrema, e a
+            # simulação deixa de significar alguma coisa — com chuva zero a
+            # projeção chegava a subir.
+            hist = df[df["municipio"] == municipio]
+            base_clima = hist if not hist.empty else df
+            fp = estimador.faixas.get("precip_total")
+            fe = estimador.faixas.get("etp_total")
+            p_min, p_max = (int(fp[0]), int(fp[1])) if fp else (0, 3000)
+            e_min, e_max = (int(fe[0]), int(fe[1])) if fe else (500, 2500)
             st.caption(
-                "Teste cenários meteorológicos forçados (O impacto na projeção será calculado via IA)")
-            precip = st.slider("Precipitação Total Estimada (mm)",
-                               0, 3000, 1500, step=100)
-            etp = st.slider("Evapotranspiração Potencial",
-                            500, 2500, 1500, step=100)
+                f"Os limites são a faixa observada nos {len(df)} registros da "
+                f"base: {br(p_min)} a {br(p_max)} mm de chuva. O modelo não tem "
+                "o que dizer fora dela.")
+            precip = st.slider("Precipitação total da safra (mm)", p_min, p_max,
+                               int(base_clima["precip_total"].mean()), step=25)
+            etp = st.slider("Evapotranspiração potencial (mm)", e_min, e_max,
+                            int(base_clima["etp_total"].mean()), step=25)
 
             st.divider()
-            hist = df[df["municipio"] == municipio]
-            clima = hist[M.FEATURES].mean().to_dict() if not hist.empty else df[M.FEATURES].mean().to_dict()
+            clima = base_clima[M.FEATURES].mean().to_dict()
             clima["precip_total"] = precip
             clima["etp_total"] = etp
             clima["balanco_hidrico"] = clima["precip_total"] - clima["etp_total"]
             cenario = ajustar_r(estimador.estimar(municipio, int(ano_alvo), clima=clima))
             dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
-            st.metric("Projeção Ajustada",
+            st.metric("Projeção ajustada",
                       f"{qtd(cenario['estimativa_kg_ha'])} {unidade}",
                       delta=f"{qtd(dif, '+')} {unidade}")
+            sens = M.sensibilidade_climatica(df)
+            virg = lambda v, c: f"{v:.{c}f}".replace(".", ",")
+            st.caption(
+                "**O que este número vale.** A associação entre chuva e "
+                "produtividade nesta base não é distinguível de zero "
+                f"(r = {virg(sens['r'], 3)}; p = {virg(sens['p'], 3)}; "
+                f"n = {sens['n']}), e a diferença entre o terço mais seco e o "
+                f"mais chuvoso é de {br(round(sens['amplitude_kg_ha']))} kg/ha — "
+                f"contra margem de erro do modelo de "
+                f"{br(round(estimador.rmse or 0))} kg/ha. A variação acima está "
+                "dentro do ruído, e é assim que deve ser lida.")
 
     with dir_:
         mapa, nome_para_interno, faixa_rend = construir_mapa(

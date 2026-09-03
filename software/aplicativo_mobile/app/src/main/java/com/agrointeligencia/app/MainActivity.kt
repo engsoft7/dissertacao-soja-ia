@@ -783,8 +783,10 @@ fun MetodologiaCard() {
             Text(text = "Satélite: MODIS (Resolução 250m)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Clima: CHIRPS (Chuva) & ERA5-Land (Temp.)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Base Territorial: MapBiomas e IBGE (PAM)", fontSize = 12.sp, color = Color.Gray)
-            Text(text = "Preço da saca: CONAB (preço recebido pelo produtor)", fontSize = 12.sp, color = Color.Gray)
-            Text(text = "Custo de produção: CONAB (levantamento de referência)", fontSize = 12.sp, color = Color.Gray)
+            // Preço e custo são constantes de um levantamento datado, não cotação
+            // diária. Sem a praça e a data o número envelhece sem avisar.
+            Text(text = "Preço e custo: CONAB, Pedro Afonso (TO), março de 2026", fontSize = 12.sp, color = Color.Gray)
+            Text(text = "Preço de porteira, não cotação de bolsa. Ambos editáveis na tela Resumo.", fontSize = 12.sp, color = Color.Gray)
             
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
             

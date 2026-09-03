@@ -409,6 +409,15 @@ fun AgroDashboard() {
                                         color = MaterialTheme.colorScheme.onBackground
                                     )
                                 }
+                                Text(
+                                    text = "A estimativa das safras passadas parte do histórico " +
+                                           "do município e da tendência, com o clima médio da série. " +
+                                           "Ela não é uma previsão refeita ano a ano.",
+                                    fontSize = 11.sp,
+                                    color = Color.Gray,
+                                    lineHeight = 15.sp,
+                                    modifier = Modifier.padding(top = 6.dp, bottom = 4.dp)
+                                )
                             }
                             
                                 item {
@@ -526,8 +535,11 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                            else "Real: —",
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                // Para safras passadas a estimativa usa o clima médio do município, e
+                // não o da safra: ela acompanha a tendência. Chamá-la de "IA" sugeria
+                // uma previsão ano a ano que o modelo não faz aqui.
                 Text(
-                    text = "IA: ${historico.rendimento_predito.toInt()} kg",
+                    text = "Estimativa: ${historico.rendimento_predito.toInt()} kg",
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
@@ -771,7 +783,8 @@ fun MetodologiaCard() {
             Text(text = "Satélite: MODIS (Resolução 250m)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Clima: CHIRPS (Chuva) & ERA5-Land (Temp.)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Base Territorial: MapBiomas e IBGE (PAM)", fontSize = 12.sp, color = Color.Gray)
-            Text(text = "Mercado Financeiro: CBOT/Yahoo Finance (Soja & Dólar)", fontSize = 12.sp, color = Color.Gray)
+            Text(text = "Preço da saca: CONAB (preço recebido pelo produtor)", fontSize = 12.sp, color = Color.Gray)
+            Text(text = "Custo de produção: CONAB (levantamento de referência)", fontSize = 12.sp, color = Color.Gray)
             
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
             

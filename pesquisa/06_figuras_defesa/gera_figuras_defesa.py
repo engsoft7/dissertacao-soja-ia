@@ -219,3 +219,57 @@ def figura_fluxograma_pagina():
 
 
 figura_fluxograma_pagina()
+
+
+# --------------------------------------------- Figura 3 (nova) — repetição ---
+def figura_variavel_alvo():
+    """Por que os valores se repetem: a distribuição e um município exemplar."""
+    pa = (pd.read_csv(REPO / "pesquisa/dados/soja_para_mascarado_2001_2024.csv")
+            .sort_values(["municipio", "ano"]))
+    sc = pa.rendimento_kg_ha / 60.0
+
+    fig, eixos = plt.subplots(1, 2, figsize=(9.10, 3.55),
+                              gridspec_kw={"width_ratios": [1.15, 1], "wspace": 0.26})
+
+    # (a) a distribuição encosta nos múltiplos de cinco sacas
+    ax = eixos[0]
+    bordas = np.arange(11.5, 78.5, 1.0)
+    n, _ = np.histogram(sc, bins=bordas)
+    centros = (bordas[:-1] + bordas[1:]) / 2
+    cheio = np.isclose(np.round(centros) % 5, 0)
+    ax.bar(centros[~cheio], n[~cheio], width=0.92, color=MUDO)
+    ax.bar(centros[cheio], n[cheio], width=0.92, color=ESCURO)
+    pico = int(n[np.isclose(centros, 50.0)][0])
+    exatos = int((pa.rendimento_kg_ha == 3000).sum())
+    ax.annotate("50 sc/ha\n3.000 kg/ha", xy=(50, pico), xytext=(58, pico * 0.86),
+                fontsize=13, color=ESCURO, ha="left",
+                arrowprops=dict(arrowstyle="-", color=ESCURO, lw=1.2))
+    ax.set_xlabel("rendimento (sacas por hectare)", fontsize=14)
+    ax.set_ylabel("registros", fontsize=14)
+    ax.set_xticks([20, 30, 40, 50, 60, 70])
+    ax.set_xlim(11, 78)
+    ax.set_title("Distribuição do rendimento", fontsize=15, color=TINTA, pad=10, loc="left")
+    limpa(ax)
+
+    # (b) um município: doze anos travados em 50 sacas
+    d = (pa[pa.municipio == "Floresta Do Araguaia"]
+         .set_index("ano").reindex(range(2001, 2025)))       # safras ausentes viram lacuna
+    ax = eixos[1]
+    serie = d.rendimento_kg_ha / 60.0
+    ax.plot(serie.index, serie.values, "-o", color=PRIM, lw=2.2, ms=5)
+    ax.axhline(50, color=ESCURO, lw=1.2, zorder=0)
+    ax.annotate("50 sc/ha, de 2005 a 2016", xy=(2005, 50), xytext=(2003.5, 60),
+                fontsize=13, color=ESCURO)
+    ax.set_ylabel("sacas por hectare", fontsize=14)
+    ax.set_xticks([2005, 2010, 2015, 2020])
+    ax.set_ylim(0, 70)
+    ax.set_title("Floresta do Araguaia", fontsize=15, color=TINTA, pad=10, loc="left")
+    limpa(ax)
+
+    fig.subplots_adjust(left=0.085, right=0.985, top=0.86, bottom=0.17)
+    fig.savefig(SAI / "fig_variavel_alvo.png", dpi=220, facecolor="white")
+    plt.close(fig)
+    print(f"fig_variavel_alvo.png  barra dos 50 sc/ha: {pico}; valor exato 3.000 kg/ha: {exatos} de {len(sc)}")
+
+
+figura_variavel_alvo()

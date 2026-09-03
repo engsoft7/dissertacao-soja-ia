@@ -207,7 +207,10 @@ def get_previsao(municipio: str):
             resultado.append({
                  "ano": ano_futuro,
                  "rendimento_predito": float(rf["estimativa_kg_ha"]),
-                 "rendimento_real": 0.0, # Indisponível
+                 # Sentinela de safra ainda não divulgada pela PAM. Os clientes
+                 # devem exibir traço, e não zero: um zero aqui anuncia uma
+                 # colheita nula que não houve.
+                 "rendimento_real": 0.0,
                  "margem_erro": float(rf["margem_kg_ha"])
             })
     except Exception as e:

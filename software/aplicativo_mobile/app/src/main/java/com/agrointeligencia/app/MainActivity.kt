@@ -409,6 +409,15 @@ fun AgroDashboard() {
                                         color = MaterialTheme.colorScheme.onBackground
                                     )
                                 }
+                                Text(
+                                    text = "A estimativa das safras passadas parte do histórico " +
+                                           "do município e da tendência, com o clima médio da série. " +
+                                           "Ela não é uma previsão refeita ano a ano.",
+                                    fontSize = 11.sp,
+                                    color = Color.Gray,
+                                    lineHeight = 15.sp,
+                                    modifier = Modifier.padding(top = 6.dp, bottom = 4.dp)
+                                )
                             }
                             
                                 item {
@@ -497,13 +506,19 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
             Column {
                 Text(text = "Ano ${historico.ano}", fontWeight = FontWeight.Bold)
                 Text(text = "Margem: ±${historico.margem_erro.toInt()} kg/ha", fontSize = 12.sp, color = Color.Gray)
-                if (kpis != null && historico.rendimento_predito > 0) {
-                    val scHa = historico.rendimento_predito / 60
+                // Safra observada: a margem parte do rendimento medido. Safra ainda
+                // por vir: parte da projeção. Nos dois casos o preço e o custo são os
+                // de hoje, e não os da época — daí o rótulo.
+                val observado = historico.rendimento_real > 0
+                if (kpis != null && (observado || historico.rendimento_predito > 0)) {
+                    val kgHa = if (observado) historico.rendimento_real else historico.rendimento_predito
+                    val scHa = kgHa / 60
                     val receita = scHa * kpis.soja_preco_saca
                     val lucro = receita - kpis.custo_ha
                     val color = if (lucro > 0) (if(isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else (if(isDark) Color(0xFFf85149) else Color(0xFFdc2626))
                     Text(
-                        text = "Margem Liq.: R$ ${lucro.toInt()}/ha",
+                        text = (if (observado) "Margem a preços de hoje: R$ "
+                                else "Margem projetada: R$ ") + "${lucro.toInt()}/ha",
                         fontSize = 13.sp,
                         color = color,
                         fontWeight = FontWeight.SemiBold,
@@ -512,12 +527,19 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
+                // A API envia 0.0 como sentinela de safra ainda não divulgada pela
+                // PAM; imprimir esse zero anunciaria uma colheita nula que não houve.
                 Text(
-                    text = "Real: ${historico.rendimento_real.toInt()} kg",
+                    text = if (historico.rendimento_real > 0)
+                               "Real: ${historico.rendimento_real.toInt()} kg"
+                           else "Real: —",
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                // Para safras passadas a estimativa usa o clima médio do município, e
+                // não o da safra: ela acompanha a tendência. Chamá-la de "IA" sugeria
+                // uma previsão ano a ano que o modelo não faz aqui.
                 Text(
-                    text = "IA: ${historico.rendimento_predito.toInt()} kg",
+                    text = "Estimativa: ${historico.rendimento_predito.toInt()} kg",
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
@@ -761,20 +783,33 @@ fun MetodologiaCard() {
             Text(text = "Satélite: MODIS (Resolução 250m)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Clima: CHIRPS (Chuva) & ERA5-Land (Temp.)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Base Territorial: MapBiomas e IBGE (PAM)", fontSize = 12.sp, color = Color.Gray)
-            Text(text = "Mercado Financeiro: CBOT/Yahoo Finance (Soja & Dólar)", fontSize = 12.sp, color = Color.Gray)
+            Text(text = "Preço da saca: CONAB (preço recebido pelo produtor)", fontSize = 12.sp, color = Color.Gray)
+            Text(text = "Custo de produção: CONAB (levantamento de referência)", fontSize = 12.sp, color = Color.Gray)
             
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
             
+            // Métricas da validação temporal deixando um ano de fora por vez, sobre
+            // os 415 registros da base. São as mesmas da Tabela 6 da dissertação e do
+            // painel web; a fonte da verdade é pesquisa/dados/metricas_validacao.json.
+            // O R² da referência aparece ao lado de propósito: o modelo empata com o
+            // histórico municipal somado à tendência, e omitir isso superestimaria o
+            // que a ferramenta entrega.
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text(text = "Aderência Preditiva (R²)", fontSize = 11.sp, color = Color.Gray)
-                    Text(text = "0.963", fontSize = 14.sp, color = (if(isDark) Color(0xFFbc8cff) else Color(0xFF7c3aed)), fontWeight = FontWeight.Bold)
+                    Text(text = "R² do modelo", fontSize = 11.sp, color = Color.Gray)
+                    Text(text = "0,216", fontSize = 14.sp, color = (if(isDark) Color(0xFFbc8cff) else Color(0xFF7c3aed)), fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "Variação Relativa", fontSize = 11.sp, color = Color.Gray)
-                    Text(text = "± 12.4%", fontSize = 14.sp, color = (if(isDark) Color(0xFF58a6ff) else Color(0xFF2563eb)), fontWeight = FontWeight.Bold)
+                    Text(text = "R² da tendência (referência)", fontSize = 11.sp, color = Color.Gray)
+                    Text(text = "0,216", fontSize = 14.sp, color = (if(isDark) Color(0xFF8b949e) else Color(0xFF57606a)), fontWeight = FontWeight.Bold)
                 }
             }
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Erro típico de ± 416 kg/ha, ou 13,9% da produtividade média, " +
+                       "sobre 415 registros de 38 municípios.",
+                fontSize = 11.sp, color = Color.Gray, lineHeight = 15.sp
+            )
             
             Spacer(modifier = Modifier.height(20.dp))
             Text(

@@ -1,4 +1,5 @@
-from financas import get_financas, get_custos_locais, CUSTO_REFERENCIA_HA
+from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
+                      PRECO_RECEBIDO_CONAB_SACA)
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -18,7 +19,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "dashboard_web"))
 import model as M
 
 # ── Background Yahoo Finance cache ──────────────────────────────────
-_finance_cache = {"soja_preco_saca": 120.0, "usd_brl": 5.50, "ts": 0.0}
+# Guarda apenas a cotação de bolsa, usada como comparação. O preço da
+# simulação é o de porteira da CONAB, constante e definido em financas.py.
+_finance_cache = {"cbot_saca": None, "usd_brl": None, "ts": 0.0}
 _finance_lock = threading.Lock()
 
 def _refresh_finance():
@@ -37,7 +40,7 @@ def _refresh_finance():
 
         brl_price_bag = round(usd_price_bag * usd_brl, 2)
         with _finance_lock:
-            _finance_cache["soja_preco_saca"] = brl_price_bag
+            _finance_cache["cbot_saca"] = brl_price_bag
             _finance_cache["usd_brl"] = usd_brl
             _finance_cache["ts"] = time.time()
         print(f"Finance cache atualizado: R$ {brl_price_bag}/sc", flush=True)
@@ -101,7 +104,6 @@ app.add_middleware(
 @app.get("/api/financas/{municipio}")
 def get_financas(municipio: str):
     fin = _get_cached_finance()
-    brl_price_bag = fin["soja_preco_saca"]
 
     raw_municipio = REVERSE_FORMATADOS.get(municipio, municipio)
     custos = get_custos_locais(raw_municipio)
@@ -109,7 +111,10 @@ def get_financas(municipio: str):
     
     return {
         "municipio": municipio,
-        "soja_preco_saca": brl_price_bag,
+        # Preço de porteira da CONAB, da mesma praça de onde vem o custo. A
+        # cotação de Chicago vai ao lado, para comparação, e nunca como padrão.
+        "soja_preco_saca": PRECO_RECEBIDO_CONAB_SACA,
+        "soja_preco_cbot_saca": fin["cbot_saca"],
         "custo_ha": custo_ha,
         "vtn_ha": custos["vtn_ha"],
         "ano_referencia": int(AppState.last_year) if AppState.df is not None else 2024
@@ -148,14 +153,14 @@ def get_kpis_economia():
          raise HTTPException(status_code=503, detail="Modelo não carregado")
     
     fin = _get_cached_finance()
-    brl_price_bag = fin["soja_preco_saca"]
     # Antes: custo_ha = preço da saca * 55 * 0,65, fórmula sem origem que fazia
     # o custo variar com a cotação. Custeio de lavoura não acompanha o preço de
     # venda. Passa a usar a referência da CONAB, a mesma do painel web.
     custo_ha = CUSTO_REFERENCIA_HA
 
     return {
-         "soja_preco_saca": brl_price_bag,
+         "soja_preco_saca": PRECO_RECEBIDO_CONAB_SACA,
+         "soja_preco_cbot_saca": fin["cbot_saca"],
          "custo_ha": custo_ha,
          "ano_referencia": int(AppState.last_year)
     }

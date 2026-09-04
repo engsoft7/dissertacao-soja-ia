@@ -87,6 +87,31 @@ def test_custo_total_de_emergencia_igual_ao_oficial():
         _constante(FINANCAS, "CUSTO_TOTAL_HA")
 
 
+def test_serie_conab_confere_com_o_csv():
+    """O painel e o aplicativo afirmam ao usuário que os R$ 105,09 são o menor
+    dos 13 levantamentos da praça. A afirmação tem que sair da série extraída da
+    CONAB, não da memória de quem escreveu a legenda."""
+    import csv
+    import statistics
+
+    serie = RAIZ / "pesquisa" / "dados" / "conab" / "serie_pedro_afonso_to.csv"
+    with serie.open(encoding="utf-8") as fh:
+        precos = [float(linha["Preco Mercado"])
+                  for linha in csv.DictReader(fh, delimiter=";")]
+    # Levantamentos sem preço divulgado saem como 0,00 na planilha da CONAB;
+    # não são cotação e não entram na conta (eram JAN e MAR de 2024).
+    precos = [p for p in precos if p > 0]
+
+    assert len(precos) == int(_constante(FINANCAS, "PRECO_SERIE_LEVANTAMENTOS"))
+    assert min(precos) == _constante(FINANCAS, "PRECO_SERIE_MENOR_SACA")
+    assert max(precos) == _constante(FINANCAS, "PRECO_SERIE_MAIOR_SACA")
+    assert round(statistics.median(precos), 2) == \
+        _constante(FINANCAS, "PRECO_SERIE_MEDIANA_SACA")
+    # O preço padrão do produto é justamente o menor da série. Se um
+    # levantamento novo mudar isso, a legenda passa a mentir e o teste avisa.
+    assert _constante(FINANCAS, "PRECO_RECEBIDO_CONAB_SACA") == min(precos)
+
+
 def test_requisitos_declaram_o_que_financas_importa():
     """O painel importa financas.py; o que financas.py usa precisa estar no
     requirements.txt do painel, e não só como dependência transitiva."""

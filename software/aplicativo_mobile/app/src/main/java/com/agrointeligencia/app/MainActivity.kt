@@ -640,7 +640,16 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     )
                 )
             }
-            
+
+            Spacer(modifier = Modifier.height(8.dp))
+            // Onde o preço padrão está na série da praça. O usuário só consegue
+            // julgar a margem se souber que ela nasce do menor preço do triênio.
+            Text(
+                text = "Padrão: CONAB, Pedro Afonso (TO), mar/2026. Os R$ 105,09 são o menor dos 13 levantamentos desde mar/2023 (mediana R$ 116,91) — edite o preço para ver outro cenário.",
+                fontSize = 11.sp,
+                color = Color.Gray
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
             val scHa = projecao.rendimento_predito / 60
@@ -822,6 +831,11 @@ fun MetodologiaCard() {
             // diária. Sem a praça e a data o número envelhece sem avisar.
             Text(text = "Preço e custo: CONAB, Pedro Afonso (TO), março de 2026", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Preço de porteira, não cotação de bolsa. Ambos editáveis na tela Resumo.", fontSize = 12.sp, color = Color.Gray)
+            // Os R$ 105,09 são o MENOR dos 13 levantamentos da praça desde março de
+            // 2023 (mediana R$ 116,91, máximo R$ 146,35). Sem dizer isso, o padrão é
+            // lido como "o preço da soja" quando é o pior momento do triênio — e a
+            // margem é quase toda dirigida por esse único parâmetro.
+            Text(text = "R$ 105,09/sc é o menor dos 13 levantamentos da praça desde mar/2023 (mediana R$ 116,91): cenário conservador, não previsão de preço.", fontSize = 12.sp, color = Color.Gray)
             
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
             

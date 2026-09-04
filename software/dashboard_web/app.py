@@ -1200,9 +1200,20 @@ if tela_atual == "💰 Viabilidade Financeira":
         comparacoes.append(f"físico em Paranaguá hoje, {brl_md(PRECO_SACA_ONLINE, 2)}")
     if preco_cbot:
         comparacoes.append(f"futuro em Chicago convertido, {brl_md(preco_cbot, 2)}")
+    # Os R$ 105,09 são o MENOR preço dos 13 levantamentos da praça desde março
+    # de 2023. Sem essa informação o usuário lê o padrão como "o preço da soja",
+    # quando ele é o momento mais pessimista da série — e a margem é quase toda
+    # dirigida por esse único parâmetro. A série está em
+    # pesquisa/dados/conab/serie_pedro_afonso_to.csv.
     fonte_preco = ("**Cotação:** CONAB, preço recebido pelo produtor em Pedro "
                    "Afonso (TO), levantamento de março de 2026 — preço de "
-                   "porteira, e da mesma praça de onde vem o custo abaixo.")
+                   "porteira, e da mesma praça de onde vem o custo abaixo. "
+                   "É o **menor dos 13 levantamentos** da praça entre março de "
+                   "2023 e março de 2026 (mediana R$ 116,91; máximo R$ 146,35, "
+                   "em março de 2023): a margem calculada abaixo está no "
+                   "cenário mais pessimista dos últimos três anos. Cada R$ 1,00 "
+                   "a mais por saca acrescenta cerca de R$ 55 por hectare numa "
+                   "lavoura de 55 sacas.")
     if comparacoes:
         fonte_preco += (" Para comparação: " + "; ".join(comparacoes) +
                         ". São preços de porto e de bolsa, acima do que se "
@@ -1470,7 +1481,15 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
       levantamento de Pedro Afonso (TO), de março de 2026. É a cotação que o
       simulador usa por padrão, por ser preço de porteira e por vir da mesma
       praça de onde sai o custo — receita e custo passam a nascer do mesmo
-      levantamento. O campo é editável.
+      levantamento. O campo é editável. **É o menor preço dos 13 levantamentos
+      da praça entre março de 2023 e março de 2026** (mediana R$ 116,91, média
+      R$ 118,89, máximo R$ 146,35 em março de 2023), e um dos dois únicos em que
+      a própria CONAB apura margem líquida negativa ali. O padrão é, portanto,
+      o cenário mais pessimista do triênio: é uma escolha conservadora, não uma
+      previsão de preço. A série está em
+      `pesquisa/dados/conab/serie_pedro_afonso_to.csv`. Preço e custo têm de vir
+      do mesmo levantamento — usar a mediana da série com o custo de março de
+      2026 misturaria dois momentos e infla a margem.
     * **Notícias Agrícolas:** preço físico da saca em Paranaguá, relido a cada
       hora, exibido como comparação. É preço de porto, no Paraná: o produtor no
       Pará recebe menos, por causa de frete e base.

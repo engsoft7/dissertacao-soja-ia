@@ -42,7 +42,10 @@ Abre em `http://localhost:8501`.
   e faz uma **análise econômica** (receita, custo e **margem por hectare**). O
   preço parte do preço recebido pelo produtor no levantamento da CONAB
   (R$ 105,09/saca), que é preço de porteira e vem da mesma praça de onde sai o
-  custo. A cotação física em Paranaguá (Notícias Agrícolas) e o futuro de
+  custo. Esse valor é o **menor dos 13 levantamentos** da praça entre março de
+  2023 e março de 2026 (mediana R$ 116,91, máximo R$ 146,35), e a interface diz
+  isso: o padrão é um cenário conservador, não uma previsão de preço, e o campo
+  é editável. A cotação física em Paranaguá (Notícias Agrícolas) e o futuro de
   Chicago são exibidos apenas como comparação: são preços de porto e de bolsa,
   acima do que se recebe no Pará, e não há série pública de preço ao produtor
   paraense. O custo vem do levantamento da CONAB para Pedro Afonso (TO), de

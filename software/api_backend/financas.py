@@ -53,6 +53,27 @@ CUSTO_REFERENCIA_HA = CUSTO_OPERACIONAL_HA
 # consistente: receita e custo passam a sair do mesmo levantamento.
 PRECO_RECEBIDO_CONAB_SACA = 105.09
 
+# ── ONDE ESSE PREÇO ESTÁ NA SÉRIE ────────────────────────────────────────────
+# A CONAB levantou Pedro Afonso 13 vezes entre março de 2023 e março de 2026, e
+# os R$ 105,09 de março de 2026 são o MENOR preço dos 13 levantamentos: mediana
+# R$ 116,91, média R$ 118,89, máximo R$ 146,35 (março de 2023). É também um dos
+# dois únicos levantamentos em que a própria CONAB apura margem líquida
+# negativa ali (-R$ 4,85 por saca).
+#
+# O número é oficial e está correto, mas ancora a simulação no momento mais
+# pessimista dos últimos três anos, e a margem por hectare é quase toda dirigida
+# por ele: aos R$ 116,91 da mediana, a mesma lavoura de 55 sc/ha sai de
+# +R$ 534/ha para +R$ 1.188/ha. Por isso a interface informa a posição do preço
+# na série em vez de apresentar 105,09 como "o preço da soja".
+#
+# Série completa e conferida em pesquisa/dados/conab/serie_pedro_afonso_to.csv;
+# test_robustez_painel.py verifica estes valores contra o CSV.
+PRECO_SERIE_LEVANTAMENTOS = 13
+PRECO_SERIE_MENOR_SACA    = 105.09
+PRECO_SERIE_MEDIANA_SACA  = 116.91
+PRECO_SERIE_MAIOR_SACA    = 146.35
+PRECO_SERIE_PERIODO       = "março de 2023 a março de 2026"
+
 # ── VALOR DA TERRA NUA ───────────────────────────────────────────────────────
 # Fonte: Receita Federal, Tabela de Valores de Terra Nua do exercício 2026,
 # publicada em 07/08/2026 e reenviada corrigida em 21/08/2026. O PDF nacional e

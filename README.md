@@ -339,6 +339,15 @@ Ele consulta a API do SIDRA/IBGE e:
   frente da fila, mas deixou de ser necessária. Se nada for encontrado, o
   workflow verifica quantos meses tem o levantamento em uso e abre uma
   **issue** quando ele passa de quatro meses.
+
+  Os dois primeiros disparos reais, em 04/09/2026, disseram o que faltava
+  saber. A página de custos do portal **não expõe link de arquivo algum** — é
+  aplicação de painéis, e a varredura de links não tem o que encontrar. E o
+  catálogo federal responde **HTTP 401**: passou a exigir chave de API. A chave
+  é gratuita e sai em minutos no próprio <https://dados.gov.br>; guardada como
+  secret `DADOS_GOV_API_KEY` do repositório, liga a descoberta pelo catálogo,
+  que é o caminho mais estável dos dois. Sem ela, resta capturar o endereço da
+  exportação pelo inspetor do navegador e defini-lo em `CONAB_CUSTOS_URL`.
 - **O produto declara a própria idade.** A issue serve a quem mantém o
   repositório; o usuário do aplicativo não a vê. Por isso o painel e o
   aplicativo calculam, **a cada leitura**, quantos meses separam o levantamento

@@ -189,7 +189,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.2` (03/09/2026) | 49 | 7.357 | `796a300e962b1803056e3229c2db21514bc08a8d46da4d122d4133269fd77d43` |
 | Tag `v2.3.3` (04/09/2026) | 52 | 8.956 | `dd1b118301cf246b3a7a6a3d53e19f9fc0b992607edd58ece2901aa14873db77` |
 | Tag `v2.3.4` (04/09/2026) | 53 | 9.234 | `890a97644fefdeddc0321c7fd8e927c9deb2572e37a2fbecc215c66f1026d448` |
-| Tag `v2.3.5` (04/09/2026) — versão da defesa | 54 | 10.058 | `770536d69304da51b1dd9a218db259a3c30ec1bdf6dd6a57de1a0e0321525381` |
+| Tag `v2.3.5` (04/09/2026) — versão da defesa | 54 | 10.072 | `acf5c75d0d9c53cfc86c486e40eeea356af4eabf2096b1b7644b5249de600450` |
 
 Os seis foram recalculados a partir de cópias limpas dos respectivos commits e
 conferem em execuções repetidas. A tag da defesa é a `v2.3.5`, e é dela que sai

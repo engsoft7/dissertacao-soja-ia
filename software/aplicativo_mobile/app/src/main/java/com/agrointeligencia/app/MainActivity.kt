@@ -429,7 +429,7 @@ fun AgroDashboard() {
                         }
                         3 -> { // Sobre
                             item {
-                                MetodologiaCard()
+                                MetodologiaCard(kpis)
                             }
                         }
                         1 -> { // Mapa WebView
@@ -643,12 +643,20 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
 
             Spacer(modifier = Modifier.height(8.dp))
             // Onde o preço padrão está na série da praça. O usuário só consegue
-            // julgar a margem se souber que ela nasce do menor preço do triênio.
-            Text(
-                text = "Padrão: CONAB, Pedro Afonso (TO), mar/2026. Os R$ 105,09 são o menor dos 13 levantamentos desde mar/2023 (mediana R$ 116,91) — edite o preço para ver outro cenário.",
-                fontSize = 11.sp,
-                color = Color.Gray
-            )
+            // julgar a margem se souber de que levantamento ela nasce — e, quando
+            // esse levantamento é o piso do triênio, que ela é conservadora. Texto
+            // servido pela API para acompanhar a CONAB sem recompilar.
+            if (kpis.fonte_preco != null || kpis.nota_preco != null) {
+                Text(
+                    text = listOfNotNull(
+                        kpis.fonte_preco?.let { "Padrão: $it." },
+                        kpis.nota_preco,
+                        "Edite o preço para simular outro cenário."
+                    ).joinToString(" "),
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -803,7 +811,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
 }
 
 @Composable
-fun MetodologiaCard() {
+fun MetodologiaCard(kpis: FinancaResponse?) {
     val isDark = isSystemInDarkTheme()
     Card(
         modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 24.dp),
@@ -828,14 +836,15 @@ fun MetodologiaCard() {
             Text(text = "Clima: CHIRPS (Chuva) & ERA5-Land (Temp.)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Base Territorial: MapBiomas e IBGE (PAM)", fontSize = 12.sp, color = Color.Gray)
             // Preço e custo são constantes de um levantamento datado, não cotação
-            // diária. Sem a praça e a data o número envelhece sem avisar.
-            Text(text = "Preço e custo: CONAB, Pedro Afonso (TO), março de 2026", fontSize = 12.sp, color = Color.Gray)
+            // diária. Sem a praça e a data o número envelhece sem avisar — por isso
+            // o rótulo vem da API, junto com a frase que diz onde o preço está na
+            // série da praça: quando a CONAB publica levantamento novo, esta tela
+            // acompanha sem recompilar o APK.
+            Text(text = "Preço e custo: " + (kpis?.fonte_preco ?: "CONAB (levantamento indisponível offline)"), fontSize = 12.sp, color = Color.Gray)
             Text(text = "Preço de porteira, não cotação de bolsa. Ambos editáveis na tela Resumo.", fontSize = 12.sp, color = Color.Gray)
-            // Os R$ 105,09 são o MENOR dos 13 levantamentos da praça desde março de
-            // 2023 (mediana R$ 116,91, máximo R$ 146,35). Sem dizer isso, o padrão é
-            // lido como "o preço da soja" quando é o pior momento do triênio — e a
-            // margem é quase toda dirigida por esse único parâmetro.
-            Text(text = "R$ 105,09/sc é o menor dos 13 levantamentos da praça desde mar/2023 (mediana R$ 116,91): cenário conservador, não previsão de preço.", fontSize = 12.sp, color = Color.Gray)
+            kpis?.nota_preco?.let {
+                Text(text = it, fontSize = 12.sp, color = Color.Gray)
+            }
             
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
             

@@ -45,7 +45,10 @@ Abre em `http://localhost:8501`.
   custo. Esse valor é o **menor dos 13 levantamentos** da praça entre março de
   2023 e março de 2026 (mediana R$ 116,91, máximo R$ 146,35), e a interface diz
   isso: o padrão é um cenário conservador, não uma previsão de preço, e o campo
-  é editável. A cotação física em Paranaguá (Notícias Agrícolas) e o futuro de
+  é editável. Preço, custo, praça, data e essa frase não são literais no
+  código — saem de `pesquisa/dados/conab/levantamento_atual.json`, que o
+  workflow mensal atualiza; quando a CONAB publica levantamento novo, as
+  legendas acompanham sozinhas. A cotação física em Paranaguá (Notícias Agrícolas) e o futuro de
   Chicago são exibidos apenas como comparação: são preços de porto e de bolsa,
   acima do que se recebe no Pará, e não há série pública de preço ao produtor
   paraense. O custo vem do levantamento da CONAB para Pedro Afonso (TO), de

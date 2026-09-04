@@ -8,6 +8,7 @@ falhou, o tratamento de erro quebrou junto e a tela inteira caiu.
 Rode com:  python -m pytest software -q
 """
 import ast
+import json
 import sys
 from pathlib import Path
 
@@ -58,6 +59,23 @@ def test_tratamento_de_erro_nao_depende_do_try():
     assert not problemas, "except depende de nome criado no try: " + "; ".join(problemas)
 
 
+def test_tratamento_de_erro_nao_depende_do_try():
+    """Nenhum `except` pode ler um nome que só o `try` cria."""
+    problemas = []
+    for arquivo in sorted((RAIZ / "software").rglob("*.py")):
+        arvore = ast.parse(arquivo.read_text(encoding="utf-8"), filename=str(arquivo))
+        for no in ast.walk(arvore):
+            if not isinstance(no, ast.Try):
+                continue
+            ligados = _nomes_ligados(no.body)
+            for tratador in no.handlers:
+                risco = sorted(ligados & _nomes_lidos(tratador.body))
+                if risco:
+                    rel = arquivo.relative_to(RAIZ)
+                    problemas.append(f"{rel}:{tratador.lineno} usa {risco}")
+    assert not problemas, "except depende de nome criado no try: " + "; ".join(problemas)
+
+
 def _constante(arquivo: Path, nome: str) -> float:
     """Lê uma constante numérica de módulo sem importar o arquivo."""
     arvore = ast.parse(arquivo.read_text(encoding="utf-8"), filename=str(arquivo))
@@ -69,47 +87,80 @@ def _constante(arquivo: Path, nome: str) -> float:
     raise AssertionError(f"{nome} não encontrado em {arquivo.name}")
 
 
-def test_custo_de_emergencia_igual_ao_oficial():
-    """A cópia literal no painel tem que bater com a fonte da verdade."""
-    assert _constante(APP, "CUSTO_OPERACIONAL_PADRAO_HA") == \
-        _constante(FINANCAS, "CUSTO_OPERACIONAL_HA")
+def test_levantamento_e_reservas_conferem_com_os_csv():
+    """O produto inteiro tem que descrever um único levantamento da CONAB.
+
+    Preço, custo, praça, data e a frase que situa o preço na série saem de
+    pesquisa/dados/conab/levantamento_atual.json, gerado dos CSVs da extração.
+    financas.py e app.py guardam uma cópia literal do mesmo levantamento, para
+    subirem com números corretos se o arquivo não chegar ao deploy — e é aí que
+    mora o risco: uma cópia defasada faz painel e API afirmarem preços
+    diferentes sem ninguém perceber. Este teste roda a mesma conferência do CI.
+    """
+    sys.path.insert(0, str(RAIZ / "software" / "automacao_github"))
+    import gera_levantamento_conab as gerador
+
+    assert gerador.main(["--conferir"]) == 0, (
+        "levantamento_atual.json ou as reservas de emergência estão defasados "
+        "em relação aos CSVs da CONAB. Rode "
+        "`python software/automacao_github/gera_levantamento_conab.py`.")
 
 
-def test_preco_de_emergencia_igual_ao_oficial():
-    """Mesma regra do custo, para o preço de referência da CONAB."""
-    assert _constante(APP, "PRECO_RECEBIDO_CONAB_PADRAO_SACA") == \
-        _constante(FINANCAS, "PRECO_RECEBIDO_CONAB_SACA")
+def test_preco_e_custo_saem_do_mesmo_levantamento():
+    """A regra que a versão anterior quebrou ao exibir Chicago como porteira.
 
-
-def test_custo_total_de_emergencia_igual_ao_oficial():
-    """Mesma regra do custo operacional, para o custo total."""
-    assert _constante(APP, "CUSTO_TOTAL_PADRAO_HA") == \
-        _constante(FINANCAS, "CUSTO_TOTAL_HA")
-
-
-def test_serie_conab_confere_com_o_csv():
-    """O painel e o aplicativo afirmam ao usuário que os R$ 105,09 são o menor
-    dos 13 levantamentos da praça. A afirmação tem que sair da série extraída da
-    CONAB, não da memória de quem escreveu a legenda."""
+    O gerador tem que recusar um preço de um levantamento com o custo de outro,
+    inclusive no caso real em que a CONAB publica custo sem divulgar preço — o
+    0,00 da planilha não é cotação.
+    """
     import csv
-    import statistics
 
-    serie = RAIZ / "pesquisa" / "dados" / "conab" / "serie_pedro_afonso_to.csv"
-    with serie.open(encoding="utf-8") as fh:
-        precos = [float(linha["Preco Mercado"])
-                  for linha in csv.DictReader(fh, delimiter=";")]
-    # Levantamentos sem preço divulgado saem como 0,00 na planilha da CONAB;
-    # não são cotação e não entram na conta (eram JAN e MAR de 2024).
-    precos = [p for p in precos if p > 0]
+    sys.path.insert(0, str(RAIZ / "software" / "automacao_github"))
+    import gera_levantamento_conab as gerador
 
-    assert len(precos) == int(_constante(FINANCAS, "PRECO_SERIE_LEVANTAMENTOS"))
-    assert min(precos) == _constante(FINANCAS, "PRECO_SERIE_MENOR_SACA")
-    assert max(precos) == _constante(FINANCAS, "PRECO_SERIE_MAIOR_SACA")
-    assert round(statistics.median(precos), 2) == \
-        _constante(FINANCAS, "PRECO_SERIE_MEDIANA_SACA")
-    # O preço padrão do produto é justamente o menor da série. Se um
-    # levantamento novo mudar isso, a legenda passa a mentir e o teste avisa.
-    assert _constante(FINANCAS, "PRECO_RECEBIDO_CONAB_SACA") == min(precos)
+    serie = gerador.ler_serie()
+    com_preco = [l for l in serie if l["preco_recebido_saca"] > 0]
+    adotado = com_preco[-1]
+
+    lev = json.loads(gerador.SAIDA.read_text(encoding="utf-8"))
+    assert lev["levantamento"] == adotado["levantamento"]
+    assert lev["preco_recebido_saca"] == round(adotado["preco_recebido_saca"], 2)
+    assert lev["custo_variavel_saca"] == round(adotado["custo_variavel_saca"], 2)
+    assert lev["custo_fixo_saca"] == round(adotado["custo_fixo_saca"], 2)
+
+    # E o custo por saca do levantamento adotado tem que ser o mesmo da
+    # planilha por município, senão os dois CSVs vieram de extrações
+    # diferentes.
+    with (RAIZ / "pesquisa" / "dados" / "conab" /
+          "custo_variavel_e_produtividade_por_municipio.csv").open(encoding="utf-8") as fh:
+        por_municipio = {l["Municipio.Municipio"].strip('"').upper():
+                         float(l["Custo Variavel Unid Comercializacao(R$)"])
+                         for l in csv.DictReader(fh, delimiter=";")}
+    assert por_municipio[lev["praca_csv"]] == lev["custo_variavel_saca"]
+
+
+def test_reserva_vale_quando_o_levantamento_some():
+    """A rede de segurança precisa funcionar, não só existir.
+
+    Se o JSON não chegar ao deploy, API e painel têm que subir com os números
+    do levantamento em vigor, e não quebrar nem servir zero — foi um NameError
+    no caminho de erro que tirou o painel do ar em 30/08/2026.
+    """
+    sys.path.insert(0, str(RAIZ / "software" / "api_backend"))
+    import financas
+
+    original = financas.LEVANTAMENTO_JSON
+    try:
+        financas.LEVANTAMENTO_JSON = Path("/caminho/que/nao/existe.json")
+        reserva = financas._carregar_levantamento()
+    finally:
+        financas.LEVANTAMENTO_JSON = original
+
+    lev = json.loads((RAIZ / "pesquisa" / "dados" / "conab" /
+                      "levantamento_atual.json").read_text(encoding="utf-8"))
+    assert reserva["preco_recebido_saca"] == lev["preco_recebido_saca"]
+    assert reserva["custo_operacional_ha"] == lev["custo_operacional_ha"]
+    assert reserva["textos"]["descricao"] == lev["textos"]["descricao"]
 
 
 def test_requisitos_declaram_o_que_financas_importa():

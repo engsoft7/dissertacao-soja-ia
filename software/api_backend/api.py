@@ -1,5 +1,6 @@
 from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
-                      PRECO_RECEBIDO_CONAB_SACA)
+                      PRECO_RECEBIDO_CONAB_SACA, LEVANTAMENTO,
+                      descricao_do_levantamento, nota_sobre_o_preco)
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -117,6 +118,13 @@ def get_financas(municipio: str):
         "soja_preco_cbot_saca": fin["cbot_saca"],
         "custo_ha": custo_ha,
         "vtn_ha": custos["vtn_ha"],
+        # Rótulo e nota vêm do servidor de propósito: quando a CONAB publica
+        # levantamento novo, o aplicativo passa a exibir a praça, a data e a
+        # posição do preço na série corretas sem recompilar o APK. Antes eram
+        # strings fixas no Kotlin, que envelheciam em silêncio.
+        "fonte_preco": descricao_do_levantamento(),
+        "nota_preco": nota_sobre_o_preco(),
+        "levantamento": LEVANTAMENTO["levantamento"],
         "ano_referencia": int(AppState.last_year) if AppState.df is not None else 2024
     }
 
@@ -162,6 +170,9 @@ def get_kpis_economia():
          "soja_preco_saca": PRECO_RECEBIDO_CONAB_SACA,
          "soja_preco_cbot_saca": fin["cbot_saca"],
          "custo_ha": custo_ha,
+         "fonte_preco": descricao_do_levantamento(),
+         "nota_preco": nota_sobre_o_preco(),
+         "levantamento": LEVANTAMENTO["levantamento"],
          "ano_referencia": int(AppState.last_year)
     }
 

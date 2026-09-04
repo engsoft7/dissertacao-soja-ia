@@ -325,6 +325,42 @@ Ele consulta a API do SIDRA/IBGE e:
   painel usa para a faixa de fase climática da safra alvo e para as barras de
   El Niño e La Niña do gráfico histórico. Se a NOAA não responder, o arquivo
   existente é preservado e nenhum PR é aberto por isso.
+- **Custos e preço da CONAB:** o levantamento de custos de produção da soja em
+  Pedro Afonso (TO) é publicado a cada dois meses e alimenta o preço e o custo
+  do simulador. O ciclo consolida os CSVs em
+  `pesquisa/dados/conab/levantamento_atual.json` e propaga o resultado para o
+  painel, a API e o aplicativo de uma vez — inclusive a praça, a data e a frase
+  que diz onde o preço está na série histórica. Nada disso é literal no código:
+  trocar o levantamento é trocar o CSV. Com a variável de repositório
+  `CONAB_CUSTOS_URL` configurada, a coleta é automática; sem ela, o workflow
+  verifica quantos meses tem o levantamento em uso e abre uma **issue** com o
+  comando de atualização quando ele passa de quatro meses — em vez de o produto
+  seguir exibindo um preço antigo como se fosse o de hoje.
+
+### Atualizar o levantamento da CONAB à mão (um comando)
+
+Baixe as três planilhas em CSV do [Portal de Informações
+Agropecuárias](https://portaldeinformacoes.conab.gov.br/custos-de-producao.html)
+— série histórica de Pedro Afonso (TO), custo por município e produtividade por
+município — e rode:
+
+```bash
+python software/automacao_github/atualiza_conab.py \
+  --arquivo serie.csv --arquivo municipios.csv --arquivo produtividade.csv
+```
+
+O script identifica cada planilha pelo cabeçalho (o portal exporta tudo como
+`dados.csv`), acrescenta o levantamento sem apagar a série, recusa conteúdo que
+não seja planilha da CONAB, e chama
+`software/automacao_github/gera_levantamento_conab.py`, que recalcula custo por
+hectare, posição do preço na série e as legendas, e sincroniza as cópias de
+emergência de `financas.py` e `app.py`. Não há número para editar à mão nem APK
+para recompilar: as legendas do aplicativo vêm da API.
+
+Duas regras que o gerador não deixa violar: preço e custo saem sempre do **mesmo
+levantamento** (se a CONAB publicar custo sem divulgar preço, ele fica no último
+com cotação em vez de misturar dois momentos), e as três planilhas têm de vir da
+**mesma extração** (o custo variável por saca é conferido entre elas).
 
 ### Ativar a coleta automática no Earth Engine (configuração única)
 
@@ -345,6 +381,12 @@ robô mergeia na sequência, e o merge redeploya o painel publicado. O PR fica
 como registro auditável de cada atualização; para desfazer uma, use
 `git revert` no commit correspondente. Para voltar ao merge manual, remova o
 passo "Mergeia o PR automaticamente" do workflow.
+
+Duas situações escapam do merge automático de propósito, porque mexem em números
+que a dissertação reporta: quando a revisão do IBGE altera as métricas de
+validação (Tabela 6 e subseção 4.9), e quando a CONAB revisa um levantamento já
+publicado. Nesses casos o PR fica aberto para conferência humana. Levantamento
+**novo** da CONAB entra sozinho — o produto declara em tela qual está usando.
 
 Para conferir a credencial na hora: **Actions → Atualiza base de dados →
 Run workflow**, marque **"Testar a credencial do Earth Engine"** e rode. O log

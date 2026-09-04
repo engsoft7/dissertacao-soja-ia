@@ -36,26 +36,99 @@ RIOS_PARA = DADOS.parent / "rios_para.json"
 EVENTOS_ENSO = DADOS.parent / "eventos_enso.json"
 SACA_KG = 60  # saca de soja
 
-# Custo operacional da CONAB (Pedro Afonso-TO, levantamento de março de 2026),
-# repetido aqui como literal de emergência. A fonte da verdade é
-# CUSTO_REFERENCIA_HA em software/api_backend/financas.py; esta cópia só é
-# usada quando aquele módulo não pode ser importado, para o painel abrir com
-# um número correto em vez de quebrar. Ao atualizar a CONAB, mudar nos dois.
-CUSTO_OPERACIONAL_PADRAO_HA = 5277.12
-# Preço recebido pelo produtor no mesmo levantamento da CONAB. Também é cópia
-# literal: a fonte da verdade é PRECO_RECEBIDO_CONAB_SACA em financas.py.
-PRECO_RECEBIDO_CONAB_PADRAO_SACA = 105.09
-# Produtividade de referência do levantamento da CONAB, base da conversão do
-# custo por saca para custo por hectare. O custo por hectare está preso a ela.
-PRODUTIVIDADE_REFERENCIA_CONAB_SC = 48.0
-# Custo total da CONAB = operacional + renda de fatores (a parcela que remunera
-# terra e capital). Cópia literal; a fonte da verdade é CUSTO_TOTAL_HA em
-# financas.py. A diferença entre os dois é o que a margem operacional não cobre.
-CUSTO_TOTAL_PADRAO_HA = 5714.88
+# ── LEVANTAMENTO DA CONAB (preço, custo, praça e data) ───────────────────────
+# Vem de pesquisa/dados/conab/levantamento_atual.json, o MESMO arquivo que a
+# API lê, gerado dos CSVs da extração por
+# software/automacao_github/gera_levantamento_conab.py e atualizado pelo
+# workflow mensal. Painel, API e aplicativo passam a não poder discordar sobre
+# qual levantamento está em uso, e as legendas acompanham a CONAB sozinhas:
+# antes a praça e a data estavam escritas por extenso em cada legenda, e
+# envelheciam em silêncio.
+#
+# Lê o arquivo direto, sem importar financas.py, de propósito: o painel tem que
+# abrir mesmo quando aquele módulo não importa (foi o que o derrubou em
+# 30/08/2026), e um dado de arquivo não deve depender de um import opcional.
+LEVANTAMENTO_JSON = DADOS.parent / "conab" / "levantamento_atual.json"
+
+# Reserva de emergência, com o levantamento de março de 2026, para o painel
+# abrir com números corretos se o arquivo faltar no deploy. Não é segunda fonte
+# da verdade: test_robustez_painel.py confere que continua igual ao JSON.
+# reserva-conab-inicio (reescrita por gera_levantamento_conab.py)
+LEVANTAMENTO_CONAB_RESERVA = {
+    "praca": "Pedro Afonso (TO)",
+    "levantamento": "MAR-2026",
+    "levantamento_extenso": "março de 2026",
+    "preco_recebido_saca": 105.09,
+    "custo_operacional_saca": 109.94,
+    "produtividade_referencia_kg_ha": 2880.0,
+    "produtividade_referencia_sc_ha": 48.0,
+    "custo_operacional_ha": 5277.12,
+    "custo_total_ha": 5714.88,
+    "renda_fatores_ha": 437.76,
+    "serie": {
+        "levantamentos": 13,
+        "periodo": "março de 2023 a março de 2026",
+        "periodo_curto": "mar/2023 a mar/2026",
+        "menor_saca": 105.09,
+        "menor_levantamento": "MAR-2026",
+        "menor_levantamento_extenso": "março de 2026",
+        "maior_saca": 146.35,
+        "maior_levantamento": "MAR-2023",
+        "maior_levantamento_extenso": "março de 2023",
+        "mediana_saca": 116.91,
+        "media_saca": 118.89,
+        "posicao_do_atual": 1,
+        "levantamentos_negativos": [
+            "MAI-2023",
+            "MAR-2026"
+        ]
+    },
+    "textos": {
+        "descricao": "CONAB, Pedro Afonso (TO), março de 2026",
+        "nota_preco": "R$ 105,09/sc é o menor dos 13 levantamentos da praça (mar/2023 a mar/2026, mediana R$ 116,91). Cenário conservador, não previsão de preço.",
+        "nota_custo": "Custo operacional de R$ 109,94/sc, convertido para R$ 5.277,12/ha pela produtividade de referência do próprio levantamento (2.880 kg/ha, 48 sc/ha)."
+    }
+}
+# reserva-conab-fim
+
+
+def _carregar_levantamento_conab() -> dict:
+    """Levantamento em vigor, com a reserva como rede de segurança.
+
+    Nunca levanta exceção: é lido na importação do módulo, e um JSON ausente ou
+    corrompido não pode impedir o painel de abrir.
+    """
+    try:
+        dados = json.loads(LEVANTAMENTO_JSON.read_text(encoding="utf-8"))
+        faltando = [c for c in LEVANTAMENTO_CONAB_RESERVA if c not in dados]
+        faltando += [f"serie.{c}" for c in LEVANTAMENTO_CONAB_RESERVA["serie"]
+                     if c not in dados.get("serie", {})]
+        if faltando:
+            raise KeyError(", ".join(faltando))
+        return dados
+    except Exception as e:  # noqa: BLE001 — abrir o painel vale mais
+        print(f"[painel] levantamento da CONAB indisponivel "
+              f"({type(e).__name__}: {e}); usando a reserva", flush=True)
+        return LEVANTAMENTO_CONAB_RESERVA
+
+
+LEVANTAMENTO_CONAB = _carregar_levantamento_conab()
+
+# Nomes mantidos por serem usados em todo o arquivo; o valor agora é derivado.
+CUSTO_OPERACIONAL_PADRAO_HA = LEVANTAMENTO_CONAB["custo_operacional_ha"]
+CUSTO_TOTAL_PADRAO_HA = LEVANTAMENTO_CONAB["custo_total_ha"]
+PRECO_RECEBIDO_CONAB_PADRAO_SACA = LEVANTAMENTO_CONAB["preco_recebido_saca"]
+# Produtividade de referência do levantamento, base da conversão do custo por
+# saca para custo por hectare. O custo por hectare está preso a ela.
+PRODUTIVIDADE_REFERENCIA_CONAB_SC = LEVANTAMENTO_CONAB["produtividade_referencia_sc_ha"]
 # Preço e custo operacional POR SACA na praça de referência, para a interface
 # poder mostrar o resultado que o próprio levantamento apurou.
-PRECO_RECEBIDO_CONAB_SACA_REF = 105.09
-CUSTO_OPERACIONAL_CONAB_SACA_REF = 109.94
+PRECO_RECEBIDO_CONAB_SACA_REF = LEVANTAMENTO_CONAB["preco_recebido_saca"]
+CUSTO_OPERACIONAL_CONAB_SACA_REF = LEVANTAMENTO_CONAB["custo_operacional_saca"]
+# Rótulo pronto para as legendas: "Pedro Afonso (TO), levantamento de março de
+# 2026".
+PRACA_CONAB = LEVANTAMENTO_CONAB["praca"]
+LEVANTAMENTO_CONAB_EXTENSO = LEVANTAMENTO_CONAB["levantamento_extenso"]
 
 
 @st.cache_data
@@ -839,6 +912,16 @@ def dec(v: float, casas: int = 1) -> str:
     return f"{v:.{casas}f}".replace(".", ",")
 
 
+def esc_md(texto: str) -> str:
+    """Escapa o cifrão em texto vindo do levantamento da CONAB.
+
+    Mesma razão de brl_md: o Streamlit lê "$...$" como LaTeX, e a nota sobre o
+    preço traz dois valores em reais na mesma frase — sem escapar, o trecho
+    entre eles vira fórmula em monoespaçado.
+    """
+    return texto.replace("$", r"\$")
+
+
 def brl_md(v: float, dec: int = 0) -> str:
     """brl() para markdown puro.
 
@@ -1200,20 +1283,15 @@ if tela_atual == "💰 Viabilidade Financeira":
         comparacoes.append(f"físico em Paranaguá hoje, {brl_md(PRECO_SACA_ONLINE, 2)}")
     if preco_cbot:
         comparacoes.append(f"futuro em Chicago convertido, {brl_md(preco_cbot, 2)}")
-    # Os R$ 105,09 são o MENOR preço dos 13 levantamentos da praça desde março
-    # de 2023. Sem essa informação o usuário lê o padrão como "o preço da soja",
-    # quando ele é o momento mais pessimista da série — e a margem é quase toda
-    # dirigida por esse único parâmetro. A série está em
+    # A frase que situa o preço na série vem do levantamento gerado, não
+    # escrita aqui: sem ela o usuário lê o padrão como "o preço da soja",
+    # quando ele pode ser o piso do triênio — e a margem é quase toda dirigida
+    # por esse único parâmetro. Série em
     # pesquisa/dados/conab/serie_pedro_afonso_to.csv.
-    fonte_preco = ("**Cotação:** CONAB, preço recebido pelo produtor em Pedro "
-                   "Afonso (TO), levantamento de março de 2026 — preço de "
-                   "porteira, e da mesma praça de onde vem o custo abaixo. "
-                   "É o **menor dos 13 levantamentos** da praça entre março de "
-                   "2023 e março de 2026 (mediana R$ 116,91; máximo R$ 146,35, "
-                   "em março de 2023): a margem calculada abaixo está no "
-                   "cenário mais pessimista dos últimos três anos. Cada R$ 1,00 "
-                   "a mais por saca acrescenta cerca de R$ 55 por hectare numa "
-                   "lavoura de 55 sacas.")
+    fonte_preco = (f"**Cotação:** CONAB, preço recebido pelo produtor em "
+                   f"{PRACA_CONAB}, levantamento de {LEVANTAMENTO_CONAB_EXTENSO} "
+                   f"— preço de porteira, e da mesma praça de onde vem o custo "
+                   f"abaixo. {esc_md(LEVANTAMENTO_CONAB['textos']['nota_preco'])}")
     if comparacoes:
         fonte_preco += (" Para comparação: " + "; ".join(comparacoes) +
                         ". São preços de porto e de bolsa, acima do que se "
@@ -1234,13 +1312,15 @@ if tela_atual == "💰 Viabilidade Financeira":
             value=int(custos_locais["custo_ha"]),
             step=100)
         st.caption(
-            "**Custo:** CONAB, custo operacional da soja em Pedro Afonso (TO), "
-            "levantamento de março de 2026, convertido pela produtividade de "
-            "referência de 2.880 kg/ha (48 sc/ha). O Pará não tem levantamento "
-            "próprio. **Atenção:** este é um custo por hectare fixo, preso à "
-            "produtividade de referência — ele não cresce junto com a "
-            "produtividade projetada, então parte da colheita, secagem e frete "
-            "das sacas acima de 48 sc/ha não está sendo cobrada.")
+            f"**Custo:** CONAB, custo operacional da soja em {PRACA_CONAB}, "
+            f"levantamento de {LEVANTAMENTO_CONAB_EXTENSO}. "
+            f"{esc_md(LEVANTAMENTO_CONAB['textos']['nota_custo'])} O Pará não tem "
+            f"levantamento próprio. **Atenção:** este é um custo por hectare "
+            f"fixo, preso à produtividade de referência — ele não cresce junto "
+            f"com a produtividade projetada, então parte da colheita, secagem e "
+            f"frete das sacas acima de "
+            f"{PRODUTIVIDADE_REFERENCIA_CONAB_SC:.0f} sc/ha não está sendo "
+            f"cobrada.")
     # O Valor da Terra Nua sai dos campos editáveis e do grid de resultados.
     # Era um campo que o usuário podia alterar sem que nada na tela mudasse,
     # porque o VTN não entra em cálculo nenhum, e um cartão de patrimônio no
@@ -1339,8 +1419,8 @@ if tela_atual == "💰 Viabilidade Financeira":
     resultado_ref = (PRECO_RECEBIDO_CONAB_SACA_REF
                      - CUSTO_OPERACIONAL_CONAB_SACA_REF) * PRODUTIVIDADE_REFERENCIA_CONAB_SC
     st.caption(
-        f"**Na praça de referência:** no mesmo levantamento da CONAB, em Pedro "
-        f"Afonso (TO), o preço recebido ({brl_md(PRECO_RECEBIDO_CONAB_SACA_REF, 2)}"
+        f"**Na praça de referência:** no mesmo levantamento da CONAB, em "
+        f"{PRACA_CONAB}, o preço recebido ({brl_md(PRECO_RECEBIDO_CONAB_SACA_REF, 2)}"
         f"/sc) ficou abaixo do custo operacional "
         f"({brl_md(CUSTO_OPERACIONAL_CONAB_SACA_REF, 2)}/sc): a lavoura apurou "
         f"{brl_md(resultado_ref)}/ha ali. O resultado positivo aqui depende de a "
@@ -1477,36 +1557,34 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
     * **Projeto MapBiomas:** Extração das coberturas de Uso e Ocupação do Solo com foco em áreas exclusivas de soja no Pará (mascaramento de satélite).
 
     ### Dados econômicos do simulador
-    * **Preço recebido pelo produtor (CONAB):** R$ 105,09 por saca no
-      levantamento de Pedro Afonso (TO), de março de 2026. É a cotação que o
+''' + f'''    * **Preço recebido pelo produtor (CONAB):** {brl_md(LEVANTAMENTO_CONAB['preco_recebido_saca'], 2)} por saca no
+      levantamento de {PRACA_CONAB}, de {LEVANTAMENTO_CONAB_EXTENSO}. É a cotação que o
       simulador usa por padrão, por ser preço de porteira e por vir da mesma
       praça de onde sai o custo — receita e custo passam a nascer do mesmo
-      levantamento. O campo é editável. **É o menor preço dos 13 levantamentos
-      da praça entre março de 2023 e março de 2026** (mediana R$ 116,91, média
-      R$ 118,89, máximo R$ 146,35 em março de 2023), e um dos dois únicos em que
-      a própria CONAB apura margem líquida negativa ali. O padrão é, portanto,
-      o cenário mais pessimista do triênio: é uma escolha conservadora, não uma
-      previsão de preço. A série está em
-      `pesquisa/dados/conab/serie_pedro_afonso_to.csv`. Preço e custo têm de vir
-      do mesmo levantamento — usar a mediana da série com o custo de março de
-      2026 misturaria dois momentos e infla a margem.
-    * **Notícias Agrícolas:** preço físico da saca em Paranaguá, relido a cada
+      levantamento. O campo é editável.
+      {esc_md(LEVANTAMENTO_CONAB['textos']['nota_preco'])} Na série completa da praça
+      ({LEVANTAMENTO_CONAB['serie']['periodo']}), a média é
+      {brl_md(LEVANTAMENTO_CONAB['serie']['media_saca'], 2)} e o maior preço foi
+      {brl_md(LEVANTAMENTO_CONAB['serie']['maior_saca'], 2)}, em
+      {LEVANTAMENTO_CONAB['serie']['maior_levantamento_extenso']}. A série está em
+      `pesquisa/dados/conab/serie_pedro_afonso_to.csv`, e é atualizada pelo
+      workflow mensal. Preço e custo têm de vir do mesmo levantamento — usar a
+      mediana da série com o custo de {LEVANTAMENTO_CONAB_EXTENSO} misturaria
+      dois momentos e inflaria a margem.
+''' + '''    * **Notícias Agrícolas:** preço físico da saca em Paranaguá, relido a cada
       hora, exibido como comparação. É preço de porto, no Paraná: o produtor no
       Pará recebe menos, por causa de frete e base.
     * **Yahoo Finance (CBOT `ZS=F` e `BRL=X`):** contrato futuro de Chicago
       convertido para reais por saca de 60 kg, também exibido como comparação.
       É cotação de bolsa e fica acima do preço físico brasileiro.
-    * **Custo operacional (CONAB):** levantamento de custos de produção da soja
-      no município de Pedro Afonso (TO), de março de 2026 — ponto de coleta da
+''' + f'''    * **Custo operacional (CONAB):** levantamento de custos de produção da soja
+      no município de {PRACA_CONAB}, de {LEVANTAMENTO_CONAB_EXTENSO} — ponto de coleta da
       CONAB no cerrado do Tocantins. O Pará não integra o MATOPIBA e não tem
-      custo de soja levantado, por isso adota-se o cerrado vizinho. A CONAB
-      publica o custo por saca; a conversão para hectare usa a produtividade de
-      referência do próprio levantamento, de 2.880 kg/ha. O valor empregado é o
-      custo operacional, R$ 109,94 por saca ou R$ 5.277,12 por hectare, soma do
-      custo variável (R$ 4.081,44/ha) com o custo fixo (R$ 1.195,68/ha). É um
-      valor de referência embutido no código, igual para todos os municípios, e
-      editável no campo acima.
-    * **Valor da Terra Nua (Receita Federal):** Tabela de Valores de Terra Nua do
+      custo de soja levantado, por isso adota-se o cerrado vizinho.
+      {esc_md(LEVANTAMENTO_CONAB['textos']['nota_custo'])} É um valor de referência
+      igual para todos os municípios, lido de
+      `pesquisa/dados/conab/levantamento_atual.json` e editável no campo acima.
+''' + '''    * **Valor da Terra Nua (Receita Federal):** Tabela de Valores de Terra Nua do
       exercício 2026, publicada em 07/08/2026 e reenviada corrigida em
       21/08/2026. A tabela traz seis valores por município, por classe de
       aptidão agrícola; usa-se "Lavoura — Aptidão Boa", que é a classe da soja.

@@ -1,6 +1,9 @@
 # Atualização automática da base PAM/IBGE + coleta GEE de safra nova.
 # Roda todo dia 15 e pode ser disparado manualmente na aba Actions.
 # - Revisões do IBGE em anos já presentes: abre um PR com o CSV atualizado.
+# - Levantamento novo de custos da CONAB: atualiza preço e custo do simulador
+#   e propaga para o painel, a API e o aplicativo. Sem fonte configurada, avisa
+#   por issue quando o levantamento em uso fica velho demais.
 # - Safra nova no SIDRA:
 #     * com o secret GEE_SERVICE_ACCOUNT_JSON configurado, coleta as variáveis
 #       ambientais no Earth Engine e inclui a safra no mesmo PR;
@@ -14,6 +17,10 @@ on:
     inputs:
       testar_gee:
         description: "Testar a credencial do Earth Engine (não altera a base)"
+        type: boolean
+        default: false
+      testar_conab:
+        description: "Testar a fonte de custos da CONAB (não altera a base)"
         type: boolean
         default: false
       simular:
@@ -55,12 +62,18 @@ jobs:
           pip install --quiet earthengine-api
           python software/automacao_github/coleta_gee_safra.py --testar
 
+      - name: Testa a fonte de custos da CONAB
+        if: github.event_name == 'workflow_dispatch' && inputs.testar_conab
+        env:
+          CONAB_CUSTOS_URL: ${{ vars.CONAB_CUSTOS_URL }}
+        run: python software/automacao_github/atualiza_conab.py --testar
+
       # O teste de credencial é anunciado no README como "sem alterar nada".
       # Sem esta guarda ele seguiria para o SIDRA e poderia abrir e mergear um
       # PR na base — que é a mesma que produz os números da dissertação.
       - name: Consulta o SIDRA e aplica revisões
         id: pam
-        if: ${{ !inputs.testar_gee }}
+        if: ${{ !inputs.testar_gee && !inputs.testar_conab }}
         env:
           RESUMO_MD: /tmp/resumo_pam.md
         run: python software/automacao_github/atualiza_pam.py
@@ -70,7 +83,7 @@ jobs:
       # as barras do gráfico histórico, então vale manter atualizado.
       - name: Atualiza a classificação El Niño / La Niña (NOAA ONI)
         id: enso
-        if: ${{ !inputs.testar_gee }}
+        if: ${{ !inputs.testar_gee && !inputs.testar_conab }}
         run: |
           ANTES=$(python -c "import json;d=json.load(open('pesquisa/dados/eventos_enso.json'));print(d['el_ninos'],d['la_ninas'])" 2>/dev/null || echo "")
           python software/automacao_github/atualiza_enso.py
@@ -89,6 +102,26 @@ jobs:
           fi
         env:
           RESUMO_MD: /tmp/resumo_pam.md
+
+      # Preço e custo do simulador saem do levantamento de custos da CONAB, que
+      # é publicado a cada dois meses. Sem esta etapa eles envelheciam calados:
+      # o produto exibia março de 2026 como se fosse o preço de hoje, e trocar
+      # de levantamento exigia editar oito literais e recompilar o APK.
+      #
+      # Com CONAB_CUSTOS_URL configurada (Settings > Variables), a etapa baixa,
+      # valida e propaga sozinha. Sem ela, faz a única verificação que não
+      # precisa de rede — quantos meses tem o levantamento em uso — e o passo
+      # seguinte abre issue quando ficou velho demais.
+      - name: Atualiza o levantamento de custos da CONAB
+        id: conab
+        if: ${{ !inputs.testar_gee && !inputs.testar_conab }}
+        env:
+          CONAB_CUSTOS_URL: ${{ vars.CONAB_CUSTOS_URL }}
+          RESUMO_MD: /tmp/resumo_pam.md
+        run: |
+          ARGS=""
+          if [ "${{ inputs.simular }}" = "true" ]; then ARGS="--simular"; fi
+          python software/automacao_github/atualiza_conab.py $ARGS
 
       - name: Coleta a safra nova no Earth Engine
         id: gee
@@ -137,11 +170,18 @@ jobs:
 
       - name: Abre PR com as mudanças na base
         id: cpr
-        if: ${{ (steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true' || steps.enso.outputs.alterado == 'true') && !inputs.simular }}
+        if: ${{ (steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true' || steps.enso.outputs.alterado == 'true' || steps.conab.outputs.csv_alterado == 'true') && !inputs.simular }}
         uses: peter-evans/create-pull-request@v7
         with:
           branch: automacao/atualiza-base
-          add-paths: pesquisa/dados/*
+          # As cópias de emergência do levantamento vivem fora de
+          # pesquisa/dados/: o gerador as reescreve, e um PR sem elas entraria
+          # com painel e API afirmando preços diferentes — e reprovaria nos
+          # testes, que é o que se quer.
+          add-paths: |
+            pesquisa/dados/*
+            software/api_backend/financas.py
+            software/dashboard_web/app.py
           commit-message: "Atualiza a base do painel com dados oficiais (PAM/SIDRA + GEE)"
           title: "Atualização automática da base do painel"
           body-path: /tmp/resumo_pam.md
@@ -152,9 +192,14 @@ jobs:
       # métricas de validação: elas são os números que a Tabela 6 e a subseção
       # 4.9 da dissertação reportam, e um robô não deve alterar sozinho o que
       # um documento publicado afirma. Nesse caso o PR fica aberto para
-      # conferência humana.
+      # conferência humana. A segunda exceção é a CONAB revisar um levantamento
+      # já publicado: levantamento novo entra sozinho, porque o produto declara
+      # qual está usando, mas mudar um valor que ele já exibiu — e que a
+      # subseção 4.9 pode citar — passa por gente.
       - name: Mergeia o PR automaticamente
-        if: steps.cpr.outputs.pull-request-number != '' && steps.metricas.outputs.mudaram != 'true'
+        if: steps.cpr.outputs.pull-request-number != ''
+          && steps.metricas.outputs.mudaram != 'true'
+          && steps.conab.outputs.revisao != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -176,6 +221,7 @@ jobs:
             echo "| revisão na base | ${{ steps.pam.outputs.csv_alterado || 'false' }} |"
             echo "| safra nova encontrada | ${{ steps.pam.outputs.novo_ano || 'nenhuma' }} |"
             echo "| classificação ENSO | ${{ steps.enso.outcome }} (alterada: ${{ steps.enso.outputs.alterado || 'false' }}) |"
+            echo "| levantamento da CONAB | ${{ steps.conab.outputs.levantamento || '?' }}, ${{ steps.conab.outputs.meses || '?' }} meses (alterado: ${{ steps.conab.outputs.csv_alterado || 'false' }}) |"
             echo "| coleta no Earth Engine | ${{ steps.gee.outcome }} |"
             echo ""
             echo "Arquivos que teriam entrado no PR:"
@@ -185,6 +231,59 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
           git checkout -- pesquisa/dados/ 2>/dev/null || true
+
+      # Sem fonte configurada, esta é a parte que ainda depende de gente: baixar
+      # o CSV do portal. A issue existe para que isso apareça como tarefa em vez
+      # de o produto seguir exibindo um preço de meses atrás como se fosse o de
+      # hoje — que era o comportamento anterior, calado.
+      - name: Abre issue quando o levantamento da CONAB fica velho
+        if: ${{ always() && steps.conab.outputs.defasado == 'true' && !inputs.simular }}
+        uses: actions/github-script@v7
+        env:
+          LEVANTAMENTO: ${{ steps.conab.outputs.levantamento }}
+          MESES: ${{ steps.conab.outputs.meses }}
+          TEM_FONTE: ${{ vars.CONAB_CUSTOS_URL != '' }}
+        with:
+          script: |
+            const lev = process.env.LEVANTAMENTO;
+            const meses = process.env.MESES;
+            const temFonte = process.env.TEM_FONTE === "true";
+            const titulo = `Levantamento da CONAB em uso (${lev}) tem ${meses} meses`;
+            const abertas = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: "open", per_page: 100,
+            });
+            if (abertas.data.some(i => i.title.startsWith("Levantamento da CONAB em uso"))) {
+              core.info("Issue já existe; nada a fazer.");
+              return;
+            }
+            let corpo = `O preço e o custo do simulador saem do levantamento ` +
+              `**${lev}** da CONAB para Pedro Afonso (TO), que já tem **${meses} ` +
+              `meses**. A CONAB publica custos de produção da soja a cada dois ` +
+              `meses, então provavelmente há levantamento mais recente.\n\n`;
+            corpo += temFonte
+              ? `A fonte automática está configurada (\`CONAB_CUSTOS_URL\`), mas ` +
+                `não trouxe levantamento novo. Vale conferir o endereço rodando ` +
+                `este workflow com a opção "Testar a fonte de custos da CONAB".\n\n`
+              : `A coleta automática está desativada: a variável de repositório ` +
+                `\`CONAB_CUSTOS_URL\` não está definida (Settings > Variables).\n\n`;
+            corpo += `Atualização manual, um comando:\n` +
+              `1. Baixe as planilhas em CSV do [Portal de Informações ` +
+              `Agropecuárias](https://portaldeinformacoes.conab.gov.br/custos-de-producao.html) ` +
+              `— série histórica de Pedro Afonso (TO), custo por município e ` +
+              `produtividade por município.\n` +
+              `2. Rode:\n` +
+              "```\n" +
+              `python software/automacao_github/atualiza_conab.py \\\n` +
+              `  --arquivo serie.csv --arquivo municipios.csv --arquivo produtividade.csv\n` +
+              "```\n" +
+              `3. Abra um PR. Preço, custo, data, praça e as legendas do painel, ` +
+              `da API e do aplicativo são atualizados juntos — nada de editar ` +
+              `número na mão nem recompilar o APK.`;
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: titulo, body: corpo, labels: ["dados"],
+            });
 
       - name: Abre issue para a safra nova (sem chave GEE ou coleta falhou)
         if: ${{ always() && steps.pam.outputs.novo_ano != '' && !inputs.simular && (env.TEM_CHAVE_GEE != 'true' || steps.gee.outcome == 'failure') }}

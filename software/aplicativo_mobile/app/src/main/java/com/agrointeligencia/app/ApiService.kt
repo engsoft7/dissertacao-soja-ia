@@ -29,12 +29,24 @@ data class FinancaResponse(
     val custo_ha: Double,
     // Nulo quando a Receita Federal não publica VTN para o município.
     val vtn_ha: Double? = null,
+    // Rótulo da praça e da data do levantamento da CONAB, e a frase que situa
+    // o preço padrão na série histórica. Vêm do servidor, e não escritos aqui,
+    // para o aplicativo acompanhar um levantamento novo sem recompilar: são a
+    // única parte da tela que envelhece quando a CONAB publica. Nulos quando a
+    // API é mais antiga que o aplicativo — a tela omite a legenda em vez de
+    // exibir uma data errada.
+    val fonte_preco: String? = null,
+    val nota_preco: String? = null,
+    val levantamento: String? = null,
     val ano_referencia: Int
 )
 
 data class KpiEconomiaResponse(
     val soja_preco_saca: Double,
     val custo_ha: Double,
+    val fonte_preco: String? = null,
+    val nota_preco: String? = null,
+    val levantamento: String? = null,
     val ano_referencia: Int
 )
 

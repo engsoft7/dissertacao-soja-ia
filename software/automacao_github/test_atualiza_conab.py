@@ -1,0 +1,112 @@
+# -*- coding: utf-8 -*-
+"""Testes do coletor de custos da CONAB.
+
+O que é exercitado aqui é a parte que decide o que entra na base do produto:
+reconhecer a planilha, acrescentar levantamento sem apagar história, relatar
+revisão de valor já publicado e não sujar o diff com mudança de formato. O
+download em si não é testado — depende do portal da CONAB estar no ar e do
+endereço configurado, e é justamente por isso que existe o modo --testar.
+
+Rode com:  python -m pytest software -q
+"""
+import shutil
+import sys
+from pathlib import Path
+
+import pytest
+
+RAIZ = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import atualiza_conab as coletor  # noqa: E402
+
+ORIGINAIS = RAIZ / "pesquisa" / "dados" / "conab"
+
+
+@pytest.fixture
+def conab(tmp_path, monkeypatch):
+    """Cópia descartável da pasta de dados, para os testes gravarem à vontade."""
+    destino = tmp_path / "conab"
+    shutil.copytree(ORIGINAIS, destino)
+    monkeypatch.setattr(coletor, "CONAB", destino)
+    return destino
+
+
+def test_reconhece_as_planilhas_do_portal():
+    """Cada arquivo já versionado tem que ser identificado como ele mesmo.
+
+    A identificação é pelo cabeçalho, e não pelo nome, porque o portal exporta
+    tudo como "dados.csv" — o usuário não deve ter que renomear nada.
+    """
+    for nome in coletor.PLANILHAS:
+        texto = (ORIGINAIS / nome).read_text(encoding="utf-8")
+        assert coletor.identificar(texto)[0] == nome
+
+
+def test_recusa_o_que_nao_e_planilha_da_conab():
+    """Portal fora do ar devolve HTML com status 200. Gravar isso apagaria a
+    base — a recusa é o comportamento certo."""
+    with pytest.raises(coletor.ConteudoInesperado):
+        coletor.identificar("<!doctype html><html><body>Erro</body></html>")
+
+
+def test_ida_e_volta_nao_altera_o_arquivo(conab):
+    """Reescrever sem mudança nenhuma tem que produzir bytes idênticos.
+
+    Se o formato mudasse na volta (aspas em todas as colunas, por exemplo), o
+    diff do PR mensal viria com o arquivo inteiro alterado e a mudança real do
+    levantamento ficaria invisível na revisão.
+    """
+    for nome in coletor.PLANILHAS:
+        texto = (conab / nome).read_text(encoding="utf-8")
+        _, mudancas = coletor.aplicar(texto)
+        assert mudancas == [], f"{nome} acusou mudança sem haver"
+        assert (conab / nome).read_text(encoding="utf-8") == texto
+
+
+def test_levantamento_novo_entra_sem_apagar_a_serie(conab):
+    """A série histórica é acumulada, não substituída."""
+    arquivo = conab / "serie_pedro_afonso_to.csv"
+    antes = arquivo.read_text(encoding="utf-8")
+    novo = antes + '"JUL-2026";9.4;25.3;86.1;121.5;71.04;35.4;10.1\n'
+
+    nome, mudancas = coletor.aplicar(novo)
+    assert nome == "serie_pedro_afonso_to.csv"
+    assert mudancas == ["levantamento novo: JUL-2026"]
+
+    depois = arquivo.read_text(encoding="utf-8")
+    assert "MAR-2023" in depois, "a série perdeu o começo"
+    assert depois.count("\n") == antes.count("\n") + 1
+
+
+def test_revisao_de_valor_publicado_e_relatada(conab):
+    """A CONAB revisa levantamento já publicado, e o painel cita esses números.
+
+    Uma revisão pode entrar — mas nunca calada: tem que aparecer no relato que
+    vira corpo do PR, para a conferência humana ver o que mudou.
+    """
+    arquivo = conab / "serie_pedro_afonso_to.csv"
+    revisado = arquivo.read_text(encoding="utf-8").replace(
+        '"MAR-2026";9.12;24.91;85.03;105.09', '"MAR-2026";9.12;24.91;85.03;111.4')
+
+    _, mudancas = coletor.aplicar(revisado)
+    assert len(mudancas) == 1
+    assert "revisão em MAR-2026" in mudancas[0]
+    assert "105.09" in mudancas[0] and "111.4" in mudancas[0]
+
+
+def test_simular_nao_grava(conab):
+    arquivo = conab / "serie_pedro_afonso_to.csv"
+    antes = arquivo.read_text(encoding="utf-8")
+    _, mudancas = coletor.aplicar(
+        antes + '"JUL-2026";9.4;25.3;86.1;121.5;71.04;35.4;10.1\n', simular=True)
+    assert mudancas, "a simulação tem que dizer o que mudaria"
+    assert arquivo.read_text(encoding="utf-8") == antes
+
+
+def test_defasagem_e_contada_em_meses():
+    """A única verificação que funciona sem rede: quantos meses o levantamento
+    em uso tem. É o que permite avisar que provavelmente há um mais recente."""
+    rotulo, meses = coletor.meses_de_defasagem()
+    assert rotulo == "MAR-2026"
+    assert meses >= 0

@@ -89,6 +89,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.testar_conab
         env:
           CONAB_CUSTOS_URL: ${{ vars.CONAB_CUSTOS_URL }}
+          DADOS_GOV_API_KEY: ${{ secrets.DADOS_GOV_API_KEY }}
         run: python software/automacao_github/atualiza_conab.py --testar
 
       # O teste de credencial é anunciado no README como "sem alterar nada".
@@ -147,6 +148,7 @@ jobs:
         if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos }}
         env:
           CONAB_CUSTOS_URL: ${{ vars.CONAB_CUSTOS_URL }}
+          DADOS_GOV_API_KEY: ${{ secrets.DADOS_GOV_API_KEY }}
           RESUMO_MD: /tmp/resumo_pam.md
         run: |
           ARGS=""

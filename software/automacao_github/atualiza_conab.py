@@ -61,6 +61,11 @@ MESES_ATE_SUSPEITAR = 4
 # variável de repositório CONAB_CUSTOS_URL (Settings > Variables) liga o modo
 # automático sem alterar código; sem ela, vale o modo --arquivo.
 ENV_URL = "CONAB_CUSTOS_URL"
+# O catálogo federal passou a exigir chave de API: sem ela devolve 401, como o
+# primeiro disparo real mostrou. A chave é gratuita e sai em minutos no próprio
+# dados.gov.br; guardada como secret do repositório, liga a descoberta pelo
+# catálogo, que é o caminho mais estável dos dois.
+ENV_CHAVE_CATALOGO = "DADOS_GOV_API_KEY"
 
 # Cada planilha é reconhecida pelo cabeçalho, não pelo nome do arquivo: o
 # portal exporta tudo como "dados.csv".
@@ -217,10 +222,18 @@ def _candidatas_do_catalogo() -> list[str]:
     """
     consulta = urllib.parse.urlencode(
         {"q": "conab custos de produção", "rows": "10"})
+    chave = os.environ.get(ENV_CHAVE_CATALOGO, "")
+    cabecalhos = {"chave-api-dados-abertos": chave} if chave else {}
     try:
-        dados = json.loads(baixar(f"{CATALOGO_CKAN}?{consulta}", tempo=20))
+        dados = json.loads(baixar(f"{CATALOGO_CKAN}?{consulta}", tempo=20,
+                                  cabecalhos=cabecalhos))
     except Exception as e:
-        print(f"  catálogo indisponível ({type(e).__name__}: {e})")
+        recado = f"  catálogo indisponível ({type(e).__name__}: {e})"
+        if "401" in str(e) and not chave:
+            recado += (f"\n  o catálogo exige chave de API. Crie uma, gratuita, "
+                       f"em https://dados.gov.br e guarde como secret "
+                       f"{ENV_CHAVE_CATALOGO} do repositório.")
+        print(recado)
         return []
     achados = []
     for pacote in (dados.get("result", {}) or {}).get("results", []) or []:
@@ -285,10 +298,11 @@ def coletar(url_fixa: str = "") -> tuple[list[str], list[str]]:
     return planilhas, relato
 
 
-def baixar(url: str, tempo: int = 30) -> str:
+def baixar(url: str, tempo: int = 30, cabecalhos: dict | None = None) -> str:
     req = urllib.request.Request(
         url, headers={"User-Agent":
-                      "AgroInteligencia-Dissertacao/1.0 (UFPA/EngSoft7)"})
+                      "AgroInteligencia-Dissertacao/1.0 (UFPA/EngSoft7)",
+                      **(cabecalhos or {})})
     with urllib.request.urlopen(req, timeout=tempo) as resp:
         bruto = resp.read()
     for codec in ("utf-8-sig", "utf-8", "latin-1"):

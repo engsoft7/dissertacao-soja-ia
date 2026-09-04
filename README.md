@@ -325,6 +325,42 @@ Ele consulta a API do SIDRA/IBGE e:
   painel usa para a faixa de fase climática da safra alvo e para as barras de
   El Niño e La Niña do gráfico histórico. Se a NOAA não responder, o arquivo
   existente é preservado e nenhum PR é aberto por isso.
+- **Custos e preço da CONAB:** o levantamento de custos de produção da soja em
+  Pedro Afonso (TO) é publicado a cada dois meses e alimenta o preço e o custo
+  do simulador. O ciclo consolida os CSVs em
+  `pesquisa/dados/conab/levantamento_atual.json` e propaga o resultado para o
+  painel, a API e o aplicativo de uma vez — inclusive a praça, a data e a frase
+  que diz onde o preço está na série histórica. Nada disso é literal no código:
+  trocar o levantamento é trocar o CSV. Com a variável de repositório
+  `CONAB_CUSTOS_URL` configurada, a coleta é automática; sem ela, o workflow
+  verifica quantos meses tem o levantamento em uso e abre uma **issue** com o
+  comando de atualização quando ele passa de quatro meses — em vez de o produto
+  seguir exibindo um preço antigo como se fosse o de hoje.
+
+### Atualizar o levantamento da CONAB à mão (um comando)
+
+Baixe as três planilhas em CSV do [Portal de Informações
+Agropecuárias](https://portaldeinformacoes.conab.gov.br/custos-de-producao.html)
+— série histórica de Pedro Afonso (TO), custo por município e produtividade por
+município — e rode:
+
+```bash
+python software/automacao_github/atualiza_conab.py \
+  --arquivo serie.csv --arquivo municipios.csv --arquivo produtividade.csv
+```
+
+O script identifica cada planilha pelo cabeçalho (o portal exporta tudo como
+`dados.csv`), acrescenta o levantamento sem apagar a série, recusa conteúdo que
+não seja planilha da CONAB, e chama
+`software/automacao_github/gera_levantamento_conab.py`, que recalcula custo por
+hectare, posição do preço na série e as legendas, e sincroniza as cópias de
+emergência de `financas.py` e `app.py`. Não há número para editar à mão nem APK
+para recompilar: as legendas do aplicativo vêm da API.
+
+Duas regras que o gerador não deixa violar: preço e custo saem sempre do **mesmo
+levantamento** (se a CONAB publicar custo sem divulgar preço, ele fica no último
+com cotação em vez de misturar dois momentos), e as três planilhas têm de vir da
+**mesma extração** (o custo variável por saca é conferido entre elas).
 
 ### Ativar a coleta automática no Earth Engine (configuração única)
 
@@ -345,6 +381,12 @@ robô mergeia na sequência, e o merge redeploya o painel publicado. O PR fica
 como registro auditável de cada atualização; para desfazer uma, use
 `git revert` no commit correspondente. Para voltar ao merge manual, remova o
 passo "Mergeia o PR automaticamente" do workflow.
+
+Duas situações escapam do merge automático de propósito, porque mexem em números
+que a dissertação reporta: quando a revisão do IBGE altera as métricas de
+validação (Tabela 6 e subseção 4.9), e quando a CONAB revisa um levantamento já
+publicado. Nesses casos o PR fica aberto para conferência humana. Levantamento
+**novo** da CONAB entra sozinho — o produto declara em tela qual está usando.
 
 Para conferir a credencial na hora: **Actions → Atualiza base de dados →
 Run workflow**, marque **"Testar a credencial do Earth Engine"** e rode. O log
@@ -465,7 +507,7 @@ DOI: 10.5281/zenodo.21286115. Disponível em: https://doi.org/10.5281/zenodo.212
 ## 🌐 AgroInteligência Web v2.0 (Executive SPA Dashboard)
 - **Single Page Application (SPA):** Navegação redesenhada para uma "Sidebar" global, fluida e com responsividade estrita. O encadeamento do painel elimina tabulações e se comporta como um SaaS nativo multi-tenant.
 - **Ecossistema Modular:** Código fonte fragmentado num ecossistema elegante e sustentável, separando roteamento de manipulação do layout via Python e consumo (ETL) da cotação física em Paranaguá (Notícias Agrícolas), exibida como comparação — a referência da simulação é o preço recebido pelo produtor no levantamento da CONAB, que é preço de porteira.
-- **Parâmetros econômicos com fonte declarada:** o custo operacional vem do levantamento da CONAB para Pedro Afonso (TO), de março de 2026, e o Valor da Terra Nua da tabela da Receita Federal do exercício 2026, classe lavoura de aptidão boa. São tabelas estáticas versionadas em `pesquisa/dados/`, não coleta em tempo real. Preço e custo são editáveis na interface, porque entram na conta da margem; o Valor da Terra Nua não, porque é referência fiscal (base de cálculo do ITR) e não preço de mercado — aparece como nota de contexto. A Receita Federal publica VTN para 13 dos 38 municípios; nos demais o painel informa que não há valor oficial.
+- **Parâmetros econômicos com fonte declarada:** o custo operacional vem do levantamento da CONAB para Pedro Afonso (TO), de março de 2026, e o Valor da Terra Nua da tabela da Receita Federal do exercício 2026, classe lavoura de aptidão boa. O preço recebido no mesmo levantamento, R$ 105,09 por saca, é o menor dos 13 levantamentos da praça desde março de 2023 (mediana R$ 116,91); o produto informa essa posição na série, para o padrão ser lido como cenário conservador e não como previsão de preço. São tabelas estáticas versionadas em `pesquisa/dados/`, não coleta em tempo real. Preço e custo são editáveis na interface, porque entram na conta da margem; o Valor da Terra Nua não, porque é referência fiscal (base de cálculo do ITR) e não preço de mercado — aparece como nota de contexto. A Receita Federal publica VTN para 13 dos 38 municípios; nos demais o painel informa que não há valor oficial.
 - **Visibilidade Asynchronous de AI:** Processamento dinâmico do Random Forest encapsulado em "shimmers" / Spinners UX, indicando cálculo simultâneo na simulação de cenários operacionais e previsões em tempo real do Agro-mercado do Pará.
 - **Plotly Analytics (Fintech Interactivity):** Upgrade massivo das engines gráficas do Altair para o *Plotly.js*. Anotação autônoma de Zonas de Risco Climático (El Niño e La Niña Históricos mapeados via *VRects*) e regressões lineares paramétricas sobrepondo a série cronológica de produtividade, além de Full-Zoom Crosshairs.
 - **Agente de Linguagem Natural (LLM Heurístico):** Um sintetizador inteligente lê as matrizes de cálculo e o fluxo de caixa final simulado, formulando sentenças interpretativas em parágrafos para o produtor. Ele transcreve a matemática dura para relatórios humanos como *"Alto risco crítico projetado"* ou *"Viabilidade Econômica Robusta de Safra"*.

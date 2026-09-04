@@ -29,12 +29,24 @@ data class FinancaResponse(
     val custo_ha: Double,
     // Nulo quando a Receita Federal não publica VTN para o município.
     val vtn_ha: Double? = null,
+    // Rótulo da praça e da data do levantamento da CONAB, e a frase que situa
+    // o preço padrão na série histórica. Vêm do servidor, e não escritos aqui,
+    // para o aplicativo acompanhar um levantamento novo sem recompilar: são a
+    // única parte da tela que envelhece quando a CONAB publica. Nulos quando a
+    // API é mais antiga que o aplicativo — a tela omite a legenda em vez de
+    // exibir uma data errada.
+    val fonte_preco: String? = null,
+    val nota_preco: String? = null,
+    val levantamento: String? = null,
     val ano_referencia: Int
 )
 
 data class KpiEconomiaResponse(
     val soja_preco_saca: Double,
     val custo_ha: Double,
+    val fonte_preco: String? = null,
+    val nota_preco: String? = null,
+    val levantamento: String? = null,
     val ano_referencia: Int
 )
 
@@ -44,11 +56,23 @@ data class SimulacaoRequest(
     val temp_offset: Double
 )
 
+data class Sensibilidade(
+    val variavel: String,
+    val r: Double,
+    val p: Double,
+    val n: Int,
+    val amplitude_kg_ha: Double
+)
+
 data class SimulacaoResponse(
     val municipio: String,
     val baseline_kg_ha: Double,
     val estimativa_kg_ha: Double,
-    val delta_kg_ha: Double
+    val delta_kg_ha: Double,
+    // Opcionais para a versão antiga da API continuar sendo lida.
+    val fora_da_faixa: List<String>? = null,
+    val margem_kg_ha: Double? = null,
+    val sensibilidade: Sensibilidade? = null
 )
 
 data class PingResponse(val status: String, val model_loaded: Boolean)

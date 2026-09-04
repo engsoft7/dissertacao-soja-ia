@@ -76,6 +76,11 @@ class Estimador:
         self.mae: float | None = None
         self.r2: float | None = None
         self.r2_baseline: float | None = None
+        # Faixa observada de cada preditor no treino. Uma floresta aleatória não
+        # extrapola: fora dessa faixa ela devolve o valor da folha extrema, de
+        # modo que a resposta deixa de significar alguma coisa. Simular chuva
+        # zero, por exemplo, produzia colheita ACIMA da média.
+        self.faixas: dict[str, tuple[float, float]] = {}
 
     def treinar(self, df: pd.DataFrame) -> "Estimador":
         self.df = df
@@ -85,6 +90,7 @@ class Estimador:
         self.modelo = RandomForestRegressor(
             n_estimators=120, max_depth=10, min_samples_split=4, random_state=42
         ).fit(self.scaler.transform(df[FEATURES].values), residuo)
+        self.faixas = {f: (float(df[f].min()), float(df[f].max())) for f in FEATURES}
         return self
 
     def validar(self, df: pd.DataFrame) -> dict:
@@ -113,6 +119,25 @@ class Estimador:
             "n": len(y_obs), "anos_testados": len(anos),
         }
 
+    def limitar_clima(self, clima: dict) -> tuple[dict, list[str]]:
+        """Prende cada preditor à faixa vista no treino.
+
+        Devolve o clima limitado e a lista de variáveis que precisaram ser
+        presas. Quem chama deve avisar o usuário quando a lista não for vazia:
+        ali o modelo está fora do domínio em que foi ajustado.
+        """
+        if not self.faixas:
+            return dict(clima), []
+        limitado, fora = dict(clima), []
+        for f, (menor, maior) in self.faixas.items():
+            if f not in limitado:
+                continue
+            v = float(limitado[f])
+            if v < menor or v > maior:
+                limitado[f] = menor if v < menor else maior
+                fora.append(f)
+        return limitado, fora
+
     def estimar(self, municipio: str, ano: int, clima: dict | None = None) -> dict:
         """Estimativa pontual, sempre acompanhada da margem de erro."""
         if self.modelo is None or self.df is None:
@@ -127,7 +152,9 @@ class Estimador:
             else:
                 x = hist[FEATURES].mean().values
             origem = "médias históricas do município"
+            fora_da_faixa = []
         else:
+            clima, fora_da_faixa = self.limitar_clima(clima)
             x = np.array([clima[f] for f in FEATURES], dtype=float)
             origem = "clima informado para a safra"
 
@@ -139,12 +166,36 @@ class Estimador:
             "baseline_kg_ha": base,
             "correcao_climatica_kg_ha": correcao,
             "margem_kg_ha": margem,
+            "fora_da_faixa": fora_da_faixa,
             "intervalo": (estimativa - margem, estimativa + margem),
             "origem_das_variaveis": origem,
         }
 
 
 # ---------------------------------------------- qualidade do dado oficial
+def sensibilidade_climatica(df: pd.DataFrame, variavel: str = "precip_total") -> dict:
+    """Associação entre um preditor climático e a produtividade observada.
+
+    Serve para a interface do simulador dizer o que o modelo pode prometer.
+    É calculado da base, e não fixado em código, porque a base se atualiza
+    mensalmente e um valor digitado envelheceria sem avisar.
+    """
+    from scipy import stats
+
+    x, y = df[variavel].values, df[ALVO].values
+    r, p = stats.pearsonr(x, y)
+    tercos = pd.qcut(df[variavel], 3, labels=["menor", "medio", "maior"])
+    desvio = (df[ALVO].values - _baseline(df, df["municipio"], df["ano"]))
+    por_terco = pd.Series(desvio).groupby(tercos.values, observed=True).mean()
+    return {
+        "variavel": variavel,
+        "r": float(r),
+        "p": float(p),
+        "n": int(len(df)),
+        "amplitude_kg_ha": float(por_terco.max() - por_terco.min()),
+    }
+
+
 def diagnostico_pam(df: pd.DataFrame, municipio: str) -> dict:
     """Detecta repetição de valores na série oficial de um município."""
     serie = df[df["municipio"] == municipio].sort_values("ano")

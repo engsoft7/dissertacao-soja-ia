@@ -429,7 +429,7 @@ fun AgroDashboard() {
                         }
                         3 -> { // Sobre
                             item {
-                                MetodologiaCard()
+                                MetodologiaCard(kpis)
                             }
                         }
                         1 -> { // Mapa WebView
@@ -442,9 +442,12 @@ fun AgroDashboard() {
                                     ) {
                                         Icon(Icons.Filled.WifiOff, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(64.dp))
                                         Spacer(modifier = Modifier.height(16.dp))
-                                        Text("Mapa Satélite Indisponível Offline", fontWeight = FontWeight.Bold, color = Color.Gray, fontSize = 16.sp)
+                                        // Nunca houve imagem de satélite aqui: o mapa é vetorial,
+                                        // com o contorno do Pará da malha do IBGE, rios do Natural
+                                        // Earth e círculos coloridos pela produtividade observada.
+                                        Text("Mapa indisponível offline", fontWeight = FontWeight.Bold, color = Color.Gray, fontSize = 16.sp)
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Text("Conecte-se para puxar a cartografia da API.", color = Color.Gray, fontSize = 14.sp)
+                                        Text("O mapa é desenhado pela API. Conecte-se para carregá-lo.", color = Color.Gray, fontSize = 14.sp)
                                     }
                                 } else {
                                     Card(
@@ -637,7 +640,24 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     )
                 )
             }
-            
+
+            Spacer(modifier = Modifier.height(8.dp))
+            // Onde o preço padrão está na série da praça. O usuário só consegue
+            // julgar a margem se souber de que levantamento ela nasce — e, quando
+            // esse levantamento é o piso do triênio, que ela é conservadora. Texto
+            // servido pela API para acompanhar a CONAB sem recompilar.
+            if (kpis.fonte_preco != null || kpis.nota_preco != null) {
+                Text(
+                    text = listOfNotNull(
+                        kpis.fonte_preco?.let { "Padrão: $it." },
+                        kpis.nota_preco,
+                        "Edite o preço para simular outro cenário."
+                    ).joinToString(" "),
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             val scHa = projecao.rendimento_predito / 60
@@ -687,6 +707,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
     var delta by remember { mutableStateOf(0.0) }
     var simulado by remember { mutableStateOf(baselineRendimento) }
     var isSimulating by remember { mutableStateOf(false) }
+    var resposta by remember { mutableStateOf<SimulacaoResponse?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
     val haptic = LocalHapticFeedback.current
@@ -699,6 +720,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                 val resp = RetrofitClient.getInstance().simularCenario(req)
                 simulado = resp.estimativa_kg_ha
                 delta = resp.delta_kg_ha
+                resposta = resp
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -754,12 +776,42 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                 valueRange = -2f..3f,
                 steps = 9
             )
+
+            // O simulador precisa declarar o que pode prometer. A associação
+            // entre chuva e produtividade nesta base não é distinguível de
+            // zero, e a variação que ele produz cabe dentro da margem de erro
+            // do modelo. Sem isso o usuário lê ruído como resposta agronômica.
+            resposta?.sensibilidade?.let { sens ->
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "O que este número vale: a associação entre chuva e " +
+                           "produtividade nesta base não é distinguível de zero " +
+                           "(r = ${String.format("%.3f", sens.r).replace('.', ',')}; " +
+                           "p = ${String.format("%.3f", sens.p).replace('.', ',')}; " +
+                           "n = ${sens.n})." +
+                           (resposta?.margem_kg_ha?.let {
+                               " A variação acima cabe dentro da margem de erro do " +
+                               "modelo, de ± ${it.toInt()} kg/ha."
+                           } ?: ""),
+                    fontSize = 11.sp, color = Color.Gray, lineHeight = 15.sp
+                )
+            }
+            resposta?.fora_da_faixa?.takeIf { it.isNotEmpty() }?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Cenário fora da faixa observada na base; o resultado foi " +
+                           "preso ao limite do que o modelo viu.",
+                    fontSize = 11.sp,
+                    color = if (isDark) Color(0xFFd29922) else Color(0xFF9a6700),
+                    lineHeight = 15.sp
+                )
+            }
         }
     }
 }
 
 @Composable
-fun MetodologiaCard() {
+fun MetodologiaCard(kpis: FinancaResponse?) {
     val isDark = isSystemInDarkTheme()
     Card(
         modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 24.dp),
@@ -783,8 +835,16 @@ fun MetodologiaCard() {
             Text(text = "Satélite: MODIS (Resolução 250m)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Clima: CHIRPS (Chuva) & ERA5-Land (Temp.)", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Base Territorial: MapBiomas e IBGE (PAM)", fontSize = 12.sp, color = Color.Gray)
-            Text(text = "Preço da saca: CONAB (preço recebido pelo produtor)", fontSize = 12.sp, color = Color.Gray)
-            Text(text = "Custo de produção: CONAB (levantamento de referência)", fontSize = 12.sp, color = Color.Gray)
+            // Preço e custo são constantes de um levantamento datado, não cotação
+            // diária. Sem a praça e a data o número envelhece sem avisar — por isso
+            // o rótulo vem da API, junto com a frase que diz onde o preço está na
+            // série da praça: quando a CONAB publica levantamento novo, esta tela
+            // acompanha sem recompilar o APK.
+            Text(text = "Preço e custo: " + (kpis?.fonte_preco ?: "CONAB (levantamento indisponível offline)"), fontSize = 12.sp, color = Color.Gray)
+            Text(text = "Preço de porteira, não cotação de bolsa. Ambos editáveis na tela Resumo.", fontSize = 12.sp, color = Color.Gray)
+            kpis?.nota_preco?.let {
+                Text(text = it, fontSize = 12.sp, color = Color.Gray)
+            }
             
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
             

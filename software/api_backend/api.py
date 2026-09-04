@@ -1,4 +1,6 @@
-from financas import get_financas, get_custos_locais, CUSTO_REFERENCIA_HA
+from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
+                      PRECO_RECEBIDO_CONAB_SACA, LEVANTAMENTO,
+                      descricao_do_levantamento, nota_sobre_o_preco)
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -18,7 +20,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "dashboard_web"))
 import model as M
 
 # ── Background Yahoo Finance cache ──────────────────────────────────
-_finance_cache = {"soja_preco_saca": 120.0, "usd_brl": 5.50, "ts": 0.0}
+# Guarda apenas a cotação de bolsa, usada como comparação. O preço da
+# simulação é o de porteira da CONAB, constante e definido em financas.py.
+_finance_cache = {"cbot_saca": None, "usd_brl": None, "ts": 0.0}
 _finance_lock = threading.Lock()
 
 def _refresh_finance():
@@ -37,7 +41,7 @@ def _refresh_finance():
 
         brl_price_bag = round(usd_price_bag * usd_brl, 2)
         with _finance_lock:
-            _finance_cache["soja_preco_saca"] = brl_price_bag
+            _finance_cache["cbot_saca"] = brl_price_bag
             _finance_cache["usd_brl"] = usd_brl
             _finance_cache["ts"] = time.time()
         print(f"Finance cache atualizado: R$ {brl_price_bag}/sc", flush=True)
@@ -101,7 +105,6 @@ app.add_middleware(
 @app.get("/api/financas/{municipio}")
 def get_financas(municipio: str):
     fin = _get_cached_finance()
-    brl_price_bag = fin["soja_preco_saca"]
 
     raw_municipio = REVERSE_FORMATADOS.get(municipio, municipio)
     custos = get_custos_locais(raw_municipio)
@@ -109,9 +112,19 @@ def get_financas(municipio: str):
     
     return {
         "municipio": municipio,
-        "soja_preco_saca": brl_price_bag,
+        # Preço de porteira da CONAB, da mesma praça de onde vem o custo. A
+        # cotação de Chicago vai ao lado, para comparação, e nunca como padrão.
+        "soja_preco_saca": PRECO_RECEBIDO_CONAB_SACA,
+        "soja_preco_cbot_saca": fin["cbot_saca"],
         "custo_ha": custo_ha,
         "vtn_ha": custos["vtn_ha"],
+        # Rótulo e nota vêm do servidor de propósito: quando a CONAB publica
+        # levantamento novo, o aplicativo passa a exibir a praça, a data e a
+        # posição do preço na série corretas sem recompilar o APK. Antes eram
+        # strings fixas no Kotlin, que envelheciam em silêncio.
+        "fonte_preco": descricao_do_levantamento(),
+        "nota_preco": nota_sobre_o_preco(),
+        "levantamento": LEVANTAMENTO["levantamento"],
         "ano_referencia": int(AppState.last_year) if AppState.df is not None else 2024
     }
 
@@ -148,15 +161,18 @@ def get_kpis_economia():
          raise HTTPException(status_code=503, detail="Modelo não carregado")
     
     fin = _get_cached_finance()
-    brl_price_bag = fin["soja_preco_saca"]
     # Antes: custo_ha = preço da saca * 55 * 0,65, fórmula sem origem que fazia
     # o custo variar com a cotação. Custeio de lavoura não acompanha o preço de
     # venda. Passa a usar a referência da CONAB, a mesma do painel web.
     custo_ha = CUSTO_REFERENCIA_HA
 
     return {
-         "soja_preco_saca": brl_price_bag,
+         "soja_preco_saca": PRECO_RECEBIDO_CONAB_SACA,
+         "soja_preco_cbot_saca": fin["cbot_saca"],
          "custo_ha": custo_ha,
+         "fonte_preco": descricao_do_levantamento(),
+         "nota_preco": nota_sobre_o_preco(),
+         "levantamento": LEVANTAMENTO["levantamento"],
          "ano_referencia": int(AppState.last_year)
     }
 
@@ -263,9 +279,16 @@ def _generate_map_html_cached(municipio: str, theme: str) -> str:
     latmin, latmax = pts["latitude"].min(), pts["latitude"].max()
     lonmin, lonmax = pts["longitude"].min(), pts["longitude"].max()
 
+    # Sem camada de tiles, como no painel web. As geometrias que importam — o
+    # contorno do Pará e os rios — estão versionadas no repositório. Puxar tiles
+    # do CARTO deixava o mapa do aplicativo dependendo de um terceiro em tempo
+    # de execução, contradizia a legenda do painel ("o mapa não usa camada de
+    # terceiros") e derrubava a tela inteira sem internet, num aplicativo que se
+    # anuncia de operação predominantemente offline.
+    fundo_mapa = "#12151a" if theme == "dark" else "#eef1f4"
     m = folium.Map(
         location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
-        tiles="cartodbdark_matter" if theme == "dark" else "cartodbpositron",
+        tiles=None,
         zoom_start=6,
         min_zoom=5,
         max_zoom=12,
@@ -343,7 +366,8 @@ def _generate_map_html_cached(municipio: str, theme: str) -> str:
                 width: 75%; max-width: 320px; background: {bg_color}; padding: 8px 12px; 
                 border-radius: 8px; z-index: 9999; color: {text_color}; 
                 font-family: Arial, sans-serif; font-size: 13px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-        <div style="text-align: center; margin-bottom: 5px; font-weight: bold; letter-spacing: 0.5px;">PRODUTIVIDADE (KG/HA)</div>
+        <div style="text-align: center; margin-bottom: 2px; font-weight: bold; letter-spacing: 0.5px;">PRODUTIVIDADE (KG/HA)</div>
+        <div style="text-align: center; margin-bottom: 5px; font-size: 10px; opacity: 0.75;">média observada das cinco últimas safras</div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-weight: 500;">
             <span>{int(rmin)}</span>
             <span>{int((rmin+rmax)/2)}</span>
@@ -353,6 +377,10 @@ def _generate_map_html_cached(municipio: str, theme: str) -> str:
     </div>
     '''
     m.get_root().html.add_child(folium.Element(legend_html))
+    # Sem tiles o Leaflet deixa o fundo transparente; sem isto o mapa aparece
+    # branco no tema escuro.
+    m.get_root().html.add_child(folium.Element(
+        f"<style>.leaflet-container {{ background: {fundo_mapa} !important; }}</style>"))
     
     if lat_sel is not None and lon_sel is not None:
         m.fit_bounds([[lat_sel - 0.7, lon_sel - 0.7], [lat_sel + 0.7, lon_sel + 0.7]])
@@ -378,6 +406,14 @@ class SimulacaoRequest(BaseModel):
     municipio: str
     precip_factor: float
     temp_offset: float
+
+@lru_cache(maxsize=1)
+def _sensibilidade_clima():
+    """Associação chuva-rendimento na base, calculada uma vez por processo."""
+    if AppState.df is None:
+        return None
+    return M.sensibilidade_climatica(AppState.df)
+
 
 @app.post("/api/simulacao")
 def simular_cenario(req: SimulacaoRequest):
@@ -415,7 +451,13 @@ def simular_cenario(req: SimulacaoRequest):
     clima_novo["temp_mean"] += req.temp_offset
     clima_novo["temp_max"] += req.temp_offset
     clima_novo["balanco_hidrico"] = clima_novo["precip_total"] - clima_novo["etp_total"]
-    
+
+    # A floresta aleatória não extrapola. Sem prender o cenário à faixa vista no
+    # treino, chuva zero devolvia colheita acima da média e +3 °C dava o mesmo
+    # número que +6 °C. O cenário é limitado, e a interface avisa quando isso
+    # acontece — o modelo só tem o que dizer onde ele viu dado.
+    clima_novo, fora_da_faixa = AppState.estimador.limitar_clima(clima_novo)
+
     x_sim = np.array([clima_novo[f] for f in M.FEATURES], dtype=float)
     corr_sim = float(AppState.estimador.modelo.predict(
         AppState.estimador.scaler.transform(x_sim.reshape(1, -1))
@@ -426,5 +468,11 @@ def simular_cenario(req: SimulacaoRequest):
         "municipio": req.municipio,
         "baseline_kg_ha": est_base,
         "estimativa_kg_ha": est_sim,
-        "delta_kg_ha": est_sim - est_base
+        "fora_da_faixa": fora_da_faixa,
+        "delta_kg_ha": est_sim - est_base,
+        # Para a interface poder dizer o que o cenário significa: a margem do
+        # modelo e a força da associação medida na base. Sem isso o usuário lê
+        # uma variação de dezenas de quilos como se fosse resposta agronômica.
+        "margem_kg_ha": AppState.estimador.rmse,
+        "sensibilidade": _sensibilidade_clima(),
     }

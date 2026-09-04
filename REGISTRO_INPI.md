@@ -175,7 +175,7 @@ Para conferir o estado exato de um commit ou versão, sem alterar a cópia de
 trabalho:
 
 ```bash
-git worktree add --detach /tmp/conferencia 7b8375df   # ou: v2.3.2
+git worktree add --detach /tmp/conferencia 7b8375df   # ou: v2.3.3
 cd /tmp/conferencia && <comando acima>
 ```
 
@@ -186,18 +186,32 @@ cd /tmp/conferencia && <comando acima>
 | Commit-âncora `7b8375df` (19/08/2026) — código depositado no INPI | 45 | 5.505 | `5a93dfca9511fcab534c76da4618e670e5c6ed6d33d48ac2a557963a5ef9f11d` |
 | Tag `v2.3.0` (30/08/2026) | 47 | 6.822 | `47f50a1e28486d618d8ab92e0507d984a26c0138bc863ce2c0c31cd62884c775` |
 | Tag `v2.3.1` (31/08/2026) | 47 | 6.927 | `dd2219ca6885ae934dc31fc3bc44834a2916a372f63651af1214bea7258d5ae2` |
-| Tag `v2.3.2` (03/09/2026) — versão da defesa | 49 | 7.357 | `796a300e962b1803056e3229c2db21514bc08a8d46da4d122d4133269fd77d43` |
+| Tag `v2.3.2` (03/09/2026) | 49 | 7.357 | `796a300e962b1803056e3229c2db21514bc08a8d46da4d122d4133269fd77d43` |
+| Tag `v2.3.3` (04/09/2026) — versão da defesa | 52 | 8.712 | `94bda477e2d2ac88a90f814be22108b413c97c7f22b6a8fb0ceaa4c0d8469588` |
 
-Os quatro foram recalculados a partir de cópias limpas dos respectivos commits e
-conferem em execuções repetidas. A tag da defesa é a `v2.3.2`, e é dela que sai
-o APK distribuído. As anteriores ficam registradas pelo que as separa: a
-`v2.3.0` é anterior às correções do simulador financeiro e do ranking de
-municípios; a `v2.3.1` ainda traz, na tela "Sobre" do aplicativo, um
-coeficiente de determinação de 0,963 e uma variação de 12,4% escritos
-diretamente no código, que não correspondem à validação — os valores da
-Tabela 6 são R² de 0,216 e erro relativo de 13,9%, e é o que a `v2.3.2`
-exibe. A subseção 4.9 da dissertação, que afirma serem os mesmos os números
-do produto e os da tabela, vale para a `v2.3.2`.
+Os cinco foram recalculados a partir de cópias limpas dos respectivos commits e
+conferem em execuções repetidas. A tag da defesa é a `v2.3.3`, e é dela que sai
+o APK distribuído (`versionCode` 10, `versionName` 2.1.3). As anteriores ficam
+registradas pelo que as separa:
+
+- a `v2.3.0` é anterior às correções do simulador financeiro e do ranking de
+  municípios;
+- a `v2.3.1` ainda traz, na tela "Sobre" do aplicativo, um coeficiente de
+  determinação de 0,963 e uma variação de 12,4% escritos diretamente no código,
+  que não correspondem à validação — os valores da Tabela 6 são R² de 0,216 e
+  erro relativo de 13,9%, e é o que a `v2.3.2` já exibe;
+- a `v2.3.2` corrige a tela "Sobre", mas a **API ainda serve a cotação de
+  Chicago no campo do preço recebido pelo produtor**: o painel usava o preço de
+  porteira da CONAB e o aplicativo, a cotação de bolsa convertida, de modo que
+  as duas telas do mesmo produto exibiam margens diferentes para o mesmo
+  município. A `v2.3.3` corrige isso na origem, prende o simulador climático à
+  faixa em que o modelo foi ajustado, remove a camada de mapa de terceiro, e
+  passa a ler preço e custo do levantamento da CONAB versionado em
+  `pesquisa/dados/conab/levantamento_atual.json`, com a praça, a data e a
+  posição do preço na série declaradas em tela.
+
+A subseção 4.9 da dissertação, que afirma serem os mesmos os números do produto
+e os da Tabela 6, vale da `v2.3.2` em diante.
 
 > **Sobre o agregado publicado em 19/08/2026.** A versão anterior desta seção
 > trazia `7eca3e90aadcd5d0eaa765b92a8ad7e55083f90846a78fdc1854525fffa94e6b`

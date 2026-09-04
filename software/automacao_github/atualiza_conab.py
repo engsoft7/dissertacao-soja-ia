@@ -37,8 +37,10 @@ import argparse
 import csv
 import io
 import os
+import re
 import subprocess
 import sys
+import urllib.parse
 import urllib.request
 from datetime import date
 from pathlib import Path
@@ -168,6 +170,120 @@ def aplicar(texto: str, simular: bool = False) -> tuple[str, list[str]]:
     return nome, mudancas
 
 
+# ── DESCOBERTA AUTOMÁTICA DA FONTE ───────────────────────────────────────────
+# Exigir que alguém copiasse a URL do portal e a guardasse numa variável era
+# transformar "automático" em "automático depois que um humano fizer uma coisa"
+# — e é justamente o humano que falta quando o levantamento envelhece.
+#
+# Aqui o coletor procura a fonte sozinho, em três estratégias, da mais estável
+# para a mais frágil. A rede do GitHub Actions é aberta, então isto roda lá
+# mesmo que não rode em toda máquina de desenvolvimento.
+#
+# A segurança não vem de acertar a URL: vem de identificar() recusar qualquer
+# conteúdo cujo cabeçalho não seja o de uma das quatro planilhas da CONAB. Uma
+# candidata errada é descartada, não gravada. Por isso vale tentar várias.
+CATALOGO_CKAN = "https://dados.gov.br/api/3/action/package_search"
+PORTAL_HTML = "https://portaldeinformacoes.conab.gov.br/custos-de-producao.html"
+MAX_CANDIDATAS = 12
+FORMATOS = (".csv", ".xlsx", ".xls", ".txt")
+
+
+def _links_de_html(html: str, base: str) -> list[str]:
+    """Endereços de arquivo de dados citados numa página, já absolutos.
+
+    Ignora imagem, folha de estilo e script: numa página de painéis eles são a
+    maioria dos links, e baixá-los seria varredura, não coleta.
+    """
+    achados = []
+    for bruto in re.findall(r'(?:href|src|data-url)="([^"]+)"', html, re.I):
+        endereco = urllib.parse.urljoin(base, bruto.strip())
+        caminho = urllib.parse.urlparse(endereco).path.lower()
+        # Páginas ficam de fora junto com os estáticos: a própria página de
+        # custos casa com "custo" no caminho e viraria candidata de si mesma.
+        if caminho.endswith((".png", ".jpg", ".svg", ".css", ".js", ".ico",
+                             ".html", ".htm", ".php")):
+            continue
+        if caminho.endswith(FORMATOS) or "download" in caminho or "custo" in caminho:
+            achados.append(endereco)
+    return achados
+
+
+def _candidatas_do_catalogo() -> list[str]:
+    """Recursos de dados abertos publicados pela CONAB no catálogo federal.
+
+    É a estratégia mais estável das três: um catálogo tem endereço fixo e API
+    documentada, ao contrário do endereço interno de um painel.
+    """
+    consulta = urllib.parse.urlencode(
+        {"q": "conab custos de produção", "rows": "10"})
+    try:
+        dados = json.loads(baixar(f"{CATALOGO_CKAN}?{consulta}", tempo=20))
+    except Exception as e:
+        print(f"  catálogo indisponível ({type(e).__name__}: {e})")
+        return []
+    achados = []
+    for pacote in (dados.get("result", {}) or {}).get("results", []) or []:
+        for recurso in pacote.get("resources", []) or []:
+            endereco = (recurso.get("url") or "").strip()
+            formato = (recurso.get("format") or "").lower()
+            if endereco and (formato in ("csv", "xlsx", "xls", "txt")
+                             or endereco.lower().endswith(FORMATOS)):
+                achados.append(endereco)
+    return achados
+
+
+def _candidatas_do_portal() -> list[str]:
+    """Arquivos citados na própria página de custos de produção."""
+    try:
+        return _links_de_html(baixar(PORTAL_HTML, tempo=20), PORTAL_HTML)
+    except Exception as e:
+        print(f"  portal indisponível ({type(e).__name__}: {e})")
+        return []
+
+
+def descobrir_fontes(url_fixa: str = "") -> list[str]:
+    """Candidatas a fonte, em ordem de preferência e sem repetição.
+
+    A URL explícita, quando existir, vem primeiro e sempre: quem a configurou
+    sabe mais sobre o portal do que qualquer heurística daqui.
+    """
+    ordenadas = []
+    if url_fixa:
+        ordenadas.append(url_fixa)
+    ordenadas += _candidatas_do_catalogo()
+    ordenadas += _candidatas_do_portal()
+
+    vistas, unicas = set(), []
+    for endereco in ordenadas:
+        if endereco not in vistas:
+            vistas.add(endereco)
+            unicas.append(endereco)
+    return unicas[:MAX_CANDIDATAS]
+
+
+def coletar(url_fixa: str = "") -> tuple[list[str], list[str]]:
+    """Baixa as candidatas e devolve (planilhas reconhecidas, relato)."""
+    relato, planilhas = [], []
+    candidatas = descobrir_fontes(url_fixa)
+    if not candidatas:
+        relato.append("nenhuma candidata encontrada")
+        return planilhas, relato
+    for endereco in candidatas:
+        try:
+            conteudo = baixar(endereco)
+        except Exception as e:
+            relato.append(f"{endereco} — não baixou ({type(e).__name__})")
+            continue
+        try:
+            nome, _ = identificar(conteudo)
+        except ConteudoInesperado:
+            relato.append(f"{endereco} — não é planilha da CONAB")
+            continue
+        relato.append(f"{endereco} — reconhecida como {nome}")
+        planilhas.append(conteudo)
+    return planilhas, relato
+
+
 def baixar(url: str, tempo: int = 30) -> str:
     req = urllib.request.Request(
         url, headers={"User-Agent":
@@ -240,20 +356,22 @@ def main(argv: list[str] | None = None) -> int:
     conteudos: list[str] = []
     for caminho in args.arquivo:
         conteudos.append(caminho.read_text(encoding="utf-8-sig"))
-    if args.url:
-        try:
-            conteudos.append(baixar(args.url))
-        except Exception as e:
-            print(f"::warning::não foi possível baixar {args.url}: "
-                  f"{type(e).__name__}: {e}")
-            if args.testar:
-                return 1
+    if not args.arquivo:
+        # Sem arquivo na linha de comando, o coletor procura a fonte sozinho.
+        # A URL explícita, se houver, entra como primeira candidata.
+        print("procurando a fonte dos dados...")
+        achadas, relato = coletar(args.url)
+        for linha in relato:
+            print(f"  {linha}")
+        conteudos += achadas
 
     if args.testar:
         if not conteudos:
-            print(f"::warning::nenhuma fonte configurada. Defina a variável de "
-                  f"repositório {ENV_URL} com o endereço da exportação em CSV "
-                  f"do portal, ou use --arquivo.")
+            print(f"::warning::nenhuma planilha da CONAB foi encontrada. A "
+                  f"descoberta automática tentou o catálogo de dados abertos e "
+                  f"a página do portal. Se você souber o endereço da exportação "
+                  f"em CSV, defina a variável de repositório {ENV_URL} e ele "
+                  f"será tentado primeiro; ou use --arquivo.")
             return 1
         for texto in conteudos:
             try:

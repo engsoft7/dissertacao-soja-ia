@@ -188,10 +188,11 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.1` (31/08/2026) | 47 | 6.927 | `dd2219ca6885ae934dc31fc3bc44834a2916a372f63651af1214bea7258d5ae2` |
 | Tag `v2.3.2` (03/09/2026) | 49 | 7.357 | `796a300e962b1803056e3229c2db21514bc08a8d46da4d122d4133269fd77d43` |
 | Tag `v2.3.3` (04/09/2026) | 52 | 8.956 | `dd1b118301cf246b3a7a6a3d53e19f9fc0b992607edd58ece2901aa14873db77` |
-| Tag `v2.3.4` (04/09/2026) — versão da defesa | 53 | 9.234 | `890a97644fefdeddc0321c7fd8e927c9deb2572e37a2fbecc215c66f1026d448` |
+| Tag `v2.3.4` (04/09/2026) | 53 | 9.234 | `890a97644fefdeddc0321c7fd8e927c9deb2572e37a2fbecc215c66f1026d448` |
+| Tag `v2.3.5` (04/09/2026) — versão da defesa | 53 | 9.429 | `20b7ab3b2da4632ef162805135733bc4b483b85329d1d8f3694ab4b75dcc9e5d` |
 
-Os seis foram recalculados a partir de cópias limpas dos respectivos commits e
-conferem em execuções repetidas. A tag da defesa é a `v2.3.4`, e é dela que sai
+Os sete foram recalculados a partir de cópias limpas dos respectivos commits e
+conferem em execuções repetidas. A tag da defesa é a `v2.3.5`, e é dela que sai
 o APK distribuído (`versionCode` 11, `versionName` 2.1.4). As anteriores ficam
 registradas pelo que as separa:
 

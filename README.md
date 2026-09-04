@@ -108,9 +108,11 @@ pesquisa/03_analise_nacional/
   resultados_ajustados.json               métricas da Tabela 3
 pesquisa/04_analise_para/
   01_compara_mascara_controlada.py        com/sem máscara na amostra comum → Tabela 5, Figura 5
+  02_desempenho_base_completa.py          os cinco modelos na base completa → Tabela 6
   02_gera_figuras.py
-  03_busca_hiperparametros.py             busca aninhada → Tabela 6
+  03_busca_hiperparametros.py             busca aninhada, um algoritmo por chamada
   04_gera_fig6_aninhada.py                Figura 6
+  05_natureza_da_repeticao.py             repetição na PAM → subseção 6.4
   comparacao_controlada.json              métricas da Tabela 5
   resultados_busca_aninhada.json          métricas da Tabela 6
   01_compara_mascara_e_baseline_DEPRECADO.py
@@ -240,17 +242,32 @@ reavalia o topo do ranking com 7.000 registros justamente para mostrar isso.
 ```bash
 cd pesquisa/04_analise_para
 python 01_compara_mascara_controlada.py  # Tabela 5 e Figura 5
+python 02_desempenho_base_completa.py    # Tabela 6 (cerca de 10 minutos)
 python 02_gera_figuras.py
+python 04_gera_fig6_aninhada.py          # Figura 6
+python 05_natureza_da_repeticao.py       # números da subseção 6.4
+```
 
-# a busca aninhada também recebe um alvo por vez
+`02_desempenho_base_completa.py` roda os quatro algoritmos mais o modelo de
+referência e reescreve `resultados_busca_aninhada.json`. Com `--conferir` ele
+roda igual mas não grava: compara com o que está publicado e sai com código 1 se
+alguma métrica divergir. Com `--tabela` apenas imprime a Tabela 6 já gravada,
+sem recalcular.
+
+Para buscar um algoritmo de cada vez — útil quando a busca é longa e convém
+retomá-la —, `03_busca_hiperparametros.py` recebe um alvo por chamada:
+
+```bash
 python 03_busca_hiperparametros.py baseline
-python 03_busca_hiperparametros.py "Random Forest"
+python 03_busca_hiperparametros.py "Random Forest" 9
 python 03_busca_hiperparametros.py "XGBoost"
 python 03_busca_hiperparametros.py "SVR"
 python 03_busca_hiperparametros.py "MLP"
-
-python 04_gera_fig6_aninhada.py          # Figura 6
 ```
+
+O orçamento de configurações do Random Forest é menor que o dos demais (9 contra
+15 sorteadas, além da adotada na dissertação). `02_desempenho_base_completa.py`
+guarda esses orçamentos em `ORCAMENTO`; sem eles a Tabela 6 não se reproduz.
 
 `01_compara_mascara_controlada.py` aborta com mensagem explícita se os baselines
 dos dois cenários divergirem — isso indicaria que o controle da amostra falhou e

@@ -102,14 +102,38 @@ jobs:
           python software/automacao_github/coleta_gee_safra.py --ano "${{ steps.pam.outputs.novo_ano }}"
 
       - name: Recalcula as métricas de validação do painel
+        id: metricas
         if: steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true' || steps.enso.outputs.alterado == 'true'
+        env:
+          RESUMO_MD: /tmp/resumo_pam.md
         run: |
           # Sem o pino o CI instala a versão mais recente, e a partir da 1.9 o
           # Random Forest muda de resultado com a mesma semente: a validação
           # devolveu 440,3 kg/ha contra os 415,6 do ambiente fixado. Lê o pino
           # do requirements.txt para não haver duas fontes de verdade.
           pip install --quiet "$(grep -m1 '^scikit-learn' requirements.txt)"
+          LER='import json;d=json.load(open("pesquisa/dados/metricas_validacao.json"));print("%.4f %.1f %d" % (d["r2"], d["rmse"], d["registros"]))'
+          ANTES=$(python -c "$LER")
           python software/automacao_github/gera_metricas.py
+          DEPOIS=$(python -c "$LER")
+          echo "métricas antes:  $ANTES"
+          echo "métricas depois: $DEPOIS"
+          if [ "$ANTES" = "$DEPOIS" ]; then
+            echo "mudaram=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "mudaram=true" >> "$GITHUB_OUTPUT"
+            {
+              echo ""
+              echo "> **As métricas de validação mudaram.**"
+              echo "> Antes: R² / RMSE / registros = \`$ANTES\`"
+              echo "> Depois: \`$DEPOIS\`"
+              echo ">"
+              echo "> São os números que a Tabela 6 e a subseção 4.9 da dissertação"
+              echo "> reportam, e que o painel exibe ao usuário. Este PR **não foi"
+              echo "> mergeado automaticamente**: a alteração precisa de conferência"
+              echo "> humana antes de entrar na base publicada."
+            } >> "$RESUMO_MD"
+          fi
 
       - name: Abre PR com as mudanças na base
         id: cpr
@@ -123,11 +147,14 @@ jobs:
           body-path: /tmp/resumo_pam.md
           delete-branch: true
 
-      # O PR é mergeado na hora pelo próprio robô: o ciclo é 100% automático e o
-      # PR fica como registro auditável do que mudou. Para voltar ao merge
-      # manual, remova este passo.
+      # O PR é mergeado na hora pelo próprio robô, e fica como registro
+      # auditável do que mudou. A exceção é quando a revisão do IBGE move as
+      # métricas de validação: elas são os números que a Tabela 6 e a subseção
+      # 4.9 da dissertação reportam, e um robô não deve alterar sozinho o que
+      # um documento publicado afirma. Nesse caso o PR fica aberto para
+      # conferência humana.
       - name: Mergeia o PR automaticamente
-        if: steps.cpr.outputs.pull-request-number != ''
+        if: steps.cpr.outputs.pull-request-number != '' && steps.metricas.outputs.mudaram != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

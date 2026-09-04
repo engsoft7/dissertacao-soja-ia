@@ -1379,7 +1379,29 @@ if tela_atual == "💰 Viabilidade Financeira":
     # ser nota de contexto, abaixo, com o que ele de fato é: referência fiscal.
     vtn_publicado = custos_locais["vtn_ha"]
 
-    est_sacas_ha = r_eco["estimativa_kg_ha"] / SACA_KG
+    # A produtividade também é editável, pelas mesmas razões do preço e do
+    # custo: quem usa este painel — produtor, técnico de campo — pesou a carga,
+    # e a estimativa sai da PAM, que esta própria pesquisa mostrou arredondar
+    # para sacas inteiras e travar em platôs. Calcular a margem de quem colheu
+    # 65 sacas sobre as 55 que a estatística oficial registrou não serve a
+    # ninguém. O valor do modelo continua sendo o padrão e aparece ao lado.
+    est_modelo_sc = r_eco["estimativa_kg_ha"] / SACA_KG
+    est_sacas_ha = st.number_input(
+        "Produtividade (sacas / ha)",
+        min_value=0.0,
+        value=float(round(est_modelo_sc, 1)),
+        step=1.0,
+        help="Estimativa do modelo. Se você já colheu, informe a produtividade "
+             "medida: a margem passa a ser calculada sobre ela.")
+    # Um rótulo só para todos os textos abaixo: chamar de "predita" um número
+    # que o usuário digitou é dizer que a conta é do modelo quando não é.
+    prod_e_do_usuario = abs(est_sacas_ha - est_modelo_sc) > 0.05
+    rotulo_prod = "informada" if prod_e_do_usuario else "projetada"
+    if prod_e_do_usuario:
+        st.caption(
+            f"Calculando sobre {dec(est_sacas_ha)} sc/ha, informadas por você. "
+            f"O modelo estima {dec(est_modelo_sc)} sc/ha "
+            f"({qtd(r_eco['estimativa_kg_ha'])} kg/ha).")
     receita_ha = est_sacas_ha * preco
     margem_ha = receita_ha - custo_ha
     pct_margem = f"{margem_ha / custo_ha * 100:+.0f}%" if custo_ha else "—"
@@ -1409,17 +1431,17 @@ if tela_atual == "💰 Viabilidade Financeira":
             f"<b>Resultado inconclusivo (Síntese IA):</b> a projeção central é de "
             f"{brl(margem_ha)}/ha, mas o erro típico do modelo leva o resultado de "
             f"{brl(margem_min)} a {brl(margem_max)} por hectare — a margem muda de "
-            f"sinal. Com a produtividade predita de <b>{dec(est_sacas_ha)} sc/ha</b>, "
+            f"sinal. Com a produtividade {rotulo_prod} de <b>{dec(est_sacas_ha)} sc/ha</b>, "
             f"o cenário não permite afirmar se a lavoura fecha no azul ou no "
             f"vermelho. Ajuste preço, custo ou a expectativa produtiva da fazenda "
             f"para um cenário conclusivo.")
     elif margem_ha > 0:
         if margem_ha > (custo_ha * 0.3):
-             texto_ia = f"<b>Alta Viabilidade (Síntese IA):</b> Cenário projeta lucro operacional robusto. A produtividade estimada de <b>{dec(est_sacas_ha)} sc/ha</b> assegura um faturamento de {brl(receita_ha)}/ha, cobrindo com folga o custeio de {brl(custo_ha)}, deixando uma margem excelente."
+             texto_ia = f"<b>Alta Viabilidade (Síntese IA):</b> Cenário projeta lucro operacional robusto. A produtividade {rotulo_prod} de <b>{dec(est_sacas_ha)} sc/ha</b> assegura um faturamento de {brl(receita_ha)}/ha, cobrindo com folga o custeio de {brl(custo_ha)}, deixando uma margem excelente."
         else:
-             texto_ia = f"<b>Alerta de Stress (Síntese IA):</b> A conta fecha no azul, mas a margem estreita de {brl(margem_ha)}/ha exige cautela. A produtividade predita de <b>{dec(est_sacas_ha)} sc/ha</b> não suportará solavancos climáticos intensos sem risco de prejuízo."
+             texto_ia = f"<b>Alerta de Stress (Síntese IA):</b> A conta fecha no azul, mas a margem estreita de {brl(margem_ha)}/ha exige cautela. A produtividade {rotulo_prod} de <b>{dec(est_sacas_ha)} sc/ha</b> não suportará solavancos climáticos intensos sem risco de prejuízo."
     else:
-        texto_ia = f"<b>Risco Operacional Crítico (Síntese IA):</b> Alerta Vermelho! Com a soja simulada a {brl(preco)} e custo elevado ({brl(custo_ha)}/ha), a IA prevê colapso econômico em {disp(municipio)}. A produtividade de <b>{dec(est_sacas_ha)} sc/ha</b> destruiria o capital, com perdas de {brl(abs(margem_ha))} por hectare."
+        texto_ia = f"<b>Risco Operacional Crítico (Síntese IA):</b> Alerta Vermelho! Com a soja simulada a {brl(preco)} e custo elevado ({brl(custo_ha)}/ha), a IA prevê colapso econômico em {disp(municipio)}. A produtividade {rotulo_prod} de <b>{dec(est_sacas_ha)} sc/ha</b> destruiria o capital, com perdas de {brl(abs(margem_ha))} por hectare."
 
     st.markdown(
         f'<div style="background:var(--card-bg); border:1px solid var(--card-border);'
@@ -1430,7 +1452,7 @@ if tela_atual == "💰 Viabilidade Financeira":
 
     st.markdown(f"""
     <div class="eco-grid">
-        <div class="eco-card receita" title="Produtividade projetada multiplicada pelo preço da saca.">
+        <div class="eco-card receita" title="Produtividade adotada multiplicada pelo preço da saca.">
             <div class="eco-label">Receita bruta projetada (R$/ha)</div>
             <div class="eco-value">{brl(receita_ha)}</div>
             <div class="eco-delta">{faixa_receita}</div>
@@ -1475,7 +1497,7 @@ if tela_atual == "💰 Viabilidade Financeira":
         f"/sc) ficou abaixo do custo operacional "
         f"({brl_md(CUSTO_OPERACIONAL_CONAB_SACA_REF, 2)}/sc): a lavoura apurou "
         f"{brl_md(resultado_ref)}/ha ali. O resultado positivo aqui depende de a "
-        f"produtividade projetada ({dec(est_sacas_ha)} sc/ha) superar a de "
+        f"produtividade {rotulo_prod} ({dec(est_sacas_ha)} sc/ha) superar a de "
         f"referência do levantamento ({PRODUTIVIDADE_REFERENCIA_CONAB_SC:.0f} sc/ha), "
         f"já que o custo por hectare não acompanha essa diferença.")
     if vtn_publicado is None:

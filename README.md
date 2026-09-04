@@ -348,6 +348,18 @@ Ele consulta a API do SIDRA/IBGE e:
   congelado na geração já nasceria errado no dia seguinte. É o que impede este
   produto, aberto daqui a dois anos sem ninguém ter mantido nada, de exibir o
   preço de 2026 como se fosse o de hoje.
+- **Os três números que decidem a margem são do produtor.** Produtividade,
+  preço e custeio são o que o fazendeiro, o produtor rural e o técnico que usam
+  este produto conhecem melhor que qualquer levantamento ou modelo: eles
+  pesaram a carga, receberam o pagamento e pagaram as notas. Os três são
+  editáveis no painel e no aplicativo, e o aplicativo os guarda com a data em
+  que foram informados — digitar o próprio custeio e perdê-lo ao fechar o app é
+  defeito, não economia de tela. O padrão existe para a tela abrir com algo
+  plausível, e passa a ser exibido como comparação assim que houver número do
+  produtor. A produtividade importa em especial: a estimativa sai da PAM, que
+  esta pesquisa mostrou arredondar para sacas inteiras e travar em platôs, de
+  modo que calcular a margem de quem colheu 65 sacas sobre as 55 registradas
+  não serve a ninguém.
 - **O preço é do produtor, e o aplicativo o guarda.** Custo é grandeza de
   levantamento; preço é grandeza de mercado. A CONAB publica a cada dois meses
   e o preço da soja muda todo dia, então nenhum padrão vindo de levantamento

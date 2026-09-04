@@ -896,10 +896,14 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                 if (temPreco) null else kpis.nota_preco,
                 if (temCusto) null else kpis.fonte_preco?.let { "Custo padrão: $it." },
                 // Referência que se move todo dia, contra um padrão que se move
-                // a cada dois meses. Concatenar antes de .format() deixaria
-                // dúvida sobre a qual literal o format se aplica.
-                kpis.soja_preco_paranagua_saca?.let {
-                    "Físico em Paranaguá hoje: R$ %.2f/sc — é porto, no Paraná, acima do que se recebe na porteira no Pará.".format(it)
+                // a cada dois meses. A praça vem do servidor: o corredor do
+                // Pará quando a fonte publica, um porto do Sul só quando não
+                // publica. Escrever "Paranaguá" fixo aqui era afirmar uma praça
+                // que pode não ser a exibida. Concatenar antes de .format()
+                // deixaria dúvida sobre a qual literal o format se aplica.
+                kpis.preco_fisico?.let {
+                    "Físico hoje em %s (%s), %s: R$ %.2f/sc — não é preço de porteira, entre a praça e a fazenda ainda há frete e base."
+                        .format(it.praca, it.uf, it.tipo, it.valor)
                 }
             ).joinToString(" ")
             if (legenda.isNotBlank()) {

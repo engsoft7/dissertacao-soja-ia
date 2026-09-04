@@ -1020,7 +1020,30 @@ def brl(v: float, dec: int = 0) -> str:
     return f"{'-' if negativo else ''}R$ {s}"
 
 
-PRECO_SACA_ONLINE = buscar_preco_soja_online()
+# ── COTAÇÃO FÍSICA DIÁRIA, DA PRAÇA MAIS PRÓXIMA ────────────────────────────
+# Antes era só Paranaguá — porto no Paraná, longe do que o produtor paraense
+# enfrenta. precos.py procura uma lista de praças com as do corredor do Pará
+# na frente e devolve a primeira que a fonte publicar, junto com a praça e o
+# tipo (porto, terminal, interior), porque porto não é preço de porteira.
+#
+# Importado do api_backend, que é onde o módulo vive; o painel cai na leitura
+# antiga se o import falhar, para não deixar de abrir por causa disso.
+@st.cache_data(ttl=3600)
+def buscar_cotacao_fisica() -> dict | None:
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
+        import precos
+        return precos.preferida(precos.buscar_precos())
+    except Exception as e:  # noqa: BLE001 — abrir o painel vale mais
+        print(f"[painel] cotacoes por praca indisponiveis: "
+              f"{type(e).__name__}: {e}", flush=True)
+        valor = buscar_preco_soja_online()
+        return ({"praca": "Paranaguá", "uf": "PR", "tipo": "porto", "valor": valor}
+                if valor is not None else None)
+
+
+COTACAO_FISICA = buscar_cotacao_fisica()
+PRECO_SACA_ONLINE = COTACAO_FISICA["valor"] if COTACAO_FISICA else None
 
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
@@ -1360,7 +1383,9 @@ if tela_atual == "💰 Viabilidade Financeira":
     default_preco = float(preco_referencia)
     comparacoes = []
     if PRECO_SACA_ONLINE is not None:
-        comparacoes.append(f"físico em Paranaguá hoje, {brl_md(PRECO_SACA_ONLINE, 2)}")
+        praca = (f"{COTACAO_FISICA['praca']} ({COTACAO_FISICA['uf']}), "
+                 f"{COTACAO_FISICA['tipo']}") if COTACAO_FISICA else "praça de referência"
+        comparacoes.append(f"físico hoje em {praca}, {brl_md(PRECO_SACA_ONLINE, 2)}")
     if preco_cbot:
         comparacoes.append(f"futuro em Chicago convertido, {brl_md(preco_cbot, 2)}")
     # A frase que situa o preço na série vem do levantamento gerado, não

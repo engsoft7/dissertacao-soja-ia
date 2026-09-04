@@ -34,6 +34,10 @@ on:
         description: "Testar a fonte de custos da CONAB (não altera a base)"
         type: boolean
         default: false
+      testar_precos:
+        description: "Testar as cotações físicas por praça (não altera a base)"
+        type: boolean
+        default: false
       simular:
         description: "Simular o ciclo completo: consulta as fontes e relata o que mudaria, sem abrir PR"
         type: boolean
@@ -73,6 +77,14 @@ jobs:
           pip install --quiet earthengine-api
           python software/automacao_github/coleta_gee_safra.py --testar
 
+      # Diz quais praças a fonte publica hoje. É a única forma de descobrir
+      # isso: o portal de cotações não é alcançável de todo ambiente, e a lista
+      # de praças procuradas foi escrita maior do que se espera encontrar
+      # justamente para o relatório revelar o que existe de fato.
+      - name: Testa as cotações físicas por praça
+        if: github.event_name == 'workflow_dispatch' && inputs.testar_precos
+        run: python software/api_backend/precos.py
+
       - name: Testa a fonte de custos da CONAB
         if: github.event_name == 'workflow_dispatch' && inputs.testar_conab
         env:
@@ -84,7 +96,7 @@ jobs:
       # PR na base — que é a mesma que produz os números da dissertação.
       - name: Consulta o SIDRA e aplica revisões
         id: pam
-        if: ${{ !inputs.testar_gee && !inputs.testar_conab }}
+        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos }}
         env:
           RESUMO_MD: /tmp/resumo_pam.md
         run: python software/automacao_github/atualiza_pam.py
@@ -94,7 +106,7 @@ jobs:
       # as barras do gráfico histórico, então vale manter atualizado.
       - name: Atualiza a classificação El Niño / La Niña (NOAA ONI)
         id: enso
-        if: ${{ !inputs.testar_gee && !inputs.testar_conab }}
+        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos }}
         run: |
           ANTES=$(python -c "import json;d=json.load(open('pesquisa/dados/eventos_enso.json'));print(d['el_ninos'],d['la_ninas'])" 2>/dev/null || echo "")
           python software/automacao_github/atualiza_enso.py
@@ -132,7 +144,7 @@ jobs:
       # meses tem o levantamento em uso — e o passo seguinte abre a issue.
       - name: Atualiza o levantamento de custos da CONAB
         id: conab
-        if: ${{ !inputs.testar_gee && !inputs.testar_conab }}
+        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos }}
         env:
           CONAB_CUSTOS_URL: ${{ vars.CONAB_CUSTOS_URL }}
           RESUMO_MD: /tmp/resumo_pam.md

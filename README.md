@@ -348,6 +348,18 @@ Ele consulta a API do SIDRA/IBGE e:
   congelado na geração já nasceria errado no dia seguinte. É o que impede este
   produto, aberto daqui a dois anos sem ninguém ter mantido nada, de exibir o
   preço de 2026 como se fosse o de hoje.
+- **Cotação física diária, da praça mais próxima.** O padrão vem de
+  levantamento bimestral e nunca chega em dia; a única referência diária do
+  produto é a cotação física, e ela deixou de ser só Paranaguá. O coletor
+  procura uma lista de praças com as do corredor do Pará na frente — Barcarena,
+  Miritituba, Itaituba, Santarém — e devolve a primeira que a fonte publicar,
+  com a praça e o tipo (porto, terminal, interior) junto do valor. Porto e
+  terminal **não são preço de porteira**: entre eles e a fazenda ainda há frete
+  e base, e a interface diz isso em vez de apresentar o número como o preço
+  recebido. A lista procurada é maior do que se espera encontrar de propósito:
+  o diagnóstico em **Actions → Run workflow → "Testar as cotações físicas por
+  praça"** relata todas as praças localizadas, e é assim que se descobre o que a
+  fonte de fato publica.
 - **Os três números que decidem a margem são do produtor.** Produtividade,
   preço e custeio são o que o fazendeiro, o produtor rural e o técnico que usam
   este produto conhecem melhor que qualquer levantamento ou modelo: eles

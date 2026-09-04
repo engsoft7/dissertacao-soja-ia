@@ -189,12 +189,14 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.2` (03/09/2026) | 49 | 7.357 | `796a300e962b1803056e3229c2db21514bc08a8d46da4d122d4133269fd77d43` |
 | Tag `v2.3.3` (04/09/2026) | 52 | 8.956 | `dd1b118301cf246b3a7a6a3d53e19f9fc0b992607edd58ece2901aa14873db77` |
 | Tag `v2.3.4` (04/09/2026) | 53 | 9.234 | `890a97644fefdeddc0321c7fd8e927c9deb2572e37a2fbecc215c66f1026d448` |
-| Tag `v2.3.5` (04/09/2026) — versão da defesa | 54 | 10.072 | `acf5c75d0d9c53cfc86c486e40eeea356af4eabf2096b1b7644b5249de600450` |
+| Tag `v2.3.5` (04/09/2026) | 54 | 10.072 | `acf5c75d0d9c53cfc86c486e40eeea356af4eabf2096b1b7644b5249de600450` |
+| Tag `v2.3.6` (04/09/2026) — versão da defesa | 55 | 10.252 | `d6c87068c6e4fb9bbca849f63541d2f6abb648ea8cbb75db66bfaf15677de7a5` |
 
-Os seis foram recalculados a partir de cópias limpas dos respectivos commits e
-conferem em execuções repetidas. A tag da defesa é a `v2.3.5`, e é dela que sai
-o APK distribuído (`versionCode` 13, `versionName` 2.1.6). As anteriores ficam
-registradas pelo que as separa:
+Os sete foram recalculados a partir de cópias limpas dos respectivos commits e
+conferem em execuções repetidas. A tag da defesa é a `v2.3.6`, e é da `v2.3.5`
+que sai o APK distribuído (`versionCode` 13, `versionName` 2.1.6) — a `v2.3.6`
+não altera código do aplicativo. As anteriores ficam registradas pelo que as
+separa:
 
 - a `v2.3.0` é anterior às correções do simulador financeiro e do ranking de
   municípios;
@@ -220,6 +222,14 @@ registradas pelo que as separa:
   com a data, e passa a abrir com ele; o padrão vira ponto de partida; e a API
   serve o preço físico de Paranaguá, relido de hora em hora, como a única
   referência diária do produto.
+- a `v2.3.5` prometia, no cabeçalho de `01_compara_mascara_controlada.py`, um
+  `02_desempenho_base_completa.py` que não existia: os números da Tabela 6
+  viviam só em `resultados_busca_aninhada.json`, sem script que os regerasse. A
+  `v2.3.6` acrescenta esse script e registra o que dele se reproduz — modelo de
+  referência, MLP, SVR e Random Forest saem idênticos; o XGBoost, único cujo
+  treino não vem do scikit-learn, dá R² 0,148 sob `xgboost` 3.2.0 contra os
+  0,123 publicados, por diferença de versão da biblioteca. Não altera código do
+  aplicativo, e por isso o APK distribuído continua sendo o da `v2.3.5`.
 
 A subseção 4.9 da dissertação, que afirma serem os mesmos os números do produto
 e os da Tabela 6, vale da `v2.3.2` em diante.

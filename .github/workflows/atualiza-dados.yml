@@ -11,8 +11,19 @@
 name: Atualiza base de dados (PAM/IBGE)
 
 on:
-  schedule:
-    - cron: "0 9 15 * *"
+  # AGENDAMENTO PAUSADO ATÉ A DEFESA.
+  #
+  # O ciclo roda todo dia 15 e pode trazer levantamento novo da CONAB ou
+  # revisão do IBGE. Os dois mudam números que a dissertação cita, e o produto
+  # passaria a exibir um preço diferente do que o texto descreve na véspera da
+  # apresentação. O disparo manual continua valendo (aba Actions > Run
+  # workflow), inclusive a opção "Simular o ciclo completo", que consulta as
+  # fontes e relata o que mudaria sem abrir PR.
+  #
+  # PARA RELIGAR: apague este comentário e as duas linhas comentadas abaixo,
+  # deixando `schedule:` e o `- cron:` ativos como estavam.
+  # schedule:
+  #   - cron: "0 9 15 * *"
   workflow_dispatch:
     inputs:
       testar_gee:

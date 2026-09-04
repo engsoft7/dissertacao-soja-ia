@@ -360,6 +360,16 @@ Ele consulta a API do SIDRA/IBGE e:
   o diagnóstico em **Actions → Run workflow → "Testar as cotações físicas por
   praça"** relata todas as praças localizadas, e é assim que se descobre o que a
   fonte de fato publica.
+
+  O primeiro diagnóstico real, em 04/09/2026, encontrou quatro praças e
+  **nenhuma do Pará**: Sorriso (MT) a R$ 134,80, Rondonópolis (MT) a R$ 145,30,
+  Paranaguá (PR) a R$ 162,00 e Rio Grande (RS) a R$ 161,00. Adotou-se Sorriso,
+  a de interior mais bem posicionada na lista. O achado que importa é a
+  distância para o padrão do produto: o levantamento da CONAB de março de 2026
+  traz R$ 105,09, **28% abaixo** do interior do Centro-Oeste no mesmo dia — o
+  que, numa lavoura de 55,3 sc/ha, são R$ 1.643 por hectare de diferença. É a
+  medida concreta do que significa um preço de levantamento com seis meses, e a
+  razão de o produto avisar a idade em tela e pedir o preço do produtor.
 - **Os três números que decidem a margem são do produtor.** Produtividade,
   preço e custeio são o que o fazendeiro, o produtor rural e o técnico que usam
   este produto conhecem melhor que qualquer levantamento ou modelo: eles

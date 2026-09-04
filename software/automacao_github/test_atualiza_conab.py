@@ -187,3 +187,35 @@ def test_fonte_fora_do_ar_nao_derruba_a_coleta(monkeypatch):
     achadas, relato = coletor.coletar()
     assert len(achadas) == 1
     assert any("não baixou" in l for l in relato)
+
+def test_nenhum_modulo_usado_sem_import():
+    """Módulo usado por nome e não importado só estoura quando aquela linha roda.
+
+    Foi assim que a descoberta pelo catálogo de dados abertos falhou no primeiro
+    disparo real: json.loads no meio de um caminho de rede que nenhum teste
+    alcança, sem o import correspondente. O interpretador não avisa antes; esta
+    checagem estática avisa.
+    """
+    import ast
+    import sys as _sys
+
+    scripts = sorted((RAIZ / "software" / "automacao_github").glob("*.py"))
+    scripts += [RAIZ / "software" / "api_backend" / "precos.py",
+                RAIZ / "software" / "api_backend" / "financas.py",
+                RAIZ / "software" / "api_backend" / "api.py"]
+    problemas = {}
+    for arquivo in scripts:
+        arvore = ast.parse(arquivo.read_text(encoding="utf-8"), filename=str(arquivo))
+        importados = set()
+        for no in ast.walk(arvore):
+            if isinstance(no, ast.Import):
+                importados |= {a.asname or a.name.split(".")[0] for a in no.names}
+            elif isinstance(no, ast.ImportFrom):
+                importados |= {a.asname or a.name for a in no.names}
+        usados = {n.value.id for n in ast.walk(arvore)
+                  if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)}
+        faltando = sorted(u for u in usados
+                          if u in _sys.stdlib_module_names and u not in importados)
+        if faltando:
+            problemas[arquivo.name] = faltando
+    assert not problemas, f"módulos usados sem import: {problemas}"

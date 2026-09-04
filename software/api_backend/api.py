@@ -2,7 +2,7 @@ from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
                       PRECO_RECEBIDO_CONAB_SACA, LEVANTAMENTO,
                       descricao_do_levantamento, nota_sobre_o_preco,
                       aviso_de_defasagem, meses_desde_o_levantamento,
-                      buscar_preco_paranagua, aviso_sobre_o_custo)
+                      buscar_cotacoes, aviso_sobre_o_custo)
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -57,12 +57,19 @@ def _refresh_finance():
     # levantamento bimestral e sempre chegará com semanas de atraso; sem uma
     # referência que se mova, o usuário não tem como julgar se o padrão ainda
     # vale. Não substitui o preço de porteira: é porto, no Paraná.
-    preco_pgua = buscar_preco_paranagua()
-    if preco_pgua is not None:
+    cotacoes = buscar_cotacoes()
+    if cotacoes:
         with _finance_lock:
-            _finance_cache["paranagua_saca"] = preco_pgua
-            _finance_cache["paranagua_ts"] = time.time()
-        print(f"Físico em Paranaguá: R$ {preco_pgua}/sc", flush=True)
+            _finance_cache["cotacoes"] = cotacoes
+            # A primeira é a de praça mais próxima do usuário do produto: o
+            # corredor do Pará vem antes dos portos do Sul na lista de busca.
+            _finance_cache["fisico"] = cotacoes[0]
+            # Mantido para o APK já instalado, que só conhece este campo.
+            _finance_cache["paranagua_saca"] = next(
+                (c["valor"] for c in cotacoes if c["praca"] == "Paranaguá"), None)
+            _finance_cache["cotacoes_ts"] = time.time()
+        print("Cotações físicas: " + ", ".join(
+            f"{c['praca']}/{c['uf']} R$ {c['valor']:.2f}" for c in cotacoes), flush=True)
 
 def _get_cached_finance():
     """Return cached finance data; refresh in background if stale (>15 min)."""
@@ -133,6 +140,13 @@ def get_financas(municipio: str):
         "soja_preco_saca": PRECO_RECEBIDO_CONAB_SACA,
         "soja_preco_cbot_saca": fin["cbot_saca"],
         "soja_preco_paranagua_saca": fin.get("paranagua_saca"),
+        # Cotação física diária da praça mais próxima do usuário, e a lista
+        # inteira do que a fonte publicou. É a única referência diária do
+        # produto: o padrão vem de levantamento bimestral. Porto e terminal
+        # não são preço de porteira — daí a praça e o tipo virem junto, para
+        # a tela dizer de onde o número veio.
+        "preco_fisico": fin.get("fisico"),
+        "precos_fisicos": fin.get("cotacoes") or [],
         "custo_ha": custo_ha,
         # Componentes do custo, para a interface poder mostrar quanto o
         # resultado depende do rateio. A CONAB publica só os totais por
@@ -205,6 +219,13 @@ def get_kpis_economia():
          "soja_preco_saca": PRECO_RECEBIDO_CONAB_SACA,
          "soja_preco_cbot_saca": fin["cbot_saca"],
          "soja_preco_paranagua_saca": fin.get("paranagua_saca"),
+         # Cotação física diária da praça mais próxima do usuário, e a lista
+         # inteira do que a fonte publicou. É a única referência diária do
+         # produto: o padrão vem de levantamento bimestral. Porto e terminal
+         # não são preço de porteira — daí a praça e o tipo virem junto, para
+         # a tela dizer de onde o número veio.
+         "preco_fisico": fin.get("fisico"),
+         "precos_fisicos": fin.get("cotacoes") or [],
          "custo_ha": custo_ha,
          # Componentes do custo, para a interface poder mostrar quanto o
          # resultado depende do rateio. A CONAB publica só os totais por

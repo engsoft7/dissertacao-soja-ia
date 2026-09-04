@@ -87,3 +87,63 @@ def test_rotulo_ilegivel_nao_derruba_o_aviso(monkeypatch):
     assert financas.meses_desde_o_levantamento() is None
     assert financas.aviso_de_defasagem() is None
     assert financas.aviso_sobre_o_custo() is None
+
+# ── cotações por praça ───────────────────────────────────────────────────────
+
+import precos  # noqa: E402
+
+PAGINA = """
+<table>
+<tr><td>Paranaguá</td><td>-2,15</td><td>1.250.000,00</td><td>131,50</td></tr>
+<tr><td>Barcarena</td><td>+1,05</td><td>118,40</td></tr>
+<tr><td>Sorriso</td><td>112,00</td></tr>
+<tr><td>Santarém</td><td>sem negócio</td></tr>
+<tr><td>Rondonópolis</td><td>0,00</td></tr>
+</table>
+"""
+
+
+def test_praca_do_para_vem_antes_do_porto_do_sul():
+    """O produtor paraense não recebe o preço de Paranaguá. Entre uma cotação
+    do corredor do Pará e uma do Paraná, a do Pará é a que importa."""
+    achados = precos.extrair_precos(PAGINA)
+    assert precos.preferida(achados)["praca"] == "Barcarena"
+    nomes = [a["praca"] for a in achados]
+    assert nomes.index("Barcarena") < nomes.index("Paranaguá")
+
+
+def test_ignora_variacao_e_volume_da_mesma_linha():
+    """Na linha de Paranaguá há -2,15 e 1.250.000,00 antes da cotação."""
+    achados = {a["praca"]: a["valor"] for a in precos.extrair_precos(PAGINA)}
+    assert achados["Paranaguá"] == 131.50
+    assert achados["Barcarena"] == 118.40
+
+
+def test_praca_sem_numero_plausivel_fica_de_fora():
+    """Melhor não ter cotação do que publicar a coluna errada. Santarém aparece
+    na página sem preço, e Rondonópolis só com 0,00."""
+    achados = {a["praca"] for a in precos.extrair_precos(PAGINA)}
+    assert "Santarém" not in achados
+    assert "Rondonópolis" not in achados
+
+
+def test_pagina_sem_pracas_conhecidas():
+    assert precos.extrair_precos("<html>fora do ar</html>") == []
+    assert precos.preferida([]) is None
+
+
+def test_falha_de_rede_devolve_lista_vazia(monkeypatch):
+    """Nunca valor de reserva: número inventado exibido como cotação do dia é
+    pior que cotação nenhuma."""
+    def cai(*_a, **_k):
+        raise OSError("sem rede")
+
+    monkeypatch.setattr(precos.urllib.request, "urlopen", cai)
+    assert precos.buscar_precos() == []
+
+
+def test_descricao_diz_praca_uf_e_tipo():
+    """A tela precisa dizer de onde veio o número: porto e terminal não são
+    preço de porteira."""
+    achado = precos.preferida(precos.extrair_precos(PAGINA))
+    assert precos.descricao(achado) == "Barcarena (PA), porto"

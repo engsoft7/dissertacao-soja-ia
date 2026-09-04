@@ -270,7 +270,12 @@ def test_requisitos_declaram_o_que_financas_importa():
         else:
             continue
         for m in modulos:
-            if m not in sys.stdlib_module_names and m.lower() not in declarados:
+            # Módulo vizinho no mesmo diretório não é dependência a declarar:
+            # viaja junto com o próprio arquivo. É o caso de precos.py, que
+            # financas.py importa.
+            local = (FINANCAS.parent / f"{m}.py").exists()
+            if (m not in sys.stdlib_module_names and not local
+                    and m.lower() not in declarados):
                 faltando.append(m)
     assert not faltando, f"ausentes em dashboard_web/requirements.txt: {faltando}"
 

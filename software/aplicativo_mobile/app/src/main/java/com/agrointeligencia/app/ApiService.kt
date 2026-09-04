@@ -24,6 +24,18 @@ data class PrevisaoResponse(
 )
 
 
+/**
+ * Cotação física do dia numa praça. Porto e terminal não são preço de
+ * porteira: entre eles e a fazenda ainda há frete e base. A praça e o tipo
+ * viajam junto com o valor para a tela poder dizer de onde o número veio.
+ */
+data class CotacaoFisica(
+    val praca: String,
+    val uf: String,
+    val tipo: String,
+    val valor: Double
+)
+
 data class FinancaResponse(
     val soja_preco_saca: Double,
     val custo_ha: Double,
@@ -68,6 +80,10 @@ data class FinancaResponse(
     val custo_variavel_saca: Double? = null,
     val custo_fixo_ha: Double? = null,
     val produtividade_referencia_sc: Double? = null,
+    // Cotação diária da praça mais próxima do usuário. O corredor do Pará vem
+    // antes dos portos do Sul na busca; nulo quando a fonte não responde, e
+    // nunca um valor de reserva.
+    val preco_fisico: CotacaoFisica? = null,
     val ano_referencia: Int
 )
 
@@ -85,6 +101,10 @@ data class KpiEconomiaResponse(
     val custo_variavel_saca: Double? = null,
     val custo_fixo_ha: Double? = null,
     val produtividade_referencia_sc: Double? = null,
+    // Cotação diária da praça mais próxima do usuário. O corredor do Pará vem
+    // antes dos portos do Sul na busca; nulo quando a fonte não responde, e
+    // nunca um valor de reserva.
+    val preco_fisico: CotacaoFisica? = null,
     val ano_referencia: Int
 )
 

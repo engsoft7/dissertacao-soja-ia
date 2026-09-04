@@ -189,11 +189,11 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.2` (03/09/2026) | 49 | 7.357 | `796a300e962b1803056e3229c2db21514bc08a8d46da4d122d4133269fd77d43` |
 | Tag `v2.3.3` (04/09/2026) | 52 | 8.956 | `dd1b118301cf246b3a7a6a3d53e19f9fc0b992607edd58ece2901aa14873db77` |
 | Tag `v2.3.4` (04/09/2026) | 53 | 9.234 | `890a97644fefdeddc0321c7fd8e927c9deb2572e37a2fbecc215c66f1026d448` |
-| Tag `v2.3.5` (04/09/2026) — versão da defesa | 53 | 9.761 | `7bc3e0596e42fc1591423700af1066994123b62785a12becc73436167767404c` |
+| Tag `v2.3.5` (04/09/2026) — versão da defesa | 54 | 10.025 | `dcdc0ebc3b9a5dad632432b718de9b44224ab353b9f5bdd49a30bb50a7f9be16` |
 
 Os seis foram recalculados a partir de cópias limpas dos respectivos commits e
 conferem em execuções repetidas. A tag da defesa é a `v2.3.5`, e é dela que sai
-o APK distribuído (`versionCode` 12, `versionName` 2.1.5). As anteriores ficam
+o APK distribuído (`versionCode` 13, `versionName` 2.1.6). As anteriores ficam
 registradas pelo que as separa:
 
 - a `v2.3.0` é anterior às correções do simulador financeiro e do ranking de

@@ -6,6 +6,8 @@ from pathlib import Path
 
 import requests
 
+import precos
+
 REV_MUNICIPIOS = {
     "Goianesia Do Para": "GOIANESIA DO PARA",
     "Dom Eliseu": "DOM ELISEU",
@@ -172,41 +174,33 @@ PRECO_SACA_MIN, PRECO_SACA_MAX = 60.0, 400.0
 
 
 def extrair_preco_paranagua(html: str) -> float | None:
-    """Tira da página o preço físico da saca em Paranaguá.
+    """Só a cotação de Paranaguá, para quem já dependia deste nome.
 
-    A tabela da fonte muda de formato de tempos em tempos, então em vez de
-    confiar numa posição fixa de coluna, varre as células da linha e aceita o
-    primeiro número que se pareça com preço em reais e caia na faixa
-    plausível. Assim uma coluna de variação ("-2,15") ou um total em milhares
-    não entram no lugar da cotação.
+    A leitura de verdade mora em precos.py, que procura uma lista de praças
+    com as do corredor do Pará na frente. Esta função continua existindo
+    porque o painel e os testes a chamam pelo nome.
     """
-    for achado_nome in re.finditer("Paranaguá", html, re.IGNORECASE):
-        linha = html[achado_nome.end():achado_nome.end() + 800].split("</tr>")[0]
-        for celula in re.findall(r"<td[^>]*>(.*?)</td>", linha, re.DOTALL):
-            texto = re.sub(r"<[^>]+>", " ", celula)
-            for numero in re.findall(r"\d{1,3}(?:\.\d{3})*,\d{2}", texto):
-                valor = float(numero.replace(".", "").replace(",", "."))
-                if PRECO_SACA_MIN <= valor <= PRECO_SACA_MAX:
-                    return valor
+    for achado in precos.extrair_precos(html):
+        if achado["praca"] == "Paranaguá":
+            return achado["valor"]
     return None
 
 
 def buscar_preco_paranagua() -> float | None:
-    """Preço físico da saca em Paranaguá, ou None.
+    """Preço físico em Paranaguá, ou None. Ver extrair_preco_paranagua."""
+    for achado in precos.buscar_precos():
+        if achado["praca"] == "Paranaguá":
+            return achado["valor"]
+    return None
 
-    None, e nunca um valor de reserva: exibir um número inventado como se
-    fosse cotação do dia é pior que não exibir cotação nenhuma.
+
+def buscar_cotacoes() -> list[dict]:
+    """Todas as praças reconhecidas na fonte, na ordem de preferência.
+
+    A primeira é a mais próxima da realidade de quem usa o produto: o corredor
+    do Pará antes dos portos do Sul. Lista vazia quando a fonte não responde.
     """
-    try:
-        req = urllib.request.Request(
-            PARANAGUA_URL,
-            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
-        html = urllib.request.urlopen(req, timeout=8).read().decode("utf-8")
-    except Exception as e:
-        print(f"[financas] preco de Paranagua indisponivel: "
-              f"{type(e).__name__}: {e}", flush=True)
-        return None
-    return extrair_preco_paranagua(html)
+    return precos.buscar_precos()
 
 
 # ── IDADE DO LEVANTAMENTO ────────────────────────────────────────────────────

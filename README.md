@@ -269,6 +269,21 @@ O orçamento de configurações do Random Forest é menor que o dos demais (9 co
 15 sorteadas, além da adotada na dissertação). `02_desempenho_base_completa.py`
 guarda esses orçamentos em `ORCAMENTO`; sem eles a Tabela 6 não se reproduz.
 
+**O que reproduz e o que não reproduz.** Modelo de referência, MLP, SVR e Random
+Forest saem idênticos aos da Tabela 6, até a configuração modal e a frequência
+com que ela foi eleita. O XGBoost, não: sob `xgboost` 3.2.0 a busca interna
+elege outra configuração e o resultado sai 433,2 / 310,6 / R² 0,148, contra os
+439,5 / 314,5 / 0,123 publicados. É o único dos quatro cujo treino não vem do
+scikit-learn, e a tabela foi gerada com uma versão anterior da biblioteca.
+
+A diferença é de ambiente, e não de código ou de semente: as dezesseis
+candidatas sorteadas são as mesmas, e três execuções seguidas — uma delas com a
+máquina disputada por outro processo — devolveram 433,2 / 310,6 / 0,148 sem
+variar um decimal. O ordenamento dos modelos não muda, e a conclusão do
+Capítulo 6 tampouco: em qualquer das duas leituras o XGBoost é o pior dos quatro
+e fica bem abaixo do modelo de referência (R² 0,216). Quem rodar hoje e obtiver
+0,148 onde o texto traz 0,123 está vendo isto, e `--conferir` diz isso na tela.
+
 `01_compara_mascara_controlada.py` aborta com mensagem explícita se os baselines
 dos dois cenários divergirem — isso indicaria que o controle da amostra falhou e
 que o resultado não deve ser publicado.

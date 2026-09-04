@@ -1,7 +1,8 @@
 from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
                       PRECO_RECEBIDO_CONAB_SACA, LEVANTAMENTO,
                       descricao_do_levantamento, nota_sobre_o_preco,
-                      aviso_de_defasagem, meses_desde_o_levantamento)
+                      aviso_de_defasagem, meses_desde_o_levantamento,
+                      buscar_preco_paranagua, aviso_sobre_o_custo)
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -48,6 +49,20 @@ def _refresh_finance():
         print(f"Finance cache atualizado: R$ {brl_price_bag}/sc", flush=True)
     except Exception as e:
         print(f"Finance refresh erro (usando cache): {e}", flush=True)
+
+    # Em bloco próprio: se o Yahoo cair, o físico de Paranaguá ainda deve ser
+    # buscado. Era tudo num try só, e uma fonte fora do ar levava a outra junto.
+    #
+    # Esta é a única cotação DIÁRIA que o produto tem. O padrão vem de um
+    # levantamento bimestral e sempre chegará com semanas de atraso; sem uma
+    # referência que se mova, o usuário não tem como julgar se o padrão ainda
+    # vale. Não substitui o preço de porteira: é porto, no Paraná.
+    preco_pgua = buscar_preco_paranagua()
+    if preco_pgua is not None:
+        with _finance_lock:
+            _finance_cache["paranagua_saca"] = preco_pgua
+            _finance_cache["paranagua_ts"] = time.time()
+        print(f"Físico em Paranaguá: R$ {preco_pgua}/sc", flush=True)
 
 def _get_cached_finance():
     """Return cached finance data; refresh in background if stale (>15 min)."""
@@ -117,6 +132,7 @@ def get_financas(municipio: str):
         # cotação de Chicago vai ao lado, para comparação, e nunca como padrão.
         "soja_preco_saca": PRECO_RECEBIDO_CONAB_SACA,
         "soja_preco_cbot_saca": fin["cbot_saca"],
+        "soja_preco_paranagua_saca": fin.get("paranagua_saca"),
         "custo_ha": custo_ha,
         "vtn_ha": custos["vtn_ha"],
         # Rótulo e nota vêm do servidor de propósito: quando a CONAB publica
@@ -132,6 +148,7 @@ def get_financas(municipio: str):
         # fosse o de agora.
         "defasagem_meses": meses_desde_o_levantamento(),
         "aviso_preco": aviso_de_defasagem(),
+        "aviso_custo": aviso_sobre_o_custo(),
         "ano_referencia": int(AppState.last_year) if AppState.df is not None else 2024
     }
 
@@ -176,12 +193,14 @@ def get_kpis_economia():
     return {
          "soja_preco_saca": PRECO_RECEBIDO_CONAB_SACA,
          "soja_preco_cbot_saca": fin["cbot_saca"],
+         "soja_preco_paranagua_saca": fin.get("paranagua_saca"),
          "custo_ha": custo_ha,
          "fonte_preco": descricao_do_levantamento(),
          "nota_preco": nota_sobre_o_preco(),
          "levantamento": LEVANTAMENTO["levantamento"],
          "defasagem_meses": meses_desde_o_levantamento(),
          "aviso_preco": aviso_de_defasagem(),
+         "aviso_custo": aviso_sobre_o_custo(),
          "ano_referencia": int(AppState.last_year)
     }
 

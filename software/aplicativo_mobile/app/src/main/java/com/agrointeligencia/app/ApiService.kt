@@ -45,6 +45,15 @@ data class FinancaResponse(
     // para o alerta acompanhar o tempo sem depender de um APK novo.
     val defasagem_meses: Int? = null,
     val aviso_preco: String? = null,
+    // A mesma idade, dita do lado do custo: quando o produtor informa o próprio
+    // preço, o aviso do preço perde sentido, mas o custo continua saindo do
+    // levantamento velho e entrando na margem do mesmo jeito.
+    val aviso_custo: String? = null,
+    // Físico em Paranaguá, relido de hora em hora. É a única cotação DIÁRIA do
+    // produto: o padrão vem de levantamento bimestral e sempre chega com
+    // semanas de atraso. Não substitui o preço de porteira — é porto, no
+    // Paraná, acima do que se recebe no Pará.
+    val soja_preco_paranagua_saca: Double? = null,
     // Cotação de bolsa, só para comparação. Nunca entra em receita nem em
     // margem: é preço de Chicago, acima do que se recebe na porteira no Pará.
     // Antes o campo nem existia aqui, e o painel mostrava a comparação
@@ -61,6 +70,8 @@ data class KpiEconomiaResponse(
     val levantamento: String? = null,
     val defasagem_meses: Int? = null,
     val aviso_preco: String? = null,
+    val aviso_custo: String? = null,
+    val soja_preco_paranagua_saca: Double? = null,
     val soja_preco_cbot_saca: Double? = null,
     val ano_referencia: Int
 )

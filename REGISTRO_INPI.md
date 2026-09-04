@@ -187,11 +187,12 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.0` (30/08/2026) | 47 | 6.822 | `47f50a1e28486d618d8ab92e0507d984a26c0138bc863ce2c0c31cd62884c775` |
 | Tag `v2.3.1` (31/08/2026) | 47 | 6.927 | `dd2219ca6885ae934dc31fc3bc44834a2916a372f63651af1214bea7258d5ae2` |
 | Tag `v2.3.2` (03/09/2026) | 49 | 7.357 | `796a300e962b1803056e3229c2db21514bc08a8d46da4d122d4133269fd77d43` |
-| Tag `v2.3.3` (04/09/2026) — versão da defesa | 52 | 8.956 | `dd1b118301cf246b3a7a6a3d53e19f9fc0b992607edd58ece2901aa14873db77` |
+| Tag `v2.3.3` (04/09/2026) | 52 | 8.956 | `dd1b118301cf246b3a7a6a3d53e19f9fc0b992607edd58ece2901aa14873db77` |
+| Tag `v2.3.4` (04/09/2026) — versão da defesa | 53 | 9.234 | `890a97644fefdeddc0321c7fd8e927c9deb2572e37a2fbecc215c66f1026d448` |
 
-Os cinco foram recalculados a partir de cópias limpas dos respectivos commits e
-conferem em execuções repetidas. A tag da defesa é a `v2.3.3`, e é dela que sai
-o APK distribuído (`versionCode` 10, `versionName` 2.1.3). As anteriores ficam
+Os seis foram recalculados a partir de cópias limpas dos respectivos commits e
+conferem em execuções repetidas. A tag da defesa é a `v2.3.4`, e é dela que sai
+o APK distribuído (`versionCode` 11, `versionName` 2.1.4). As anteriores ficam
 registradas pelo que as separa:
 
 - a `v2.3.0` é anterior às correções do simulador financeiro e do ranking de
@@ -211,7 +212,13 @@ registradas pelo que as separa:
   posição do preço na série declaradas em tela. O painel e o aplicativo também
   calculam, a cada leitura, a idade do levantamento em uso, e avisam quando ele
   passa da cadência de publicação da CONAB — de modo que o produto deixa de
-  poder exibir um preço antigo como se fosse o corrente.
+  poder exibir um preço antigo como se fosse o corrente;
+- a `v2.3.3` avisa que o preço envelheceu, mas ainda abre com o padrão da CONAB
+  como se um levantamento bimestral pudesse acompanhar um preço diário. A
+  `v2.3.4` inverte isso: o aplicativo guarda o preço informado pelo produtor,
+  com a data, e passa a abrir com ele; o padrão vira ponto de partida; e a API
+  serve o preço físico de Paranaguá, relido de hora em hora, como a única
+  referência diária do produto.
 
 A subseção 4.9 da dissertação, que afirma serem os mesmos os números do produto
 e os da Tabela 6, vale da `v2.3.2` em diante.

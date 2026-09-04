@@ -1,4 +1,6 @@
 import json
+import re
+import urllib.request
 from datetime import date
 from pathlib import Path
 
@@ -152,6 +154,61 @@ CUSTO_OPERACIONAL_CONAB_SACA = LEVANTAMENTO["custo_operacional_saca"]
 PRODUTIVIDADE_REFERENCIA_SC = LEVANTAMENTO["produtividade_referencia_sc_ha"]
 
 
+# ── PREÇO FÍSICO DO DIA, PARA O USUÁRIO SE SITUAR ────────────────────────────
+# O levantamento da CONAB é bimestral, e preço de soja é diário. Nenhuma
+# automação resolve isso: um número de levantamento sempre vai chegar velho ao
+# usuário, por melhor que seja a coleta. Custo é grandeza de levantamento;
+# preço é grandeza de mercado, e trocar uma pela outra é o erro de fundo.
+#
+# Então o produto passa a mostrar, ao lado do padrão, uma referência que se
+# move todo dia: o físico em Paranaguá. NÃO é o preço do produtor no Pará — é
+# porto no Paraná, e fica acima do que se recebe aqui, descontados frete e
+# base. Serve para o usuário julgar se o padrão ainda faz sentido e corrigir o
+# campo, que é o caminho certo de qualquer forma.
+#
+# O painel já lia esta fonte; o aplicativo não tinha nada equivalente.
+PARANAGUA_URL = "https://www.noticiasagricolas.com.br/cotacoes/soja/"
+PRECO_SACA_MIN, PRECO_SACA_MAX = 60.0, 400.0
+
+
+def extrair_preco_paranagua(html: str) -> float | None:
+    """Tira da página o preço físico da saca em Paranaguá.
+
+    A tabela da fonte muda de formato de tempos em tempos, então em vez de
+    confiar numa posição fixa de coluna, varre as células da linha e aceita o
+    primeiro número que se pareça com preço em reais e caia na faixa
+    plausível. Assim uma coluna de variação ("-2,15") ou um total em milhares
+    não entram no lugar da cotação.
+    """
+    for achado_nome in re.finditer("Paranaguá", html, re.IGNORECASE):
+        linha = html[achado_nome.end():achado_nome.end() + 800].split("</tr>")[0]
+        for celula in re.findall(r"<td[^>]*>(.*?)</td>", linha, re.DOTALL):
+            texto = re.sub(r"<[^>]+>", " ", celula)
+            for numero in re.findall(r"\d{1,3}(?:\.\d{3})*,\d{2}", texto):
+                valor = float(numero.replace(".", "").replace(",", "."))
+                if PRECO_SACA_MIN <= valor <= PRECO_SACA_MAX:
+                    return valor
+    return None
+
+
+def buscar_preco_paranagua() -> float | None:
+    """Preço físico da saca em Paranaguá, ou None.
+
+    None, e nunca um valor de reserva: exibir um número inventado como se
+    fosse cotação do dia é pior que não exibir cotação nenhuma.
+    """
+    try:
+        req = urllib.request.Request(
+            PARANAGUA_URL,
+            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+        html = urllib.request.urlopen(req, timeout=8).read().decode("utf-8")
+    except Exception as e:
+        print(f"[financas] preco de Paranagua indisponivel: "
+              f"{type(e).__name__}: {e}", flush=True)
+        return None
+    return extrair_preco_paranagua(html)
+
+
 # ── IDADE DO LEVANTAMENTO ────────────────────────────────────────────────────
 # A pergunta que este bloco responde: se alguém abrir este produto daqui a dois
 # anos, ele vai exibir o preço de 2026 como se fosse o de hoje?
@@ -203,6 +260,23 @@ def aviso_de_defasagem(hoje: date | None = None) -> str | None:
     return (f"Este levantamento é de {quando}, há {meses} meses ({tempo}). "
             f"Trate o preço como referência histórica, não como cotação atual, "
             f"e edite o campo com o preço que você recebe hoje.")
+
+
+def aviso_sobre_o_custo(hoje: date | None = None) -> str | None:
+    """Mesma idade, dita do lado do custo.
+
+    Quando o usuário informa o próprio preço, o aviso do preço deixa de fazer
+    sentido — mas o CUSTO continua saindo do mesmo levantamento envelhecido, e
+    entra na margem do mesmo jeito. Sem esta frase, informar o preço próprio
+    faria o produto parecer atualizado quando metade da conta não está.
+    """
+    meses = meses_desde_o_levantamento(hoje)
+    if meses is None or meses < MESES_PARA_AVISAR:
+        return None
+    quando = LEVANTAMENTO.get("levantamento_extenso", "data desconhecida")
+    return (f"O custo continua vindo do levantamento de {quando}, há {meses} "
+            f"meses. Se o seu custeio mudou desde então, edite também o campo "
+            f"de custo.")
 
 
 def descricao_do_levantamento() -> str:

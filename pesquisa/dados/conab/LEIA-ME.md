@@ -109,3 +109,19 @@ o levantamento da data corrente:
 A idade nunca é gravada no JSON: um número congelado na geração começaria
 errado no dia seguinte. A frase é montada em `financas.aviso_de_defasagem` e
 servida pela API, para o aplicativo acompanhar sem recompilar.
+
+## O limite que a automação não resolve
+
+Custo de produção é grandeza de levantamento: fertilizante, semente e operações
+não mudam de um dia para o outro, e um levantamento bimestral descreve isso bem.
+**Preço não.** O preço da soja muda todo dia, e nenhuma coleta, por melhor que
+seja, faz um número bimestral chegar em dia ao produtor.
+
+Por isso o preço da CONAB é tratado como ponto de partida, e não como resposta:
+
+- o aplicativo guarda o preço que o produtor informa, com a data, e passa a
+  abrir com ele;
+- o físico em Paranaguá (Notícias Agrícolas), relido de hora em hora, aparece
+  ao lado como a única referência diária do produto — é porto, no Paraná, acima
+  do que se recebe no Pará;
+- o custo segue vindo daqui, que é onde a CONAB é a fonte certa.

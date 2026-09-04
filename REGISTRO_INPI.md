@@ -187,7 +187,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.0` (30/08/2026) | 47 | 6.822 | `47f50a1e28486d618d8ab92e0507d984a26c0138bc863ce2c0c31cd62884c775` |
 | Tag `v2.3.1` (31/08/2026) | 47 | 6.927 | `dd2219ca6885ae934dc31fc3bc44834a2916a372f63651af1214bea7258d5ae2` |
 | Tag `v2.3.2` (03/09/2026) | 49 | 7.357 | `796a300e962b1803056e3229c2db21514bc08a8d46da4d122d4133269fd77d43` |
-| Tag `v2.3.3` (04/09/2026) — versão da defesa | 52 | 8.712 | `94bda477e2d2ac88a90f814be22108b413c97c7f22b6a8fb0ceaa4c0d8469588` |
+| Tag `v2.3.3` (04/09/2026) — versão da defesa | 52 | 8.956 | `dd1b118301cf246b3a7a6a3d53e19f9fc0b992607edd58ece2901aa14873db77` |
 
 Os cinco foram recalculados a partir de cópias limpas dos respectivos commits e
 conferem em execuções repetidas. A tag da defesa é a `v2.3.3`, e é dela que sai
@@ -208,7 +208,10 @@ registradas pelo que as separa:
   faixa em que o modelo foi ajustado, remove a camada de mapa de terceiro, e
   passa a ler preço e custo do levantamento da CONAB versionado em
   `pesquisa/dados/conab/levantamento_atual.json`, com a praça, a data e a
-  posição do preço na série declaradas em tela.
+  posição do preço na série declaradas em tela. O painel e o aplicativo também
+  calculam, a cada leitura, a idade do levantamento em uso, e avisam quando ele
+  passa da cadência de publicação da CONAB — de modo que o produto deixa de
+  poder exibir um preço antigo como se fosse o corrente.
 
 A subseção 4.9 da dissertação, que afirma serem os mesmos os números do produto
 e os da Tabela 6, vale da `v2.3.2` em diante.

@@ -38,6 +38,18 @@ data class FinancaResponse(
     val fonte_preco: String? = null,
     val nota_preco: String? = null,
     val levantamento: String? = null,
+    // Idade do levantamento, calculada no servidor a cada requisição. Sem isto,
+    // este aplicativo aberto daqui a dois anos exibiria o preço de 2026 como se
+    // fosse o de hoje: o levantamento é um arquivo estático e a atualização
+    // depende de alguém manter o repositório. O aviso vem pronto do servidor,
+    // para o alerta acompanhar o tempo sem depender de um APK novo.
+    val defasagem_meses: Int? = null,
+    val aviso_preco: String? = null,
+    // Cotação de bolsa, só para comparação. Nunca entra em receita nem em
+    // margem: é preço de Chicago, acima do que se recebe na porteira no Pará.
+    // Antes o campo nem existia aqui, e o painel mostrava a comparação
+    // enquanto o aplicativo não mostrava nada.
+    val soja_preco_cbot_saca: Double? = null,
     val ano_referencia: Int
 )
 
@@ -47,6 +59,9 @@ data class KpiEconomiaResponse(
     val fonte_preco: String? = null,
     val nota_preco: String? = null,
     val levantamento: String? = null,
+    val defasagem_meses: Int? = null,
+    val aviso_preco: String? = null,
+    val soja_preco_cbot_saca: Double? = null,
     val ano_referencia: Int
 )
 

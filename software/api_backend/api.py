@@ -1,6 +1,7 @@
 from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
                       PRECO_RECEBIDO_CONAB_SACA, LEVANTAMENTO,
-                      descricao_do_levantamento, nota_sobre_o_preco)
+                      descricao_do_levantamento, nota_sobre_o_preco,
+                      aviso_de_defasagem, meses_desde_o_levantamento)
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -125,6 +126,12 @@ def get_financas(municipio: str):
         "fonte_preco": descricao_do_levantamento(),
         "nota_preco": nota_sobre_o_preco(),
         "levantamento": LEVANTAMENTO["levantamento"],
+        # Calculado a cada requisição, nunca gravado: um levantamento estático
+        # envelhece calado, e é o servidor que sabe que dia é hoje. Sem isto, o
+        # aplicativo aberto daqui a dois anos exibiria o preço de 2026 como se
+        # fosse o de agora.
+        "defasagem_meses": meses_desde_o_levantamento(),
+        "aviso_preco": aviso_de_defasagem(),
         "ano_referencia": int(AppState.last_year) if AppState.df is not None else 2024
     }
 
@@ -173,6 +180,8 @@ def get_kpis_economia():
          "fonte_preco": descricao_do_levantamento(),
          "nota_preco": nota_sobre_o_preco(),
          "levantamento": LEVANTAMENTO["levantamento"],
+         "defasagem_meses": meses_desde_o_levantamento(),
+         "aviso_preco": aviso_de_defasagem(),
          "ano_referencia": int(AppState.last_year)
     }
 

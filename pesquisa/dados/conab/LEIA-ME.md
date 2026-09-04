@@ -92,3 +92,20 @@ da série mantendo o custo de março de 2026 misturaria dois momentos e inflaria
 margem — foi esse tipo de mistura que fez a versão anterior exibir a cotação de
 Chicago como preço de porteira. Quem quiser simular outro preço deve usar o
 campo editável, que existe exatamente para isso.
+
+## O produto avisa quando este arquivo envelhece
+
+`levantamento_atual.json` é estático, e a atualização depende de alguém rodar o
+comando acima. Para que o produto não exiba um preço antigo como se fosse o de
+hoje, o painel e o aplicativo calculam **a cada leitura** quantos meses separam
+o levantamento da data corrente:
+
+| idade | comportamento |
+|---|---|
+| até 4 meses | silêncio, é a cadência normal da CONAB |
+| 5 a 11 meses | avisa que provavelmente já há levantamento mais recente |
+| 12 meses ou mais | pede que o preço seja tratado como referência histórica |
+
+A idade nunca é gravada no JSON: um número congelado na geração começaria
+errado no dia seguinte. A frase é montada em `financas.aviso_de_defasagem` e
+servida pela API, para o aplicativo acompanhar sem recompilar.

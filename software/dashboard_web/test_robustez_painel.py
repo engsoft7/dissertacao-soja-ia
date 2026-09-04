@@ -163,6 +163,95 @@ def test_reserva_vale_quando_o_levantamento_some():
     assert reserva["textos"]["descricao"] == lev["textos"]["descricao"]
 
 
+def _funcoes_do_painel(nomes: tuple[str, ...], constantes: tuple[str, ...],
+                      extras: dict) -> dict:
+    """Extrai funções e constantes de app.py e as executa isoladas.
+
+    O painel não pode ser importado num teste: o corpo do módulo é um script
+    Streamlit que desenha a página inteira. As funções puras, porém, precisam
+    ser exercitadas de verdade — não basta conferir que existem.
+
+    As constantes vêm do PRÓPRIO app.py, e nunca são injetadas por `extras`.
+    A primeira versão deste ajudante recebia os limiares de financas.py, e com
+    isso o teste do espelho passava mesmo com os limiares do painel alterados —
+    ou seja, não testava nada.
+    """
+    fonte = APP.read_text(encoding="utf-8")
+    arvore = ast.parse(fonte, filename=str(APP))
+    espaco = dict(extras)
+    for nome in constantes:
+        assert nome not in extras, (
+            f"{nome} tem que vir de app.py, não ser injetada pelo teste")
+    for no in arvore.body:
+        if isinstance(no, ast.Assign) and any(
+                isinstance(a, ast.Name) and a.id in constantes for a in no.targets):
+            exec(compile(ast.Module([no], []), str(APP), "exec"), espaco)
+        elif isinstance(no, ast.FunctionDef) and no.name in nomes:
+            exec(compile(ast.Module([no], []), str(APP), "exec"), espaco)
+    faltando = [n for n in nomes + constantes if n not in espaco]
+    assert not faltando, f"não encontrei em app.py: {faltando}"
+    return espaco
+
+
+def test_produto_denuncia_levantamento_velho():
+    """A pergunta é: aberto daqui a dois anos, o produto exibe o preço de 2026
+    como se fosse o de hoje?
+
+    Não pode. O levantamento é um arquivo estático e a automação depende de
+    alguém manter o repositório; o usuário do aplicativo não vê issue nenhuma.
+    A idade tem que ser calculada na leitura, nunca gravada, para o produto se
+    denunciar sozinho sem rede e sem manutenção.
+    """
+    from datetime import date
+
+    sys.path.insert(0, str(RAIZ / "software" / "api_backend"))
+    import financas
+
+    lev = json.loads((RAIZ / "pesquisa" / "dados" / "conab" /
+                      "levantamento_atual.json").read_text(encoding="utf-8"))
+    sigla, _, ano = lev["levantamento"].partition("-")
+    mes = financas.MESES_SIGLA[sigla.upper()]
+    publicado = date(int(ano), mes, 1)
+
+    def somar_meses(base, n):
+        total = base.month - 1 + n
+        return date(base.year + total // 12, total % 12 + 1, 1)
+
+    # Na cadência normal da CONAB (publica a cada dois meses), silêncio.
+    assert financas.aviso_de_defasagem(somar_meses(publicado, 2)) is None
+    assert financas.aviso_de_defasagem(somar_meses(publicado, 4)) is None
+    # Passada a cadência, o produto avisa.
+    aviso = financas.aviso_de_defasagem(somar_meses(publicado, 6))
+    assert aviso and "provavelmente já há um mais recente" in aviso
+    # Dois anos depois, o alerta muda de tom e manda editar o campo.
+    dois_anos = financas.aviso_de_defasagem(somar_meses(publicado, 24))
+    assert dois_anos and "referência histórica" in dois_anos
+    assert "mais de 2 anos" in dois_anos
+
+
+def test_painel_e_api_avisam_com_as_mesmas_palavras():
+    """O painel espelha a função de financas.py porque não pode depender de
+    importá-lo. Espelho que diverge é pior que espelho nenhum: as duas telas do
+    mesmo produto passariam a descrever o preço de formas diferentes."""
+    from datetime import date
+
+    sys.path.insert(0, str(RAIZ / "software" / "api_backend"))
+    import financas
+
+    painel = _funcoes_do_painel(
+        nomes=("meses_desde_o_levantamento", "aviso_de_defasagem"),
+        constantes=("MESES_SIGLA_CONAB", "MESES_PARA_AVISAR_CONAB",
+                    "MESES_PARA_ALERTAR_CONAB"),
+        extras={"LEVANTAMENTO_CONAB": financas.LEVANTAMENTO, "date": date})
+
+    for quando in (date(2026, 3, 1), date(2026, 7, 1), date(2026, 9, 4),
+                   date(2027, 3, 1), date(2028, 9, 4), date(2031, 1, 1)):
+        assert painel["meses_desde_o_levantamento"](quando) == \
+            financas.meses_desde_o_levantamento(quando), quando
+        assert painel["aviso_de_defasagem"](quando) == \
+            financas.aviso_de_defasagem(quando), quando
+
+
 def test_requisitos_declaram_o_que_financas_importa():
     """O painel importa financas.py; o que financas.py usa precisa estar no
     requirements.txt do painel, e não só como dependência transitiva."""

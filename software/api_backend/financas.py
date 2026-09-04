@@ -1,4 +1,5 @@
 import json
+from datetime import date
 from pathlib import Path
 
 import requests
@@ -149,6 +150,59 @@ CUSTO_REFERENCIA_HA  = CUSTO_OPERACIONAL_HA
 PRECO_RECEBIDO_CONAB_SACA = LEVANTAMENTO["preco_recebido_saca"]
 CUSTO_OPERACIONAL_CONAB_SACA = LEVANTAMENTO["custo_operacional_saca"]
 PRODUTIVIDADE_REFERENCIA_SC = LEVANTAMENTO["produtividade_referencia_sc_ha"]
+
+
+# ── IDADE DO LEVANTAMENTO ────────────────────────────────────────────────────
+# A pergunta que este bloco responde: se alguém abrir este produto daqui a dois
+# anos, ele vai exibir o preço de 2026 como se fosse o de hoje?
+#
+# Sem isto, sim. O levantamento é um arquivo estático; a automação depende de
+# alguém manter o repositório, e o usuário do aplicativo não vê issue nenhuma.
+# O número simplesmente envelhece calado, que é o pior comportamento possível
+# para um valor que dirige quase toda a margem exibida.
+#
+# A idade é calculada A CADA LEITURA, e nunca gravada no JSON: um número
+# congelado na geração já nasce errado no dia seguinte. Assim o produto se
+# denuncia sozinho, sem rede, sem manutenção e sem depender de ninguém.
+MESES_SIGLA = {"JAN": 1, "FEV": 2, "MAR": 3, "ABR": 4, "MAI": 5, "JUN": 6,
+               "JUL": 7, "AGO": 8, "SET": 9, "OUT": 10, "NOV": 11, "DEZ": 12}
+
+# A CONAB publica custos de produção da soja a cada dois meses. Uma defasagem
+# de até quatro meses é a cadência normal somada ao atraso de publicação, e não
+# merece alarme. A partir daí, provavelmente já existe levantamento mais novo.
+MESES_PARA_AVISAR = 5
+MESES_PARA_ALERTAR = 12
+
+
+def meses_desde_o_levantamento(hoje: date | None = None) -> int | None:
+    """Meses entre o levantamento em uso e hoje. None se o rótulo não for lido."""
+    rotulo = str(LEVANTAMENTO.get("levantamento", ""))
+    sigla, _, ano = rotulo.partition("-")
+    if sigla.upper() not in MESES_SIGLA or not ano.isdigit():
+        return None
+    hoje = hoje or date.today()
+    return (hoje.year - int(ano)) * 12 + (hoje.month - MESES_SIGLA[sigla.upper()])
+
+
+def aviso_de_defasagem(hoje: date | None = None) -> str | None:
+    """Frase a exibir quando o levantamento está velho, ou None se está em dia.
+
+    Servida pela API para o aplicativo poder exibi-la sem recompilar, e montada
+    aqui para painel e aplicativo dizerem exatamente a mesma coisa.
+    """
+    meses = meses_desde_o_levantamento(hoje)
+    if meses is None or meses < MESES_PARA_AVISAR:
+        return None
+    quando = LEVANTAMENTO.get("levantamento_extenso", "data desconhecida")
+    if meses < MESES_PARA_ALERTAR:
+        return (f"Este levantamento é de {quando}, há {meses} meses. A CONAB "
+                f"publica a cada dois meses, então provavelmente já há um mais "
+                f"recente — confira antes de decidir por este preço.")
+    anos = meses // 12
+    tempo = "mais de um ano" if anos == 1 else f"mais de {anos} anos"
+    return (f"Este levantamento é de {quando}, há {meses} meses ({tempo}). "
+            f"Trate o preço como referência histórica, não como cotação atual, "
+            f"e edite o campo com o preço que você recebe hoje.")
 
 
 def descricao_do_levantamento() -> str:

@@ -10,6 +10,7 @@ import json
 import math
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 import altair as alt  # type: ignore  # pyrefly: ignore[missing-import]
@@ -129,6 +130,50 @@ CUSTO_OPERACIONAL_CONAB_SACA_REF = LEVANTAMENTO_CONAB["custo_operacional_saca"]
 # 2026".
 PRACA_CONAB = LEVANTAMENTO_CONAB["praca"]
 LEVANTAMENTO_CONAB_EXTENSO = LEVANTAMENTO_CONAB["levantamento_extenso"]
+
+# ── IDADE DO LEVANTAMENTO ────────────────────────────────────────────────────
+# Sem isto, um painel aberto daqui a dois anos exibiria o preço de março de
+# 2026 como se fosse o de hoje: o levantamento é um arquivo estático, e a
+# automação depende de alguém manter o repositório. A idade é calculada a cada
+# carregamento da página, nunca gravada, e por isso o produto se denuncia
+# sozinho, sem rede e sem manutenção.
+#
+# Espelha financas.aviso_de_defasagem, porque o painel não pode depender de
+# importar aquele módulo — foi um import quebrado que o derrubou em 30/08/2026.
+# test_robustez_painel.py confere que os dois dizem exatamente a mesma frase.
+MESES_SIGLA_CONAB = {"JAN": 1, "FEV": 2, "MAR": 3, "ABR": 4, "MAI": 5, "JUN": 6,
+                     "JUL": 7, "AGO": 8, "SET": 9, "OUT": 10, "NOV": 11,
+                     "DEZ": 12}
+MESES_PARA_AVISAR_CONAB = 5
+MESES_PARA_ALERTAR_CONAB = 12
+
+
+def meses_desde_o_levantamento(hoje: date | None = None) -> int | None:
+    """Meses entre o levantamento em uso e hoje. None se o rótulo não for lido."""
+    rotulo = str(LEVANTAMENTO_CONAB.get("levantamento", ""))
+    sigla, _, ano = rotulo.partition("-")
+    if sigla.upper() not in MESES_SIGLA_CONAB or not ano.isdigit():
+        return None
+    hoje = hoje or date.today()
+    return (hoje.year - int(ano)) * 12 + (hoje.month - MESES_SIGLA_CONAB[sigla.upper()])
+
+
+def aviso_de_defasagem(hoje: date | None = None) -> str | None:
+    """Frase a exibir quando o levantamento está velho, ou None se está em dia."""
+    meses = meses_desde_o_levantamento(hoje)
+    if meses is None or meses < MESES_PARA_AVISAR_CONAB:
+        return None
+    quando = LEVANTAMENTO_CONAB.get("levantamento_extenso", "data desconhecida")
+    if meses < MESES_PARA_ALERTAR_CONAB:
+        return (f"Este levantamento é de {quando}, há {meses} meses. A CONAB "
+                f"publica a cada dois meses, então provavelmente já há um mais "
+                f"recente — confira antes de decidir por este preço.")
+    anos = meses // 12
+    tempo = "mais de um ano" if anos == 1 else f"mais de {anos} anos"
+    return (f"Este levantamento é de {quando}, há {meses} meses ({tempo}). "
+            f"Trate o preço como referência histórica, não como cotação atual, "
+            f"e edite o campo com o preço que você recebe hoje.")
+
 
 
 @st.cache_data
@@ -1297,7 +1342,13 @@ if tela_atual == "💰 Viabilidade Financeira":
                         ". São preços de porto e de bolsa, acima do que se "
                         "recebe na porteira no Pará.")
 
-    
+
+    # O aviso vem antes dos campos, e não como nota de rodapé: se o preço está
+    # velho, quem vai ler a margem precisa saber disso antes de lê-la.
+    _aviso_conab = aviso_de_defasagem()
+    if _aviso_conab:
+        st.warning(f"**Preço possivelmente desatualizado.** {_aviso_conab}")
+
     with col_eco1:
         preco = st.number_input(
             "Preço de referência da saca (R$ / 60 kg)",

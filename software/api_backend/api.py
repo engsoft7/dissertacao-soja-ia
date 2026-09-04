@@ -268,9 +268,16 @@ def _generate_map_html_cached(municipio: str, theme: str) -> str:
     latmin, latmax = pts["latitude"].min(), pts["latitude"].max()
     lonmin, lonmax = pts["longitude"].min(), pts["longitude"].max()
 
+    # Sem camada de tiles, como no painel web. As geometrias que importam — o
+    # contorno do Pará e os rios — estão versionadas no repositório. Puxar tiles
+    # do CARTO deixava o mapa do aplicativo dependendo de um terceiro em tempo
+    # de execução, contradizia a legenda do painel ("o mapa não usa camada de
+    # terceiros") e derrubava a tela inteira sem internet, num aplicativo que se
+    # anuncia de operação predominantemente offline.
+    fundo_mapa = "#12151a" if theme == "dark" else "#eef1f4"
     m = folium.Map(
         location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
-        tiles="cartodbdark_matter" if theme == "dark" else "cartodbpositron",
+        tiles=None,
         zoom_start=6,
         min_zoom=5,
         max_zoom=12,
@@ -348,7 +355,8 @@ def _generate_map_html_cached(municipio: str, theme: str) -> str:
                 width: 75%; max-width: 320px; background: {bg_color}; padding: 8px 12px; 
                 border-radius: 8px; z-index: 9999; color: {text_color}; 
                 font-family: Arial, sans-serif; font-size: 13px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-        <div style="text-align: center; margin-bottom: 5px; font-weight: bold; letter-spacing: 0.5px;">PRODUTIVIDADE (KG/HA)</div>
+        <div style="text-align: center; margin-bottom: 2px; font-weight: bold; letter-spacing: 0.5px;">PRODUTIVIDADE (KG/HA)</div>
+        <div style="text-align: center; margin-bottom: 5px; font-size: 10px; opacity: 0.75;">média observada das cinco últimas safras</div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-weight: 500;">
             <span>{int(rmin)}</span>
             <span>{int((rmin+rmax)/2)}</span>
@@ -358,6 +366,10 @@ def _generate_map_html_cached(municipio: str, theme: str) -> str:
     </div>
     '''
     m.get_root().html.add_child(folium.Element(legend_html))
+    # Sem tiles o Leaflet deixa o fundo transparente; sem isto o mapa aparece
+    # branco no tema escuro.
+    m.get_root().html.add_child(folium.Element(
+        f"<style>.leaflet-container {{ background: {fundo_mapa} !important; }}</style>"))
     
     if lat_sel is not None and lon_sel is not None:
         m.fit_bounds([[lat_sel - 0.7, lon_sel - 0.7], [lat_sel + 0.7, lon_sel + 0.7]])

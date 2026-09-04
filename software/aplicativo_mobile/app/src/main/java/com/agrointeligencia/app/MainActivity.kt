@@ -442,9 +442,12 @@ fun AgroDashboard() {
                                     ) {
                                         Icon(Icons.Filled.WifiOff, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(64.dp))
                                         Spacer(modifier = Modifier.height(16.dp))
-                                        Text("Mapa Satélite Indisponível Offline", fontWeight = FontWeight.Bold, color = Color.Gray, fontSize = 16.sp)
+                                        // Nunca houve imagem de satélite aqui: o mapa é vetorial,
+                                        // com o contorno do Pará da malha do IBGE, rios do Natural
+                                        // Earth e círculos coloridos pela produtividade observada.
+                                        Text("Mapa indisponível offline", fontWeight = FontWeight.Bold, color = Color.Gray, fontSize = 16.sp)
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Text("Conecte-se para puxar a cartografia da API.", color = Color.Gray, fontSize = 14.sp)
+                                        Text("O mapa é desenhado pela API. Conecte-se para carregá-lo.", color = Color.Gray, fontSize = 14.sp)
                                     }
                                 } else {
                                     Card(

@@ -547,49 +547,72 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(text = "Ano ${historico.ano}", fontWeight = FontWeight.Bold)
-                Text(text = "Margem: ±${historico.margem_erro.toInt()} kg/ha", fontSize = 12.sp, color = Color.Gray)
-                // Safra observada: a margem parte do rendimento medido. Safra ainda
-                // por vir: parte da projeção. Nos dois casos o preço e o custo são os
-                // de hoje, e não os da época — daí o rótulo.
-                val observado = historico.rendimento_real > 0
-                if (kpis != null && (observado || historico.rendimento_predito > 0)) {
-                    val kgHa = if (observado) historico.rendimento_real else historico.rendimento_predito
-                    val scHa = kgHa / 60
-                    val receita = scHa * (precoDoProdutor ?: kpis.soja_preco_saca)
-                    val lucro = receita - (custoDoProdutor ?: kpis.custo_ha)
-                    val color = if (lucro > 0) (if(isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else (if(isDark) Color(0xFFf85149) else Color(0xFFdc2626))
-                    Text(
-                        text = (if (observado) "Margem a preços de hoje: R$ "
-                                else "Margem projetada: R$ ") + "${lucro.toInt()}/ha",
-                        fontSize = 13.sp,
-                        color = color,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                }
-            }
-            Column(horizontalAlignment = Alignment.End) {
-                // A API envia 0.0 como sentinela de safra ainda não divulgada pela
-                // PAM; imprimir esse zero anunciaria uma colheita nula que não houve.
+        // Layout em coluna, e não duas colunas lado a lado. Com Row + Column sem
+        // largura definida, "Estimativa: 3230 kg" não cabia na coluna direita,
+        // quebrava linha e o "kg" ia parar ao lado da margem em reais — duas
+        // informações diferentes na mesma altura da tela. Empilhado, nada
+        // colide em nenhum tamanho de fonte ou de aparelho.
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            val observado = historico.rendimento_real > 0
+
+            // O ano e o que de fato se colheu, que é o que o produtor procura
+            // ao percorrer a lista.
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = if (historico.rendimento_real > 0)
-                               "Real: ${historico.rendimento_real.toInt()} kg"
-                           else "Real: —",
-                    color = MaterialTheme.colorScheme.onSurface
+                    text = "Ano ${historico.ano}",
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f)
                 )
-                // Para safras passadas a estimativa usa o clima médio do município, e
-                // não o da safra: ela acompanha a tendência. Chamá-la de "IA" sugeria
-                // uma previsão ano a ano que o modelo não faz aqui.
+                // A API envia 0.0 como sentinela de safra ainda não divulgada
+                // pela PAM; imprimir esse zero anunciaria colheita nula.
                 Text(
-                    text = "Estimativa: ${historico.rendimento_predito.toInt()} kg",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    text = if (observado) "%,d kg".format(historico.rendimento_real.toInt())
+                           else "não divulgada",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = if (observado) 16.sp else 12.sp,
+                    maxLines = 1,
+                    color = if (observado) MaterialTheme.colorScheme.onSurface else Color.Gray
+                )
+            }
+
+            // Estimativa e erro típico juntos, em cinza: são contexto do
+            // modelo, não o dado da safra. "Margem" saiu daqui de propósito —
+            // aparecia com dois sentidos no mesmo cartão, erro em kg e
+            // dinheiro em reais, e para quem lê no talhão isso confunde.
+            //
+            // Para safras passadas a estimativa usa o clima médio do
+            // município, e não o da safra: ela acompanha a tendência. Chamá-la
+            // de "IA" sugeria uma previsão ano a ano que o modelo não faz.
+            Text(
+                text = "Estimativa %,d kg · erro típico ±%,d kg/ha".format(
+                    historico.rendimento_predito.toInt(), historico.margem_erro.toInt()),
+                fontSize = 12.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+
+            // Safra observada: a margem parte do rendimento medido. Safra ainda
+            // por vir: parte da projeção. Nos dois casos o preço e o custo são
+            // os de hoje, e não os da época — daí o rótulo.
+            if (kpis != null && (observado || historico.rendimento_predito > 0)) {
+                val kgHa = if (observado) historico.rendimento_real else historico.rendimento_predito
+                val scHa = kgHa / 60
+                val receita = scHa * (precoDoProdutor ?: kpis.soja_preco_saca)
+                val lucro = receita - (custoDoProdutor ?: kpis.custo_ha)
+                val color = if (lucro > 0) (if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a))
+                            else (if (isDark) Color(0xFFf85149) else Color(0xFFdc2626))
+                Text(
+                    text = (if (observado) "Resultado a preços de hoje: "
+                            else "Resultado projetado: ") + "R$ %,d/ha".format(lucro.toInt()),
+                    fontSize = 13.sp,
+                    color = color,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
         }

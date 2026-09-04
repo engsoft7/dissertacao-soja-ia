@@ -61,6 +61,8 @@ LEVANTAMENTO_CONAB_RESERVA = {
     "levantamento_extenso": "março de 2026",
     "preco_recebido_saca": 105.09,
     "custo_operacional_saca": 109.94,
+    "custo_variavel_saca": 85.03,
+    "custo_fixo_saca": 24.91,
     "produtividade_referencia_kg_ha": 2880.0,
     "produtividade_referencia_sc_ha": 48.0,
     "custo_operacional_ha": 5277.12,
@@ -957,6 +959,39 @@ def dec(v: float, casas: int = 1) -> str:
     return f"{v:.{casas}f}".replace(".", ",")
 
 
+def resultado_por_hectare(sacas_ha: float, preco: float,
+                          custo_do_usuario: float | None = None) -> tuple[float, float | None, bool]:
+    """Resultado por hectare pelos dois rateios possíveis do custo.
+
+    Devolve (valor exibido, valor pelo outro rateio, sinal é incerto).
+
+    A CONAB publica o custo por saca comercializada, sem abrir por item. Tratar
+    o custo variável como fixo por hectare — o que o painel faz, por ser o
+    único caminho com os dados publicados — faz as sacas acima da produtividade
+    de referência entrarem na receita sem onerar colheita, secagem e frete.
+    Tratá-lo como proporcional à produção é o outro extremo.
+
+    Entre os dois, o SINAL do resultado se inverte sempre que a produtividade
+    supera a de referência e a margem é estreita: a 52 sc/ha e R$ 105,09, o
+    resultado vai de +R$ 188 a -R$ 153 por hectare com os mesmos dados. Exibir
+    só um dos dois, em verde, é dar por decidido o que o dado não decide.
+
+    Com custo informado pelo usuário não há rateio a discutir: é o número dele.
+    """
+    receita = sacas_ha * preco
+    if custo_do_usuario is not None:
+        return receita - custo_do_usuario, None, False
+    lev = LEVANTAMENTO_CONAB
+    por_hectare = receita - lev["custo_operacional_ha"]
+    variavel = lev.get("custo_variavel_saca")
+    fixo_sc = lev.get("custo_fixo_saca")
+    prod_ref = lev.get("produtividade_referencia_sc_ha")
+    if variavel is None or fixo_sc is None or prod_ref is None:
+        return por_hectare, None, False
+    por_saca = receita - (variavel * sacas_ha + fixo_sc * prod_ref)
+    return por_hectare, por_saca, (por_hectare > 0) != (por_saca > 0)
+
+
 def esc_md(texto: str) -> str:
     """Escapa o cifrão em texto vindo do levantamento da CONAB.
 
@@ -1403,7 +1438,11 @@ if tela_atual == "💰 Viabilidade Financeira":
             f"O modelo estima {dec(est_modelo_sc)} sc/ha "
             f"({qtd(r_eco['estimativa_kg_ha'])} kg/ha).")
     receita_ha = est_sacas_ha * preco
-    margem_ha = receita_ha - custo_ha
+    # O custo editado pelo usuário é dele: não há rateio a discutir. Só quando
+    # o valor ainda é o da CONAB é que a faixa do rateio faz sentido.
+    custo_e_do_usuario = abs(custo_ha - LEVANTAMENTO_CONAB["custo_operacional_ha"]) > 0.5
+    margem_ha, margem_outro_rateio, sinal_incerto = resultado_por_hectare(
+        est_sacas_ha, preco, custo_ha if custo_e_do_usuario else None)
     pct_margem = f"{margem_ha / custo_ha * 100:+.0f}%" if custo_ha else "—"
     cor_delta = 'var(--positivo)' if margem_ha >= 0 else 'var(--negativo)'
     # 'margem_incerta' é definida logo abaixo e reajusta esta cor.
@@ -1417,7 +1456,11 @@ if tela_atual == "💰 Viabilidade Financeira":
     margem_min, margem_max = margem_ha - erro_reais, margem_ha + erro_reais
     faixa_receita = f"{brl(receita_min)} a {brl(receita_max)}"
     faixa_margem = f"{brl(margem_min)} a {brl(margem_max)}"
-    margem_incerta = margem_min < 0 < margem_max
+    # Duas fontes de incerteza, e basta uma para o resultado ser inconclusivo:
+    # o erro típico do modelo, que move a produtividade, e o rateio do custo
+    # variável, que a CONAB não publica aberto por item. A segunda costuma ser
+    # maior que a primeira acima da produtividade de referência.
+    margem_incerta = (margem_min < 0 < margem_max) or sinal_incerto
 
     # SÍNTESE LLM (ANÁLISE GENERATIVA)
     # Quando o resultado muda de sinal dentro do erro do modelo, a síntese não
@@ -1489,6 +1532,20 @@ if tela_atual == "💰 Viabilidade Financeira":
         f"patrimônio empregado. Descontando também a renda de fatores da CONAB "
         f"({brl_md(renda_fatores_ha, 2)}/ha, que remunera terra e capital), "
         f"sobram {brl_md(margem_total)}/ha.")
+    if sinal_incerto and margem_outro_rateio is not None:
+        baixo, alto = sorted((margem_ha, margem_outro_rateio))
+        st.warning(
+            f"**O sinal deste resultado não está determinado pelos dados.** "
+            f"A CONAB publica o custo por saca comercializada, sem abrir por "
+            f"item, e não se sabe que parcela do custo variável acompanha a "
+            f"área — semente, adubo, pulverização — e que parcela acompanha a "
+            f"produção — colheita, secagem, frete. Tratando toda ela como fixa "
+            f"por hectare, o resultado é {brl_md(margem_ha)}/ha; tratando toda "
+            f"ela como proporcional à produção, {brl_md(margem_outro_rateio)}/ha. "
+            f"O valor está entre {brl_md(baixo)} e {brl_md(alto)} por hectare, e "
+            f"muda de sinal no meio do caminho. Informe o seu custeio no campo "
+            f"acima para a conta deixar de depender desse rateio.")
+
     resultado_ref = (PRECO_RECEBIDO_CONAB_SACA_REF
                      - CUSTO_OPERACIONAL_CONAB_SACA_REF) * PRODUTIVIDADE_REFERENCIA_CONAB_SC
     st.caption(

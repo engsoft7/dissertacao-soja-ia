@@ -134,6 +134,17 @@ def get_financas(municipio: str):
         "soja_preco_cbot_saca": fin["cbot_saca"],
         "soja_preco_paranagua_saca": fin.get("paranagua_saca"),
         "custo_ha": custo_ha,
+        # Componentes do custo, para a interface poder mostrar quanto o
+        # resultado depende do rateio. A CONAB publica só os totais por
+        # saca, sem abertura por item: não dá para saber que parcela do
+        # custo variável acompanha a área e que parcela acompanha a
+        # produção. Acima da produtividade de referência os dois rateios
+        # possíveis chegam a inverter o SINAL da margem, e um produto que
+        # pinta de verde um resultado que pode ser negativo perde a
+        # confiança de quem decidiu com ele.
+        "custo_variavel_saca": LEVANTAMENTO["custo_variavel_saca"],
+        "custo_fixo_ha": LEVANTAMENTO["custo_fixo_saca"] * LEVANTAMENTO["produtividade_referencia_sc_ha"],
+        "produtividade_referencia_sc": LEVANTAMENTO["produtividade_referencia_sc_ha"],
         "vtn_ha": custos["vtn_ha"],
         # Rótulo e nota vêm do servidor de propósito: quando a CONAB publica
         # levantamento novo, o aplicativo passa a exibir a praça, a data e a
@@ -195,6 +206,17 @@ def get_kpis_economia():
          "soja_preco_cbot_saca": fin["cbot_saca"],
          "soja_preco_paranagua_saca": fin.get("paranagua_saca"),
          "custo_ha": custo_ha,
+         # Componentes do custo, para a interface poder mostrar quanto o
+         # resultado depende do rateio. A CONAB publica só os totais por
+         # saca, sem abertura por item: não dá para saber que parcela do
+         # custo variável acompanha a área e que parcela acompanha a
+         # produção. Acima da produtividade de referência os dois rateios
+         # possíveis chegam a inverter o SINAL da margem, e um produto que
+         # pinta de verde um resultado que pode ser negativo perde a
+         # confiança de quem decidiu com ele.
+         "custo_variavel_saca": LEVANTAMENTO["custo_variavel_saca"],
+         "custo_fixo_ha": LEVANTAMENTO["custo_fixo_saca"] * LEVANTAMENTO["produtividade_referencia_sc_ha"],
+         "produtividade_referencia_sc": LEVANTAMENTO["produtividade_referencia_sc_ha"],
          "fonte_preco": descricao_do_levantamento(),
          "nota_preco": nota_sobre_o_preco(),
          "levantamento": LEVANTAMENTO["levantamento"],

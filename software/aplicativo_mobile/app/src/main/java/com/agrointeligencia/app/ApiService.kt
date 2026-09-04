@@ -59,6 +59,15 @@ data class FinancaResponse(
     // Antes o campo nem existia aqui, e o painel mostrava a comparação
     // enquanto o aplicativo não mostrava nada.
     val soja_preco_cbot_saca: Double? = null,
+    // Componentes do custo. A CONAB publica só os totais por saca, sem abrir
+    // por item: não se sabe que parcela do custo variável acompanha a área
+    // (semente, adubo, pulverização) e que parcela acompanha a produção
+    // (colheita, secagem, frete). Acima da produtividade de referência os dois
+    // rateios possíveis chegam a inverter o sinal do resultado, e daí a tela
+    // precisa dizer isso em vez de pintar de verde.
+    val custo_variavel_saca: Double? = null,
+    val custo_fixo_ha: Double? = null,
+    val produtividade_referencia_sc: Double? = null,
     val ano_referencia: Int
 )
 
@@ -73,6 +82,9 @@ data class KpiEconomiaResponse(
     val aviso_custo: String? = null,
     val soja_preco_paranagua_saca: Double? = null,
     val soja_preco_cbot_saca: Double? = null,
+    val custo_variavel_saca: Double? = null,
+    val custo_fixo_ha: Double? = null,
+    val produtividade_referencia_sc: Double? = null,
     val ano_referencia: Int
 )
 

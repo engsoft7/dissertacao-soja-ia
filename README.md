@@ -344,6 +344,16 @@ Ele consulta a API do SIDRA/IBGE e:
   congelado na geração já nasceria errado no dia seguinte. É o que impede este
   produto, aberto daqui a dois anos sem ninguém ter mantido nada, de exibir o
   preço de 2026 como se fosse o de hoje.
+- **O preço é do produtor, e o aplicativo o guarda.** Custo é grandeza de
+  levantamento; preço é grandeza de mercado. A CONAB publica a cada dois meses
+  e o preço da soja muda todo dia, então nenhum padrão vindo de levantamento
+  chega em dia, por melhor que seja a coleta. Quem sabe o preço é quem vendeu:
+  o aplicativo guarda o valor informado com a data e passa a abrir com ele, e o
+  padrão da CONAB vira ponto de partida. Passados 45 dias, pede confirmação —
+  e o aviso de idade troca de assunto para o custo, que continua vindo do
+  levantamento. Ao lado, o físico em Paranaguá, relido de hora em hora, dá a
+  única referência diária do produto: é preço de porto, no Paraná, e serve para
+  o usuário julgar se o número no campo ainda faz sentido.
 
 ### Atualizar o levantamento da CONAB à mão (um comando)
 

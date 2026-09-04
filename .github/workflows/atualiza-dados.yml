@@ -119,10 +119,17 @@ jobs:
       # o produto exibia março de 2026 como se fosse o preço de hoje, e trocar
       # de levantamento exigia editar oito literais e recompilar o APK.
       #
-      # Com CONAB_CUSTOS_URL configurada (Settings > Variables), a etapa baixa,
-      # valida e propaga sozinha. Sem ela, faz a única verificação que não
-      # precisa de rede — quantos meses tem o levantamento em uso — e o passo
-      # seguinte abre issue quando ficou velho demais.
+      # A etapa procura a fonte sozinha: consulta o catálogo federal de dados
+      # abertos e a própria página do portal, e tenta as candidatas até uma
+      # delas ter o cabeçalho de uma planilha da CONAB. Exigir que alguém
+      # copiasse a URL para uma variável era transformar "automático" em
+      # "automático depois que um humano fizer uma coisa" — e é justamente o
+      # humano que falta quando o levantamento envelhece.
+      #
+      # CONAB_CUSTOS_URL continua valendo, e vai na frente da fila: quem a
+      # configurou sabe mais do portal que a heurística. Se nada for
+      # reconhecido, resta a verificação que não precisa de rede — quantos
+      # meses tem o levantamento em uso — e o passo seguinte abre a issue.
       - name: Atualiza o levantamento de custos da CONAB
         id: conab
         if: ${{ !inputs.testar_gee && !inputs.testar_conab }}
@@ -273,11 +280,17 @@ jobs:
               `meses**. A CONAB publica custos de produção da soja a cada dois ` +
               `meses, então provavelmente há levantamento mais recente.\n\n`;
             corpo += temFonte
-              ? `A fonte automática está configurada (\`CONAB_CUSTOS_URL\`), mas ` +
-                `não trouxe levantamento novo. Vale conferir o endereço rodando ` +
-                `este workflow com a opção "Testar a fonte de custos da CONAB".\n\n`
-              : `A coleta automática está desativada: a variável de repositório ` +
-                `\`CONAB_CUSTOS_URL\` não está definida (Settings > Variables).\n\n`;
+              ? `A descoberta automática tentou primeiro o endereço fixado em ` +
+                `\`CONAB_CUSTOS_URL\`, depois o catálogo de dados abertos e a ` +
+                `página do portal, e nenhuma candidata tinha o cabeçalho de uma ` +
+                `planilha da CONAB. Rode este workflow com a opção "Testar a ` +
+                `fonte de custos da CONAB" para ver o que cada candidata ` +
+                `devolveu.\n\n`
+              : `A descoberta automática tentou o catálogo de dados abertos e a ` +
+                `página do portal, e nenhuma candidata tinha o cabeçalho de uma ` +
+                `planilha da CONAB. Se você souber o endereço da exportação em ` +
+                `CSV, defina a variável de repositório \`CONAB_CUSTOS_URL\` ` +
+                `(Settings > Variables) e ele passa a ser tentado primeiro.\n\n`;
             corpo += `Atualização manual, um comando:\n` +
               `1. Baixe as planilhas em CSV do [Portal de Informações ` +
               `Agropecuárias](https://portaldeinformacoes.conab.gov.br/custos-de-producao.html) ` +

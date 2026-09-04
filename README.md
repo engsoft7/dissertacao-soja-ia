@@ -331,10 +331,14 @@ Ele consulta a API do SIDRA/IBGE e:
   `pesquisa/dados/conab/levantamento_atual.json` e propaga o resultado para o
   painel, a API e o aplicativo de uma vez — inclusive a praça, a data e a frase
   que diz onde o preço está na série histórica. Nada disso é literal no código:
-  trocar o levantamento é trocar o CSV. Com a variável de repositório
-  `CONAB_CUSTOS_URL` configurada, a coleta é automática; sem ela, o workflow
-  verifica quantos meses tem o levantamento em uso e abre uma **issue** com o
-  comando de atualização quando ele passa de quatro meses.
+  trocar o levantamento é trocar o CSV. O coletor **procura a fonte
+  sozinho**: consulta o catálogo federal de
+  dados abertos e a página do portal, e tenta as candidatas até uma delas
+  ter o cabeçalho de uma planilha da CONAB — o que não for reconhecido é
+  descartado, nunca gravado. `CONAB_CUSTOS_URL` continua valendo e vai na
+  frente da fila, mas deixou de ser necessária. Se nada for encontrado, o
+  workflow verifica quantos meses tem o levantamento em uso e abre uma
+  **issue** quando ele passa de quatro meses.
 - **O produto declara a própria idade.** A issue serve a quem mantém o
   repositório; o usuário do aplicativo não a vê. Por isso o painel e o
   aplicativo calculam, **a cada leitura**, quantos meses separam o levantamento

@@ -616,6 +616,20 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
             val preco = customPreco.toDoubleOrNull() ?: kpis.soja_preco_saca
             val custo = customCusto.toDoubleOrNull() ?: kpis.custo_ha
 
+            // O aviso vem antes dos campos, não como nota de rodapé: se o preço
+            // está velho, quem for ler a margem precisa saber disso antes de
+            // lê-la. O texto é do servidor, que sabe que dia é hoje — sem ele,
+            // este aplicativo mostraria 2026 como se fosse agora, para sempre.
+            kpis.aviso_preco?.let { aviso ->
+                Text(
+                    text = "Preço possivelmente desatualizado. $aviso",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isDark) Color(0xFFd29922) else Color(0xFFbf8700),
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
+
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
                     value = customPreco,
@@ -651,6 +665,11 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     text = listOfNotNull(
                         kpis.fonte_preco?.let { "Padrão: $it." },
                         kpis.nota_preco,
+                        // Concatenar antes de .format() deixaria dúvida sobre a
+                        // qual literal o format se aplica; uma string só resolve.
+                        kpis.soja_preco_cbot_saca?.let {
+                            "Para comparação, o futuro de Chicago convertido está em R$ %.2f/sc: é cotação de bolsa, acima do que se recebe na porteira no Pará.".format(it)
+                        },
                         "Edite o preço para simular outro cenário."
                     ).joinToString(" "),
                     fontSize = 11.sp,
@@ -844,6 +863,13 @@ fun MetodologiaCard(kpis: FinancaResponse?) {
             Text(text = "Preço de porteira, não cotação de bolsa. Ambos editáveis na tela Resumo.", fontSize = 12.sp, color = Color.Gray)
             kpis?.nota_preco?.let {
                 Text(text = it, fontSize = 12.sp, color = Color.Gray)
+            }
+            kpis?.aviso_preco?.let {
+                Text(
+                    text = it,
+                    fontSize = 12.sp,
+                    color = if (isDark) Color(0xFFd29922) else Color(0xFFbf8700)
+                )
             }
             
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)

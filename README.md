@@ -334,8 +334,16 @@ Ele consulta a API do SIDRA/IBGE e:
   trocar o levantamento é trocar o CSV. Com a variável de repositório
   `CONAB_CUSTOS_URL` configurada, a coleta é automática; sem ela, o workflow
   verifica quantos meses tem o levantamento em uso e abre uma **issue** com o
-  comando de atualização quando ele passa de quatro meses — em vez de o produto
-  seguir exibindo um preço antigo como se fosse o de hoje.
+  comando de atualização quando ele passa de quatro meses.
+- **O produto declara a própria idade.** A issue serve a quem mantém o
+  repositório; o usuário do aplicativo não a vê. Por isso o painel e o
+  aplicativo calculam, **a cada leitura**, quantos meses separam o levantamento
+  em uso da data de hoje, e avisam em tela quando ele passa da cadência da
+  CONAB. Passado um ano, o aviso muda de tom e pede que o preço seja tratado
+  como referência histórica. A idade nunca é gravada em arquivo: um número
+  congelado na geração já nasceria errado no dia seguinte. É o que impede este
+  produto, aberto daqui a dois anos sem ninguém ter mantido nada, de exibir o
+  preço de 2026 como se fosse o de hoje.
 
 ### Atualizar o levantamento da CONAB à mão (um comando)
 

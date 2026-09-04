@@ -48,7 +48,9 @@ Abre em `http://localhost:8501`.
   é editável. Preço, custo, praça, data e essa frase não são literais no
   código — saem de `pesquisa/dados/conab/levantamento_atual.json`, que o
   workflow mensal atualiza; quando a CONAB publica levantamento novo, as
-  legendas acompanham sozinhas. A cotação física em Paranaguá (Notícias Agrícolas) e o futuro de
+  legendas acompanham sozinhas. E o painel calcula a idade do levantamento a
+  cada carregamento: passada a cadência da CONAB, avisa em tela que o preço
+  pode estar desatualizado, em vez de exibi-lo calado. A cotação física em Paranaguá (Notícias Agrícolas) e o futuro de
   Chicago são exibidos apenas como comparação: são preços de porto e de bolsa,
   acima do que se recebe no Pará, e não há série pública de preço ao produtor
   paraense. O custo vem do levantamento da CONAB para Pedro Afonso (TO), de

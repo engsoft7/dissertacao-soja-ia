@@ -273,3 +273,38 @@ def test_requisitos_declaram_o_que_financas_importa():
             if m not in sys.stdlib_module_names and m.lower() not in declarados:
                 faltando.append(m)
     assert not faltando, f"ausentes em dashboard_web/requirements.txt: {faltando}"
+
+def test_sinal_do_resultado_avisa_quando_depende_do_rateio():
+    """A CONAB publica o custo por saca sem abrir por item, e acima da
+    produtividade de referência os dois rateios possíveis discordam sobre lucro
+    ou prejuízo. Pintar um deles de verde é dar por decidido o que o dado não
+    decide — e quem decide com isso é o produtor, no talhão."""
+    import json as _json
+
+    lev = _json.loads((RAIZ / "pesquisa" / "dados" / "conab" /
+                       "levantamento_atual.json").read_text(encoding="utf-8"))
+    painel = _funcoes_do_painel(
+        nomes=("resultado_por_hectare",),
+        constantes=(),
+        extras={"LEVANTAMENTO_CONAB": lev})
+    calcular = painel["resultado_por_hectare"]
+    preco = lev["preco_recebido_saca"]
+    prod_ref = lev["produtividade_referencia_sc_ha"]
+
+    # Na produtividade de referência os dois rateios coincidem, por construção:
+    # é exatamente ali que o custo por saca vezes as sacas dá o custo por
+    # hectare publicado.
+    valor, outro, incerto = calcular(prod_ref, preco)
+    assert outro is not None
+    assert abs(valor - outro) < 0.01
+    assert not incerto
+
+    # Acima dela, com margem estreita, o sinal se inverte.
+    valor, outro, incerto = calcular(52.0, preco)
+    assert incerto, "a 52 sc/ha os dois rateios discordam e o teste tem que ver isso"
+    assert valor > 0 > outro
+
+    # Com custo informado pelo produtor não há rateio a discutir.
+    valor, outro, incerto = calcular(52.0, preco, 4000.0)
+    assert outro is None and not incerto
+    assert abs(valor - (52.0 * preco - 4000.0)) < 0.01

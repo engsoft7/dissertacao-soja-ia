@@ -240,7 +240,8 @@ RESERVAS = (
      # O painel não usa o levantamento inteiro; guardar só o que ele lê deixa
      # a reserva legível e evita fingir que app.py conhece campos que ignora.
      ("praca", "levantamento", "levantamento_extenso", "preco_recebido_saca",
-      "custo_operacional_saca", "produtividade_referencia_kg_ha",
+      "custo_operacional_saca", "custo_variavel_saca", "custo_fixo_saca",
+      "produtividade_referencia_kg_ha",
       "produtividade_referencia_sc_ha", "custo_operacional_ha",
       "custo_total_ha", "renda_fatores_ha", "serie", "textos")),
 )

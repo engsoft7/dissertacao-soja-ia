@@ -71,6 +71,51 @@ private const val PREF_PROD = "produtividade_usuario_sc"
 // número velho do produtor ainda vale mais que um padrão de levantamento.
 private const val DIAS_PARA_RECONFERIR_PRECO = 45L
 
+/** Resultado por hectare e o quanto ele depende do rateio do custo. */
+private data class Resultado(
+    val valor: Double,
+    val outroRateio: Double?,
+    /** true quando os dois rateios possíveis discordam sobre lucro ou prejuízo. */
+    val sinalIncerto: Boolean,
+)
+
+/**
+ * Resultado por hectare pelos dois rateios possíveis do custo.
+ *
+ * A CONAB publica o custo por saca comercializada, sem abrir por item. Tratar
+ * o custo variável como fixo por hectare — o que a interface faz, por ser o
+ * único caminho com os dados publicados — faz as sacas acima da produtividade
+ * de referência entrarem na receita sem onerar colheita, secagem e frete.
+ * Tratá-lo como proporcional à produção é o outro extremo.
+ *
+ * Entre os dois, o SINAL do resultado se inverte sempre que a produtividade
+ * supera a de referência e a margem é estreita: em 2022, +R$ 188 ou -R$ 153
+ * por hectare, com os mesmos dados. Um produto que pinta isso de verde manda
+ * o produtor decidir com uma certeza que o dado não sustenta.
+ *
+ * Quando o produtor informa o próprio custo não há rateio a discutir: o número
+ * é dele, e a função devolve só ele.
+ */
+private fun resultadoPorHectare(
+    sacasPorHectare: Double,
+    preco: Double,
+    custoDoProdutor: Double?,
+    kpis: FinancaResponse
+): Resultado {
+    val receita = sacasPorHectare * preco
+    if (custoDoProdutor != null) {
+        return Resultado(receita - custoDoProdutor, null, false)
+    }
+    val porHectare = receita - kpis.custo_ha
+    val variavel = kpis.custo_variavel_saca
+    val fixo = kpis.custo_fixo_ha
+    if (variavel == null || fixo == null) {
+        return Resultado(porHectare, null, false)
+    }
+    val porSaca = receita - (variavel * sacasPorHectare + fixo)
+    return Resultado(porHectare, porSaca, (porHectare > 0) != (porSaca > 0))
+}
+
 private fun SharedPreferences.valorDoProdutor(chave: String): Float? =
     getFloat(chave, -1f).takeIf { it > 0f }
 
@@ -601,19 +646,34 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
             // os de hoje, e não os da época — daí o rótulo.
             if (kpis != null && (observado || historico.rendimento_predito > 0)) {
                 val kgHa = if (observado) historico.rendimento_real else historico.rendimento_predito
-                val scHa = kgHa / 60
-                val receita = scHa * (precoDoProdutor ?: kpis.soja_preco_saca)
-                val lucro = receita - (custoDoProdutor ?: kpis.custo_ha)
-                val color = if (lucro > 0) (if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a))
-                            else (if (isDark) Color(0xFFf85149) else Color(0xFFdc2626))
+                val r = resultadoPorHectare(
+                    kgHa / 60, precoDoProdutor ?: kpis.soja_preco_saca, custoDoProdutor, kpis)
+                val outro = r.outroRateio
+                // Sinal incerto não leva verde nem vermelho: o dado publicado
+                // não sustenta nenhum dos dois, e a cor é o que o produtor lê
+                // antes do número.
+                val color = when {
+                    r.sinalIncerto -> if (isDark) Color(0xFFd29922) else Color(0xFFbf8700)
+                    r.valor > 0 -> if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
+                    else -> if (isDark) Color(0xFFf85149) else Color(0xFFdc2626)
+                }
                 Text(
                     text = (if (observado) "Resultado a preços de hoje: "
-                            else "Resultado projetado: ") + "R$ %,d/ha".format(lucro.toInt()),
+                            else "Resultado projetado: ") + "R$ %,d/ha".format(r.valor.toInt()),
                     fontSize = 13.sp,
                     color = color,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(top = 8.dp)
                 )
+                if (r.sinalIncerto && outro != null) {
+                    Text(
+                        text = "Pode ir de R$ %,d a R$ %,d conforme o rateio do custo, que a CONAB não publica aberto por item.".format(
+                            minOf(r.valor, outro).toInt(), maxOf(r.valor, outro).toInt()),
+                        fontSize = 11.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
             }
         }
     }
@@ -872,9 +932,15 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
             Spacer(modifier = Modifier.height(16.dp))
 
             val receita = scHa * preco
-            val lucro = receita - custo
+            val r = resultadoPorHectare(scHa, preco, if (temCusto) custo else null, kpis)
+            val outroRateio = r.outroRateio
+            val lucro = r.valor
             val roi = if (custo > 0) (lucro / custo) * 100 else 0.0
-            val profitColor = if (lucro >= 0) (if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else (if (isDark) Color(0xFFf85149) else Color(0xFFdc2626))
+            val profitColor = when {
+                r.sinalIncerto -> if (isDark) Color(0xFFd29922) else Color(0xFFbf8700)
+                lucro >= 0 -> if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
+                else -> if (isDark) Color(0xFFf85149) else Color(0xFFdc2626)
+            }
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
@@ -901,6 +967,16 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                 }
             }
             
+            if (r.sinalIncerto && outroRateio != null) {
+                Text(
+                    text = "Atenção: com estes dados o resultado pode ir de R$ %,d a R$ %,d por hectare, conforme quanto do custo variável acompanha a área e quanto acompanha a produção. A CONAB publica só o total por saca, sem abrir por item. Informe o seu custeio para a conta parar de depender disso.".format(
+                        minOf(lucro, outroRateio).toInt(), maxOf(lucro, outroRateio).toInt()),
+                    fontSize = 11.sp,
+                    color = if (isDark) Color(0xFFd29922) else Color(0xFFbf8700),
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "Simulação Inteligente", fontSize = 11.sp, color = Color.Gray)

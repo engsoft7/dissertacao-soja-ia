@@ -108,9 +108,11 @@ pesquisa/03_analise_nacional/
   resultados_ajustados.json               métricas da Tabela 3
 pesquisa/04_analise_para/
   01_compara_mascara_controlada.py        com/sem máscara na amostra comum → Tabela 5, Figura 5
+  02_desempenho_base_completa.py          os cinco modelos na base completa → Tabela 6
   02_gera_figuras.py
-  03_busca_hiperparametros.py             busca aninhada → Tabela 6
+  03_busca_hiperparametros.py             busca aninhada, um algoritmo por chamada
   04_gera_fig6_aninhada.py                Figura 6
+  05_natureza_da_repeticao.py             repetição na PAM → subseção 6.4
   comparacao_controlada.json              métricas da Tabela 5
   resultados_busca_aninhada.json          métricas da Tabela 6
   01_compara_mascara_e_baseline_DEPRECADO.py
@@ -240,17 +242,47 @@ reavalia o topo do ranking com 7.000 registros justamente para mostrar isso.
 ```bash
 cd pesquisa/04_analise_para
 python 01_compara_mascara_controlada.py  # Tabela 5 e Figura 5
+python 02_desempenho_base_completa.py    # Tabela 6 (cerca de 10 minutos)
 python 02_gera_figuras.py
+python 04_gera_fig6_aninhada.py          # Figura 6
+python 05_natureza_da_repeticao.py       # números da subseção 6.4
+```
 
-# a busca aninhada também recebe um alvo por vez
+`02_desempenho_base_completa.py` roda os quatro algoritmos mais o modelo de
+referência e reescreve `resultados_busca_aninhada.json`. Com `--conferir` ele
+roda igual mas não grava: compara com o que está publicado e sai com código 1 se
+alguma métrica divergir. Com `--tabela` apenas imprime a Tabela 6 já gravada,
+sem recalcular.
+
+Para buscar um algoritmo de cada vez — útil quando a busca é longa e convém
+retomá-la —, `03_busca_hiperparametros.py` recebe um alvo por chamada:
+
+```bash
 python 03_busca_hiperparametros.py baseline
-python 03_busca_hiperparametros.py "Random Forest"
+python 03_busca_hiperparametros.py "Random Forest" 9
 python 03_busca_hiperparametros.py "XGBoost"
 python 03_busca_hiperparametros.py "SVR"
 python 03_busca_hiperparametros.py "MLP"
-
-python 04_gera_fig6_aninhada.py          # Figura 6
 ```
+
+O orçamento de configurações do Random Forest é menor que o dos demais (9 contra
+15 sorteadas, além da adotada na dissertação). `02_desempenho_base_completa.py`
+guarda esses orçamentos em `ORCAMENTO`; sem eles a Tabela 6 não se reproduz.
+
+**O que reproduz e o que não reproduz.** Modelo de referência, MLP, SVR e Random
+Forest saem idênticos aos da Tabela 6, até a configuração modal e a frequência
+com que ela foi eleita. O XGBoost, não: sob `xgboost` 3.2.0 a busca interna
+elege outra configuração e o resultado sai 433,2 / 310,6 / R² 0,148, contra os
+439,5 / 314,5 / 0,123 publicados. É o único dos quatro cujo treino não vem do
+scikit-learn, e a tabela foi gerada com uma versão anterior da biblioteca.
+
+A diferença é de ambiente, e não de código ou de semente: as dezesseis
+candidatas sorteadas são as mesmas, e três execuções seguidas — uma delas com a
+máquina disputada por outro processo — devolveram 433,2 / 310,6 / 0,148 sem
+variar um decimal. O ordenamento dos modelos não muda, e a conclusão do
+Capítulo 6 tampouco: em qualquer das duas leituras o XGBoost é o pior dos quatro
+e fica bem abaixo do modelo de referência (R² 0,216). Quem rodar hoje e obtiver
+0,148 onde o texto traz 0,123 está vendo isto, e `--conferir` diz isso na tela.
 
 `01_compara_mascara_controlada.py` aborta com mensagem explícita se os baselines
 dos dois cenários divergirem — isso indicaria que o controle da amostra falhou e

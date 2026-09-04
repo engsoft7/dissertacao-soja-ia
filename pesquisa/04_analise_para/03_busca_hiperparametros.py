@@ -113,46 +113,64 @@ def metricas(obs, prev, media):
             'R2': round(float(r2_score(obs, prev)), 3), 'rRMSE_%': round(rmse / media * 100, 1)}
 
 
+def _matrizes(df):
+    """Colunas na forma que as rotinas de avaliação esperam."""
+    y = df.rendimento_kg_ha.values.astype(float)
+    anos, mun, X = df.ano.values, df.municipio.values, df[FEATURES].values
+    safras = [a for a in sorted(set(anos)) if (anos == a).sum() >= MIN_MUN]
+    return y, anos, mun, X, safras
+
+
+def avalia_baseline(df):
+    """Modelo de referência sob leave-one-year-out: média do município + tendência."""
+    y, anos, mun, _, safras = _matrizes(df)
+    obs, prev = [], []
+    for ty in safras:
+        obs += list(y[anos == ty])
+        prev += list(referencia(y, anos, mun, anos != ty, anos == ty))
+    return metricas(obs, prev, y.mean())
+
+
+def avalia_modelo(alvo, n_cfg, df):
+    """Busca aninhada e avaliação externa de um algoritmo, na base completa."""
+    t0 = time.time()
+    y, anos, mun, X, safras = _matrizes(df)
+    cands = [ATUAL[alvo]] + amostra(alvo, n_cfg, np.random.default_rng(SEED))
+    obs, prev, escolhidas = [], [], []
+    for ty in safras:
+        tr_ext = anos != ty
+        internas = [a for a in safras if a != ty][-N_INTERNAS:]
+        melhor, melhor_r = None, np.inf
+        for cfg in cands:
+            erros = [np.sqrt(mean_squared_error(
+                        y[anos == vi], preve(alvo, cfg, X, y, anos, mun, tr_ext & (anos != vi), anos == vi)))
+                     for vi in internas if (anos == vi).sum() >= MIN_MUN]
+            r = float(np.mean(erros)) if erros else np.inf
+            if r < melhor_r:
+                melhor, melhor_r = cfg, r
+        escolhidas.append(tuple(sorted((k, str(v)) for k, v in melhor.items())))
+        obs += list(y[anos == ty])
+        prev += list(preve(alvo, melhor, X, y, anos, mun, tr_ext, anos == ty))
+    modal = Counter(escolhidas).most_common(1)[0]
+    resultado = metricas(obs, prev, y.mean())
+    resultado.update({'config_modal': dict(modal[0]), 'freq_modal': f'{modal[1]}/{len(escolhidas)}',
+                      'n_configs': len(cands), 'segundos': round(time.time() - t0)})
+    return resultado
+
+
 def main():
     os.makedirs(SAIDA, exist_ok=True)
     alvo = sys.argv[1]
     n_cfg = int(sys.argv[2]) if len(sys.argv) > 2 else 15
     df = carrega()
-    y = df.rendimento_kg_ha.values.astype(float)
-    anos, mun, X = df.ano.values, df.municipio.values, df[FEATURES].values
-    safras = [a for a in sorted(set(anos)) if (anos == a).sum() >= MIN_MUN]
     arq = f'{SAIDA}/busca_hiperparametros.json'
     saida = json.load(open(arq, encoding='utf-8')) if os.path.exists(arq) else {}
 
     if alvo == 'baseline':
-        obs, prev = [], []
-        for ty in safras:
-            obs += list(y[anos == ty])
-            prev += list(referencia(y, anos, mun, anos != ty, anos == ty))
-        saida['Baseline (sem clima)'] = metricas(obs, prev, y.mean())
+        saida['Baseline (sem clima)'] = avalia_baseline(df)
         print('Baseline:', saida['Baseline (sem clima)'])
     else:
-        t0 = time.time()
-        cands = [ATUAL[alvo]] + amostra(alvo, n_cfg, np.random.default_rng(SEED))
-        obs, prev, escolhidas = [], [], []
-        for ty in safras:
-            tr_ext = anos != ty
-            internas = [a for a in safras if a != ty][-N_INTERNAS:]
-            melhor, melhor_r = None, np.inf
-            for cfg in cands:
-                erros = [np.sqrt(mean_squared_error(
-                            y[anos == vi], preve(alvo, cfg, X, y, anos, mun, tr_ext & (anos != vi), anos == vi)))
-                         for vi in internas if (anos == vi).sum() >= MIN_MUN]
-                r = float(np.mean(erros)) if erros else np.inf
-                if r < melhor_r:
-                    melhor, melhor_r = cfg, r
-            escolhidas.append(tuple(sorted((k, str(v)) for k, v in melhor.items())))
-            obs += list(y[anos == ty])
-            prev += list(preve(alvo, melhor, X, y, anos, mun, tr_ext, anos == ty))
-        modal = Counter(escolhidas).most_common(1)[0]
-        saida[alvo] = metricas(obs, prev, y.mean())
-        saida[alvo].update({'config_modal': dict(modal[0]), 'freq_modal': f'{modal[1]}/{len(escolhidas)}',
-                            'n_configs': len(cands), 'segundos': round(time.time() - t0)})
+        saida[alvo] = avalia_modelo(alvo, n_cfg, df)
         print(f"{alvo}: {saida[alvo]}")
 
     json.dump(saida, open(arq, 'w', encoding='utf-8'), indent=2, ensure_ascii=False)

@@ -101,6 +101,7 @@ pesquisa/03_analise_nacional/
   02_gera_figuras.py                      figuras da versão sem ajuste
   03_busca_hiperparametros.py             busca aleatória na janela 2001–2015
   06_confirma_busca.py                    reavalia o topo do ranking com 7.000 registros
+  07_repeticao_27_estados.py              repetição da PAM nas 27 UFs, da fonte primária
   04_avalia_ajustado.py                   avaliação em 2016–2020 → Tabela 3
   05_gera_figuras_ajustado.py             Figuras 2, 3 e 4 (importância por permutação)
   resultados_busca.json                   ranking completo da busca
@@ -176,6 +177,10 @@ python 03_busca_hiperparametros.py "SVR"
 python 03_busca_hiperparametros.py "MLP"
 
 python 06_confirma_busca.py              # reavalia o topo com 7.000 registros
+
+# a medida de repetição nas 27 UFs baixa a PAM inteira do SIDRA (~5 min)
+python 07_repeticao_27_estados.py
+python 07_repeticao_27_estados.py --conferir   # refaz a análise do CSV já baixado
 python 04_avalia_ajustado.py             # avalia em 2016–2020 → Tabela 3
 python 05_gera_figuras_ajustado.py       # Figuras 2, 3 e 4
 ```

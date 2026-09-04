@@ -42,6 +42,10 @@ on:
         description: "Simular o ciclo completo: consulta as fontes e relata o que mudaria, sem abrir PR"
         type: boolean
         default: false
+      repeticao_27_estados:
+        description: "Medir a repetição da PAM nas 27 UFs e abrir PR com o resultado (demora ~5 min)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -92,12 +96,53 @@ jobs:
           DADOS_GOV_API_KEY: ${{ secrets.DADOS_GOV_API_KEY }}
         run: python software/automacao_github/atualiza_conab.py --testar
 
+      # Mede a repetição nas 27 UFs sobre a fonte primária. É a extensão do
+      # estudo do Pará a todo o país, e roda aqui porque a coleta precisa de
+      # rede. Grava CSV e JSON, que a etapa de PR versiona.
+      - name: Mede a repetição da PAM nas 27 UFs
+        if: github.event_name == 'workflow_dispatch' && inputs.repeticao_27_estados
+        run: |
+          pip install --quiet numpy
+          cd pesquisa/03_analise_nacional
+          python 07_repeticao_27_estados.py | tee /tmp/repeticao.txt
+          {
+            echo "Medida da taxa de repetição da PAM para a soja nas 27 unidades da"
+            echo "federação, sobre a fonte primária (SIDRA, tabela 5457), gerada pelo"
+            echo "script \`pesquisa/03_analise_nacional/07_repeticao_27_estados.py\`."
+            echo ""
+            echo "Estende ao país a medida que o estudo do Pará fazia em um estado, e"
+            echo "que a comparação com von Bloh et al. (2023) fazia em sete, com janela"
+            echo "temporal distinta. Aqui todos os estados são medidos pelo mesmo"
+            echo "instrumento e no mesmo período."
+            echo ""
+            echo "O denominador é o par de safras consecutivas, nunca o registro."
+            echo ""
+            echo '```'
+            cat /tmp/repeticao.txt
+            echo '```'
+            echo ""
+            echo "Confira antes de mergear: este PR acrescenta base nova ao repositório."
+          } > /tmp/resumo_repeticao.md
+
+      - name: Abre PR com a medida das 27 UFs
+        if: github.event_name == 'workflow_dispatch' && inputs.repeticao_27_estados
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automacao/repeticao-27-estados
+          add-paths: |
+            pesquisa/03_analise_nacional/pam_soja_municipios.csv
+            pesquisa/03_analise_nacional/repeticao_27_estados.json
+          commit-message: "Mede a repetição da PAM para a soja nas 27 unidades da federação"
+          title: "Repetição da PAM nas 27 UFs"
+          body-path: /tmp/resumo_repeticao.md
+          delete-branch: true
+
       # O teste de credencial é anunciado no README como "sem alterar nada".
       # Sem esta guarda ele seguiria para o SIDRA e poderia abrir e mergear um
       # PR na base — que é a mesma que produz os números da dissertação.
       - name: Consulta o SIDRA e aplica revisões
         id: pam
-        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos }}
+        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos && !inputs.repeticao_27_estados }}
         env:
           RESUMO_MD: /tmp/resumo_pam.md
         run: python software/automacao_github/atualiza_pam.py

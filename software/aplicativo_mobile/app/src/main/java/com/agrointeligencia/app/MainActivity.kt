@@ -2,6 +2,7 @@ package com.agrointeligencia.app
 
 import android.os.Bundle
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
 
@@ -53,14 +54,41 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
-// Preço informado pelo produtor, guardado entre sessões. Ver o comentário em
-// ResumoFinanceiroCard: preço é grandeza de mercado, e nenhum padrão vindo de
-// levantamento bimestral chega em dia — o número de quem vendeu vale mais.
-private const val PREF_PRECO_USUARIO = "preco_usuario_saca"
-private const val PREF_PRECO_USUARIO_EM = "preco_usuario_informado_em"
-// Passado esse tempo, o app pede confirmação do preço próprio. Não o descarta:
-// um número velho do produtor ainda é melhor que um padrão de levantamento.
+// OS TRÊS NÚMEROS QUE DECIDEM A MARGEM SÃO DO PRODUTOR.
+//
+// Este produto é usado por fazendeiro, produtor rural e técnico — não por
+// quem escreveu a dissertação. Produtividade, preço e custeio são justamente
+// o que essa pessoa conhece melhor que qualquer levantamento ou modelo: ela
+// pesou a carga, recebeu o pagamento e pagou as notas.
+//
+// O padrão serve para a tela abrir com algo plausível. A partir do momento em
+// que o produtor informa o dele, é o dele que vale, e fica guardado com a data
+// — digitar o próprio custeio e perdê-lo ao fechar o aplicativo é defeito.
+private const val PREF_PRECO = "preco_usuario_saca"
+private const val PREF_CUSTO = "custo_usuario_ha"
+private const val PREF_PROD = "produtividade_usuario_sc"
+// Passado esse tempo, o app pede confirmação do preço. Não o descarta: um
+// número velho do produtor ainda vale mais que um padrão de levantamento.
 private const val DIAS_PARA_RECONFERIR_PRECO = 45L
+
+private fun SharedPreferences.valorDoProdutor(chave: String): Float? =
+    getFloat(chave, -1f).takeIf { it > 0f }
+
+private fun SharedPreferences.informadoEm(chave: String): Long =
+    getLong(chave + "_em", 0L)
+
+private fun SharedPreferences.guardarDoProdutor(chave: String, valor: Double, quando: Long) {
+    edit().putFloat(chave, valor.toFloat()).putLong(chave + "_em", quando).apply()
+}
+
+private fun SharedPreferences.esquecerDoProdutor(vararg chaves: String) {
+    val editor = edit()
+    for (chave in chaves) {
+        editor.remove(chave)
+        editor.remove(chave + "_em")
+    }
+    editor.apply()
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -505,6 +533,14 @@ fun AgroDashboard() {
 @Composable
 fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
     val isDark = isSystemInDarkTheme()
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
+    // O mesmo preço e o mesmo custo do Resumo Financeiro. Sem isto, o produtor
+    // informava o preço dele numa aba e via o histórico calculado com o da
+    // CONAB na outra — duas margens diferentes para a mesma lavoura, no mesmo
+    // aplicativo. Num produto de campo, isso destrói a confiança no número.
+    val precoDoProdutor = remember { prefs.valorDoProdutor(PREF_PRECO)?.toDouble() }
+    val custoDoProdutor = remember { prefs.valorDoProdutor(PREF_CUSTO)?.toDouble() }
     Card(
         modifier = Modifier.animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)).fillMaxWidth().padding(vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
@@ -525,8 +561,8 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                 if (kpis != null && (observado || historico.rendimento_predito > 0)) {
                     val kgHa = if (observado) historico.rendimento_real else historico.rendimento_predito
                     val scHa = kgHa / 60
-                    val receita = scHa * kpis.soja_preco_saca
-                    val lucro = receita - kpis.custo_ha
+                    val receita = scHa * (precoDoProdutor ?: kpis.soja_preco_saca)
+                    val lucro = receita - (custoDoProdutor ?: kpis.custo_ha)
                     val color = if (lucro > 0) (if(isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else (if(isDark) Color(0xFFf85149) else Color(0xFFdc2626))
                     Text(
                         text = (if (observado) "Margem a preços de hoje: R$ "
@@ -615,24 +651,33 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
 
-    // O PREÇO DO PRODUTOR, GUARDADO.
+    // Ver o comentário das constantes PREF_*: os três números são do produtor,
+    // e o padrão só existe para a tela abrir com algo plausível.
     //
-    // O problema de fundo não é a coleta estar desligada: é que custo é
-    // grandeza de levantamento e preço é grandeza de mercado. A CONAB publica
-    // a cada dois meses e o preço da soja muda todo dia, então NENHUM padrão
-    // vindo de levantamento chega em dia — por melhor que seja a automação.
-    //
-    // Quem sabe o preço é quem vendeu. O produto pergunta uma vez, guarda com
-    // a data, e passa a abrir com o número do produtor em vez do da CONAB. O
-    // padrão vira ponto de partida, que é tudo o que ele podia ser.
-    val precoSalvo = remember { prefs.getFloat(PREF_PRECO_USUARIO, -1f).takeIf { it > 0f } }
-    var salvoEm by remember { mutableStateOf(prefs.getLong(PREF_PRECO_USUARIO_EM, 0L)) }
-    var usandoPrecoProprio by remember { mutableStateOf(precoSalvo != null) }
+    // A produtividade é a que mais desloca o resultado. A estimativa sai da
+    // PAM, e a própria pesquisa mostrou que a PAM arredonda para sacas
+    // inteiras e trava em platôs: dois terços dos registros da base são
+    // múltiplos exatos de 60 kg. Quem colheu 65 sacas não deve ver a margem
+    // calculada sobre 55 porque a estatística oficial arredondou.
+    val precoSalvo = remember { prefs.valorDoProdutor(PREF_PRECO) }
+    val custoSalvo = remember { prefs.valorDoProdutor(PREF_CUSTO) }
+    val prodSalva = remember { prefs.valorDoProdutor(PREF_PROD) }
+    val prodModelo = projecao.rendimento_predito / 60.0
+
+    var precoEm by remember { mutableStateOf(prefs.informadoEm(PREF_PRECO)) }
+    var temPreco by remember { mutableStateOf(precoSalvo != null) }
+    var temCusto by remember { mutableStateOf(custoSalvo != null) }
+    var temProd by remember { mutableStateOf(prodSalva != null) }
 
     var customPreco by remember {
         mutableStateOf((precoSalvo?.toDouble() ?: kpis.soja_preco_saca).toString())
     }
-    var customCusto by remember { mutableStateOf(kpis.custo_ha.toString()) }
+    var customCusto by remember {
+        mutableStateOf((custoSalvo?.toDouble() ?: kpis.custo_ha).toString())
+    }
+    var customProd by remember {
+        mutableStateOf("%.1f".format(prodSalva?.toDouble() ?: prodModelo))
+    }
 
     Card(
         modifier = Modifier.animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)).fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
@@ -643,9 +688,10 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
         Column(modifier = Modifier.padding(16.dp)) {
             val preco = customPreco.replace(',', '.').toDoubleOrNull() ?: kpis.soja_preco_saca
             val custo = customCusto.replace(',', '.').toDoubleOrNull() ?: kpis.custo_ha
+            val scHa = customProd.replace(',', '.').toDoubleOrNull() ?: prodModelo
             val diasDoPrecoProprio =
-                if (usandoPrecoProprio && salvoEm > 0L)
-                    (System.currentTimeMillis() - salvoEm) / 86_400_000L
+                if (temPreco && precoEm > 0L)
+                    (System.currentTimeMillis() - precoEm) / 86_400_000L
                 else -1L
 
             // Os avisos vêm ANTES dos campos, não como nota de rodapé: quem for
@@ -657,9 +703,12 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
             // o CUSTO continua saindo do mesmo levantamento velho e entrando na
             // margem: aí o alerta troca de assunto em vez de sumir.
             val alerta = when {
-                usandoPrecoProprio && diasDoPrecoProprio >= DIAS_PARA_RECONFERIR_PRECO ->
+                temPreco && diasDoPrecoProprio >= DIAS_PARA_RECONFERIR_PRECO ->
                     "Você informou este preço há $diasDoPrecoProprio dias. Confirme se ainda é o que recebe."
-                usandoPrecoProprio -> kpis.aviso_custo
+                // Com preço próprio, o custo é que continua vindo do
+                // levantamento — a menos que o produtor já tenha informado o
+                // dele também, e aí não há o que avisar.
+                temPreco && !temCusto -> kpis.aviso_custo
                 else -> kpis.aviso_preco?.let { "Preço possivelmente desatualizado. $it" }
             }
             alerta?.let {
@@ -674,22 +723,18 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
-                    value = customPreco,
+                    value = customProd,
                     onValueChange = { digitado ->
-                        customPreco = digitado
+                        customProd = digitado
                         // Guarda assim que o número for válido: o produtor não
                         // deve precisar apertar nada para o app lembrar.
                         val valor = digitado.replace(',', '.').toDoubleOrNull()
                         if (valor != null && valor > 0) {
-                            salvoEm = System.currentTimeMillis()
-                            usandoPrecoProprio = true
-                            prefs.edit()
-                                .putFloat(PREF_PRECO_USUARIO, valor.toFloat())
-                                .putLong(PREF_PRECO_USUARIO_EM, salvoEm)
-                                .apply()
+                            temProd = true
+                            prefs.guardarDoProdutor(PREF_PROD, valor, System.currentTimeMillis())
                         }
                     },
-                    label = { Text(if (usandoPrecoProprio) "Seu preço (R$/sc)" else "Preço Saca (R$)", fontSize = 12.sp) },
+                    label = { Text(if (temProd) "Sua produtividade (sc/ha)" else "Produtividade (sc/ha)", fontSize = 12.sp) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -698,9 +743,19 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     )
                 )
                 OutlinedTextField(
-                    value = customCusto,
-                    onValueChange = { customCusto = it },
-                    label = { Text("Custo/ha (R$)", fontSize = 12.sp) },
+                    value = customPreco,
+                    onValueChange = { digitado ->
+                        customPreco = digitado
+                        // Guarda assim que o número for válido: o produtor não
+                        // deve precisar apertar nada para o app lembrar.
+                        val valor = digitado.replace(',', '.').toDoubleOrNull()
+                        if (valor != null && valor > 0) {
+                            temPreco = true
+                            precoEm = System.currentTimeMillis()
+                            prefs.guardarDoProdutor(PREF_PRECO, valor, System.currentTimeMillis())
+                        }
+                    },
+                    label = { Text(if (temPreco) "Seu preço (R$/sc)" else "Preço da saca (R$)", fontSize = 12.sp) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -710,61 +765,89 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                 )
             }
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = customCusto,
+                    onValueChange = { digitado ->
+                        customCusto = digitado
+                        // Guarda assim que o número for válido: o produtor não
+                        // deve precisar apertar nada para o app lembrar.
+                        val valor = digitado.replace(',', '.').toDoubleOrNull()
+                        if (valor != null && valor > 0) {
+                            temCusto = true
+                            prefs.guardarDoProdutor(PREF_CUSTO, valor, System.currentTimeMillis())
+                        }
+                    },
+                    label = { Text(if (temCusto) "Seu custo/ha (R$)" else "Custo/ha (R$)", fontSize = 12.sp) },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9),
+                        unfocusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9)
+                    )
+                )
+                // Mantém a largura das colunas igual à da linha de cima.
+                Spacer(modifier = Modifier.weight(1f))
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
-            // De onde vem o número que está no campo, e contra o que compará-lo.
-            // Com preço próprio, a legenda diz de quando ele é; com o padrão da
-            // CONAB, diz de que levantamento nasce e onde está na série da
-            // praça. Nos dois casos vem o físico de Paranaguá, que é a única
-            // referência diária que o produto tem. Texto servido pela API, para
-            // acompanhar a CONAB sem recompilar o aplicativo.
+            // A legenda diz, em linguagem de campo, o que é do produtor e o que
+            // ainda é padrão. Quem usa isto no talhão precisa saber de onde vem
+            // o número antes de decidir com ele.
+            val seus = listOfNotNull(
+                if (temProd) "produtividade" else null,
+                if (temPreco) "preço" else null,
+                if (temCusto) "custo" else null
+            )
+            val quando = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
             val legenda = listOfNotNull(
-                if (usandoPrecoProprio) {
-                    val quando = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
-                        .format(java.util.Date(salvoEm))
-                    "Seu preço, informado em $quando."
-                } else {
-                    kpis.fonte_preco?.let { "Padrão: $it." }
-                },
-                if (usandoPrecoProprio) null else kpis.nota_preco,
+                if (seus.isEmpty())
+                    "Preencha com os seus números: o app guarda e passa a abrir com eles."
+                else
+                    "Seus números: " + seus.joinToString(", ") + ".",
+                if (temProd) null
+                    else "A produtividade é a estimativa do modelo — se você já colheu, informe a sua.",
+                if (temPreco) null else kpis.fonte_preco?.let { "Preço padrão: $it." },
+                if (temPreco) null else kpis.nota_preco,
+                if (temCusto) null else kpis.fonte_preco?.let { "Custo padrão: $it." },
                 // Referência que se move todo dia, contra um padrão que se move
                 // a cada dois meses. Concatenar antes de .format() deixaria
                 // dúvida sobre a qual literal o format se aplica.
                 kpis.soja_preco_paranagua_saca?.let {
                     "Físico em Paranaguá hoje: R$ %.2f/sc — é porto, no Paraná, acima do que se recebe na porteira no Pará.".format(it)
-                },
-                kpis.soja_preco_cbot_saca?.let {
-                    "Futuro em Chicago convertido: R$ %.2f/sc, cotação de bolsa.".format(it)
-                },
-                if (usandoPrecoProprio) null
-                else "Digite o preço que você recebe: o app passa a abrir com ele."
+                }
             ).joinToString(" ")
             if (legenda.isNotBlank()) {
                 Text(text = legenda, fontSize = 11.sp, color = Color.Gray)
             }
-            // Só aparece depois que há preço próprio guardado: é o caminho de
-            // volta, para o produtor não ficar preso a um número que digitou
-            // errado sem saber de onde vinha o padrão.
-            if (usandoPrecoProprio) {
+            if (seus.isNotEmpty()) {
+                Text(
+                    text = "Informados em " + quando.format(java.util.Date(
+                        maxOf(precoEm, prefs.informadoEm(PREF_CUSTO), prefs.informadoEm(PREF_PROD)))) + ".",
+                    fontSize = 11.sp,
+                    color = Color.Gray
+                )
+                // Caminho de volta, para ninguém ficar preso a um número
+                // digitado errado sem saber de onde vinha o padrão.
                 TextButton(
                     onClick = {
-                        prefs.edit().remove(PREF_PRECO_USUARIO)
-                            .remove(PREF_PRECO_USUARIO_EM).apply()
-                        usandoPrecoProprio = false
-                        salvoEm = 0L
+                        prefs.esquecerDoProdutor(PREF_PRECO, PREF_CUSTO, PREF_PROD)
+                        temPreco = false; temCusto = false; temProd = false
+                        precoEm = 0L
                         customPreco = kpis.soja_preco_saca.toString()
+                        customCusto = kpis.custo_ha.toString()
+                        customProd = "%.1f".format(prodModelo)
                     },
                     contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
                 ) {
-                    Text(
-                        text = "Voltar ao padrão da CONAB (R$ %.2f)".format(kpis.soja_preco_saca),
-                        fontSize = 11.sp
-                    )
+                    Text(text = "Voltar aos valores padrão", fontSize = 11.sp)
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val scHa = projecao.rendimento_predito / 60
             val receita = scHa * preco
             val lucro = receita - custo
             val roi = if (custo > 0) (lucro / custo) * 100 else 0.0
@@ -772,7 +855,8 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text(text = "Receita Bruta Est.", fontSize = 12.sp, color = Color.Gray)
+                    Text(text = if (temProd) "Receita Bruta" else "Receita Bruta Est.",
+                         fontSize = 12.sp, color = Color.Gray)
                     Text(text = "R$ ${receita.toInt()}/ha", fontSize = 18.sp, color = (if(isDark) Color(0xFF58a6ff) else Color(0xFF2563eb)), fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {

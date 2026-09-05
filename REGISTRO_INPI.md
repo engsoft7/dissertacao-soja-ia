@@ -194,11 +194,12 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.7` (05/09/2026) — versão da defesa | 57 | 10.711 | `0a2aaf79c45e875bfb6d89714a74a034e4d8ef5739bf6fd7e1ff7fa31073cd7a` |
 | Tag `v2.3.8` (05/09/2026) — geradores do artigo submetido | 60 | 11.680 | `506baabfca171e40cc5d968d0ca47a7aff1877938d92f532376d67d7c1429a83` |
 
-A `v2.3.8` acrescenta os três geradores do manuscrito submetido à CEA em
-`pesquisa/05_artigo/` — são os primeiros arquivos-fonte a entrar depois da
-versão da defesa, e por isso a primeira mudança de hash desde ela. As
-correções de identidade do autor que a acompanham tocam apenas `.cff` e `.md`,
-que ficam fora do conjunto resumido e não alteram o valor.
+A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
+manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
+arquivos-fonte a entrar depois da versão da defesa, e por isso a primeira
+mudança de hash desde ela. As correções de identidade do autor que a
+acompanham tocam apenas `.cff` e `.md`, que ficam fora do conjunto resumido e
+não alteram o valor.
 
 Os nove foram recalculados a partir de cópias limpas dos respectivos commits e
 conferem em execuções repetidas. A tag da defesa é a `v2.3.7`, e é do Release
@@ -417,6 +418,8 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
   previsão da produtividade da soja*. 2026. Dissertação (Em andamento) (PPCA/UFPA), Tucuruí.
 - **Repositório:** https://github.com/engsoft7/dissertacao-soja-ia
 - **DOI (conceito, resolve para a versão mais recente):** 10.5281/zenodo.21285918
-- **DOI da versão da defesa (`v2.3.7`):** 10.5281/zenodo.22343315
+- **DOI da versão da defesa (`v2.3.7`), citada como referência de dados do
+  artigo submetido:** 10.5281/zenodo.22343315
+- **DOI da versão mais recente (`v2.3.8`):** 10.5281/zenodo.22348036
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

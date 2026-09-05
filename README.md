@@ -1,6 +1,6 @@
 # Aplicação da Inteligência Artificial na Previsão da Produtividade da Soja
 
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21286115-1682D4?logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.21286115)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21285918-1682D4?logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.21285918)
 [![Painel online](https://img.shields.io/badge/painel_online-soja--para.streamlit.app-FF4B4B?logo=streamlit&logoColor=white)](https://soja-para.streamlit.app)
 [![Download App (Android)](https://img.shields.io/badge/Download_APK-Android_Nativo-3DDC84?logo=android&logoColor=white)](https://github.com/engsoft7/dissertacao-soja-ia/releases/latest)
 
@@ -504,9 +504,13 @@ dissertação: se o IBGE revisar uma safra, a base muda e as métricas do painel
 são recalculadas, enquanto as tabelas do texto continuam reportando o
 levantamento vigente na época da escrita.
 
-Para reproduzir exatamente os valores das tabelas da dissertação, use a
-**versão arquivada no Zenodo** indicada pelo DOI, e não o `main`. O DOI aponta
-para um instantâneo imutável; o `main` é a versão viva do produto técnico.
+Para reproduzir exatamente os valores das tabelas da dissertação, use uma
+**versão arquivada no Zenodo**, e não o `main`: o DOI de versão aponta para um
+instantâneo imutável, enquanto o `main` é a versão viva do produto técnico. O
+DOI do selo acima é o de conceito, que resolve sempre para a mais recente e
+por isso não serve para fixar um estado; para isso use o DOI da versão — a
+`v2.3.7` é `10.5281/zenodo.22343315`, e é a primeira a conter a base nacional
+usada no artigo sobre a repetição na PAM.
 
 Somente `pesquisa/dados/soja_para_mascarado_2001_2024.csv` (a base do painel) é
 atualizado — o nome do arquivo preserva o recorte original da dissertação, mas
@@ -597,7 +601,10 @@ licenças de origem; cite as fontes originais ao reutilizá-los.
 
 SANTOS, Maycon Lima dos. **Aplicação da Inteligência Artificial na Previsão da
 Produtividade da Soja: códigos e dados**. Zenodo, 2026. Software.
-DOI: 10.5281/zenodo.21286115. Disponível em: https://doi.org/10.5281/zenodo.21286115.
+DOI: 10.5281/zenodo.21285918. Disponível em: https://doi.org/10.5281/zenodo.21285918.
+Esse DOI representa todas as versões e resolve sempre para a mais recente.
+Para citar o estado exato usado no artigo sobre a repetição na PAM, use a
+versão v2.3.7: DOI: 10.5281/zenodo.22343315.
 
 ## 🌟 Lançamento Oficial v2.1.1 (AgroInteligência Mobile)
 - **Migração Cloud-Native:** Lógica de predição isolada em servidor próprio (FastAPI / Render).

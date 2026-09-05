@@ -194,9 +194,12 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.7` (05/09/2026) — versão da defesa | 57 | 10.711 | `0a2aaf79c45e875bfb6d89714a74a034e4d8ef5739bf6fd7e1ff7fa31073cd7a` |
 
 Os oito foram recalculados a partir de cópias limpas dos respectivos commits e
-conferem em execuções repetidas. A tag da defesa é a `v2.3.7`, e é da `v2.3.5`
-que sai o APK distribuído (`versionCode` 13, `versionName` 2.1.6) — nem a
-`v2.3.6` nem a `v2.3.7` alteram código do aplicativo. As anteriores ficam
+conferem em execuções repetidas. A tag da defesa é a `v2.3.7`, e é do Release
+dela que sai o APK distribuído (`versionCode` 13, `versionName` 2.1.6,
+SHA-256 `5ee2ea9697b092c9b27fe76f3c1533eaf7aabb79e68c7b1d4700ced34bd18a21`).
+Esse binário não difere em comportamento do publicado na `v2.3.5`: nem a
+`v2.3.6` nem a `v2.3.7` alteram código do aplicativo — as duas mexem apenas na
+pesquisa, na documentação e nos metadados de citação. As anteriores ficam
 registradas pelo que as separa:
 
 - a `v2.3.0` é anterior às correções do simulador financeiro e do ranking de
@@ -406,6 +409,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **Dissertação:** SANTOS, M. L. dos. *Aplicação da Inteligência Artificial na
   previsão da produtividade da soja*. 2026. Dissertação (Em andamento) (PPCA/UFPA), Tucuruí.
 - **Repositório:** https://github.com/engsoft7/dissertacao-soja-ia
-- **DOI:** 10.5281/zenodo.21286115
+- **DOI (conceito, resolve para a versão mais recente):** 10.5281/zenodo.21285918
+- **DOI da versão da defesa (`v2.3.7`):** 10.5281/zenodo.22343315
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

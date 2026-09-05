@@ -9,26 +9,27 @@ manuscrito pode ser recomputada a partir do depósito; um PNG que ninguém sabe
 regerar não sustenta essa afirmação, e é justamente na revisão que ele precisa
 ser refeito.
 
-DIVERGÊNCIA CONHECIDA, na figura 3
-──────────────────────────────────
-O manuscrito submetido declara Spearman −0,456 no país, −0,489 fora da Amazônia
-Legal e −0,240 dentro dela. Recomputando aqui a partir do CSV depositado, com a
-mesma população — 2.460 municípios com ao menos cinco pares, 2.207 fora e 253
-dentro, contagens que conferem exatamente —, os valores são −0,459, −0,492 e
-−0,235.
+O QUE MUDOU EM RELAÇÃO À VERSÃO SUBMETIDA
+─────────────────────────────────────────
+A versão enviada à revista em 05/09/2026 declara Spearman −0,456 no país,
+−0,489 fora da Amazônia Legal e −0,240 dentro dela, sobre um recorte de 2.207
+municípios fora e 253 dentro. Nenhum desses três valores se reproduz a partir
+do CSV depositado, embora a população confira exatamente — e todo o resto
+também: 46.536 pares, 8.192 repetições, 17,6% no país, 45,7% no Pará.
 
-A diferença é de 0,003 a 0,005 e não altera nenhuma conclusão: a correlação
-continua se fortalecendo fora da Amazônia, que é o argumento. Mas os números
-impressos não são reproduzíveis pelo depósito, e isso precisa ser corrigido na
-revisão. Tudo o mais confere: 46.536 pares, 8.192 repetições, 17,6% no país,
-45,7% no Pará.
+O recorte, além disso, estava errado: os 253 municípios rotulados "Legal
+Amazon" excluíam Mato Grosso, que integra a Amazônia Legal. Com MT são 378
+dentro e 2.082 fora.
 
-Há ainda um erro de rótulo. Os 253 municípios que a figura submetida chama de
-"Legal Amazon" excluem Mato Grosso, que integra a Amazônia Legal. Com MT são
-378 municípios, e a correlação fora dela passa a −0,503 — ou seja, corrigir o
-rótulo reforça o argumento do artigo em vez de enfraquecê-lo. Este script usa a
-definição correta e imprime as duas, para que a revisão possa escolher com o
-número à vista.
+Os dois defeitos foram corrigidos aqui e em gera_manuscrito_cea.py, que agora
+produzem −0,459 no país, −0,503 fora e −0,266 dentro. Corrigir o recorte
+reforça o argumento em vez de enfraquecê-lo: a correlação fora da Amazônia
+passa de −0,489 para −0,503, e a leitura de que o gradiente é de escala e não
+de região fica mais nítida.
+
+Esta é a versão para a revisão. A submetida permanece como está no registro da
+revista; a divergência está documentada aqui para que a carta de resposta aos
+revisores possa declará-la.
 
 Uso:  python gera_figuras_cea.py           # gera as quatro figuras em saida/
       python gera_figuras_cea.py --sem-permutacao   # pula a figura 2 (2 min)
@@ -204,11 +205,12 @@ def main():
     r_sub_fora, _ = spearmanr(m.loc[~sub, 'area'], m.loc[~sub, 'taxa'])
     r_sub_dentro, _ = spearmanr(m.loc[sub, 'area'], m.loc[sub, 'taxa'])
     print('\nCorrelação de Spearman entre área plantada e taxa de repetição')
-    print(f'  país                        : {rho:+.3f}   (manuscrito: -0.456)')
-    print(f'  fora da Amazônia Legal      : {r_fora:+.3f}   com MT, {(~m.uf.isin(AMAZONIA_LEGAL)).sum():,} municípios')
-    print(f'  dentro da Amazônia Legal    : {r_dentro:+.3f}   com MT, {m.uf.isin(AMAZONIA_LEGAL).sum():,} municípios')
-    print(f'  fora, recorte da figura     : {r_sub_fora:+.3f}   sem MT, {(~sub).sum():,} municípios (manuscrito: -0.489)')
-    print(f'  dentro, recorte da figura   : {r_sub_dentro:+.3f}   sem MT, {sub.sum():,} municípios (manuscrito: -0.240)')
+    print(f'  país                     : {rho:+.3f}   submetido: -0.456')
+    print(f'  fora da Amazônia Legal   : {r_fora:+.3f}   {(~m.uf.isin(AMAZONIA_LEGAL)).sum():,} municípios, com MT   submetido: -0.489')
+    print(f'  dentro da Amazônia Legal : {r_dentro:+.3f}   {m.uf.isin(AMAZONIA_LEGAL).sum():,} municípios, com MT     submetido: -0.240')
+    print('\n  O recorte da versão submetida, sem Mato Grosso, para conferência:')
+    print(f'    fora   : {r_sub_fora:+.3f}   {(~sub).sum():,} municípios')
+    print(f'    dentro : {r_sub_dentro:+.3f}   {sub.sum():,} municípios')
     return 0
 
 

@@ -46,6 +46,10 @@ on:
         description: "Medir a repetição da PAM nas 27 UFs e abrir PR com o resultado (demora ~5 min)"
         type: boolean
         default: false
+      conferir_referencias:
+        description: "Conferir as referências do artigo na Crossref (só relata, não altera nada)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -96,6 +100,14 @@ jobs:
           DADOS_GOV_API_KEY: ${{ secrets.DADOS_GOV_API_KEY }}
         run: python software/automacao_github/atualiza_conab.py --testar
 
+      # Confere as referências do artigo contra o registro oficial da Crossref.
+      # Roda aqui porque o ambiente de desenvolvimento não alcança a API. Só
+      # imprime: nenhum arquivo é alterado, nenhum PR é aberto.
+      - name: Confere as referências do artigo na Crossref
+        if: github.event_name == 'workflow_dispatch' && inputs.conferir_referencias
+        working-directory: pesquisa/05_artigo
+        run: python confere_referencias.py
+
       # Mede a repetição nas 27 UFs sobre a fonte primária. É a extensão do
       # estudo do Pará a todo o país, e roda aqui porque a coleta precisa de
       # rede. Grava CSV e JSON, que a etapa de PR versiona.
@@ -142,7 +154,7 @@ jobs:
       # PR na base — que é a mesma que produz os números da dissertação.
       - name: Consulta o SIDRA e aplica revisões
         id: pam
-        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos && !inputs.repeticao_27_estados }}
+        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos && !inputs.repeticao_27_estados && !inputs.conferir_referencias }}
         env:
           RESUMO_MD: /tmp/resumo_pam.md
         run: python software/automacao_github/atualiza_pam.py

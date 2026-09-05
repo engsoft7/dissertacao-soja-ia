@@ -120,7 +120,7 @@ par('Machine learning pipelines for crop yield prediction are evaluated against 
     'chance, with none of 2,000 permutations reaching the observed rate. The rate '
     'ranges from 3.7% to 45.7% across states, and what predicts it is not the region '
     'but the scale of the crop: the Spearman correlation between municipal planted '
-    'area and repetition rate is −0.456, strengthening to −0.489 when the Legal '
+    'area and repetition rate is −0.459, strengthening to −0.503 when the Legal '
     'Amazon states are excluded. Where the rate is highest, four standard algorithms '
     'fed with climatic and spectral predictors failed to outperform a baseline using '
     'only municipal history and temporal trend (R² = 0.216 for both), which shows '
@@ -344,14 +344,15 @@ corpo('Crop scale does. Fig. 3 relates, for each municipality with at least five
       'association is monotonic across four orders of magnitude: the mean per area '
       'decile falls from about 33% in the smallest-area decile to about 7% in the '
       'largest. The Spearman correlation between the logarithm of area and the rate '
-      'is −0.456 (n = 2,460 municipalities; p < 10⁻¹²⁵).')
+      'is −0.459 (n = 2,460 municipalities; p < 10⁻¹²⁷).')
 cap('Fig. 3. Municipal soybean planted area and repetition rate. Each point is a '
-    'municipality with at least five consecutive-season pairs. Logarithmic scale on '
-    'the abscissa.')
+    'municipality with at least five consecutive-season pairs, coloured by whether '
+    'it lies in one of the nine Legal Amazon states. Logarithmic scale on the '
+    'abscissa.')
 corpo('The decisive test is to exclude the Amazon. Restricting the analysis to the '
-      '2,207 municipalities outside the Legal Amazon states, the correlation does not '
-      'weaken: it strengthens to −0.489. Within the Legal Amazon itself, over 253 '
-      'municipalities, it is −0.240. The gradient is therefore not an effect of the '
+      '2,082 municipalities outside the Legal Amazon states, the correlation does not '
+      'weaken: it strengthens to −0.503. Within the Legal Amazon itself, over 378 '
+      'municipalities, it is −0.266. The gradient is therefore not an effect of the '
       'region; it is an effect of scale, which manifests equally — or more sharply — '
       'outside it.')
 corpo('The pattern also holds within individual states. Dividing the municipalities of '
@@ -434,8 +435,8 @@ corpo('These findings do not constitute a failure of the PAM, but a manifestatio
       'identification of what governs it.')
 corpo('The regional hypothesis, which would be the natural reading, does not hold. If '
       'the problem belonged to the Amazon, the correlation between area and repetition '
-      'would vanish when the Amazon is excluded; instead it strengthens, from −0.456 '
-      'to −0.489. And São Paulo, with 31.9% over almost eight thousand pairs, would be '
+      'would vanish when the Amazon is excluded; instead it strengthens, from −0.459 '
+      'to −0.503. And São Paulo, with 31.9% over almost eight thousand pairs, would be '
       'inexplicable. The predictor is the scale of the crop in that municipality, not '
       'latitude: a five-hundred-hectare soybean crop has a sparse informant network in '
       'Ribeirão Preto as much as in Novo Progresso.')
@@ -493,8 +494,8 @@ corpo('This study documented that 17.6% of the 46,536 consecutive-season pairs o
       'entire national dataset concentrated in a single value, 3,000 kg ha⁻¹.')
 corpo('The central finding, however, is not the magnitude but the predictor. The '
       'repetition rate is not a function of region but of the scale of the crop in the '
-      'municipality: the correlation between planted area and repetition is −0.456 '
-      'nationally and −0.489 when the Legal Amazon states are excluded, and the '
+      'municipality: the correlation between planted area and repetition is −0.459 '
+      'nationally and −0.503 when the Legal Amazon states are excluded, and the '
       'gradient holds within ten of the fourteen states with sufficient sample. São '
       'Paulo, at 31.9%, demonstrates that the phenomenon is not Amazonian.')
 corpo('As a consequence, machine learning models fed with climatic and spectral '
@@ -642,7 +643,7 @@ par('Highlights', 12, True, align=AL.LEFT, lh=1.0, dep=12, doc=h)
 for b in [
     '17.6% of consecutive soybean seasons in Brazil report identical yield',
     'Observed rate exceeds chance by more than 100 standard deviations',
-    'Crop scale, not region, predicts repetition (Spearman −0.46; −0.49 outside Amazon)',
+    'Crop scale, not region, predicts repetition (Spearman −0.46; −0.50 outside Amazon)',
     'São Paulo reaches 31.9%, showing the effect is not an Amazonian phenomenon',
     'Environmental predictors do not beat a municipal history-plus-trend baseline',
 ]:

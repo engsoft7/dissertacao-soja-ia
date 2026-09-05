@@ -37,7 +37,7 @@ REFERENCIAS = [
     ('Souza 2020',
      'Reconstructing three decades of land use and land cover changes in Brazilian '
      'biomes with Landsat archive and Earth Engine',
-     'Remote Sens. 12, 2735'),
+     'Remote Sens. 12, 2735', '10.3390/rs12172735'),
     ('Maimaitijiang 2020',
      'Soybean yield prediction from UAV using multimodal data fusion and deep learning',
      'Remote Sens. Environ. 237, 111599'),
@@ -59,7 +59,7 @@ REFERENCIAS = [
 JA_CONFERIDAS = [
     ('van Klompenburg 2020',
      'Crop yield prediction using machine learning: a systematic literature review',
-     'Comput. Electron. Agric. 177, 105709'),
+     'Comput. Electron. Agric. 177, 105709', '10.1016/j.compag.2020.105709'),
     ('Leukel 2023',
      'Machine learning technology for early prediction of grain yield at the field '
      'scale: a systematic review', 'Comput. Electron. Agric. 207, 107721'),
@@ -86,13 +86,31 @@ JA_CONFERIDAS = [
      'Comput. Electron. Agric. 221, 108978'),
     ('Fu 2025', 'Prediction of soybean yield at the county scale based on multi-source '
      'remote sensing data and deep learning models', 'Agriculture 15, 1337'),
-    ('Breiman 2001', 'Random forests', 'Mach. Learn. 45, 5-32'),
+    ('Breiman 2001', 'Random forests', 'Mach. Learn. 45, 5-32',
+     '10.1023/A:1010933404324'),
     ('Chen 2016', 'XGBoost: a scalable tree boosting system', 'ACM SIGKDD, 785-794'),
 ]
 
 
-def busca(titulo, tentativas=3):
-    """Primeiro resultado da busca bibliográfica na Crossref."""
+def busca(titulo, doi=None, tentativas=3):
+    """Registro da Crossref: por DOI quando há um, senão pelo título.
+
+    Títulos genéricos — "Random forests", ou o do Souza et al. (2020), que
+    descreve um tema comum a muitos trabalhos — devolvem casamento falso na
+    busca bibliográfica. Nesses casos o DOI é declarado em REFERENCIAS e a
+    consulta passa a ser exata.
+    """
+    if doi:
+        for n in range(tentativas):
+            try:
+                r = requests.get(f'{API}/{doi}', timeout=60)
+                r.raise_for_status()
+                return r.json()['message']
+            except Exception as erro:
+                if n == tentativas - 1:
+                    print(f'    ERRO no DOI {doi}: {erro}')
+                    return None
+                time.sleep(2 ** n)
     p = {'query.bibliographic': titulo, 'rows': 1}
     if MAILTO:
         p['mailto'] = MAILTO
@@ -128,9 +146,11 @@ def ano(m):
     return None, '—'
 
 
-def relata(rotulo, titulo, afirmado):
+def relata(rotulo, titulo, afirmado, doi=None):
     print(f'\n{"─" * 76}\n{rotulo}   |   manuscrito afirma: {afirmado}')
-    m = busca(titulo)
+    if doi:
+        print(f'    (consulta por DOI: {doi})')
+    m = busca(titulo, doi)
     if not m:
         print('    NÃO ENCONTRADO na Crossref')
         return False
@@ -156,8 +176,8 @@ def main():
     print(f'Conferindo {len(lista)} referências na Crossref'
           f'{" (só as faltantes)" if so_faltantes else ""}')
     achadas = 0
-    for rotulo, titulo, afirmado in lista:
-        achadas += relata(rotulo, titulo, afirmado)
+    for entrada in lista:
+        achadas += relata(*entrada)
         time.sleep(1)
     print(f'\n{"─" * 76}\n{achadas} de {len(lista)} encontradas na Crossref.')
     print('Compare as listas de autores acima com as do manuscrito.')

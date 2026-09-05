@@ -192,8 +192,15 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.5` (04/09/2026) | 54 | 10.072 | `acf5c75d0d9c53cfc86c486e40eeea356af4eabf2096b1b7644b5249de600450` |
 | Tag `v2.3.6` (04/09/2026) | 55 | 10.252 | `d6c87068c6e4fb9bbca849f63541d2f6abb648ea8cbb75db66bfaf15677de7a5` |
 | Tag `v2.3.7` (05/09/2026) — versão da defesa | 57 | 10.711 | `0a2aaf79c45e875bfb6d89714a74a034e4d8ef5739bf6fd7e1ff7fa31073cd7a` |
+| Commit `b0f3628` (05/09/2026) — geradores do artigo submetido | 60 | 11.680 | `506baabfca171e40cc5d968d0ca47a7aff1877938d92f532376d67d7c1429a83` |
 
-Os oito foram recalculados a partir de cópias limpas dos respectivos commits e
+A última linha não é uma tag: registra o estado do `main` depois que os três
+geradores do manuscrito submetido à CEA entraram em `pesquisa/05_artigo/`. Ela
+continua valendo para o commit que a acrescenta, porque o conjunto resumido
+cobre apenas `.py`, `.kt` e `.kts` — alterar este `.md` não muda o hash. É esse
+o valor que a próxima tag levará, se nenhum arquivo-fonte for tocado até lá.
+
+Os nove foram recalculados a partir de cópias limpas dos respectivos commits e
 conferem em execuções repetidas. A tag da defesa é a `v2.3.7`, e é do Release
 dela que sai o APK distribuído (`versionCode` 13, `versionName` 2.1.6,
 SHA-256 `5ee2ea9697b092c9b27fe76f3c1533eaf7aabb79e68c7b1d4700ced34bd18a21`).

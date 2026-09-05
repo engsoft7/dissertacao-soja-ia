@@ -1,0 +1,303 @@
+{
+  "brasil": {
+    "municipios": 2806,
+    "registros": 49342,
+    "pares": 46536,
+    "repetidos": 8192,
+    "taxa": 17.6,
+    "h0_media": 7.5,
+    "h0_dp": 0.1,
+    "h0_max": 7.9,
+    "z": 102.8,
+    "permutacoes": 2000,
+    "nulos_acima_do_observado": 0,
+    "multiplos_de_100": 58.4,
+    "pares_com_lacuna": 1024
+  },
+  "estados": {
+    "AM": {
+      "nome": "Amazonas",
+      "municipios": 11,
+      "registros": 49,
+      "pares": 38,
+      "repetidos": 24,
+      "taxa": 63.2,
+      "multiplos_de_100": 55.1,
+      "amostra_suficiente": true
+    },
+    "PA": {
+      "nome": "Pará",
+      "municipios": 53,
+      "registros": 545,
+      "pares": 492,
+      "repetidos": 225,
+      "taxa": 45.7,
+      "multiplos_de_100": 77.4,
+      "amostra_suficiente": true
+    },
+    "RO": {
+      "nome": "Rondônia",
+      "municipios": 46,
+      "registros": 544,
+      "pares": 498,
+      "repetidos": 176,
+      "taxa": 35.3,
+      "multiplos_de_100": 57.0,
+      "amostra_suficiente": true
+    },
+    "SP": {
+      "nome": "São Paulo",
+      "municipios": 522,
+      "registros": 8284,
+      "pares": 7762,
+      "repetidos": 2478,
+      "taxa": 31.9,
+      "multiplos_de_100": 69.5,
+      "amostra_suficiente": true
+    },
+    "RR": {
+      "nome": "Roraima",
+      "municipios": 9,
+      "registros": 116,
+      "pares": 107,
+      "repetidos": 30,
+      "taxa": 28.0,
+      "multiplos_de_100": 64.7,
+      "amostra_suficiente": true
+    },
+    "MG": {
+      "nome": "Minas Gerais",
+      "municipios": 322,
+      "registros": 4309,
+      "pares": 3987,
+      "repetidos": 1105,
+      "taxa": 27.7,
+      "multiplos_de_100": 73.9,
+      "amostra_suficiente": true
+    },
+    "GO": {
+      "nome": "Goiás",
+      "municipios": 240,
+      "registros": 4435,
+      "pares": 4195,
+      "repetidos": 914,
+      "taxa": 21.8,
+      "multiplos_de_100": 67.4,
+      "amostra_suficiente": true
+    },
+    "TO": {
+      "nome": "Tocantins",
+      "municipios": 114,
+      "registros": 1755,
+      "pares": 1641,
+      "repetidos": 356,
+      "taxa": 21.7,
+      "multiplos_de_100": 56.5,
+      "amostra_suficiente": true
+    },
+    "SC": {
+      "nome": "Santa Catarina",
+      "municipios": 223,
+      "registros": 4134,
+      "pares": 3911,
+      "repetidos": 775,
+      "taxa": 19.8,
+      "multiplos_de_100": 72.6,
+      "amostra_suficiente": true
+    },
+    "AL": {
+      "nome": "Alagoas",
+      "municipios": 18,
+      "registros": 81,
+      "pares": 63,
+      "repetidos": 8,
+      "taxa": 12.7,
+      "multiplos_de_100": 44.4,
+      "amostra_suficiente": true
+    },
+    "MT": {
+      "nome": "Mato Grosso",
+      "municipios": 136,
+      "registros": 2615,
+      "pares": 2479,
+      "repetidos": 308,
+      "taxa": 12.4,
+      "multiplos_de_100": 43.7,
+      "amostra_suficiente": true
+    },
+    "RS": {
+      "nome": "Rio Grande do Sul",
+      "municipios": 453,
+      "registros": 9756,
+      "pares": 9303,
+      "repetidos": 1072,
+      "taxa": 11.5,
+      "multiplos_de_100": 57.9,
+      "amostra_suficiente": true
+    },
+    "MA": {
+      "nome": "Maranhão",
+      "municipios": 86,
+      "registros": 1085,
+      "pares": 999,
+      "repetidos": 96,
+      "taxa": 9.6,
+      "multiplos_de_100": 39.7,
+      "amostra_suficiente": true
+    },
+    "AC": {
+      "nome": "Acre",
+      "municipios": 9,
+      "registros": 51,
+      "pares": 42,
+      "repetidos": 4,
+      "taxa": 9.5,
+      "multiplos_de_100": 60.8,
+      "amostra_suficiente": true
+    },
+    "DF": {
+      "nome": "Distrito Federal",
+      "municipios": 1,
+      "registros": 24,
+      "pares": 23,
+      "repetidos": 2,
+      "taxa": 8.7,
+      "multiplos_de_100": 37.5,
+      "amostra_suficiente": false
+    },
+    "MS": {
+      "nome": "Mato Grosso do Sul",
+      "municipios": 78,
+      "registros": 1679,
+      "pares": 1601,
+      "repetidos": 133,
+      "taxa": 8.3,
+      "multiplos_de_100": 52.5,
+      "amostra_suficiente": true
+    },
+    "BA": {
+      "nome": "Bahia",
+      "municipios": 26,
+      "registros": 337,
+      "pares": 311,
+      "repetidos": 22,
+      "taxa": 7.1,
+      "multiplos_de_100": 24.6,
+      "amostra_suficiente": true
+    },
+    "PR": {
+      "nome": "Paraná",
+      "municipios": 392,
+      "registros": 8914,
+      "pares": 8522,
+      "repetidos": 446,
+      "taxa": 5.2,
+      "multiplos_de_100": 40.8,
+      "amostra_suficiente": true
+    },
+    "PI": {
+      "nome": "Piauí",
+      "municipios": 39,
+      "registros": 521,
+      "pares": 482,
+      "repetidos": 18,
+      "taxa": 3.7,
+      "multiplos_de_100": 22.3,
+      "amostra_suficiente": true
+    },
+    "AP": {
+      "nome": "Amapá",
+      "municipios": 8,
+      "registros": 52,
+      "pares": 44,
+      "repetidos": 0,
+      "taxa": 0.0,
+      "multiplos_de_100": 9.6,
+      "amostra_suficiente": true
+    },
+    "CE": {
+      "nome": "Ceará",
+      "municipios": 9,
+      "registros": 37,
+      "pares": 28,
+      "repetidos": 0,
+      "taxa": 0.0,
+      "multiplos_de_100": 45.9,
+      "amostra_suficiente": false
+    },
+    "ES": {
+      "nome": "Espírito Santo",
+      "municipios": 3,
+      "registros": 5,
+      "pares": 2,
+      "repetidos": 0,
+      "taxa": 0.0,
+      "multiplos_de_100": 80.0,
+      "amostra_suficiente": false
+    },
+    "PB": {
+      "nome": "Paraíba",
+      "municipios": 2,
+      "registros": 2,
+      "pares": 0,
+      "repetidos": 0,
+      "taxa": null,
+      "multiplos_de_100": 50.0,
+      "amostra_suficiente": false
+    },
+    "PE": {
+      "nome": "Pernambuco",
+      "municipios": 2,
+      "registros": 2,
+      "pares": 0,
+      "repetidos": 0,
+      "taxa": null,
+      "multiplos_de_100": 100.0,
+      "amostra_suficiente": false
+    },
+    "RJ": {
+      "nome": "Rio de Janeiro",
+      "municipios": 3,
+      "registros": 9,
+      "pares": 6,
+      "repetidos": 0,
+      "taxa": 0.0,
+      "multiplos_de_100": 33.3,
+      "amostra_suficiente": false
+    },
+    "RN": {
+      "nome": "Rio Grande do Norte",
+      "municipios": 1,
+      "registros": 1,
+      "pares": 0,
+      "repetidos": 0,
+      "taxa": null,
+      "multiplos_de_100": 100.0,
+      "amostra_suficiente": false
+    }
+  },
+  "quartis_area": {
+    "Q1": {
+      "taxa": 30.5,
+      "pares": 11790
+    },
+    "Q2": {
+      "taxa": 20.1,
+      "pares": 11776
+    },
+    "Q3": {
+      "taxa": 12.0,
+      "pares": 11521
+    },
+    "Q4": {
+      "taxa": 7.4,
+      "pares": 11449
+    }
+  },
+  "periodo": [
+    2001,
+    2024
+  ],
+  "gerado_em": "2026-09-05",
+  "fonte": "IBGE/SIDRA, tabela 5457, variáveis 112 e 216, soja em grão"
+}

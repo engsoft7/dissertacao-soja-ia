@@ -20,3 +20,6 @@ keystore.properties
 .artifacts/
 *.log
 temp_out.json
+
+# Saída dos geradores do artigo (regerável por pesquisa/05_artigo/gera_*.py)
+pesquisa/05_artigo/saida/

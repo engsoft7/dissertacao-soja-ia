@@ -514,8 +514,8 @@ par('Maycon Lima dos Santos: Conceptualization, Methodology, Software, Formal '
     12, align=AL.JUSTIFY, lh=2.0, dep=12)
 
 sec('Declaration of competing interest')
-par('The author declares that he has no known competing financial interests or '
-    'personal relationships that could have appeared to influence the work reported in '
+par('The author declares no known competing financial interests or personal '
+    'relationships that could have appeared to influence the work reported in '
     'this paper.', 12, align=AL.JUSTIFY, lh=2.0, dep=12)
 
 sec('Funding')

@@ -557,7 +557,8 @@ refs = [
     'Barbosa dos Santos, V., Santos, A.M.F.D., Rolim, G.D.S., 2021. Estimation and '
     'forecasting of soybean yield using artificial neural networks. Agron. J. 113, '
     '3193–3209. https://doi.org/10.1002/agj2.20729.',
-    'Breiman, L., 2001. Random forests. Mach. Learn. 45, 5–32.',
+    'Breiman, L., 2001. Random forests. Mach. Learn. 45, 5–32. '
+    'https://doi.org/10.1023/A:1010933404324.',
     'Chen, T., Guestrin, C., 2016. XGBoost: a scalable tree boosting system, in: '
     'Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery '
     'and Data Mining. ACM, New York, pp. 785–794. '
@@ -602,7 +603,8 @@ refs = [
     'Balsamo, G., Boussetta, S., Choulga, M., Harrigan, S., Hersbach, H., Martens, B., '
     'Miralles, D.G., Piles, M., Rodríguez-Fernández, N.J., Zsoter, E., Buontempo, C., '
     'Thépaut, J.-N., 2021. ERA5-Land: a state-of-the-art global reanalysis dataset for '
-    'land applications. Earth Syst. Sci. Data 13, 4349–4383.',
+    'land applications. Earth Syst. Sci. Data 13, 4349–4383. '
+    'https://doi.org/10.5194/essd-13-4349-2021.',
     'Richetti, J., Judge, J., Boote, K.J., Johann, J.A., Uribe-Opazo, M.A., Becker, '
     'W.R., Paludo, A., Silva, L.C.d.A., 2018. Using phenology-based enhanced vegetation '
     'index and machine learning for soybean yield estimation in Paraná State, Brazil. '
@@ -625,7 +627,7 @@ refs = [
     'https://doi.org/10.3390/s19204363.',
     'van Klompenburg, T., Kassahun, A., Catal, C., 2020. Crop yield prediction using '
     'machine learning: a systematic literature review. Comput. Electron. Agric. 177, '
-    '105709.',
+    '105709. https://doi.org/10.1016/j.compag.2020.105709.',
     'von Bloh, M., Nóia Júnior, R.d.S., Wangerpohl, X., Saltık, A.O., Haller, V., '
     'Kaiser, L., Asseng, S., 2023. Machine learning for soybean yield forecasting in '
     'Brazil. Agric. For. Meteorol. 341, 109670. '

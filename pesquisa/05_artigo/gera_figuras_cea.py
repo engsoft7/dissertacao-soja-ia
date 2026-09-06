@@ -56,9 +56,11 @@ DPI = 400
 MIN_PARES_MUNICIPIO = 5          # legenda da figura 3: "at least five pairs"
 DESTAQUE = ['Floresta do Araguaia', 'Uruará', 'Paragominas']
 
-# Amazônia Legal, Lei 12.651/2012: os sete estados do Norte, Mato Grosso e a
-# parte do Maranhão a oeste do meridiano 44°O. Como a medida é estadual, o
-# Maranhão entra inteiro — aproximação declarada, não descuido.
+# Amazônia Legal, Lei 12.651/2012: sete estados inteiros — AC, AP, AM, MT, PA,
+# RO e RR —, mais as porções de Tocantins e Goiás ao norte do paralelo 13°S e a
+# do Maranhão a oeste do meridiano 44°O. Como a medida é estadual, TO e MA
+# entram inteiros e GO fica de fora: aproximação declarada no manuscrito, não
+# descuido. Ela desloca a fronteira da partição, não o contraste que sustenta.
 AMAZONIA_LEGAL = {'AC', 'AP', 'AM', 'MA', 'MT', 'PA', 'RO', 'RR', 'TO'}
 AMAZONIA_SUBMETIDA = AMAZONIA_LEGAL - {'MT'}   # o recorte da figura submetida
 

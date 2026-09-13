@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Cover letter da submissão à Smart Agricultural Technology.
+"""Cover letter da submissão à European Journal of Agronomy.
 
 A versão anterior desta carta acompanhou a submissão à Computers and
 Electronics in Agriculture, recusada em 12/09/2026 com três objeções de
@@ -48,7 +48,7 @@ p('ORCID 0009-0005-9424-6048 — mayconlimasan@gmail.com', align=AL.LEFT, dep=16
 p('14 September 2026', align=AL.LEFT, dep=16)
 
 p('To the Editors-in-Chief', align=AL.LEFT, dep=0)
-p('Smart Agricultural Technology', align=AL.LEFT, dep=16)
+p('European Journal of Agronomy', align=AL.LEFT, dep=16)
 
 p('Dear Editors,')
 
@@ -105,13 +105,24 @@ p('Third, that independent validation of the diagnostic was insufficient. The '
   'Pará dataset and did not succeed; it is reported as a null result, because it '
   'bounds what the diagnostic has been shown to do.')
 
-p('On the fit to your scope: the manuscript proposes no new algorithm and uses '
-  'established implementations. Its contribution is to the machine learning pipeline '
-  'rather than to agronomy — a diagnostic computed from the target series alone, '
-  'before any model is fitted, costing a single pass over the data, which identifies '
-  'datasets on which model comparison cannot be informative. Given that apparent '
-  'accuracy rises with repetition, the studies most exposed are not those reporting '
-  'poor results but those reporting comfortable ones.')
+p('On the fit to your scope, I would like to be explicit. Official agricultural '
+  'statistics are the empirical base on which a large part of agronomic research '
+  'rests: yield gap assessment, the calibration and evaluation of crop models, the '
+  'analysis of regional productivity trends and the targeting of agricultural policy '
+  'all take municipal or county yield series as measurement. This manuscript examines '
+  'the internal quality of that base and finds that a substantial share of its '
+  'interannual transitions carries no new measurement, in a proportion that varies by '
+  'a factor of twelve between states and is predicted by the scale of the crop. That '
+  'finding concerns any study drawing inference from such series, whether or not it '
+  'fits a machine learning model.')
+p('The modelling section makes the consequence concrete rather than defining the '
+  'scope. It shows that a target of this kind inflates measured accuracy while '
+  'erasing the difference between a model informed by climate and remote sensing and '
+  'one built from municipal history alone. The diagnostic itself is agronomically '
+  'neutral and computationally trivial: one pass over the yield series, before any '
+  'model or any gap analysis is attempted. I would welcome your judgement on whether '
+  'the work is better placed in your journal or in one addressed primarily to the '
+  'modelling community.')
 
 p('The dataset assembled for this study — 49,342 municipality-season records from the '
   'primary source, together with the derived measures and every analysis script, '

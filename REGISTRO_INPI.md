@@ -193,6 +193,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.6` (04/09/2026) | 55 | 10.252 | `d6c87068c6e4fb9bbca849f63541d2f6abb648ea8cbb75db66bfaf15677de7a5` |
 | Tag `v2.3.7` (05/09/2026) — versão da defesa | 57 | 10.711 | `0a2aaf79c45e875bfb6d89714a74a034e4d8ef5739bf6fd7e1ff7fa31073cd7a` |
 | Tag `v2.3.8` (05/09/2026) — geradores do artigo submetido | 60 | 11.680 | `506baabfca171e40cc5d968d0ca47a7aff1877938d92f532376d67d7c1429a83` |
+| Tag `v2.3.9` (14/09/2026) — análises da revisão | 64 | 12.792 | `b9a4a09bca08161efdef3e8f746ff84c1d314c79a19e10335cc5a005a3e5305d` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -201,7 +202,13 @@ mudança de hash desde ela. As correções de identidade do autor que a
 acompanham tocam apenas `.cff` e `.md`, que ficam fora do conjunto resumido e
 não alteram o valor.
 
-Os nove foram recalculados a partir de cópias limpas dos respectivos commits e
+A `v2.3.9` acrescenta os quatro scripts escritos para responder às objeções da
+revisão da Computers and Electronics in Agriculture: o nulo que preserva a
+dependência temporal das séries, a verificação de coerência interna entre
+rendimento e área plantada, o confronto da repetição com o sinal orbital e o
+experimento de injeção controlada. É o depósito que o artigo ressubmetido cita.
+
+Os dez foram recalculados a partir de cópias limpas dos respectivos commits e
 conferem em execuções repetidas. A tag da defesa é a `v2.3.7`, e é do Release
 dela que sai o APK distribuído (`versionCode` 13, `versionName` 2.1.6,
 SHA-256 `5ee2ea9697b092c9b27fe76f3c1533eaf7aabb79e68c7b1d4700ced34bd18a21`).

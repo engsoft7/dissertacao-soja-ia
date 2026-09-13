@@ -1,0 +1,32 @@
+{
+ "pares": 46536,
+ "rendimento_repetiu": 8192,
+ "taxa_repeticao": 17.6,
+ "area_tambem_repetiu": {
+  "quando_rendimento_repetiu_%": 44.3,
+  "quando_rendimento_mudou_%": 19.3,
+  "razao": 2.29,
+  "qui_quadrado": 2330.4,
+  "p": "<1e-300"
+ },
+ "rendimento_repetiu_area_mudou": {
+  "pares": 4560,
+  "fracao_dos_repetidos_%": 55.7,
+  "variacao_mediana_da_area_%": 25.0,
+  "variacao_mediana_quando_rendimento_mudou_%": 8.9,
+  "p_mannwhitney": "<1e-300",
+  "area_variou_mais_de_10%": {
+   "pares": 3322,
+   "fracao_%": 72.9
+  },
+  "area_variou_mais_de_25%": {
+   "pares": 2131,
+   "fracao_%": 46.7
+  },
+  "area_variou_mais_de_50%": {
+   "pares": 1212,
+   "fracao_%": 26.6
+  }
+ },
+ "fonte": "IBGE/SIDRA, tabela 5457, variáveis 112 e 216, soja em grão"
+}

@@ -1,0 +1,79 @@
+{
+ "observado": {
+  "taxa": 17.49,
+  "pares": 45988,
+  "repetidos": 8043,
+  "municipios": 2460,
+  "autocorrelacao_lag1": 0.333,
+  "platos_2_ou_mais": 4897,
+  "platos_3_ou_mais": 1562,
+  "platos_4_ou_mais": 694,
+  "plato_mais_longo": 17
+ },
+ "nulos": {
+  "permutacao": {
+   "taxa_media": 7.34,
+   "taxa_dp": 0.089,
+   "taxa_max": 7.61,
+   "z": 114.4,
+   "replicas_acima_do_observado": 0,
+   "autocorrelacao_lag1": -0.085,
+   "platos_2_ou_mais": 2532.7,
+   "platos_3_ou_mais": 484.7,
+   "platos_4_ou_mais": 158.7,
+   "segundos": 5
+  },
+  "iaaft": {
+   "taxa_media": 9.59,
+   "taxa_dp": 0.099,
+   "taxa_max": 9.79,
+   "z": 79.6,
+   "replicas_acima_do_observado": 0,
+   "autocorrelacao_lag1": 0.215,
+   "platos_2_ou_mais": 3137.3,
+   "platos_3_ou_mais": 713.7,
+   "platos_4_ou_mais": 259.7,
+   "segundos": 58
+  },
+  "ar1_rho_0.3": {
+   "rho_alvo": 0.3,
+   "taxa_media": 8.37,
+   "taxa_dp": 0.089,
+   "taxa_max": 8.67,
+   "z": 102.0,
+   "replicas_acima_do_observado": 0,
+   "autocorrelacao_lag1": 0.106
+  },
+  "ar1_rho_0.5": {
+   "rho_alvo": 0.5,
+   "taxa_media": 9.32,
+   "taxa_dp": 0.11,
+   "taxa_max": 9.63,
+   "z": 74.4,
+   "replicas_acima_do_observado": 0,
+   "autocorrelacao_lag1": 0.222
+  },
+  "ar1_rho_0.7": {
+   "rho_alvo": 0.7,
+   "taxa_media": 10.6,
+   "taxa_dp": 0.112,
+   "taxa_max": 10.9,
+   "z": 61.3,
+   "replicas_acima_do_observado": 0,
+   "autocorrelacao_lag1": 0.335
+  },
+  "ar1_rho_0.9": {
+   "rho_alvo": 0.9,
+   "taxa_media": 12.52,
+   "taxa_dp": 0.128,
+   "taxa_max": 13.04,
+   "z": 38.7,
+   "replicas_acima_do_observado": 0,
+   "autocorrelacao_lag1": 0.438
+  }
+ },
+ "replicas": 200,
+ "iteracoes_iaaft": 100,
+ "semente": 42,
+ "min_safras": 6
+}

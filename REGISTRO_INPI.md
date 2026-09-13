@@ -202,7 +202,7 @@ mudança de hash desde ela. As correções de identidade do autor que a
 acompanham tocam apenas `.cff` e `.md`, que ficam fora do conjunto resumido e
 não alteram o valor.
 
-A `v2.3.9` acrescenta os quatro scripts escritos para responder às objeções da
+A `v2.3.9` (DOI 10.5281/zenodo.22739059) acrescenta os quatro scripts escritos para responder às objeções da
 revisão da Computers and Electronics in Agriculture: o nulo que preserva a
 dependência temporal das séries, a verificação de coerência interna entre
 rendimento e área plantada, o confronto da repetição com o sinal orbital e o
@@ -427,6 +427,8 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI (conceito, resolve para a versão mais recente):** 10.5281/zenodo.21285918
 - **DOI da versão da defesa (`v2.3.7`), citada como referência de dados do
   artigo submetido:** 10.5281/zenodo.22343315
-- **DOI da versão mais recente (`v2.3.8`):** 10.5281/zenodo.22348036
+- **DOI da `v2.3.8`:** 10.5281/zenodo.22348036
+- **DOI da versão mais recente (`v2.3.9`), citada como referência de dados do
+  artigo ressubmetido:** 10.5281/zenodo.22739059
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

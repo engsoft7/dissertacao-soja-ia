@@ -116,7 +116,8 @@ p('On the fit to your scope: the manuscript proposes no new algorithm and uses '
 p('The dataset assembled for this study — 49,342 municipality-season records from the '
   'primary source, together with the derived measures and every analysis script, '
   'including those written to answer the objections above — is openly archived at '
-  'Zenodo under DOI 10.5281/zenodo.21285918 and available at '
+  'Zenodo under DOI 10.5281/zenodo.22739059, the version cited in the manuscript, '
+  'and available at '
   'https://github.com/engsoft7/dissertacao-soja-ia. Every numerical claim in the '
   'manuscript can be recomputed from that deposit.')
 

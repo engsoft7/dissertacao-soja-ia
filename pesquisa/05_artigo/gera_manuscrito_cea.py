@@ -716,8 +716,9 @@ sec('Data availability')
 par('The data and code that support the findings of this study are openly available. '
     'The national dataset assembled from SIDRA/IBGE table 5457 '
     '(pam_soja_municipios.csv, 49,342 records), the derived measures '
-    '(repeticao_27_estados.json), the Pará dataset and all analysis scripts are '
-    'archived at Zenodo under version v2.3.7, cited as dos Santos (2026), '
+    '(repeticao_27_estados.json, nulo_com_dependencia.json, coerencia_interna.json, '
+    'injecao_de_repeticao.json), the Pará dataset and all analysis scripts are '
+    'archived at Zenodo under version v2.3.9, cited as dos Santos (2026), '
     'and are also available at '
     'https://github.com/engsoft7/dissertacao-soja-ia.', 12, align=AL.JUSTIFY, lh=2.0, dep=12)
 
@@ -747,8 +748,8 @@ refs = [
     'and Data Mining. ACM, New York, pp. 785–794. '
     'https://doi.org/10.1145/2939672.2939785.',
     'dos Santos, M.L., 2026. Repetition in the Brazilian Municipal '
-    'Agricultural Production survey: datasets and analysis code, v2.3.7 [dataset]. '
-    'Zenodo. https://doi.org/10.5281/zenodo.22343315.',
+    'Agricultural Production survey: datasets and analysis code, v2.3.9 [dataset]. '
+    'Zenodo. https://doi.org/10.5281/zenodo.22739059.',
     'Fathi, M., Shah-Hosseini, R., Moghimi, A., Arefi, H., 2025. '
     'MHRA-MS-3D-ResNet-BiLSTM: a multi-head-residual attention-based multi-stream deep '
     'learning model for soybean yield prediction in the U.S. using multi-source remote '

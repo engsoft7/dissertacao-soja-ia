@@ -1,0 +1,208 @@
+{
+ "niveis": [
+  {
+   "injecao": 0.0,
+   "replicas": 20,
+   "taxa": [
+    40.053,
+    0.0
+   ],
+   "aparente_baseline_R2": [
+    0.216,
+    0.0
+   ],
+   "aparente_modelo_R2": [
+    0.164,
+    0.0
+   ],
+   "aparente_diferenca": [
+    -0.052,
+    0.0
+   ],
+   "real_baseline_R2": [
+    0.216,
+    0.0
+   ],
+   "real_modelo_R2": [
+    0.164,
+    0.0
+   ],
+   "real_modelo_MAE": [
+    302.4,
+    0.0
+   ]
+  },
+  {
+   "injecao": 0.1,
+   "replicas": 20,
+   "taxa": [
+    44.92,
+    0.873
+   ],
+   "aparente_baseline_R2": [
+    0.232,
+    0.017
+   ],
+   "aparente_modelo_R2": [
+    0.192,
+    0.016
+   ],
+   "aparente_diferenca": [
+    -0.04,
+    0.009
+   ],
+   "real_baseline_R2": [
+    0.217,
+    0.005
+   ],
+   "real_modelo_R2": [
+    0.174,
+    0.012
+   ],
+   "real_modelo_MAE": [
+    300.795,
+    2.483
+   ]
+  },
+  {
+   "injecao": 0.2,
+   "replicas": 20,
+   "taxa": [
+    50.544,
+    1.4
+   ],
+   "aparente_baseline_R2": [
+    0.237,
+    0.022
+   ],
+   "aparente_modelo_R2": [
+    0.213,
+    0.028
+   ],
+   "aparente_diferenca": [
+    -0.024,
+    0.018
+   ],
+   "real_baseline_R2": [
+    0.219,
+    0.006
+   ],
+   "real_modelo_R2": [
+    0.186,
+    0.019
+   ],
+   "real_modelo_MAE": [
+    298.875,
+    3.919
+   ]
+  },
+  {
+   "injecao": 0.3,
+   "replicas": 20,
+   "taxa": [
+    55.955,
+    1.271
+   ],
+   "aparente_baseline_R2": [
+    0.248,
+    0.031
+   ],
+   "aparente_modelo_R2": [
+    0.228,
+    0.037
+   ],
+   "aparente_diferenca": [
+    -0.02,
+    0.015
+   ],
+   "real_baseline_R2": [
+    0.218,
+    0.014
+   ],
+   "real_modelo_R2": [
+    0.183,
+    0.017
+   ],
+   "real_modelo_MAE": [
+    298.875,
+    3.97
+   ]
+  },
+  {
+   "injecao": 0.4,
+   "replicas": 20,
+   "taxa": [
+    61.074,
+    1.624
+   ],
+   "aparente_baseline_R2": [
+    0.255,
+    0.043
+   ],
+   "aparente_modelo_R2": [
+    0.245,
+    0.05
+   ],
+   "aparente_diferenca": [
+    -0.01,
+    0.016
+   ],
+   "real_baseline_R2": [
+    0.205,
+    0.028
+   ],
+   "real_modelo_R2": [
+    0.18,
+    0.034
+   ],
+   "real_modelo_MAE": [
+    300.685,
+    7.794
+   ]
+  },
+  {
+   "injecao": 0.5,
+   "replicas": 20,
+   "taxa": [
+    67.427,
+    0.951
+   ],
+   "aparente_baseline_R2": [
+    0.297,
+    0.046
+   ],
+   "aparente_modelo_R2": [
+    0.296,
+    0.047
+   ],
+   "aparente_diferenca": [
+    -0.001,
+    0.014
+   ],
+   "real_baseline_R2": [
+    0.203,
+    0.029
+   ],
+   "real_modelo_R2": [
+    0.181,
+    0.041
+   ],
+   "real_modelo_MAE": [
+    299.67,
+    9.431
+   ]
+  }
+ ],
+ "replicas": 20,
+ "modelo": "Random Forest",
+ "configuracao": {
+  "n_estimators": "300",
+  "max_depth": "10",
+  "min_samples_leaf": "4",
+  "max_features": "1.0"
+ },
+ "semente": 42,
+ "registros": 415,
+ "municipios": 38,
+ "taxa_observada": 40.1
+}

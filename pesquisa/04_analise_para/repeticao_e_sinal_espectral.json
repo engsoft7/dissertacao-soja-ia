@@ -1,0 +1,243 @@
+{
+ "regressao": {
+  "NDVI_mean": {
+   "coef_repetiu": 0.125,
+   "efeito_%": 13.3,
+   "p": 0.346,
+   "ic95": [
+    -0.135,
+    0.385
+   ],
+   "n": 377
+  },
+  "NDVI_max": {
+   "coef_repetiu": 0.064,
+   "efeito_%": 6.6,
+   "p": 0.612,
+   "ic95": [
+    -0.185,
+    0.314
+   ],
+   "n": 377
+  },
+  "EVI_mean": {
+   "coef_repetiu": 0.107,
+   "efeito_%": 11.3,
+   "p": 0.417,
+   "ic95": [
+    -0.153,
+    0.368
+   ],
+   "n": 377
+  },
+  "EVI_max": {
+   "coef_repetiu": -0.102,
+   "efeito_%": -9.7,
+   "p": 0.434,
+   "ic95": [
+    -0.356,
+    0.153
+   ],
+   "n": 377
+  },
+  "precip_total": {
+   "coef_repetiu": -0.056,
+   "efeito_%": -5.4,
+   "p": 0.653,
+   "ic95": [
+    -0.3,
+    0.188
+   ],
+   "n": 377
+  },
+  "temp_mean": {
+   "coef_repetiu": 0.031,
+   "efeito_%": 3.1,
+   "p": 0.809,
+   "ic95": [
+    -0.219,
+    0.281
+   ],
+   "n": 377
+  }
+ },
+ "pares": 377,
+ "municipios": 31,
+ "repetidos": 151,
+ "taxa": 40.1,
+ "estratos": [
+  {
+   "estrato": "todos os pares",
+   "pares_repetidos": 151,
+   "pares_nao_repetidos": 226,
+   "sinais": {
+    "NDVI_mean": {
+     "mediana_repetiu": 5.52,
+     "mediana_nao_repetiu": 3.73,
+     "razao": 1.48,
+     "p_mannwhitney": 0.00257
+    },
+    "NDVI_max": {
+     "mediana_repetiu": 2.27,
+     "mediana_nao_repetiu": 1.67,
+     "razao": 1.36,
+     "p_mannwhitney": 0.00337
+    },
+    "EVI_mean": {
+     "mediana_repetiu": 6.9,
+     "mediana_nao_repetiu": 4.59,
+     "razao": 1.5,
+     "p_mannwhitney": 0.0058
+    },
+    "EVI_max": {
+     "mediana_repetiu": 4.99,
+     "mediana_nao_repetiu": 4.02,
+     "razao": 1.24,
+     "p_mannwhitney": 0.0201
+    },
+    "precip_total": {
+     "mediana_repetiu": 12.29,
+     "mediana_nao_repetiu": 12.91,
+     "razao": 0.95,
+     "p_mannwhitney": 0.684
+    },
+    "temp_mean": {
+     "mediana_repetiu": 1.28,
+     "mediana_nao_repetiu": 1.35,
+     "razao": 0.95,
+     "p_mannwhitney": 0.572
+    }
+   }
+  },
+  {
+   "estrato": "área pequena",
+   "pares_repetidos": 70,
+   "pares_nao_repetidos": 56,
+   "sinais": {
+    "NDVI_mean": {
+     "mediana_repetiu": 8.61,
+     "mediana_nao_repetiu": 6.38,
+     "razao": 1.35,
+     "p_mannwhitney": 0.273
+    },
+    "NDVI_max": {
+     "mediana_repetiu": 3.47,
+     "mediana_nao_repetiu": 3.06,
+     "razao": 1.14,
+     "p_mannwhitney": 0.601
+    },
+    "EVI_mean": {
+     "mediana_repetiu": 9.68,
+     "mediana_nao_repetiu": 9.62,
+     "razao": 1.01,
+     "p_mannwhitney": 0.9
+    },
+    "EVI_max": {
+     "mediana_repetiu": 8.29,
+     "mediana_nao_repetiu": 7.37,
+     "razao": 1.12,
+     "p_mannwhitney": 0.816
+    },
+    "precip_total": {
+     "mediana_repetiu": 11.0,
+     "mediana_nao_repetiu": 12.24,
+     "razao": 0.9,
+     "p_mannwhitney": 0.25
+    },
+    "temp_mean": {
+     "mediana_repetiu": 1.26,
+     "mediana_nao_repetiu": 1.4,
+     "razao": 0.9,
+     "p_mannwhitney": 0.601
+    }
+   }
+  },
+  {
+   "estrato": "área média",
+   "pares_repetidos": 54,
+   "pares_nao_repetidos": 71,
+   "sinais": {
+    "NDVI_mean": {
+     "mediana_repetiu": 3.37,
+     "mediana_nao_repetiu": 3.11,
+     "razao": 1.08,
+     "p_mannwhitney": 0.49
+    },
+    "NDVI_max": {
+     "mediana_repetiu": 1.7,
+     "mediana_nao_repetiu": 1.95,
+     "razao": 0.87,
+     "p_mannwhitney": 0.771
+    },
+    "EVI_mean": {
+     "mediana_repetiu": 4.36,
+     "mediana_nao_repetiu": 3.84,
+     "razao": 1.13,
+     "p_mannwhitney": 0.278
+    },
+    "EVI_max": {
+     "mediana_repetiu": 2.84,
+     "mediana_nao_repetiu": 3.7,
+     "razao": 0.77,
+     "p_mannwhitney": 0.43
+    },
+    "precip_total": {
+     "mediana_repetiu": 13.63,
+     "mediana_nao_repetiu": 16.12,
+     "razao": 0.85,
+     "p_mannwhitney": 0.515
+    },
+    "temp_mean": {
+     "mediana_repetiu": 1.26,
+     "mediana_nao_repetiu": 1.41,
+     "razao": 0.89,
+     "p_mannwhitney": 0.648
+    }
+   }
+  },
+  {
+   "estrato": "área grande",
+   "pares_repetidos": 27,
+   "pares_nao_repetidos": 99,
+   "sinais": {
+    "NDVI_mean": {
+     "mediana_repetiu": 5.02,
+     "mediana_nao_repetiu": 3.31,
+     "razao": 1.52,
+     "p_mannwhitney": 0.0972
+    },
+    "NDVI_max": {
+     "mediana_repetiu": 1.34,
+     "mediana_nao_repetiu": 1.28,
+     "razao": 1.04,
+     "p_mannwhitney": 0.433
+    },
+    "EVI_mean": {
+     "mediana_repetiu": 5.86,
+     "mediana_nao_repetiu": 4.08,
+     "razao": 1.43,
+     "p_mannwhitney": 0.193
+    },
+    "EVI_max": {
+     "mediana_repetiu": 4.39,
+     "mediana_nao_repetiu": 2.68,
+     "razao": 1.64,
+     "p_mannwhitney": 0.385
+    },
+    "precip_total": {
+     "mediana_repetiu": 18.04,
+     "mediana_nao_repetiu": 10.28,
+     "razao": 1.75,
+     "p_mannwhitney": 0.147
+    },
+    "temp_mean": {
+     "mediana_repetiu": 1.36,
+     "mediana_nao_repetiu": 1.25,
+     "razao": 1.09,
+     "p_mannwhitney": 0.91
+    }
+   }
+  }
+ ],
+ "fonte": "soja_para_mascarado_2001_2024.csv"
+}

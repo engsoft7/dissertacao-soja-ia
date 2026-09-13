@@ -50,6 +50,7 @@ RAIZ = os.path.dirname(os.path.abspath(__file__))
 NACIONAL = os.path.join(RAIZ, '..', '03_analise_nacional')
 CSV = os.path.join(NACIONAL, 'pam_soja_municipios.csv')
 JSON = os.path.join(NACIONAL, 'repeticao_27_estados.json')
+INJECAO = os.path.join(RAIZ, '..', '04_analise_para', 'injecao_de_repeticao.json')
 SAIDA = os.path.join(RAIZ, 'saida')
 
 DPI = 400
@@ -189,6 +190,43 @@ def figura4(df):
     salva(fig, 'Figure_4.png')
 
 
+# ─────────────────────────── figura 5 ───────────────────────────
+def figura5():
+    """O que a repetição faz com a medida de desempenho, não com o desempenho.
+
+    Duas escalas contam histórias opostas sobre o mesmo vetor de previsões, e é
+    o descolamento entre elas que a figura precisa mostrar — por isso as três
+    curvas de R² ficam num eixo e a diferença entre modelo e baseline no outro.
+    """
+    with open(INJECAO, encoding='utf-8') as f:
+        d = json.load(f)
+    n = d['niveis']
+    x = [v['injecao'] * 100 for v in n]
+    ap_b = [v['aparente_baseline_R2'][0] for v in n]
+    ap_m = [v['aparente_modelo_R2'][0] for v in n]
+    re_m = [v['real_modelo_R2'][0] for v in n]
+    dif = [v['aparente_diferenca'][0] for v in n]
+
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(7.2, 3.0))
+    ax.plot(x, ap_b, 'o--', color=CINZA, lw=2, ms=5,
+            label='Apparent, baseline')
+    ax.plot(x, ap_m, 'o-', color=AZUL, lw=2.4, ms=6,
+            label='Apparent, model')
+    ax.plot(x, re_m, 's-', color=VERMELHO, lw=2.4, ms=6,
+            label='True, model')
+    ax.set_xlabel('Injected repetition (% of records)')
+    ax.set_ylabel('R²')
+    ax.legend(fontsize=8.5, loc='upper left')
+
+    ax2.axhline(0, color='black', lw=0.8)
+    ax2.plot(x, dif, 'o-', color=LARANJA, lw=2.4, ms=6)
+    ax2.set_xlabel('Injected repetition (% of records)')
+    ax2.set_ylabel('Apparent R², model − baseline')
+    ax2.set_ylim(-0.065, 0.015)
+    plt.tight_layout()
+    salva(fig, 'Figure_5.png')
+
+
 def main():
     df = pd.read_csv(CSV)
     res = json.load(open(JSON, encoding='utf-8'))
@@ -202,6 +240,7 @@ def main():
     m = por_municipio(df)
     rho, r_fora, r_dentro = figura3(m)
     figura4(df)
+    figura5()
 
     sub = m.uf.isin(AMAZONIA_SUBMETIDA)
     r_sub_fora, _ = spearmanr(m.loc[~sub, 'area'], m.loc[~sub, 'taxa'])

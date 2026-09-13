@@ -95,9 +95,9 @@ def tabela(cab, linhas, negrito_em=()):
 
 
 # ══════════════════════════ TITLE PAGE ══════════════════════════
-par('Machine learning crop yield prediction is bounded by target-variable '
-    'quality: a diagnostic of value repetition in official statistics and its '
-    'effect on model evaluation', 14, True, align=AL.LEFT, lh=1.5, dep=12)
+par('Value repetition in official crop statistics: a diagnostic of '
+    'target-variable quality and its effect on the evaluation of machine learning '
+    'yield models', 14, True, align=AL.LEFT, lh=1.5, dep=12)
 
 par('Maycon Lima dos Santos', 12, align=AL.LEFT, lh=1.0, dep=6)
 par('Graduate Program in Applied Computing (PPCA), Universidade Federal do Pará, '
@@ -114,20 +114,25 @@ par('Machine learning pipelines for crop yield prediction are evaluated against 
     'We propose one — the rate at which consecutive values repeat — and apply it to '
     'the Brazilian Municipal Agricultural Production survey (PAM/IBGE) for soybean '
     'across 2,806 municipalities in every state from 2001 to 2024. Of 46,536 '
-    'consecutive-season pairs, 17.6% report strictly identical values, against '
-    '7.5% ± 0.1 expected under a conservative permutation null that preserves each '
-    'series\' marginal distribution — more than a hundred standard deviations above '
-    'chance, with none of 2,000 permutations reaching the observed rate. The rate '
-    'ranges from 3.7% to 45.7% across states, and what predicts it is not the region '
-    'but the scale of the crop: the Spearman correlation between municipal planted '
-    'area and repetition rate is −0.459, strengthening to −0.503 when the Legal '
-    'Amazon states are excluded. Where the rate is highest, four standard algorithms '
-    'fed with climatic and spectral predictors failed to outperform a baseline using '
-    'only municipal history and temporal trend (R² = 0.216 for both), which shows '
-    'that reported model accuracy in this task is bounded by a property of the '
-    'target variable rather than by model capacity. We recommend that the repetition '
-    'rate be reported alongside the proportion of missing data whenever official '
-    'statistics are used as ground truth.',
+    'consecutive-season pairs, 17.6% report strictly identical values. The excess '
+    'survives nulls built to preserve the temporal dependence of the series: '
+    'surrogates reproducing the observed lag-1 autocorrelation expect 10.6%, and '
+    'surrogates made deliberately smoother than the data expect 12.5%, while the '
+    'longest observed run holds one value for seventeen consecutive seasons. That '
+    'the repeated figures were not remeasured is established from the survey itself: '
+    'planted area repeats alongside yield in 44.3% of repeated pairs against 19.3% '
+    'otherwise, and where yield repeats while area moves, area moves by a median of '
+    '25.0% against 8.9%. What predicts the rate is not the region but the scale of '
+    'the crop, with a Spearman correlation of −0.459 against planted area, '
+    'strengthening to −0.503 outside the Legal Amazon. Injecting repetition into an '
+    'uncorrupted target while holding every predictor fixed shows what such data do '
+    'to model assessment: apparent R² rises by 37% for a history-only baseline and '
+    '80% for an environmental model, true performance stays flat, and the gap '
+    'between the two collapses from −0.052 to −0.001. Repetition does not bound how '
+    'well a model can predict; it removes the ability to measure it, while inflating '
+    'the figure that would be reported. We recommend that the repetition rate be '
+    'reported alongside the proportion of missing data whenever official statistics '
+    'are used as ground truth.',
     12, align=AL.JUSTIFY, lh=2.0, dep=12)
 
 sec('Keywords')
@@ -275,8 +280,55 @@ corpo('The null hypothesis is deliberately conservative. Shuffling within each '
       'therefore not close to zero, and any excess observed above it cannot be '
       'attributed to rounding of the values. The descriptive significance level is '
       'reported as p < 0.0005, the lower bound imposed by the number of permutations.')
+corpo('Shuffling destroys the temporal ordering, however, and a yield series is not '
+      'temporally exchangeable: trend and interannual persistence make adjacent '
+      'seasons resemble each other more than randomly drawn ones. A null that ignores '
+      'this would credit to measurement failure an excess that mere temporal '
+      'smoothness could produce. Two further nulls were therefore constructed, both '
+      'restricted to the 2,460 municipalities with at least six seasons, for which a '
+      'spectrum can be estimated.')
+corpo('The first uses iterative amplitude adjusted Fourier transform (IAAFT) '
+      'surrogates. The procedure alternates two projections: it imposes the power '
+      'spectrum of the original series, which fixes its autocorrelation function, and '
+      'then restores the original marginal distribution by rank, which returns the '
+      'exact observed values with their rounding and their duplicates. The surrogate '
+      'thus carries the same temporal dependence and the same value repertoire as the '
+      'observation, differing only in phase.')
+corpo('The second null does not attempt to match the observed autocorrelation but to '
+      'exceed it. Gaussian AR(1) series of prescribed lag-1 coefficient are generated '
+      'and mapped by rank onto the observed marginal, again reproducing the value '
+      'repertoire exactly. Sweeping the coefficient allows the question to be posed in '
+      'the strongest form available: how much repetition would a series smoother than '
+      'the real one produce?')
+corpo('Because high autocorrelation yields values that are close rather than '
+      'identical, the length of the constant runs discriminates more sharply than '
+      'their count. Runs of two, three and four or more consecutive seasons at the '
+      'same value were therefore counted in the observation and in each surrogate '
+      'ensemble. Two hundred replicates were drawn under each null.')
 
-sec('3.4. Predictive models and baseline')
+sec('3.4. Whether the repeated values are measurements')
+corpo('The diagnostic asserts that a repeated value was not measured. The assertion '
+      'requires a referent external to the yield series itself, and two were used.')
+corpo('The first is internal to the survey. The PAM publishes planted area (variable '
+      '216) alongside yield (112), collected in the same municipal enquiry but '
+      'recorded in separate fields. Two consequences follow and can be tested. If an '
+      'informant carried the whole record forward, planted area repeats together with '
+      'yield. If instead the area changed while yield remained identical to the '
+      'kilogram, then production must have moved in exact proportion to area — an '
+      'arithmetic coincidence, since yield is production divided by area. The '
+      'frequency of both situations was compared between pairs whose yield repeated '
+      'and pairs whose yield changed.')
+corpo('The second referent is orbital. In the Pará dataset, where spectral and '
+      'climatic covariates are available, the interannual change in NDVI, EVI, '
+      'rainfall and temperature was compared between pairs whose yield repeated and '
+      'pairs whose yield changed. If two consecutive seasons genuinely produced the '
+      'same yield, field conditions were similar and the satellite would have '
+      'recorded that similarity. Because repetition concentrates in small-area '
+      'municipalities, where the pixel is noisier, the comparison was also run as a '
+      'regression of the log change on repetition status with log planted area as a '
+      'covariate.')
+
+sec('3.5. Predictive models and baseline')
 corpo('Four algorithms were trained — Random Forest (Breiman, 2001), XGBoost (Chen '
       'and Guestrin, 2016), Support Vector Regression and Multilayer Perceptron — '
       'under leave-one-year-out temporal cross-validation: each season is predicted '
@@ -332,6 +384,35 @@ corpo('An identical value between consecutive seasons could, in principle, occur
       'permutation came close to the observed value.')
 cap('Fig. 2. Permutation test: observed rate versus the distribution under '
     'randomness, obtained from 2,000 permutations of the municipal series.')
+corpo('Shuffling, however, removes the temporal dependence of the series, and that '
+      'dependence is real: the mean lag-1 autocorrelation of the municipal series is '
+      '0.333. Table 2 reports the rate expected under nulls that preserve it. Among '
+      'the 2,460 municipalities with at least six seasons — 45,988 pairs, observed '
+      'rate 17.5% — IAAFT surrogates, which carry both the spectrum and the exact '
+      'value repertoire, expect 9.59% ± 0.10. The AR(1) surrogate whose lag-1 '
+      'coefficient reproduces the observed one, 0.335 against 0.333, expects 10.60% ± '
+      '0.11, leaving the observation 61 standard deviations above it. Even a surrogate '
+      'made deliberately smoother than reality, with autocorrelation 0.438, expects '
+      '12.52%.')
+cap('Table 2. Repetition rate expected under nulls of increasing temporal dependence, '
+    '200 replicates each, over the 2,460 municipalities with at least six seasons. '
+    'The AR(1) coefficient is imposed; the autocorrelation column reports what each '
+    'null actually attains after the marginal is restored.')
+tabela(['Null', 'Lag-1 autocorrelation', 'Expected rate (%)', 'z'],
+       [['Shuffling within municipality', '−0.085', '7.34 ± 0.09', '114.4'],
+        ['IAAFT surrogates', '+0.215', '9.59 ± 0.10', '79.6'],
+        ['AR(1), coefficient 0.5', '+0.222', '9.32 ± 0.11', '74.4'],
+        ['AR(1), coefficient 0.7', '+0.335', '10.60 ± 0.11', '61.3'],
+        ['AR(1), coefficient 0.9', '+0.438', '12.52 ± 0.13', '38.7'],
+        ['Observed', '+0.333', '17.50', '—']])
+par('', dep=9)
+corpo('The length of the constant runs settles the question. High autocorrelation '
+      'produces values that are close, not identical, and the discrepancy therefore '
+      'widens with run length: the observation contains 4,897 runs of two or more '
+      'consecutive seasons at the same value against 3,137 expected under IAAFT, '
+      '1,562 of three or more against 714, and 694 of four or more against 260. The '
+      'longest observed run holds the same value for seventeen consecutive seasons. '
+      'No autoregressive process with the observed variance produces that.')
 
 sec('4.3. Crop scale, not region, predicts repetition')
 corpo('An immediate reading of Fig. 1 would suggest a regional effect: the leading '
@@ -366,8 +447,8 @@ corpo('The pattern also holds within individual states. Dividing the municipalit
       'each state into quartiles of planted area, ten of the fourteen states with at '
       'least two hundred pairs show a strictly decreasing gradient, and in the '
       'remaining four the inversion occurs between the first and second quartiles, '
-      'with the fourth always below the first. Table 2 presents selected cases.')
-cap('Table 2. Repetition rate by quartile of planted area, within each state. Median '
+      'with the fourth always below the first. Table 3 presents selected cases.')
+cap('Table 3. Repetition rate by quartile of planted area, within each state. Median '
     'area is per municipality-season; quartiles are computed within each state, with '
     'the consecutive-season pair as denominator.')
 tabela(['State', 'Q1 (smallest)', 'Q2', 'Q3', 'Q4 (largest)', 'Median area'],
@@ -406,13 +487,45 @@ corpo('Second, value granularity is coarse: 58.4% of records are exact multiples
 cap('Fig. 4. Municipal soybean yield series from the PAM/IBGE, for three '
     'municipalities in Pará, showing plateaus of constant value.')
 
-sec('4.5. Consequence for predictive models')
-corpo('Table 3 reports the performance of four algorithms in the state of Pará, '
+sec('4.5. The repeated values are not measurements')
+corpo('That the rate exceeds every null does not by itself establish that a repeated '
+      'value was never measured; a survey could, in principle, have recorded the same '
+      'figure twice because the crop truly yielded the same. The survey itself '
+      'refutes this, through a field it publishes independently of yield.')
+corpo('When yield repeats, planted area repeats with it in 44.3% of pairs, against '
+      '19.3% when yield changes — a ratio of 2.3, with χ² = 2,330 on one degree of '
+      'freedom. In almost half of the repeated pairs, therefore, the entire record '
+      'carried forward, area and yield together, which is the signature of a '
+      'transcribed rather than collected value.')
+corpo('The remaining 4,560 pairs are more telling still. In them yield repeated while '
+      'planted area moved, and it moved by a median of 25.0% — against 8.9% in pairs '
+      'whose yield changed. Area changed by more than half in 26.6% of them. Since '
+      'yield is production divided by area, a municipality whose soybean area grew by '
+      'half and which reports the same yield to the kilogram implies a production that '
+      'followed area in exact proportion. That arithmetic coincidence would have to '
+      'recur thousands of times. The more parsimonious reading is that the yield '
+      'figure was not recomputed.')
+corpo('A second, orbital check was attempted and did not succeed, and the failure is '
+      'reported here because it bounds what the diagnostic has been shown to do. In '
+      'the Pará dataset, pairs whose yield repeated show 48% greater interannual '
+      'variation in mean NDVI than pairs whose yield changed (p = 0.003) — the '
+      'opposite of what genuinely identical crop conditions would produce. But '
+      'repetition concentrates in small-area municipalities, where the pixel is '
+      'noisier, and once planted area is controlled by regression the effect '
+      'disappears: +13.3% for mean NDVI with a confidence interval of [−0.14, +0.39] '
+      'and p = 0.35, and no signal significant at any conventional level. With 377 '
+      'pairs the Pará sample cannot resolve the question. The satellite neither '
+      'corroborates nor contradicts the diagnostic; the corroboration rests on the '
+      'internal-consistency evidence above, which has two orders of magnitude more '
+      'data behind it.')
+
+sec('4.6. Consequence for predictive models')
+corpo('Table 4 reports the performance of four algorithms in the state of Pará, '
       'against the baseline. None outperforms the baseline: the Multilayer Perceptron '
       'matches it (R² = 0.216), Support Vector Regression very nearly reaches it '
       '(0.208), and the tree-based methods degrade performance, behaviour typical of '
       'overfitting on small samples.')
-cap('Table 3. Predictive performance in Pará under leave-one-year-out validation '
+cap('Table 4. Predictive performance in Pará under leave-one-year-out validation '
     '(2001–2024). The baseline uses no climatic or spectral variables. Dataset of 415 '
     'records, 38 municipalities, mean yield 2,995 kg ha⁻¹.')
 tabela(['Model', 'RMSE (kg ha⁻¹)', 'MAE (kg ha⁻¹)', 'R²'],
@@ -428,9 +541,46 @@ corpo('The variance decomposition clarifies the result. Sixty-three per cent of 
       'deviation of each observation from its municipal mean, the correlations between '
       'that deviation and each predictor are negligible, not exceeding 0.20 in '
       'absolute value, which amounts to less than 4% of the within-municipality '
-      'variation explained by any single predictor. If a substantial share of that '
-      'interannual variation is not agronomic signal but administrative carry-forward '
-      'of the previous value, no model can recover it.')
+      'variation explained by any single predictor.')
+corpo('A comparison of this kind, however, cannot on its own attribute the outcome to '
+      'the target rather than to the predictors: weak covariates would produce the '
+      'same table. The injection experiment separates the two, because the predictors '
+      'are held fixed throughout and only the target is altered. Table 5 reports it.')
+cap('Table 5. Effect of injected repetition on measured performance in Pará. '
+    'Predictors are identical in every row; only the target is altered, by carrying '
+    'the previous season\'s value forward in a growing fraction of records. The same '
+    'predictions are scored twice: against the published target, which is what an '
+    'analyst would see, and against the original values. Random Forest with the '
+    'configuration adopted in the source study; 20 replicates per level.')
+tabela(['Injected', 'Repetition rate (%)', 'Apparent R², baseline',
+        'Apparent R², model', 'Apparent difference', 'True R², model'],
+       [['0%', '40.1', '0.216', '0.164', '−0.052', '0.164'],
+        ['10%', '44.9', '0.232', '0.192', '−0.040', '0.174'],
+        ['20%', '50.5', '0.237', '0.213', '−0.024', '0.186'],
+        ['30%', '56.0', '0.248', '0.228', '−0.020', '0.183'],
+        ['40%', '61.1', '0.255', '0.245', '−0.010', '0.180'],
+        ['50%', '67.4', '0.297', '0.296', '−0.001', '0.181']])
+par('', dep=9)
+corpo('Two things happen, and neither is a loss of predictive ability. Measured '
+      'against the published target, apparent performance rises throughout: the '
+      'baseline gains 37% in R² and the model 80%, although no predictor changed and '
+      'no additional information entered the problem. Carried values are trivially '
+      'recoverable from the series itself, and both estimators collect that reward. '
+      'Measured against the original values, by contrast, performance is flat — the '
+      'model moves from 0.164 to 0.181 and its mean absolute error stays at about 300 '
+      'kg ha⁻¹ at every level.')
+cap('Fig. 5. Effect of injected repetition on measured performance. Left: apparent '
+    'R², scored against the published target, for the baseline and the environmental '
+    'model, and true R², scored against the original values. Right: the apparent '
+    'difference between model and baseline. Predictors are identical at every level.')
+corpo('The second effect is the consequential one. The gap between the environmental '
+      'model and a baseline that uses no environmental information at all collapses '
+      'from −0.052 to −0.001 as injection rises. At the highest level the two are '
+      'indistinguishable. Repetition in the target does not bound how well a model can '
+      'predict; it destroys the ability to tell one model from another, and it does so '
+      'while inflating the number that would be reported. An analyst working on such a '
+      'dataset would observe improving scores and vanishing differences between '
+      'algorithms, and would have no way, from the metrics alone, to know why.')
 
 # ══════════════════════════ 5 ══════════════════════════
 sec('5. Discussion')
@@ -447,22 +597,34 @@ corpo('The regional hypothesis, which would be the natural reading, does not hol
       'inexplicable. The predictor is the scale of the crop in that municipality, not '
       'latitude: a five-hundred-hectare soybean crop has a sparse informant network in '
       'Ribeirão Preto as much as in Novo Progresso.')
-corpo('The methodological implication is direct. A predictive model can only recover '
-      'variation present in the target variable. If a fraction of interannual '
-      'transitions is administratively constant, there is a ceiling on the attainable '
-      'coefficient of determination, regardless of algorithm sophistication or '
-      'predictor richness. This explains why, in Pará, performance saturates at the '
-      'baseline level, whereas in Paraná — where repetition is 5.2% — the same '
-      'algorithms and the same families of variables reach substantially higher R².')
-corpo('It is worth being precise about what the ceiling means quantitatively. If a '
-      'fraction of transitions is administratively constant, the observed interannual '
-      'variance is smaller than the true agronomic variance, and the denominator of '
-      'the coefficient of determination shrinks. The R² of 0.216 obtained in Pará '
-      'should not, therefore, be read as weak performance of models that would achieve '
-      'higher values elsewhere: it measures the explained fraction of a variance that '
-      'has already been partly suppressed at source. Direct comparisons of R² between '
-      'regions with differing survey quality are, in this sense, misleading, and the '
-      'repetition rate offers a simple indicator with which to qualify them.')
+corpo('The methodological implication is not the one we expected when this work '
+      'began, and the injection experiment is what corrected it. The intuitive account '
+      'is that administratively constant transitions place a ceiling on the attainable '
+      'coefficient of determination: variation absent from the target cannot be '
+      'recovered by any algorithm. That account is wrong, or at least incomplete. '
+      'Injecting repetition left true performance unchanged — the model\'s R² against '
+      'the original values moved from 0.164 to 0.181 and its mean absolute error not '
+      'at all — while apparent performance rose steadily. Carried values do not remove '
+      'predictable signal; they add a component that is trivially predictable from the '
+      'series itself, and every estimator collects it.')
+corpo('What repetition destroys is discrimination. The measured gap between a model '
+      'with climatic and spectral covariates and a baseline with none fell from −0.052 '
+      'to −0.001 as injection rose, until the two were indistinguishable. This is the '
+      'sense in which such a dataset is unfit for model comparison: not that good '
+      'models cannot succeed on it, but that success and triviality produce the same '
+      'number. The consequence for the literature is specific. A study reporting that '
+      'its architecture beat a simpler alternative by a small margin, on a target of '
+      'unexamined repetition, has not shown that the architecture is better; it may '
+      'have shown only that the margin was compressed below what its data could '
+      'resolve. And because apparent R² rises with repetition, the affected studies '
+      'are not the ones reporting poor results — they are the ones reporting '
+      'comfortable ones.')
+corpo('Direct comparisons of R² between regions of differing survey quality are, in '
+      'this sense, misleading in a direction opposite to the intuitive one. The 0.216 '
+      'obtained in Pará is not a deflated figure awaiting a better model; it is a '
+      'figure whose relation to predictive skill is weaker than in Paraná, where '
+      'repetition is 5.2%. The repetition rate offers a simple indicator with which to '
+      'qualify such comparisons.')
 corpo('This diagnosis speaks to two recent findings. Li et al. (2024) show that '
       'removing the global trend markedly improves the accuracy of XGBoost-based '
       'models, indicating that a relevant share of the variance explained in crop '
@@ -486,32 +648,53 @@ corpo('Limitations are acknowledged. The predictive analysis is restricted to Pa
       'the repetition diagnosis is national. Attributing the pattern to carry-forward '
       'by the field agent, although consistent with the official methodology and with '
       'the scale gradient, remains inferential: confirming it would require access to '
-      'the survey\'s field records. And planted area, used as the measure of scale, '
-      'comes from the same survey whose quality is under examination, although there '
-      'is no reason to expect any error in it to be correlated with repetition in '
-      'yield.')
+      'the survey\'s field records. Planted area, used as the measure of scale, comes '
+      'from the same survey whose quality is under examination, and Section 4.5 shows '
+      'that its errors are in fact correlated with repetition in yield: area repeats '
+      'alongside yield far more often than chance. The scale measure used here is the '
+      'median of each municipal series, which a minority of carried records displaces '
+      'little, but the gradient should be read as an association between two variables '
+      'of the same survey rather than between yield quality and an independent '
+      'measurement of scale. Finally, the orbital validation was inconclusive: with '
+      '377 pairs, the Pará sample cannot establish whether repeated values depart from '
+      'what the satellite observed, and a larger panel with spectral covariates would '
+      'be required to settle it.')
 
 # ══════════════════════════ 6 ══════════════════════════
 sec('6. Conclusion')
 corpo('This study documented that 17.6% of the 46,536 consecutive-season pairs of '
-      'soybean in the Brazilian PAM report strictly identical yield — a rate lying '
-      'more than one hundred standard deviations from that expected under randomness, '
-      'with none of 2,000 permutations reaching it. The pattern forms plateaus of up '
-      'to seventeen years and is associated with strong rounding, with 11.9% of the '
-      'entire national dataset concentrated in a single value, 3,000 kg ha⁻¹.')
+      'soybean in the Brazilian PAM report strictly identical yield. The excess is not '
+      'an artefact of rounding, which the nulls preserve, nor of the temporal '
+      'smoothness of the series: surrogates reproducing the observed autocorrelation '
+      'expect 10.6% and surrogates smoother than the data expect 12.5%, while the '
+      'observation contains 694 runs of four or more consecutive seasons at one value '
+      'and one run of seventeen. That the repeated figures were not remeasured follows '
+      'from the survey itself, which repeats planted area alongside yield in 44.3% of '
+      'repeated pairs against 19.3% otherwise, and which, where yield repeats and area '
+      'moves, moves it by a median of 25.0% against 8.9%.')
 corpo('The central finding, however, is not the magnitude but the predictor. The '
       'repetition rate is not a function of region but of the scale of the crop in the '
       'municipality: the correlation between planted area and repetition is −0.459 '
       'nationally and −0.503 when the Legal Amazon states are excluded, and the '
       'gradient holds within ten of the fourteen states with sufficient sample. São '
       'Paulo, at 31.9%, demonstrates that the phenomenon is not Amazonian.')
-corpo('As a consequence, machine learning models fed with climatic and spectral '
-      'variables did not outperform, in Pará, a baseline built solely from municipal '
-      'history and temporal trend. The limit lies not in the method but in the target '
-      'variable. Beyond the diagnosis, this work provides a reproducible national '
-      'dataset and a verification procedure applicable to other crops and territories, '
-      'and recommends that the repetition rate be reported as an indicator of target '
-      'variable quality in crop yield prediction studies.')
+corpo('The consequence for modelling is narrower than it first appears, and more '
+      'troubling. In Pará, machine learning models fed with climatic and spectral '
+      'variables did not outperform a baseline built solely from municipal history and '
+      'temporal trend. Injecting repetition into an uncorrupted target, with every '
+      'predictor held fixed, shows why such a comparison should not be read as a '
+      'verdict on the models: apparent performance rises with repetition, true '
+      'performance does not move, and the measured distance between a model and a '
+      'trivial baseline collapses to zero. Repetition does not place a ceiling on '
+      'predictive skill; it removes the ability to measure skill, while inflating the '
+      'figure that gets reported.')
+corpo('Beyond the diagnosis, this work provides a reproducible national dataset and a '
+      'verification procedure applicable to other crops and territories. Its practical '
+      'recommendation is a single line in the data description: the repetition rate of '
+      'the target variable, reported as one reports the proportion of missing data. '
+      'It costs one pass over the series, it can be computed before any model is '
+      'fitted, and it says whether the comparison about to be made can carry the '
+      'weight that will be placed on it.')
 
 # ══════════════════════ DECLARATIONS ══════════════════════
 sec('CRediT authorship contribution statement')
@@ -651,10 +834,10 @@ h = novo_doc()
 par('Highlights', 12, True, align=AL.LEFT, lh=1.0, dep=12, doc=h)
 for b in [
     '17.6% of consecutive soybean seasons in Brazil report identical yield',
-    'Observed rate exceeds chance by more than 100 standard deviations',
+    'Excess survives nulls that preserve trend and interannual autocorrelation',
+    'Planted area repeats with yield in 44.3% of repeated pairs, against 19.3%',
     'Crop scale, not region, predicts repetition (Spearman −0.46; −0.50 outside Amazon)',
-    'São Paulo reaches 31.9%, showing the effect is not an Amazonian phenomenon',
-    'Environmental predictors do not beat a municipal history-plus-trend baseline',
+    'Injected repetition inflates apparent R² and erases differences between models',
 ]:
     assert len(b) <= 85, (len(b), b)
     par('• ' + b, 12, align=AL.LEFT, lh=1.5, dep=6, doc=h)

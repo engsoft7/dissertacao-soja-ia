@@ -45,9 +45,9 @@ SERIES = {
                          2023: 9, 2024: 15, 2025: 7},
     'Apêndice B': {2018: 3, 2019: 3, 2020: 3, 2021: 8, 2022: 4,
                    2023: 10, 2024: 15, 2025: 7},
-    'repositório': {2018: 3, 2019: 3, 2020: 3, 2021: 8, 2022: 5,
-                    2023: 10, 2024: 16, 2025: 5},
 }
+# O do repositório não se escreve à mão: lê-se do arquivo, para que a tabela
+# acuse sozinha se alguém reintroduzir um ano errado.
 
 
 # DOIs cujo ano é disputado entre os três registros e que, por isso, valem
@@ -78,6 +78,53 @@ def ano_abnt(linha):
 def parte_ano(item, campo):
     partes = (item.get(campo) or {}).get('date-parts', [[None]])
     return partes[0][0] if partes and partes[0] else None
+
+
+def coerencia_volume_ano(linhas):
+    """Confere se o ano impresso é coerente com o volume, periódico a periódico.
+
+    Foi isto que desempatou os dois artigos da MDPI, que a Crossref não decide e
+    cuja página responde 403 a quem consulta de um servidor. Periódico sério
+    incrementa o volume uma vez por ano, e a própria bibliografia deste trabalho
+    fixa a escala: Remote Sensing v. 13 em 2021, v. 14 em 2022, v. 15 em 2023 —
+    logo v. 17 é 2025, e não 2024, que é apenas a data em que o artigo apareceu
+    on-line, nos últimos dias de dezembro, já dentro do volume seguinte.
+
+    A checagem não depende de saber o calendário de nenhuma editora: deriva a
+    escala das próprias referências e aponta quem destoa dela.
+    """
+    import collections
+    por_revista = collections.defaultdict(list)
+    for l in linhas:
+        if 'DOI:' not in l or ', v. ' not in l:
+            continue
+        revista = l.split(', v. ')[0].split('. ')[-1].strip()
+        v = re.search(r',\s*v\.\s*(\d+)', l)
+        a = re.search(r',\s*((?:19|20)\d{2})[ab]?\s*\.\s*DOI', l)
+        if v and a:
+            por_revista[revista].append((int(v.group(1)), int(a.group(1)),
+                                         doi_de(l)))
+
+    print('Coerência entre volume e ano, periódico a periódico:')
+    print('-' * 78)
+    incoerentes = 0
+    for revista, itens in sorted(por_revista.items()):
+        if len(itens) < 2:
+            continue
+        # a escala: quanto vale volume - ano nesse periódico, pelo voto da maioria
+        desloc = collections.Counter(v - a for v, a, _ in itens)
+        base, quantos = desloc.most_common(1)[0]
+        if quantos < 2:
+            continue
+        fora = [(v, a, d) for v, a, d in itens if v - a != base]
+        marca = 'ok' if not fora else f'{len(fora)} fora da escala'
+        print(f'  {revista[:56]:56s} {len(itens):>2} itens  {marca}')
+        for v, a, dd in fora:
+            incoerentes += 1
+            print(f'       v. {v} impresso como {a}; pela escala seria {v - base}')
+            print(f'       {dd}')
+    print(f'  total incoerente: {incoerentes}\n')
+    return incoerentes
 
 
 def confere_mdpi(doi):
@@ -115,6 +162,11 @@ def confere_mdpi(doi):
 def main():
     linhas = [l.strip() for l in open(FONTE, encoding='utf-8') if l.strip()]
     print(f'referências no arquivo: {len(linhas)}\n')
+
+    coerencia_volume_ano(linhas)
+
+    SERIES['repositório'] = collections.Counter(
+        a for a in (ano_abnt(l) for l in linhas) if a)
 
     resolvidos, falhas = {}, []
     for linha in linhas:

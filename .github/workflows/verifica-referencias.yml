@@ -5,10 +5,16 @@
 # escrever ano e edição de memória, é justamente o erro que a banca encontra
 # folheando a lista de referências.
 #
-# Roda sob demanda: referência não muda a cada push.
+# Roda quando o próprio script muda, e sob demanda. O gatilho por caminho
+# existe porque workflow_dispatch só alcança workflows que já estão no branch
+# padrão, e este nasceu num branch de trabalho.
 name: Verifica referências
 
 on:
+  push:
+    paths:
+      - 'pesquisa/07_referencias/**'
+      - '.github/workflows/verifica-referencias.yml'
   workflow_dispatch:
 
 jobs:

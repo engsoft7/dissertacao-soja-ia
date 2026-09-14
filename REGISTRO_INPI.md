@@ -194,7 +194,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.7` (05/09/2026) — versão da defesa | 57 | 10.711 | `0a2aaf79c45e875bfb6d89714a74a034e4d8ef5739bf6fd7e1ff7fa31073cd7a` |
 | Tag `v2.3.8` (05/09/2026) — geradores do artigo submetido | 60 | 11.680 | `506baabfca171e40cc5d968d0ca47a7aff1877938d92f532376d67d7c1429a83` |
 | Tag `v2.3.9` (14/09/2026) — análises da revisão | 64 | 12.792 | `b9a4a09bca08161efdef3e8f746ff84c1d314c79a19e10335cc5a005a3e5305d` |
-| Commit `2351dcfd` (14/09/2026) — ainda sem etiqueta | 74 | 14.683 | `f5e8d0673c108b8795467b04d7532a0be59dfb6632b6242e70852ce315ae28a6` |
+| Tag `v2.4.0` (14/09/2026) — conferência de referências e primeiro teste do aplicativo | 74 | 14.683 | `f5e8d0673c108b8795467b04d7532a0be59dfb6632b6242e70852ce315ae28a6` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -209,8 +209,7 @@ dependência temporal das séries, a verificação de coerência interna entre
 rendimento e área plantada, o confronto da repetição com o sinal orbital e o
 experimento de injeção controlada. É o depósito que o artigo ressubmetido cita.
 
-O commit `2351dcfd` é o estado atual da `main`, ainda **sem etiqueta e sem DOI**.
-Acrescenta dez arquivos-fonte à `v2.3.9` e altera outros dez. Entram os
+A `v2.4.0` acrescenta dez arquivos-fonte à `v2.3.9` e altera outros dez. Entram os
 geradores e conferidores que acompanharam a submissão do artigo — a resolução
 dos DOIs impressos contra a Crossref, a busca por preprint, a declaração de
 conflito de interesses e o resumo gráfico —, o diagnóstico da coleta da CONAB,
@@ -222,8 +221,13 @@ Entre os arquivos alterados estão `MainActivity.kt`, que passou a guardar o
 preço informado pelo produtor em precisão dupla, e `build.gradle.kts`, sem o
 qual o aplicativo não compilava a partir de um clone limpo.
 
-Enquanto não houver etiqueta, este estado não tem depósito no Zenodo nem DOI
-próprio: o DOI de conceito continua resolvendo para a `v2.3.9`.
+O DOI de versão desta etiqueta é atribuído pelo Zenodo no depósito que ela
+dispara, e deve ser acrescentado aqui e na seção 12 quando sair. O DOI de
+conceito, 10.5281/zenodo.21285918, passa a resolver para ela.
+
+O resumo criptográfico não muda entre o commit `2351dcfd` e a etiqueta: os
+arquivos alterados na preparação da `v2.4.0` são `.md` e `.cff`, que ficam fora
+do conjunto resumido — o mesmo que já ocorrera na `v2.3.8`.
 
 Os dez foram recalculados a partir de cópias limpas dos respectivos commits e
 conferem em execuções repetidas. A tag da defesa é a `v2.3.7`, e é do Release
@@ -453,7 +457,10 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da versão da defesa (`v2.3.7`), citada como referência de dados do
   artigo submetido:** 10.5281/zenodo.22343315
 - **DOI da `v2.3.8`:** 10.5281/zenodo.22348036
-- **DOI da versão mais recente (`v2.3.9`), citada como referência de dados do
-  artigo ressubmetido:** 10.5281/zenodo.22739059
+- **DOI da `v2.3.9`, citada como referência de dados do artigo ressubmetido:**
+  10.5281/zenodo.22739059
+- **DOI da versão mais recente (`v2.4.0`):** atribuído pelo Zenodo no depósito
+  disparado pela etiqueta; acrescentar aqui quando sair. Até lá, o DOI de
+  conceito acima resolve para ela.
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

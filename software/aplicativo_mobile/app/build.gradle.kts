@@ -1,3 +1,10 @@
+// Importado no topo, e não escrito como java.util.Properties lá embaixo:
+// dentro do bloco android {} o identificador `java` resolve para o acessor
+// do Gradle e sombreia o pacote, e o script falhava com "Unresolved
+// reference 'util'" em qualquer ambiente limpo. Passava despercebido porque
+// nada além da máquina do autor compilava o aplicativo.
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -13,7 +20,7 @@ android {
 
     
     val keystoreFile = rootProject.file("keystore.properties")
-    val keystoreProps = java.util.Properties()
+    val keystoreProps = Properties()
     if (keystoreFile.exists()) keystoreProps.load(keystoreFile.inputStream())
 
     signingConfigs {

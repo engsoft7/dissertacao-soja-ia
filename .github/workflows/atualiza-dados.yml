@@ -54,6 +54,10 @@ on:
         description: "Resolver todos os DOIs das referências na Crossref e comparar com o manuscrito"
         type: boolean
         default: false
+      procurar_preprint:
+        description: "Procurar preprint deste trabalho no SSRN, pelo registro da Crossref"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -122,6 +126,14 @@ jobs:
           pip install --quiet python-docx
           python gera_manuscrito_cea.py
           python confere_doi_referencias.py
+
+      # O SSRN está bloqueado por política de rede, mas seus preprints recebem
+      # DOI 10.2139/ssrn.* e são depositados na Crossref. A pergunta — existe
+      # preprint público com o título antigo? — se responde por lá.
+      - name: Procura preprint no SSRN pela Crossref
+        if: github.event_name == 'workflow_dispatch' && inputs.procurar_preprint
+        working-directory: pesquisa/05_artigo
+        run: python procura_preprint_ssrn.py
 
       # Mede a repetição nas 27 UFs sobre a fonte primária. É a extensão do
       # estudo do Pará a todo o país, e roda aqui porque a coleta precisa de

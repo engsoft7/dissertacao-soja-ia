@@ -221,8 +221,8 @@ Entre os arquivos alterados estão `MainActivity.kt`, que passou a guardar o
 preço informado pelo produtor em precisão dupla, e `build.gradle.kts`, sem o
 qual o aplicativo não compilava a partir de um clone limpo.
 
-O DOI de versão desta etiqueta é atribuído pelo Zenodo no depósito que ela
-dispara, e deve ser acrescentado aqui e na seção 12 quando sair. O DOI de
+O DOI de versão desta etiqueta é 10.5281/zenodo.22755108, atribuído pelo Zenodo
+no depósito disparado pela publicação do Release em 14/09/2026. O DOI de
 conceito, 10.5281/zenodo.21285918, passa a resolver para ela.
 
 O resumo criptográfico não muda entre o commit `2351dcfd` e a etiqueta: os
@@ -459,8 +459,6 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.3.8`:** 10.5281/zenodo.22348036
 - **DOI da `v2.3.9`, citada como referência de dados do artigo ressubmetido:**
   10.5281/zenodo.22739059
-- **DOI da versão mais recente (`v2.4.0`):** atribuído pelo Zenodo no depósito
-  disparado pela etiqueta; acrescentar aqui quando sair. Até lá, o DOI de
-  conceito acima resolve para ela.
+- **DOI da versão mais recente (`v2.4.0`):** 10.5281/zenodo.22755108
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

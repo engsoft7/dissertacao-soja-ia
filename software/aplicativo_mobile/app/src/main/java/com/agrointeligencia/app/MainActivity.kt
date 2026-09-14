@@ -72,7 +72,10 @@ private const val PREF_PROD = "produtividade_usuario_sc"
 private const val DIAS_PARA_RECONFERIR_PRECO = 45L
 
 /** Resultado por hectare e o quanto ele depende do rateio do custo. */
-private data class Resultado(
+// internal, e não private: o teste de unidade vive no mesmo módulo e precisa
+// enxergar. É a margem que o produtor lê na tela — a função que mais merece
+// teste no aplicativo inteiro, e a única coisa que a impedia era visibilidade.
+internal data class Resultado(
     val valor: Double,
     val outroRateio: Double?,
     /** true quando os dois rateios possíveis discordam sobre lucro ou prejuízo. */
@@ -96,7 +99,7 @@ private data class Resultado(
  * Quando o produtor informa o próprio custo não há rateio a discutir: o número
  * é dele, e a função devolve só ele.
  */
-private fun resultadoPorHectare(
+internal fun resultadoPorHectare(
     sacasPorHectare: Double,
     preco: Double,
     custoDoProdutor: Double?,

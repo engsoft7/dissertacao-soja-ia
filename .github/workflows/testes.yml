@@ -26,3 +26,47 @@ jobs:
 
       - name: Roda os testes
         run: python -m pytest software -q
+
+  # Compila o aplicativo Android e roda os testes de unidade dele.
+  #
+  # Existe porque a correção que devolveu o preço do produtor em Double —
+  # 135,15 aparecia como 135.14999389648438 — foi escrita sem que ninguém
+  # pudesse compilá-la: o ambiente de desenvolvimento não tem o SDK do
+  # Android, e o repositório não tinha nada que compilasse o aplicativo. A
+  # única verificação possível era o autor rodar o Gradle na própria máquina
+  # e descobrir ali. Num produto que vai à defesa, esse é o ponto mais frágil
+  # que a auditoria encontrou.
+  #
+  # assembleDebug e não assembleRelease: release exige a chave de assinatura,
+  # que não está aqui e não deve estar. Compilar em debug prova o que importa
+  # neste ponto — que o código compila — e a assinatura continua sendo um ato
+  # deliberado do autor, na máquina dele.
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          # O projeto compila contra Java 17 (sourceCompatibility no
+          # build.gradle.kts). Divergir aqui produz erro de bytecode que não
+          # tem nada a ver com o código.
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Compila e roda os testes de unidade
+        working-directory: software/aplicativo_mobile
+        run: ./gradlew --no-daemon testDebugUnitTest assembleDebug
+
+      # O relatório sobrevive ao fim do job: quando um teste reprova, a
+      # mensagem do Gradle no log raramente basta para entender qual caso
+      # quebrou e com que número.
+      - name: Guarda o relatório dos testes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-testes-android
+          path: software/aplicativo_mobile/app/build/reports/tests/
+          if-no-files-found: ignore

@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Manuscrito em inglês para a Computers and Electronics in Agriculture."""
+"""Manuscrito em inglês para a European Journal of Agronomy.
+
+A versão anterior foi submetida à Computers and Electronics in Agriculture
+(COMPAG-D-26-09128) e recusada em 12/09/2026. Nada no texto pode continuar
+falando com aquela revista: as revisões sistemáticas citadas na introdução
+saíram lá, não aqui, e a contribuição não se declara alheia à agronomia
+numa revista de agronomia.
+"""
 import os
 
 RAIZ = os.path.dirname(os.path.abspath(__file__))
@@ -162,9 +169,11 @@ corpo('That design is operationally adequate where the network of informants is 
       'belong to agricultural frontiers — and it is that framing this study puts to '
       'the test, by measuring the structure of the series across the entire national '
       'territory rather than in a region chosen in advance.')
-corpo('The contribution is methodological and addressed to the machine learning '
-      'pipeline rather than to agronomy. Systematic reviews of this field published '
-      'in this journal catalogue predictors, architectures and validation protocols '
+corpo('The contribution is methodological, and it bears on any study that takes '
+      'these series as measurement — yield gap assessment and the calibration and '
+      'evaluation of crop models as much as machine learning. Systematic reviews of '
+      'machine learning for yield prediction catalogue predictors, architectures and '
+      'validation protocols '
       '(van Klompenburg et al., 2020; Leukel et al., 2023), and recent work has begun '
       'to question how much of the reported accuracy survives an explicit statistical '
       'reference (Wang et al., 2024). None of them provides a way to check whether the '
@@ -828,7 +837,7 @@ refs = [
 for r in refs:
     par(r, 12, align=AL.JUSTIFY, lh=1.5, dep=6)
 
-d.save(os.path.join(SAIDA, 'Manuscript_CEA.docx'))
+d.save(os.path.join(SAIDA, 'Manuscript.docx'))
 
 # ─────────── Highlights, arquivo separado ───────────
 h = novo_doc()

@@ -28,3 +28,6 @@ pesquisa/05_artigo/saida/
 # avisa que não deve ser versionado, e versionado ele quebrava a compilação
 # em qualquer lugar que não fosse a máquina onde foi gerado.
 software/aplicativo_mobile/local.properties
+
+# Figuras geradas da revisão: saem do script, como as demais figuras.
+pesquisa/02_revisao_sistematica/fig_revisao_*.png

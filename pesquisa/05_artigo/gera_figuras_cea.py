@@ -138,11 +138,16 @@ def figura2(df, res):
     ax.hist(nulos, bins=60, color=AZUL, alpha=0.75,
             label=f"Null distribution ({mod.PERMUTACOES:,} permutations)")
     ax.axvline(obs, color=VERMELHO, lw=3, label=f'Observed: {obs:.1f}%')
+    # p é 1/PERMUTACOES, o menor valor que o teste consegue distinguir de zero —
+    # o mesmo limite que a seção 4.2 declara. A anotação fica na metade inferior
+    # do eixo porque a legenda ocupa a faixa superior: na versão anterior as duas
+    # se sobrepunham e o texto saía ilegível sob a caixa da legenda.
+    topo = ax.get_ylim()[1]
     ax.annotate(f"> {int(b['z'] // 1)} standard deviations\n"
-                f"(p < {1 / mod.PERMUTACOES / 2:.4f})",
-                xy=(obs, ax.get_ylim()[1] * 0.5),
-                xytext=(obs - 4.3, ax.get_ylim()[1] * 0.72),
-                color=VERMELHO, fontsize=10,
+                f"(p < {1 / mod.PERMUTACOES:.4f})",
+                xy=(obs, topo * 0.28),
+                xytext=(obs - 5.4, topo * 0.45),
+                color=VERMELHO, fontsize=10, va='center',
                 arrowprops=dict(arrowstyle='->', color=VERMELHO, lw=1.8))
     ax.set_xlabel('Consecutive seasons with identical yield (%)')
     ax.set_ylabel('Frequency')

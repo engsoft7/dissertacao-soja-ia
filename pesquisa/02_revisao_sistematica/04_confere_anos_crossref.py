@@ -50,6 +50,19 @@ SERIES = {
 }
 
 
+# DOIs cujo ano é disputado entre os três registros e que, por isso, valem
+# detalhe mesmo quando o repositório acerta. Os dois da MDPI estão aqui porque
+# o número do volume sugere um ano e a data depositada pode sugerir outro:
+# Remote Sensing v. 17 e Computation v. 13 são volumes de 2025, ainda que o
+# artigo tenha saído nos últimos dias de 2024.
+DETALHAR = (
+    '10.3390/rs17010107',
+    '10.3390/computation13010004',
+    '10.1002/agj2.21473',
+    '10.1109/jstars.2022.3223423',
+)
+
+
 def doi_de(linha):
     m = re.search(r'10\.\d{4,9}/[^\s,;]+', linha)
     return m.group(0).rstrip('.').lower() if m else None
@@ -94,6 +107,7 @@ def main():
             'online': parte_ano(item, 'published-online'),
             'issued': parte_ano(item, 'issued'),
             'veiculo': (item.get('container-title') or ['?'])[0],
+            'volume': item.get('volume'),
             'abnt': ano_abnt(linha),
         }
 
@@ -120,6 +134,20 @@ def main():
     print(f'  total: {divergentes}\n')
 
     crossref = collections.Counter(ano_final(d) for d in resolvidos.values())
+    print('DOIs disputados, com tudo o que a editora depositou:')
+    print('-' * 78)
+    for doi in DETALHAR:
+        d = resolvidos.get(doi)
+        if not d:
+            print(f'  {doi}  não resolvido')
+            continue
+        print(f'  {doi}')
+        print(f'     fascículo: {d["impresso"] or "-"}   on-line: {d["online"] or "-"}'
+              f'   issued: {d["issued"] or "-"}   volume: {d.get("volume") or "-"}')
+        print(f'     no repositório: {d["abnt"]}   ->   adotado: {ano_final(d)}')
+        print(f'     {d["veiculo"][:70]}')
+    print()
+
     print('=' * 78)
     print('DISTRIBUIÇÃO POR ANO')
     print('=' * 78)

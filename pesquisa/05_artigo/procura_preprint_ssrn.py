@@ -44,6 +44,22 @@ def busca(**params):
     return r.json()['message']['items']
 
 
+def e_deste_trabalho(titulo, autores):
+    """O item devolvido é mesmo este trabalho, ou só caiu na mesma busca?
+
+    A Crossref com filtro de prefixo devolve sempre os vinte melhores casos
+    dentro daquele prefixo, relevantes ou não. Sem este teste o relato acusa
+    preprint alheio como se fosse o nosso — foi o que aconteceu na primeira
+    execução. O critério é deliberadamente estreito: o sobrenome completo do
+    autor, ou uma expressão que só este trabalho usa."""
+    t, a = titulo.lower(), autores.lower()
+    if 'maycon' in a:
+        return True
+    return any(e in t for e in ('value repetition in official crop statistics',
+                                'municipal agricultural production',
+                                'target-variable quality'))
+
+
 def relata(rotulo, itens, so_ssrn=False):
     print(f'\n── {rotulo} ──')
     achou = False
@@ -51,16 +67,18 @@ def relata(rotulo, itens, so_ssrn=False):
         doi = it.get('DOI', '')
         if so_ssrn and 'ssrn' not in doi.lower():
             continue
-        achou = True
         titulo = (it.get('title') or [''])[0]
         autores = ', '.join(f"{a.get('given','')} {a.get('family','')}".strip()
                             for a in (it.get('author') or [])[:4])
+        nosso = e_deste_trabalho(titulo, autores)
+        achou = achou or nosso
         ano = (it.get('issued', {}).get('date-parts') or [[None]])[0][0]
-        print(f'  {doi}')
+        print(f'  {"<<< ESTE" if nosso else "        "} {doi}')
         print(f'    [{it.get("type","")}] {ano} — {titulo[:90]}')
         print(f'    {autores or "(sem autores depositados)"}')
     if not achou:
-        print('  nada' + (' com DOI do SSRN' if so_ssrn else ''))
+        print('  nenhum destes é este trabalho'
+              + (' (só casos vizinhos do mesmo prefixo)' if so_ssrn else ''))
     return achou
 
 
@@ -86,7 +104,8 @@ def main():
 
     print('\n' + '=' * 72)
     if algum:
-        print('HÁ registro do SSRN. Confira o título acima contra o submetido.')
+        print('HÁ preprint deste trabalho no SSRN — marcado com <<< ESTE acima.')
+        print('Confira o título contra o que foi submetido à EJA.')
         return 1
     print('Nenhum preprint do SSRN registrado na Crossref para este autor ou título.')
     print('Ressalva: o depósito na Crossref pode levar dias após a publicação no')

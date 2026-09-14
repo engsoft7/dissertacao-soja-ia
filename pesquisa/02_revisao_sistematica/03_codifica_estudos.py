@@ -228,12 +228,16 @@ RAMPA_AZUL = ('#cde2fb', '#b7d3f6', '#9ec5f4', '#86b6ef',
               '#6da7ec', '#5598e7', '#3987e5', '#256abf')
 
 
-def _pizza(ax, valores, rotulos, cores, n):
+def _pizza(ax, valores, rotulos, cores, n, fora=False):
     """Desenha a pizza com rótulo direto em cada fatia.
 
     Rótulo direto porque o validador de paleta avisa que duas das cores ficam
     abaixo de 3:1 contra a superfície — e porque fatias de tamanho próximo não
     se comparam a olho. Com o número escrito, o leitor não depende da área.
+
+    Com `fora`, todos os rótulos vão para o lado de fora do círculo, ancorados
+    pelo lado em que caem. É o que se faz quando os nomes são longos demais
+    para caber dentro da fatia, como na Figura 3.
     """
     cunhas, _ = ax.pie(
         valores, colors=cores, startangle=90, counterclock=False,
@@ -242,10 +246,16 @@ def _pizza(ax, valores, rotulos, cores, n):
     import numpy as np
     for cunha, rot, v in zip(cunhas, rotulos, valores):
         meio = np.deg2rad((cunha.theta1 + cunha.theta2) / 2)
-        raio = 0.68 if v / n >= 0.08 else 1.16
-        ax.text(raio * np.cos(meio), raio * np.sin(meio),
+        cos, sen = np.cos(meio), np.sin(meio)
+        if fora:
+            raio, ha = 1.08, ('left' if cos > 0.15 else
+                              'right' if cos < -0.15 else 'center')
+        else:
+            raio = 0.68 if v / n >= 0.08 else 1.16
+            ha = 'center'
+        ax.text(raio * cos, raio * sen,
                 f'{rot}\n{v} ({v / n * 100:.0f}%)',
-                ha='center', va='center', fontsize=8.5, color=TINTA,
+                ha=ha, va='center', fontsize=8.5, color=TINTA,
                 linespacing=1.25)
     ax.set_aspect('equal')
 
@@ -276,13 +286,17 @@ def gera_pizza_familias(saida, n):
     ]
     assert sum(v for _, v in grupos) == n, grupos
 
-    # Mais larga que as demais: os rótulos das famílias são longos e, na
-    # largura padrão, encostavam na borda.
+    # Mais larga que as demais: os rótulos das famílias são longos e, dentro
+    # das fatias, encavalavam — daí saírem todos para fora do círculo.
     fig, ax = plt.subplots(figsize=(7.4, 4.8))
-    _pizza(ax, [v for _, v in grupos], [r for r, _ in grupos], CATEGORICAS, n)
+    _pizza(ax, [v for _, v in grupos], [r for r, _ in grupos], CATEGORICAS, n,
+           fora=True)
     ax.set_title(f'Família de técnica empregada (n = {n})', color=TINTA)
+    # folga para os rótulos de fora, que a pizza sozinha não reserva
+    ax.set_xlim(-2.05, 2.05)
+    ax.set_ylim(-1.38, 1.28)
     fig.patch.set_facecolor(SUPERFICIE)
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.90, bottom=0.02)
     caminho = os.path.join(RAIZ, 'fig_revisao_familia_pizza.png')
     fig.savefig(caminho, dpi=200, facecolor=SUPERFICIE)
     plt.close(fig)

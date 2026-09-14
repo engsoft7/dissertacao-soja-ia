@@ -4,7 +4,7 @@ County-Level Soybean Yield Prediction Using Deep CNN-LSTM Model,2019,10.3390/s19
 Crop yield prediction integrating genotype and weather variables using deep learning,2021,10.1371/journal.pone.0252402,1,1,0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0
 Hybrid Deep Learning-based Models for Crop Yield Prediction,2022,10.1080/08839514.2022.2031823,1,1,1,0,1,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1,0
 "A Comparison Between Major Artificial Intelligence Models for Crop Yield Prediction: Case Study of the Midwestern United States, 2006–2015",2019,10.3390/ijgi8050240,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0
-Multispectral Crop Yield Prediction Using 3D-Convolutional Neural Networks and Attention Convolutional LSTM Approaches,2022,10.1109/jstars.2022.3223423,1,1,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0
+Multispectral Crop Yield Prediction Using 3D-Convolutional Neural Networks and Attention Convolutional LSTM Approaches,2023,10.1109/jstars.2022.3223423,1,1,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0
 Using Hybrid Artificial Intelligence and Evolutionary Optimization Algorithms for Estimating Soybean Yield and Fresh Biomass Using Hyperspectral Vegetation Indices,2021,10.3390/rs13132555,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0
 A Scalable Machine Learning System for Pre-Season Agriculture Yield Forecast,2018,10.1109/escience.2018.00131,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0
 "Use Of Deep Neural Networks For Crop Yield Prediction: A Case Study Of Soybean Yield in Lauderdale County, Alabama, USA",2019,10.1109/agro-geoinformatics.2019.8820257,1,1,1,0,0,1,0,0,0,1,0,0,1,1,0,0,1,1,0,0,0
@@ -20,8 +20,8 @@ Global de-trending significantly improves the accuracy of XGBoost-based county-l
 "3D-ResNet-BiLSTM Model: A Deep Learning Model for County-Level Soybean Yield Prediction with Time-Series Sentinel-1, Sentinel-2 Imagery, and Daymet Data",2023,10.3390/rs15235551,1,1,1,1,0,0,0,0,1,0,0,1,0,0,1,0,1,1,1,1,1
 Soya Yield Prediction on a Within-Field Scale Using Machine Learning Models Trained on Sentinel-2 and Soil Data,2022,10.3390/rs14092256,0,0,0,1,1,1,0,0,1,0,1,0,0,0,1,0,0,0,0,1,0
 "Using phenology-based enhanced vegetation index and machine learning for soybean yield estimation in Paraná State, Brazil",2018,10.1117/1.jrs.12.026029,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0
-Machine learning algorithms for soybean yield forecasting in the Brazilian Cerrado,2021,10.1002/jsfa.11713,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0
-Artificial intelligence and satellite‐based remote sensing can be used to predict soybean (<i>Glycine max</i>) yield,2023,10.1002/agj2.21473,0,0,0,1,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0
+Machine learning algorithms for soybean yield forecasting in the Brazilian Cerrado,2022,10.1002/jsfa.11713,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0
+Artificial intelligence and satellite‐based remote sensing can be used to predict soybean (<i>Glycine max</i>) yield,2024,10.1002/agj2.21473,0,0,0,1,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0
 Soybean yield prediction using machine learning algorithms under a cover crop management system,2024,10.1016/j.atech.2024.100442,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0
 Satellite-based soybean yield prediction in Argentina: A comparison between panel regression and deep learning methods,2024,10.1016/j.compag.2024.108978,1,1,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0
 Coupling Process-Based Crop Model and Extreme Climate Indicators with Machine Learning Can Improve the Predictions and Reduce Uncertainties of Global Soybean Yields,2022,10.3390/agriculture12111791,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0
@@ -29,8 +29,8 @@ Satellite Images and Deep Learning Tools for Crop Yield Prediction and Price For
 &lt;b&gt;Estimating soybean yields with artificial neural networks,2018,10.4025/actasciagron.v40i1.35250,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 Beyond assimilation of leaf area index: Leveraging additional spectral information using machine learning for site-specific soybean yield prediction,2024,10.1016/j.agrformet.2024.110022,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0
 A Generalized Multimodal Deep Learning Model for Early Crop Yield Prediction,2022,10.1109/bigdata55660.2022.10020917,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,0,0,0,0,0
-"A Hybrid Model for Soybean Yield Prediction Integrating Convolutional Neural Networks, Recurrent Neural Networks, and Graph Convolutional Networks",2024,10.3390/computation13010004,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1,0
-MHRA-MS-3D-ResNet-BiLSTM: A Multi-Head-Residual Attention-Based Multi-Stream Deep Learning Model for Soybean Yield Prediction in the U.S. Using Multi-Source Remote Sensing Data,2024,10.3390/rs17010107,1,1,0,1,1,0,0,1,0,1,1,0,1,0,1,0,0,0,1,0,1
+"A Hybrid Model for Soybean Yield Prediction Integrating Convolutional Neural Networks, Recurrent Neural Networks, and Graph Convolutional Networks",2025,10.3390/computation13010004,1,0,1,0,0,0,0,1,0,1,1,0,0,0,0,0,0,1,1,1,0
+MHRA-MS-3D-ResNet-BiLSTM: A Multi-Head-Residual Attention-Based Multi-Stream Deep Learning Model for Soybean Yield Prediction in the U.S. Using Multi-Source Remote Sensing Data,2025,10.3390/rs17010107,1,1,0,1,1,0,0,1,0,1,1,0,1,0,1,0,0,0,1,0,1
 Estimating Soybean Yields Using Causal Inference and Deep Learning Approaches With Satellite Remote Sensing Data,2024,10.1109/jstars.2024.3435699,1,1,0,1,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0
 Effectiveness of machine learning and deep learning models at county-level soybean yield forecasting,2024,10.15201/hungeobull.72.4.4,0,0,1,1,1,0,0,0,1,0,0,0,1,1,0,0,1,1,0,0,0
 A Temporal–Geospatial Deep Learning Framework for Crop Yield Prediction,2024,10.3390/electronics13214273,1,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0,0

@@ -146,6 +146,7 @@ def main():
 
     if '--graficos' in sys.argv:
         gera_graficos(saida, n)
+        gera_grafico_anos(ENTRADA, n)
     return 0
 
 
@@ -174,6 +175,44 @@ def gera_graficos(saida, n):
         fig.savefig(caminho, dpi=200)
         plt.close(fig)
         print(f'  {os.path.basename(caminho)}')
+
+
+def gera_grafico_anos(entrada, n):
+    """A distribuição por ano, em colunas.
+
+    Aqui, ao contrário dos demais blocos, as categorias são exclusivas: cada
+    estudo tem um ano e um só, e os oito somam os 53. Ainda assim não é pizza,
+    e sim coluna sobre o eixo do tempo — o que o dado mostra é o adensamento
+    recente da área, e pizza embaralha a ordem cronológica, que é justamente a
+    informação que interessa.
+    """
+    import collections
+
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    import pandas as pd
+
+    df = pd.read_csv(entrada)
+    inc = df[df['DECISAO'].astype(str).str.strip().str.upper() == 'S']
+    contagem = collections.Counter(inc['ano'].astype(int))
+    anos = sorted(contagem)
+    valores = [contagem[a] for a in anos]
+    assert sum(valores) == n, f'{sum(valores)} != {n}'
+
+    fig, ax = plt.subplots(figsize=(6.2, 3.6))
+    ax.bar([str(a) for a in anos], valores, color='#2E75B6')
+    for x, v in enumerate(valores):
+        ax.text(x, v + 0.25, str(v), ha='center', fontsize=9)
+    ax.set_ylim(0, max(valores) * 1.2)
+    ax.set_ylabel(f'estudos incluídos (n = {n})')
+    ax.set_xlabel('ano de publicação')
+    ax.set_title('Distribuição por ano')
+    fig.tight_layout()
+    caminho = os.path.join(RAIZ, 'fig_revisao_ano.png')
+    fig.savefig(caminho, dpi=200)
+    plt.close(fig)
+    print(f'  {os.path.basename(caminho)}')
 
 
 if __name__ == '__main__':

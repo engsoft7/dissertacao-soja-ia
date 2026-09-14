@@ -207,11 +207,17 @@ API = "https://dados.gov.br/dados/api/publico/conjuntos-dados"
 # abaixo vão do mais específico ao mais amplo, e o primeiro que trouxer
 # conjunto encerra. O último é o nome do órgão, que é o que existe com certeza
 # se a CONAB publica alguma coisa no catálogo federal.
+# A busca é por nome de conjunto. "custo" traz quinze, todos administrativos —
+# força de trabalho, medicamentos, serviços de terceiros —, de outros órgãos.
+# Parar no primeiro termo que traz resultado foi um erro: deu resposta com
+# conjuntos irrelevantes e nunca testou o nome do órgão, que é o que decide se
+# a CONAB publica alguma coisa aqui. Os termos passam a ser percorridos todos,
+# e só encerra quem trouxer conjunto cujo nome mencione a CONAB ou a cultura.
 CATALOGOS = tuple(
     (f'busca por "{termo}"', API, {"pagina": "1", "nomeConjuntoDados": termo})
-    for termo in ("custos de produção soja", "custos de produção", "custo",
-                  "conab")
+    for termo in ("conab", "soja", "custos de produção agrícola")
 )
+RELEVANTES = ("conab", "soja", "safra", "agrícola", "agricola")
 PORTAL_HTML = "https://portaldeinformacoes.conab.gov.br/custos-de-producao.html"
 MAX_CANDIDATAS = 12
 FORMATOS = (".csv", ".xlsx", ".xls", ".txt")
@@ -252,13 +258,17 @@ def _candidatas_do_catalogo() -> list[str]:
             dados = json.loads(baixar(f"{base}?{consulta}", tempo=20,
                                       cabecalhos=cabecalhos))
             lista = dados if isinstance(dados, list) else []
-            print(f"  {rotulo}: respondeu, {len(lista)} conjuntos")
-            for pacote in lista[:8]:
-                titulo = (pacote.get("title") or pacote.get("nome")
-                          or pacote.get("nomeConjuntoDados") or "?")
+            titulos = [(p.get("title") or p.get("nome")
+                        or p.get("nomeConjuntoDados") or "?") for p in lista]
+            uteis = [t for t in titulos
+                     if any(r in t.lower() for r in RELEVANTES)]
+            print(f"  {rotulo}: respondeu, {len(lista)} conjuntos, "
+                  f"{len(uteis)} com nome relacionado")
+            for titulo in (uteis or titulos)[:8]:
                 print(f"      - {titulo[:90]}")
-            if lista:
+            if uteis:
                 break
+            dados = None
         except Exception as e:
             print(f"  {rotulo}: {type(e).__name__}: {e}")
     if dados is None:

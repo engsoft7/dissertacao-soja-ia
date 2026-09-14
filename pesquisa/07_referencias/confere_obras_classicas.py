@@ -33,6 +33,11 @@ import requests
 
 CROSSREF = 'https://api.crossref.org/works'
 OPENLIB = 'https://openlibrary.org/search.json'
+# A Crossref não indexa os proceedings do NIPS dos anos 1990 — a primeira
+# rodada deste script devolveu cinco capítulos de livro alheios no lugar do
+# artigo procurado. A OpenAlex indexa, e a revisão sistemática desta pesquisa
+# já a utiliza.
+OPENALEX = 'https://api.openalex.org/works'
 ESPERA = 1.0
 
 # Trabalhos com DOI: a Crossref responde com o registro do próprio editor.
@@ -44,7 +49,10 @@ POR_DOI = [
 ]
 
 # Trabalhos sem DOI confiável: busca por título na Crossref.
-POR_TITULO = [
+POR_TITULO = []
+
+# Trabalhos que a Crossref não alcança.
+POR_OPENALEX = [
     ('Drucker et al. — o artigo que propõe a SVR', 'Support vector regression machines'),
 ]
 
@@ -52,8 +60,10 @@ POR_TITULO = [
 # da primeira edição e as edições subsequentes, porque é nisso que a citação
 # erra.
 LIVROS = [
+    # Sem os dois-pontos e sem o subtítulo: com o título completo a Open
+    # Library não devolveu nada na primeira rodada.
     ('Russell; Norvig — manual canônico de IA',
-     'Artificial Intelligence: A Modern Approach', 'Russell'),
+     'Artificial intelligence', 'Norvig'),
     ('Mitchell — manual canônico de Aprendizado de Máquina',
      'Machine Learning', 'Mitchell'),
     ('Vapnik — a teoria por trás das máquinas de vetores de suporte',
@@ -108,6 +118,22 @@ def mostra_crossref(rotulo, item):
     print(f'  editora   : {item.get("publisher", "?")}')
 
 
+def mostra_openalex(obra):
+    aut = '; '.join(a['author'].get('display_name', '?')
+                    for a in obra.get('authorships', []))
+    loc = (obra.get('primary_location') or {}).get('source') or {}
+    print(f'  título    : {obra.get("display_name", "?")}')
+    print(f'  autoria   : {aut or "(sem autoria no registro)"}')
+    print(f'  ano       : {obra.get("publication_year", "?")}')
+    print(f'  veículo   : {loc.get("display_name", "(sem veículo)")}')
+    print(f'  tipo      : {obra.get("type", "?")}')
+    bib = obra.get('biblio') or {}
+    print(f'  v./n./p.  : {bib.get("volume") or "-"} / {bib.get("issue") or "-"} / '
+          f'{bib.get("first_page") or "-"}-{bib.get("last_page") or "-"}')
+    print(f'  DOI       : {obra.get("doi") or "(sem DOI)"}')
+    print(f'  citações  : {obra.get("cited_by_count", "?")}')
+
+
 def main():
     falhas = 0
 
@@ -143,6 +169,27 @@ def main():
         for i, item in enumerate(itens, 1):
             print(f'  --- candidato {i} ---')
             mostra_crossref(rotulo, item)
+
+    print('\n' + '=' * 78)
+    print('FORA DA CROSSREF — OpenAlex')
+    print('=' * 78)
+    for rotulo, titulo in POR_OPENALEX:
+        print(f'\n{rotulo}\n  consulta  : "{titulo}"')
+        dados, erro = pede(OPENALEX, search=titulo, per_page=5,
+                           mailto='mayconlimasan@gmail.com')
+        time.sleep(ESPERA)
+        if erro:
+            print(f'  ERRO      : {erro}')
+            falhas += 1
+            continue
+        obras = dados.get('results', [])
+        if not obras:
+            print('  nada encontrado')
+            falhas += 1
+            continue
+        for i, obra in enumerate(obras, 1):
+            print(f'  --- candidato {i} ---')
+            mostra_openalex(obra)
 
     print('\n' + '=' * 78)
     print('LIVROS — Open Library')

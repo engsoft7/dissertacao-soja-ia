@@ -15,6 +15,7 @@ on:
     paths:
       - 'pesquisa/07_referencias/**'
       - 'pesquisa/02_revisao_sistematica/04_confere_anos_crossref.py'
+      - 'software/automacao_github/consulta_doi_zenodo.py'
       - '.github/workflows/verifica-referencias.yml'
   workflow_dispatch:
 
@@ -54,3 +55,22 @@ jobs:
       - name: Resolve os 53 DOIs na Crossref
         continue-on-error: true
         run: python pesquisa/02_revisao_sistematica/04_confere_anos_crossref.py
+
+  # O DOI de versão sai do Zenodo depois da release, e precisa ser copiado para
+  # o REGISTRO_INPI.md. Digitá-lo à mão a partir da página é como se troca um
+  # dígito de um identificador permanente.
+  doi-do-deposito:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências
+        run: pip install --quiet requests
+
+      - name: Lista as versões depositadas no Zenodo
+        continue-on-error: true
+        run: python software/automacao_github/consulta_doi_zenodo.py

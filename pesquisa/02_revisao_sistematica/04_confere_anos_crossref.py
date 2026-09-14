@@ -97,21 +97,27 @@ def main():
             'abnt': ano_abnt(linha),
         }
 
-    print('DOIs em que a data impressa e a on-line caem em anos diferentes:')
-    print('-' * 78)
-    divergentes = 0
-    for doi, d in sorted(resolvidos.items()):
-        if d['impresso'] and d['online'] and d['impresso'] != d['online']:
-            divergentes += 1
-            print(f'  {doi}')
-            print(f'     fascículo: {d["impresso"]}   on-line: {d["online"]}   '
-                  f'no repositório: {d["abnt"]}')
-            print(f'     {d["veiculo"][:70]}')
-    print(f'  total: {divergentes}\n')
-
     # O ano da norma é o do fascículo; on-line só quando não há fascículo.
     def ano_final(d):
         return d['impresso'] or d['online'] or d['issued']
+
+    # A primeira versão deste script só listava os DOIs em que a data impressa e
+    # a on-line caíam em anos diferentes, e por isso explicava apenas parte da
+    # divergência: um ano trocado por outro motivo — registro sem data impressa,
+    # ou ano simplesmente errado no arquivo — passava sem aparecer. O que
+    # interessa é comparar cada DOI com o ano que está impresso na referência.
+    print('DOIs em que o ano do repositório difere do que a editora depositou:')
+    print('-' * 78)
+    divergentes = 0
+    for doi, d in sorted(resolvidos.items()):
+        if ano_final(d) != d['abnt']:
+            divergentes += 1
+            print(f'  {doi}')
+            print(f'     no repositório: {d["abnt"]}   ->   Crossref: {ano_final(d)}')
+            print(f'     fascículo: {d["impresso"] or "-"}   on-line: '
+                  f'{d["online"] or "-"}   issued: {d["issued"] or "-"}')
+            print(f'     {d["veiculo"][:70]}')
+    print(f'  total: {divergentes}\n')
 
     crossref = collections.Counter(ano_final(d) for d in resolvidos.values())
     print('=' * 78)

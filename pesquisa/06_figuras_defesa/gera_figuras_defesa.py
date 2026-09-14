@@ -273,3 +273,59 @@ def figura_variavel_alvo():
 
 
 figura_variavel_alvo()
+
+
+# ------------------------------------------- Figura da revisão (pizza) -------
+def figura_revisao_familias():
+    """A pizza das famílias de técnica, redesenhada na medida do slide.
+
+    A versão da dissertação foi composta para a coluna da página, com rótulo de
+    8,5 pt; projetada ao lado de um texto de 25 pt, ficaria ilegível. Aqui os
+    rótulos vão para fora da pizza, encurtados, e o corpo sobe para 14 pt.
+
+    A partição é a mesma de `pesquisa/02_revisao_sistematica/03_codifica_estudos.py`
+    e é exclusiva: cada estudo entra em uma única fatia, de modo que as quatro
+    fecham os 53. As barras por algoritmo, essas, não podem virar pizza — as
+    categorias se sobrepõem e somam mais de 100%.
+    """
+    cod = pd.read_csv(REPO / "pesquisa/02_revisao_sistematica/codificacao_53_estudos.csv")
+    n = len(cod)
+    profundo = ["Recorrentes (LSTM/RNN/GRU)", "CNN", "Transformer"]
+    classico = ["Random Forest", "XGBoost", "SVR/SVM", "Rede neural rasa/MLP",
+                "Regressão linear"]
+    tem_p = cod[profundo].sum(axis=1) > 0
+    tem_c = cod[classico].sum(axis=1) > 0
+    grupos = [
+        ("Apenas métodos\nclássicos", int((tem_c & ~tem_p).sum())),
+        ("Ambas as famílias", int((tem_c & tem_p).sum())),
+        ("Apenas aprendizado\nprofundo", int((tem_p & ~tem_c).sum())),
+        ("Sem técnica declarada\nno resumo", int((~tem_p & ~tem_c).sum())),
+    ]
+    assert sum(v for _, v in grupos) == n, grupos
+
+    # as mesmas cores da figura impressa: o examinador reconhece o gráfico
+    cores = ("#2a78d6", "#eb6834", "#1baf7a", "#eda100")
+    fig, ax = plt.subplots(figsize=(6.90, 4.55))
+    cunhas, _ = ax.pie([v for _, v in grupos], colors=cores, startangle=90,
+                       counterclock=False, radius=1.0,
+                       wedgeprops=dict(edgecolor="white", linewidth=2))
+    for cunha, (rot, v) in zip(cunhas, grupos):
+        meio = np.deg2rad((cunha.theta1 + cunha.theta2) / 2)
+        x, y = 1.28 * np.cos(meio), 1.28 * np.sin(meio)
+        ax.text(x, y, f"{rot}\n{v} ({v / n * 100:.0f}%)",
+                ha="center" if abs(x) < 0.35 else ("left" if x > 0 else "right"),
+                va="center", fontsize=14, color=TINTA, linespacing=1.3)
+    ax.set_aspect("equal")
+    ax.set_xlim(-2.72, 2.72)
+    ax.set_ylim(-1.79, 1.79)
+    ax.set_axis_off()
+    ax.set_title(f"Família de técnica empregada (n = {n})", fontsize=15,
+                 color=TINTA, pad=2)
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.93, bottom=0.02)
+    fig.savefig(SAI / "fig_revisao_familias.png", dpi=220, facecolor="white")
+    plt.close(fig)
+    print("fig_revisao_familias.png  " +
+          "; ".join(f"{r.replace(chr(10), ' ')}: {v}" for r, v in grupos))
+
+
+figura_revisao_familias()

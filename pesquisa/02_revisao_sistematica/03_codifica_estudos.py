@@ -221,8 +221,6 @@ def gera_grafico_anos(entrada, n):
 # fixa, e não ciclada: a cor acompanha a categoria, não a posição no ranking.
 SUPERFICIE = '#fcfcfb'
 TINTA = '#0b0b0b'
-# tinta secundária: etiqueta acompanha o valor sem competir com ele
-TINTA2 = '#52514e'
 CATEGORICAS = ('#2a78d6', '#eb6834', '#1baf7a', '#eda100')
 # Rampa sequencial de um só tom, clara para escura. Ano é dado ordenado: cor
 # que escurece com o tempo preserva a ordem que a pizza, por si, embaralha.
@@ -263,7 +261,6 @@ def gera_pizza_familias(saida, n):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
-    from matplotlib.patches import FancyBboxPatch
 
     profundo = ['Recorrentes (LSTM/RNN/GRU)', 'CNN', 'Transformer']
     classico = ['Random Forest', 'XGBoost', 'SVR/SVM', 'Rede neural rasa/MLP',
@@ -273,58 +270,19 @@ def gera_pizza_familias(saida, n):
 
     grupos = [
         ('Apenas métodos clássicos', int((tem_c & ~tem_p).sum())),
-        ('Ambas as famílias (híbrido ou comparação)', int((tem_c & tem_p).sum())),
+        ('Ambas as famílias\n(híbrido ou comparação)', int((tem_c & tem_p).sum())),
         ('Apenas aprendizado profundo', int((tem_p & ~tem_c).sum())),
-        ('Sem técnica declarada no resumo', int((~tem_p & ~tem_c).sum())),
+        ('Sem técnica declarada\nno resumo', int((~tem_p & ~tem_c).sum())),
     ]
     assert sum(v for _, v in grupos) == n, grupos
 
-    import numpy as np
-
-    # Rosca, e não pizza cheia: o miolo carrega o total e os nomes saem de
-    # dentro das fatias, onde encavalavam. A legenda fica à direita, em coluna,
-    # porque quatro nomes longos não cabem em volta de um círculo sem colidir.
+    # Mais larga que as demais: os rótulos das famílias são longos e, na
+    # largura padrão, encostavam na borda.
     fig, ax = plt.subplots(figsize=(7.4, 4.8))
-    centro, raio, espessura = (-0.98, 0.0), 0.88, 0.35
-    valores = [v for _, v in grupos]
-    cunhas, _ = ax.pie(
-        valores, colors=CATEGORICAS, startangle=90, counterclock=False,
-        center=centro, radius=raio,
-        # 2 px da cor da superfície entre as fatias: separa sem desenhar borda
-        wedgeprops=dict(width=espessura, edgecolor=SUPERFICIE, linewidth=2))
-
-    # Rótulo direto na fatia — só a contagem, que é curta e cabe fora do anel,
-    # sobre a superfície. É o canal que não depende da cor: o leitor liga a
-    # fatia à linha da legenda pelo número, não pelo tom.
-    for cunha, v in zip(cunhas, valores):
-        meio = np.deg2rad((cunha.theta1 + cunha.theta2) / 2)
-        cos, sen = np.cos(meio), np.sin(meio)
-        ax.text(centro[0] + (raio + 0.12) * cos, centro[1] + (raio + 0.12) * sen,
-                str(v), fontsize=10.5, color=TINTA, va='center',
-                ha='left' if cos > 0.2 else ('right' if cos < -0.2 else 'center'))
-
-    ax.text(*centro, f'{n}\n', fontsize=23, color=TINTA, ha='center',
-            va='center', linespacing=0.9)
-    ax.text(centro[0], centro[1] - 0.19, 'estudos', fontsize=9.5,
-            color=TINTA2, ha='center', va='center')
-
-    # Legenda em coluna: pastilha, valor e nome. O valor vem acima do nome, e
-    # maior, porque é o dado; o nome é a etiqueta.
-    for i, ((rotulo, v), cor) in enumerate(zip(grupos, CATEGORICAS)):
-        y = 0.92 - i * 0.60
-        ax.add_patch(FancyBboxPatch(
-            (0.16, y - 0.038), 0.078, 0.078, boxstyle='round,pad=0,rounding_size=0.02',
-            facecolor=cor, edgecolor='none'))
-        ax.text(0.32, y, f'{v} ({v / n * 100:.0f}%)', fontsize=13,
-                color=TINTA, va='center')
-        ax.text(0.32, y - 0.185, rotulo, fontsize=9.2, color=TINTA2, va='center')
-
-    ax.set_aspect('equal')
-    ax.set_xlim(-2.08, 2.08)
-    ax.set_ylim(-1.35, 1.35)
-    ax.set_axis_off()
-    # sem título: a legenda ABNT da Figura 3 já o diz, acima da imagem
-    fig.subplots_adjust(left=0.005, right=0.995, top=0.995, bottom=0.005)
+    _pizza(ax, [v for _, v in grupos], [r for r, _ in grupos], CATEGORICAS, n)
+    ax.set_title(f'Família de técnica empregada (n = {n})', color=TINTA)
+    fig.patch.set_facecolor(SUPERFICIE)
+    fig.tight_layout()
     caminho = os.path.join(RAIZ, 'fig_revisao_familia_pizza.png')
     fig.savefig(caminho, dpi=200, facecolor=SUPERFICIE)
     plt.close(fig)

@@ -15,9 +15,15 @@ Saídas (não versionadas):
 | `fig_modelos.png` | slide 7 — Figura 2 | 9,10 × 3,55 pol |
 | `fig_repeticao.png` | slide 8 — Figura 3 | 9,10 × 3,55 pol |
 | `fig_fluxograma_pagina.png` | Figura 1 da dissertação, coluna única | 6,10 × 8,00 pol |
+| `fig_revisao_familias.png` | slide 6 — pizza da revisão | 6,90 × 4,55 pol |
 
-Os números vêm de `pesquisa/03_analise_nacional/resultados_ajustados.json` e de
-`pesquisa/dados/soja_para_mascarado_2001_2024.csv`; nada é redigitado.
+Os números vêm de `pesquisa/03_analise_nacional/resultados_ajustados.json`, de
+`pesquisa/dados/soja_para_mascarado_2001_2024.csv` e de
+`pesquisa/02_revisao_sistematica/codificacao_53_estudos.csv`; nada é redigitado.
+
+A pizza da revisão é a mesma figura da dissertação — mesma partição, mesmas
+cores —, redesenhada com rótulos para fora e corpo de 14 pt, porque a versão da
+página, projetada ao lado de um texto de 25 pt, ficaria ilegível.
 
 ## Correções de conteúdo em relação à Figura 1 da dissertação
 

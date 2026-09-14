@@ -14,6 +14,7 @@ on:
   push:
     paths:
       - 'pesquisa/07_referencias/**'
+      - 'pesquisa/02_revisao_sistematica/04_confere_anos_crossref.py'
       - '.github/workflows/verifica-referencias.yml'
   workflow_dispatch:
 
@@ -35,3 +36,21 @@ jobs:
       - name: Consulta Crossref e Open Library
         continue-on-error: true
         run: python pesquisa/07_referencias/confere_obras_classicas.py
+
+  # Os três registros da distribuição por ano dos 53 estudos discordam entre si
+  # nas safras recentes. Este job pergunta à editora de cada um.
+  anos-da-revisao:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências
+        run: pip install --quiet requests
+
+      - name: Resolve os 53 DOIs na Crossref
+        continue-on-error: true
+        run: python pesquisa/02_revisao_sistematica/04_confere_anos_crossref.py

@@ -199,16 +199,18 @@ def aplicar(texto: str, simular: bool = False) -> tuple[str, list[str]]:
 # é a forma da consulta. A paginação costuma ser obrigatória nele, então a
 # primeira tentativa a inclui e a segunda pede a página sem filtro — se esta
 # responder e aquela não, o problema é o nome do filtro, e o log dirá.
-CATALOGOS = (
-    ("API atual, com filtro",
-     "https://dados.gov.br/dados/api/publico/conjuntos-dados",
-     {"pagina": "1", "nomeConjuntoDados": "custos de produção"}),
-    ("API atual, sem filtro",
-     "https://dados.gov.br/dados/api/publico/conjuntos-dados",
-     {"pagina": "1"}),
-    ("CKAN legado",
-     "https://dados.gov.br/api/3/action/package_search",
-     {"q": "conab custos de produção", "rows": "10"}),
+API = "https://dados.gov.br/dados/api/publico/conjuntos-dados"
+
+# A rodada de 14/09 fechou a parte de infraestrutura: com pagina=1 a API atual
+# responde 200, e o 401 anterior era do CKAN legado, que não aceita a chave
+# nova. Sobrou a busca. "custos de produção" devolveu zero, então os termos
+# abaixo vão do mais específico ao mais amplo, e o primeiro que trouxer
+# conjunto encerra. O último é o nome do órgão, que é o que existe com certeza
+# se a CONAB publica alguma coisa no catálogo federal.
+CATALOGOS = tuple(
+    (f'busca por "{termo}"', API, {"pagina": "1", "nomeConjuntoDados": termo})
+    for termo in ("custos de produção soja", "custos de produção", "custo",
+                  "conab")
 )
 PORTAL_HTML = "https://portaldeinformacoes.conab.gov.br/custos-de-producao.html"
 MAX_CANDIDATAS = 12
@@ -249,9 +251,14 @@ def _candidatas_do_catalogo() -> list[str]:
         try:
             dados = json.loads(baixar(f"{base}?{consulta}", tempo=20,
                                       cabecalhos=cabecalhos))
-            quantos = len(dados) if isinstance(dados, list) else "?"
-            print(f"  {rotulo}: respondeu, {quantos} conjuntos")
-            break
+            lista = dados if isinstance(dados, list) else []
+            print(f"  {rotulo}: respondeu, {len(lista)} conjuntos")
+            for pacote in lista[:8]:
+                titulo = (pacote.get("title") or pacote.get("nome")
+                          or pacote.get("nomeConjuntoDados") or "?")
+                print(f"      - {titulo[:90]}")
+            if lista:
+                break
         except Exception as e:
             print(f"  {rotulo}: {type(e).__name__}: {e}")
     if dados is None:

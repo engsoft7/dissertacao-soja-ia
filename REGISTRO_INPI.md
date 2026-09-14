@@ -194,6 +194,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.7` (05/09/2026) — versão da defesa | 57 | 10.711 | `0a2aaf79c45e875bfb6d89714a74a034e4d8ef5739bf6fd7e1ff7fa31073cd7a` |
 | Tag `v2.3.8` (05/09/2026) — geradores do artigo submetido | 60 | 11.680 | `506baabfca171e40cc5d968d0ca47a7aff1877938d92f532376d67d7c1429a83` |
 | Tag `v2.3.9` (14/09/2026) — análises da revisão | 64 | 12.792 | `b9a4a09bca08161efdef3e8f746ff84c1d314c79a19e10335cc5a005a3e5305d` |
+| Commit `2351dcfd` (14/09/2026) — ainda sem etiqueta | 74 | 14.683 | `f5e8d0673c108b8795467b04d7532a0be59dfb6632b6242e70852ce315ae28a6` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -207,6 +208,22 @@ revisão da Computers and Electronics in Agriculture: o nulo que preserva a
 dependência temporal das séries, a verificação de coerência interna entre
 rendimento e área plantada, o confronto da repetição com o sinal orbital e o
 experimento de injeção controlada. É o depósito que o artigo ressubmetido cita.
+
+O commit `2351dcfd` é o estado atual da `main`, ainda **sem etiqueta e sem DOI**.
+Acrescenta dez arquivos-fonte à `v2.3.9` e altera outros dez. Entram os
+geradores e conferidores que acompanharam a submissão do artigo — a resolução
+dos DOIs impressos contra a Crossref, a busca por preprint, a declaração de
+conflito de interesses e o resumo gráfico —, o diagnóstico da coleta da CONAB,
+que estabeleceu ser a rota automática fechada por autenticação e não por falta
+de endereço, a codificação dos 53 estudos da revisão, a conferência dos anos de
+publicação desses estudos e das obras clássicas que faltavam citar, e o primeiro
+teste de unidade do aplicativo, sobre a função que calcula a margem por hectare.
+Entre os arquivos alterados estão `MainActivity.kt`, que passou a guardar o
+preço informado pelo produtor em precisão dupla, e `build.gradle.kts`, sem o
+qual o aplicativo não compilava a partir de um clone limpo.
+
+Enquanto não houver etiqueta, este estado não tem depósito no Zenodo nem DOI
+próprio: o DOI de conceito continua resolvendo para a `v2.3.9`.
 
 Os dez foram recalculados a partir de cópias limpas dos respectivos commits e
 conferem em execuções repetidas. A tag da defesa é a `v2.3.7`, e é do Release
@@ -374,18 +391,26 @@ estes passos:
    git checkout 7b8375df14ca031355c4b9c87fd42942bffec6ae
    ```
 
-2. **Executar o comando de hash:**
+2. **Executar o comando de hash** — o mesmo da seção 9.1, com `LC_ALL=C` nas
+   duas etapas, sem o qual a ordenação varia com o idioma do sistema e o
+   resultado não confere:
    ```bash
-   find . \( -name '*.py' -o -name '*.kt' -o -name '*.kts' \) \
+   LC_ALL=C find . \( -name '*.py' -o -name '*.kt' -o -name '*.kts' \) \
      -not -path './.git/*' -not -path '*/build/*' \
      -not -path '*__pycache__*' -not -path '*/.gradle/*' \
-     | sort | xargs sha256sum | sha256sum
+     | LC_ALL=C sort | xargs sha256sum | sha256sum
    ```
 
 3. **Resultado esperado:**
    ```
-   7eca3e90aadcd5d0eaa765b92a8ad7e55083f90846a78fdc1854525fffa94e6b  -
+   5a93dfca9511fcab534c76da4618e670e5c6ed6d33d48ac2a557963a5ef9f11d  -
    ```
+
+   > Esta seção trazia aqui, até esta revisão, o valor `7eca3e90…`, que a
+   > seção 9.1 declara irreproduzível. Um examinador que seguisse estes passos
+   > obteria divergência e concluiria, sem razão, que a prova de integridade não
+   > se sustenta. O valor acima é o que o comando devolve no commit-âncora, e
+   > confere em execuções repetidas.
 
 4. **Verificação cruzada:** O mesmo código está arquivado permanentemente no
    Zenodo (CERN) sob DOI [10.5281/zenodo.21286115](https://doi.org/10.5281/zenodo.21286115),

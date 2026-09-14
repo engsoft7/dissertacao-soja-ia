@@ -33,6 +33,10 @@ AUTOR = 'Maycon Lima dos Santos'
 
 
 def busca(**params):
+    # Os parâmetros de consulta da Crossref levam ponto — query.author,
+    # query.bibliographic — então chegam aqui por dicionário desempacotado:
+    # com ponto o Python não aceita palavra-chave, e trocar o ponto por
+    # sublinhado faz a API devolver 400.
     cab = {'User-Agent': f'dissertacao-soja-ia/1.0 (mailto:{MAILTO})' if MAILTO
            else 'dissertacao-soja-ia/1.0'}
     r = requests.get(API, params={'rows': 20, **params}, headers=cab, timeout=40)
@@ -67,7 +71,7 @@ def main():
 
     algum = False
     algum |= relata('DOIs do SSRN com o autor no nome',
-                    busca(query_author=AUTOR, filter='prefix:10.2139'), so_ssrn=True)
+                    busca(**{'query.author': AUTOR, 'filter': 'prefix:10.2139'}), so_ssrn=True)
     time.sleep(0.5)
     algum |= relata('DOIs do SSRN com o título atual',
                     busca(**{'query.bibliographic': TITULO_ATUAL,
@@ -78,7 +82,7 @@ def main():
                              'filter': 'prefix:10.2139'}), so_ssrn=True)
     time.sleep(0.5)
     relata('qualquer registro com este autor, sem filtro de prefixo',
-           busca(query_author=AUTOR, query_bibliographic='soybean yield repetition'))
+           busca(**{'query.author': AUTOR, 'query.bibliographic': 'soybean yield repetition'}))
 
     print('\n' + '=' * 72)
     if algum:

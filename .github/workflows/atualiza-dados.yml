@@ -375,8 +375,20 @@ jobs:
             }
             let corpo = `O preço e o custo do simulador saem do levantamento ` +
               `**${lev}** da CONAB para Pedro Afonso (TO), que já tem **${meses} ` +
-              `meses**. A CONAB publica custos de produção da soja a cada dois ` +
-              `meses, então provavelmente há levantamento mais recente.\n\n`;
+              `meses**.\n\n` +
+              `Isto é um aviso de idade, não a constatação de que exista ` +
+              `levantamento mais recente. O portal é uma aplicação de painéis e ` +
+              `este workflow não consegue consultá-lo, então ele não sabe o que ` +
+              `há publicado — sabe apenas há quanto tempo o dado em uso foi ` +
+              `medido. Os levantamentos da praça não saem em cadência fixa: em ` +
+              `2026 o portal ofereceu um só para a soja.\n\n` +
+              `**Confira em trinta segundos, antes de qualquer outra coisa.** Abra ` +
+              `[o painel de custos de produção](https://portaldeinformacoes.conab.gov.br/home/custo-de-producao), ` +
+              `ponha **Produto** em SOJA e **Ano** no corrente, e veja o que o ` +
+              `seletor **Mês** oferece. Não havendo mês posterior a ${lev}, o dado ` +
+              `em uso já é o mais recente que a CONAB publicou: feche esta issue, ` +
+              `não há o que atualizar.\n\n` +
+              `Havendo mês mais novo, siga adiante.\n\n`;
             corpo += temFonte
               ? `A descoberta automática tentou primeiro o endereço fixado em ` +
                 `\`CONAB_CUSTOS_URL\`, depois o catálogo de dados abertos e a ` +

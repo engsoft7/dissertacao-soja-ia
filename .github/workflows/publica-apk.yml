@@ -1,0 +1,115 @@
+# Gera e assina o .aab e o .apk de release, e anexa os dois ao Release.
+#
+# Existe porque, até aqui, o binário distribuído só podia sair da máquina do
+# autor: a chave de assinatura não está no repositório, e o workflow de testes
+# compila apenas em debug, de propósito. Isso deixa o produto que vai à banca
+# sem caminho reprodutível — quem avalia não tem como regenerar o APK que
+# recebeu e conferir que corresponde ao código.
+#
+# ESCOPO DELIBERADAMENTE ESTREITO
+# ──────────────────────────────
+# Dispara só na publicação de um Release, e não a cada push. A chave fica
+# exposta a um gatilho, e não a todos. O job de testes continua compilando em
+# debug em cada push, e é ele que serve de guarda de compilação.
+#
+# ANTES DE ATIVAR, LEIA
+# ─────────────────────
+# Segredo de repositório é legível por qualquer workflow e por quem tiver
+# acesso de escrita. Se a chave aqui for a única que assina o aplicativo, um
+# vazamento é irreversível: não se revoga chave de assinatura, e quem a tiver
+# assina um pacote que o Android aceita como atualização deste. Só use este
+# workflow se o aplicativo estiver inscrito no Play App Signing, caso em que
+# esta é a chave de upload, que o Google permite substituir.
+#
+# Sem os segredos configurados, o workflow não falha: apenas se declara
+# inativo e encerra.
+name: Publica APK assinado
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  assina:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Sem os segredos não há o que fazer, e falhar seria ruído: o repositório
+      # é público e nem todo mundo que o clona tem a chave.
+      - name: Verifica se a chave está configurada
+        id: chave
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "presente=nao" >> "$GITHUB_OUTPUT"
+            echo "::notice::KEYSTORE_BASE64 não configurado — nada a assinar."
+          else
+            echo "presente=sim" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.chave.outputs.presente == 'sim'
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.chave.outputs.presente == 'sim'
+
+      # O build.gradle.kts já lê keystore.properties se existir, e só aplica a
+      # assinatura de release quando o .jks está presente. Aqui só se
+      # materializam os dois arquivos que ele espera.
+      - name: Materializa a chave
+        if: steps.chave.outputs.presente == 'sim'
+        working-directory: software/aplicativo_mobile
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > agro_playstore.jks
+          {
+            echo "storeFile=../agro_playstore.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > keystore.properties
+
+      - name: Compila e assina
+        if: steps.chave.outputs.presente == 'sim'
+        working-directory: software/aplicativo_mobile
+        run: ./gradlew --no-daemon bundleRelease assembleRelease
+
+      # O REGISTRO_INPI.md declara o SHA-256 do APK distribuído. Imprimi-lo aqui
+      # deixa o valor no log do Release, conferível sem baixar nada.
+      - name: Resumo criptográfico dos pacotes
+        if: steps.chave.outputs.presente == 'sim'
+        working-directory: software/aplicativo_mobile
+        run: |
+          find app/build/outputs -name '*.aab' -o -name '*-release*.apk' | sort | while read -r f; do
+            echo "$(sha256sum "$f" | cut -d' ' -f1)  $(basename "$f")"
+          done | tee "$GITHUB_STEP_SUMMARY"
+
+      - name: Anexa ao Release
+        if: steps.chave.outputs.presente == 'sim' && github.event_name == 'release'
+        working-directory: software/aplicativo_mobile
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            $(find app/build/outputs -name '*.aab' -o -name '*-release*.apk') \
+            --clobber --repo "${{ github.repository }}"
+
+      # O runner é efêmero, mas apagar é barato e evita que a chave sobreviva
+      # num passo posterior que alguém acrescente sem pensar nisso.
+      - name: Apaga a chave
+        if: always()
+        working-directory: software/aplicativo_mobile
+        run: rm -f agro_playstore.jks keystore.properties

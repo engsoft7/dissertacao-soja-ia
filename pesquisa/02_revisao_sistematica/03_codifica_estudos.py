@@ -147,6 +147,8 @@ def main():
     if '--graficos' in sys.argv:
         gera_graficos(saida, n)
         gera_grafico_anos(ENTRADA, n)
+        gera_pizza_familias(saida, n)
+        gera_pizza_anos(ENTRADA, n)
     return 0
 
 
@@ -211,6 +213,112 @@ def gera_grafico_anos(entrada, n):
     fig.tight_layout()
     caminho = os.path.join(RAIZ, 'fig_revisao_ano.png')
     fig.savefig(caminho, dpi=200)
+    plt.close(fig)
+    print(f'  {os.path.basename(caminho)}')
+
+
+# Superfície e tinta da figura, e a ordem fixa das cores categóricas. Ordem
+# fixa, e não ciclada: a cor acompanha a categoria, não a posição no ranking.
+SUPERFICIE = '#fcfcfb'
+TINTA = '#0b0b0b'
+CATEGORICAS = ('#2a78d6', '#eb6834', '#1baf7a', '#eda100')
+# Rampa sequencial de um só tom, clara para escura. Ano é dado ordenado: cor
+# que escurece com o tempo preserva a ordem que a pizza, por si, embaralha.
+RAMPA_AZUL = ('#cde2fb', '#b7d3f6', '#9ec5f4', '#86b6ef',
+              '#6da7ec', '#5598e7', '#3987e5', '#256abf')
+
+
+def _pizza(ax, valores, rotulos, cores, n):
+    """Desenha a pizza com rótulo direto em cada fatia.
+
+    Rótulo direto porque o validador de paleta avisa que duas das cores ficam
+    abaixo de 3:1 contra a superfície — e porque fatias de tamanho próximo não
+    se comparam a olho. Com o número escrito, o leitor não depende da área.
+    """
+    cunhas, _ = ax.pie(
+        valores, colors=cores, startangle=90, counterclock=False,
+        # 2 px da cor da superfície entre as fatias: separa sem desenhar borda
+        wedgeprops=dict(edgecolor=SUPERFICIE, linewidth=2))
+    import numpy as np
+    for cunha, rot, v in zip(cunhas, rotulos, valores):
+        meio = np.deg2rad((cunha.theta1 + cunha.theta2) / 2)
+        raio = 0.68 if v / n >= 0.08 else 1.16
+        ax.text(raio * np.cos(meio), raio * np.sin(meio),
+                f'{rot}\n{v} ({v / n * 100:.0f}%)',
+                ha='center', va='center', fontsize=8.5, color=TINTA,
+                linespacing=1.25)
+    ax.set_aspect('equal')
+
+
+def gera_pizza_familias(saida, n):
+    """A partição dos 53 por família de técnica — exclusiva, logo somável.
+
+    As barras por algoritmo não podem virar pizza: as categorias se sobrepõem e
+    somam 163%. Esta parte de outra pergunta — qual família cada estudo
+    emprega — e essa tem resposta única por estudo, de modo que as quatro
+    fatias fecham os 53.
+    """
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+
+    profundo = ['Recorrentes (LSTM/RNN/GRU)', 'CNN', 'Transformer']
+    classico = ['Random Forest', 'XGBoost', 'SVR/SVM', 'Rede neural rasa/MLP',
+                'Regressão linear']
+    tem_p = saida[profundo].sum(axis=1) > 0
+    tem_c = saida[classico].sum(axis=1) > 0
+
+    grupos = [
+        ('Apenas métodos clássicos', int((tem_c & ~tem_p).sum())),
+        ('Ambas as famílias\n(híbrido ou comparação)', int((tem_c & tem_p).sum())),
+        ('Apenas aprendizado profundo', int((tem_p & ~tem_c).sum())),
+        ('Sem técnica declarada\nno resumo', int((~tem_p & ~tem_c).sum())),
+    ]
+    assert sum(v for _, v in grupos) == n, grupos
+
+    # Mais larga que as demais: os rótulos das famílias são longos e, na
+    # largura padrão, encostavam na borda.
+    fig, ax = plt.subplots(figsize=(7.4, 4.8))
+    _pizza(ax, [v for _, v in grupos], [r for r, _ in grupos], CATEGORICAS, n)
+    ax.set_title(f'Família de técnica empregada (n = {n})', color=TINTA)
+    fig.patch.set_facecolor(SUPERFICIE)
+    fig.tight_layout()
+    caminho = os.path.join(RAIZ, 'fig_revisao_familia_pizza.png')
+    fig.savefig(caminho, dpi=200, facecolor=SUPERFICIE)
+    plt.close(fig)
+    print(f'  {os.path.basename(caminho)}')
+
+
+def gera_pizza_anos(entrada, n):
+    """A distribuição por ano em pizza, como o orientador sugeriu.
+
+    Categoria exclusiva e somável, portanto legítima. Registre-se, ainda assim,
+    que a coluna comunica melhor o que este dado tem de relevante — o
+    adensamento recente —, porque pizza não tem eixo do tempo. Daí a rampa
+    sequencial e o sentido horário a partir do topo: é o que resta da ordem
+    cronológica dentro de um círculo.
+    """
+    import collections
+
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    import pandas as pd
+
+    df = pd.read_csv(entrada)
+    inc = df[df['DECISAO'].astype(str).str.strip().str.upper() == 'S']
+    contagem = collections.Counter(inc['ano'].astype(int))
+    anos = sorted(contagem)
+    valores = [contagem[a] for a in anos]
+    assert sum(valores) == n
+
+    fig, ax = plt.subplots(figsize=(6.2, 4.6))
+    _pizza(ax, valores, [str(a) for a in anos], RAMPA_AZUL[:len(anos)], n)
+    ax.set_title(f'Distribuição por ano de publicação (n = {n})', color=TINTA)
+    fig.patch.set_facecolor(SUPERFICIE)
+    fig.tight_layout()
+    caminho = os.path.join(RAIZ, 'fig_revisao_ano_pizza.png')
+    fig.savefig(caminho, dpi=200, facecolor=SUPERFICIE)
     plt.close(fig)
     print(f'  {os.path.basename(caminho)}')
 

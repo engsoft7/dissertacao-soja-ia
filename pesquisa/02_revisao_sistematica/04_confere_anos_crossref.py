@@ -80,6 +80,38 @@ def parte_ano(item, campo):
     return partes[0][0] if partes and partes[0] else None
 
 
+def confere_mdpi(doi):
+    """Pergunta à MDPI o ano que ela própria imprime na citação do artigo.
+
+    A Crossref não decide o caso dos dois artigos da MDPI. Ela traz apenas a
+    data on-line, dezembro de 2024, enquanto o número do volume — Remote
+    Sensing v. 17 e Computation v. 13 — é o do volume de 2025. A MDPI publica
+    nos últimos dias de dezembro dentro do volume do ano seguinte, e a norma
+    pede o ano do fascículo, não o do depósito.
+
+    Quem desempata é a própria editora: a página do artigo imprime a citação
+    completa, no formato "Remote Sens. 2025, 17(1), 107". É esse ano que o
+    leitor vê e que a banca confere.
+    """
+    try:
+        r = requests.get(f'https://doi.org/{doi}', timeout=40, allow_redirects=True,
+                         headers={'User-Agent': 'Mozilla/5.0 (compatible; '
+                                                'dissertacao-soja-ia/1.0)'})
+    except requests.RequestException as e:
+        return None, f'falhou: {e}'
+    if r.status_code != 200:
+        return None, f'HTTP {r.status_code}'
+    # A citação aparece em <meta name="citation_date"> e no texto da página.
+    m = re.search(r'name="citation_(?:date|publication_date)"\s+content="(\d{4})',
+                  r.text)
+    if m:
+        return int(m.group(1)), 'meta citation_date'
+    m = re.search(r'\b(?:Remote Sens|Computation)\.\s+(\d{4}),', r.text)
+    if m:
+        return int(m.group(1)), 'linha de citação da página'
+    return None, 'não encontrei o ano na página'
+
+
 def main():
     linhas = [l.strip() for l in open(FONTE, encoding='utf-8') if l.strip()]
     print(f'referências no arquivo: {len(linhas)}\n')
@@ -146,6 +178,21 @@ def main():
               f'   issued: {d["issued"] or "-"}   volume: {d.get("volume") or "-"}')
         print(f'     no repositório: {d["abnt"]}   ->   adotado: {ano_final(d)}')
         print(f'     {d["veiculo"][:70]}')
+    print()
+
+    print('O que a MDPI imprime na página dos dois artigos:')
+    print('-' * 78)
+    mdpi = {}
+    for doi in DETALHAR:
+        if not doi.startswith('10.3390/'):
+            continue
+        ano, origem = confere_mdpi(doi)
+        mdpi[doi] = ano
+        time.sleep(ESPERA)
+        dep = resolvidos.get(doi, {})
+        print(f'  {doi}')
+        print(f'     Crossref: {ano_final(dep) if dep else "?"}   '
+              f'MDPI: {ano if ano else "—"}  ({origem})')
     print()
 
     print('=' * 78)

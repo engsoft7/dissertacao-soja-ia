@@ -761,7 +761,15 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
     val prodSalva = remember { prefs.valorDoProdutor(PREF_PROD) }
     val prodModelo = projecao.rendimento_predito / 60.0
 
+    // Os três carimbos de "informado em" são estado, e os três se declaram
+    // aqui. Antes só o preço era: custo e produtividade eram lidos do disco
+    // dentro da composição, na hora de montar a legenda. Funcionava por
+    // acidente — editar qualquer campo provoca recomposição, e a leitura se
+    // refazia —, mas era I/O em @Composable e tratamento diferente para três
+    // coisas iguais, que é como um bug entra quando alguém mexer perto.
     var precoEm by remember { mutableStateOf(prefs.informadoEm(PREF_PRECO)) }
+    var custoEm by remember { mutableStateOf(prefs.informadoEm(PREF_CUSTO)) }
+    var prodEm by remember { mutableStateOf(prefs.informadoEm(PREF_PROD)) }
     var temPreco by remember { mutableStateOf(precoSalvo != null) }
     var temCusto by remember { mutableStateOf(custoSalvo != null) }
     var temProd by remember { mutableStateOf(prodSalva != null) }
@@ -832,7 +840,8 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                         val valor = digitado.replace(',', '.').toDoubleOrNull()
                         if (valor != null && valor > 0) {
                             temProd = true
-                            prefs.guardarDoProdutor(PREF_PROD, valor, System.currentTimeMillis())
+                            prodEm = System.currentTimeMillis()
+                            prefs.guardarDoProdutor(PREF_PROD, valor, prodEm)
                         }
                     },
                     label = { Text(if (temProd) "Sua produtividade (sc/ha)" else "Produtividade (sc/ha)", fontSize = 12.sp) },
@@ -853,7 +862,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                         if (valor != null && valor > 0) {
                             temPreco = true
                             precoEm = System.currentTimeMillis()
-                            prefs.guardarDoProdutor(PREF_PRECO, valor, System.currentTimeMillis())
+                            prefs.guardarDoProdutor(PREF_PRECO, valor, precoEm)
                         }
                     },
                     label = { Text(if (temPreco) "Seu preço (R$/sc)" else "Preço da saca (R$)", fontSize = 12.sp) },
@@ -878,7 +887,8 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                         val valor = digitado.replace(',', '.').toDoubleOrNull()
                         if (valor != null && valor > 0) {
                             temCusto = true
-                            prefs.guardarDoProdutor(PREF_CUSTO, valor, System.currentTimeMillis())
+                            custoEm = System.currentTimeMillis()
+                            prefs.guardarDoProdutor(PREF_CUSTO, valor, custoEm)
                         }
                     },
                     label = { Text(if (temCusto) "Seu custo/ha (R$)" else "Custo/ha (R$)", fontSize = 12.sp) },
@@ -930,7 +940,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
             if (seus.isNotEmpty()) {
                 Text(
                     text = "Informados em " + quando.format(java.util.Date(
-                        maxOf(precoEm, prefs.informadoEm(PREF_CUSTO), prefs.informadoEm(PREF_PROD)))) + ".",
+                        maxOf(precoEm, custoEm, prodEm))) + ".",
                     fontSize = 11.sp,
                     color = Color.Gray
                 )
@@ -940,7 +950,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     onClick = {
                         prefs.esquecerDoProdutor(PREF_PRECO, PREF_CUSTO, PREF_PROD)
                         temPreco = false; temCusto = false; temProd = false
-                        precoEm = 0L
+                        precoEm = 0L; custoEm = 0L; prodEm = 0L
                         customPreco = "%.2f".format(kpis.soja_preco_saca)
                         customCusto = "%.2f".format(kpis.custo_ha)
                         customProd = "%.1f".format(prodModelo)

@@ -168,8 +168,8 @@ def aviso_de_defasagem(hoje: date | None = None) -> str | None:
     quando = LEVANTAMENTO_CONAB.get("levantamento_extenso", "data desconhecida")
     if meses < MESES_PARA_ALERTAR_CONAB:
         return (f"Este levantamento é de {quando}, há {meses} meses. A CONAB "
-                f"publica a cada dois meses, então provavelmente já há um mais "
-                f"recente — confira antes de decidir por este preço.")
+                f"não publica em cadência fixa — confira no portal se há um "
+                f"mais recente antes de decidir por este preço.")
     anos = meses // 12
     tempo = "mais de um ano" if anos == 1 else f"mais de {anos} anos"
     return (f"Este levantamento é de {quando}, há {meses} meses ({tempo}). "

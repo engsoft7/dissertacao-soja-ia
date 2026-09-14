@@ -116,14 +116,28 @@ private fun resultadoPorHectare(
     return Resultado(porHectare, porSaca, (porHectare > 0) != (porSaca > 0))
 }
 
-private fun SharedPreferences.valorDoProdutor(chave: String): Float? =
-    getFloat(chave, -1f).takeIf { it > 0f }
+// O valor que o produtor digita é dinheiro, e dinheiro não cabe em float de
+// 32 bits: 135,15 vira 135.14999389648438 na volta, porque não existe em
+// binário de 32 bits. Guardado assim, o campo devolvia ao produtor um número
+// que ele não digitou. Vai em Double, pelos bits, que é o jeito de pôr um
+// Double em SharedPreferences — ela só conhece Long.
+private fun SharedPreferences.valorDoProdutor(chave: String): Double? {
+    val bruto = try {
+        getLong(chave, 0L).takeIf { it != 0L }?.let { Double.fromBits(it) }
+    } catch (_: ClassCastException) {
+        // Instalação anterior a esta versão: a chave ainda guarda um Float.
+        // Lê, converte e segue — a próxima gravação já sai em Double, e
+        // ninguém precisa redigitar o preço dele por causa da nossa correção.
+        getFloat(chave, -1f).takeIf { it > 0f }?.toDouble()
+    }
+    return bruto?.takeIf { it > 0.0 }
+}
 
 private fun SharedPreferences.informadoEm(chave: String): Long =
     getLong(chave + "_em", 0L)
 
 private fun SharedPreferences.guardarDoProdutor(chave: String, valor: Double, quando: Long) {
-    edit().putFloat(chave, valor.toFloat()).putLong(chave + "_em", quando).apply()
+    edit().putLong(chave, valor.toRawBits()).putLong(chave + "_em", quando).apply()
 }
 
 private fun SharedPreferences.esquecerDoProdutor(vararg chaves: String) {
@@ -584,8 +598,8 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
     // informava o preço dele numa aba e via o histórico calculado com o da
     // CONAB na outra — duas margens diferentes para a mesma lavoura, no mesmo
     // aplicativo. Num produto de campo, isso destrói a confiança no número.
-    val precoDoProdutor = remember { prefs.valorDoProdutor(PREF_PRECO)?.toDouble() }
-    val custoDoProdutor = remember { prefs.valorDoProdutor(PREF_CUSTO)?.toDouble() }
+    val precoDoProdutor = remember { prefs.valorDoProdutor(PREF_PRECO) }
+    val custoDoProdutor = remember { prefs.valorDoProdutor(PREF_CUSTO) }
     Card(
         modifier = Modifier.animateContentSize(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)).fillMaxWidth().padding(vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
@@ -747,19 +761,31 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
     val prodSalva = remember { prefs.valorDoProdutor(PREF_PROD) }
     val prodModelo = projecao.rendimento_predito / 60.0
 
+    // Os três carimbos de "informado em" são estado, e os três se declaram
+    // aqui. Antes só o preço era: custo e produtividade eram lidos do disco
+    // dentro da composição, na hora de montar a legenda. Funcionava por
+    // acidente — editar qualquer campo provoca recomposição, e a leitura se
+    // refazia —, mas era I/O em @Composable e tratamento diferente para três
+    // coisas iguais, que é como um bug entra quando alguém mexer perto.
     var precoEm by remember { mutableStateOf(prefs.informadoEm(PREF_PRECO)) }
+    var custoEm by remember { mutableStateOf(prefs.informadoEm(PREF_CUSTO)) }
+    var prodEm by remember { mutableStateOf(prefs.informadoEm(PREF_PROD)) }
     var temPreco by remember { mutableStateOf(precoSalvo != null) }
     var temCusto by remember { mutableStateOf(custoSalvo != null) }
     var temProd by remember { mutableStateOf(prodSalva != null) }
 
+    // Os três campos são formatados, e não impressos com toString(). Preço e
+    // custo são dinheiro e param em centavos; produtividade, em décimos de
+    // saca. Sem isto o campo exibia a representação binária inteira — foi
+    // assim que 135,15 apareceu ao produtor como 135.14999389648438.
     var customPreco by remember {
-        mutableStateOf((precoSalvo?.toDouble() ?: kpis.soja_preco_saca).toString())
+        mutableStateOf("%.2f".format(precoSalvo ?: kpis.soja_preco_saca))
     }
     var customCusto by remember {
-        mutableStateOf((custoSalvo?.toDouble() ?: kpis.custo_ha).toString())
+        mutableStateOf("%.2f".format(custoSalvo ?: kpis.custo_ha))
     }
     var customProd by remember {
-        mutableStateOf("%.1f".format(prodSalva?.toDouble() ?: prodModelo))
+        mutableStateOf("%.1f".format(prodSalva ?: prodModelo))
     }
 
     Card(
@@ -814,7 +840,8 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                         val valor = digitado.replace(',', '.').toDoubleOrNull()
                         if (valor != null && valor > 0) {
                             temProd = true
-                            prefs.guardarDoProdutor(PREF_PROD, valor, System.currentTimeMillis())
+                            prodEm = System.currentTimeMillis()
+                            prefs.guardarDoProdutor(PREF_PROD, valor, prodEm)
                         }
                     },
                     label = { Text(if (temProd) "Sua produtividade (sc/ha)" else "Produtividade (sc/ha)", fontSize = 12.sp) },
@@ -835,7 +862,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                         if (valor != null && valor > 0) {
                             temPreco = true
                             precoEm = System.currentTimeMillis()
-                            prefs.guardarDoProdutor(PREF_PRECO, valor, System.currentTimeMillis())
+                            prefs.guardarDoProdutor(PREF_PRECO, valor, precoEm)
                         }
                     },
                     label = { Text(if (temPreco) "Seu preço (R$/sc)" else "Preço da saca (R$)", fontSize = 12.sp) },
@@ -860,7 +887,8 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                         val valor = digitado.replace(',', '.').toDoubleOrNull()
                         if (valor != null && valor > 0) {
                             temCusto = true
-                            prefs.guardarDoProdutor(PREF_CUSTO, valor, System.currentTimeMillis())
+                            custoEm = System.currentTimeMillis()
+                            prefs.guardarDoProdutor(PREF_CUSTO, valor, custoEm)
                         }
                     },
                     label = { Text(if (temCusto) "Seu custo/ha (R$)" else "Custo/ha (R$)", fontSize = 12.sp) },
@@ -912,7 +940,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
             if (seus.isNotEmpty()) {
                 Text(
                     text = "Informados em " + quando.format(java.util.Date(
-                        maxOf(precoEm, prefs.informadoEm(PREF_CUSTO), prefs.informadoEm(PREF_PROD)))) + ".",
+                        maxOf(precoEm, custoEm, prodEm))) + ".",
                     fontSize = 11.sp,
                     color = Color.Gray
                 )
@@ -922,9 +950,9 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     onClick = {
                         prefs.esquecerDoProdutor(PREF_PRECO, PREF_CUSTO, PREF_PROD)
                         temPreco = false; temCusto = false; temProd = false
-                        precoEm = 0L
-                        customPreco = kpis.soja_preco_saca.toString()
-                        customCusto = kpis.custo_ha.toString()
+                        precoEm = 0L; custoEm = 0L; prodEm = 0L
+                        customPreco = "%.2f".format(kpis.soja_preco_saca)
+                        customCusto = "%.2f".format(kpis.custo_ha)
                         customProd = "%.1f".format(prodModelo)
                     },
                     contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)

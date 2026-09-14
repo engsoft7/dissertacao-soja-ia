@@ -85,11 +85,37 @@ def amostra(texto, linhas=6):
         print(f'    … mais {resto} linhas')
 
 
-def consulta(**extra):
+PORTAL = 'https://portaldeinformacoes.conab.gov.br/home/custo-de-producao'
+
+
+def abre_sessao():
+    """Visita o portal antes de consultar, como faria um navegador.
+
+    O painel é declarado público, mas a primeira tentativa fria levou 401. A
+    hipótese é a mais simples: o CDA quer a sessão que o Pentaho entrega a
+    quem abre a página, e um POST avulso não tem cookie nenhum. Se for isso,
+    visitar o portal resolve; se o 401 persistir, a API exige credencial e o
+    caminho automático termina aqui.
+    """
+    s = requests.Session()
+    s.headers.update(CABECALHO)
+    visitadas = []
+    for url in (PORTAL,
+                'https://pentahoportaldeinformacoes.conab.gov.br/pentaho/Home',
+                f'{BASE}/listQueries'):
+        try:
+            r = s.get(url, timeout=TEMPO)
+            visitadas.append((url, r.status_code, len(s.cookies)))
+        except Exception as erro:
+            visitadas.append((url, f'erro: {erro}', len(s.cookies)))
+    return s, visitadas
+
+
+def consulta(sessao=None, **extra):
     dados = dict(CAPTURADO, **extra)
-    r = requests.post(f'{BASE}/doQuery', data=dados, headers=CABECALHO,
-                      timeout=TEMPO)
-    return r
+    cliente = sessao or requests
+    return cliente.post(f'{BASE}/doQuery', data=dados,
+                        headers=None if sessao else CABECALHO, timeout=TEMPO)
 
 
 def main():
@@ -105,20 +131,41 @@ def main():
         return 1
     print(f'  HTTP {r.status_code} | {len(r.content):,} bytes | '
           f'{r.headers.get("Content-Type", "?")}')
-    if r.status_code != 200:
-        print('  ✗ a API recusou. Sem isso, nada do resto importa.')
-        amostra(r.text, 4)
-        return 1
-    texto = r.content.decode('utf-8', errors='replace')
-    amostra(texto)
-    print('  ✓ responde sem sessão, sem cookie e sem token')
+    sessao = None
+    if r.status_code == 200:
+        amostra(r.content.decode('utf-8', errors='replace'))
+        print('  ✓ responde sem sessão, sem cookie e sem token')
+    else:
+        print('  ✗ recusou sem sessão')
+        amostra(r.text, 3)
+
+        mostra('1b. A mesma consulta, depois de visitar o portal')
+        sessao, visitadas = abre_sessao()
+        for url, status, n in visitadas:
+            print(f'  GET {url[:66]:<66s} {status}  {n} cookies')
+        print(f'  cookies: {sorted(c.name for c in sessao.cookies) or "nenhum"}')
+        try:
+            r = consulta(sessao)
+            print(f'\n  HTTP {r.status_code} | {len(r.content):,} bytes | '
+                  f'{r.headers.get("Content-Type", "?")}')
+            if r.status_code == 200:
+                amostra(r.content.decode('utf-8', errors='replace'))
+                print('  ✓ a sessão anônima do portal basta')
+            else:
+                print('  ✗ 401 persiste: a API exige credencial, não só sessão')
+                amostra(r.text, 3)
+                sessao = None
+        except Exception as erro:
+            print(f'  ✗ {erro}')
+            sessao = None
 
     # ── 2. que consultas existem no arquivo? ──
     mostra('2. Consultas declaradas em CustoProducao.cda')
     try:
-        r = requests.get(f'{BASE}/listQueries',
-                         params={'path': CDA, 'outputType': 'json'},
-                         headers=CABECALHO, timeout=TEMPO)
+        cliente = sessao or requests
+        r = cliente.get(f'{BASE}/listQueries',
+                        params={'path': CDA, 'outputType': 'json'},
+                        headers=None if sessao else CABECALHO, timeout=TEMPO)
         print(f'  HTTP {r.status_code} | {r.headers.get("Content-Type", "?")}')
         if r.status_code == 200:
             try:
@@ -142,7 +189,7 @@ def main():
     print('  sozinha, sem precisar de ninguém abrindo o painel.\n')
     for mes in ('MARÇO', 'MAIO', 'JULHO', 'SETEMBRO'):
         try:
-            r = consulta(parammes=f'[Mes].[{mes}]')
+            r = consulta(sessao, parammes=f'[Mes].[{mes}]')
             corpo = r.content.decode('utf-8', errors='replace')
             n = max(len(corpo.strip().splitlines()) - 1, 0)
             print(f'  {mes:<10s} HTTP {r.status_code}  {n:>3d} linhas de dado'
@@ -154,7 +201,7 @@ def main():
     mostra('4. O ano seguinte')
     for ano in ('2026', '2027'):
         try:
-            r = consulta(paramano=f'[Ano].[{ano}]')
+            r = consulta(sessao, paramano=f'[Ano].[{ano}]')
             corpo = r.content.decode('utf-8', errors='replace')
             n = max(len(corpo.strip().splitlines()) - 1, 0)
             print(f'  {ano}  HTTP {r.status_code}  {n:>3d} linhas de dado')

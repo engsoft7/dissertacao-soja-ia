@@ -36,6 +36,11 @@ class ResultadoPorHectareTest {
         custo_ha = 5277.12,
         custo_variavel_saca = variavel,
         custo_fixo_ha = fixo,
+        // Obrigatório no modelo, e sem valor padrão de propósito: é o ano que
+        // a tela cita ao lado do custo. Não entra em nenhum cálculo desta
+        // função, mas omitir não compila — e é assim que tem de ser, para
+        // ninguém exibir margem sem dizer de que safra ela é.
+        ano_referencia = 2026,
     )
 
     /**

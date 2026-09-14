@@ -279,9 +279,12 @@ def _valores(no):
 
 def sincronizar_reservas(levantamento: dict, conferir: bool = False) -> list[str]:
     """Reescreve (ou confere) as cópias literais. Devolve o que está defasado."""
-    # gerado_em muda a cada execução e não é dado da CONAB: fora da reserva,
-    # senão todo mês haveria diff só para trocar um carimbo de data.
-    base = {k: v for k, v in levantamento.items() if k != "gerado_em"}
+    # Dois campos ficam fora da reserva por não serem dado da CONAB: gerado_em
+    # muda a cada execução, e todo mês haveria diff só para trocar um carimbo;
+    # conferido_em registra quando alguém olhou o portal, o que não diz nada
+    # sobre preço nem custo e faria a reserva divergir a cada conferência.
+    FORA = {"gerado_em", "conferido_em"}
+    base = {k: v for k, v in levantamento.items() if k not in FORA}
     defasados = []
     for caminho, nome, chaves in RESERVAS:
         dados = base if chaves is None else {k: base[k] for k in chaves}
@@ -359,6 +362,21 @@ def main(argv: list[str] | None = None) -> int:
     except LevantamentoInconsistente as e:
         print(f"::error::levantamento da CONAB inconsistente: {e}", flush=True)
         return 1
+
+    # conferido_em não é derivado dos CSVs: é o registro de que alguém abriu o
+    # portal e viu que não havia levantamento posterior. Regerar o arquivo não
+    # pode apagar essa informação, ou o aviso de idade volta a gritar sobre um
+    # dado que já se sabe ser o mais recente publicado.
+    if SAIDA.exists():
+        try:
+            anterior = json.loads(SAIDA.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            anterior = {}
+        # Só sobrevive se o levantamento for o mesmo: conferência vale para o
+        # dado que foi conferido, não para o que vier depois dele.
+        if (anterior.get("conferido_em")
+                and anterior.get("levantamento") == novo["levantamento"]):
+            novo["conferido_em"] = anterior["conferido_em"]
 
     if args.conferir:
         if not SAIDA.exists():

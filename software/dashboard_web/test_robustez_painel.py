@@ -217,12 +217,15 @@ def test_produto_denuncia_levantamento_velho():
         total = base.month - 1 + n
         return date(base.year + total // 12, total % 12 + 1, 1)
 
-    # Na cadência normal da CONAB (publica a cada dois meses), silêncio.
+    # Dentro da cadência usual da CONAB, silêncio.
     assert financas.aviso_de_defasagem(somar_meses(publicado, 2)) is None
     assert financas.aviso_de_defasagem(somar_meses(publicado, 4)) is None
-    # Passada a cadência, o produto avisa.
+    # Passada a cadência, o produto relata a idade e manda conferir. Não
+    # afirma que exista levantamento mais novo: quem sabe isso é o portal, e
+    # nem o painel nem a API o alcançam.
     aviso = financas.aviso_de_defasagem(somar_meses(publicado, 6))
-    assert aviso and "provavelmente já há um mais recente" in aviso
+    assert aviso and "confira no portal" in aviso
+    assert "provavelmente" not in aviso
     # Dois anos depois, o alerta muda de tom e manda editar o campo.
     dois_anos = financas.aviso_de_defasagem(somar_meses(publicado, 24))
     assert dois_anos and "referência histórica" in dois_anos

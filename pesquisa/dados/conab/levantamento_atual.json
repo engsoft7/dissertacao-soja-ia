@@ -6,6 +6,7 @@
   "fonte": "https://portaldeinformacoes.conab.gov.br/custos-de-producao.html",
   "gerado_em": "2026-09-04",
   "gerado_por": "software/automacao_github/gera_levantamento_conab.py",
+  "conferido_em": "2026-09-14",
   "preco_recebido_saca": 105.09,
   "custo_variavel_saca": 85.03,
   "custo_fixo_saca": 24.91,

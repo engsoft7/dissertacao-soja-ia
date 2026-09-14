@@ -50,11 +50,19 @@ RAIZ = Path(__file__).resolve().parents[2]
 CONAB = RAIZ / "pesquisa" / "dados" / "conab"
 GERADOR = Path(__file__).resolve().parent / "gera_levantamento_conab.py"
 
-# Cadência do levantamento: a CONAB publica custos de produção da soja a cada
-# dois meses. Passados quatro meses do levantamento em uso, é quase certo que
-# há um mais recente publicado — e o workflow avisa em vez de seguir exibindo
-# um preço velho como se fosse o atual.
+# Passados quatro meses, o levantamento em uso merece uma conferência. Note o
+# verbo: merece conferência, não "está desatualizado". A cadência da CONAB não
+# é fixa — em 2026 o portal ofereceu um único levantamento para a soja, em
+# março — e este script não tem como consultar o portal para saber o que há
+# publicado (ver CONFERENCIA abaixo). Ele sabe uma coisa só: a idade do dado.
 MESES_ATE_SUSPEITAR = 4
+
+# Conferido por um humano no portal: enquanto esta data for recente, o aviso
+# de idade fica quieto. Existe porque o alarme, sozinho, não consegue
+# distinguir "o dado está velho" de "o dado está velho porque a CONAB não
+# publicou mais nada" — e gritar no segundo caso ensina a ignorar o primeiro.
+# Quem conferir grava a data em levantamento_atual.json, campo conferido_em.
+MESES_DE_VALIDADE_DA_CONFERENCIA = 2
 
 # A URL do arquivo no portal não está fixada no código de propósito: o portal é
 # uma aplicação de painéis e o endereço do arquivo muda com ela. Configurar a
@@ -374,12 +382,35 @@ def levantamento_em_uso() -> tuple[str, int, int]:
     return rotulo, ano, mes
 
 
+def conferencia_recente() -> tuple[bool, int]:
+    """Alguém conferiu o portal recentemente, e não havia nada mais novo?
+
+    Devolve (suprimir, meses desde a conferência). Sem o campo conferido_em,
+    devolve (False, -1) e o aviso sai normalmente — a ausência de conferência
+    não é conferência com resultado negativo.
+    """
+    atual = CONAB / "levantamento_atual.json"
+    if not atual.exists():
+        return False, -1
+    try:
+        data = json.loads(atual.read_text(encoding="utf-8")).get("conferido_em")
+        if not data:
+            return False, -1
+        d = date.fromisoformat(data)
+    except (ValueError, json.JSONDecodeError):
+        return False, -1
+    hoje = date.today()
+    meses = (hoje.year - d.year) * 12 + (hoje.month - d.month)
+    return meses < MESES_DE_VALIDADE_DA_CONFERENCIA, meses
+
+
 def meses_de_defasagem() -> tuple[str, int]:
     """Quantos meses separam o levantamento em uso de hoje.
 
     Não depende de rede: é a única checagem que funciona mesmo sem fonte
-    configurada, e é o que permite ao workflow avisar que provavelmente há
-    levantamento novo em vez de exibir um preço velho calado.
+    configurada, e é o que permite ao workflow relatar a idade do dado em vez
+    de exibir um preço velho calado. Idade não é o mesmo que atraso, e o aviso
+    que sai daqui não afirma que exista levantamento mais recente.
     """
     rotulo, ano, mes = levantamento_em_uso()
     hoje = date.today()
@@ -451,12 +482,17 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     defasado = "true" if defasagem >= MESES_ATE_SUSPEITAR else "false"
+    conferido, desde = conferencia_recente()
+    if defasado == "true" and conferido:
+        print(f"conferido no portal há {desde} {'mês' if desde == 1 else 'meses'}: "
+              f"nada mais recente publicado. Aviso suprimido.")
+        defasado = "false"
     if not conteudos:
         # Sem fonte configurada, resta a verificação que não precisa de rede.
         if defasado == "true":
             print(f"::warning::o levantamento {rotulo} tem {defasagem} meses. "
-                  f"A CONAB publica a cada dois meses, então provavelmente há "
-                  f"um mais recente.")
+                  f"Confira no portal se há mais recente: o seletor de mês do "
+                  f"painel de custos responde em trinta segundos.")
         _saida(csv_alterado="false", revisao="false", defasado=defasado,
                levantamento=rotulo, meses=defasagem)
         return 0

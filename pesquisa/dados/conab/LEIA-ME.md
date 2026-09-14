@@ -103,7 +103,7 @@ o levantamento da data corrente:
 | idade | comportamento |
 |---|---|
 | até 4 meses | silêncio, é a cadência normal da CONAB |
-| 5 a 11 meses | avisa que provavelmente já há levantamento mais recente |
+| 5 a 11 meses | relata a idade e pede conferência no portal |
 | 12 meses ou mais | pede que o preço seja tratado como referência histórica |
 
 A idade nunca é gravada no JSON: um número congelado na geração começaria

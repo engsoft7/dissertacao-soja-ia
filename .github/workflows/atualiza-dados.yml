@@ -58,6 +58,10 @@ on:
         description: "Procurar preprint deste trabalho no SSRN, pelo registro da Crossref"
         type: boolean
         default: false
+      diagnosticar_cda:
+        description: "Perguntar ao Pentaho CDA da CONAB o que ele oferece (só relata)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -134,6 +138,13 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.procurar_preprint
         working-directory: pesquisa/05_artigo
         run: python procura_preprint_ssrn.py
+
+      # O "Exportar" do portal da CONAB dispara um POST para o Pentaho CDA com
+      # os filtros como parâmetros nomeados. Antes de escrever o coletor, vale
+      # perguntar à API o que ela oferece. Só relata.
+      - name: Diagnostica o Pentaho CDA da CONAB
+        if: github.event_name == 'workflow_dispatch' && inputs.diagnosticar_cda
+        run: python software/automacao_github/diagnostica_conab_cda.py
 
       # Mede a repetição nas 27 UFs sobre a fonte primária. É a extensão do
       # estudo do Pará a todo o país, e roda aqui porque a coleta precisa de
@@ -375,8 +386,20 @@ jobs:
             }
             let corpo = `O preço e o custo do simulador saem do levantamento ` +
               `**${lev}** da CONAB para Pedro Afonso (TO), que já tem **${meses} ` +
-              `meses**. A CONAB publica custos de produção da soja a cada dois ` +
-              `meses, então provavelmente há levantamento mais recente.\n\n`;
+              `meses**.\n\n` +
+              `Isto é um aviso de idade, não a constatação de que exista ` +
+              `levantamento mais recente. O portal é uma aplicação de painéis e ` +
+              `este workflow não consegue consultá-lo, então ele não sabe o que ` +
+              `há publicado — sabe apenas há quanto tempo o dado em uso foi ` +
+              `medido. Os levantamentos da praça não saem em cadência fixa: em ` +
+              `2026 o portal ofereceu um só para a soja.\n\n` +
+              `**Confira em trinta segundos, antes de qualquer outra coisa.** Abra ` +
+              `[o painel de custos de produção](https://portaldeinformacoes.conab.gov.br/home/custo-de-producao), ` +
+              `ponha **Produto** em SOJA e **Ano** no corrente, e veja o que o ` +
+              `seletor **Mês** oferece. Não havendo mês posterior a ${lev}, o dado ` +
+              `em uso já é o mais recente que a CONAB publicou: feche esta issue, ` +
+              `não há o que atualizar.\n\n` +
+              `Havendo mês mais novo, siga adiante.\n\n`;
             corpo += temFonte
               ? `A descoberta automática tentou primeiro o endereço fixado em ` +
                 `\`CONAB_CUSTOS_URL\`, depois o catálogo de dados abertos e a ` +

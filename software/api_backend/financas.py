@@ -218,9 +218,10 @@ def buscar_cotacoes() -> list[dict]:
 MESES_SIGLA = {"JAN": 1, "FEV": 2, "MAR": 3, "ABR": 4, "MAI": 5, "JUN": 6,
                "JUL": 7, "AGO": 8, "SET": 9, "OUT": 10, "NOV": 11, "DEZ": 12}
 
-# A CONAB publica custos de produção da soja a cada dois meses. Uma defasagem
-# de até quatro meses é a cadência normal somada ao atraso de publicação, e não
-# merece alarme. A partir daí, provavelmente já existe levantamento mais novo.
+# Até quatro meses é cadência normal e não merece aviso. A partir daí o dado
+# merece conferência — conferência, não alarme: a cadência da CONAB não é fixa,
+# e em 2026 o portal ofereceu um único levantamento para a soja, em março.
+# Idade é o que este código mede; se existe coisa mais nova, só o portal diz.
 MESES_PARA_AVISAR = 5
 MESES_PARA_ALERTAR = 12
 
@@ -247,8 +248,8 @@ def aviso_de_defasagem(hoje: date | None = None) -> str | None:
     quando = LEVANTAMENTO.get("levantamento_extenso", "data desconhecida")
     if meses < MESES_PARA_ALERTAR:
         return (f"Este levantamento é de {quando}, há {meses} meses. A CONAB "
-                f"publica a cada dois meses, então provavelmente já há um mais "
-                f"recente — confira antes de decidir por este preço.")
+                f"não publica em cadência fixa — confira no portal se há um "
+                f"mais recente antes de decidir por este preço.")
     anos = meses // 12
     tempo = "mais de um ano" if anos == 1 else f"mais de {anos} anos"
     return (f"Este levantamento é de {quando}, há {meses} meses ({tempo}). "

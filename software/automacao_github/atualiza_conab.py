@@ -188,7 +188,19 @@ def aplicar(texto: str, simular: bool = False) -> tuple[str, list[str]]:
 # A segurança não vem de acertar a URL: vem de identificar() recusar qualquer
 # conteúdo cujo cabeçalho não seja o de uma das quatro planilhas da CONAB. Uma
 # candidata errada é descartada, não gravada. Por isso vale tentar várias.
-CATALOGO_CKAN = "https://dados.gov.br/api/3/action/package_search"
+# O dados.gov.br trocou de API. O caminho /api/3/action/ é o CKAN antigo, e a
+# chave emitida hoje pelo portal é do serviço novo, em /dados/api/publico/.
+# Mandar uma chave nova para o endpoint velho devolve 401 — que é exatamente o
+# que se vê quando a chave está correta e mesmo assim não passa. Os dois ficam
+# na lista, na ordem em que devem ser tentados, e o relato diz qual respondeu.
+CATALOGOS = (
+    ("dados.gov.br (API atual)",
+     "https://dados.gov.br/dados/api/publico/conjuntos-dados",
+     "nomeConjuntoDados"),
+    ("dados.gov.br (CKAN legado)",
+     "https://dados.gov.br/api/3/action/package_search",
+     "q"),
+)
 PORTAL_HTML = "https://portaldeinformacoes.conab.gov.br/custos-de-producao.html"
 MAX_CANDIDATAS = 12
 FORMATOS = (".csv", ".xlsx", ".xls", ".txt")
@@ -220,23 +232,34 @@ def _candidatas_do_catalogo() -> list[str]:
     É a estratégia mais estável das três: um catálogo tem endereço fixo e API
     documentada, ao contrário do endereço interno de um painel.
     """
-    consulta = urllib.parse.urlencode(
-        {"q": "conab custos de produção", "rows": "10"})
     chave = os.environ.get(ENV_CHAVE_CATALOGO, "")
     cabecalhos = {"chave-api-dados-abertos": chave} if chave else {}
-    try:
-        dados = json.loads(baixar(f"{CATALOGO_CKAN}?{consulta}", tempo=20,
-                                  cabecalhos=cabecalhos))
-    except Exception as e:
-        recado = f"  catálogo indisponível ({type(e).__name__}: {e})"
-        if "401" in str(e) and not chave:
-            recado += (f"\n  o catálogo exige chave de API. Crie uma, gratuita, "
-                       f"em https://dados.gov.br e guarde como secret "
-                       f"{ENV_CHAVE_CATALOGO} do repositório.")
-        print(recado)
+    dados = None
+    for rotulo, base, parametro in CATALOGOS:
+        consulta = urllib.parse.urlencode({parametro: "custos de produção"})
+        try:
+            dados = json.loads(baixar(f"{base}?{consulta}", tempo=20,
+                                      cabecalhos=cabecalhos))
+            print(f"  {rotulo}: respondeu")
+            break
+        except Exception as e:
+            print(f"  {rotulo}: {type(e).__name__}: {e}")
+    if dados is None:
+        if not chave:
+            print(f"  nenhum catálogo respondeu, e não há chave configurada. "
+                  f"Crie uma, gratuita, em https://dados.gov.br e guarde como "
+                  f"secret {ENV_CHAVE_CATALOGO} do repositório.")
+        else:
+            print("  nenhum catálogo respondeu, mesmo com a chave presente. "
+                  "O caminho que resolve é a variável CONAB_CUSTOS_URL, com o "
+                  "endereço da exportação copiado do portal.")
         return []
     achados = []
-    for pacote in (dados.get("result", {}) or {}).get("results", []) or []:
+    if isinstance(dados, list):
+        pacotes = dados
+    else:
+        pacotes = (dados.get("result", {}) or {}).get("results", []) or []
+    for pacote in pacotes:
         for recurso in pacote.get("resources", []) or []:
             endereco = (recurso.get("url") or "").strip()
             formato = (recurso.get("format") or "").lower()

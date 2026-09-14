@@ -193,13 +193,22 @@ def aplicar(texto: str, simular: bool = False) -> tuple[str, list[str]]:
 # Mandar uma chave nova para o endpoint velho devolve 401 — que é exatamente o
 # que se vê quando a chave está correta e mesmo assim não passa. Os dois ficam
 # na lista, na ordem em que devem ser tentados, e o relato diz qual respondeu.
+# A rodada de diagnóstico de 14/09 mostrou 400 na API atual e 401 no CKAN
+# legado. A diferença decide: 401 é credencial recusada, 400 é credencial
+# aceita e consulta malformada. A chave vale para o serviço novo; o que falta
+# é a forma da consulta. A paginação costuma ser obrigatória nele, então a
+# primeira tentativa a inclui e a segunda pede a página sem filtro — se esta
+# responder e aquela não, o problema é o nome do filtro, e o log dirá.
 CATALOGOS = (
-    ("dados.gov.br (API atual)",
+    ("API atual, com filtro",
      "https://dados.gov.br/dados/api/publico/conjuntos-dados",
-     "nomeConjuntoDados"),
-    ("dados.gov.br (CKAN legado)",
+     {"pagina": "1", "nomeConjuntoDados": "custos de produção"}),
+    ("API atual, sem filtro",
+     "https://dados.gov.br/dados/api/publico/conjuntos-dados",
+     {"pagina": "1"}),
+    ("CKAN legado",
      "https://dados.gov.br/api/3/action/package_search",
-     "q"),
+     {"q": "conab custos de produção", "rows": "10"}),
 )
 PORTAL_HTML = "https://portaldeinformacoes.conab.gov.br/custos-de-producao.html"
 MAX_CANDIDATAS = 12
@@ -235,12 +244,13 @@ def _candidatas_do_catalogo() -> list[str]:
     chave = os.environ.get(ENV_CHAVE_CATALOGO, "")
     cabecalhos = {"chave-api-dados-abertos": chave} if chave else {}
     dados = None
-    for rotulo, base, parametro in CATALOGOS:
-        consulta = urllib.parse.urlencode({parametro: "custos de produção"})
+    for rotulo, base, parametros in CATALOGOS:
+        consulta = urllib.parse.urlencode(parametros)
         try:
             dados = json.loads(baixar(f"{base}?{consulta}", tempo=20,
                                       cabecalhos=cabecalhos))
-            print(f"  {rotulo}: respondeu")
+            quantos = len(dados) if isinstance(dados, list) else "?"
+            print(f"  {rotulo}: respondeu, {quantos} conjuntos")
             break
         except Exception as e:
             print(f"  {rotulo}: {type(e).__name__}: {e}")

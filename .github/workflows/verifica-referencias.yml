@@ -1,0 +1,31 @@
+# Confere metadados bibliográficos contra as bases que os publicam.
+#
+# Existe porque o ambiente de desenvolvimento não alcança api.crossref.org nem
+# openlibrary.org — negados por política de rede —, e porque a alternativa,
+# escrever ano e edição de memória, é justamente o erro que a banca encontra
+# folheando a lista de referências.
+#
+# Roda sob demanda: referência não muda a cada push.
+name: Verifica referências
+
+on:
+  workflow_dispatch:
+
+jobs:
+  obras-classicas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências
+        run: pip install --quiet requests
+
+      # continue-on-error: uma base fora do ar não é motivo para esconder o que
+      # a outra respondeu. O log é o produto deste job.
+      - name: Consulta Crossref e Open Library
+        continue-on-error: true
+        run: python pesquisa/07_referencias/confere_obras_classicas.py

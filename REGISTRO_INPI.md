@@ -195,6 +195,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.8` (05/09/2026) — geradores do artigo submetido | 60 | 11.680 | `506baabfca171e40cc5d968d0ca47a7aff1877938d92f532376d67d7c1429a83` |
 | Tag `v2.3.9` (14/09/2026) — análises da revisão | 64 | 12.792 | `b9a4a09bca08161efdef3e8f746ff84c1d314c79a19e10335cc5a005a3e5305d` |
 | Tag `v2.4.0` (14/09/2026) — conferência de referências e primeiro teste do aplicativo | 74 | 14.683 | `f5e8d0673c108b8795467b04d7532a0be59dfb6632b6242e70852ce315ae28a6` |
+| Tag `v2.4.1` (18/09/2026) — correções do painel web | 77 | 15.288 | `d9f118ead8a19e172f87118c40b76b7378bb7979b9eab9aec400254ef74644a5` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -228,6 +229,33 @@ conceito, 10.5281/zenodo.21285918, passa a resolver para ela.
 O resumo criptográfico não muda entre o commit `2351dcfd` e a etiqueta: os
 arquivos alterados na preparação da `v2.4.0` são `.md` e `.cff`, que ficam fora
 do conjunto resumido — o mesmo que já ocorrera na `v2.3.8`.
+
+A `v2.4.1` corrige o painel web e existe por uma razão que vale registrar: a
+`v2.4.0` carrega um defeito. Nela, `software/dashboard_web/model.py` prevê com
+uma `RandomForestRegressor`, mas `pesquisa/dados/metricas_validacao.json`
+guarda as métricas do `MLPRegressor` anterior — o commit `e5e3d8e`, de
+26/07/2026, trocou o algoritmo e o arquivo nunca foi regerado. Quem baixar a
+`v2.4.0` e executar o painel recebe, nos quatro indicadores do topo, a precisão
+de um modelo que não é o que está prevendo. Como o DOI de conceito resolve
+sempre para a versão mais recente, corrigir exigia uma etiqueta nova.
+
+O painel volta ao `MLPRegressor`, que é o modelo documentado na Tabela 6 da
+dissertação para a base completa do Pará, e as métricas passam a gravar a
+identidade de quem as produziu — classe do regressor e hiperparâmetros —, com
+um teste que reprova quando as duas deixam de corresponder. Os valores
+gravados não mudaram: a validação com o MLP restaurado reproduz o arquivo
+dígito a dígito. Entram ainda a correção da barra de ferramentas do Plotly, que
+cobria a legenda dos dois gráficos, e um roteiro que abre o painel num
+navegador e confere que o mapa desenha, executado no GitHub Actions porque o
+Leaflet vem de CDN.
+
+São três arquivos-fonte novos e sete alterados em relação à `v2.4.0`. Dois dos
+alterados não são do painel e vêm de antes destas correções: a pizza por
+família de técnica da revisão sistemática, em
+`pesquisa/02_revisao_sistematica/03_codifica_estudos.py`, e a mesma figura na
+medida do slide, em `pesquisa/06_figuras_defesa/gera_figuras_defesa.py`. O DOI
+de versão desta etiqueta será preenchido aqui quando o Zenodo o atribuir, no
+depósito disparado pela publicação do Release.
 
 Os dez foram recalculados a partir de cópias limpas dos respectivos commits e
 conferem em execuções repetidas. A tag da defesa é a `v2.3.7`, e é do Release
@@ -459,6 +487,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.3.8`:** 10.5281/zenodo.22348036
 - **DOI da `v2.3.9`, citada como referência de dados do artigo ressubmetido:**
   10.5281/zenodo.22739059
-- **DOI da versão mais recente (`v2.4.0`):** 10.5281/zenodo.22755108
+- **DOI da `v2.4.0`:** 10.5281/zenodo.22755108
+- **DOI da versão mais recente (`v2.4.1`):** a preencher após a publicação do Release
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

@@ -513,6 +513,13 @@ __VARS__
         padding-top: 12px; border-top: 1px solid var(--card-border);
     }
 
+    /* De onde vem o número do cartão. Fica abaixo do erro típico, sem régua
+       própria, porque é continuação dele e não um dado novo. */
+    .hero-proc {
+        font-size: 0.74rem; color: var(--text-muted); margin-top: 6px;
+        line-height: 1.45;
+    }
+
     /* Ponto de cor no rótulo: identifica o cartão sem pintar uma barra
        inteira. Nas métricas de validação não há cor nenhuma — verde ou roxo
        não querem dizer nada a respeito de um RMSE. */
@@ -1206,6 +1213,16 @@ if tela_atual == "📍 Inteligência Territorial":
             r = ajustar_r(estimador.estimar(municipio, int(ano_alvo)))
         # É o número principal da tela; até aqui saía do mesmo tamanho de um
         # cartão de validação qualquer.
+        # Quanto o modelo de fato acrescentou ao histórico. Declarar isso no
+        # cartão é a resposta honesta à pergunta que o rótulo "Projeção IA"
+        # convida: sobre uma variável-alvo em que 40,1% das safras repetem a
+        # anterior, a correção climática que o modelo aprende é de menos de um
+        # quilo por hectare, e o que sustenta o número é o histórico somado à
+        # tendência. É o achado da dissertação aparecendo no produto — vale
+        # mais dito do que descoberto por quem for ler o código.
+        contrib = r['correcao_climatica_kg_ha']
+        # Vírgula decimal, como o resto do painel; e o sinal colado no número.
+        contrib_txt = f"{'+' if contrib >= 0 else '−'}{abs(contrib):.1f}".replace('.', ',')
         st.markdown(f"""
         <div class="hero-card">
             <div class="hero-label">Projeção · safra {ano_alvo}</div>
@@ -1213,6 +1230,16 @@ if tela_atual == "📍 Inteligência Territorial":
                  class="hero-unit">{unidade}</span></div>
             <div class="hero-foot">{disp(municipio)} · erro típico de
                 ± {qtd(metricas['rmse'])} {unidade}</div>
+            <div class="hero-proc" title="O modelo é treinado para prever o
+                resíduo entre a produtividade observada e o histórico do
+                município somado à tendência tecnológica. Sobre esta base, em
+                que 40,1% das safras repetem o valor da anterior, esse resíduo
+                é quase todo ruído — daí a correção pequena.">
+                O modelo de IA foi aplicado e acrescentou
+                <b>{contrib_txt} kg/ha</b> ao histórico do
+                município. O que sustenta esta projeção é o histórico somado à
+                tendência tecnológica.
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1317,6 +1344,35 @@ if tela_atual == "📈 Análise Histórica":
 
     from ui.charts import plot_produtividade, plot_area
     import plotly.graph_objects as go
+
+    # As três safras à frente da última publicada, uma por município — os
+    # mesmos três anos que a API entrega ao aplicativo em /api/previsao, e que
+    # ele desenha tracejados desde sempre. O painel só mostrava a projeção como
+    # número, na outra tela.
+    def _projecao(municipios):
+        linhas = []
+        for m in municipios:
+            hist = df[df.municipio == m]
+            if hist.empty:
+                continue
+            ano_pivo = int(hist.ano.max())
+            # A safra-pivô entra com o valor observado, e não com o previsto:
+            # é o que faz o tracejado sair de cima da linha cheia.
+            linhas.append({
+                "ano": ano_pivo, "Nome": disp(m), "previsto": False,
+                "produtividade": float(hist[hist.ano == ano_pivo][M.ALVO].iloc[0]) * fator,
+                "margem": 0.0,
+            })
+            for adiante in range(1, 4):
+                r = estimador.estimar(m, ano_pivo + adiante)
+                linhas.append({
+                    "ano": ano_pivo + adiante, "Nome": disp(m), "previsto": True,
+                    "produtividade": r["estimativa_kg_ha"] * fator,
+                    "margem": r["margem_kg_ha"] * fator,
+                })
+        return pd.DataFrame(linhas)
+
+    projecao = _projecao([municipio, mun_comp] if mun_comp else [municipio])
     
     # Sem a barra de ferramentas do Plotly: ela cobria a legenda, e os dois
     # gestos que a legenda abaixo promete — arrastar para dar zoom, dois
@@ -1325,8 +1381,14 @@ if tela_atual == "📈 Análise Histórica":
     SEM_BARRA = {"displayModeBar": False}
 
     st.plotly_chart(
-        plot_produtividade(serie_plot, is_dark=is_dark, unidade=unidade),
+        plot_produtividade(serie_plot, is_dark=is_dark, unidade=unidade,
+                           projecao=projecao),
         use_container_width=True, config=SEM_BARRA)
+    st.caption(
+        "O trecho tracejado é projeção, não safra publicada: são as três "
+        "seguintes à última do IBGE, e o hover traz a margem de cada uma. "
+        "Sem clima observado para elas, o modelo usa a média climática do "
+        "município — o que sobra, ali, é a tendência.")
     st.caption("Gráfico interativo: arraste para selecionar um período, dois toques para resetar o zoom.")
 
     st.subheader("Expansão da área plantada")

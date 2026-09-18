@@ -253,9 +253,18 @@ São três arquivos-fonte novos e sete alterados em relação à `v2.4.0`. Dois 
 alterados não são do painel e vêm de antes destas correções: a pizza por
 família de técnica da revisão sistemática, em
 `pesquisa/02_revisao_sistematica/03_codifica_estudos.py`, e a mesma figura na
-medida do slide, em `pesquisa/06_figuras_defesa/gera_figuras_defesa.py`. O DOI
-de versão desta etiqueta será preenchido aqui quando o Zenodo o atribuir, no
-depósito disparado pela publicação do Release.
+medida do slide, em `pesquisa/06_figuras_defesa/gera_figuras_defesa.py`.
+
+O DOI de versão desta etiqueta é 10.5281/zenodo.22833602, atribuído pelo Zenodo
+no depósito disparado pela publicação do Release em 18/09/2026. O DOI de
+conceito, 10.5281/zenodo.21285918, passa a resolver para ela — e é o que corrige,
+para quem cita o conceito, o retrato defeituoso que a `v2.4.0` deixava.
+
+O resumo criptográfico não muda entre o commit `555af62` e a etiqueta: o único
+arquivo alterado na preparação da `v2.4.1` é este `REGISTRO_INPI.md`, que fica
+fora do conjunto resumido — o mesmo que já ocorrera na `v2.3.8` e na `v2.4.0`.
+Conferido depois de etiquetar, sobre uma cópia limpa da `v2.4.1`: o valor
+confere.
 
 Os dez foram recalculados a partir de cópias limpas dos respectivos commits e
 conferem em execuções repetidas. A tag da defesa é a `v2.3.7`, e é do Release
@@ -488,6 +497,6 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.3.9`, citada como referência de dados do artigo ressubmetido:**
   10.5281/zenodo.22739059
 - **DOI da `v2.4.0`:** 10.5281/zenodo.22755108
-- **DOI da versão mais recente (`v2.4.1`):** a preencher após a publicação do Release
+- **DOI da versão mais recente (`v2.4.1`):** 10.5281/zenodo.22833602
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

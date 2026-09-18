@@ -3,9 +3,18 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True,
-                       unidade: str = ""):
+                       unidade: str = "", projecao: pd.DataFrame | None = None):
     """`unidade` rotula o eixo e o hover; sem ela o gráfico não diz se os
-    valores estão em sacas ou em quilos, que o usuário alterna no topo."""
+    valores estão em sacas ou em quilos, que o usuário alterna no topo.
+
+    `projecao` traz as safras à frente da última publicada, no mesmo desenho
+    que o aplicativo Android usa desde sempre: linha tracejada, emendada no
+    último ano observado pelo valor real — para as duas não darem degrau —, e
+    marcador só nos anos futuros. O painel não desenhava nada disso, e a
+    projeção vivia só como número na outra tela.
+
+    Espera as colunas `ano`, `produtividade`, `Nome`, `margem` e `previsto`,
+    esta última falsa na safra-pivô e verdadeira nas projetadas."""
     bg_color = "rgba(0,0,0,0)"
     # Mesmos tons de --text-muted e --card-border do tema do painel.
     font_color = "#a1a1a6" if is_dark else "#6e6e73"
@@ -46,6 +55,31 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True,
             hoverinfo="skip",
             showlegend=True
         )
+
+    # Safras à frente da última publicada, no naipe do aplicativo.
+    if projecao is not None and not projecao.empty:
+        cor_do_municipio = {t.name: t.line.color for t in fig.data
+                            if t.type == "scatter" and t.line.color}
+        for nome, g in projecao.groupby("Nome", sort=False):
+            g = g.sort_values("ano")
+            # Marcador só no futuro: na safra-pivô o ponto já está desenhado
+            # pela série observada, e dois marcadores no mesmo lugar sujam.
+            tamanhos = [8 if p else 0 for p in g["previsto"]]
+            fig.add_scatter(
+                x=g["ano"], y=g["produtividade"],
+                mode="lines+markers",
+                name=f"{nome} — projeção",
+                line=dict(color=cor_do_municipio.get(nome), dash="dash", width=3),
+                marker=dict(size=tamanhos, symbol="circle-open",
+                            line=dict(width=2)),
+                customdata=g[["margem", "previsto"]].values,
+                # A margem viaja no hover porque, nesta tela, é o único lugar
+                # onde ela aparece — os indicadores do topo estão na outra.
+                hovertemplate="<b>%{x}</b><br>Projeção: %{y:.1f} ± "
+                              "%{customdata[0]:.1f}"
+                              + (f" {unidade}" if unidade else "")
+                              + "<extra></extra>",
+            )
 
     # Carrega o histórico oficial de eventos El Niño e La Niña (dinâmico via NOAA)
     from pathlib import Path

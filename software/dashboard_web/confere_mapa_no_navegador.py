@@ -37,6 +37,10 @@ SELETORES = (".leaflet-interactive",
              ".leaflet-overlay-pane canvas",
              ".leaflet-marker-icon")
 
+# Piso de tela pintada. A malha do Pará ocupa a maior parte do quadro; meio por
+# cento é bem abaixo disso e bem acima de uma tela em branco, que dá zero.
+MINIMO_PINTADO_PCT = 0.5
+
 
 def sobe_painel(porta: int) -> subprocess.Popen:
     """Sobe o Streamlit e espera ele responder."""
@@ -107,11 +111,30 @@ async def confere(porta: int, foto: Path) -> int:
             print(f"leaflet-container: {mapas}")
             for sel, n in medida.items():
                 print(f"  {sel:32} {n}")
-            desenhado = sum(medida.values())
+
+            # O painel pede prefer_canvas=True, então não há um elemento por
+            # feição para contar: tudo vai para um <canvas> só. Quem diz se o
+            # mapa desenhou é o pixel.
+            tinta = await quadro.evaluate("""() => {
+                const c = document.querySelector('.leaflet-overlay-pane canvas');
+                if (!c) return null;
+                const d = c.getContext('2d')
+                           .getImageData(0, 0, c.width, c.height).data;
+                let pintados = 0;
+                for (let i = 3; i < d.length; i += 4) if (d[i] > 10) pintados++;
+                return {pintados, total: d.length / 4};
+            }""")
             if not mapas:
                 problemas.append("o Leaflet não montou dentro do componente")
-            elif not desenhado:
-                problemas.append("o Leaflet montou, mas não desenhou geometria")
+            elif tinta is None:
+                problemas.append("o Leaflet montou, mas não criou a tela de desenho")
+            else:
+                parte = tinta["pintados"] / tinta["total"] * 100
+                print(f"  tela pintada                     {parte:.1f}% dos pixels")
+                if parte < MINIMO_PINTADO_PCT:
+                    problemas.append(
+                        f"a tela do mapa está {parte:.1f}% pintada, abaixo dos "
+                        f"{MINIMO_PINTADO_PCT}% que a malha do Pará cobre")
 
         await pg.screenshot(path=str(foto), full_page=True)
         print(f"foto: {foto}")

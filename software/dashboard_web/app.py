@@ -1317,6 +1317,35 @@ if tela_atual == "📈 Análise Histórica":
 
     from ui.charts import plot_produtividade, plot_area
     import plotly.graph_objects as go
+
+    # As três safras à frente da última publicada, uma por município — os
+    # mesmos três anos que a API entrega ao aplicativo em /api/previsao, e que
+    # ele desenha tracejados desde sempre. O painel só mostrava a projeção como
+    # número, na outra tela.
+    def _projecao(municipios):
+        linhas = []
+        for m in municipios:
+            hist = df[df.municipio == m]
+            if hist.empty:
+                continue
+            ano_pivo = int(hist.ano.max())
+            # A safra-pivô entra com o valor observado, e não com o previsto:
+            # é o que faz o tracejado sair de cima da linha cheia.
+            linhas.append({
+                "ano": ano_pivo, "Nome": disp(m), "previsto": False,
+                "produtividade": float(hist[hist.ano == ano_pivo][M.ALVO].iloc[0]) * fator,
+                "margem": 0.0,
+            })
+            for adiante in range(1, 4):
+                r = estimador.estimar(m, ano_pivo + adiante)
+                linhas.append({
+                    "ano": ano_pivo + adiante, "Nome": disp(m), "previsto": True,
+                    "produtividade": r["estimativa_kg_ha"] * fator,
+                    "margem": r["margem_kg_ha"] * fator,
+                })
+        return pd.DataFrame(linhas)
+
+    projecao = _projecao([municipio, mun_comp] if mun_comp else [municipio])
     
     # Sem a barra de ferramentas do Plotly: ela cobria a legenda, e os dois
     # gestos que a legenda abaixo promete — arrastar para dar zoom, dois
@@ -1325,8 +1354,14 @@ if tela_atual == "📈 Análise Histórica":
     SEM_BARRA = {"displayModeBar": False}
 
     st.plotly_chart(
-        plot_produtividade(serie_plot, is_dark=is_dark, unidade=unidade),
+        plot_produtividade(serie_plot, is_dark=is_dark, unidade=unidade,
+                           projecao=projecao),
         use_container_width=True, config=SEM_BARRA)
+    st.caption(
+        "O trecho tracejado é projeção, não safra publicada: são as três "
+        "seguintes à última do IBGE, e o hover traz a margem de cada uma. "
+        "Sem clima observado para elas, o modelo usa a média climática do "
+        "município — o que sobra, ali, é a tendência.")
     st.caption("Gráfico interativo: arraste para selecionar um período, dois toques para resetar o zoom.")
 
     st.subheader("Expansão da área plantada")

@@ -1,0 +1,53 @@
+# Abre o painel num navegador e confere se o mapa desenha.
+#
+# Existe porque o ambiente de desenvolvimento não alcança cdn.jsdelivr.net, de
+# onde o folium carrega o Leaflet em tempo de execução. Lá o mapa nunca desenha
+# e não se distingue bloqueio de rede de defeito do painel; aqui, com internet
+# plena, a distinção é possível.
+#
+# Também é o ensaio da rede da sala da defesa: se o CDN estiver fora do ar no
+# dia, é assim que o mapa vai se comportar.
+#
+# Roda quando o painel ou este workflow mudam, e sob demanda. O gatilho por
+# caminho existe porque workflow_dispatch só alcança workflows que já estão no
+# branch padrão, e este nasceu num branch de trabalho.
+name: Confere painel
+
+on:
+  push:
+    paths:
+      - 'software/dashboard_web/**'
+      - '.github/workflows/confere-painel.yml'
+  workflow_dispatch:
+
+jobs:
+  mapa-no-navegador:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências do painel
+        run: pip install --quiet -r software/dashboard_web/requirements.txt
+
+      - name: Instala o navegador
+        run: |
+          pip install --quiet playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Abre o painel e confere o mapa
+        run: |
+          python software/dashboard_web/confere_mapa_no_navegador.py \
+            --foto "$GITHUB_WORKSPACE/mapa_no_navegador.png"
+
+      # A foto é o produto deste job: se reprovar, é nela que se vê o que houve.
+      - name: Guarda a foto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: painel-no-navegador
+          path: mapa_no_navegador.png
+          if-no-files-found: warn

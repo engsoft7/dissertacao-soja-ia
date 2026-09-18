@@ -28,6 +28,11 @@ from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 
+# A malha municipal do Pará que o painel desenha tem 38 municípios, e ainda
+# vêm os rios e um círculo por município. Trinta é folga confortável abaixo
+# disso e bem acima do contorno do estado sozinho, que é o que aparece primeiro.
+MINIMO_DE_FEICOES = 30
+
 
 def sobe_painel(porta: int) -> subprocess.Popen:
     """Sobe o Streamlit e espera ele responder."""
@@ -84,12 +89,26 @@ async def confere(porta: int, foto: Path) -> int:
             problemas.append("o componente do mapa não foi montado")
         else:
             mapas = await quadro.locator(".leaflet-container").count()
-            tracos = await quadro.locator("svg path, canvas").count()
-            print(f"leaflet-container: {mapas} | traços desenhados: {tracos}")
+            # O mapa leva a malha municipal, os rios e um círculo por município.
+            # Contar só "desenhou alguma coisa" deixaria passar um mapa pela
+            # metade: o contorno do estado aparece antes da malha. Espera o
+            # número parar de crescer e cobra o mínimo que os 38 municípios já
+            # garantem.
+            tracos, estavel = 0, 0
+            for _ in range(30):
+                agora = await quadro.locator(".leaflet-interactive").count()
+                estavel = estavel + 1 if agora == tracos else 0
+                tracos = agora
+                if estavel >= 3 and tracos:
+                    break
+                await pg.wait_for_timeout(1000)
+            print(f"leaflet-container: {mapas} | feições desenhadas: {tracos}")
             if not mapas:
                 problemas.append("o Leaflet não montou dentro do componente")
-            elif not tracos:
-                problemas.append("o Leaflet montou, mas não desenhou geometria")
+            elif tracos < MINIMO_DE_FEICOES:
+                problemas.append(
+                    f"o Leaflet desenhou {tracos} feições, menos que as "
+                    f"{MINIMO_DE_FEICOES} que a malha municipal já garante")
 
         await pg.screenshot(path=str(foto), full_page=True)
         print(f"foto: {foto}")

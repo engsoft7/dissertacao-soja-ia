@@ -318,6 +318,15 @@ def test_sinal_do_resultado_avisa_quando_depende_do_rateio():
     assert abs(valor - (52.0 * preco - 4000.0)) < 0.01
 
 
+def _atribuicao(modulo: ast.Module, nome: str):
+    """Valor de uma atribuição de módulo, lido sem importar o arquivo."""
+    for no in modulo.body:
+        if isinstance(no, ast.Assign) and any(
+                isinstance(a, ast.Name) and a.id == nome for a in no.targets):
+            return ast.literal_eval(no.value)
+    raise AssertionError(f"{nome} não está declarado em model.py")
+
+
 def test_metricas_publicadas_pertencem_ao_modelo_que_o_painel_roda():
     """Reprova se as métricas do topo forem de outro modelo.
 
@@ -329,12 +338,17 @@ def test_metricas_publicadas_pertencem_ao_modelo_que_o_painel_roda():
     prever com um modelo e a informar a precisão de outro.
 
     Refazer a validação aqui levaria dezenas de segundos. Em vez disso o
-    arquivo guarda a identidade de quem o produziu, e o teste compara com o
-    regressor que o painel constrói hoje.
+    arquivo guarda a identidade de quem o produziu, e o teste a compara com o
+    que model.py declara — lendo o arquivo, sem importá-lo, porque este job
+    instala só pytest, pandas e requests, e o sklearn não está entre eles.
     """
-    sys.path.insert(0, str(RAIZ / "software" / "dashboard_web"))
-    import model
-
+    modulo = ast.parse((RAIZ / "software" / "dashboard_web" / "model.py")
+                       .read_text(encoding="utf-8"))
+    declarado = {
+        "classe": _atribuicao(modulo, "REGRESSOR"),
+        "parametros": {k: str(v) for k, v
+                       in sorted(_atribuicao(modulo, "HIPERPARAMETROS").items())},
+    }
     metricas = json.loads(
         (RAIZ / "pesquisa" / "dados" / "metricas_validacao.json")
         .read_text(encoding="utf-8"))
@@ -342,6 +356,6 @@ def test_metricas_publicadas_pertencem_ao_modelo_que_o_painel_roda():
     assert gravado, (
         "metricas_validacao.json não diz que modelo o produziu. Rode "
         "software/automacao_github/gera_metricas.py para regravá-lo.")
-    assert gravado == model.assinatura_do_modelo(), (
+    assert gravado == declarado, (
         f"as métricas publicadas são de {gravado}, mas o painel roda "
-        f"{model.assinatura_do_modelo()}. Regere as métricas ou volte o modelo.")
+        f"{declarado}. Regere as métricas ou volte o modelo.")

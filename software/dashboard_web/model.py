@@ -64,14 +64,21 @@ def _baseline(df_treino: pd.DataFrame, municipios: pd.Series, anos: pd.Series) -
     ])
 
 
-def _regressor() -> MLPRegressor:
-    """O regressor da correção, em um lugar só.
+# O regressor da correção, declarado em dados e não dentro da chamada. Estava
+# escrito duas vezes — em treinar() e em validar() —, e duas cópias de um
+# hiperparâmetro é uma que pode ficar para trás sem ninguém ver.
+#
+# Fica aqui em cima, e em literais, para que o teste de procedência das métricas
+# consiga lê-lo sem importar o sklearn: o job de testes instala só pytest,
+# pandas e requests, de propósito, e carregar a biblioteca inteira para conferir
+# um nome e cinco números sairia caro em todo push.
+REGRESSOR = "MLPRegressor"
+HIPERPARAMETROS = {"hidden_layer_sizes": (64, 32), "alpha": 0.01,
+                   "max_iter": 800, "early_stopping": True, "random_state": 42}
 
-    Estava escrito duas vezes — em treinar() e em validar() —, e duas cópias de
-    um hiperparâmetro é uma que pode ficar para trás sem ninguém ver.
-    """
-    return MLPRegressor(hidden_layer_sizes=(64, 32), alpha=1e-2,
-                        max_iter=800, early_stopping=True, random_state=42)
+
+def _regressor() -> MLPRegressor:
+    return MLPRegressor(**HIPERPARAMETROS)
 
 
 def assinatura_do_modelo() -> dict:
@@ -80,11 +87,8 @@ def assinatura_do_modelo() -> dict:
     É o que permite descobrir que as métricas publicadas pertencem a outro
     modelo — que foi o que aconteceu entre 26/07/2026 e 18/09/2026.
     """
-    m = _regressor()
-    return {"classe": type(m).__name__,
-            "parametros": {k: str(v) for k, v in sorted(m.get_params().items())
-                           if k in ("hidden_layer_sizes", "alpha", "max_iter",
-                                    "early_stopping", "random_state")}}
+    return {"classe": REGRESSOR,
+            "parametros": {k: str(v) for k, v in sorted(HIPERPARAMETROS.items())}}
 
 
 # ------------------------------------------------------------------- modelo

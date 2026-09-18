@@ -28,10 +28,14 @@ from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 
-# A malha municipal do Pará que o painel desenha tem 38 municípios, e ainda
-# vêm os rios e um círculo por município. Trinta é folga confortável abaixo
-# disso e bem acima do contorno do estado sozinho, que é o que aparece primeiro.
-MINIMO_DE_FEICOES = 30
+# Onde o Leaflet põe o que desenha. São vários porque o renderizador varia: as
+# camadas vetoriais podem sair como <path> no painel de sobreposição ou como um
+# <canvas> só, e os círculos dos municípios podem vir como marcador. Contar um
+# seletor só já me fez chamar de defeito o que era seletor errado.
+SELETORES = (".leaflet-interactive",
+             ".leaflet-overlay-pane path",
+             ".leaflet-overlay-pane canvas",
+             ".leaflet-marker-icon")
 
 
 def sobe_painel(porta: int) -> subprocess.Popen:
@@ -89,26 +93,25 @@ async def confere(porta: int, foto: Path) -> int:
             problemas.append("o componente do mapa não foi montado")
         else:
             mapas = await quadro.locator(".leaflet-container").count()
-            # O mapa leva a malha municipal, os rios e um círculo por município.
-            # Contar só "desenhou alguma coisa" deixaria passar um mapa pela
-            # metade: o contorno do estado aparece antes da malha. Espera o
-            # número parar de crescer e cobra o mínimo que os 38 municípios já
-            # garantem.
-            tracos, estavel = 0, 0
-            for _ in range(30):
-                agora = await quadro.locator(".leaflet-interactive").count()
-                estavel = estavel + 1 if agora == tracos else 0
-                tracos = agora
-                if estavel >= 3 and tracos:
+            # Espera o desenho parar de crescer: o contorno do estado aparece
+            # antes da malha municipal, e conferir cedo demais aprova um mapa
+            # pela metade.
+            medida, estavel = {}, 0
+            for _ in range(25):
+                agora = {sel: await quadro.locator(sel).count() for sel in SELETORES}
+                estavel = estavel + 1 if agora == medida else 0
+                medida = agora
+                if estavel >= 3 and sum(medida.values()):
                     break
                 await pg.wait_for_timeout(1000)
-            print(f"leaflet-container: {mapas} | feições desenhadas: {tracos}")
+            print(f"leaflet-container: {mapas}")
+            for sel, n in medida.items():
+                print(f"  {sel:32} {n}")
+            desenhado = sum(medida.values())
             if not mapas:
                 problemas.append("o Leaflet não montou dentro do componente")
-            elif tracos < MINIMO_DE_FEICOES:
-                problemas.append(
-                    f"o Leaflet desenhou {tracos} feições, menos que as "
-                    f"{MINIMO_DE_FEICOES} que a malha municipal já garante")
+            elif not desenhado:
+                problemas.append("o Leaflet montou, mas não desenhou geometria")
 
         await pg.screenshot(path=str(foto), full_page=True)
         print(f"foto: {foto}")

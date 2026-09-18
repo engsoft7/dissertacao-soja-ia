@@ -105,13 +105,12 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True,
         yaxis=dict(showgrid=True, gridwidth=1, gridcolor=grid_color),
         hovermode="x unified",
         separators=",.",  # decimal com vírgula, milhar com ponto
-        # A barra de ferramentas do Plotly nasce colada no canto superior
-        # direito e não se move por configuração. Com a legenda ancorada
-        # ali, uma cobria a outra assim que o ponteiro entrava no gráfico.
-        # A legenda desce para baixo do eixo, onde a barra não alcança, e a
-        # margem superior reserva a faixa em que ela aparece.
+        # Legenda abaixo do eixo: era onde a barra de ferramentas do Plotly
+        # não alcançava, e ficou por ler bem ali. O painel esconde a barra
+        # (app.py), então a margem de cima não precisa mais reservar a faixa
+        # em que ela aparecia.
         legend=dict(orientation="h", yanchor="top", y=-0.22, xanchor="left", x=0),
-        margin=dict(t=56, b=90)
+        margin=dict(t=30, b=90)
     )
     
     return fig
@@ -145,13 +144,12 @@ def plot_area(serie_plot: pd.DataFrame, is_dark: bool = True):
                    tickformat=",.0f"),
         hovermode="x unified",
         separators=",.",  # decimal com vírgula, milhar com ponto
-        # A barra de ferramentas do Plotly nasce colada no canto superior
-        # direito e não se move por configuração. Com a legenda ancorada
-        # ali, uma cobria a outra assim que o ponteiro entrava no gráfico.
-        # A legenda desce para baixo do eixo, onde a barra não alcança, e a
-        # margem superior reserva a faixa em que ela aparece.
+        # Legenda abaixo do eixo: era onde a barra de ferramentas do Plotly
+        # não alcançava, e ficou por ler bem ali. O painel esconde a barra
+        # (app.py), então a margem de cima não precisa mais reservar a faixa
+        # em que ela aparecia.
         legend=dict(orientation="h", yanchor="top", y=-0.22, xanchor="left", x=0),
-        margin=dict(t=56, b=90)
+        margin=dict(t=30, b=90)
     )
     
     return fig

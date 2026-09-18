@@ -1318,13 +1318,20 @@ if tela_atual == "📈 Análise Histórica":
     from ui.charts import plot_produtividade, plot_area
     import plotly.graph_objects as go
     
+    # Sem a barra de ferramentas do Plotly: ela cobria a legenda, e os dois
+    # gestos que a legenda abaixo promete — arrastar para dar zoom, dois
+    # toques para resetar — são da tela, não dela. Exportar dado continua nos
+    # botões de CSV logo abaixo.
+    SEM_BARRA = {"displayModeBar": False}
+
     st.plotly_chart(
         plot_produtividade(serie_plot, is_dark=is_dark, unidade=unidade),
-        use_container_width=True)
+        use_container_width=True, config=SEM_BARRA)
     st.caption("Gráfico interativo: arraste para selecionar um período, dois toques para resetar o zoom.")
 
     st.subheader("Expansão da área plantada")
-    st.plotly_chart(plot_area(serie_plot, is_dark=is_dark), use_container_width=True)
+    st.plotly_chart(plot_area(serie_plot, is_dark=is_dark),
+                    use_container_width=True, config=SEM_BARRA)
 
     b1, b2 = st.columns(2)
     b1.download_button(

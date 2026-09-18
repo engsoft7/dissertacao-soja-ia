@@ -105,7 +105,12 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True,
         yaxis=dict(showgrid=True, gridwidth=1, gridcolor=grid_color),
         hovermode="x unified",
         separators=",.",  # decimal com vírgula, milhar com ponto
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        # Legenda abaixo do eixo: era onde a barra de ferramentas do Plotly
+        # não alcançava, e ficou por ler bem ali. O painel esconde a barra
+        # (app.py), então a margem de cima não precisa mais reservar a faixa
+        # em que ela aparecia.
+        legend=dict(orientation="h", yanchor="top", y=-0.22, xanchor="left", x=0),
+        margin=dict(t=30, b=90)
     )
     
     return fig
@@ -139,7 +144,12 @@ def plot_area(serie_plot: pd.DataFrame, is_dark: bool = True):
                    tickformat=",.0f"),
         hovermode="x unified",
         separators=",.",  # decimal com vírgula, milhar com ponto
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        # Legenda abaixo do eixo: era onde a barra de ferramentas do Plotly
+        # não alcançava, e ficou por ler bem ali. O painel esconde a barra
+        # (app.py), então a margem de cima não precisa mais reservar a faixa
+        # em que ela aparecia.
+        legend=dict(orientation="h", yanchor="top", y=-0.22, xanchor="left", x=0),
+        margin=dict(t=30, b=90)
     )
     
     return fig

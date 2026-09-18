@@ -6,5 +6,15 @@
   "rrmse": 13.877009372225732,
   "n": 415,
   "anos_testados": 24,
-  "registros": 415
+  "registros": 415,
+  "modelo": {
+    "classe": "MLPRegressor",
+    "parametros": {
+      "alpha": "0.01",
+      "early_stopping": "True",
+      "hidden_layer_sizes": "(64, 32)",
+      "max_iter": "800",
+      "random_state": "42"
+    }
+  }
 }

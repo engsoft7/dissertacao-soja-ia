@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler
 
 FEATURES = [
@@ -64,22 +64,61 @@ def _baseline(df_treino: pd.DataFrame, municipios: pd.Series, anos: pd.Series) -
     ])
 
 
+def _regressor() -> MLPRegressor:
+    """O regressor da correção, em um lugar só.
+
+    Estava escrito duas vezes — em treinar() e em validar() —, e duas cópias de
+    um hiperparâmetro é uma que pode ficar para trás sem ninguém ver.
+    """
+    return MLPRegressor(hidden_layer_sizes=(64, 32), alpha=1e-2,
+                        max_iter=800, early_stopping=True, random_state=42)
+
+
+def assinatura_do_modelo() -> dict:
+    """Identidade do regressor, para gravar junto com as métricas.
+
+    É o que permite descobrir que as métricas publicadas pertencem a outro
+    modelo — que foi o que aconteceu entre 26/07/2026 e 18/09/2026.
+    """
+    m = _regressor()
+    return {"classe": type(m).__name__,
+            "parametros": {k: str(v) for k, v in sorted(m.get_params().items())
+                           if k in ("hidden_layer_sizes", "alpha", "max_iter",
+                                    "early_stopping", "random_state")}}
+
+
 # ------------------------------------------------------------------- modelo
 class Estimador:
-    """Baseline + correção climática aprendida sobre o resíduo."""
+    """Baseline + correção climática aprendida sobre o resíduo.
+
+    O modelo é o Perceptron Multicamadas, e não outro: é o que a Tabela 6 da
+    dissertação documenta para a base completa do Pará, e é dele que saem as
+    métricas que o painel informa. Entre 26/07/2026 e esta revisão o painel
+    rodou uma Random Forest, trocada para dar resposta aos cursores de clima,
+    mas as métricas gravadas continuaram sendo as do MLP — o painel previa com
+    um modelo e informava a precisão de outro.
+
+    O custo de voltar está registrado: a correção que o MLP soma à referência
+    é de 0,65 kg/ha em média, contra 94,0 kg/ha da Random Forest. O simulador
+    de clima, portanto, quase não move a previsão. Isso não é defeito de
+    implementação — é o achado da dissertação aparecendo no produto: sobre uma
+    variável-alvo que repete 40,1% das safras, não há o que o clima explique
+    além do que o histórico já explicava.
+    """
 
     def __init__(self) -> None:
         self.scaler: StandardScaler | None = None
-        self.modelo: RandomForestRegressor | None = None
+        self.modelo: MLPRegressor | None = None
         self.df: pd.DataFrame | None = None
         self.rmse: float | None = None
         self.mae: float | None = None
         self.r2: float | None = None
         self.r2_baseline: float | None = None
-        # Faixa observada de cada preditor no treino. Uma floresta aleatória não
-        # extrapola: fora dessa faixa ela devolve o valor da folha extrema, de
-        # modo que a resposta deixa de significar alguma coisa. Simular chuva
-        # zero, por exemplo, produzia colheita ACIMA da média.
+        # Faixa observada de cada preditor no treino. O cenário climático do
+        # simulador fica preso a ela porque fora dali a resposta não se apoia
+        # em dado nenhum: a rede prolonga a superfície que ajustou, sem nada
+        # que a sustente. Simular chuva zero, por exemplo, já produziu colheita
+        # ACIMA da média.
         self.faixas: dict[str, tuple[float, float]] = {}
 
     def treinar(self, df: pd.DataFrame) -> "Estimador":
@@ -87,9 +126,8 @@ class Estimador:
         base = _baseline(df, df["municipio"], df["ano"])
         residuo = df[ALVO].values - base
         self.scaler = StandardScaler().fit(df[FEATURES].values)
-        self.modelo = RandomForestRegressor(
-            n_estimators=120, max_depth=10, min_samples_split=4, random_state=42
-        ).fit(self.scaler.transform(df[FEATURES].values), residuo)
+        self.modelo = _regressor().fit(
+            self.scaler.transform(df[FEATURES].values), residuo)
         self.faixas = {f: (float(df[f].min()), float(df[f].max())) for f in FEATURES}
         return self
 
@@ -102,7 +140,7 @@ class Estimador:
             b_tr = _baseline(treino, treino["municipio"], treino["ano"])
             b_te = _baseline(treino, teste["municipio"], teste["ano"])
             sc = StandardScaler().fit(treino[FEATURES].values)
-            mdl = RandomForestRegressor(n_estimators=120, max_depth=10, min_samples_split=4, random_state=42)
+            mdl = _regressor()
             mdl.fit(sc.transform(treino[FEATURES].values), treino[ALVO].values - b_tr)
             y_obs += list(teste[ALVO].values)
             y_est += list(b_te + mdl.predict(sc.transform(teste[FEATURES].values)))

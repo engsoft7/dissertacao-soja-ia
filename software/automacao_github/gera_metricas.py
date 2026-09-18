@@ -29,6 +29,9 @@ def main() -> int:
     df = model.carregar(str(RAIZ / "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"))
     met = model.Estimador().validar(df)
     met["registros"] = len(df)
+    # Quem produziu estes números. Sem isso não há como o teste perceber que o
+    # modelo do painel mudou e as métricas ficaram as do anterior.
+    met["modelo"] = model.assinatura_do_modelo()
     METRICAS_JSON.write_text(
         json.dumps(met, ensure_ascii=False, indent=2, default=float) + "\n",
         encoding="utf-8",

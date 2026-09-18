@@ -316,3 +316,32 @@ def test_sinal_do_resultado_avisa_quando_depende_do_rateio():
     valor, outro, incerto = calcular(52.0, preco, 4000.0)
     assert outro is None and not incerto
     assert abs(valor - (52.0 * preco - 4000.0)) < 0.01
+
+
+def test_metricas_publicadas_pertencem_ao_modelo_que_o_painel_roda():
+    """Reprova se as métricas do topo forem de outro modelo.
+
+    Entre 26/07/2026 e 18/09/2026 foi o que aconteceu: o commit e5e3d8e trocou
+    o MLPRegressor por uma RandomForestRegressor para dar resposta aos cursores
+    de clima, e metricas_validacao.json nunca foi regerado. Os quatro
+    indicadores do topo — erro típico, erro relativo, R² do modelo e R² da
+    referência — continuaram sendo os do modelo anterior, e o painel passou a
+    prever com um modelo e a informar a precisão de outro.
+
+    Refazer a validação aqui levaria dezenas de segundos. Em vez disso o
+    arquivo guarda a identidade de quem o produziu, e o teste compara com o
+    regressor que o painel constrói hoje.
+    """
+    sys.path.insert(0, str(RAIZ / "software" / "dashboard_web"))
+    import model
+
+    metricas = json.loads(
+        (RAIZ / "pesquisa" / "dados" / "metricas_validacao.json")
+        .read_text(encoding="utf-8"))
+    gravado = metricas.get("modelo")
+    assert gravado, (
+        "metricas_validacao.json não diz que modelo o produziu. Rode "
+        "software/automacao_github/gera_metricas.py para regravá-lo.")
+    assert gravado == model.assinatura_do_modelo(), (
+        f"as métricas publicadas são de {gravado}, mas o painel roda "
+        f"{model.assinatura_do_modelo()}. Regere as métricas ou volte o modelo.")

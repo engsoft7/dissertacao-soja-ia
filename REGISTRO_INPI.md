@@ -463,8 +463,10 @@ O cálculo em Python reproduz os valores registrados das etiquetas `v2.4.5` e
 O resumo criptográfico da `v2.4.7` foi calculado sobre o commit `348fccb`, que
 acrescenta o registro automático do DOI à revisão de interface. A preparação da
 versão altera apenas este `REGISTRO_INPI.md` e o `CITATION.cff`, de modo que o
-valor deve se manter na etiqueta; convém conferi-lo sobre uma cópia limpa dela
-depois de etiquetar.
+valor se mantém na etiqueta. Conferido depois de etiquetar, sobre uma cópia
+limpa da `v2.4.7` (commit `e05a140`), pelo workflow `registra-doi.yml`: o valor
+confere. O DOI de versão desta etiqueta é 10.5281/zenodo.23576847, atribuído
+pelo Zenodo no depósito disparado pela publicação do Release em 22/10/2026.
 
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
@@ -704,6 +706,6 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.4`:** 10.5281/zenodo.23573276
 - **DOI da `v2.4.5`:** 10.5281/zenodo.23574981
 - **DOI da `v2.4.6`:** 10.5281/zenodo.23575177
-- **DOI da versão mais recente (`v2.4.7`):** a preencher após a publicação do Release
+- **DOI da versão mais recente (`v2.4.7`):** 10.5281/zenodo.23576847
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

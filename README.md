@@ -86,8 +86,9 @@ Esse resultado se sustenta sob dois controles adicionais:
   município somado à tendência.
 
 A investigação da variável-alvo revelou que **40,1% dos pares de safras
-consecutivas da PAM/IBGE nos municípios paraenses apresentam produtividade
-rigorosamente idêntica**, o que indica imputação nos levantamentos oficiais e
+sucessivas da PAM/IBGE nos municípios paraenses apresentam produtividade
+rigorosamente idêntica** (151 de 377; contando só anos seguidos, sem lacuna na
+série, 147 de 367, também 40,1%), o que indica imputação nos levantamentos oficiais e
 impõe um teto estrutural à acurácia de qualquer modelo calibrado sobre essa base.
 
 ---

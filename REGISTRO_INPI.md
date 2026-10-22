@@ -137,7 +137,7 @@ principais:
            │
      ┌─────▼──────────────┐
      │  MODELO ML         │
-     │  (MLP / XGBoost)   │
+     │  (MLP)             │
      │  model.py          │
      └─────┬──────────────┘
            │

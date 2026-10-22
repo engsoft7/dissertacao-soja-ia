@@ -62,6 +62,10 @@ on:
         description: "Perguntar ao Pentaho CDA da CONAB o que ele oferece (só relata)"
         type: boolean
         default: false
+      coleta_previsao:
+        description: "Coletar dados da previsão (PAM, Atlântico, CONAB, fases no GEE) e gravar na branch escolhida (nunca na main; ~1 h)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -187,12 +191,60 @@ jobs:
           body-path: /tmp/resumo_repeticao.md
           delete-branch: true
 
+      # Coleta para pesquisa/08_previsao_futura (itens 1 a 4 de
+      # TRABALHOS_FUTUROS.md). Cada fonte roda por conta própria: uma que falhe
+      # não impede as outras, e o que vier é versionado na branch de onde o
+      # workflow foi disparado. Na main a gravação é recusada: dado novo de
+      # pesquisa entra por PR. A base do painel não é tocada.
+      - name: Coleta para a previsão — PAM do Pará e das UFs (SIDRA)
+        if: github.event_name == 'workflow_dispatch' && inputs.coleta_previsao
+        continue-on-error: true
+        run: python pesquisa/08_previsao_futura/coleta/coleta_pam_para.py
+
+      - name: Coleta para a previsão — Atlântico tropical (NOAA PSL)
+        if: github.event_name == 'workflow_dispatch' && inputs.coleta_previsao
+        continue-on-error: true
+        run: python pesquisa/08_previsao_futura/coleta/coleta_atlantico.py
+
+      - name: Coleta para a previsão — série histórica de safras da CONAB
+        if: github.event_name == 'workflow_dispatch' && inputs.coleta_previsao
+        continue-on-error: true
+        run: python pesquisa/08_previsao_futura/coleta/coleta_conab_safras.py
+
+      - name: Coleta para a previsão — séries por fase no Earth Engine
+        if: github.event_name == 'workflow_dispatch' && inputs.coleta_previsao && env.TEM_CHAVE_GEE == 'true'
+        continue-on-error: true
+        timeout-minutes: 240
+        env:
+          GEE_SERVICE_ACCOUNT_JSON: ${{ secrets.GEE_SERVICE_ACCOUNT_JSON }}
+          GEE_PROJECT: ${{ vars.GEE_PROJECT }}
+        run: |
+          pip install --quiet earthengine-api
+          python pesquisa/08_previsao_futura/coleta/coleta_fases_gee.py
+
+      - name: Coleta para a previsão — grava na branch
+        if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.coleta_previsao }}
+        run: |
+          if [ "$GITHUB_REF_NAME" = "${{ github.event.repository.default_branch }}" ]; then
+            echo "::error::A coleta não grava na branch principal. Dispare o workflow a partir de outra branch e traga o resultado por PR."
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pesquisa/08_previsao_futura/dados
+          if git diff --cached --quiet; then
+            echo "Nenhum dado novo coletado."
+            exit 0
+          fi
+          git commit -m "Coleta para a previsão: PAM, Atlântico, CONAB e séries por fase"
+          git push origin HEAD:"$GITHUB_REF_NAME"
+
       # O teste de credencial é anunciado no README como "sem alterar nada".
       # Sem esta guarda ele seguiria para o SIDRA e poderia abrir e mergear um
       # PR na base — que é a mesma que produz os números da dissertação.
       - name: Consulta o SIDRA e aplica revisões
         id: pam
-        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos && !inputs.repeticao_27_estados && !inputs.conferir_referencias }}
+        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos && !inputs.repeticao_27_estados && !inputs.conferir_referencias && !inputs.coleta_previsao }}
         env:
           RESUMO_MD: /tmp/resumo_pam.md
         run: python software/automacao_github/atualiza_pam.py
@@ -202,7 +254,7 @@ jobs:
       # as barras do gráfico histórico, então vale manter atualizado.
       - name: Atualiza a classificação El Niño / La Niña (NOAA ONI)
         id: enso
-        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos }}
+        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos && !inputs.coleta_previsao }}
         run: |
           ANTES=$(python -c "import json;d=json.load(open('pesquisa/dados/eventos_enso.json'));print(d['el_ninos'],d['la_ninas'])" 2>/dev/null || echo "")
           python software/automacao_github/atualiza_enso.py
@@ -240,7 +292,7 @@ jobs:
       # meses tem o levantamento em uso — e o passo seguinte abre a issue.
       - name: Atualiza o levantamento de custos da CONAB
         id: conab
-        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos }}
+        if: ${{ !inputs.testar_gee && !inputs.testar_conab && !inputs.testar_precos && !inputs.coleta_previsao }}
         env:
           CONAB_CUSTOS_URL: ${{ vars.CONAB_CUSTOS_URL }}
           DADOS_GOV_API_KEY: ${{ secrets.DADOS_GOV_API_KEY }}

@@ -364,14 +364,17 @@ Nenhum código-fonte do aplicativo Android muda nesta versão; o quadro de
 validação do aplicativo continua a exibir os números da Tabela 6, escritos no
 código, enquanto o painel exibe os da base do produto. Os números da
 dissertação nas Tabelas 3, 5 e 6 tampouco mudam, porque as análises novas leem
-a base congelada.
+a base congelada. O DOI de versão desta etiqueta é 10.5281/zenodo.23573276,
+atribuído pelo Zenodo no depósito disparado pela publicação do Release em
+22/10/2026. O DOI de conceito, 10.5281/zenodo.21285918, passa a resolver para
+ela.
 
 O resumo criptográfico da `v2.4.4` foi calculado sobre o commit de merge
 `5d63b49`, com o mesmo comando, que reproduz na mesma data o valor registrado
 para a `v2.4.3`. A preparação da versão altera apenas este `REGISTRO_INPI.md` e
-o `CITATION.cff`, que ficam fora do conjunto resumido, de modo que o valor deve
-se manter na etiqueta; como nas anteriores, convém conferi-lo sobre uma cópia
-limpa dela depois de etiquetar.
+o `CITATION.cff`, que ficam fora do conjunto resumido, de modo que o valor se
+mantém na etiqueta. Conferido depois de etiquetar, sobre uma cópia limpa da
+`v2.4.4` (commit `3f3a4ef`): o valor confere.
 
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
@@ -608,6 +611,6 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.1`:** 10.5281/zenodo.22833602
 - **DOI da `v2.4.2`:** 10.5281/zenodo.22837962
 - **DOI da `v2.4.3`:** 10.5281/zenodo.23560491
-- **DOI da versão mais recente (`v2.4.4`):** a preencher após a publicação do Release
+- **DOI da versão mais recente (`v2.4.4`):** 10.5281/zenodo.23573276
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

@@ -28,7 +28,14 @@ name: Publica APK assinado
 on:
   release:
     types: [published]
+  # Disparo manual para anexar o APK a um Release já publicado, sem
+  # republicá-lo: republicar dispararia um depósito novo no Zenodo e outro DOI.
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Etiqueta do Release a que anexar (ex.: v2.4.4); vazio só compila"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -36,8 +43,13 @@ permissions:
 jobs:
   assina:
     runs-on: ubuntu-latest
+    env:
+      ETIQUETA: ${{ github.event.release.tag_name || inputs.tag }}
     steps:
+      # Compila o código da etiqueta, e não o da branch de onde se disparou.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag || github.ref }}
 
       # Sem os segredos não há o que fazer, e falhar seria ruído: o repositório
       # é público e nem todo mundo que o clona tem a chave.
@@ -98,12 +110,12 @@ jobs:
           done | tee "$GITHUB_STEP_SUMMARY"
 
       - name: Anexa ao Release
-        if: steps.chave.outputs.presente == 'sim' && github.event_name == 'release'
+        if: steps.chave.outputs.presente == 'sim' && env.ETIQUETA != ''
         working-directory: software/aplicativo_mobile
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload "${{ github.event.release.tag_name }}" \
+          gh release upload "$ETIQUETA" \
             $(find app/build/outputs -name '*.aab' -o -name '*-release*.apk') \
             --clobber --repo "${{ github.repository }}"
 

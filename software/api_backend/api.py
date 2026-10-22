@@ -252,13 +252,12 @@ def _get_eventos_enso():
     if enso_path.exists():
         try:
             d = json.loads(enso_path.read_text(encoding="utf-8"))
-            return (
-                d.get("el_ninos", [2003, 2010, 2015, 2016, 2023, 2024]),
-                d.get("la_ninas", [2000, 2008, 2011, 2021, 2022])
-            )
+            return d.get("el_ninos", []), d.get("la_ninas", [])
         except Exception:
             pass
-    return [2003, 2010, 2015, 2016, 2023, 2024], [2000, 2008, 2011, 2021, 2022]
+    # Sem o arquivo, nenhuma safra marcada: uma lista fixa aqui já marcou safras
+    # erradas (classificação por ano do calendário, e não pela safra).
+    return [], []
 
 @app.get("/api/previsao/{municipio}")
 def get_previsao(municipio: str):

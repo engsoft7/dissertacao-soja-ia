@@ -418,7 +418,10 @@ Ele consulta a API do SIDRA/IBGE e:
 - **Classificação climática:** consulta o Oceanic Niño Index do Climate
   Prediction Center (NOAA) e atualiza `pesquisa/dados/eventos_enso.json`, que o
   painel usa para a faixa de fase climática da safra alvo e para as barras de
-  El Niño e La Niña do gráfico histórico. Se a NOAA não responder, o arquivo
+  El Niño e La Niña do gráfico histórico. A classificação é por safra, e não
+  por ano do calendário: a safra Y é El Niño ou La Niña quando o trimestre
+  dezembro-fevereiro de Y pertence a um episódio da NOAA (5 ou mais trimestres
+  seguidos com ONI ≥ +0,5 ou ≤ −0,5). Se a NOAA não responder, o arquivo
   existente é preservado e nenhum PR é aberto por isso.
 - **Custos e preço da CONAB:** o levantamento de custos de produção da soja em
   Pedro Afonso (TO) é publicado a cada dois meses e alimenta o preço e o custo

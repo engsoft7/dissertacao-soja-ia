@@ -85,8 +85,8 @@ def plot_produtividade(serie_plot: pd.DataFrame, is_dark: bool = True,
     from pathlib import Path
     import json
     enso_path = Path(__file__).resolve().parents[3] / "pesquisa" / "dados" / "eventos_enso.json"
-    el_ninos = [2003, 2010, 2015, 2016, 2023, 2024]
-    la_ninas = [2000, 2008, 2011, 2021, 2022]
+    # Sem o arquivo, nenhuma faixa: uma lista fixa aqui já marcou safras erradas.
+    el_ninos, la_ninas = [], []
     if enso_path.exists():
         try:
             d = json.loads(enso_path.read_text(encoding="utf-8"))

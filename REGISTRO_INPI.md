@@ -209,7 +209,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.4` (22/10/2026) — previsão de safras futuras, safra 2025 no produto e ENSO por safra | 95 | 17.923 | `5ebaa5df49a04f1bf619f9ec6b8aeea04fe418af614b9fbb031c61b05b9d5696` |
 | Tag `v2.4.5` (22/10/2026) — métricas de validação do aplicativo servidas pela API | 97 | 18.036 | `f98568169031c82a2dcda524286b0f541f515f5d901fc49deebf94f1c25294da` |
 | Tag `v2.4.6` (22/10/2026) — tela Mercado no aplicativo | 99 | 18.438 | `c96b5a6c643a2d15dd8187f7835418ea04bd9672c9856c0f8338e848bfd28444` |
-| Tag `v2.4.7` (22/10/2026) — gráficos legíveis, ajustes de interface e capturas de tela do aplicativo | 100 | 18.683 | `6981b9df70d2fa987bec9dc9ef78327fd4ca3fd96ba000fd9a25f4a6615155ad` |
+| Tag `v2.4.7` (22/10/2026) — gráficos legíveis, ajustes de interface e capturas de tela do aplicativo; registro automático do DOI | 102 | 18.977 | `270db6e46daf2cef7649057fa45dec3454574eea102087515b54bc4c77839820` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -435,8 +435,8 @@ etiquetar, sobre uma cópia limpa da `v2.4.6` (commit `d8b501c`): o valor
 confere.
 
 A `v2.4.7` revisa a interface do aplicativo, que vai a `versionCode` 16,
-`versionName` 2.2.1. É um arquivo-fonte novo e dois alterados em relação à
-`v2.4.6`. O novo é o teste
+`versionName` 2.2.1, e automatiza o registro do DOI. São três arquivos-fonte
+novos e dois alterados em relação à `v2.4.6`. O primeiro novo é o teste
 `software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/CapturasDeTelaTest.kt`,
 que desenha as telas com dados de exemplo nos temas claro e escuro (Robolectric
 e Roborazzi, sem emulador); o workflow `capturas.yml` publica as imagens na
@@ -451,10 +451,20 @@ da previsão do município, o texto secundário passa a uma cor com contraste
 acima de 7:1 e a no mínimo 12 sp, os termos ficam em português e os números
 no formato brasileiro em qualquer aparelho.
 
-O resumo criptográfico da `v2.4.7` foi calculado sobre o commit de merge
-`40c241f`. A preparação da versão altera apenas este `REGISTRO_INPI.md` e o
-`CITATION.cff`, de modo que o valor deve se manter na etiqueta; convém
-conferi-lo sobre uma cópia limpa dela depois de etiquetar.
+Os outros dois novos são `software/automacao_github/registra_doi.py` e o teste
+dele, `test_registra_doi.py`. Na publicação de cada Release, o workflow
+`registra-doi.yml` espera o Zenodo atribuir o DOI de versão, recalcula o resumo
+criptográfico sobre uma cópia limpa da etiqueta com o mesmo critério do comando
+acima e, se conferir com a linha da tabela, abre um PR que troca o "a
+preencher" pelo DOI e registra a conferência; se não conferir, abre uma issue.
+O cálculo em Python reproduz os valores registrados das etiquetas `v2.4.5` e
+`v2.4.6`.
+
+O resumo criptográfico da `v2.4.7` foi calculado sobre o commit `348fccb`, que
+acrescenta o registro automático do DOI à revisão de interface. A preparação da
+versão altera apenas este `REGISTRO_INPI.md` e o `CITATION.cff`, de modo que o
+valor deve se manter na etiqueta; convém conferi-lo sobre uma cópia limpa dela
+depois de etiquetar.
 
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi

@@ -27,6 +27,7 @@ import requests
 SAIDA = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dados', 'conab')
 UA = {'User-Agent': 'AgroInteligencia-Dissertacao/1.0 (UFPA/EngSoft7; pesquisa academica)'}
 INICIAIS = [
+    'https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja',
     'https://portaldeinformacoes.conab.gov.br/downloads/arquivos/SerieHistoricaGraos.txt',
     'https://portaldeinformacoes.conab.gov.br/download-arquivos.html',
     'https://portaldeinformacoes.conab.gov.br/safra-serie-historica-graos.html',
@@ -38,7 +39,10 @@ INICIAIS = [
     'https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos',
 ]
 DADOS = ('.xls', '.xlsx', '.csv', '.txt', '.zip', '.ods')
+# no gov.br (Plone) o arquivo vem como .../nome.xls/@@download/file ou .../nome.xls/view
+EH_DADO = re.compile(r'\.(xlsx?|csv|txt|zip|ods)(/(@@download|view|at_download)\b.*)?$', re.I)
 INTERESSE = re.compile(r'soja|serie.?hist|seriehist|graos|safra', re.I)
+FORA = re.compile(r'facebook|twitter|whatsapp|linkedin|@@images|/noticias/|\.(png|jpe?g|gif|svg)$', re.I)
 MAX_PAGINAS, MAX_ARQUIVOS, MAX_BYTES = 25, 20, 60_000_000
 
 
@@ -60,7 +64,7 @@ def links(html, base):
     achados = set()
     for bruto in re.findall(r'(?:href|src|data-url)\s*=\s*["\']([^"\']+)["\']', html, re.I):
         url = urllib.parse.urljoin(base, bruto.strip()).split('#')[0]
-        if url.startswith('http') and INTERESSE.search(urllib.parse.unquote(url)):
+        if url.startswith('http') and INTERESSE.search(urllib.parse.unquote(url)) and not FORA.search(url):
             achados.add(url)
     return sorted(achados)
 
@@ -100,15 +104,22 @@ def main():
         if r.status_code != 200:
             relato.append(item)
             continue
-        caminho = urllib.parse.urlparse(r.url).path.lower()
-        if 'html' in tipo and not caminho.endswith(DADOS):
+        caminho = urllib.parse.urlparse(r.url).path
+        if 'html' in tipo and not EH_DADO.search(caminho):
             paginas += 1
-            novos = [u for u in links(r.text, r.url) if u not in vistos]
-            # arquivos de dados antes das páginas, e só páginas do mesmo órgão
-            dados = [u for u in novos if urllib.parse.urlparse(u).path.lower().endswith(DADOS)]
+            todos = links(r.text, r.url)
+            novos = [u for u in todos if u not in vistos]
+            # arquivos de dados antes das páginas; páginas só do mesmo órgão e, de
+            # preferência, as de série histórica
+            dados = [u for u in novos if EH_DADO.search(urllib.parse.urlparse(u).path)]
             pags = [u for u in novos if u not in dados and 'conab' in u.lower()]
+            pags.sort(key=lambda u: ('serie' not in u.lower(), 'soja' not in u.lower()))
             item['links_dados'] = dados[:40]
+            if 'series-historicas' in r.url or 'serie-historica' in r.url:
+                item['links_todos'] = todos[:80]
             fila = dados + fila + pags[:15]
+        elif tipo.startswith('image/'):
+            item['ignorado'] = 'imagem'
         elif len(r.content) <= MAX_BYTES:
             nome = nome_arquivo(r.url, r)
             with open(os.path.join(SAIDA, nome), 'wb') as f:

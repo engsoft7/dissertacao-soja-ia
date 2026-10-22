@@ -1,0 +1,54 @@
+{
+  "safras_teste": [
+    2016,
+    2017,
+    2018,
+    2019,
+    2020
+  ],
+  "registros_teste": 6215,
+  "modelos": {
+    "E1 SVR (tendência da base, como na Tabela 3)": {
+      "RMSE": 460.7,
+      "R2": 0.425,
+      "comparado_a": "E2 referência: média + tendência (LOYO)",
+      "ganho": 0.385,
+      "IC95": [
+        0.357,
+        0.41
+      ]
+    },
+    "E2 tendência da base sozinha": {
+      "RMSE": 633.7,
+      "R2": -0.087
+    },
+    "E2 referência: média + tendência (LOYO)": {
+      "RMSE": 587.3,
+      "R2": 0.066
+    },
+    "E2 referência: média + tendência (só passado)": {
+      "RMSE": 601.4,
+      "R2": 0.021
+    },
+    "E3 SVR sobre o resíduo da referência (LOYO)": {
+      "RMSE": 458.7,
+      "R2": 0.43,
+      "comparado_a": "E2 referência: média + tendência (LOYO)",
+      "ganho": 0.39,
+      "IC95": [
+        0.369,
+        0.41
+      ]
+    },
+    "E4 SVR sobre o resíduo da referência (só passado)": {
+      "RMSE": 477.5,
+      "R2": 0.383,
+      "comparado_a": "E2 referência: média + tendência (só passado)",
+      "ganho": 0.37,
+      "IC95": [
+        0.35,
+        0.389
+      ]
+    }
+  }
+}

@@ -19,6 +19,14 @@ Todos os experimentos comparam com o **modelo de referência** da dissertação
 | `03_previsao_producao_para.py` | Quanto o Pará vai produzir nas próximas safras? | `previsao_producao_para.json`, `fig_previsao_producao_para.png` |
 | `04_referencia_nacional.py` | No recorte nacional, o SVR supera o modelo de referência? | `referencia_nacional.json` |
 | `05_oni_na_tabela6.py` | O ONI, como variável, melhora os modelos no protocolo da Tabela 6? | `oni_na_tabela6.json` |
+| `06_confere_projecao_2025.py` | A projeção registrada para 2025 acertou? E os modelos municipais, fora da amostra? | `confere_projecao_2025.json` |
+| `07_variaveis_por_fase.py` | Medir o ambiente na floração e no enchimento, e o Atlântico, melhora os modelos? | `variaveis_por_fase.json` |
+| `08_triangula_conab.py` | A CONAB concorda com a PAM? O clima aparece mais nela? | `triangula_conab.json` |
+
+Os dados que só o GitHub Actions alcança (SIDRA, NOAA, CONAB, Earth Engine)
+são baixados por `coleta/`, disparada na aba Actions com a opção
+`coleta_previsao` do workflow `atualiza-dados.yml` (`tudo` ou uma fonte), e
+gravados em `dados/`. O workflow recusa gravar na branch principal.
 
 ```bash
 cd pesquisa/08_previsao_futura
@@ -27,6 +35,9 @@ python 02_previsao_rendimento_para.py      # ~1 min
 python 03_previsao_producao_para.py
 python 04_referencia_nacional.py           # requer 03_analise_nacional/data/data_cast.csv (00_baixa_dados.py)
 python 05_oni_na_tabela6.py                # ~5 min, busca aninhada
+python 06_confere_projecao_2025.py         # requer dados/pam_para_municipios.csv
+python 07_variaveis_por_fase.py            # ~1 h, busca aninhada por família
+python 08_triangula_conab.py
 ```
 
 O **ganho** é a habilidade sobre a referência, `1 − MSE(modelo)/MSE(referência)`:
@@ -109,12 +120,20 @@ erro, é a área plantada, que passou de 500 mil ha em 2017 para 1,19 milhão em
 | 2027 | 5,20 milhões t | 3,98 a 8,73 milhões t |
 
 **Registro antecipado.** A projeção foi feita em 22/10/2026, antes de a PAM de
-2025 entrar na base. Quando a rotina de atualização trouxer 2025, rodar de novo
-`03` com origem em 2024 e comparar com a produção publicada é um teste fora da
-amostra, que nenhum retroteste substitui. Ressalvas: a produção aqui é
-rendimento × área plantada (a PAM usa a área colhida); a área depende de preço,
-crédito e abertura de áreas, que não estão no modelo; a escolha do melhor
-modelo usa o próprio retroteste, e o erro dele é otimista.
+2025 entrar na base, e conferida no mesmo dia, quando a coleta a trouxe (seção
+6). Ressalvas: a área depende de preço, crédito e abertura de áreas, que não
+estão no modelo; a escolha do melhor modelo usa o próprio retroteste, e o erro
+dele é otimista.
+
+**Correção.** A ressalva original dizia que a produção aqui era rendimento ×
+área *plantada*, e não a colhida, que a PAM usa. Está errada: a coluna
+`area_plantada_ha` de `03_analise_nacional/pam_soja_municipios.csv` guarda a
+variável 216 do SIDRA, que o IBGE chama de "Área colhida". A coleta de 2025
+leu o nome na própria resposta da API e conferiu: os totais de 2001-2024
+batem com a área colhida sem diferença, e com a plantada diferem em até 2,2%.
+A produção calculada aqui é, portanto, a da PAM (4.372.392 t em 2025, contra
+4.372.363 t publicadas; a diferença é de arredondamento). Os números da
+projeção não mudam; o script `03` e o JSON ficam como foram registrados.
 
 ### 4. Referência no recorte nacional (`04`)
 
@@ -155,6 +174,91 @@ numericamente acima da referência neste protocolo. O ganho, +0,031, é o mesmo
 medido em janela crescente (+0,033), mas o intervalo inclui o zero: com 24
 safras, a melhora não se distingue do acaso. O MLP piora. A Tabela 6 da
 dissertação não muda.
+
+### 6. A projeção de 2025, conferida (`06`)
+
+A PAM 2025 saiu antes de esta pasta ser fechada, e a coleta pelo Actions a
+trouxe. O script lê a projeção registrada, confere que ela se reproduz com a
+série até 2024 e só então compara:
+
+| | Projetado (origem 2024) | Publicado (PAM 2025) | Erro da projeção |
+|---|---|---|---|
+| Produção | 4,29 milhões t (faixa de 80%: 3,90 a 4,71) | 4,37 milhões t | −2,0% |
+| Área colhida | 1,35 milhão ha | 1,32 milhão ha | +1,9% |
+| Produtividade | 3.175 kg/ha | 3.303 kg/ha | −3,9% |
+
+A produção caiu dentro da faixa de 80%, e o erro de 2,0% é menor que 86% dos
+erros do retroteste a 1 safra. Área e produtividade erraram em sentidos
+opostos e se compensaram em parte. A revisão do IBGE não mudou nenhum valor de
+2001 a 2024. Um acerto só não valida o método; ele mostra que a faixa do
+retroteste descreveu bem o erro desta vez.
+
+**Novo registro, com origem em 2025** (mesmo modelo, série nova):
+
+| Safra | Produção projetada | Faixa de 80% |
+|---|---|---|
+| 2026 | 4,81 milhões t | 4,41 a 5,28 milhões t |
+| 2027 | 5,35 milhões t | 4,45 a 6,71 milhões t |
+| 2028 | 5,83 milhões t | 4,47 a 9,59 milhões t |
+
+A CONAB estima 5,40 milhões de toneladas para 2026 (levantamento de outubro de
+2026), acima da faixa. A PAM 2026, prevista para o segundo semestre de 2027,
+decide quem errou.
+
+**Os modelos municipais, fora da amostra.** A rotina de atualização coletou as
+onze variáveis de 2025 para 36 municípios. Com os modelos treinados só em
+2001-2024 (configurações do Quadro 8):
+
+| Modelo | RMSE em 2025 | Ganho sobre a referência (IC95, por municípios) |
+|---|---|---|
+| Referência (média + tendência) | 463 kg/ha (13,7%) | — |
+| MLP (o do painel) | 464 kg/ha | −0,002 (−0,003 a 0,000) |
+| SVR | 503 kg/ha | −0,181 (−0,304 a −0,056) |
+
+O MLP repete a referência, como na Tabela 6. O SVR, o melhor modelo ambiental
+em *leave-one-year-out*, fica pior que ela na primeira safra realmente nova.
+É uma safra só, e o intervalo reamostra municípios, não safras: o resultado
+não decide nada sozinho, mas aponta no mesmo sentido do resto da pasta.
+
+### 7. Ambiente por fase e Atlântico tropical (`07`)
+
+Resultados em andamento (a busca aninhada por família leva cerca de uma hora).
+
+### 8. PAM contra CONAB (`08`)
+
+A CONAB publica por UF, então o teste municipal previsto (refazer as Tabelas 5
+e 6 com outro alvo) não é possível com ela. Por UF, 2001-2025, nas 15 UFs com
+mais de 100 mil hectares:
+
+| UF | Diferença média de produtividade (CONAB − PAM) | r da variação anual | Desvio da anomalia PAM / CONAB |
+|---|---|---|---|
+| PR, RS, PI, BA, MS | −0,7% a +3,2% | 0,98 a 0,997 | iguais (±1,6 p.p.) |
+| MT, MG, SC, SP, GO, MA, TO | −0,1% a +2,1% | 0,89 a 0,96 | iguais (±3 p.p.) |
+| RO | −0,4% | 0,42 | 4,1% / 4,7% |
+| RR | +4,0% | 0,21 | 11,2% / 7,0% |
+| **PA** | **+0,2%** | **0,12** | **5,1% / 7,1%** |
+
+Onde a soja é antiga, as duas fontes contam a mesma história ano a ano. No
+Pará, elas concordam na média, mas quase não concordam sobre quais safras
+foram boas ou ruins (r = 0,12 para a variação anual); Rondônia (0,42) e
+Roraima (0,21), também na fronteira norte, concordam pouco. A CONAB varia mais
+que a PAM no Pará (7,1% contra 5,1% de desvio da anomalia), o que é compatível
+com a PAM achatada pela repetição municipal.
+
+O teste de que a CONAB carregaria o sinal climático que falta à PAM não se
+confirma: no Pará, chuva, EVI máximo, ONI e gradiente do Atlântico têm
+correlação baixa com a anomalia das duas fontes (|ρ| ≤ 0,30, nenhuma
+significativa), e as diferenças entre elas têm intervalos que cruzam o zero.
+O que fica é negativo e útil: no Pará, nem o alvo oficial nem a fonte
+independente medem a mesma variação de ano para ano, e nenhum dos dois a liga
+ao clima na escala estadual. A triangulação que resolveria a questão precisa
+de dado municipal ou de talhão (itens 5 e 6 de `TRABALHOS_FUTUROS.md`).
+
+**Previsões da safra 2025 no Pará:** a CONAB estimou 3,90 milhões de toneladas
+em fevereiro de 2025 e fechou em 4,50; a PAM publicou 4,37. A projeção desta
+pasta (4,29) partiu da PAM até 2024, que só saiu em setembro de 2025; não é
+uma previsão feita na mesma data que a da CONAB e não deve ser comparada como
+tal.
 
 ## O que isso responde
 

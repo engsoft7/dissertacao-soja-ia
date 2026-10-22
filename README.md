@@ -142,6 +142,12 @@ pesquisa/08_previsao_futura/             previsão em janela crescente (só o pa
   03_previsao_producao_para.py            produção estadual (área x produtividade), 2025-2027
   04_referencia_nacional.py               SVR da Tabela 3 contra o modelo de referência
   05_oni_na_tabela6.py                    ONI como variável no protocolo da Tabela 6
+  06_confere_projecao_2025.py             projeção de 2025 contra a PAM 2025; teste municipal
+  07_variaveis_por_fase.py                ambiente na floração e no enchimento; Atlântico
+  08_triangula_conab.py                   PAM contra a série histórica da CONAB, por UF
+  fases.py, conab.py                      variáveis por fase; leitura das planilhas da CONAB
+  coleta/                                 coleta pelo Actions (SIDRA, NOAA, CONAB, Earth Engine)
+  dados/                                  o que a coleta trouxe
   README.md, TRABALHOS_FUTUROS.md         resultados e protocolos do que falta testar
 pesquisa/dados/
   soja_para_mascarado_2001_2024.csv       base da dissertação (congelada: Tabelas 5 e 6, subseção 6.4)

@@ -9,13 +9,12 @@ com intervalo de 95% por reamostragem de safras, em janela crescente.
 
 - **Hipótese.** A produção do Pará em 2025 cai na faixa de 80% registrada em
   22/10/2026 (3,90 a 4,71 milhões de toneladas).
-- **Dado.** PAM 2025, trazida pela rotina `atualiza-dados.yml`.
-- **Teste.** Rodar `03_previsao_producao_para.py` com origem em 2024 sem mudar
-  nada e comparar com a produção publicada, calculada do mesmo jeito
-  (rendimento × área plantada).
-- **Critério.** Dentro da faixa: o retroteste descreveu bem o erro. Fora dela:
-  registrar o tamanho e o sentido do erro, e qual componente errou (área ou
-  produtividade).
+- **Feito em 22/10/2026** (`06_confere_projecao_2025.py`). A PAM 2025 publicou
+  4,37 milhões de toneladas; a projeção era 4,29 (erro de −2,0%, dentro da
+  faixa). Área +1,9%, produtividade −3,9%.
+- **Próximo teste.** O registro com origem em 2025 projeta 4,81 milhões de
+  toneladas para 2026 (faixa de 80%: 4,41 a 5,28). A CONAB estima 5,40. Rodar
+  `06` de novo quando a PAM 2026 sair, trocando o ano conferido.
 
 ## 2. El Niño e La Niña como preditores
 
@@ -63,6 +62,13 @@ testadas (Holm).
 - **Critério.** Se o ganho do ambiente sobre a referência aparecer com o alvo
   independente e não com a PAM, a hipótese subsidiária fica confirmada por uma
   segunda via.
+- **Feito em 22/10/2026, por UF** (`08_triangula_conab.py`). A CONAB não
+  publica por município nem por mesorregião na série histórica, então o teste
+  previsto não é possível com ela. Por UF, no Pará a CONAB varia mais que a
+  PAM (desvio da anomalia de 7,1% contra 5,1%) e as duas quase não concordam
+  sobre a variação de um ano para o outro (r = 0,12, contra 0,89 a 0,997 nos
+  estados de soja antiga). O sinal climático não aparece em nenhuma das duas
+  na escala estadual. Falta a fonte municipal ou de talhão.
 
 ## 5. Estimativa por foto no aplicativo
 

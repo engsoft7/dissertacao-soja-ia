@@ -280,8 +280,9 @@ o aplicativo já fazia, e o cartão de projeção declara quanto o modelo acresc
 `software/dashboard_web/app.py` e `software/dashboard_web/ui/charts.py`; nenhum
 entra. A versão foi publicada sem o commit de preparação que as anteriores
 tiveram, e por isso só entra neste registro agora, com o resumo recalculado em
-22/10/2026 sobre uma cópia limpa da etiqueta. O DOI de versão que o Zenodo lhe
-atribuiu está por conferir.
+22/10/2026 sobre uma cópia limpa da etiqueta. O DOI de versão desta etiqueta é
+10.5281/zenodo.22837962, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 18/09/2026.
 
 A `v2.4.3` reúne a revisão feita para os dois artigos no modelo da SBC (ERAD e
 ERAMIA). São dois arquivos-fonte novos e quatro alterados em relação à
@@ -554,7 +555,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
   10.5281/zenodo.22739059
 - **DOI da `v2.4.0`:** 10.5281/zenodo.22755108
 - **DOI da `v2.4.1`:** 10.5281/zenodo.22833602
-- **DOI da `v2.4.2`:** a conferir no Zenodo (Release publicado em 18/09/2026)
+- **DOI da `v2.4.2`:** 10.5281/zenodo.22837962
 - **DOI da versão mais recente (`v2.4.3`):** 10.5281/zenodo.23560491
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

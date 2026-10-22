@@ -113,9 +113,13 @@ pesquisa/03_analise_nacional/
   07_repeticao_27_estados.py              repetição da PAM nas 27 UFs, da fonte primária
   04_avalia_ajustado.py                   avaliação em 2016–2020 → Tabela 3
   05_gera_figuras_ajustado.py             Figuras 2, 3 e 4 (importância por permutação)
+  10_mede_custo_escalabilidade.py         custo de ajuste e memória até a base completa
   resultados_busca.json                   ranking completo da busca
   confirmacao_7000.json                   confirmação do topo do ranking
   resultados_ajustados.json               métricas da Tabela 3
+  custo_medicoes.jsonl, custo_escala.jsonl
+                                          registro da medição de custo (um ajuste por linha)
+  custo_agregado.csv                      custo e acurácia por modelo e tamanho de treino
 pesquisa/04_analise_para/
   01_compara_mascara_controlada.py        com/sem máscara na amostra comum → Tabela 5, Figura 5
   02_desempenho_base_completa.py          os cinco modelos na base completa → Tabela 6
@@ -123,6 +127,8 @@ pesquisa/04_analise_para/
   03_busca_hiperparametros.py             busca aninhada, um algoritmo por chamada
   04_gera_fig6_aninhada.py                Figura 6
   05_natureza_da_repeticao.py             repetição na PAM → subseção 6.4
+  08_nulo_com_dependencia_para.py         teste de acaso com IAAFT e AR(1) → subseção 6.4
+  nulo_com_dependencia_para.json          resultados do teste de acaso
   comparacao_controlada.json              métricas da Tabela 5
   resultados_busca_aninhada.json          métricas da Tabela 6
   01_compara_mascara_e_baseline_DEPRECADO.py
@@ -192,7 +198,23 @@ python 07_repeticao_27_estados.py
 python 07_repeticao_27_estados.py --conferir   # refaz a análise do CSV já baixado
 python 04_avalia_ajustado.py             # avalia em 2016–2020 → Tabela 3
 python 05_gera_figuras_ajustado.py       # Figuras 2, 3 e 4
+
+# custo de ajuste e memória, da subamostra à base completa (cerca de meia hora)
+python 10_mede_custo_escalabilidade.py
+python 10_mede_custo_escalabilidade.py --analisar   # só agrega o registro versionado
 ```
+
+`10_mede_custo_escalabilidade.py` mede, com os hiperparâmetros da Tabela 3,
+quanto custa treinar cada modelo em tamanhos crescentes de treino até a base
+completa, nas cinco safras de teste. Cada ajuste roda num processo próprio,
+para que o pico de memória de um não esconda o do seguinte. O registro
+versionado (`custo_*.jsonl`, `custo_agregado.csv`) foi gerado numa máquina
+virtual com 2 vCPUs Intel Xeon e 7 GB de RAM, com scikit-learn 1.8.0 e XGBoost
+3.4.1: noutra máquina tempo e memória mudam, R² e RMSE não. Com a base completa,
+os quatro modelos levam 205 s somados contra 37 s na configuração reduzida, e o
+R² não piora (SVR 0,413, RF 0,386, XGBoost 0,409, MLP 0,224). O registro guarda
+as previsões, mas não a produtividade observada, que é da base de terceiros:
+`--analisar` a relê de `data/data_cast.csv`.
 
 `04_avalia_ajustado.py` fecha com um comparativo entre a versão sem ajuste e a
 ajustada, que depende de `01_treina_modelos.py` ter rodado antes — é ele quem
@@ -260,6 +282,7 @@ python 02_desempenho_base_completa.py    # Tabela 6 (cerca de 10 minutos)
 python 02_gera_figuras.py
 python 04_gera_fig6_aninhada.py          # Figura 6
 python 05_natureza_da_repeticao.py       # números da subseção 6.4
+python 08_nulo_com_dependencia_para.py   # teste de acaso com IAAFT e AR(1) (~30 s)
 ```
 
 `02_desempenho_base_completa.py` roda os quatro algoritmos mais o modelo de

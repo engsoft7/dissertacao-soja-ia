@@ -211,6 +211,8 @@ def carregar_municipios():
 def fase_enso(ano: int) -> str:
     """Fase do ENSO para a safra, pelo Oceanic Niño Index da NOAA.
 
+    A safra é classificada pelo trimestre dezembro-fevereiro em que está o
+    ciclo da soja (regra em atualiza_enso.py), e não pelo ano do calendário.
     É o mesmo arquivo que pinta as faixas do gráfico histórico. Devolve
     "El Niño", "La Niña" ou "neutra" — e "neutra" também quando o arquivo
     não está disponível, que é a hipótese conservadora."""
@@ -1158,11 +1160,13 @@ if tela_atual == "📍 Inteligência Territorial":
     if fase == "El Niño":
         cor_faixa, texto_fase = "#d97706", (
             "safra classificada como <b>El Niño</b> pelo Oceanic Niño Index (NOAA). "
-            "No histórico do Pará, anos de El Niño concentram as maiores quebras.")
+            "No histórico do Pará (2001-2024), safras de El Niño ficaram em média "
+            "acima da tendência; as maiores quebras vieram em safras de La Niña.")
     elif fase == "La Niña":
         cor_faixa, texto_fase = "#2563eb", (
             "safra classificada como <b>La Niña</b> pelo Oceanic Niño Index (NOAA). "
-            "A projeção abaixo já considera o clima observado, não a fase em si.")
+            "No histórico do Pará (2001-2024), quatro das cinco piores safras foram de "
+            "La Niña. A projeção abaixo considera o clima observado, não a fase em si.")
     else:
         cor_faixa, texto_fase = "#737373", (
             "safra sem El Niño ou La Niña registrado pelo Oceanic Niño Index (NOAA). "

@@ -1,29 +1,37 @@
 {
   "fonte": "NOAA Climate Prediction Center (CPC) - Oceanic Niño Index (ONI)",
   "url_origem": "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt",
+  "regra": "safra Y classificada pelo trimestre DJF de Y (dezembro de Y-1 a fevereiro de Y): El Niño ou La Niña se esse trimestre pertence a um episódio da NOAA (5 ou mais trimestres seguidos com ONI >= +0,5 ou <= -0,5)",
   "ultima_atualizacao": "2026-08-16 22:44:02 UTC",
   "el_ninos": [
     2003,
+    2005,
+    2007,
     2010,
     2015,
     2016,
-    2023,
-    2024,
-    2026
+    2019,
+    2020,
+    2024
   ],
   "la_ninas": [
     2000,
+    2001,
+    2006,
     2008,
+    2009,
     2011,
+    2012,
+    2018,
     2021,
     2022,
-    2025
+    2023
   ],
   "historico_detalhado": {
     "2000": {
       "classificacao": "La Niña",
-      "anomalia_media": -0.77,
-      "pico_anomalia": -1.47,
+      "provisoria": false,
+      "oni_djf": -1.47,
       "trimestres": {
         "DJF": -1.47,
         "JFM": -1.26,
@@ -40,9 +48,9 @@
       }
     },
     "2001": {
-      "classificacao": "Neutro",
-      "anomalia_media": -0.29,
-      "pico_anomalia": -0.76,
+      "classificacao": "La Niña",
+      "provisoria": false,
+      "oni_djf": -0.76,
       "trimestres": {
         "DJF": -0.76,
         "JFM": -0.54,
@@ -60,8 +68,8 @@
     },
     "2002": {
       "classificacao": "Neutro",
-      "anomalia_media": 0.51,
-      "pico_anomalia": -0.15,
+      "provisoria": false,
+      "oni_djf": -0.15,
       "trimestres": {
         "DJF": -0.15,
         "JFM": 0.07,
@@ -79,8 +87,8 @@
     },
     "2003": {
       "classificacao": "El Niño",
-      "anomalia_media": 0.23,
-      "pico_anomalia": 0.9,
+      "provisoria": false,
+      "oni_djf": 0.9,
       "trimestres": {
         "DJF": 0.9,
         "JFM": 0.59,
@@ -98,8 +106,8 @@
     },
     "2004": {
       "classificacao": "Neutro",
-      "anomalia_media": 0.39,
-      "pico_anomalia": 0.1,
+      "provisoria": false,
+      "oni_djf": 0.34,
       "trimestres": {
         "DJF": 0.34,
         "JFM": 0.27,
@@ -116,9 +124,9 @@
       }
     },
     "2005": {
-      "classificacao": "Neutro",
-      "anomalia_media": 0.03,
-      "pico_anomalia": -0.82,
+      "classificacao": "El Niño",
+      "provisoria": false,
+      "oni_djf": 0.62,
       "trimestres": {
         "DJF": 0.62,
         "JFM": 0.55,
@@ -135,9 +143,9 @@
       }
     },
     "2006": {
-      "classificacao": "Neutro",
-      "anomalia_media": 0.04,
-      "pico_anomalia": -0.86,
+      "classificacao": "La Niña",
+      "provisoria": false,
+      "oni_djf": -0.86,
       "trimestres": {
         "DJF": -0.86,
         "JFM": -0.8,
@@ -154,9 +162,9 @@
       }
     },
     "2007": {
-      "classificacao": "Neutro",
-      "anomalia_media": -0.61,
-      "pico_anomalia": -1.72,
+      "classificacao": "El Niño",
+      "provisoria": false,
+      "oni_djf": 0.62,
       "trimestres": {
         "DJF": 0.62,
         "JFM": 0.19,
@@ -174,8 +182,8 @@
     },
     "2008": {
       "classificacao": "La Niña",
-      "anomalia_media": -0.81,
-      "pico_anomalia": -1.76,
+      "provisoria": false,
+      "oni_djf": -1.76,
       "trimestres": {
         "DJF": -1.76,
         "JFM": -1.61,
@@ -192,9 +200,9 @@
       }
     },
     "2009": {
-      "classificacao": "Neutro",
-      "anomalia_media": 0.26,
-      "pico_anomalia": -0.89,
+      "classificacao": "La Niña",
+      "provisoria": false,
+      "oni_djf": -0.89,
       "trimestres": {
         "DJF": -0.89,
         "JFM": -0.84,
@@ -212,8 +220,8 @@
     },
     "2010": {
       "classificacao": "El Niño",
-      "anomalia_media": -0.43,
-      "pico_anomalia": 1.47,
+      "provisoria": false,
+      "oni_djf": 1.47,
       "trimestres": {
         "DJF": 1.47,
         "JFM": 1.21,
@@ -231,8 +239,8 @@
     },
     "2011": {
       "classificacao": "La Niña",
-      "anomalia_media": -0.77,
-      "pico_anomalia": -1.29,
+      "provisoria": false,
+      "oni_djf": -1.29,
       "trimestres": {
         "DJF": -1.29,
         "JFM": -1.06,
@@ -249,9 +257,9 @@
       }
     },
     "2012": {
-      "classificacao": "Neutro",
-      "anomalia_media": -0.07,
-      "pico_anomalia": -0.71,
+      "classificacao": "La Niña",
+      "provisoria": false,
+      "oni_djf": -0.71,
       "trimestres": {
         "DJF": -0.71,
         "JFM": -0.56,
@@ -269,8 +277,8 @@
     },
     "2013": {
       "classificacao": "Neutro",
-      "anomalia_media": -0.26,
-      "pico_anomalia": -0.45,
+      "provisoria": false,
+      "oni_djf": -0.24,
       "trimestres": {
         "DJF": -0.24,
         "JFM": -0.28,
@@ -288,8 +296,8 @@
     },
     "2014": {
       "classificacao": "Neutro",
-      "anomalia_media": 0.23,
-      "pico_anomalia": -0.24,
+      "provisoria": false,
+      "oni_djf": -0.24,
       "trimestres": {
         "DJF": -0.24,
         "JFM": -0.21,
@@ -307,8 +315,8 @@
     },
     "2015": {
       "classificacao": "El Niño",
-      "anomalia_media": 1.47,
-      "pico_anomalia": 2.59,
+      "provisoria": false,
+      "oni_djf": 0.73,
       "trimestres": {
         "DJF": 0.73,
         "JFM": 0.65,
@@ -326,8 +334,8 @@
     },
     "2016": {
       "classificacao": "El Niño",
-      "anomalia_media": 0.49,
-      "pico_anomalia": 2.5,
+      "provisoria": false,
+      "oni_djf": 2.5,
       "trimestres": {
         "DJF": 2.5,
         "JFM": 2.21,
@@ -345,8 +353,8 @@
     },
     "2017": {
       "classificacao": "Neutro",
-      "anomalia_media": -0.06,
-      "pico_anomalia": -0.76,
+      "provisoria": false,
+      "oni_djf": -0.08,
       "trimestres": {
         "DJF": -0.08,
         "JFM": 0.08,
@@ -363,9 +371,9 @@
       }
     },
     "2018": {
-      "classificacao": "Neutro",
-      "anomalia_media": 0.14,
-      "pico_anomalia": -0.71,
+      "classificacao": "La Niña",
+      "provisoria": false,
+      "oni_djf": -0.71,
       "trimestres": {
         "DJF": -0.71,
         "JFM": -0.67,
@@ -382,9 +390,9 @@
       }
     },
     "2019": {
-      "classificacao": "Neutro",
-      "anomalia_media": 0.65,
-      "pico_anomalia": 0.2,
+      "classificacao": "El Niño",
+      "provisoria": false,
+      "oni_djf": 0.99,
       "trimestres": {
         "DJF": 0.99,
         "JFM": 0.94,
@@ -401,9 +409,9 @@
       }
     },
     "2020": {
-      "classificacao": "Neutro",
-      "anomalia_media": -0.21,
-      "pico_anomalia": -1.11,
+      "classificacao": "El Niño",
+      "provisoria": false,
+      "oni_djf": 0.71,
       "trimestres": {
         "DJF": 0.71,
         "JFM": 0.66,
@@ -421,8 +429,8 @@
     },
     "2021": {
       "classificacao": "La Niña",
-      "anomalia_media": -0.65,
-      "pico_anomalia": -0.99,
+      "provisoria": false,
+      "oni_djf": -0.99,
       "trimestres": {
         "DJF": -0.99,
         "JFM": -0.85,
@@ -440,8 +448,8 @@
     },
     "2022": {
       "classificacao": "La Niña",
-      "anomalia_media": -0.78,
-      "pico_anomalia": -0.89,
+      "provisoria": false,
+      "oni_djf": -0.76,
       "trimestres": {
         "DJF": -0.76,
         "JFM": -0.68,
@@ -458,9 +466,9 @@
       }
     },
     "2023": {
-      "classificacao": "El Niño",
-      "anomalia_media": 0.81,
-      "pico_anomalia": 1.99,
+      "classificacao": "La Niña",
+      "provisoria": false,
+      "oni_djf": -0.55,
       "trimestres": {
         "DJF": -0.55,
         "JFM": -0.33,
@@ -478,8 +486,8 @@
     },
     "2024": {
       "classificacao": "El Niño",
-      "anomalia_media": 0.41,
-      "pico_anomalia": 1.84,
+      "provisoria": false,
+      "oni_djf": 1.84,
       "trimestres": {
         "DJF": 1.84,
         "JFM": 1.53,
@@ -496,9 +504,9 @@
       }
     },
     "2025": {
-      "classificacao": "La Niña",
-      "anomalia_media": -0.28,
-      "pico_anomalia": -0.61,
+      "classificacao": "Neutro",
+      "provisoria": false,
+      "oni_djf": -0.46,
       "trimestres": {
         "DJF": -0.46,
         "JFM": -0.22,
@@ -515,9 +523,9 @@
       }
     },
     "2026": {
-      "classificacao": "El Niño",
-      "anomalia_media": 0.39,
-      "pico_anomalia": 1.39,
+      "classificacao": "Neutro",
+      "provisoria": false,
+      "oni_djf": -0.39,
       "trimestres": {
         "DJF": -0.39,
         "JFM": -0.21,

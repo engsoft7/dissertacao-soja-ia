@@ -1,14 +1,60 @@
 {
   "coletado_em": "2026-10-22",
   "salvos": [
-    "9c7a829c-a751-49ba-8611-df9b5bbbf3c3.png",
-    "795e932d-427f-435f-9097-2549d83ab6c7.png",
-    "3729d82c-3646-4e16-8742-f7abd8d38eb1.png",
-    "1f1071b0-1b7b-453d-8c62-d4f3dc956212.jpeg",
+    "sojaseriehist.xls",
+    "SojaSerieHist.xls",
     "site_tabela-de-dados-graos_2026-27.xls",
-    "site_previsao_de_safra-por_produto-out-2026.xlsx"
+    "site_previsao_de_safra-por_produto-out-2026.xlsx",
+    "site_previsao_de_safra-por_produto-jul-2026.xlsx",
+    "site_previsao_de_safra-por_produto-ago-2026.xlsx",
+    "site_previsao_de_safra-por_produto-set-2026.xlsx",
+    "site_previsao_de_safra-por_produto-jul-2025.xlsx",
+    "site_previsao_de_safra-por_produto-ago-2025.xlsx",
+    "site_previsao_de_safra-por_produto-set-2025.xlsx",
+    "site_previsao_de_safra-por_produto-out-2025.xlsx",
+    "site_previsao_de_safra-por_produto-nov-2025.xlsx",
+    "site_previsao_de_safra-por_produto-dez-2025.xlsx",
+    "site_previsao_de_safra-por_produto-fev-2025.xlsx",
+    "site_previsao_de_safra-por_produto-fev-2026.xlsx",
+    "site_previsao_de_safra-por_produto-mar-2026.xlsx",
+    "site_previsao_de_safra-por_produto-abr-2026.xlsx",
+    "site_previsao_de_safra-por_produto-mai-2026.xlsx",
+    "site_previsao_de_safra-por_produto-jun-2026.xlsx",
+    "boletim-de-monitoramento-dos-cultivos-de-verao-inverno-2013-agosto-2026"
   ],
   "tentativas": [
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja/sojaseriehist.xls",
+      "status": 200,
+      "tipo": "application/vnd.ms-excel",
+      "bytes": 87040,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja/sojaseriehist.xls",
+      "salvo_como": "sojaseriehist.xls"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja/sojaseriehist.xls/@@download/file",
+      "status": 200,
+      "tipo": "application/vnd.ms-excel",
+      "bytes": 87040,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja/sojaseriehist.xls/@@download/file",
+      "salvo_como": "SojaSerieHist.xls"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja",
+      "status": 200,
+      "tipo": "text/html;charset=utf-8",
+      "bytes": 124910,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja",
+      "links_dados": [],
+      "links_todos": [
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja/",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja/sojaseriehist.xls"
+      ]
+    },
     {
       "url": "https://portaldeinformacoes.conab.gov.br/downloads/arquivos/SerieHistoricaGraos.txt",
       "aviso": "SSL recusado em HTTPS (HTTPSConnectionPool(host='portaldeinformacoes.conab.gov.br', port=443): Max retries exceeded with url: /downloads/arquivos/SerieHistoricaGraos.txt (Caused by SS); tentado HTTP",
@@ -55,7 +101,15 @@
       "tipo": "text/html;charset=utf-8",
       "bytes": 120963,
       "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas",
-      "links_dados": []
+      "links_dados": [],
+      "links_todos": [
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/cafe",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/cana-de-acucar",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos"
+      ]
     },
     {
       "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos",
@@ -63,15 +117,31 @@
       "tipo": "text/html;charset=utf-8",
       "bytes": 127903,
       "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos",
-      "links_dados": []
-    },
-    {
-      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja",
-      "status": 200,
-      "tipo": "text/html;charset=utf-8",
-      "bytes": 124910,
-      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja",
-      "links_dados": []
+      "links_dados": [],
+      "links_todos": [
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/algodao",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/amendoim",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/arroz",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/aveia",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/canola",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/centeio",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/cevada",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/feijao",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/gergelim",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/girassol",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/graos",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/graos-por-produtos",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/graos-por-unidades-da-federacao",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/mamona",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/milho",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/sorgo",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/trigo",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/triticale"
+      ]
     },
     {
       "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos",
@@ -82,51 +152,27 @@
       "links_dados": []
     },
     {
-      "url": "https://www.gov.br/conab/pt-br/assuntos/imagens/banner-safra-de-graos/15-10-26-graos-banner-1.png/@@images/9c7a829c-a751-49ba-8611-df9b5bbbf3c3.png",
-      "status": 200,
-      "tipo": "image/png",
-      "bytes": 842799,
-      "final": "https://www.gov.br/conab/pt-br/assuntos/imagens/banner-safra-de-graos/15-10-26-graos-banner-1.png/@@images/9c7a829c-a751-49ba-8611-df9b5bbbf3c3.png",
-      "salvo_como": "9c7a829c-a751-49ba-8611-df9b5bbbf3c3.png"
-    },
-    {
-      "url": "https://www.gov.br/conab/pt-br/assuntos/imagens/banners-safras-de-cafe/imagem-de-graos-cafe-e-uma-xicara-da-bebida-com-estimativa-de-producao-de-67-6-milhoes-de-sacas/@@images/795e932d-427f-435f-9097-2549d83ab6c7.png",
-      "status": 200,
-      "tipo": "image/png",
-      "bytes": 1002210,
-      "final": "https://www.gov.br/conab/pt-br/assuntos/imagens/banners-safras-de-cafe/imagem-de-graos-cafe-e-uma-xicara-da-bebida-com-estimativa-de-producao-de-67-6-milhoes-de-sacas/@@images/795e932d-427f-435f-9097-2549d83ab6c7.png",
-      "salvo_como": "795e932d-427f-435f-9097-2549d83ab6c7.png"
-    },
-    {
-      "url": "https://www.gov.br/conab/pt-br/assuntos/imagens/banners-safras-de-cana/caules-de-cana-de-acucar-e-a-estimativa-do-2o-levantamento-da-safra-de-cana-de-acucar-na-safra-2026-27-com-uma-producao-de-705-2-milhoes-de-toneladas/@@images/3729d82c-3646-4e16-8742-f7abd8d38eb1.png",
-      "status": 200,
-      "tipo": "image/png",
-      "bytes": 901251,
-      "final": "https://www.gov.br/conab/pt-br/assuntos/imagens/banners-safras-de-cana/caules-de-cana-de-acucar-e-a-estimativa-do-2o-levantamento-da-safra-de-cana-de-acucar-na-safra-2026-27-com-uma-producao-de-705-2-milhoes-de-toneladas/@@images/3729d82c-3646-4e16-8742-f7abd8d38eb1.png",
-      "salvo_como": "3729d82c-3646-4e16-8742-f7abd8d38eb1.png"
-    },
-    {
-      "url": "https://www.gov.br/conab/pt-br/assuntos/imagens/imagem-de-milho-em-graos-com-informacao-de-compra-de-191-mil-toneladas-do-cereal-pela-conab-para-reforco-nos-estoques-publicos/@@images/1f1071b0-1b7b-453d-8c62-d4f3dc956212.jpeg",
-      "status": 200,
-      "tipo": "image/jpeg",
-      "bytes": 111167,
-      "final": "https://www.gov.br/conab/pt-br/assuntos/imagens/imagem-de-milho-em-graos-com-informacao-de-compra-de-191-mil-toneladas-do-cereal-pela-conab-para-reforco-nos-estoques-publicos/@@images/1f1071b0-1b7b-453d-8c62-d4f3dc956212.jpeg",
-      "salvo_como": "1f1071b0-1b7b-453d-8c62-d4f3dc956212.jpeg"
-    },
-    {
-      "url": "https://www.gov.br/conab/pt-br/assuntos/noticias/conab-detalha-operacao-para-comercializacao-de-farelo-de-soja",
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja/",
       "status": 200,
       "tipo": "text/html;charset=utf-8",
-      "bytes": 129346,
-      "final": "https://www.gov.br/conab/pt-br/assuntos/noticias/conab-detalha-operacao-para-comercializacao-de-farelo-de-soja",
-      "links_dados": []
+      "bytes": 124910,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja/",
+      "links_dados": [],
+      "links_todos": [
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja/",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja/sojaseriehist.xls"
+      ]
     },
     {
-      "url": "https://www.gov.br/conab/pt-br/assuntos/noticias/primeiro-levantamento-da-safra-de-graos-2026-27-estima-producao-acima-de-367-milhoes-de-toneladas",
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras",
       "status": 200,
       "tipo": "text/html;charset=utf-8",
-      "bytes": 133308,
-      "final": "https://www.gov.br/conab/pt-br/assuntos/noticias/primeiro-levantamento-da-safra-de-graos-2026-27-estima-producao-acima-de-367-milhoes-de-toneladas",
+      "bytes": 163453,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras",
       "links_dados": []
     },
     {
@@ -146,14 +192,6 @@
       "bytes": 287232,
       "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/perspectivas-para-a-agropecuaria/perspectivas-para-a-agropecuaria-edicao-14-2026-27/site_tabela-de-dados-graos_2026-27.xls",
       "salvo_como": "site_tabela-de-dados-graos_2026-27.xls"
-    },
-    {
-      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras",
-      "status": 200,
-      "tipo": "text/html;charset=utf-8",
-      "bytes": 163447,
-      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras",
-      "links_dados": []
     },
     {
       "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-cafe",
@@ -190,100 +228,231 @@
       "salvo_como": "site_previsao_de_safra-por_produto-out-2026.xlsx"
     },
     {
-      "url": "http://www.facebook.com/sharer.php?u=https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas",
-      "status": 200,
-      "tipo": "text/html; charset=\"utf-8\"",
-      "bytes": 423668,
-      "final": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.gov.br%252Fconab%252Fpt-br%252Fatuacao%252Finformacoes-agropecuarias%252Fsafras%252Fseries-historicas%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
-      "links_dados": []
-    },
-    {
       "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/",
       "status": 200,
       "tipo": "text/html;charset=utf-8",
       "bytes": 120963,
       "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/",
-      "links_dados": []
+      "links_dados": [],
+      "links_todos": [
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/cafe",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/cana-de-acucar",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos"
+      ]
     },
     {
-      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/cafe",
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/graos",
       "status": 200,
       "tipo": "text/html;charset=utf-8",
-      "bytes": 124140,
-      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/cafe",
-      "links_dados": []
+      "bytes": 127909,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/graos",
+      "links_dados": [],
+      "links_todos": [
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/algodao",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/amendoim",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/arroz",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/aveia",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/canola",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/centeio",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/cevada",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/feijao",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/gergelim",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/girassol",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/graos",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/graos-por-produtos",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/graos-por-unidades-da-federacao",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/mamona",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/milho",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/soja",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/sorgo",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/trigo",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/triticale"
+      ]
     },
     {
-      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/cana-de-acucar",
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/10o-levantamento-safra-2025-26/10o-levantamento-safra-2025-26",
       "status": 200,
       "tipo": "text/html;charset=utf-8",
-      "bytes": 124180,
-      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/cana-de-acucar",
-      "links_dados": []
+      "bytes": 126209,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/10o-levantamento-safra-2025-26/10o-levantamento-safra-2025-26",
+      "links_dados": [
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/10o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-jul-2026.xlsx"
+      ]
     },
     {
-      "url": "http://www.facebook.com/sharer.php?u=https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/graos",
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/10o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-jul-2026.xlsx",
       "status": 200,
-      "tipo": "text/html; charset=\"utf-8\"",
-      "bytes": 423887,
-      "final": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.gov.br%252Fconab%252Fpt-br%252Fatuacao%252Finformacoes-agropecuarias%252Fsafras%252Fseries-historicas%252Fgraos%252Fgraos%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
-      "links_dados": []
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 1018661,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/10o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-jul-2026.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-jul-2026.xlsx"
     },
     {
-      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/algodao",
-      "status": 200,
-      "tipo": "text/html;charset=utf-8",
-      "bytes": 124990,
-      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/algodao",
-      "links_dados": []
-    },
-    {
-      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/amendoim",
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/11o-levantamento-safra-2025-26/11o-levantamento-safra-2025-26",
       "status": 200,
       "tipo": "text/html;charset=utf-8",
-      "bytes": 127736,
-      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/amendoim",
-      "links_dados": []
+      "bytes": 126209,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/11o-levantamento-safra-2025-26/11o-levantamento-safra-2025-26",
+      "links_dados": [
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/11o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-ago-2026.xlsx"
+      ]
     },
     {
-      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/arroz",
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/11o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-ago-2026.xlsx",
       "status": 200,
-      "tipo": "text/html;charset=utf-8",
-      "bytes": 127682,
-      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/arroz",
-      "links_dados": []
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 985966,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/11o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-ago-2026.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-ago-2026.xlsx"
     },
     {
-      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/aveia",
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/12o-levantamento-safra-2025-26/12o-levantamento-safra-2025-26",
       "status": 200,
       "tipo": "text/html;charset=utf-8",
-      "bytes": 124930,
-      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/aveia",
-      "links_dados": []
+      "bytes": 125615,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/12o-levantamento-safra-2025-26/12o-levantamento-safra-2025-26",
+      "links_dados": [
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/12o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-set-2026.xlsx"
+      ]
     },
     {
-      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/canola",
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/12o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-set-2026.xlsx",
       "status": 200,
-      "tipo": "text/html;charset=utf-8",
-      "bytes": 124950,
-      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/canola",
-      "links_dados": []
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 965384,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/12o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-set-2026.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-set-2026.xlsx"
     },
     {
-      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/centeio",
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/boletim-da-safra-de-graos",
       "status": 200,
       "tipo": "text/html;charset=utf-8",
-      "bytes": 124970,
-      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/centeio",
-      "links_dados": []
+      "bytes": 254275,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/boletim-da-safra-de-graos",
+      "links_dados": [
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/10o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-jul-2025.xlsx",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/11o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-ago-2025.xlsx",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/12o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-set-2025.xlsx",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/1o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-out-2025.xlsx",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/2o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-nov-2025.xlsx",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/3o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-dez-2025.xlsx",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/5o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-fev-2025.xlsx",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/5o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-fev-2026.xlsx",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/6o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-mar-2026.xlsx",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/7o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-abr-2026.xlsx",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/8o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-mai-2026.xlsx",
+        "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/9o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-jun-2026.xlsx"
+      ]
     },
     {
-      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/cevada",
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/10o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-jul-2025.xlsx",
       "status": 200,
-      "tipo": "text/html;charset=utf-8",
-      "bytes": 124950,
-      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/series-historicas/graos/cevada",
-      "links_dados": []
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 955757,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/10o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-jul-2025.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-jul-2025.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/11o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-ago-2025.xlsx",
+      "status": 200,
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 962994,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/11o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-ago-2025.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-ago-2025.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/12o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-set-2025.xlsx",
+      "status": 200,
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 958070,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/12o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-set-2025.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-set-2025.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/1o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-out-2025.xlsx",
+      "status": 200,
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 956754,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/1o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-out-2025.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-out-2025.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/2o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-nov-2025.xlsx",
+      "status": 200,
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 942877,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/2o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-nov-2025.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-nov-2025.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/3o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-dez-2025.xlsx",
+      "status": 200,
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 950335,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/3o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-dez-2025.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-dez-2025.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/5o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-fev-2025.xlsx",
+      "status": 200,
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 953320,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/5o-levantamento-safra-2024-25/site_previsao_de_safra-por_produto-fev-2025.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-fev-2025.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/5o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-fev-2026.xlsx",
+      "status": 200,
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 977472,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/5o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-fev-2026.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-fev-2026.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/6o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-mar-2026.xlsx",
+      "status": 200,
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 976504,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/6o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-mar-2026.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-mar-2026.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/7o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-abr-2026.xlsx",
+      "status": 200,
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 983622,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/7o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-abr-2026.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-abr-2026.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/8o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-mai-2026.xlsx",
+      "status": 200,
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 1017346,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/8o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-mai-2026.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-mai-2026.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/9o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-jun-2026.xlsx",
+      "status": 200,
+      "tipo": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "bytes": 1007489,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/boletim-da-safra-de-graos/9o-levantamento-safra-2025-26/site_previsao_de_safra-por_produto-jun-2026.xlsx",
+      "salvo_como": "site_previsao_de_safra-por_produto-jun-2026.xlsx"
+    },
+    {
+      "url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/monitoramento-agricola/boletim-de-monitoramento-dos-cultivos-de-verao-inverno-2013-agosto-2026",
+      "status": 200,
+      "tipo": "application/pdf",
+      "bytes": 17648878,
+      "final": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos/monitoramento-agricola/boletim-de-monitoramento-dos-cultivos-de-verao-inverno-2013-agosto-2026",
+      "salvo_como": "boletim-de-monitoramento-dos-cultivos-de-verao-inverno-2013-agosto-2026"
     }
   ]
 }

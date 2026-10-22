@@ -65,7 +65,12 @@ principais:
 ### 5.1 Módulo de Aprendizado de Máquina (Backend)
 - Núcleo preditivo baseado em modelo Random Forest (sklearn), com baseline
   de referência (média histórica + tendência tecnológica) e correção climática
-  aprendida sobre o resíduo.
+  aprendida sobre o resíduo. *(Em versões posteriores ao commit registrado, a
+  partir da `v2.4.1`, a correção climática voltou a ser aprendida por um
+  Perceptron Multicamadas (`MLPRegressor`), o modelo que a Tabela 6 da
+  dissertação documenta para a base completa do Pará. O Random Forest entrara
+  no commit `e5e3d8e`, de 26/07/2026, mas as métricas exibidas continuaram
+  sendo as do MLP; a seção 9.1 registra o defeito e a correção.)*
 - Treinamento com validação *leave-one-year-out* para evitar vazamento temporal.
 - Decomposição produtividade = tendência tecnológica + anomalia climática.
 - API REST (FastAPI) hospedada na nuvem (Render) para consumo por clientes.
@@ -96,7 +101,7 @@ principais:
 
 ## 6. Funcionalidades Principais
 
-1. **Previsão de Produtividade (Machine Learning):** Treinamento e inferência automática de algoritmos de I.A. (Random Forest) para simular o rendimento (kg/ha e scs/ha) baseado em tendências históricas.
+1. **Previsão de Produtividade (Machine Learning):** Treinamento e inferência automática de algoritmos de I.A. (Random Forest) para simular o rendimento (kg/ha e scs/ha) baseado em tendências históricas. *(A partir da `v2.4.1`, o algoritmo é o Perceptron Multicamadas, conforme a nota da seção 5.1.)*
 2. **Dashboard Web B2B (Módulo SaaS - Single Page Application):** Sistema executivo moderno projetado sob arquitetura modular, comportando mapas de calor regionais Folium (Inteligência Territorial), laboratórios Climáticos "What-if" e módulos matemáticos interativos gerados por Plotly Analytics para renderização de marcos históricos paramétricos (El Niño/La Niña).
 3. **Módulo de Síntese em Linguagem Natural (IA Heurística):** Agente preditivo (Agente de Síntese BIA) embutido nativamente no Painel Financeiro que reescreve a lógica matemática e projeções logarítmicas de fluxo hídrico num linguajar executivo humano e avaliativo (ex: sentenças de alerta "Alta Viabilidade", "Alerta" ou "Risco Crítico").
 4. **Captura de cotação e referências econômicas:** Consulta ao contrato futuro de soja em Chicago (CBOT `ZS=F`) e ao câmbio (`BRL=X`) pelo Yahoo Finance, convertidos para reais por saca de 60 kg, com valor de reserva fixo quando a consulta falha. O custo operacional e o Valor da Terra Nua não são coletados: são uma tabela de referência estática de sete municípios, embutida em `software/api_backend/financas.py` e editável na interface. *(Em versões posteriores ao commit registrado, a cotação passou a priorizar o preço físico em Paranaguá com o CBOT como reserva; o custo passou a vir do levantamento da CONAB para Pedro Afonso (TO) e o Valor da Terra Nua da tabela da Receita Federal de 2026.)*

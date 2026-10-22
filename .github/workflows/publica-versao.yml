@@ -1,0 +1,101 @@
+# Publica uma versão nova com um clique: aba Actions > "Publicar versão" >
+# Run workflow, com o título da versão.
+#
+# Calcula o próximo número (v2.4.7 -> v2.4.8, ou o nível escolhido), cria a
+# etiqueta sobre a main e o Release, com as notas geradas a partir dos PRs
+# desde a versão anterior, e em seguida roda os dois workflows que a publicação
+# de um Release dispara: o que assina e anexa o APK e o que registra a versão e
+# o DOI no REGISTRO_INPI.md. Eles são chamados daqui porque um Release criado
+# pelo próprio Actions não dispara o evento "release" que os aciona. O depósito
+# no Zenodo, que gera o DOI, é disparado pelo webhook do próprio GitHub.
+#
+# Publicar continua sendo uma decisão: cada versão ganha um DOI permanente, por
+# isso o workflow não roda sozinho a cada merge.
+name: Publicar versão
+
+on:
+  workflow_dispatch:
+    inputs:
+      titulo:
+        description: "O que muda nesta versão (vira o título do Release e a descrição no registro)"
+        required: true
+      incremento:
+        description: "Tipo de versão"
+        type: choice
+        options: [correcao, funcionalidade, principal]
+        default: correcao
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: publica-versao
+  cancel-in-progress: false
+
+jobs:
+  versao:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.numero.outputs.tag }}
+      titulo: ${{ steps.numero.outputs.titulo }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Calcula o número da versão
+        id: numero
+        env:
+          TITULO: ${{ inputs.titulo }}
+          INCREMENTO: ${{ inputs.incremento }}
+        run: |
+          if [ "$GITHUB_REF_NAME" != "main" ]; then
+            echo "::error::Dispare a partir da main: a versão é criada sobre ela."
+            exit 1
+          fi
+          ultima=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -1)
+          [ -n "$ultima" ] || { echo "::error::Nenhuma etiqueta vX.Y.Z encontrada."; exit 1; }
+          if [ "$(git rev-parse "$ultima^{commit}")" = "$(git rev-parse HEAD)" ]; then
+            echo "::error::A main não mudou desde a $ultima: não há o que publicar."
+            exit 1
+          fi
+          IFS=. read -r maior menor corr <<< "${ultima#v}"
+          case "$INCREMENTO" in
+            principal)      tag="v$((maior + 1)).0.0" ;;
+            funcionalidade) tag="v$maior.$((menor + 1)).0" ;;
+            *)              tag="v$maior.$menor.$((corr + 1))" ;;
+          esac
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "::error::A etiqueta $tag já existe."
+            exit 1
+          fi
+          echo "Última: $ultima; nova: $tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "titulo=$tag — $TITULO" >> "$GITHUB_OUTPUT"
+
+      - name: Cria a etiqueta e o Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.numero.outputs.tag }}
+          TITULO: ${{ steps.numero.outputs.titulo }}
+        run: |
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$(git rev-parse HEAD)" \
+            --title "$TITULO" --generate-notes
+          echo "Release $TAG publicado sobre $(git rev-parse --short HEAD)." >> "$GITHUB_STEP_SUMMARY"
+
+  apk:
+    needs: versao
+    uses: ./.github/workflows/publica-apk.yml
+    with:
+      tag: ${{ needs.versao.outputs.tag }}
+    secrets: inherit
+
+  doi:
+    needs: versao
+    uses: ./.github/workflows/registra-doi.yml
+    with:
+      tag: ${{ needs.versao.outputs.tag }}
+      titulo: ${{ needs.versao.outputs.titulo }}

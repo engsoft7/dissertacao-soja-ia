@@ -1,10 +1,12 @@
 # Registra no REGISTRO_INPI.md o DOI que o Zenodo atribui a cada Release.
 #
-# Na publicação de um Release: espera o Zenodo atribuir o DOI de versão,
-# confere o resumo criptográfico da etiqueta contra a tabela do registro e, se
-# conferir, abre um PR com o DOI e a conferência e faz o merge dele. O PR fica
-# como registro auditável do que mudou. Se o resumo não conferir, ou o DOI não
-# aparecer no prazo, nada é mergeado: abre uma issue em vez do PR.
+# Na publicação de um Release: calcula o resumo criptográfico sobre a etiqueta,
+# espera o Zenodo atribuir o DOI de versão e registra a versão no
+# REGISTRO_INPI.md e no CITATION.cff. Versão sem linha na tabela ganha linha,
+# texto (arquivos-fonte que entram, mudam e saem) e referência do DOI; versão já
+# preparada à mão é conferida contra a etiqueta e só recebe o DOI. Abre um PR e
+# faz o merge dele, que fica como registro auditável do que mudou. Se o resumo
+# não conferir, ou o DOI não aparecer no prazo, nada é mergeado: abre uma issue.
 #
 # Disparo manual (aba Actions) com a etiqueta, para repetir ou para um Release
 # publicado antes deste workflow existir.
@@ -44,11 +46,16 @@ jobs:
       - name: Instala dependências
         run: pip install --quiet requests
 
-      - name: Confere a etiqueta e espera o DOI
+      - name: Registra a versão e o DOI
         id: doi
+        env:
+          TITULO: ${{ github.event.release.name }}
+          PUBLICADO_EM: ${{ github.event.release.published_at }}
         run: |
-          PUBLICADO=$(date -u -d "${{ github.event.release.published_at || '' }}" +%d/%m/%Y 2>/dev/null || date -u +%d/%m/%Y)
-          python software/automacao_github/registra_doi.py "$ETIQUETA" --esperar-min 40 --publicado "$PUBLICADO"
+          PUBLICADO=$(date -u -d "$PUBLICADO_EM" +%d/%m/%Y 2>/dev/null || date -u +%d/%m/%Y)
+          [ -n "$PUBLICADO_EM" ] || PUBLICADO=$(date -u +%d/%m/%Y)
+          python software/automacao_github/registra_doi.py "$ETIQUETA" --esperar-min 40 \
+            --publicado "$PUBLICADO" --titulo "$TITULO"
 
       - name: Abre PR com o DOI
         id: cpr
@@ -56,13 +63,15 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           branch: automacao/doi-${{ env.ETIQUETA }}
-          add-paths: REGISTRO_INPI.md
-          commit-message: "Registra o DOI da ${{ env.ETIQUETA }}"
-          title: "Registra o DOI da ${{ env.ETIQUETA }}"
+          add-paths: |
+            REGISTRO_INPI.md
+            CITATION.cff
+          commit-message: "Registra a ${{ env.ETIQUETA }} e o DOI dela"
+          title: "Registra a ${{ env.ETIQUETA }} e o DOI dela"
           body: |
             DOI de versão da `${{ env.ETIQUETA }}`: `${{ steps.doi.outputs.doi }}`, lido da API do Zenodo.
 
-            O resumo criptográfico foi recalculado sobre uma cópia limpa da etiqueta (commit `${{ steps.doi.outputs.commit }}`) e confere com a linha da tabela da seção 9.1.
+            O resumo criptográfico foi calculado sobre uma cópia limpa da etiqueta (commit `${{ steps.doi.outputs.commit }}`). Se a versão já tinha linha na tabela da seção 9.1, o valor foi conferido contra ela; se não tinha, a linha, o texto da versão e a citação foram escritos a partir da etiqueta.
 
             Gerado e mergeado pelo workflow `registra-doi.yml`.
           delete-branch: true
@@ -76,7 +85,7 @@ jobs:
         run: |
           gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" \
             --repo "${{ github.repository }}" --merge --delete-branch \
-            --subject "Registra o DOI da ${ETIQUETA}"
+            --subject "Registra a ${ETIQUETA} e o DOI dela"
 
       - name: Abre issue quando não dá para registrar
         if: failure()

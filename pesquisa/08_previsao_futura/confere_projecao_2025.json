@@ -1,0 +1,98 @@
+{
+  "registro": {
+    "modelo": "Crescimento amortecido x Média + tendência",
+    "feito_em": "2026-10-22",
+    "central_t": 4285721,
+    "faixa80_t": [
+      3902051,
+      4712513
+    ],
+    "area_ha": 1349713,
+    "rendimento_kg_ha": 3175
+  },
+  "area_usada": {
+    "coluna": "area_colhida_ha",
+    "variavel_ibge": "Área colhida",
+    "maior_diferenca_relativa_2001_2024": {
+      "area_colhida_ha": 0.0,
+      "area_plantada_ha": 0.0215
+    }
+  },
+  "revisao_2001_2024_%": {
+    "max_abs": 0.0,
+    "anos_com_revisao": []
+  },
+  "observado_2025": {
+    "producao_t": 4372392,
+    "producao_ibge_t": 4372363,
+    "area_ha": 1323964,
+    "rendimento_kg_ha": 3303,
+    "municipios": 41
+  },
+  "resultado": {
+    "dentro_da_faixa_80": true,
+    "erro_producao_%": -2.0,
+    "erro_area_%": 1.9,
+    "erro_rendimento_%": -3.9,
+    "erros_maiores_no_retroteste_%": 85.7
+  },
+  "novo_registro_origem_2025": {
+    "modelo": "Crescimento amortecido x Média + tendência",
+    "feito_em": "2026-10-22",
+    "projecao": {
+      "2026": {
+        "central_t": 4813256,
+        "faixa80_t": [
+          4409691,
+          5283970
+        ]
+      },
+      "2027": {
+        "central_t": 5350527,
+        "faixa80_t": [
+          4449894,
+          6707187
+        ]
+      },
+      "2028": {
+        "central_t": 5834584,
+        "faixa80_t": [
+          4470537,
+          9590543
+        ]
+      }
+    }
+  },
+  "municipal_2025": {
+    "municipios": 36,
+    "Referência": {
+      "RMSE": 463.3,
+      "MAE": 358.9,
+      "rRMSE_%": 13.7,
+      "n": 36
+    },
+    "SVR": {
+      "RMSE": 503.4,
+      "MAE": 370.3,
+      "rRMSE_%": 14.8,
+      "n": 36,
+      "ganho_sobre_referencia": -0.181,
+      "IC95_municipios": [
+        -0.304,
+        -0.056
+      ]
+    },
+    "MLP": {
+      "RMSE": 463.7,
+      "MAE": 359.1,
+      "rRMSE_%": 13.7,
+      "n": 36,
+      "ganho_sobre_referencia": -0.002,
+      "IC95_municipios": [
+        -0.003,
+        -0.0
+      ]
+    },
+    "ressalva": "uma safra só: o intervalo reamostra municípios, não safras"
+  }
+}

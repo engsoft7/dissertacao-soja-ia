@@ -2,9 +2,9 @@
 #
 # Na publicação de um Release: espera o Zenodo atribuir o DOI de versão,
 # confere o resumo criptográfico da etiqueta contra a tabela do registro e, se
-# conferir, abre um PR com o DOI e a conferência. O merge fica com o autor: o
-# registro é documento formal. Se o resumo não conferir, ou o DOI não aparecer
-# no prazo, abre uma issue em vez do PR.
+# conferir, abre um PR com o DOI e a conferência e faz o merge dele. O PR fica
+# como registro auditável do que mudou. Se o resumo não conferir, ou o DOI não
+# aparecer no prazo, nada é mergeado: abre uma issue em vez do PR.
 #
 # Disparo manual (aba Actions) com a etiqueta, para repetir ou para um Release
 # publicado antes deste workflow existir.
@@ -51,6 +51,7 @@ jobs:
           python software/automacao_github/registra_doi.py "$ETIQUETA" --esperar-min 40 --publicado "$PUBLICADO"
 
       - name: Abre PR com o DOI
+        id: cpr
         if: success()
         uses: peter-evans/create-pull-request@v7
         with:
@@ -63,8 +64,19 @@ jobs:
 
             O resumo criptográfico foi recalculado sobre uma cópia limpa da etiqueta (commit `${{ steps.doi.outputs.commit }}`) e confere com a linha da tabela da seção 9.1.
 
-            Gerado pelo workflow `registra-doi.yml`. Confira e faça o merge.
+            Gerado e mergeado pelo workflow `registra-doi.yml`.
           delete-branch: true
+
+      # Só chega aqui o que passou pela conferência do resumo criptográfico e
+      # tem o DOI lido do Zenodo; o PR só altera o REGISTRO_INPI.md.
+      - name: Mergeia o PR do DOI
+        if: success() && steps.cpr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" \
+            --repo "${{ github.repository }}" --merge --delete-branch \
+            --subject "Registra o DOI da ${ETIQUETA}"
 
       - name: Abre issue quando não dá para registrar
         if: failure()

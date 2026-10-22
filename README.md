@@ -234,20 +234,22 @@ sua máquina produz com o que está no texto, sem sobrescrever o registro.
 
 **Sobre reproduzir os números exatos.** O SVR e o MLP reproduzem os valores da
 dissertação dígito a dígito, safra a safra, e a importância por permutação da
-Figura 4 sai idêntica até a casa decimal. Três dos quatro modelos, portanto, não
-dependem do ambiente. O Random Forest depende, e o XGBoost fica em aberto.
+Figura 4 sai idêntica até a casa decimal. O Random Forest e o XGBoost dependem
+da versão da biblioteca, e os dois se reproduzem nas versões indicadas abaixo.
 
 **Random Forest — resolvido pelo pin.** A partir do scikit-learn 1.9 o Random
 Forest muda de resultado mesmo com `random_state` fixo, e a linha da Tabela 3 cai
 de 476,0 para 473,7 kg/ha. As versões 1.3.2, 1.4.2, 1.5.0, 1.5.2 e 1.8.0 foram
 testadas e todas devolvem 476,0 / 353,5 / 0,387, exatamente o registrado. Por
 isso o `requirements.txt` fixa `scikit-learn>=1.3,<1.9`. Verificado de ponta a
-ponta: rodando `04_avalia_ajustado.py` com scikit-learn 1.8.0, três das quatro
-linhas da Tabela 3 — SVR, Random Forest e MLP — saem idênticas às registradas.
+ponta: rodando `04_avalia_ajustado.py` com scikit-learn 1.8.0, as linhas do SVR,
+do Random Forest e do MLP saem idênticas às registradas, e com XGBoost 3.3.0 ou
+posterior a do XGBoost também.
 
-**XGBoost — divergência em aberto, de 1,3 kg/ha.** A linha do XGBoost sai 479,3
-em vez dos 480,6 registrados. Foram testadas vinte versões, e o valor de fato
-muda entre elas — mas nenhuma chega a 480,6:
+**XGBoost — resolvido pela versão: 3.3.0 ou posterior.** Da 3.3.0 em diante a
+linha do XGBoost sai 480,6 / 352,8 / 0,374, exatamente o registrado; testadas
+3.3.0, 3.4.0 e 3.4.1, com scikit-learn 1.8.0. As versões anteriores devolvem
+outro valor:
 
 | versão do XGBoost | RMSE |
 |---|---|
@@ -256,17 +258,17 @@ muda entre elas — mas nenhuma chega a 480,6:
 | 2.1.0, 2.1.1, 2.1.2 | 476,5 |
 | 2.1.3, 2.1.4 | 479,3 |
 | 3.0.0, 3.0.2, 3.0.5, 3.1.0, 3.1.1, 3.2.0 | 479,3 |
+| 3.3.0, 3.4.0, 3.4.1 | **480,6** |
 
-Também não é contagem de threads: `n_jobs` de 1 a 16 devolve sempre o mesmo
-valor. A diferença aparece espalhada pelas cinco safras com sinais alternados
-(−7,8 a +2,6 kg/ha), o que indica um ajuste de modelo distinto e não um desvio
-sistemático. A hipótese que resta é a do ambiente de compilação: a ordem de
-redução em ponto flutuante na construção do histograma depende do conjunto de
-instruções da CPU, e isso não se reproduz noutra máquina.
+A versão anterior desta nota atribuía a diferença ao conjunto de instruções da
+CPU, por não ter encontrado versão que chegasse a 480,6. Não é a CPU: na mesma
+máquina, em 22/10/2026, a 3.2.0 devolveu 479,3 e a 3.3.0, a 3.4.0 e a 3.4.1
+devolveram 480,6. Tampouco é contagem de threads: `n_jobs` de 1 a 16 devolve
+sempre o mesmo valor.
 
-Quem reproduzir deve esperar um valor entre 476,5 e 479,3 nessa linha, e apenas
-nela. A conclusão do capítulo não muda: o XGBoost é o terceiro colocado nos dois
-casos, atrás de SVR e Random Forest.
+Quem reproduzir com uma versão anterior à 3.3.0 deve esperar um valor entre
+476,5 e 479,3 nessa linha, e apenas nela. A conclusão do capítulo não muda: o
+XGBoost é o terceiro colocado nos dois casos, atrás de SVR e Random Forest.
 
 A busca de hiperparâmetros é aleatória: reexecutá-la tende a eleger uma
 configuração diferente, sem que a conclusão mude. O que ela decide com segurança
@@ -315,11 +317,12 @@ argumento é obrigatório para ele: com 10 o resultado já muda, para 433,3 /
 
 **O que reproduz e o que não reproduz.** Modelo de referência, MLP, SVR e Random
 Forest saem idênticos aos da Tabela 6, até a configuração modal e a frequência
-com que ela foi eleita. O XGBoost também, mas depende da versão da biblioteca:
-com o `xgboost` 3.4.1 e o scikit-learn 1.8.0 os comandos acima devolvem os
-439,5 / 314,5 / 0,123 publicados (conferido em 22/10/2026), e sob o 3.2.0 a
-busca interna elege outra configuração e o resultado sai 433,2 / 310,6 /
-R² 0,148. É o único dos quatro cujo treino não vem do scikit-learn.
+com que ela foi eleita. O XGBoost também, mas depende da versão da biblioteca,
+com a mesma fronteira da Tabela 3: com o `xgboost` 3.3.0 ou 3.4.1 e o
+scikit-learn 1.8.0 os comandos acima devolvem os 439,5 / 314,5 / 0,123
+publicados (conferido em 22/10/2026), e sob o 3.2.0 a busca interna elege outra
+configuração e o resultado sai 433,2 / 310,6 / R² 0,148. É o único dos quatro
+cujo treino não vem do scikit-learn.
 
 A diferença é de ambiente, e não de código ou de semente: as dezesseis
 candidatas sorteadas são as mesmas, e três execuções seguidas — uma delas com a

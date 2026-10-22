@@ -18,6 +18,7 @@ Todos os experimentos comparam com o **modelo de referência** da dissertação
 | `02_previsao_rendimento_para.py` | Que modelo prevê melhor a produtividade municipal 1, 2 e 3 safras à frente, e ao fim do ciclo? | `previsao_rendimento_para.json` |
 | `03_previsao_producao_para.py` | Quanto o Pará vai produzir nas próximas safras? | `previsao_producao_para.json`, `fig_previsao_producao_para.png` |
 | `04_referencia_nacional.py` | No recorte nacional, o SVR supera o modelo de referência? | `referencia_nacional.json` |
+| `05_oni_na_tabela6.py` | O ONI, como variável, melhora os modelos no protocolo da Tabela 6? | `oni_na_tabela6.json` |
 
 ```bash
 cd pesquisa/08_previsao_futura
@@ -25,6 +26,7 @@ python 01_enso_para.py
 python 02_previsao_rendimento_para.py      # ~1 min
 python 03_previsao_producao_para.py
 python 04_referencia_nacional.py           # requer 03_analise_nacional/data/data_cast.csv (00_baixa_dados.py)
+python 05_oni_na_tabela6.py                # ~5 min, busca aninhada
 ```
 
 O **ganho** é a habilidade sobre a referência, `1 − MSE(modelo)/MSE(referência)`:
@@ -134,6 +136,25 @@ treinando só com o passado (E4). No Pará, o mesmo contraste dá ganho nulo. A
 diferença entre os recortes deixa de ser de método e passa a ser de dado, o que
 é a hipótese subsidiária da dissertação: onde o alvo repete valores, a
 capacidade de discriminar modelos desaparece.
+
+### 5. ONI no protocolo da Tabela 6 (`05`)
+
+Mesma avaliação da Tabela 6 (leave-one-year-out com busca aninhada, mesmos
+orçamentos e semente), com o ONI de dezembro a março somado às onze variáveis:
+
+| Modelo | Tabela 6 (RMSE / R²) | Com ONI (RMSE / R²) | Ganho sobre a referência (IC95) |
+|---|---|---|---|
+| SVR | 417,6 / 0,208 | 409,0 / 0,241 | +0,031 (−0,024 a +0,090) |
+| Random Forest | 431,9 / 0,153 | 414,7 / 0,220 | +0,005 (−0,076 a +0,089) |
+| XGBoost | 439,5 / 0,123 | 428,6 / 0,166 | −0,063 (−0,151 a +0,014) |
+| MLP | 415,6 / 0,216 | 425,3 / 0,179 | −0,047 (−0,126 a −0,002) |
+| Referência | 415,6 / 0,216 | — | — |
+
+O ONI melhora três dos quatro modelos, e o SVR com ONI é o primeiro a ficar
+numericamente acima da referência neste protocolo. O ganho, +0,031, é o mesmo
+medido em janela crescente (+0,033), mas o intervalo inclui o zero: com 24
+safras, a melhora não se distingue do acaso. O MLP piora. A Tabela 6 da
+dissertação não muda.
 
 ## O que isso responde
 

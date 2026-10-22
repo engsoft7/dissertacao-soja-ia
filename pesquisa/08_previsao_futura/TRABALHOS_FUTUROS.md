@@ -20,12 +20,15 @@ com intervalo de 95% por reamostragem de safras, em janela crescente.
 ## 2. El Niño e La Niña como preditores
 
 - **Hipótese.** O ONI de dezembro a março melhora a previsão da produtividade
-  no Pará ao fim do ciclo. Hoje o ganho é de +0,033, com IC95 de −0,026 a
-  +0,094.
-- **Teste.** Acrescentar ao ONI o gradiente térmico do Atlântico tropical
-  (relevante para a chuva no norte do Brasil), testar as duas variáveis no
-  protocolo da Tabela 6 (busca aninhada) e em janela crescente, e repetir a
-  cada safra nova.
+  no Pará ao fim do ciclo.
+- **Feito em 22/10/2026.** No protocolo da Tabela 6 (`05_oni_na_tabela6.py`) o
+  SVR com ONI tem ganho de +0,031 (IC95 −0,024 a +0,090); em janela crescente,
+  +0,033 (IC95 −0,026 a +0,094). Os dois apontam no mesmo sentido, nenhum é
+  significativo.
+- **Teste que falta.** Acrescentar ao ONI o gradiente térmico do Atlântico
+  tropical (relevante para a chuva no norte do Brasil), que precisa ser baixado
+  da NOAA pela rotina do GitHub Actions, e repetir os dois testes a cada safra
+  nova.
 - **Critério.** O intervalo do ganho deixa de incluir o zero. Com 24 safras isso
   é improvável; o teste ganha poder a cada safra acrescentada.
 

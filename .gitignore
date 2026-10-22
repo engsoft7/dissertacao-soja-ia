@@ -1,7 +1,12 @@
 __pycache__/
 *.pyc
 results/
-data/data_cast.csv
+# Base de von Bloh et al. (2023): de terceiros, não é redistribuída. Sem o
+# "**/" o padrão só valia para data/ na raiz, e a cópia que 00_baixa_dados.py
+# grava em pesquisa/03_analise_nacional/data/ aparecia para versionar.
+**/data/data_cast.csv
+# Material de transição da revisão, que não faz parte do repositório.
+/handoff/
 *.pdf
 # ...menos os documentos-fonte de números citados, que precisam ficar
 # auditáveis junto do dado extraído deles.

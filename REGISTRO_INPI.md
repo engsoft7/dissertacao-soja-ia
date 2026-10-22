@@ -210,6 +210,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.5` (22/10/2026) — métricas de validação do aplicativo servidas pela API | 97 | 18.036 | `f98568169031c82a2dcda524286b0f541f515f5d901fc49deebf94f1c25294da` |
 | Tag `v2.4.6` (22/10/2026) — tela Mercado no aplicativo | 99 | 18.438 | `c96b5a6c643a2d15dd8187f7835418ea04bd9672c9856c0f8338e848bfd28444` |
 | Tag `v2.4.7` (22/10/2026) — gráficos legíveis, ajustes de interface e capturas de tela do aplicativo; registro automático do DOI | 102 | 18.977 | `270db6e46daf2cef7649057fa45dec3454574eea102087515b54bc4c77839820` |
+| Tag `v2.4.8` (22/10/2026) — publicação e registro automáticos da versão | 102 | 19.139 | `0bd893a160fe63bb3a94239551deee7fa5c331c8ea0dfd70df04cb313e680cc7` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -468,6 +469,18 @@ limpa da `v2.4.7` (commit `e05a140`), pelo workflow `registra-doi.yml`: o valor
 confere. O DOI de versão desta etiqueta é 10.5281/zenodo.23576847, atribuído
 pelo Zenodo no depósito disparado pela publicação do Release em 22/10/2026.
 
+A `v2.4.8` foi registrada pelo workflow `registra-doi.yml` na publicação do
+Release, em 22/10/2026, com o título “v2.4.8 — Publicação e registro automáticos
+da versão”. Em relação à `v2.4.7`, mudam 2 arquivos-fonte
+(`software/automacao_github/registra_doi.py` e
+`software/automacao_github/test_registra_doi.py`).
+
+O resumo criptográfico da `v2.4.8` foi calculado pelo mesmo workflow sobre uma
+cópia limpa da etiqueta (commit `e86b106`), com o critério do comando acima: 102
+arquivos e 19.139 linhas. O DOI de versão desta etiqueta é
+10.5281/zenodo.23577538, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 22/10/2026.
+
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
 calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
@@ -706,6 +719,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.4`:** 10.5281/zenodo.23573276
 - **DOI da `v2.4.5`:** 10.5281/zenodo.23574981
 - **DOI da `v2.4.6`:** 10.5281/zenodo.23575177
-- **DOI da versão mais recente (`v2.4.7`):** 10.5281/zenodo.23576847
+- **DOI da `v2.4.7`:** 10.5281/zenodo.23576847
+- **DOI da versão mais recente (`v2.4.8`):** 10.5281/zenodo.23577538
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

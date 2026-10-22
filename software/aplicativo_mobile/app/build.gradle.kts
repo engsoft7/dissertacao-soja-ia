@@ -36,8 +36,8 @@ android {
         applicationId = "com.agrointeligencia.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 15
-        versionName = "2.2.0"
+        versionCode = 16
+        versionName = "2.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -69,6 +69,14 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    // Capturas de tela automáticas (CapturasDeTelaTest): o Robolectric desenha
+    // as telas na JVM, sem emulador, e o Roborazzi grava cada uma em PNG.
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            all { it.systemProperty("roborazzi.test.record", "true") }
+        }
+    }
 }
 
 dependencies {
@@ -92,6 +100,12 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
 
     testImplementation(libs.junit)
+    testImplementation(libs.androidx.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 

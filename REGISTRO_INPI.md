@@ -96,13 +96,16 @@ principais:
 - Atualização mensal automática da base de dados via API SIDRA/IBGE.
 - Coleta automatizada de variáveis ambientais no Google Earth Engine.
 - Pipeline CI/CD com pull requests automáticos para revisões e safras novas.
+  *(A partir da `v2.4.4`, a rotina atualiza só a base do produto,
+  `soja_para_painel.csv`; a base da dissertação fica congelada. A mesma rotina
+  ganha a coleta de dados para a previsão de safras, disparada manualmente.)*
 
 ---
 
 ## 6. Funcionalidades Principais
 
 1. **Previsão de Produtividade (Machine Learning):** Treinamento e inferência automática de algoritmos de I.A. (Random Forest) para simular o rendimento (kg/ha e scs/ha) baseado em tendências históricas. *(A partir da `v2.4.1`, o algoritmo é o Perceptron Multicamadas, conforme a nota da seção 5.1.)*
-2. **Dashboard Web B2B (Módulo SaaS - Single Page Application):** Sistema executivo moderno projetado sob arquitetura modular, comportando mapas de calor regionais Folium (Inteligência Territorial), laboratórios Climáticos "What-if" e módulos matemáticos interativos gerados por Plotly Analytics para renderização de marcos históricos paramétricos (El Niño/La Niña).
+2. **Dashboard Web B2B (Módulo SaaS - Single Page Application):** Sistema executivo moderno projetado sob arquitetura modular, comportando mapas de calor regionais Folium (Inteligência Territorial), laboratórios Climáticos "What-if" e módulos matemáticos interativos gerados por Plotly Analytics para renderização de marcos históricos paramétricos (El Niño/La Niña). *(A partir da `v2.4.4`, cada safra é classificada pelo trimestre dezembro-fevereiro, segundo a regra de episódios da NOAA; antes, pelo ano do calendário.)*
 3. **Módulo de Síntese em Linguagem Natural (IA Heurística):** Agente preditivo (Agente de Síntese BIA) embutido nativamente no Painel Financeiro que reescreve a lógica matemática e projeções logarítmicas de fluxo hídrico num linguajar executivo humano e avaliativo (ex: sentenças de alerta "Alta Viabilidade", "Alerta" ou "Risco Crítico").
 4. **Captura de cotação e referências econômicas:** Consulta ao contrato futuro de soja em Chicago (CBOT `ZS=F`) e ao câmbio (`BRL=X`) pelo Yahoo Finance, convertidos para reais por saca de 60 kg, com valor de reserva fixo quando a consulta falha. O custo operacional e o Valor da Terra Nua não são coletados: são uma tabela de referência estática de sete municípios, embutida em `software/api_backend/financas.py` e editável na interface. *(Em versões posteriores ao commit registrado, a cotação passou a priorizar o preço físico em Paranaguá com o CBOT como reserva; o custo passou a vir do levantamento da CONAB para Pedro Afonso (TO) e o Valor da Terra Nua da tabela da Receita Federal de 2026.)*
 5. **Plataforma SDK Integrada:** Aplicação nativa programada em Kotlin/Android (UI baseada em Jetpack Compose) espelhando conectividade remota através de uma API Serverless arquitetada em FastAPI (Render).
@@ -203,6 +206,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.1` (18/09/2026) — correções do painel web | 77 | 15.288 | `d9f118ead8a19e172f87118c40b76b7378bb7979b9eab9aec400254ef74644a5` |
 | Tag `v2.4.2` (18/09/2026) — projeção no painel web | 77 | 15.384 | `7f04fddedf5d63285a1310cca9549e41fea47d646a3a22720e43e7d42f8168bb` |
 | Tag `v2.4.3` (22/10/2026) — medição de custo e revisão para os artigos SBC | 79 | 15.815 | `859bcf907bb73422be18952970a0d0ee9d4fdfa1b75c6a5ebcf7da5b91d69a84` |
+| Tag `v2.4.4` (22/10/2026) — previsão de safras futuras, safra 2025 no produto e ENSO por safra | 95 | 17.923 | `5ebaa5df49a04f1bf619f9ec6b8aeea04fe418af614b9fbb031c61b05b9d5696` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -321,6 +325,53 @@ da versão altera apenas este `REGISTRO_INPI.md` e o `CITATION.cff`, que ficam
 fora do conjunto resumido, de modo que o valor se mantém na etiqueta. Conferido
 depois de etiquetar, sobre uma cópia limpa da `v2.4.3` (commit `e267526`): o
 valor confere.
+
+A `v2.4.4` reúne a previsão de safras futuras, a safra 2025 no produto e a
+classificação do El Niño e da La Niña por safra. São dezesseis arquivos-fonte
+novos e nove alterados em relação à `v2.4.3`.
+
+Quinze dos novos estão em `pesquisa/08_previsao_futura/`. Oito são análises
+que avaliam a previsão em janela crescente, treinando só com safras anteriores
+à prevista, e confrontam os modelos com o modelo de referência da dissertação;
+uma delas confere contra a PAM 2025 a projeção de produção registrada antes de
+o IBGE publicá-la. Três são módulos comuns (`comum.py`, `fases.py` e
+`conab.py`), e quatro são os coletores de `coleta/`, que o GitHub Actions
+executa para baixar a PAM, as séries do Atlântico tropical da NOAA, a série
+histórica de safras da CONAB e as séries diárias e de 8 e 16 dias do Earth
+Engine. O décimo sexto é o teste da nova classificação climática,
+`software/automacao_github/test_atualiza_enso.py`.
+
+Os nove alterados se dividem em três mudanças. A primeira separa a base do
+produto da base da dissertação: o painel, a API e a rotina de atualização
+(`app.py`, `api.py`, `atualiza_pam.py`, `gera_metricas.py`, `gera_municipios.py`
+e `test_atualiza_pam_paths.py`) passam a ler e escrever
+`pesquisa/dados/soja_para_painel.csv`, e `soja_para_mascarado_2001_2024.csv`,
+que produz as Tabelas 5 e 6, fica congelada. Foi na base do produto que a
+rotina incluiu a safra 2025, e as métricas que o painel exibe passaram de
+R² 0,216, RMSE 415,6 kg/ha e 415 registros para 0,253, 412,8 kg/ha e 451
+registros. A segunda muda a classificação climática (`atualiza_enso.py`,
+`app.py`, `charts.py` e `api.py`): cada safra passa a ser classificada pelo
+trimestre dezembro-fevereiro, segundo a regra de episódios da NOAA, e não pelo
+ano do calendário a partir de uma lista fixa, que marcava como El Niño as safras
+2023 e 2026, colhidas antes de os eventos começarem, e omitia episódios oficiais.
+O texto do painel que atribuía ao El Niño as maiores quebras do Pará foi
+corrigido: quatro das cinco piores safras foram de La Niña. A terceira reúne
+correções do painel (`app.py` e `model.py`): a largura dos gráficos na API atual
+do Streamlit, o texto da repetição, o rótulo do custo e a documentação do
+modelo.
+
+Nenhum código-fonte do aplicativo Android muda nesta versão; o quadro de
+validação do aplicativo continua a exibir os números da Tabela 6, escritos no
+código, enquanto o painel exibe os da base do produto. Os números da
+dissertação nas Tabelas 3, 5 e 6 tampouco mudam, porque as análises novas leem
+a base congelada.
+
+O resumo criptográfico da `v2.4.4` foi calculado sobre o commit de merge
+`5d63b49`, com o mesmo comando, que reproduz na mesma data o valor registrado
+para a `v2.4.3`. A preparação da versão altera apenas este `REGISTRO_INPI.md` e
+o `CITATION.cff`, que ficam fora do conjunto resumido, de modo que o valor deve
+se manter na etiqueta; como nas anteriores, convém conferi-lo sobre uma cópia
+limpa dela depois de etiquetar.
 
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
@@ -556,6 +607,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.0`:** 10.5281/zenodo.22755108
 - **DOI da `v2.4.1`:** 10.5281/zenodo.22833602
 - **DOI da `v2.4.2`:** 10.5281/zenodo.22837962
-- **DOI da versão mais recente (`v2.4.3`):** 10.5281/zenodo.23560491
+- **DOI da `v2.4.3`:** 10.5281/zenodo.23560491
+- **DOI da versão mais recente (`v2.4.4`):** a preencher após a publicação do Release
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

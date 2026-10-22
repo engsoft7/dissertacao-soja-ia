@@ -209,6 +209,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.4` (22/10/2026) — previsão de safras futuras, safra 2025 no produto e ENSO por safra | 95 | 17.923 | `5ebaa5df49a04f1bf619f9ec6b8aeea04fe418af614b9fbb031c61b05b9d5696` |
 | Tag `v2.4.5` (22/10/2026) — métricas de validação do aplicativo servidas pela API | 97 | 18.036 | `f98568169031c82a2dcda524286b0f541f515f5d901fc49deebf94f1c25294da` |
 | Tag `v2.4.6` (22/10/2026) — tela Mercado no aplicativo | 99 | 18.438 | `c96b5a6c643a2d15dd8187f7835418ea04bd9672c9856c0f8338e848bfd28444` |
+| Tag `v2.4.7` (22/10/2026) — gráficos legíveis, ajustes de interface e capturas de tela do aplicativo | 100 | 18.683 | `6981b9df70d2fa987bec9dc9ef78327fd4ca3fd96ba000fd9a25f4a6615155ad` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -432,6 +433,28 @@ O resumo criptográfico da `v2.4.6` foi calculado sobre o commit de merge
 `CITATION.cff`, de modo que o valor se mantém na etiqueta. Conferido depois de
 etiquetar, sobre uma cópia limpa da `v2.4.6` (commit `d8b501c`): o valor
 confere.
+
+A `v2.4.7` revisa a interface do aplicativo, que vai a `versionCode` 16,
+`versionName` 2.2.1. É um arquivo-fonte novo e dois alterados em relação à
+`v2.4.6`. O novo é o teste
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/CapturasDeTelaTest.kt`,
+que desenha as telas com dados de exemplo nos temas claro e escuro (Robolectric
+e Roborazzi, sem emulador); o workflow `capturas.yml` publica as imagens na
+branch `capturas-de-tela` a cada mudança no aplicativo. Os alterados são
+`MainActivity.kt` e `build.gradle.kts`. Nos gráficos, o texto passa de pixels
+fixos (cerca de 8 sp num celular comum) a sp, as faixas de El Niño e La Niña
+perdem o rótulo em cada safra e ganham legenda, o eixo do histórico deixa de
+começar em zero, o toque mostra o valor de um ano ou de uma vela, e os
+gráficos ganham descrição para leitor de tela. Na interface, o seletor de
+município fica só nas telas em que tem efeito, a aba Mercado deixa de depender
+da previsão do município, o texto secundário passa a uma cor com contraste
+acima de 7:1 e a no mínimo 12 sp, os termos ficam em português e os números
+no formato brasileiro em qualquer aparelho.
+
+O resumo criptográfico da `v2.4.7` foi calculado sobre o commit de merge
+`40c241f`. A preparação da versão altera apenas este `REGISTRO_INPI.md` e o
+`CITATION.cff`, de modo que o valor deve se manter na etiqueta; convém
+conferi-lo sobre uma cópia limpa dela depois de etiquetar.
 
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
@@ -670,6 +693,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.3`:** 10.5281/zenodo.23560491
 - **DOI da `v2.4.4`:** 10.5281/zenodo.23573276
 - **DOI da `v2.4.5`:** 10.5281/zenodo.23574981
-- **DOI da versão mais recente (`v2.4.6`):** 10.5281/zenodo.23575177
+- **DOI da `v2.4.6`:** 10.5281/zenodo.23575177
+- **DOI da versão mais recente (`v2.4.7`):** a preencher após a publicação do Release
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

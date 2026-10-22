@@ -1476,8 +1476,8 @@ fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>, previsao: Pr
     val corProj = if (isDark) Color(0xFF38BDF8) else Color(0xFF0369A1)
     // Faixas claras e sem texto: com a classificação por safra, quase todas as
     // safras têm El Niño ou La Niña, e um rótulo em cada uma cobria o gráfico.
-    val corNino = if (isDark) Color(0x40F87171) else Color(0x33EF4444)
-    val corNina = if (isDark) Color(0x4060A5FA) else Color(0x333B82F6)
+    val corNino = if (isDark) Color(0x2EF87171) else Color(0x33EF4444)
+    val corNina = if (isDark) Color(0x2E60A5FA) else Color(0x333B82F6)
     val corTexto = MaterialTheme.colorScheme.onSurfaceVariant
     val corGrade = MaterialTheme.colorScheme.outlineVariant
 

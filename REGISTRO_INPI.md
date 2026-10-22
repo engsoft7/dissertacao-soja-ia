@@ -65,7 +65,12 @@ principais:
 ### 5.1 Módulo de Aprendizado de Máquina (Backend)
 - Núcleo preditivo baseado em modelo Random Forest (sklearn), com baseline
   de referência (média histórica + tendência tecnológica) e correção climática
-  aprendida sobre o resíduo.
+  aprendida sobre o resíduo. *(Em versões posteriores ao commit registrado, a
+  partir da `v2.4.1`, a correção climática voltou a ser aprendida por um
+  Perceptron Multicamadas (`MLPRegressor`), o modelo que a Tabela 6 da
+  dissertação documenta para a base completa do Pará. O Random Forest entrara
+  no commit `e5e3d8e`, de 26/07/2026, mas as métricas exibidas continuaram
+  sendo as do MLP; a seção 9.1 registra o defeito e a correção.)*
 - Treinamento com validação *leave-one-year-out* para evitar vazamento temporal.
 - Decomposição produtividade = tendência tecnológica + anomalia climática.
 - API REST (FastAPI) hospedada na nuvem (Render) para consumo por clientes.
@@ -96,7 +101,7 @@ principais:
 
 ## 6. Funcionalidades Principais
 
-1. **Previsão de Produtividade (Machine Learning):** Treinamento e inferência automática de algoritmos de I.A. (Random Forest) para simular o rendimento (kg/ha e scs/ha) baseado em tendências históricas.
+1. **Previsão de Produtividade (Machine Learning):** Treinamento e inferência automática de algoritmos de I.A. (Random Forest) para simular o rendimento (kg/ha e scs/ha) baseado em tendências históricas. *(A partir da `v2.4.1`, o algoritmo é o Perceptron Multicamadas, conforme a nota da seção 5.1.)*
 2. **Dashboard Web B2B (Módulo SaaS - Single Page Application):** Sistema executivo moderno projetado sob arquitetura modular, comportando mapas de calor regionais Folium (Inteligência Territorial), laboratórios Climáticos "What-if" e módulos matemáticos interativos gerados por Plotly Analytics para renderização de marcos históricos paramétricos (El Niño/La Niña).
 3. **Módulo de Síntese em Linguagem Natural (IA Heurística):** Agente preditivo (Agente de Síntese BIA) embutido nativamente no Painel Financeiro que reescreve a lógica matemática e projeções logarítmicas de fluxo hídrico num linguajar executivo humano e avaliativo (ex: sentenças de alerta "Alta Viabilidade", "Alerta" ou "Risco Crítico").
 4. **Captura de cotação e referências econômicas:** Consulta ao contrato futuro de soja em Chicago (CBOT `ZS=F`) e ao câmbio (`BRL=X`) pelo Yahoo Finance, convertidos para reais por saca de 60 kg, com valor de reserva fixo quando a consulta falha. O custo operacional e o Valor da Terra Nua não são coletados: são uma tabela de referência estática de sete municípios, embutida em `software/api_backend/financas.py` e editável na interface. *(Em versões posteriores ao commit registrado, a cotação passou a priorizar o preço físico em Paranaguá com o CBOT como reserva; o custo passou a vir do levantamento da CONAB para Pedro Afonso (TO) e o Valor da Terra Nua da tabela da Receita Federal de 2026.)*
@@ -132,7 +137,7 @@ principais:
            │
      ┌─────▼──────────────┐
      │  MODELO ML         │
-     │  (MLP / XGBoost)   │
+     │  (MLP)             │
      │  model.py          │
      └─────┬──────────────┘
            │
@@ -196,6 +201,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.9` (14/09/2026) — análises da revisão | 64 | 12.792 | `b9a4a09bca08161efdef3e8f746ff84c1d314c79a19e10335cc5a005a3e5305d` |
 | Tag `v2.4.0` (14/09/2026) — conferência de referências e primeiro teste do aplicativo | 74 | 14.683 | `f5e8d0673c108b8795467b04d7532a0be59dfb6632b6242e70852ce315ae28a6` |
 | Tag `v2.4.1` (18/09/2026) — correções do painel web | 77 | 15.288 | `d9f118ead8a19e172f87118c40b76b7378bb7979b9eab9aec400254ef74644a5` |
+| Tag `v2.4.2` (22/10/2026) — medição de custo e revisão para os artigos SBC | 79 | 15.815 | `859bcf907bb73422be18952970a0d0ee9d4fdfa1b75c6a5ebcf7da5b91d69a84` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -266,9 +272,49 @@ fora do conjunto resumido — o mesmo que já ocorrera na `v2.3.8` e na `v2.4.0`
 Conferido depois de etiquetar, sobre uma cópia limpa da `v2.4.1`: o valor
 confere.
 
-Os dez foram recalculados a partir de cópias limpas dos respectivos commits e
-conferem em execuções repetidas. A tag da defesa é a `v2.3.7`, e é do Release
-dela que sai o APK distribuído (`versionCode` 13, `versionName` 2.1.6,
+A `v2.4.2` reúne a revisão feita para os dois artigos no modelo da SBC (ERAD e
+ERAMIA) e duas melhorias do painel. São dois arquivos-fonte novos e seis
+alterados em relação à `v2.4.1`.
+
+Os novos são a medição de custo e escalabilidade do estudo nacional,
+`pesquisa/03_analise_nacional/10_mede_custo_escalabilidade.py`, que ajusta os
+quatro modelos da Tabela 3 em tamanhos crescentes de treino até a base
+completa, cada ajuste num processo isolado para medir o pico de memória, e o
+teste de acaso com dependência temporal no Pará,
+`pesquisa/04_analise_para/08_nulo_com_dependencia_para.py`, que reaproveita as
+funções do nulo nacional e acrescenta o IAAFT e o AR(1) à permutação simples.
+
+Entre os alterados, três corrigem a contagem da repetição.
+`pesquisa/06_figuras_defesa/gera_figuras_defesa.py` passa a calcular a
+repetição por quartil de área com os pares de safras como denominador —
+56,8 / 50,0 / 33,0 / 20,2%, em vez de 43,3 / 45,2 / 35,0 / 22,1%, que contavam
+como "não repetiu" o primeiro ano de cada município. `05_natureza_da_repeticao.py`
+e `06_repeticao_e_sinal_espectral.py`, em `pesquisa/04_analise_para/`, marcam
+os dez pares cuja safra anterior presente na base não é a do ano anterior e
+informam 147 de 367 ao lado dos 151 de 377. O quarto,
+`pesquisa/04_analise_para/02_desempenho_base_completa.py`, muda só a mensagem
+impressa quando o XGBoost diverge, que passa a indicar a versão 3.3.0 da
+biblioteca como a primeira que reproduz a Tabela 6. Os dois restantes,
+`software/dashboard_web/app.py` e `software/dashboard_web/ui/charts.py`, vêm de
+antes da revisão: o painel passa a desenhar a projeção das safras seguintes,
+como o aplicativo já fazia, e o cartão de projeção declara quanto o modelo
+acrescenta à referência, 0,65 kg/ha em média.
+
+Nenhum código-fonte do aplicativo Android muda nesta versão. Os números da
+dissertação nas Tabelas 3, 5 e 6 tampouco: foram reproduzidos sobre ela com
+scikit-learn 1.8.0 e XGBoost 3.4.1. O DOI de versão desta etiqueta será
+preenchido aqui quando o Zenodo o atribuir, no depósito disparado pela
+publicação do Release.
+
+O resumo criptográfico da `v2.4.2` foi calculado sobre o commit `9cf625c`. A
+preparação da versão altera apenas este `REGISTRO_INPI.md` e o `CITATION.cff`,
+que ficam fora do conjunto resumido, de modo que o valor deve se manter na
+etiqueta; como na `v2.4.1`, convém conferi-lo sobre uma cópia limpa dela depois
+de etiquetar.
+
+Os treze valores anteriores ao da `v2.4.2` foram recalculados em 22/10/2026 a
+partir de cópias limpas dos respectivos commits, e conferem. A tag da defesa
+é a `v2.3.7`, e é do Release dela que sai o APK distribuído (`versionCode` 13, `versionName` 2.1.6,
 SHA-256 `5ee2ea9697b092c9b27fe76f3c1533eaf7aabb79e68c7b1d4700ced34bd18a21`).
 Esse binário não difere em comportamento do publicado na `v2.3.5`: nem a
 `v2.3.6` nem a `v2.3.7` alteram código do aplicativo — as duas mexem apenas na
@@ -497,6 +543,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.3.9`, citada como referência de dados do artigo ressubmetido:**
   10.5281/zenodo.22739059
 - **DOI da `v2.4.0`:** 10.5281/zenodo.22755108
-- **DOI da versão mais recente (`v2.4.1`):** 10.5281/zenodo.22833602
+- **DOI da `v2.4.1`:** 10.5281/zenodo.22833602
+- **DOI da versão mais recente (`v2.4.2`):** a preencher após a publicação do Release
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

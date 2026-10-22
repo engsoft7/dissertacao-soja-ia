@@ -3,7 +3,7 @@
 Natureza dos valores repetidos na PAM do Pará.
 
 A subseção 6.4 da dissertação afirma que os rendimentos que se repetem entre
-safras consecutivas não são medições, e sim convenções expressas em sacas por
+safras sucessivas não são medições, e sim convenções expressas em sacas por
 hectare. Este script produz todos os números usados naquela subseção, de modo
 que cada afirmação possa ser conferida contra a base.
 
@@ -24,7 +24,14 @@ def carrega():
 
 
 def pares_consecutivos(pa):
-    """Um registro por par de safras consecutivas do mesmo município."""
+    """Um registro por par de safras sucessivas do mesmo município.
+
+    "Sucessivas" e não "consecutivas": a base tem lacunas, e o par liga cada
+    safra à anterior presente na base, que nem sempre é a do ano anterior. A
+    coluna com_lacuna marca os pares em que ano != ano_anterior + 1 (10 dos
+    377). Os números da subseção 6.4 usam todos os pares; main() informa
+    também a contagem só com anos seguidos.
+    """
     linhas = []
     for municipio, d in pa.groupby("municipio"):
         d = d.reset_index(drop=True)
@@ -32,6 +39,7 @@ def pares_consecutivos(pa):
             ant, atual = d.loc[i - 1], d.loc[i]
             linhas.append(dict(
                 municipio=municipio, ano=int(atual.ano), ordem=i,
+                com_lacuna=bool(int(atual.ano) != int(ant.ano) + 1),
                 rendimento=int(atual.rendimento_kg_ha),
                 repetiu=bool(atual.rendimento_kg_ha == ant.rendimento_kg_ha),
                 dNDVI=abs(atual.NDVI_mean - ant.NDVI_mean),
@@ -53,7 +61,11 @@ def main():
 
     print(f"Base: {len(pa)} registros, {pa.municipio.nunique()} municípios, "
           f"{pa.ano.min()}-{pa.ano.max()}")
-    print(f"Pares consecutivos: {len(P)} | repetidos: {len(rep)} ({virgula(taxa)}%)\n")
+    print(f"Pares sucessivos: {len(P)} | repetidos: {len(rep)} ({virgula(taxa)}%)")
+    seguidos = P[~P.com_lacuna]
+    print(f"  só anos seguidos (ano = anterior + 1): {len(seguidos)} | repetidos: "
+          f"{int(seguidos.repetiu.sum())} ({virgula(seguidos.repetiu.mean() * 100)}%)")
+    print(f"  pares com ano faltando no meio: {int(P.com_lacuna.sum())}\n")
 
     print("== A unidade escondida no dado ==")
     inteiro_rep = (rep.rendimento % SACA_KG == 0).mean() * 100

@@ -96,10 +96,16 @@ def figura_repeticao():
     anos = sorted(por_ano)
     pct = [por_ano[a][0] / por_ano[a][1] * 100 for a in anos]
 
-    pa["rep"] = pa.groupby("municipio").rendimento_kg_ha.transform(lambda s: s.diff().eq(0))
-    quart = pa.groupby(pd.qcut(pa.soy_area_ha, 4,
-                               labels=["Q1", "Q2", "Q3", "Q4"]),
-                       observed=True).rep.mean() * 100
+    # O denominador são os pares de safras, os mesmos 377 do painel (b). O
+    # primeiro registro de cada município não tem safra anterior e não pode
+    # repetir; contado como "não repetiu", ele diluía os quartis (a versão
+    # anterior dava 43,3 / 45,2 / 35,0 / 22,1%). Os quartis são de soy_area_ha
+    # do registro atual de cada par.
+    dif = pa.groupby("municipio").rendimento_kg_ha.diff()
+    pares = pa[dif.notna()].assign(rep=dif.eq(0))
+    quart = pares.groupby(pd.qcut(pares.soy_area_ha, 4,
+                                  labels=["Q1", "Q2", "Q3", "Q4"]),
+                          observed=True).rep.mean() * 100
 
     fig, eixos = plt.subplots(1, 2, figsize=(9.10, 3.55),
                               gridspec_kw={"width_ratios": [1, 1.35], "wspace": 0.30})

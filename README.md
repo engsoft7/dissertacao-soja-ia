@@ -46,7 +46,15 @@ sem ajuste. O script `01_treina_modelos.py` foi preservado como registro dessa
 versão anterior e **não reproduz a Tabela 3** — quem quiser os números da
 dissertação deve rodar `04_avalia_ajustado.py`.
 
-*Nota de Engenharia:* Embora o **MLP** tenha empatado como o melhor modelo matemático puro, o **Random Forest** foi a arquitetura escolhida para integração no Produto Técnico (Dashboard e App Mobile) devido à sua alta explicabilidade (Feature Importance) e menor custo computacional em implantações de nuvem.
+*Nota de Engenharia:* O Produto Técnico (painel web, API e aplicativo) usa o
+**MLP** (`MLPRegressor` em `software/dashboard_web/model.py`), o modelo que a
+Tabela 6 documenta para a base completa do Pará e que empata com o baseline; as
+métricas que o painel informa são as dele. Uma versão anterior desta nota dizia
+que o produto usava o Random Forest por ter menor custo computacional; nem uma
+coisa nem outra se sustenta: o painel roda o MLP desde a `v2.4.1`, e o tempo de
+predição medido nas cinco safras do estudo nacional
+(`10_mede_custo_escalabilidade.py`, 7.000 registros de treino) foi de 0,004 s no
+MLP contra 0,11 s no Random Forest.
 
 No Pará, **as variáveis climáticas e espectrais não superaram um modelo de
 referência** baseado apenas no histórico municipal e na tendência tecnológica.
@@ -78,8 +86,9 @@ Esse resultado se sustenta sob dois controles adicionais:
   município somado à tendência.
 
 A investigação da variável-alvo revelou que **40,1% dos pares de safras
-consecutivas da PAM/IBGE nos municípios paraenses apresentam produtividade
-rigorosamente idêntica**, o que indica imputação nos levantamentos oficiais e
+sucessivas da PAM/IBGE nos municípios paraenses apresentam produtividade
+rigorosamente idêntica** (151 de 377; contando só anos seguidos, sem lacuna na
+série, 147 de 367, também 40,1%), o que indica imputação nos levantamentos oficiais e
 impõe um teto estrutural à acurácia de qualquer modelo calibrado sobre essa base.
 
 ---
@@ -104,9 +113,13 @@ pesquisa/03_analise_nacional/
   07_repeticao_27_estados.py              repetição da PAM nas 27 UFs, da fonte primária
   04_avalia_ajustado.py                   avaliação em 2016–2020 → Tabela 3
   05_gera_figuras_ajustado.py             Figuras 2, 3 e 4 (importância por permutação)
+  10_mede_custo_escalabilidade.py         custo de ajuste e memória até a base completa
   resultados_busca.json                   ranking completo da busca
   confirmacao_7000.json                   confirmação do topo do ranking
   resultados_ajustados.json               métricas da Tabela 3
+  custo_medicoes.jsonl, custo_escala.jsonl
+                                          registro da medição de custo (um ajuste por linha)
+  custo_agregado.csv                      custo e acurácia por modelo e tamanho de treino
 pesquisa/04_analise_para/
   01_compara_mascara_controlada.py        com/sem máscara na amostra comum → Tabela 5, Figura 5
   02_desempenho_base_completa.py          os cinco modelos na base completa → Tabela 6
@@ -114,6 +127,8 @@ pesquisa/04_analise_para/
   03_busca_hiperparametros.py             busca aninhada, um algoritmo por chamada
   04_gera_fig6_aninhada.py                Figura 6
   05_natureza_da_repeticao.py             repetição na PAM → subseção 6.4
+  08_nulo_com_dependencia_para.py         teste de acaso com IAAFT e AR(1) → subseção 6.4
+  nulo_com_dependencia_para.json          resultados do teste de acaso
   comparacao_controlada.json              métricas da Tabela 5
   resultados_busca_aninhada.json          métricas da Tabela 6
   01_compara_mascara_e_baseline_DEPRECADO.py
@@ -183,7 +198,23 @@ python 07_repeticao_27_estados.py
 python 07_repeticao_27_estados.py --conferir   # refaz a análise do CSV já baixado
 python 04_avalia_ajustado.py             # avalia em 2016–2020 → Tabela 3
 python 05_gera_figuras_ajustado.py       # Figuras 2, 3 e 4
+
+# custo de ajuste e memória, da subamostra à base completa (cerca de meia hora)
+python 10_mede_custo_escalabilidade.py
+python 10_mede_custo_escalabilidade.py --analisar   # só agrega o registro versionado
 ```
+
+`10_mede_custo_escalabilidade.py` mede, com os hiperparâmetros da Tabela 3,
+quanto custa treinar cada modelo em tamanhos crescentes de treino até a base
+completa, nas cinco safras de teste. Cada ajuste roda num processo próprio,
+para que o pico de memória de um não esconda o do seguinte. O registro
+versionado (`custo_*.jsonl`, `custo_agregado.csv`) foi gerado numa máquina
+virtual com 2 vCPUs Intel Xeon e 7 GB de RAM, com scikit-learn 1.8.0 e XGBoost
+3.4.1: noutra máquina tempo e memória mudam, R² e RMSE não. Com a base completa,
+os quatro modelos levam 205 s somados contra 37 s na configuração reduzida, e o
+R² não piora (SVR 0,413, RF 0,386, XGBoost 0,409, MLP 0,224). O registro guarda
+as previsões, mas não a produtividade observada, que é da base de terceiros:
+`--analisar` a relê de `data/data_cast.csv`.
 
 `04_avalia_ajustado.py` fecha com um comparativo entre a versão sem ajuste e a
 ajustada, que depende de `01_treina_modelos.py` ter rodado antes — é ele quem
@@ -203,20 +234,22 @@ sua máquina produz com o que está no texto, sem sobrescrever o registro.
 
 **Sobre reproduzir os números exatos.** O SVR e o MLP reproduzem os valores da
 dissertação dígito a dígito, safra a safra, e a importância por permutação da
-Figura 4 sai idêntica até a casa decimal. Três dos quatro modelos, portanto, não
-dependem do ambiente. O Random Forest depende, e o XGBoost fica em aberto.
+Figura 4 sai idêntica até a casa decimal. O Random Forest e o XGBoost dependem
+da versão da biblioteca, e os dois se reproduzem nas versões indicadas abaixo.
 
 **Random Forest — resolvido pelo pin.** A partir do scikit-learn 1.9 o Random
 Forest muda de resultado mesmo com `random_state` fixo, e a linha da Tabela 3 cai
 de 476,0 para 473,7 kg/ha. As versões 1.3.2, 1.4.2, 1.5.0, 1.5.2 e 1.8.0 foram
 testadas e todas devolvem 476,0 / 353,5 / 0,387, exatamente o registrado. Por
 isso o `requirements.txt` fixa `scikit-learn>=1.3,<1.9`. Verificado de ponta a
-ponta: rodando `04_avalia_ajustado.py` com scikit-learn 1.8.0, três das quatro
-linhas da Tabela 3 — SVR, Random Forest e MLP — saem idênticas às registradas.
+ponta: rodando `04_avalia_ajustado.py` com scikit-learn 1.8.0, as linhas do SVR,
+do Random Forest e do MLP saem idênticas às registradas, e com XGBoost 3.3.0 ou
+posterior a do XGBoost também.
 
-**XGBoost — divergência em aberto, de 1,3 kg/ha.** A linha do XGBoost sai 479,3
-em vez dos 480,6 registrados. Foram testadas vinte versões, e o valor de fato
-muda entre elas — mas nenhuma chega a 480,6:
+**XGBoost — resolvido pela versão: 3.3.0 ou posterior.** Da 3.3.0 em diante a
+linha do XGBoost sai 480,6 / 352,8 / 0,374, exatamente o registrado; testadas
+3.3.0, 3.4.0 e 3.4.1, com scikit-learn 1.8.0. As versões anteriores devolvem
+outro valor:
 
 | versão do XGBoost | RMSE |
 |---|---|
@@ -225,17 +258,17 @@ muda entre elas — mas nenhuma chega a 480,6:
 | 2.1.0, 2.1.1, 2.1.2 | 476,5 |
 | 2.1.3, 2.1.4 | 479,3 |
 | 3.0.0, 3.0.2, 3.0.5, 3.1.0, 3.1.1, 3.2.0 | 479,3 |
+| 3.3.0, 3.4.0, 3.4.1 | **480,6** |
 
-Também não é contagem de threads: `n_jobs` de 1 a 16 devolve sempre o mesmo
-valor. A diferença aparece espalhada pelas cinco safras com sinais alternados
-(−7,8 a +2,6 kg/ha), o que indica um ajuste de modelo distinto e não um desvio
-sistemático. A hipótese que resta é a do ambiente de compilação: a ordem de
-redução em ponto flutuante na construção do histograma depende do conjunto de
-instruções da CPU, e isso não se reproduz noutra máquina.
+A versão anterior desta nota atribuía a diferença ao conjunto de instruções da
+CPU, por não ter encontrado versão que chegasse a 480,6. Não é a CPU: na mesma
+máquina, em 22/10/2026, a 3.2.0 devolveu 479,3 e a 3.3.0, a 3.4.0 e a 3.4.1
+devolveram 480,6. Tampouco é contagem de threads: `n_jobs` de 1 a 16 devolve
+sempre o mesmo valor.
 
-Quem reproduzir deve esperar um valor entre 476,5 e 479,3 nessa linha, e apenas
-nela. A conclusão do capítulo não muda: o XGBoost é o terceiro colocado nos dois
-casos, atrás de SVR e Random Forest.
+Quem reproduzir com uma versão anterior à 3.3.0 deve esperar um valor entre
+476,5 e 479,3 nessa linha, e apenas nela. A conclusão do capítulo não muda: o
+XGBoost é o terceiro colocado nos dois casos, atrás de SVR e Random Forest.
 
 A busca de hiperparâmetros é aleatória: reexecutá-la tende a eleger uma
 configuração diferente, sem que a conclusão mude. O que ela decide com segurança
@@ -251,6 +284,7 @@ python 02_desempenho_base_completa.py    # Tabela 6 (cerca de 10 minutos)
 python 02_gera_figuras.py
 python 04_gera_fig6_aninhada.py          # Figura 6
 python 05_natureza_da_repeticao.py       # números da subseção 6.4
+python 08_nulo_com_dependencia_para.py   # teste de acaso com IAAFT e AR(1) (~30 s)
 ```
 
 `02_desempenho_base_completa.py` roda os quatro algoritmos mais o modelo de
@@ -260,34 +294,44 @@ alguma métrica divergir. Com `--tabela` apenas imprime a Tabela 6 já gravada,
 sem recalcular.
 
 Para buscar um algoritmo de cada vez — útil quando a busca é longa e convém
-retomá-la —, `03_busca_hiperparametros.py` recebe um alvo por chamada:
+retomá-la —, `03_busca_hiperparametros.py` recebe um alvo por chamada. Os
+comandos abaixo, exatamente assim, são os que reproduzem a Tabela 6, rodados de
+dentro de `pesquisa/04_analise_para/` (cerca de 10 minutos no total). Cada um
+acrescenta o seu modelo a `results/busca_hiperparametros.json`:
 
 ```bash
-python 03_busca_hiperparametros.py baseline
-python 03_busca_hiperparametros.py "Random Forest" 9
-python 03_busca_hiperparametros.py "XGBoost"
-python 03_busca_hiperparametros.py "SVR"
-python 03_busca_hiperparametros.py "MLP"
+cd pesquisa/04_analise_para
+python 03_busca_hiperparametros.py baseline          # 415,6 / 296,1 / R² 0,216
+python 03_busca_hiperparametros.py "Random Forest" 9 # 431,9 / 308,6 / R² 0,153
+python 03_busca_hiperparametros.py "XGBoost"         # 439,5 / 314,5 / R² 0,123
+python 03_busca_hiperparametros.py "SVR"             # 417,6 / 294,8 / R² 0,208
+python 03_busca_hiperparametros.py "MLP"             # 415,6 / 297,4 / R² 0,216
 ```
 
-O orçamento de configurações do Random Forest é menor que o dos demais (9 contra
-15 sorteadas, além da adotada na dissertação). `02_desempenho_base_completa.py`
-guarda esses orçamentos em `ORCAMENTO`; sem eles a Tabela 6 não se reproduz.
+O segundo argumento é o número de configurações sorteadas, além da adotada na
+dissertação, que sempre entra como candidata. Sem ele valem 15, e é assim que
+XGBoost, SVR e MLP foram buscados. O Random Forest foi buscado com 9, e o
+argumento é obrigatório para ele: com 10 o resultado já muda, para 433,3 /
+309,4 / R² 0,148. `02_desempenho_base_completa.py` guarda esses orçamentos em
+`ORCAMENTO`; sem eles a Tabela 6 não se reproduz.
 
 **O que reproduz e o que não reproduz.** Modelo de referência, MLP, SVR e Random
 Forest saem idênticos aos da Tabela 6, até a configuração modal e a frequência
-com que ela foi eleita. O XGBoost, não: sob `xgboost` 3.2.0 a busca interna
-elege outra configuração e o resultado sai 433,2 / 310,6 / R² 0,148, contra os
-439,5 / 314,5 / 0,123 publicados. É o único dos quatro cujo treino não vem do
-scikit-learn, e a tabela foi gerada com uma versão anterior da biblioteca.
+com que ela foi eleita. O XGBoost também, mas depende da versão da biblioteca,
+com a mesma fronteira da Tabela 3: com o `xgboost` 3.3.0 ou 3.4.1 e o
+scikit-learn 1.8.0 os comandos acima devolvem os 439,5 / 314,5 / 0,123
+publicados (conferido em 22/10/2026), e sob o 3.2.0 a busca interna elege outra
+configuração e o resultado sai 433,2 / 310,6 / R² 0,148. É o único dos quatro
+cujo treino não vem do scikit-learn.
 
 A diferença é de ambiente, e não de código ou de semente: as dezesseis
 candidatas sorteadas são as mesmas, e três execuções seguidas — uma delas com a
 máquina disputada por outro processo — devolveram 433,2 / 310,6 / 0,148 sem
 variar um decimal. O ordenamento dos modelos não muda, e a conclusão do
 Capítulo 6 tampouco: em qualquer das duas leituras o XGBoost é o pior dos quatro
-e fica bem abaixo do modelo de referência (R² 0,216). Quem rodar hoje e obtiver
-0,148 onde o texto traz 0,123 está vendo isto, e `--conferir` diz isso na tela.
+e fica bem abaixo do modelo de referência (R² 0,216). Quem rodar com o 3.2.0 e
+obtiver 0,148 onde o texto traz 0,123 está vendo isto, e `--conferir` diz isso
+na tela.
 
 `01_compara_mascara_controlada.py` aborta com mensagem explícita se os baselines
 dos dois cenários divergirem — isso indicaria que o controle da amostra falhou e
@@ -617,6 +661,6 @@ versão v2.3.7: DOI: 10.5281/zenodo.22343315.
 - **Single Page Application (SPA):** Navegação redesenhada para uma "Sidebar" global, fluida e com responsividade estrita. O encadeamento do painel elimina tabulações e se comporta como um SaaS nativo multi-tenant.
 - **Ecossistema Modular:** Código fonte fragmentado num ecossistema elegante e sustentável, separando roteamento de manipulação do layout via Python e consumo (ETL) da cotação física em Paranaguá (Notícias Agrícolas), exibida como comparação — a referência da simulação é o preço recebido pelo produtor no levantamento da CONAB, que é preço de porteira.
 - **Parâmetros econômicos com fonte declarada:** o custo operacional vem do levantamento da CONAB para Pedro Afonso (TO), de março de 2026, e o Valor da Terra Nua da tabela da Receita Federal do exercício 2026, classe lavoura de aptidão boa. O preço recebido no mesmo levantamento, R$ 105,09 por saca, é o menor dos 13 levantamentos da praça desde março de 2023 (mediana R$ 116,91); o produto informa essa posição na série, para o padrão ser lido como cenário conservador e não como previsão de preço. São tabelas estáticas versionadas em `pesquisa/dados/`, não coleta em tempo real. Preço e custo são editáveis na interface, porque entram na conta da margem; o Valor da Terra Nua não, porque é referência fiscal (base de cálculo do ITR) e não preço de mercado — aparece como nota de contexto. A Receita Federal publica VTN para 13 dos 38 municípios; nos demais o painel informa que não há valor oficial.
-- **Visibilidade Asynchronous de AI:** Processamento dinâmico do Random Forest encapsulado em "shimmers" / Spinners UX, indicando cálculo simultâneo na simulação de cenários operacionais e previsões em tempo real do Agro-mercado do Pará.
+- **Visibilidade Asynchronous de AI:** Processamento dinâmico do modelo (MLP) encapsulado em "shimmers" / Spinners UX, indicando cálculo simultâneo na simulação de cenários operacionais e previsões em tempo real do Agro-mercado do Pará.
 - **Plotly Analytics (Fintech Interactivity):** Upgrade massivo das engines gráficas do Altair para o *Plotly.js*. Anotação autônoma de Zonas de Risco Climático (El Niño e La Niña Históricos mapeados via *VRects*) e regressões lineares paramétricas sobrepondo a série cronológica de produtividade, além de Full-Zoom Crosshairs.
 - **Agente de Linguagem Natural (LLM Heurístico):** Um sintetizador inteligente lê as matrizes de cálculo e o fluxo de caixa final simulado, formulando sentenças interpretativas em parágrafos para o produtor. Ele transcreve a matemática dura para relatórios humanos como *"Alto risco crítico projetado"* ou *"Viabilidade Econômica Robusta de Safra"*.

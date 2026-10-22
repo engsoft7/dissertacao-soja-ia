@@ -42,13 +42,15 @@ METRICAS = ['RMSE', 'MAE', 'R2', 'rRMSE_%']
 
 SO_XGBOOST = """
 Só o XGBoost divergiu, e é o único modelo cujo treino não vem do scikit-learn.
-A tabela publicada foi gerada com uma versão anterior da biblioteca; sob a
-3.2.0 a busca interna passa a eleger outra configuração e o R² sai 0,148 em vez
-de 0,123. A diferença é de ambiente, não de código: as 16 candidatas sorteadas
-são as mesmas, e três execuções seguidas — inclusive uma com a máquina
-disputada por outro processo — devolveram 433,2 / 310,6 / 0,148 sem variar.
-O ordenamento não muda: em qualquer das duas leituras o XGBoost é o pior dos
-quatro e fica muito abaixo do modelo de referência (0,216)."""
+A tabela publicada se reproduz com o xgboost 3.3.0 ou posterior (conferido com
+a 3.3.0 e a 3.4.1 em 22/10/2026). Sob a 3.2.0 a busca interna elege outra
+configuração e o R² sai 0,148 em vez de 0,123; as versões anteriores não foram
+conferidas nesta tabela. A diferença é de versão, não de código nem de máquina:
+as 16 candidatas sorteadas são as mesmas, e na mesma máquina a 3.2.0 devolve
+433,2 / 310,6 / 0,148 e a 3.3.0, os 439,5 / 314,5 / 0,123 publicados. O
+ordenamento não muda: em qualquer das duas leituras o XGBoost é o pior dos
+quatro e fica muito abaixo do modelo de referência (0,216). Para reproduzir a
+tabela: pip install "xgboost>=3.3"."""
 
 
 def versoes():

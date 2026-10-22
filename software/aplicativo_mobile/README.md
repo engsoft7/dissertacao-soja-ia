@@ -27,3 +27,12 @@ Aplicativo Android focado em Inteligência Artificial para estimar o rendimento 
 3. Para compilar Release na Play Store, garanta as configurações de *Keystore* em seu `build.gradle` (Build > Generate Signed Bundle / APK).
 
 AgroInteligência © 2026. Todos os direitos reservados.
+
+## Arquivos de manutenção
+
+Os scripts `patch_offline_flag.py`, `patch_system_bars.py` e `patch_theme.py`,
+nesta pasta, e os de `ferramentas/` são edições pontuais em `MainActivity.kt` que
+já foram aplicadas; não fazem parte da compilação e não devem ser rodados de
+novo. Os três `patch_*.py` ficam aqui, e não em `ferramentas/`, porque constam
+da tabela de hashes do depósito no INPI. O que cada um fez está em
+[`ferramentas/README.md`](ferramentas/README.md).

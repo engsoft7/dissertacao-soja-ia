@@ -26,7 +26,7 @@ METRICAS_JSON = RAIZ / "pesquisa" / "dados" / "metricas_validacao.json"
 
 
 def main() -> int:
-    df = model.carregar(str(RAIZ / "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"))
+    df = model.carregar(str(RAIZ / "pesquisa" / "dados" / "soja_para_painel.csv"))
     met = model.Estimador().validar(df)
     met["registros"] = len(df)
     # Quem produziu estes números. Sem isso não há como o teste perceber que o

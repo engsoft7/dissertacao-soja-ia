@@ -460,7 +460,7 @@ jobs:
             corpo += `Alternativa manual:\n` +
               `1. Rode \`01_coleta_dados/02_coleta_gee_com_mascara_mapbiomas.py\` no ` +
               `Google Colab com \`ANO_FIM = ${ano}\`.\n` +
-              `2. Anexe as linhas novas a \`pesquisa/dados/soja_para_mascarado_2001_2024.csv\`.\n` +
+              `2. Anexe as linhas novas a \`pesquisa/dados/soja_para_painel.csv\`.\n` +
               `3. Abra um PR — o merge atualiza o painel publicado automaticamente.`;
             await github.rest.issues.create({
               owner: context.repo.owner, repo: context.repo.repo,

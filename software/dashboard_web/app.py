@@ -28,7 +28,7 @@ from streamlit_theme import st_theme  # type: ignore
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 DADOS = Path(__file__).resolve().parents[2] / \
-    "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"
+    "pesquisa" / "dados" / "soja_para_painel.csv"
 DATA_ATUALIZACAO = DADOS.parent / "ultima_atualizacao.txt"
 METRICAS_SALVAS = DADOS.parent / "metricas_validacao.json"
 MUNICIPIOS = DADOS.parent / "municipios_para.csv"

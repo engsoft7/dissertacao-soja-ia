@@ -10,7 +10,7 @@ SPEC.loader.exec_module(atualiza_pam)
 
 
 def test_csv_painel_path_uses_pesquisa_dados():
-    esperado = RAIZ / "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"
+    esperado = RAIZ / "pesquisa" / "dados" / "soja_para_painel.csv"
     assert atualiza_pam.CSV_PAINEL == esperado
     assert atualiza_pam.CSV_PAINEL.exists()
 

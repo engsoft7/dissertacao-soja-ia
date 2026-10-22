@@ -336,6 +336,12 @@ fun AgroDashboard() {
                     label = { Text("Histórico") }
                 )
                 NavigationBarItem(
+                    selected = currentTab == 4,
+                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 4 },
+                    icon = { Icon(Icons.Filled.CandlestickChart, contentDescription = "Mercado") },
+                    label = { Text("Mercado") }
+                )
+                NavigationBarItem(
                     selected = currentTab == 3,
                     onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 3 },
                     icon = { Icon(Icons.Filled.Info, contentDescription = "Sobre") },
@@ -530,6 +536,11 @@ fun AgroDashboard() {
                         3 -> { // Sobre
                             item {
                                 MetodologiaCard(kpis, previsao?.validacao)
+                            }
+                        }
+                        4 -> { // Mercado
+                            item {
+                                MercadoCard()
                             }
                         }
                         1 -> { // Mapa WebView
@@ -1225,6 +1236,147 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
 }
 
 
+
+// Períodos da tela Mercado: chave da API e rótulo do botão.
+private val PERIODOS_MERCADO = listOf("1d" to "1D", "5d" to "5D", "1mo" to "1M", "6mo" to "6M")
+
+private fun reais(v: Double) = String.format("%.2f", v).replace('.', ',')
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MercadoCard() {
+    val isDark = isSystemInDarkTheme()
+    var periodo by remember { mutableStateOf("1d") }
+    var mercado by remember { mutableStateOf<MercadoResponse?>(null) }
+    var carregando by remember { mutableStateOf(true) }
+
+    // Atualiza a cada minuto enquanto a tela está aberta. A API guarda a
+    // cotação por dois minutos, então isto não pressiona a fonte.
+    LaunchedEffect(periodo) {
+        carregando = true
+        while (true) {
+            try {
+                mercado = RetrofitClient.getInstance().getMercado(periodo)
+            } catch (_: Exception) {
+                // mantém a última leitura; a hora dela continua visível
+            }
+            carregando = false
+            kotlinx.coroutines.delay(60_000)
+        }
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Soja em Chicago, em R$/saca", fontWeight = FontWeight.Bold, fontSize = 16.sp,
+                 color = MaterialTheme.colorScheme.onSurface)
+            Text("CBOT, contrato mais próximo, convertido pelo dólar de cada momento",
+                 fontSize = 11.sp, color = Color.Gray)
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PERIODOS_MERCADO.forEach { (chave, rotulo) ->
+                    FilterChip(selected = periodo == chave, onClick = { periodo = chave },
+                               label = { Text(rotulo) })
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+            val cot = mercado?.cotacao
+            when {
+                carregando && cot == null ->
+                    CircularProgressIndicator(modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally))
+                cot == null ->
+                    Text("Cotação indisponível no momento. Tente de novo em alguns minutos.",
+                         fontSize = 13.sp, color = Color.Gray)
+                else -> {
+                    val subiu = cot.variacao_periodo_pct >= 0
+                    val corVar = if (subiu) (if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a))
+                                 else (if (isDark) Color(0xFFf85149) else Color(0xFFcf222e))
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text("R$ ${reais(cot.ultimo_brl_saca)}", fontSize = 28.sp, fontWeight = FontWeight.Bold,
+                             color = MaterialTheme.colorScheme.onSurface)
+                        Spacer(Modifier.width(10.dp))
+                        Text((if (subiu) "+" else "") + String.format("%.2f", cot.variacao_periodo_pct).replace('.', ',') + "% no período",
+                             fontSize = 13.sp, color = corVar, modifier = Modifier.padding(bottom = 5.dp))
+                    }
+                    Text("Máxima R$ ${reais(cot.maxima_periodo)} · mínima R$ ${reais(cot.minima_periodo)}",
+                         fontSize = 12.sp, color = Color.Gray)
+                    GraficoVelas(cot.velas, isDark, cot.periodo)
+                    val quando = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale("pt", "BR"))
+                        .format(java.util.Date(cot.atualizado_em * 1000))
+                    Text("Cotação de $quando, com atraso de cerca de ${cot.atraso_min} min. Não é tempo real.",
+                         fontSize = 11.sp, color = Color.Gray)
+                    if (cot.ultimo_usd_bushel != null && cot.cambio != null) {
+                        Text("US$ ${reais(cot.ultimo_usd_bushel)}/bushel · dólar a R$ ${String.format("%.4f", cot.cambio).replace('.', ',')}",
+                             fontSize = 11.sp, color = Color.Gray)
+                    }
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
+            Text("Referências de preço físico", fontWeight = FontWeight.Bold, fontSize = 13.sp,
+                 color = MaterialTheme.colorScheme.onSurface)
+            mercado?.fisico?.let {
+                Text("${it.praca} (${it.uf}), ${it.tipo}: R$ ${reais(it.valor)}/sc, cotação do dia",
+                     fontSize = 12.sp, color = Color.Gray)
+            }
+            mercado?.conab_saca?.let {
+                Text("Porteira, ${mercado?.conab_fonte ?: "CONAB"}: R$ ${reais(it)}/sc, padrão da simulação",
+                     fontSize = 12.sp, color = Color.Gray)
+            }
+            Spacer(Modifier.height(8.dp))
+            Text("Preço de bolsa não é preço de porteira: entre Chicago e a fazenda há câmbio, " +
+                 "frete, prêmio de porto e base. Informação de mercado, não recomendação de compra ou venda.",
+                 fontSize = 11.sp, color = Color.Gray, lineHeight = 15.sp,
+                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+        }
+    }
+}
+
+@Composable
+fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
+    if (velas.isEmpty()) return
+    val alta = if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
+    val baixa = if (isDark) Color(0xFFf85149) else Color(0xFFcf222e)
+    val textColor = if (isDark) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
+    val minP = velas.minOf { it.l }
+    val maxP = velas.maxOf { it.h }
+    val faixa = if (maxP > minP) maxP - minP else 1.0
+    val formato = java.text.SimpleDateFormat(if (periodo == "1d") "HH:mm" else "dd/MM", java.util.Locale("pt", "BR"))
+
+    Canvas(modifier = Modifier.fillMaxWidth().height(220.dp).padding(top = 10.dp, bottom = 6.dp)) {
+        val padX = 100f
+        val padY = 40f
+        val w = size.width - padX
+        val h = size.height - padY
+        val passo = w / velas.size
+        val corpo = (passo * 0.6f).coerceAtLeast(1f)
+        fun y(p: Double) = (h - ((p - minP) / faixa * h)).toFloat()
+        val paint = Paint().apply { color = textColor; textSize = 24f }
+
+        for (i in 0..3) {
+            val p = minP + faixa * i / 3
+            val yy = y(p)
+            drawLine(color = Color.Gray.copy(alpha = 0.2f), start = Offset(padX, yy), end = Offset(padX + w, yy), strokeWidth = 2f)
+            drawContext.canvas.nativeCanvas.drawText(reais(p), 0f, yy + 8f, paint)
+        }
+        velas.forEachIndexed { i, v ->
+            val x = padX + passo * i + passo / 2
+            val cor = if (v.c >= v.o) alta else baixa
+            drawLine(color = cor, start = Offset(x, y(v.h)), end = Offset(x, y(v.l)), strokeWidth = 2f)
+            val topo = y(maxOf(v.o, v.c))
+            val base = y(minOf(v.o, v.c))
+            drawRect(color = cor, topLeft = Offset(x - corpo / 2, topo), size = Size(corpo, (base - topo).coerceAtLeast(2f)))
+        }
+        listOf(0, velas.size / 2, velas.size - 1).distinct().forEach { i ->
+            val x = padX + passo * i + passo / 2
+            drawContext.canvas.nativeCanvas.drawText(formato.format(java.util.Date(velas[i].t * 1000)), x - 30f, h + 34f, paint)
+        }
+    }
+}
 
 @Composable
 fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>, previsao: PrevisaoResponse?) {

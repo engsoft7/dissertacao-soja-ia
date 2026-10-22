@@ -36,8 +36,8 @@ android {
         applicationId = "com.agrointeligencia.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 14
-        versionName = "2.1.7"
+        versionCode = 15
+        versionName = "2.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

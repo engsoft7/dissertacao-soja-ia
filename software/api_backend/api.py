@@ -4,6 +4,7 @@ from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
                       aviso_de_defasagem, meses_desde_o_levantamento,
                       buscar_cotacoes, aviso_sobre_o_custo)
 from validacao import metricas_validacao
+import mercado
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -260,6 +261,25 @@ def _get_eventos_enso():
     # Sem o arquivo, nenhuma safra marcada: uma lista fixa aqui já marcou safras
     # erradas (classificação por ano do calendário, e não pela safra).
     return [], []
+
+@app.get("/api/mercado")
+def get_mercado(periodo: str = "1d"):
+    """Soja na CBOT em R$/saca ao longo do período, com as referências físicas.
+
+    A cotação de bolsa vem com atraso de 10 a 15 minutos (ver mercado.py). As
+    referências situam o número: o físico do dia na praça mais próxima do Pará
+    e o preço de porteira do levantamento da CONAB, que é o padrão da simulação.
+    """
+    if periodo not in mercado.PERIODOS:
+        raise HTTPException(status_code=400,
+                            detail=f"período deve ser um de {sorted(mercado.PERIODOS)}")
+    fin = _get_cached_finance()
+    return {
+        "cotacao": mercado.cotacao(periodo),
+        "fisico": fin.get("fisico"),
+        "conab_saca": PRECO_RECEBIDO_CONAB_SACA,
+        "conab_fonte": descricao_do_levantamento(),
+    }
 
 @app.get("/api/previsao/{municipio}")
 def get_previsao(municipio: str):

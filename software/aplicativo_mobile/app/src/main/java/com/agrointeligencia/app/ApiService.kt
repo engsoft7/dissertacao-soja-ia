@@ -153,6 +153,38 @@ data class SimulacaoResponse(
 
 data class PingResponse(val status: String, val model_loaded: Boolean)
 
+/** Uma vela da cotação de Chicago, já em R$/saca; t em segundos (Unix). */
+data class Vela(val t: Long, val o: Double, val h: Double, val l: Double, val c: Double)
+
+/**
+ * Soja na CBOT convertida para R$/saca pelo dólar de cada instante. Chega com
+ * atraso de 10 a 15 minutos: é a cotação gratuita, não a de tempo real, que
+ * exige licença paga da bolsa. A tela declara o atraso.
+ */
+data class CotacaoBolsa(
+    val fonte: String,
+    val periodo: String,
+    val intervalo: String,
+    val atraso_min: Int,
+    val atualizado_em: Long,
+    val ultimo_brl_saca: Double,
+    val ultimo_usd_bushel: Double? = null,
+    val cambio: Double? = null,
+    val variacao_periodo_pct: Double,
+    val maxima_periodo: Double,
+    val minima_periodo: Double,
+    val velas: List<Vela>
+)
+
+data class MercadoResponse(
+    // Nulo quando a fonte não respondeu: a tela diz que a cotação está
+    // indisponível em vez de exibir um número inventado.
+    val cotacao: CotacaoBolsa? = null,
+    val fisico: CotacaoFisica? = null,
+    val conab_saca: Double? = null,
+    val conab_fonte: String? = null
+)
+
 interface AgroApiService {
     @retrofit2.http.POST("api/simulacao")
     suspend fun simularCenario(@retrofit2.http.Body request: SimulacaoRequest): SimulacaoResponse
@@ -168,6 +200,9 @@ interface AgroApiService {
 
     @GET("api/ping")
     suspend fun ping(): PingResponse
+
+    @GET("api/mercado")
+    suspend fun getMercado(@retrofit2.http.Query("periodo") periodo: String): MercadoResponse
 }
 
 object RetrofitClient {

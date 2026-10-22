@@ -208,6 +208,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.3` (22/10/2026) — medição de custo e revisão para os artigos SBC | 79 | 15.815 | `859bcf907bb73422be18952970a0d0ee9d4fdfa1b75c6a5ebcf7da5b91d69a84` |
 | Tag `v2.4.4` (22/10/2026) — previsão de safras futuras, safra 2025 no produto e ENSO por safra | 95 | 17.923 | `5ebaa5df49a04f1bf619f9ec6b8aeea04fe418af614b9fbb031c61b05b9d5696` |
 | Tag `v2.4.5` (22/10/2026) — métricas de validação do aplicativo servidas pela API | 97 | 18.036 | `f98568169031c82a2dcda524286b0f541f515f5d901fc49deebf94f1c25294da` |
+| Tag `v2.4.6` (22/10/2026) — tela Mercado no aplicativo | 99 | 18.438 | `c96b5a6c643a2d15dd8187f7835418ea04bd9672c9856c0f8338e848bfd28444` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -399,13 +400,34 @@ painel web exibe e que a rotina de atualização regrava), e o teste dele,
 a previsão; `ApiService.kt` e `MainActivity.kt`, que passam a exibi-las e, sem
 conexão, dizem que estão indisponíveis em vez de mostrar números de outra base;
 e `build.gradle.kts`, que leva o aplicativo a `versionCode` 14, `versionName`
-2.1.7.
+2.1.7. O DOI de versão desta etiqueta é 10.5281/zenodo.23574981, atribuído pelo
+Zenodo no depósito disparado pela publicação do Release em 22/10/2026; o APK e
+o AAB foram assinados e anexados pelo workflow na própria publicação.
 
 O resumo criptográfico da `v2.4.5` foi calculado sobre o commit de merge
 `6d4899c`. A preparação da versão altera apenas este `REGISTRO_INPI.md` e o
-`CITATION.cff`, que ficam fora do conjunto resumido, de modo que o valor deve
-se manter na etiqueta; como nas anteriores, convém conferi-lo sobre uma cópia
-limpa dela depois de etiquetar.
+`CITATION.cff`, que ficam fora do conjunto resumido, de modo que o valor se
+mantém na etiqueta. Conferido depois de etiquetar, sobre uma cópia limpa da
+`v2.4.5` (commit `cca0215`): o valor confere.
+
+A `v2.4.6` acrescenta ao aplicativo a tela Mercado, com a cotação da soja em
+Chicago convertida para reais por saca. São dois arquivos-fonte novos e quatro
+alterados em relação à `v2.4.5`. Os novos são
+`software/api_backend/mercado.py`, que busca no Yahoo Finance a soja na CBOT
+(`ZS=F`) e o dólar (`BRL=X`) e converte cada vela pelo câmbio do seu instante,
+com cache de dois minutos, e o teste dele, `test_mercado.py`. Os alterados são
+`api.py`, que expõe a cotação em `/api/mercado` junto com o físico do dia e o
+preço de porteira da CONAB; `ApiService.kt` e `MainActivity.kt`, que trazem a
+aba Mercado, com gráfico de velas de 1 dia a 6 meses; e `build.gradle.kts`, que
+leva o aplicativo a `versionCode` 15, `versionName` 2.2.0. A cotação gratuita
+chega com atraso de 10 a 15 minutos, e a tela declara isso e que preço de bolsa
+não é preço de porteira; cotação em tempo real exigiria licença paga da CME ou
+da B3.
+
+O resumo criptográfico da `v2.4.6` foi calculado sobre o commit de merge
+`81cbb77`. A preparação da versão altera apenas este `REGISTRO_INPI.md` e o
+`CITATION.cff`, de modo que o valor deve se manter na etiqueta; convém
+conferi-lo sobre uma cópia limpa dela depois de etiquetar.
 
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
@@ -643,6 +665,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.2`:** 10.5281/zenodo.22837962
 - **DOI da `v2.4.3`:** 10.5281/zenodo.23560491
 - **DOI da `v2.4.4`:** 10.5281/zenodo.23573276
-- **DOI da versão mais recente (`v2.4.5`):** a preencher após a publicação do Release
+- **DOI da `v2.4.5`:** 10.5281/zenodo.23574981
+- **DOI da versão mais recente (`v2.4.6`):** a preencher após a publicação do Release
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

@@ -24,10 +24,10 @@ com intervalo de 95% por reamostragem de safras, em janela crescente.
   SVR com ONI tem ganho de +0,031 (IC95 −0,024 a +0,090); em janela crescente,
   +0,033 (IC95 −0,026 a +0,094). Os dois apontam no mesmo sentido, nenhum é
   significativo.
-- **Teste que falta.** Acrescentar ao ONI o gradiente térmico do Atlântico
-  tropical (relevante para a chuva no norte do Brasil), que precisa ser baixado
-  da NOAA pela rotina do GitHub Actions, e repetir os dois testes a cada safra
-  nova.
+- **Atlântico, feito em 22/10/2026** (`07_variaveis_por_fase.py`). TNA, TSA e
+  o gradiente, baixados da NOAA pelo Actions: SVR −0,001 (IC95 −0,042 a
+  +0,038) no protocolo da Tabela 6.
+- **Teste que falta.** Repetir os dois testes a cada safra nova.
 - **Critério.** O intervalo do ganho deixa de incluir o zero. Com 24 safras isso
   é improvável; o teste ganha poder a cada safra acrescentada.
 
@@ -50,6 +50,15 @@ melhora o recorte nacional e, no Pará, só se verá ganho onde o alvo não repe
 Desenho: entrar com uma família de cada vez, no protocolo da Tabela 6 e em
 janela crescente, e corrigir o nível de significância pelo número de famílias
 testadas (Holm).
+
+**Feito em 22/10/2026, no Pará** (`07_variaveis_por_fase.py`): estresse por
+fase (veranico, calor acumulado acima de 30 °C, déficit de pressão de vapor e
+chuva na floração e no enchimento), umidade do solo em duas camadas, MODIS
+MOD11 e fenologia pelo pico de EVI. Nenhuma família superou a referência (p de
+Holm = 1,0 em todas). **Falta:** o mesmo teste no recorte nacional, que decide
+se o limite é o alvo ou a forma de medir o ambiente; e as fontes de 2015 em
+diante (SMAP, TROPOMI, Sentinel-1 e 2), que exigem um desenho só com as safras
+recentes, e o SoilGrids.
 
 ## 4. Triangular a variável-alvo
 

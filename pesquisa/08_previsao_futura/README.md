@@ -222,7 +222,37 @@ não decide nada sozinho, mas aponta no mesmo sentido do resto da pasta.
 
 ### 7. Ambiente por fase e Atlântico tropical (`07`)
 
-Resultados em andamento (a busca aninhada por família leva cerca de uma hora).
+Séries diárias (CHIRPS, ERA5-Land) e de 8 e 16 dias (MODIS) foram coletadas
+no Earth Engine para os 38 municípios, safras 2001-2025, e resumidas por fase
+em `fases.py`. As fases são ancoradas no pico de EVI de cada município e safra
+(floração: pico −20 a +10 dias; enchimento: +11 a +45), porque o sul do Pará
+planta em outubro e o nordeste em janeiro, e uma janela fixa no calendário
+mediria fases diferentes. Cinco famílias, cada uma somada às onze variáveis da
+Tabela 6, nos registros em que existe, com referência e modelo de onze
+variáveis refeitos nos mesmos registros:
+
+| Família | Registros | SVR: ganho sobre a referência (IC95) | p (Holm) | Melhor dos quatro modelos |
+|---|---|---|---|---|
+| Chuva, veranico, calor > 30 °C e déficit de vapor na floração e no enchimento | 378 | −0,001 (−0,032 a +0,033) | 1,0 | MLP, +0,001 |
+| Umidade do solo (0-7 e 7-28 cm) por fase | 378 | −0,010 (−0,050 a +0,023) | 1,0 | MLP, 0,000 |
+| Temperatura da superfície (MODIS) por fase | 312 | +0,003 (−0,013 a +0,018) | 1,0 | SVR, +0,003 |
+| Fenologia (data e valor do pico de EVI) | 414 | −0,014 (−0,057 a +0,034) | 1,0 | MLP, −0,002 |
+| Atlântico tropical (TNA, TSA e gradiente, dez-mar) | 415 | −0,001 (−0,042 a +0,038) | 1,0 | MLP, +0,003 |
+
+Nenhuma família leva modelo algum a superar a referência, nem no protocolo da
+Tabela 6 nem em janela crescente (SVR e Ridge, ganhos de −0,035 a +0,012,
+todos com intervalo cruzando o zero). Contra o modelo de onze variáveis, o
+estresse por fase ajuda as árvores (Random Forest +0,047, XGBoost +0,036 de
+ganho sobre elas, intervalos cruzando o zero), mas só as aproxima da
+referência, sem passá-la. Na família do Atlântico, que usa os 415 registros, o
+modelo de onze variáveis reproduz a Tabela 6 exatamente (431,9, 439,5, 417,6 e
+415,6 kg/ha), o que confere a montagem.
+
+Medir o ambiente na fase que importa, em vez do total da safra, era a melhora
+mais citada na literatura, e no Pará ela não aparece. O resultado reforça a
+leitura da dissertação: o limite está no alvo (a PAM municipal que repete
+valores), e não na forma de medir o ambiente. O teste equivalente no recorte
+nacional, onde o alvo varia, é o que falta para separar as duas explicações.
 
 ### 8. PAM contra CONAB (`08`)
 
@@ -272,6 +302,12 @@ tal.
 - **O El Niño importa?** Associa-se à chuva e, mais fracamente, à produtividade
   no Pará, e é o único acréscimo que melhora todos os modelos ambientais ao fim
   do ciclo; o ganho não é significativo com 24 safras.
+- **E medir o ambiente por fase, ou pelo Atlântico?** No Pará, nenhuma das
+  cinco famílias testadas muda o resultado (p de Holm = 1,0 em todas).
+- **A projeção acertou?** Em 2025, sim: 4,29 milhões de toneladas projetadas,
+  4,37 publicadas, dentro da faixa de 80%.
+- **Outra fonte resolve o alvo?** A CONAB, por UF, não: no Pará ela discorda
+  da PAM sobre quais safras foram boas e também não acompanha o clima.
 
 Os protocolos para o que ainda falta testar estão em
 [`TRABALHOS_FUTUROS.md`](TRABALHOS_FUTUROS.md).

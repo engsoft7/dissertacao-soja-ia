@@ -207,6 +207,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.2` (18/09/2026) — projeção no painel web | 77 | 15.384 | `7f04fddedf5d63285a1310cca9549e41fea47d646a3a22720e43e7d42f8168bb` |
 | Tag `v2.4.3` (22/10/2026) — medição de custo e revisão para os artigos SBC | 79 | 15.815 | `859bcf907bb73422be18952970a0d0ee9d4fdfa1b75c6a5ebcf7da5b91d69a84` |
 | Tag `v2.4.4` (22/10/2026) — previsão de safras futuras, safra 2025 no produto e ENSO por safra | 95 | 17.923 | `5ebaa5df49a04f1bf619f9ec6b8aeea04fe418af614b9fbb031c61b05b9d5696` |
+| Tag `v2.4.5` (22/10/2026) — métricas de validação do aplicativo servidas pela API | 97 | 18.036 | `f98568169031c82a2dcda524286b0f541f515f5d901fc49deebf94f1c25294da` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -375,6 +376,36 @@ para a `v2.4.3`. A preparação da versão altera apenas este `REGISTRO_INPI.md`
 o `CITATION.cff`, que ficam fora do conjunto resumido, de modo que o valor se
 mantém na etiqueta. Conferido depois de etiquetar, sobre uma cópia limpa da
 `v2.4.4` (commit `3f3a4ef`): o valor confere.
+
+O APK da `v2.4.4` não foi anexado na publicação: o workflow que assina estava
+inativo, sem a chave nos segredos do repositório. A chave anterior foi
+substituída por uma nova, gerada em 22/10/2026 e guardada só nos segredos e com
+o autor, e o workflow passou a aceitar disparo manual para anexar a um Release
+já publicado, sem republicá-lo (o que geraria outro depósito no Zenodo). O APK
+e o AAB da `v2.4.4` foram assinados e anexados assim; o certificado da chave
+nova tem SHA-256
+`EA4236D3B44D59F7D1E970B1D5DE85CABA598DDB38A137EE793533796DD99AC3`. Aparelhos
+com o aplicativo assinado pela chave anterior precisam desinstalá-lo antes de
+instalar um pacote assinado pela nova.
+
+A `v2.4.5` tira do código do aplicativo as métricas de validação. A tela
+"Origem dos Dados & IA" exibia R² 0,216, ± 416 kg/ha e 415 registros escritos
+em `MainActivity.kt`, que ficaram para trás quando a safra 2025 entrou na base
+do produto. São dois arquivos-fonte novos e quatro alterados em relação à
+`v2.4.4`. Os novos são `software/api_backend/validacao.py`, que monta as
+métricas a partir de `pesquisa/dados/metricas_validacao.json` (o arquivo que o
+painel web exibe e que a rotina de atualização regrava), e o teste dele,
+`test_validacao.py`. Os alterados são `api.py`, que passa a enviá-las junto com
+a previsão; `ApiService.kt` e `MainActivity.kt`, que passam a exibi-las e, sem
+conexão, dizem que estão indisponíveis em vez de mostrar números de outra base;
+e `build.gradle.kts`, que leva o aplicativo a `versionCode` 14, `versionName`
+2.1.7.
+
+O resumo criptográfico da `v2.4.5` foi calculado sobre o commit de merge
+`6d4899c`. A preparação da versão altera apenas este `REGISTRO_INPI.md` e o
+`CITATION.cff`, que ficam fora do conjunto resumido, de modo que o valor deve
+se manter na etiqueta; como nas anteriores, convém conferi-lo sobre uma cópia
+limpa dela depois de etiquetar.
 
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
@@ -611,6 +642,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.1`:** 10.5281/zenodo.22833602
 - **DOI da `v2.4.2`:** 10.5281/zenodo.22837962
 - **DOI da `v2.4.3`:** 10.5281/zenodo.23560491
-- **DOI da versão mais recente (`v2.4.4`):** 10.5281/zenodo.23573276
+- **DOI da `v2.4.4`:** 10.5281/zenodo.23573276
+- **DOI da versão mais recente (`v2.4.5`):** a preencher após a publicação do Release
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

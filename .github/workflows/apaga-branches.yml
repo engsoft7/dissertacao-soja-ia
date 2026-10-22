@@ -1,0 +1,68 @@
+# Apaga branches que já não servem, por disparo manual na aba Actions.
+#
+# Só apaga a branch cujo último commit já está contido na main: nesse caso nada
+# do que ela tem se perde. Uma branch com commits fora da main só é apagada se
+# vier também em "confirmar_sem_merge", que é a declaração explícita de quem
+# conferiu que aquele trabalho foi superado. A main, a branch das capturas de
+# tela e a de trabalho do Claude nunca são apagadas, mesmo listadas.
+#
+# O ambiente de desenvolvimento não tem permissão de apagar branches; o Actions
+# tem, pelo token do próprio workflow.
+name: Apaga branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      branches:
+        description: "Branches a apagar, separadas por espaço"
+        required: true
+      confirmar_sem_merge:
+        description: "Das listadas, as que podem ser apagadas mesmo com commits fora da main"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  apaga:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Apaga as branches
+        env:
+          BRANCHES: ${{ inputs.branches }}
+          CONFIRMADAS: ${{ inputs.confirmar_sem_merge }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          protegidas=" main capturas-de-tela claude/revisao-artigos-sbc-gnv4vu "
+          git fetch -q origin '+refs/heads/*:refs/remotes/origin/*'
+          apagadas=0; mantidas=0
+          {
+            echo "| Branch | Resultado |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for b in $BRANCHES; do
+            if [[ "$protegidas" == *" $b "* ]]; then
+              res="protegida, mantida"; mantidas=$((mantidas + 1))
+            elif ! git rev-parse -q --verify "refs/remotes/origin/$b" >/dev/null; then
+              res="não existe"
+            elif git merge-base --is-ancestor "origin/$b" origin/main; then
+              if git push -q origin --delete "$b"; then res="apagada (contida na main)"; apagadas=$((apagadas + 1))
+              else res="falha ao apagar"; fi
+            elif [[ " $CONFIRMADAS " == *" $b "* ]]; then
+              fora=$(git rev-list --count "origin/main..origin/$b")
+              if git push -q origin --delete "$b"; then res="apagada com confirmação ($fora commit(s) fora da main)"; apagadas=$((apagadas + 1))
+              else res="falha ao apagar"; fi
+            else
+              fora=$(git rev-list --count "origin/main..origin/$b")
+              res="mantida: $fora commit(s) fora da main, sem confirmação"; mantidas=$((mantidas + 1))
+            fi
+            echo "$b: $res"
+            echo "| \`$b\` | $res |" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "Apagadas: $apagadas; mantidas: $mantidas"

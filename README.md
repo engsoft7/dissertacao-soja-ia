@@ -136,6 +136,12 @@ pesquisa/04_analise_para/
                                           como registro histórico (não usar)
 pesquisa/05_artigo/
   gera_figuras_artigo.py                  figuras do artigo sobre a PAM
+pesquisa/08_previsao_futura/             previsão em janela crescente (só o passado)
+  01_enso_para.py                         El Niño/La Niña x chuva e produtividade no Pará
+  02_previsao_rendimento_para.py          produtividade 1-3 safras à frente e ao fim do ciclo
+  03_previsao_producao_para.py            produção estadual (área x produtividade), 2025-2027
+  04_referencia_nacional.py               SVR da Tabela 3 contra o modelo de referência
+  README.md, TRABALHOS_FUTUROS.md         resultados e protocolos do que falta testar
 pesquisa/dados/
   soja_para_mascarado_2001_2024.csv       base principal (atualizada por automação)
   soja_para_sem_mascara_2001_2023.csv     base sem máscara (comparação)

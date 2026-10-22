@@ -1,0 +1,939 @@
+{
+  "desenho": "janela crescente; safras-alvo 2010-2024; ganho = 1 - MSE/MSE_referência, IC95 por reamostragem de safras",
+  "base_dissertacao": {
+    "antes da safra, h=1": {
+      "Referência (média + tendência)": {
+        "RMSE": 452.3,
+        "MAE": 315.0,
+        "rRMSE_%": 14.9,
+        "n": 326,
+        "ganho_sobre_referencia": 0.0,
+        "IC95": [
+          0.0,
+          0.0
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 511.8,
+          "MAE": 368.7,
+          "rRMSE_%": 16.9,
+          "n": 220,
+          "ganho_sobre_referencia": 0.0
+        }
+      },
+      "Referência + ONI (set-nov)": {
+        "RMSE": 453.4,
+        "MAE": 313.7,
+        "rRMSE_%": 15.0,
+        "n": 326,
+        "ganho_sobre_referencia": -0.005,
+        "IC95": [
+          -0.049,
+          0.027
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 513.1,
+          "MAE": 369.8,
+          "rRMSE_%": 17.0,
+          "n": 220,
+          "ganho_sobre_referencia": -0.005
+        }
+      },
+      "Média das 3 últimas + tendência": {
+        "RMSE": 460.1,
+        "MAE": 295.8,
+        "rRMSE_%": 15.2,
+        "n": 326,
+        "ganho_sobre_referencia": -0.035,
+        "IC95": [
+          -0.145,
+          0.072
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 534.7,
+          "MAE": 381.4,
+          "rRMSE_%": 17.7,
+          "n": 220,
+          "ganho_sobre_referencia": -0.091
+        }
+      },
+      "Média do município": {
+        "RMSE": 463.6,
+        "MAE": 319.6,
+        "rRMSE_%": 15.3,
+        "n": 326,
+        "ganho_sobre_referencia": -0.051,
+        "IC95": [
+          -0.137,
+          0.027
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 516.8,
+          "MAE": 372.0,
+          "rRMSE_%": 17.1,
+          "n": 220,
+          "ganho_sobre_referencia": -0.019
+        }
+      },
+      "Persistência (último valor)": {
+        "RMSE": 470.6,
+        "MAE": 267.6,
+        "rRMSE_%": 15.5,
+        "n": 326,
+        "ganho_sobre_referencia": -0.083,
+        "IC95": [
+          -0.384,
+          0.133
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 572.9,
+          "MAE": 396.5,
+          "rRMSE_%": 18.9,
+          "n": 220,
+          "ganho_sobre_referencia": -0.253
+        }
+      },
+      "Defasagens (GBM)": {
+        "RMSE": 482.1,
+        "MAE": 331.0,
+        "rRMSE_%": 15.9,
+        "n": 326,
+        "ganho_sobre_referencia": -0.136,
+        "IC95": [
+          -0.283,
+          -0.006
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 558.5,
+          "MAE": 402.8,
+          "rRMSE_%": 18.5,
+          "n": 220,
+          "ganho_sobre_referencia": -0.191
+        }
+      },
+      "Tendência por município": {
+        "RMSE": 486.9,
+        "MAE": 330.9,
+        "rRMSE_%": 16.1,
+        "n": 326,
+        "ganho_sobre_referencia": -0.159,
+        "IC95": [
+          -0.355,
+          -0.018
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 555.8,
+          "MAE": 396.6,
+          "rRMSE_%": 18.4,
+          "n": 220,
+          "ganho_sobre_referencia": -0.179
+        }
+      },
+      "Defasagens + ONI (GBM)": {
+        "RMSE": 493.6,
+        "MAE": 342.4,
+        "rRMSE_%": 16.3,
+        "n": 326,
+        "ganho_sobre_referencia": -0.191,
+        "IC95": [
+          -0.385,
+          -0.002
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 572.4,
+          "MAE": 415.8,
+          "rRMSE_%": 18.9,
+          "n": 220,
+          "ganho_sobre_referencia": -0.251
+        }
+      }
+    },
+    "antes da safra, h=2": {
+      "Referência (média + tendência)": {
+        "RMSE": 488.9,
+        "MAE": 344.0,
+        "rRMSE_%": 16.1,
+        "n": 326,
+        "ganho_sobre_referencia": 0.0,
+        "IC95": [
+          0.0,
+          0.0
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 529.7,
+          "MAE": 378.7,
+          "rRMSE_%": 17.5,
+          "n": 220,
+          "ganho_sobre_referencia": 0.0
+        }
+      },
+      "Média das 3 últimas + tendência": {
+        "RMSE": 498.0,
+        "MAE": 329.8,
+        "rRMSE_%": 16.4,
+        "n": 326,
+        "ganho_sobre_referencia": -0.038,
+        "IC95": [
+          -0.125,
+          0.059
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 544.2,
+          "MAE": 383.6,
+          "rRMSE_%": 18.0,
+          "n": 220,
+          "ganho_sobre_referencia": -0.056
+        }
+      },
+      "Média do município": {
+        "RMSE": 498.8,
+        "MAE": 347.3,
+        "rRMSE_%": 16.5,
+        "n": 326,
+        "ganho_sobre_referencia": -0.041,
+        "IC95": [
+          -0.117,
+          0.029
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 533.8,
+          "MAE": 381.5,
+          "rRMSE_%": 17.6,
+          "n": 220,
+          "ganho_sobre_referencia": -0.016
+        }
+      },
+      "Defasagens (GBM)": {
+        "RMSE": 554.8,
+        "MAE": 397.5,
+        "rRMSE_%": 18.3,
+        "n": 326,
+        "ganho_sobre_referencia": -0.288,
+        "IC95": [
+          -0.493,
+          -0.1
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 596.9,
+          "MAE": 436.4,
+          "rRMSE_%": 19.7,
+          "n": 220,
+          "ganho_sobre_referencia": -0.27
+        }
+      },
+      "Tendência por município": {
+        "RMSE": 556.0,
+        "MAE": 387.0,
+        "rRMSE_%": 18.3,
+        "n": 326,
+        "ganho_sobre_referencia": -0.293,
+        "IC95": [
+          -0.497,
+          -0.145
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 576.6,
+          "MAE": 420.8,
+          "rRMSE_%": 19.1,
+          "n": 220,
+          "ganho_sobre_referencia": -0.185
+        }
+      },
+      "Persistência (último valor)": {
+        "RMSE": 561.5,
+        "MAE": 347.4,
+        "rRMSE_%": 18.5,
+        "n": 326,
+        "ganho_sobre_referencia": -0.319,
+        "IC95": [
+          -0.596,
+          -0.097
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 630.6,
+          "MAE": 433.8,
+          "rRMSE_%": 20.8,
+          "n": 220,
+          "ganho_sobre_referencia": -0.417
+        }
+      }
+    },
+    "antes da safra, h=3": {
+      "Média das 3 últimas + tendência": {
+        "RMSE": 510.0,
+        "MAE": 343.2,
+        "rRMSE_%": 16.8,
+        "n": 326,
+        "ganho_sobre_referencia": 0.005,
+        "IC95": [
+          -0.045,
+          0.073
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 547.2,
+          "MAE": 384.5,
+          "rRMSE_%": 18.1,
+          "n": 220,
+          "ganho_sobre_referencia": 0.002
+        }
+      },
+      "Referência (média + tendência)": {
+        "RMSE": 511.4,
+        "MAE": 360.1,
+        "rRMSE_%": 16.9,
+        "n": 326,
+        "ganho_sobre_referencia": 0.0,
+        "IC95": [
+          0.0,
+          0.0
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 547.6,
+          "MAE": 386.5,
+          "rRMSE_%": 18.1,
+          "n": 220,
+          "ganho_sobre_referencia": 0.0
+        }
+      },
+      "Média do município": {
+        "RMSE": 521.9,
+        "MAE": 364.8,
+        "rRMSE_%": 17.2,
+        "n": 326,
+        "ganho_sobre_referencia": -0.042,
+        "IC95": [
+          -0.129,
+          0.052
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 552.0,
+          "MAE": 389.8,
+          "rRMSE_%": 18.2,
+          "n": 220,
+          "ganho_sobre_referencia": -0.016
+        }
+      },
+      "Defasagens (GBM)": {
+        "RMSE": 551.2,
+        "MAE": 417.4,
+        "rRMSE_%": 18.2,
+        "n": 326,
+        "ganho_sobre_referencia": -0.162,
+        "IC95": [
+          -0.239,
+          -0.07
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 586.5,
+          "MAE": 442.9,
+          "rRMSE_%": 19.4,
+          "n": 220,
+          "ganho_sobre_referencia": -0.147
+        }
+      },
+      "Persistência (último valor)": {
+        "RMSE": 575.2,
+        "MAE": 368.2,
+        "rRMSE_%": 19.0,
+        "n": 326,
+        "ganho_sobre_referencia": -0.265,
+        "IC95": [
+          -0.494,
+          -0.035
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 616.7,
+          "MAE": 427.2,
+          "rRMSE_%": 20.4,
+          "n": 220,
+          "ganho_sobre_referencia": -0.268
+        }
+      },
+      "Tendência por município": {
+        "RMSE": 600.5,
+        "MAE": 418.2,
+        "rRMSE_%": 19.8,
+        "n": 326,
+        "ganho_sobre_referencia": -0.379,
+        "IC95": [
+          -0.642,
+          -0.196
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 620.9,
+          "MAE": 435.9,
+          "rRMSE_%": 20.5,
+          "n": 220,
+          "ganho_sobre_referencia": -0.285
+        }
+      }
+    },
+    "fim do ciclo, com clima e satélite da safra": {
+      "SVR ambiental + ONI (dez-mar)": {
+        "RMSE": 444.8,
+        "MAE": 311.2,
+        "rRMSE_%": 14.7,
+        "n": 326,
+        "ganho_sobre_referencia": 0.033,
+        "IC95": [
+          -0.026,
+          0.094
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 504.9,
+          "MAE": 363.2,
+          "rRMSE_%": 16.7,
+          "n": 220,
+          "ganho_sobre_referencia": 0.027
+        }
+      },
+      "Ridge ambiental + ONI (dez-mar)": {
+        "RMSE": 447.7,
+        "MAE": 315.7,
+        "rRMSE_%": 14.8,
+        "n": 326,
+        "ganho_sobre_referencia": 0.02,
+        "IC95": [
+          -0.044,
+          0.062
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 504.1,
+          "MAE": 368.0,
+          "rRMSE_%": 16.7,
+          "n": 220,
+          "ganho_sobre_referencia": 0.03
+        }
+      },
+      "Ridge ambiental": {
+        "RMSE": 450.9,
+        "MAE": 319.1,
+        "rRMSE_%": 14.9,
+        "n": 326,
+        "ganho_sobre_referencia": 0.006,
+        "IC95": [
+          -0.04,
+          0.036
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 509.0,
+          "MAE": 371.7,
+          "rRMSE_%": 16.8,
+          "n": 220,
+          "ganho_sobre_referencia": 0.011
+        }
+      },
+      "Random Forest ambiental + ONI (dez-mar)": {
+        "RMSE": 451.4,
+        "MAE": 313.4,
+        "rRMSE_%": 14.9,
+        "n": 326,
+        "ganho_sobre_referencia": 0.004,
+        "IC95": [
+          -0.056,
+          0.061
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 508.6,
+          "MAE": 359.8,
+          "rRMSE_%": 16.8,
+          "n": 220,
+          "ganho_sobre_referencia": 0.012
+        }
+      },
+      "SVR ambiental": {
+        "RMSE": 452.0,
+        "MAE": 316.5,
+        "rRMSE_%": 14.9,
+        "n": 326,
+        "ganho_sobre_referencia": 0.001,
+        "IC95": [
+          -0.05,
+          0.056
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 514.4,
+          "MAE": 370.3,
+          "rRMSE_%": 17.0,
+          "n": 220,
+          "ganho_sobre_referencia": -0.01
+        }
+      },
+      "Referência (média + tendência)": {
+        "RMSE": 452.3,
+        "MAE": 315.0,
+        "rRMSE_%": 14.9,
+        "n": 326,
+        "ganho_sobre_referencia": 0.0,
+        "IC95": [
+          0.0,
+          0.0
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 511.8,
+          "MAE": 368.7,
+          "rRMSE_%": 16.9,
+          "n": 220,
+          "ganho_sobre_referencia": 0.0
+        }
+      },
+      "MLP ambiental": {
+        "RMSE": 452.4,
+        "MAE": 315.0,
+        "rRMSE_%": 14.9,
+        "n": 326,
+        "ganho_sobre_referencia": -0.0,
+        "IC95": [
+          -0.001,
+          0.001
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 511.8,
+          "MAE": 368.7,
+          "rRMSE_%": 16.9,
+          "n": 220,
+          "ganho_sobre_referencia": -0.0
+        }
+      },
+      "MLP ambiental + ONI (dez-mar)": {
+        "RMSE": 452.4,
+        "MAE": 314.8,
+        "rRMSE_%": 14.9,
+        "n": 326,
+        "ganho_sobre_referencia": -0.0,
+        "IC95": [
+          -0.002,
+          0.001
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 512.2,
+          "MAE": 368.4,
+          "rRMSE_%": 16.9,
+          "n": 220,
+          "ganho_sobre_referencia": -0.001
+        }
+      },
+      "Referência + ONI (dez-mar)": {
+        "RMSE": 452.7,
+        "MAE": 314.4,
+        "rRMSE_%": 14.9,
+        "n": 326,
+        "ganho_sobre_referencia": -0.002,
+        "IC95": [
+          -0.053,
+          0.036
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 512.1,
+          "MAE": 369.9,
+          "rRMSE_%": 16.9,
+          "n": 220,
+          "ganho_sobre_referencia": -0.001
+        }
+      },
+      "Random Forest ambiental": {
+        "RMSE": 463.4,
+        "MAE": 323.7,
+        "rRMSE_%": 15.3,
+        "n": 326,
+        "ganho_sobre_referencia": -0.05,
+        "IC95": [
+          -0.134,
+          0.02
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 525.4,
+          "MAE": 373.7,
+          "rRMSE_%": 17.4,
+          "n": 220,
+          "ganho_sobre_referencia": -0.054
+        }
+      },
+      "Ambiental + defasagens (GBM)": {
+        "RMSE": 486.2,
+        "MAE": 334.8,
+        "rRMSE_%": 16.0,
+        "n": 326,
+        "ganho_sobre_referencia": -0.156,
+        "IC95": [
+          -0.319,
+          0.021
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 567.0,
+          "MAE": 409.0,
+          "rRMSE_%": 18.7,
+          "n": 220,
+          "ganho_sobre_referencia": -0.227
+        }
+      }
+    }
+  },
+  "pam_todos_municipios": {
+    "antes da safra, h=1": {
+      "Média das 3 últimas + tendência": {
+        "RMSE": 450.2,
+        "MAE": 284.8,
+        "rRMSE_%": 15.0,
+        "n": 404,
+        "ganho_sobre_referencia": 0.066,
+        "IC95": [
+          -0.083,
+          0.187
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 549.8,
+          "MAE": 391.4,
+          "rRMSE_%": 18.3,
+          "n": 246,
+          "ganho_sobre_referencia": -0.014
+        }
+      },
+      "Defasagens (GBM)": {
+        "RMSE": 450.4,
+        "MAE": 292.8,
+        "rRMSE_%": 15.1,
+        "n": 404,
+        "ganho_sobre_referencia": 0.065,
+        "IC95": [
+          -0.074,
+          0.19
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 555.7,
+          "MAE": 394.7,
+          "rRMSE_%": 18.5,
+          "n": 246,
+          "ganho_sobre_referencia": -0.036
+        }
+      },
+      "Defasagens + ONI (GBM)": {
+        "RMSE": 461.9,
+        "MAE": 305.7,
+        "rRMSE_%": 15.4,
+        "n": 404,
+        "ganho_sobre_referencia": 0.017,
+        "IC95": [
+          -0.168,
+          0.18
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 570.0,
+          "MAE": 413.9,
+          "rRMSE_%": 18.9,
+          "n": 246,
+          "ganho_sobre_referencia": -0.09
+        }
+      },
+      "Referência (média + tendência)": {
+        "RMSE": 465.9,
+        "MAE": 323.4,
+        "rRMSE_%": 15.6,
+        "n": 404,
+        "ganho_sobre_referencia": 0.0,
+        "IC95": [
+          0.0,
+          0.0
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 546.0,
+          "MAE": 391.7,
+          "rRMSE_%": 18.2,
+          "n": 246,
+          "ganho_sobre_referencia": 0.0
+        }
+      },
+      "Persistência (último valor)": {
+        "RMSE": 466.1,
+        "MAE": 255.2,
+        "rRMSE_%": 15.6,
+        "n": 404,
+        "ganho_sobre_referencia": -0.001,
+        "IC95": [
+          -0.194,
+          0.195
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 597.4,
+          "MAE": 419.1,
+          "rRMSE_%": 19.9,
+          "n": 246,
+          "ganho_sobre_referencia": -0.197
+        }
+      },
+      "Referência + ONI (set-nov)": {
+        "RMSE": 467.1,
+        "MAE": 324.4,
+        "rRMSE_%": 15.6,
+        "n": 404,
+        "ganho_sobre_referencia": -0.005,
+        "IC95": [
+          -0.016,
+          0.007
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 547.6,
+          "MAE": 393.6,
+          "rRMSE_%": 18.2,
+          "n": 246,
+          "ganho_sobre_referencia": -0.006
+        }
+      },
+      "Média do município": {
+        "RMSE": 478.6,
+        "MAE": 331.2,
+        "rRMSE_%": 16.0,
+        "n": 404,
+        "ganho_sobre_referencia": -0.055,
+        "IC95": [
+          -0.176,
+          0.041
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 547.8,
+          "MAE": 396.5,
+          "rRMSE_%": 18.2,
+          "n": 246,
+          "ganho_sobre_referencia": -0.007
+        }
+      },
+      "Tendência por município": {
+        "RMSE": 494.6,
+        "MAE": 332.8,
+        "rRMSE_%": 16.5,
+        "n": 404,
+        "ganho_sobre_referencia": -0.127,
+        "IC95": [
+          -0.307,
+          0.009
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 587.3,
+          "MAE": 424.6,
+          "rRMSE_%": 19.5,
+          "n": 246,
+          "ganho_sobre_referencia": -0.157
+        }
+      }
+    },
+    "antes da safra, h=2": {
+      "Média das 3 últimas + tendência": {
+        "RMSE": 486.9,
+        "MAE": 319.8,
+        "rRMSE_%": 16.3,
+        "n": 404,
+        "ganho_sobre_referencia": 0.025,
+        "IC95": [
+          -0.107,
+          0.133
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 564.6,
+          "MAE": 400.8,
+          "rRMSE_%": 18.8,
+          "n": 246,
+          "ganho_sobre_referencia": -0.002
+        }
+      },
+      "Referência (média + tendência)": {
+        "RMSE": 493.2,
+        "MAE": 346.4,
+        "rRMSE_%": 16.5,
+        "n": 404,
+        "ganho_sobre_referencia": 0.0,
+        "IC95": [
+          0.0,
+          0.0
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 564.1,
+          "MAE": 405.9,
+          "rRMSE_%": 18.8,
+          "n": 246,
+          "ganho_sobre_referencia": 0.0
+        }
+      },
+      "Média do município": {
+        "RMSE": 506.7,
+        "MAE": 355.5,
+        "rRMSE_%": 16.9,
+        "n": 404,
+        "ganho_sobre_referencia": -0.055,
+        "IC95": [
+          -0.172,
+          0.037
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 564.1,
+          "MAE": 409.4,
+          "rRMSE_%": 18.8,
+          "n": 246,
+          "ganho_sobre_referencia": -0.0
+        }
+      },
+      "Defasagens (GBM)": {
+        "RMSE": 508.6,
+        "MAE": 350.4,
+        "rRMSE_%": 17.0,
+        "n": 404,
+        "ganho_sobre_referencia": -0.063,
+        "IC95": [
+          -0.218,
+          0.079
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 581.3,
+          "MAE": 422.8,
+          "rRMSE_%": 19.3,
+          "n": 246,
+          "ganho_sobre_referencia": -0.062
+        }
+      },
+      "Persistência (último valor)": {
+        "RMSE": 546.6,
+        "MAE": 326.1,
+        "rRMSE_%": 18.3,
+        "n": 404,
+        "ganho_sobre_referencia": -0.228,
+        "IC95": [
+          -0.549,
+          0.024
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 644.5,
+          "MAE": 447.1,
+          "rRMSE_%": 21.4,
+          "n": 246,
+          "ganho_sobre_referencia": -0.305
+        }
+      },
+      "Tendência por município": {
+        "RMSE": 563.9,
+        "MAE": 392.4,
+        "rRMSE_%": 18.8,
+        "n": 404,
+        "ganho_sobre_referencia": -0.307,
+        "IC95": [
+          -0.517,
+          -0.145
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 635.2,
+          "MAE": 464.8,
+          "rRMSE_%": 21.1,
+          "n": 246,
+          "ganho_sobre_referencia": -0.268
+        }
+      }
+    },
+    "antes da safra, h=3": {
+      "Média das 3 últimas + tendência": {
+        "RMSE": 498.6,
+        "MAE": 331.5,
+        "rRMSE_%": 16.7,
+        "n": 404,
+        "ganho_sobre_referencia": 0.045,
+        "IC95": [
+          -0.027,
+          0.124
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 567.3,
+          "MAE": 396.7,
+          "rRMSE_%": 18.9,
+          "n": 246,
+          "ganho_sobre_referencia": 0.043
+        }
+      },
+      "Referência (média + tendência)": {
+        "RMSE": 510.1,
+        "MAE": 358.8,
+        "rRMSE_%": 17.0,
+        "n": 404,
+        "ganho_sobre_referencia": 0.0,
+        "IC95": [
+          0.0,
+          0.0
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 579.9,
+          "MAE": 413.1,
+          "rRMSE_%": 19.3,
+          "n": 246,
+          "ganho_sobre_referencia": 0.0
+        }
+      },
+      "Média do município": {
+        "RMSE": 524.7,
+        "MAE": 369.2,
+        "rRMSE_%": 17.5,
+        "n": 404,
+        "ganho_sobre_referencia": -0.058,
+        "IC95": [
+          -0.18,
+          0.042
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 579.0,
+          "MAE": 415.4,
+          "rRMSE_%": 19.2,
+          "n": 246,
+          "ganho_sobre_referencia": 0.003
+        }
+      },
+      "Defasagens (GBM)": {
+        "RMSE": 530.0,
+        "MAE": 376.3,
+        "rRMSE_%": 17.7,
+        "n": 404,
+        "ganho_sobre_referencia": -0.079,
+        "IC95": [
+          -0.217,
+          0.049
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 604.3,
+          "MAE": 441.4,
+          "rRMSE_%": 20.1,
+          "n": 246,
+          "ganho_sobre_referencia": -0.086
+        }
+      },
+      "Persistência (último valor)": {
+        "RMSE": 552.2,
+        "MAE": 342.9,
+        "rRMSE_%": 18.5,
+        "n": 404,
+        "ganho_sobre_referencia": -0.172,
+        "IC95": [
+          -0.446,
+          0.07
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 628.0,
+          "MAE": 440.1,
+          "rRMSE_%": 20.9,
+          "n": 246,
+          "ganho_sobre_referencia": -0.173
+        }
+      },
+      "Tendência por município": {
+        "RMSE": 622.9,
+        "MAE": 437.5,
+        "rRMSE_%": 20.8,
+        "n": 404,
+        "ganho_sobre_referencia": -0.491,
+        "IC95": [
+          -0.714,
+          -0.322
+        ],
+        "so_pares_que_mudaram": {
+          "RMSE": 678.6,
+          "MAE": 489.7,
+          "rRMSE_%": 22.6,
+          "n": 246,
+          "ganho_sobre_referencia": -0.369
+        }
+      }
+    }
+  }
+}

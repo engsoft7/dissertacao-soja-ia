@@ -36,3 +36,6 @@ software/aplicativo_mobile/local.properties
 
 # Figuras geradas da revisão: saem do script, como as demais figuras.
 pesquisa/02_revisao_sistematica/fig_revisao_*.png
+
+# Figuras geradas da previsão: saem do script, como as demais figuras.
+pesquisa/08_previsao_futura/fig_*.png

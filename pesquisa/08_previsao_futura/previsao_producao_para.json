@@ -1,0 +1,368 @@
+{
+  "serie_estadual": {
+    "2001": {
+      "area_ha": 1005,
+      "producao_t": 2291,
+      "rendimento_kg_ha": 2279,
+      "municipios": 6
+    },
+    "2002": {
+      "area_ha": 2648,
+      "producao_t": 7534,
+      "rendimento_kg_ha": 2845,
+      "municipios": 8
+    },
+    "2003": {
+      "area_ha": 15310,
+      "producao_t": 43249,
+      "rendimento_kg_ha": 2825,
+      "municipios": 14
+    },
+    "2004": {
+      "area_ha": 35219,
+      "producao_t": 99434,
+      "rendimento_kg_ha": 2823,
+      "municipios": 20
+    },
+    "2005": {
+      "area_ha": 68410,
+      "producao_t": 204302,
+      "rendimento_kg_ha": 2986,
+      "municipios": 20
+    },
+    "2006": {
+      "area_ha": 70810,
+      "producao_t": 209860,
+      "rendimento_kg_ha": 2964,
+      "municipios": 20
+    },
+    "2007": {
+      "area_ha": 53553,
+      "producao_t": 154014,
+      "rendimento_kg_ha": 2876,
+      "municipios": 17
+    },
+    "2008": {
+      "area_ha": 70776,
+      "producao_t": 201111,
+      "rendimento_kg_ha": 2842,
+      "municipios": 19
+    },
+    "2009": {
+      "area_ha": 71410,
+      "producao_t": 206456,
+      "rendimento_kg_ha": 2891,
+      "municipios": 17
+    },
+    "2010": {
+      "area_ha": 85450,
+      "producao_t": 243613,
+      "rendimento_kg_ha": 2851,
+      "municipios": 17
+    },
+    "2011": {
+      "area_ha": 105888,
+      "producao_t": 317092,
+      "rendimento_kg_ha": 2995,
+      "municipios": 16
+    },
+    "2012": {
+      "area_ha": 119686,
+      "producao_t": 373398,
+      "rendimento_kg_ha": 3120,
+      "municipios": 18
+    },
+    "2013": {
+      "area_ha": 189746,
+      "producao_t": 506349,
+      "rendimento_kg_ha": 2669,
+      "municipios": 22
+    },
+    "2014": {
+      "area_ha": 242971,
+      "producao_t": 736952,
+      "rendimento_kg_ha": 3033,
+      "municipios": 24
+    },
+    "2015": {
+      "area_ha": 337056,
+      "producao_t": 1022677,
+      "rendimento_kg_ha": 3034,
+      "municipios": 23
+    },
+    "2016": {
+      "area_ha": 433813,
+      "producao_t": 1304598,
+      "rendimento_kg_ha": 3007,
+      "municipios": 27
+    },
+    "2017": {
+      "area_ha": 500385,
+      "producao_t": 1632116,
+      "rendimento_kg_ha": 3262,
+      "municipios": 29
+    },
+    "2018": {
+      "area_ha": 557532,
+      "producao_t": 1638464,
+      "rendimento_kg_ha": 2939,
+      "municipios": 28
+    },
+    "2019": {
+      "area_ha": 577764,
+      "producao_t": 1781674,
+      "rendimento_kg_ha": 3084,
+      "municipios": 32
+    },
+    "2020": {
+      "area_ha": 643267,
+      "producao_t": 1990794,
+      "rendimento_kg_ha": 3095,
+      "municipios": 32
+    },
+    "2021": {
+      "area_ha": 753781,
+      "producao_t": 2232499,
+      "rendimento_kg_ha": 2962,
+      "municipios": 32
+    },
+    "2022": {
+      "area_ha": 839560,
+      "producao_t": 2574955,
+      "rendimento_kg_ha": 3067,
+      "municipios": 31
+    },
+    "2023": {
+      "area_ha": 1007539,
+      "producao_t": 3156497,
+      "rendimento_kg_ha": 3133,
+      "municipios": 32
+    },
+    "2024": {
+      "area_ha": 1192224,
+      "producao_t": 3751972,
+      "rendimento_kg_ha": 3147,
+      "municipios": 41
+    }
+  },
+  "mape_%": {
+    "produção": {
+      "Crescimento amortecido x Média + tendência": {
+        "1": 6.7,
+        "2": 16.4,
+        "3": 27.1,
+        "média": 16.7
+      },
+      "Crescimento amortecido x Média dos 3 últimos": {
+        "1": 8.2,
+        "2": 17.7,
+        "3": 27.8,
+        "média": 17.9
+      },
+      "Crescimento amortecido x Último valor": {
+        "1": 8.4,
+        "2": 18.1,
+        "3": 28.5,
+        "média": 18.3
+      },
+      "Exponencial (10 anos) x Média + tendência": {
+        "1": 39.4,
+        "2": 58.1,
+        "3": 74.0,
+        "média": 57.2
+      },
+      "Exponencial (10 anos) x Média dos 3 últimos": {
+        "1": 37.7,
+        "2": 54.6,
+        "3": 69.2,
+        "média": 53.8
+      },
+      "Exponencial (10 anos) x Último valor": {
+        "1": 37.6,
+        "2": 54.5,
+        "3": 69.0,
+        "média": 53.7
+      },
+      "Exponencial (5 anos) x Média + tendência": {
+        "1": 11.9,
+        "2": 24.3,
+        "3": 39.9,
+        "média": 25.4
+      },
+      "Exponencial (5 anos) x Média dos 3 últimos": {
+        "1": 13.1,
+        "2": 25.1,
+        "3": 39.8,
+        "média": 26.0
+      },
+      "Exponencial (5 anos) x Último valor": {
+        "1": 13.1,
+        "2": 25.4,
+        "3": 40.4,
+        "média": 26.3
+      },
+      "Linear (5 anos) x Média + tendência": {
+        "1": 11.7,
+        "2": 19.8,
+        "3": 26.2,
+        "média": 19.2
+      },
+      "Linear (5 anos) x Média dos 3 últimos": {
+        "1": 13.7,
+        "2": 21.4,
+        "3": 28.0,
+        "média": 21.0
+      },
+      "Linear (5 anos) x Último valor": {
+        "1": 13.3,
+        "2": 21.1,
+        "3": 27.8,
+        "média": 20.7
+      },
+      "Produção: exponencial (5 anos)": {
+        "1": 13.8,
+        "2": 26.7,
+        "3": 42.7,
+        "média": 27.7
+      },
+      "Produção: linear (5 anos)": {
+        "1": 13.8,
+        "2": 21.8,
+        "3": 28.5,
+        "média": 21.4
+      },
+      "Produção: último valor": {
+        "1": 17.3,
+        "2": 31.0,
+        "3": 42.1,
+        "média": 30.1
+      },
+      "Último valor x Média + tendência": {
+        "1": 15.3,
+        "2": 28.7,
+        "3": 39.8,
+        "média": 27.9
+      },
+      "Último valor x Média dos 3 últimos": {
+        "1": 17.8,
+        "2": 31.2,
+        "3": 42.3,
+        "média": 30.4
+      },
+      "Último valor x Último valor": {
+        "1": 17.3,
+        "2": 31.0,
+        "3": 42.1,
+        "média": 30.1
+      }
+    },
+    "rendimento": {
+      "Média + tendência": {
+        "1": 3.3,
+        "2": 3.8,
+        "3": 4.3,
+        "média": 3.8
+      },
+      "Média dos 3 últimos": {
+        "1": 3.9,
+        "2": 3.9,
+        "3": 3.2,
+        "média": 3.7
+      },
+      "Último valor": {
+        "1": 5.2,
+        "2": 5.4,
+        "3": 4.1,
+        "média": 4.9
+      }
+    },
+    "área": {
+      "Crescimento amortecido": {
+        "1": 7.7,
+        "2": 17.7,
+        "3": 26.7,
+        "média": 17.4
+      },
+      "Exponencial (10 anos)": {
+        "1": 38.6,
+        "2": 54.8,
+        "3": 67.0,
+        "média": 53.5
+      },
+      "Exponencial (5 anos)": {
+        "1": 12.8,
+        "2": 24.5,
+        "3": 39.0,
+        "média": 25.4
+      },
+      "Linear (5 anos)": {
+        "1": 11.9,
+        "2": 19.9,
+        "3": 26.8,
+        "média": 19.5
+      },
+      "Último valor": {
+        "1": 16.7,
+        "2": 30.3,
+        "3": 41.7,
+        "média": 29.6
+      }
+    }
+  },
+  "melhor_no_retroteste": "Crescimento amortecido x Média + tendência",
+  "combinacao_fixada_de_antemao": "Exponencial (5 anos) x Média + tendência",
+  "projecao": {
+    "Crescimento amortecido x Média + tendência": {
+      "2025": {
+        "central_t": 4285721,
+        "faixa80_t": [
+          3902051,
+          4712513
+        ]
+      },
+      "2026": {
+        "central_t": 4765881,
+        "faixa80_t": [
+          3928221,
+          6013868
+        ]
+      },
+      "2027": {
+        "central_t": 5198359,
+        "faixa80_t": [
+          3981176,
+          8725337
+        ]
+      }
+    },
+    "Exponencial (5 anos) x Média + tendência": {
+      "2025": {
+        "central_t": 4347396,
+        "faixa80_t": [
+          3472872,
+          5125117
+        ]
+      },
+      "2026": {
+        "central_t": 5092313,
+        "faixa80_t": [
+          3324276,
+          6774559
+        ]
+      },
+      "2027": {
+        "central_t": 5964675,
+        "faixa80_t": [
+          3341094,
+          9945100
+        ]
+      }
+    }
+  },
+  "ressalvas": [
+    "produção = rendimento x área plantada (a PAM usa a área colhida)",
+    "origens 2010-2023; para h=3, a última origem é 2021",
+    "a escolha do melhor modelo usa o próprio retroteste; o erro dele é otimista",
+    "a área depende de preço, crédito e abertura de áreas, que não estão no modelo"
+  ]
+}

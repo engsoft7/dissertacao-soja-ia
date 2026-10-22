@@ -2,7 +2,7 @@
 """
 A repetição corresponde a alguma coisa no campo? Confronto com o satélite.
 
-O diagnóstico proposto afirma que safras consecutivas com produtividade
+O diagnóstico proposto afirma que safras sucessivas com produtividade
 idêntica indicam valor não medido. A afirmação precisa de uma referência
 externa: alguém poderia objetar que a lavoura simplesmente rendeu o mesmo nas
 duas safras, e que a repetição é fiel à realidade.
@@ -41,7 +41,11 @@ SEED = 42
 
 
 def pares(df):
-    """Um registro por par de safras consecutivas do mesmo município.
+    """Um registro por par de safras sucessivas do mesmo município.
+
+    O par liga cada safra à anterior presente na base, que nem sempre é a do
+    ano anterior: com_lacuna marca os pares em que ano != ano_anterior + 1
+    (10 dos 377). As análises usam todos os pares, como a subseção 6.4.
 
     Guarda a variação relativa de cada sinal entre as duas safras, em módulo, e
     se o rendimento repetiu. A variação é relativa porque NDVI e chuva têm
@@ -56,6 +60,7 @@ def pares(df):
         for i in range(len(atual)):
             a, b = ant.iloc[i], atual.iloc[i]
             reg = {'municipio': mun, 'ano': int(b.ano),
+                   'com_lacuna': bool(int(b.ano) != int(a.ano) + 1),
                    'repetiu': bool(b.rendimento_kg_ha == a.rendimento_kg_ha),
                    'area': float(a.soy_area_ha),
                    'delta_rendimento': abs(float(b.rendimento_kg_ha - a.rendimento_kg_ha))}
@@ -149,9 +154,13 @@ def imprime(r):
 def main():
     df = pd.read_csv(CSV)
     p = pares(df)
-    print(f'{len(p):,} pares de safras consecutivas em {p.municipio.nunique()} municípios '
+    print(f'{len(p):,} pares de safras sucessivas em {p.municipio.nunique()} municípios '
           f'do Pará')
     print(f'{int(p.repetiu.sum()):,} repetiram ({p.repetiu.mean() * 100:.1f}%)')
+    seguidos = p[~p.com_lacuna]
+    print(f'só anos seguidos (ano = anterior + 1): {int(seguidos.repetiu.sum())} de '
+          f'{len(seguidos)} ({seguidos.repetiu.mean() * 100:.1f}%); '
+          f'{int(p.com_lacuna.sum())} pares com ano faltando no meio')
     print('\nVariação interanual de cada sinal, em % do valor da safra anterior.')
     print('Medianas. "razão" abaixo de 1 indicaria lavoura de fato parecida nos')
     print('dois anos; perto de 1 indica que o satélite não viu a igualdade que a')

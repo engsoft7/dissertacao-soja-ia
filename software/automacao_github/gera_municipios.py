@@ -22,7 +22,7 @@ import pandas as pd
 import requests
 
 RAIZ = Path(__file__).resolve().parents[2]
-BASE = RAIZ / "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"
+BASE = RAIZ / "pesquisa" / "dados" / "soja_para_painel.csv"
 SAIDA = RAIZ / "pesquisa" / "dados" / "municipios_para.csv"
 
 IBGE = "https://servicodados.ibge.gov.br/api/v1/localidades/estados/15/municipios"

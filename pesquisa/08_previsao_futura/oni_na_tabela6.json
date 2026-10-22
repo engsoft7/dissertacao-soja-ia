@@ -1,0 +1,100 @@
+{
+  "variaveis": [
+    "NDVI_mean",
+    "NDVI_max",
+    "EVI_mean",
+    "EVI_max",
+    "precip_total",
+    "etp_total",
+    "balanco_hidrico",
+    "temp_mean",
+    "temp_max",
+    "srad_mean",
+    "log_area",
+    "oni_djf"
+  ],
+  "modelos": {
+    "Random Forest": {
+      "com_oni": {
+        "RMSE": 414.7,
+        "MAE": 294.1,
+        "R2": 0.22,
+        "rRMSE_%": 13.8
+      },
+      "tabela_6": {
+        "RMSE": 431.9,
+        "MAE": 308.6,
+        "R2": 0.153,
+        "rRMSE_%": 14.4
+      },
+      "ganho_com_oni_sobre_referencia": 0.005,
+      "IC95": [
+        -0.076,
+        0.089
+      ]
+    },
+    "XGBoost": {
+      "com_oni": {
+        "RMSE": 428.6,
+        "MAE": 301.4,
+        "R2": 0.166,
+        "rRMSE_%": 14.3
+      },
+      "tabela_6": {
+        "RMSE": 439.5,
+        "MAE": 314.5,
+        "R2": 0.123,
+        "rRMSE_%": 14.7
+      },
+      "ganho_com_oni_sobre_referencia": -0.063,
+      "IC95": [
+        -0.151,
+        0.014
+      ]
+    },
+    "SVR": {
+      "com_oni": {
+        "RMSE": 409.0,
+        "MAE": 290.2,
+        "R2": 0.241,
+        "rRMSE_%": 13.7
+      },
+      "tabela_6": {
+        "RMSE": 417.6,
+        "MAE": 294.8,
+        "R2": 0.208,
+        "rRMSE_%": 13.9
+      },
+      "ganho_com_oni_sobre_referencia": 0.031,
+      "IC95": [
+        -0.024,
+        0.09
+      ]
+    },
+    "MLP": {
+      "com_oni": {
+        "RMSE": 425.3,
+        "MAE": 301.9,
+        "R2": 0.179,
+        "rRMSE_%": 14.2
+      },
+      "tabela_6": {
+        "RMSE": 415.6,
+        "MAE": 297.4,
+        "R2": 0.216,
+        "rRMSE_%": 13.9
+      },
+      "ganho_com_oni_sobre_referencia": -0.047,
+      "IC95": [
+        -0.126,
+        -0.002
+      ]
+    }
+  },
+  "referencia_tabela_6": {
+    "RMSE": 415.6,
+    "MAE": 296.1,
+    "R2": 0.216,
+    "rRMSE_%": 13.9
+  }
+}

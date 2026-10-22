@@ -9,23 +9,25 @@ com intervalo de 95% por reamostragem de safras, em janela crescente.
 
 - **Hipótese.** A produção do Pará em 2025 cai na faixa de 80% registrada em
   22/10/2026 (3,90 a 4,71 milhões de toneladas).
-- **Dado.** PAM 2025, trazida pela rotina `atualiza-dados.yml`.
-- **Teste.** Rodar `03_previsao_producao_para.py` com origem em 2024 sem mudar
-  nada e comparar com a produção publicada, calculada do mesmo jeito
-  (rendimento × área plantada).
-- **Critério.** Dentro da faixa: o retroteste descreveu bem o erro. Fora dela:
-  registrar o tamanho e o sentido do erro, e qual componente errou (área ou
-  produtividade).
+- **Feito em 22/10/2026** (`06_confere_projecao_2025.py`). A PAM 2025 publicou
+  4,37 milhões de toneladas; a projeção era 4,29 (erro de −2,0%, dentro da
+  faixa). Área +1,9%, produtividade −3,9%.
+- **Próximo teste.** O registro com origem em 2025 projeta 4,81 milhões de
+  toneladas para 2026 (faixa de 80%: 4,41 a 5,28). A CONAB estima 5,40. Rodar
+  `06` de novo quando a PAM 2026 sair, trocando o ano conferido.
 
 ## 2. El Niño e La Niña como preditores
 
 - **Hipótese.** O ONI de dezembro a março melhora a previsão da produtividade
-  no Pará ao fim do ciclo. Hoje o ganho é de +0,033, com IC95 de −0,026 a
-  +0,094.
-- **Teste.** Acrescentar ao ONI o gradiente térmico do Atlântico tropical
-  (relevante para a chuva no norte do Brasil), testar as duas variáveis no
-  protocolo da Tabela 6 (busca aninhada) e em janela crescente, e repetir a
-  cada safra nova.
+  no Pará ao fim do ciclo.
+- **Feito em 22/10/2026.** No protocolo da Tabela 6 (`05_oni_na_tabela6.py`) o
+  SVR com ONI tem ganho de +0,031 (IC95 −0,024 a +0,090); em janela crescente,
+  +0,033 (IC95 −0,026 a +0,094). Os dois apontam no mesmo sentido, nenhum é
+  significativo.
+- **Atlântico, feito em 22/10/2026** (`07_variaveis_por_fase.py`). TNA, TSA e
+  o gradiente, baixados da NOAA pelo Actions: SVR −0,001 (IC95 −0,042 a
+  +0,038) no protocolo da Tabela 6.
+- **Teste que falta.** Repetir os dois testes a cada safra nova.
 - **Critério.** O intervalo do ganho deixa de incluir o zero. Com 24 safras isso
   é improvável; o teste ganha poder a cada safra acrescentada.
 
@@ -49,6 +51,15 @@ Desenho: entrar com uma família de cada vez, no protocolo da Tabela 6 e em
 janela crescente, e corrigir o nível de significância pelo número de famílias
 testadas (Holm).
 
+**Feito em 22/10/2026, no Pará** (`07_variaveis_por_fase.py`): estresse por
+fase (veranico, calor acumulado acima de 30 °C, déficit de pressão de vapor e
+chuva na floração e no enchimento), umidade do solo em duas camadas, MODIS
+MOD11 e fenologia pelo pico de EVI. Nenhuma família superou a referência (p de
+Holm = 1,0 em todas). **Falta:** o mesmo teste no recorte nacional, que decide
+se o limite é o alvo ou a forma de medir o ambiente; e as fontes de 2015 em
+diante (SMAP, TROPOMI, Sentinel-1 e 2), que exigem um desenho só com as safras
+recentes, e o SoilGrids.
+
 ## 4. Triangular a variável-alvo
 
 - **Hipótese.** Onde a PAM repete o valor, outra fonte independente varia.
@@ -60,6 +71,13 @@ testadas (Holm).
 - **Critério.** Se o ganho do ambiente sobre a referência aparecer com o alvo
   independente e não com a PAM, a hipótese subsidiária fica confirmada por uma
   segunda via.
+- **Feito em 22/10/2026, por UF** (`08_triangula_conab.py`). A CONAB não
+  publica por município nem por mesorregião na série histórica, então o teste
+  previsto não é possível com ela. Por UF, no Pará a CONAB varia mais que a
+  PAM (desvio da anomalia de 7,1% contra 5,1%) e as duas quase não concordam
+  sobre a variação de um ano para o outro (r = 0,12, contra 0,89 a 0,997 nos
+  estados de soja antiga). O sinal climático não aparece em nenhuma das duas
+  na escala estadual. Falta a fonte municipal ou de talhão.
 
 ## 5. Estimativa por foto no aplicativo
 

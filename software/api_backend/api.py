@@ -178,7 +178,7 @@ def get_financas(municipio: str):
     }
 
 ROOT_PATH = Path(__file__).resolve().parents[2]
-DADOS_PATH = ROOT_PATH / "pesquisa" / "dados" / "soja_para_mascarado_2001_2024.csv"
+DADOS_PATH = ROOT_PATH / "pesquisa" / "dados" / "soja_para_painel.csv"
 
 # In-memory cached model
 class AppState:

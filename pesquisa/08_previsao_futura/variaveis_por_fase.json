@@ -1,0 +1,939 @@
+{
+  "registros_base": 415,
+  "familias": {
+    "Estresse na floração e no enchimento": [
+      "chuva_flor",
+      "veranico_flor",
+      "calor30_flor",
+      "vpd_flor",
+      "chuva_ench",
+      "veranico_ench",
+      "calor30_ench",
+      "vpd_ench"
+    ],
+    "Umidade do solo por fase": [
+      "sw1_flor",
+      "sw2_flor",
+      "sw1_ench",
+      "sw2_ench"
+    ],
+    "Temperatura da superfície (MODIS)": [
+      "lst_flor",
+      "lst_ench"
+    ],
+    "Fenologia (pico de EVI)": [
+      "dias_ate_pico",
+      "evi_pico"
+    ],
+    "Atlântico tropical": [
+      "grad_atl",
+      "tna",
+      "tsa"
+    ]
+  },
+  "primario": "SVR, desenho A, Holm sobre 5 famílias",
+  "A": {
+    "Estresse na floração e no enchimento": {
+      "registros": 378,
+      "referencia": {
+        "RMSE": 425.3,
+        "MAE": 301.2,
+        "R2": 0.183,
+        "rRMSE_%": 14.2
+      },
+      "tabela_6_mesmos_registros": {
+        "Random Forest": {
+          "RMSE": 438.8,
+          "MAE": 308.3,
+          "R2": 0.13,
+          "rRMSE_%": 14.6,
+          "ganho": -0.065,
+          "IC95": [
+            -0.162,
+            0.019
+          ],
+          "p_unilateral": 0.9145
+        },
+        "XGBoost": {
+          "RMSE": 439.4,
+          "MAE": 309.2,
+          "R2": 0.128,
+          "rRMSE_%": 14.7,
+          "ganho": -0.067,
+          "IC95": [
+            -0.164,
+            0.021
+          ],
+          "p_unilateral": 0.924
+        },
+        "SVR": {
+          "RMSE": 425.4,
+          "MAE": 296.0,
+          "R2": 0.183,
+          "rRMSE_%": 14.2,
+          "ganho": -0.001,
+          "IC95": [
+            -0.046,
+            0.053
+          ],
+          "p_unilateral": 0.514
+        },
+        "MLP": {
+          "RMSE": 432.0,
+          "MAE": 304.8,
+          "R2": 0.157,
+          "rRMSE_%": 14.4,
+          "ganho": -0.032,
+          "IC95": [
+            -0.092,
+            0.0
+          ],
+          "p_unilateral": 0.9395
+        }
+      },
+      "com_familia": {
+        "Random Forest": {
+          "RMSE": 428.4,
+          "MAE": 303.3,
+          "R2": 0.171,
+          "rRMSE_%": 14.3,
+          "ganho": -0.015,
+          "IC95": [
+            -0.079,
+            0.038
+          ],
+          "p_unilateral": 0.682,
+          "ganho_sobre_11_variaveis": {
+            "ganho": 0.047,
+            "IC95": [
+              -0.016,
+              0.109
+            ],
+            "p_unilateral": 0.0805
+          }
+        },
+        "XGBoost": {
+          "RMSE": 431.4,
+          "MAE": 302.2,
+          "R2": 0.16,
+          "rRMSE_%": 14.4,
+          "ganho": -0.029,
+          "IC95": [
+            -0.103,
+            0.033
+          ],
+          "p_unilateral": 0.7955,
+          "ganho_sobre_11_variaveis": {
+            "ganho": 0.036,
+            "IC95": [
+              -0.027,
+              0.086
+            ],
+            "p_unilateral": 0.1115
+          }
+        },
+        "SVR": {
+          "RMSE": 425.5,
+          "MAE": 300.0,
+          "R2": 0.183,
+          "rRMSE_%": 14.2,
+          "ganho": -0.001,
+          "IC95": [
+            -0.032,
+            0.033
+          ],
+          "p_unilateral": 0.5205,
+          "ganho_sobre_11_variaveis": {
+            "ganho": -0.0,
+            "IC95": [
+              -0.027,
+              0.022
+            ],
+            "p_unilateral": 0.5065
+          },
+          "p_holm": 1.0
+        },
+        "MLP": {
+          "RMSE": 425.2,
+          "MAE": 302.7,
+          "R2": 0.184,
+          "rRMSE_%": 14.2,
+          "ganho": 0.001,
+          "IC95": [
+            -0.001,
+            0.003
+          ],
+          "p_unilateral": 0.334,
+          "ganho_sobre_11_variaveis": {
+            "ganho": 0.031,
+            "IC95": [
+              0.0,
+              0.084
+            ],
+            "p_unilateral": 0.009
+          }
+        }
+      }
+    },
+    "Umidade do solo por fase": {
+      "registros": 378,
+      "referencia": {
+        "RMSE": 425.3,
+        "MAE": 301.2,
+        "R2": 0.183,
+        "rRMSE_%": 14.2
+      },
+      "tabela_6_mesmos_registros": {
+        "Random Forest": {
+          "RMSE": 438.8,
+          "MAE": 308.3,
+          "R2": 0.13,
+          "rRMSE_%": 14.6,
+          "ganho": -0.065,
+          "IC95": [
+            -0.162,
+            0.019
+          ],
+          "p_unilateral": 0.9145
+        },
+        "XGBoost": {
+          "RMSE": 439.4,
+          "MAE": 309.2,
+          "R2": 0.128,
+          "rRMSE_%": 14.7,
+          "ganho": -0.067,
+          "IC95": [
+            -0.164,
+            0.021
+          ],
+          "p_unilateral": 0.924
+        },
+        "SVR": {
+          "RMSE": 425.4,
+          "MAE": 296.0,
+          "R2": 0.183,
+          "rRMSE_%": 14.2,
+          "ganho": -0.001,
+          "IC95": [
+            -0.046,
+            0.053
+          ],
+          "p_unilateral": 0.514
+        },
+        "MLP": {
+          "RMSE": 432.0,
+          "MAE": 304.8,
+          "R2": 0.157,
+          "rRMSE_%": 14.4,
+          "ganho": -0.032,
+          "IC95": [
+            -0.092,
+            0.0
+          ],
+          "p_unilateral": 0.9395
+        }
+      },
+      "com_familia": {
+        "Random Forest": {
+          "RMSE": 435.5,
+          "MAE": 308.0,
+          "R2": 0.144,
+          "rRMSE_%": 14.5,
+          "ganho": -0.049,
+          "IC95": [
+            -0.115,
+            0.017
+          ],
+          "p_unilateral": 0.9275,
+          "ganho_sobre_11_variaveis": {
+            "ganho": 0.015,
+            "IC95": [
+              -0.024,
+              0.051
+            ],
+            "p_unilateral": 0.23
+          }
+        },
+        "XGBoost": {
+          "RMSE": 442.2,
+          "MAE": 312.5,
+          "R2": 0.117,
+          "rRMSE_%": 14.8,
+          "ganho": -0.081,
+          "IC95": [
+            -0.179,
+            -0.002
+          ],
+          "p_unilateral": 0.977,
+          "ganho_sobre_11_variaveis": {
+            "ganho": -0.013,
+            "IC95": [
+              -0.052,
+              0.02
+            ],
+            "p_unilateral": 0.7865
+          }
+        },
+        "SVR": {
+          "RMSE": 427.5,
+          "MAE": 298.4,
+          "R2": 0.175,
+          "rRMSE_%": 14.3,
+          "ganho": -0.01,
+          "IC95": [
+            -0.05,
+            0.023
+          ],
+          "p_unilateral": 0.6785,
+          "ganho_sobre_11_variaveis": {
+            "ganho": -0.01,
+            "IC95": [
+              -0.059,
+              0.032
+            ],
+            "p_unilateral": 0.658
+          },
+          "p_holm": 1.0
+        },
+        "MLP": {
+          "RMSE": 425.4,
+          "MAE": 301.2,
+          "R2": 0.183,
+          "rRMSE_%": 14.2,
+          "ganho": -0.0,
+          "IC95": [
+            -0.001,
+            0.0
+          ],
+          "p_unilateral": 0.894,
+          "ganho_sobre_11_variaveis": {
+            "ganho": 0.031,
+            "IC95": [
+              -0.0,
+              0.084
+            ],
+            "p_unilateral": 0.0785
+          }
+        }
+      }
+    },
+    "Temperatura da superfície (MODIS)": {
+      "registros": 312,
+      "referencia": {
+        "RMSE": 395.6,
+        "MAE": 281.6,
+        "R2": 0.166,
+        "rRMSE_%": 13.2
+      },
+      "tabela_6_mesmos_registros": {
+        "Random Forest": {
+          "RMSE": 410.1,
+          "MAE": 291.6,
+          "R2": 0.104,
+          "rRMSE_%": 13.7,
+          "ganho": -0.075,
+          "IC95": [
+            -0.177,
+            0.008
+          ],
+          "p_unilateral": 0.95
+        },
+        "XGBoost": {
+          "RMSE": 401.6,
+          "MAE": 284.2,
+          "R2": 0.14,
+          "rRMSE_%": 13.4,
+          "ganho": -0.031,
+          "IC95": [
+            -0.071,
+            0.012
+          ],
+          "p_unilateral": 0.912
+        },
+        "SVR": {
+          "RMSE": 395.6,
+          "MAE": 284.3,
+          "R2": 0.166,
+          "rRMSE_%": 13.2,
+          "ganho": -0.0,
+          "IC95": [
+            -0.02,
+            0.019
+          ],
+          "p_unilateral": 0.548
+        },
+        "MLP": {
+          "RMSE": 396.3,
+          "MAE": 282.3,
+          "R2": 0.163,
+          "rRMSE_%": 13.2,
+          "ganho": -0.004,
+          "IC95": [
+            -0.01,
+            0.0
+          ],
+          "p_unilateral": 0.89
+        }
+      },
+      "com_familia": {
+        "Random Forest": {
+          "RMSE": 412.5,
+          "MAE": 293.4,
+          "R2": 0.093,
+          "rRMSE_%": 13.7,
+          "ganho": -0.087,
+          "IC95": [
+            -0.177,
+            -0.016
+          ],
+          "p_unilateral": 0.998,
+          "ganho_sobre_11_variaveis": {
+            "ganho": -0.012,
+            "IC95": [
+              -0.035,
+              0.006
+            ],
+            "p_unilateral": 0.8955
+          }
+        },
+        "XGBoost": {
+          "RMSE": 403.3,
+          "MAE": 285.5,
+          "R2": 0.133,
+          "rRMSE_%": 13.4,
+          "ganho": -0.039,
+          "IC95": [
+            -0.082,
+            0.009
+          ],
+          "p_unilateral": 0.947,
+          "ganho_sobre_11_variaveis": {
+            "ganho": -0.008,
+            "IC95": [
+              -0.022,
+              0.006
+            ],
+            "p_unilateral": 0.8695
+          }
+        },
+        "SVR": {
+          "RMSE": 395.0,
+          "MAE": 283.3,
+          "R2": 0.168,
+          "rRMSE_%": 13.2,
+          "ganho": 0.003,
+          "IC95": [
+            -0.013,
+            0.018
+          ],
+          "p_unilateral": 0.3665,
+          "ganho_sobre_11_variaveis": {
+            "ganho": 0.003,
+            "IC95": [
+              -0.007,
+              0.016
+            ],
+            "p_unilateral": 0.291
+          },
+          "p_holm": 1.0
+        },
+        "MLP": {
+          "RMSE": 395.7,
+          "MAE": 281.7,
+          "R2": 0.165,
+          "rRMSE_%": 13.2,
+          "ganho": -0.0,
+          "IC95": [
+            -0.001,
+            0.0
+          ],
+          "p_unilateral": 0.8555,
+          "ganho_sobre_11_variaveis": {
+            "ganho": 0.003,
+            "IC95": [
+              -0.001,
+              0.01
+            ],
+            "p_unilateral": 0.1875
+          }
+        }
+      }
+    },
+    "Fenologia (pico de EVI)": {
+      "registros": 414,
+      "referencia": {
+        "RMSE": 416.1,
+        "MAE": 296.8,
+        "R2": 0.216,
+        "rRMSE_%": 13.9
+      },
+      "tabela_6_mesmos_registros": {
+        "Random Forest": {
+          "RMSE": 428.8,
+          "MAE": 307.4,
+          "R2": 0.168,
+          "rRMSE_%": 14.3,
+          "ganho": -0.062,
+          "IC95": [
+            -0.135,
+            0.008
+          ],
+          "p_unilateral": 0.953
+        },
+        "XGBoost": {
+          "RMSE": 429.1,
+          "MAE": 307.0,
+          "R2": 0.166,
+          "rRMSE_%": 14.3,
+          "ganho": -0.063,
+          "IC95": [
+            -0.162,
+            0.019
+          ],
+          "p_unilateral": 0.924
+        },
+        "SVR": {
+          "RMSE": 417.7,
+          "MAE": 294.0,
+          "R2": 0.21,
+          "rRMSE_%": 13.9,
+          "ganho": -0.008,
+          "IC95": [
+            -0.052,
+            0.041
+          ],
+          "p_unilateral": 0.65
+        },
+        "MLP": {
+          "RMSE": 413.9,
+          "MAE": 296.1,
+          "R2": 0.224,
+          "rRMSE_%": 13.8,
+          "ganho": 0.011,
+          "IC95": [
+            -0.004,
+            0.025
+          ],
+          "p_unilateral": 0.083
+        }
+      },
+      "com_familia": {
+        "Random Forest": {
+          "RMSE": 426.6,
+          "MAE": 303.7,
+          "R2": 0.176,
+          "rRMSE_%": 14.2,
+          "ganho": -0.051,
+          "IC95": [
+            -0.129,
+            0.022
+          ],
+          "p_unilateral": 0.9015,
+          "ganho_sobre_11_variaveis": {
+            "ganho": 0.01,
+            "IC95": [
+              -0.014,
+              0.036
+            ],
+            "p_unilateral": 0.221
+          }
+        },
+        "XGBoost": {
+          "RMSE": 436.1,
+          "MAE": 311.4,
+          "R2": 0.139,
+          "rRMSE_%": 14.6,
+          "ganho": -0.098,
+          "IC95": [
+            -0.176,
+            -0.022
+          ],
+          "p_unilateral": 0.9935,
+          "ganho_sobre_11_variaveis": {
+            "ganho": -0.033,
+            "IC95": [
+              -0.087,
+              0.021
+            ],
+            "p_unilateral": 0.905
+          }
+        },
+        "SVR": {
+          "RMSE": 419.1,
+          "MAE": 293.4,
+          "R2": 0.205,
+          "rRMSE_%": 14.0,
+          "ganho": -0.014,
+          "IC95": [
+            -0.057,
+            0.034
+          ],
+          "p_unilateral": 0.7465,
+          "ganho_sobre_11_variaveis": {
+            "ganho": -0.007,
+            "IC95": [
+              -0.023,
+              0.011
+            ],
+            "p_unilateral": 0.7665
+          },
+          "p_holm": 1.0
+        },
+        "MLP": {
+          "RMSE": 416.5,
+          "MAE": 297.3,
+          "R2": 0.214,
+          "rRMSE_%": 13.9,
+          "ganho": -0.002,
+          "IC95": [
+            -0.009,
+            0.001
+          ],
+          "p_unilateral": 0.675,
+          "ganho_sobre_11_variaveis": {
+            "ganho": -0.013,
+            "IC95": [
+              -0.028,
+              0.002
+            ],
+            "p_unilateral": 0.9505
+          }
+        }
+      }
+    },
+    "Atlântico tropical": {
+      "registros": 415,
+      "referencia": {
+        "RMSE": 415.6,
+        "MAE": 296.1,
+        "R2": 0.216,
+        "rRMSE_%": 13.9
+      },
+      "tabela_6_mesmos_registros": {
+        "Random Forest": {
+          "RMSE": 431.9,
+          "MAE": 308.6,
+          "R2": 0.153,
+          "rRMSE_%": 14.4,
+          "ganho": -0.08,
+          "IC95": [
+            -0.165,
+            -0.002
+          ],
+          "p_unilateral": 0.979
+        },
+        "XGBoost": {
+          "RMSE": 439.5,
+          "MAE": 314.5,
+          "R2": 0.123,
+          "rRMSE_%": 14.7,
+          "ganho": -0.118,
+          "IC95": [
+            -0.229,
+            -0.031
+          ],
+          "p_unilateral": 0.995
+        },
+        "SVR": {
+          "RMSE": 417.6,
+          "MAE": 294.8,
+          "R2": 0.208,
+          "rRMSE_%": 13.9,
+          "ganho": -0.01,
+          "IC95": [
+            -0.045,
+            0.033
+          ],
+          "p_unilateral": 0.696
+        },
+        "MLP": {
+          "RMSE": 415.6,
+          "MAE": 297.4,
+          "R2": 0.216,
+          "rRMSE_%": 13.9,
+          "ganho": 0.0,
+          "IC95": [
+            -0.012,
+            0.012
+          ],
+          "p_unilateral": 0.523
+        }
+      },
+      "com_familia": {
+        "Random Forest": {
+          "RMSE": 433.2,
+          "MAE": 311.3,
+          "R2": 0.148,
+          "rRMSE_%": 14.5,
+          "ganho": -0.087,
+          "IC95": [
+            -0.15,
+            -0.02
+          ],
+          "p_unilateral": 0.993,
+          "ganho_sobre_11_variaveis": {
+            "ganho": -0.006,
+            "IC95": [
+              -0.058,
+              0.038
+            ],
+            "p_unilateral": 0.6065
+          }
+        },
+        "XGBoost": {
+          "RMSE": 436.6,
+          "MAE": 313.6,
+          "R2": 0.135,
+          "rRMSE_%": 14.6,
+          "ganho": -0.104,
+          "IC95": [
+            -0.214,
+            -0.015
+          ],
+          "p_unilateral": 0.992,
+          "ganho_sobre_11_variaveis": {
+            "ganho": 0.013,
+            "IC95": [
+              -0.076,
+              0.098
+            ],
+            "p_unilateral": 0.3815
+          }
+        },
+        "SVR": {
+          "RMSE": 415.9,
+          "MAE": 294.1,
+          "R2": 0.215,
+          "rRMSE_%": 13.9,
+          "ganho": -0.001,
+          "IC95": [
+            -0.042,
+            0.038
+          ],
+          "p_unilateral": 0.52,
+          "ganho_sobre_11_variaveis": {
+            "ganho": 0.009,
+            "IC95": [
+              -0.024,
+              0.042
+            ],
+            "p_unilateral": 0.319
+          },
+          "p_holm": 1.0
+        },
+        "MLP": {
+          "RMSE": 415.0,
+          "MAE": 298.6,
+          "R2": 0.218,
+          "rRMSE_%": 13.9,
+          "ganho": 0.003,
+          "IC95": [
+            -0.016,
+            0.019
+          ],
+          "p_unilateral": 0.3845,
+          "ganho_sobre_11_variaveis": {
+            "ganho": 0.003,
+            "IC95": [
+              -0.015,
+              0.019
+            ],
+            "p_unilateral": 0.3855
+          }
+        }
+      }
+    }
+  },
+  "B": {
+    "Estresse na floração e no enchimento": {
+      "tabela_6_mesmos_registros": {
+        "SVR": {
+          "ganho": 0.009,
+          "IC95": [
+            -0.047,
+            0.07
+          ],
+          "p_unilateral": 0.353
+        },
+        "Ridge": {
+          "ganho": 0.016,
+          "IC95": [
+            -0.045,
+            0.054
+          ],
+          "p_unilateral": 0.247
+        }
+      },
+      "com_familia": {
+        "SVR": {
+          "ganho": 0.002,
+          "IC95": [
+            -0.056,
+            0.061
+          ],
+          "p_unilateral": 0.4545
+        },
+        "Ridge": {
+          "ganho": 0.008,
+          "IC95": [
+            -0.136,
+            0.081
+          ],
+          "p_unilateral": 0.3855
+        }
+      }
+    },
+    "Umidade do solo por fase": {
+      "tabela_6_mesmos_registros": {
+        "SVR": {
+          "ganho": 0.009,
+          "IC95": [
+            -0.047,
+            0.07
+          ],
+          "p_unilateral": 0.353
+        },
+        "Ridge": {
+          "ganho": 0.016,
+          "IC95": [
+            -0.045,
+            0.054
+          ],
+          "p_unilateral": 0.247
+        }
+      },
+      "com_familia": {
+        "SVR": {
+          "ganho": -0.023,
+          "IC95": [
+            -0.079,
+            0.041
+          ],
+          "p_unilateral": 0.761
+        },
+        "Ridge": {
+          "ganho": 0.01,
+          "IC95": [
+            -0.053,
+            0.05
+          ],
+          "p_unilateral": 0.3215
+        }
+      }
+    },
+    "Temperatura da superfície (MODIS)": {
+      "tabela_6_mesmos_registros": {
+        "SVR": {
+          "ganho": -0.027,
+          "IC95": [
+            -0.07,
+            0.027
+          ],
+          "p_unilateral": 0.831
+        },
+        "Ridge": {
+          "ganho": -0.024,
+          "IC95": [
+            -0.059,
+            0.006
+          ],
+          "p_unilateral": 0.929
+        }
+      },
+      "com_familia": {
+        "SVR": {
+          "ganho": -0.03,
+          "IC95": [
+            -0.073,
+            0.021
+          ],
+          "p_unilateral": 0.8665
+        },
+        "Ridge": {
+          "ganho": -0.035,
+          "IC95": [
+            -0.074,
+            0.0
+          ],
+          "p_unilateral": 0.9735
+        }
+      }
+    },
+    "Fenologia (pico de EVI)": {
+      "tabela_6_mesmos_registros": {
+        "SVR": {
+          "ganho": 0.002,
+          "IC95": [
+            -0.049,
+            0.057
+          ],
+          "p_unilateral": 0.44
+        },
+        "Ridge": {
+          "ganho": 0.006,
+          "IC95": [
+            -0.04,
+            0.036
+          ],
+          "p_unilateral": 0.3605
+        }
+      },
+      "com_familia": {
+        "SVR": {
+          "ganho": 0.002,
+          "IC95": [
+            -0.048,
+            0.055
+          ],
+          "p_unilateral": 0.435
+        },
+        "Ridge": {
+          "ganho": 0.012,
+          "IC95": [
+            -0.038,
+            0.043
+          ],
+          "p_unilateral": 0.2575
+        }
+      }
+    },
+    "Atlântico tropical": {
+      "tabela_6_mesmos_registros": {
+        "SVR": {
+          "ganho": 0.001,
+          "IC95": [
+            -0.05,
+            0.056
+          ],
+          "p_unilateral": 0.446
+        },
+        "Ridge": {
+          "ganho": 0.006,
+          "IC95": [
+            -0.04,
+            0.036
+          ],
+          "p_unilateral": 0.36
+        }
+      },
+      "com_familia": {
+        "SVR": {
+          "ganho": -0.006,
+          "IC95": [
+            -0.06,
+            0.035
+          ],
+          "p_unilateral": 0.574
+        },
+        "Ridge": {
+          "ganho": -0.027,
+          "IC95": [
+            -0.152,
+            0.031
+          ],
+          "p_unilateral": 0.6745
+        }
+      }
+    }
+  }
+}

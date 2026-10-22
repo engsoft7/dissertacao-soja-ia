@@ -141,9 +141,17 @@ pesquisa/08_previsao_futura/             previsão em janela crescente (só o pa
   02_previsao_rendimento_para.py          produtividade 1-3 safras à frente e ao fim do ciclo
   03_previsao_producao_para.py            produção estadual (área x produtividade), 2025-2027
   04_referencia_nacional.py               SVR da Tabela 3 contra o modelo de referência
+  05_oni_na_tabela6.py                    ONI como variável no protocolo da Tabela 6
+  06_confere_projecao_2025.py             projeção de 2025 contra a PAM 2025; teste municipal
+  07_variaveis_por_fase.py                ambiente na floração e no enchimento; Atlântico
+  08_triangula_conab.py                   PAM contra a série histórica da CONAB, por UF
+  fases.py, conab.py                      variáveis por fase; leitura das planilhas da CONAB
+  coleta/                                 coleta pelo Actions (SIDRA, NOAA, CONAB, Earth Engine)
+  dados/                                  o que a coleta trouxe
   README.md, TRABALHOS_FUTUROS.md         resultados e protocolos do que falta testar
 pesquisa/dados/
-  soja_para_mascarado_2001_2024.csv       base principal (atualizada por automação)
+  soja_para_mascarado_2001_2024.csv       base da dissertação (congelada: Tabelas 5 e 6, subseção 6.4)
+  soja_para_painel.csv                    base do produto (painel, API; atualizada por automação)
   soja_para_sem_mascara_2001_2023.csv     base sem máscara (comparação)
   municipios_para.csv                     nome oficial acentuado e centroide (mapa)
   para_geo.json                           contorno do estado (fundo do mapa)
@@ -562,10 +570,12 @@ por isso não serve para fixar um estado; para isso use o DOI da versão — a
 `v2.3.7` é `10.5281/zenodo.22343315`, e é a primeira a conter a base nacional
 usada no artigo sobre a repetição na PAM.
 
-Somente `pesquisa/dados/soja_para_mascarado_2001_2024.csv` (a base do painel) é
-atualizado — o nome do arquivo preserva o recorte original da dissertação, mas
-safras posteriores são acrescentadas a ele pela automação. A base sem máscara
-permanece congelada como artefato da comparação feita na dissertação. Se o
+Somente `pesquisa/dados/soja_para_painel.csv` (a base do painel e da API) é
+atualizado, e safras posteriores a 2024 são acrescentadas a ele pela automação.
+A base da dissertação, `pesquisa/dados/soja_para_mascarado_2001_2024.csv`, e a
+base sem máscara permanecem congeladas: os scripts de `pesquisa/` leem delas, e
+as Tabelas 5 e 6 se reproduzem também a partir do `main`. Até a separação, as
+duas eram o mesmo arquivo, que crescia com a automação. Se o
 MapBiomas ainda não tiver publicado a máscara do ano-alvo, usa-se a mais
 recente disponível e o PR registra a aproximação.
 

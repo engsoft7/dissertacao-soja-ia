@@ -85,5 +85,7 @@ def ganho_sobre_referencia(obs, prev, ref, anos, n_boot=2000, semente=42):
         r = sum(por[a][1] for a in s)
         boot.append(1 - m / r if r > 0 else np.nan)
     lo, hi = np.nanpercentile(boot, [2.5, 97.5])
+    # p unilateral (H0: ganho <= 0): fração das reamostras sem ganho
     return {'ganho': round(float(1 - e_m.sum() / e_r.sum()), 3),
-            'IC95': [round(float(lo), 3), round(float(hi), 3)]}
+            'IC95': [round(float(lo), 3), round(float(hi), 3)],
+            'p_unilateral': round(float(np.nanmean(np.array(boot) <= 0)), 4)}

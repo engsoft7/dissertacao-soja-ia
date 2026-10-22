@@ -1,0 +1,260 @@
+{
+  "fontes": {
+    "pam": "IBGE, SIDRA 5457 (dados/pam_uf.csv)",
+    "conab": "CONAB, série histórica da soja (dados/conab/conab_serie_historica_soja.csv)"
+  },
+  "concordancia_por_uf": {
+    "BA": {
+      "safras": 25,
+      "dif_media_produtividade_%": -0.7,
+      "dif_media_producao_%": -0.2,
+      "r_nivel": 0.996,
+      "r_variacao_anual": 0.982,
+      "dp_anomalia_pam_%": 14.2,
+      "dp_anomalia_conab_%": 14.4
+    },
+    "GO": {
+      "safras": 25,
+      "dif_media_produtividade_%": 2.1,
+      "dif_media_producao_%": 3.2,
+      "r_nivel": 0.984,
+      "r_variacao_anual": 0.905,
+      "dp_anomalia_pam_%": 7.3,
+      "dp_anomalia_conab_%": 8.0
+    },
+    "MA": {
+      "safras": 25,
+      "dif_media_produtividade_%": 1.6,
+      "dif_media_producao_%": 1.8,
+      "r_nivel": 0.943,
+      "r_variacao_anual": 0.899,
+      "dp_anomalia_pam_%": 10.8,
+      "dp_anomalia_conab_%": 11.0
+    },
+    "MG": {
+      "safras": 25,
+      "dif_media_produtividade_%": 1.2,
+      "dif_media_producao_%": 0.6,
+      "r_nivel": 0.99,
+      "r_variacao_anual": 0.951,
+      "dp_anomalia_pam_%": 6.9,
+      "dp_anomalia_conab_%": 7.3
+    },
+    "MS": {
+      "safras": 25,
+      "dif_media_produtividade_%": 2.6,
+      "dif_media_producao_%": 2.6,
+      "r_nivel": 0.968,
+      "r_variacao_anual": 0.979,
+      "dp_anomalia_pam_%": 14.8,
+      "dp_anomalia_conab_%": 13.5
+    },
+    "MT": {
+      "safras": 25,
+      "dif_media_produtividade_%": 1.6,
+      "dif_media_producao_%": 2.1,
+      "r_nivel": 0.973,
+      "r_variacao_anual": 0.946,
+      "dp_anomalia_pam_%": 5.8,
+      "dp_anomalia_conab_%": 6.3
+    },
+    "PA": {
+      "safras": 25,
+      "dif_media_produtividade_%": 0.2,
+      "dif_media_producao_%": -2.5,
+      "r_nivel": 0.747,
+      "r_variacao_anual": 0.118,
+      "dp_anomalia_pam_%": 5.1,
+      "dp_anomalia_conab_%": 7.1
+    },
+    "PI": {
+      "safras": 25,
+      "dif_media_produtividade_%": 1.7,
+      "dif_media_producao_%": 2.1,
+      "r_nivel": 0.99,
+      "r_variacao_anual": 0.988,
+      "dp_anomalia_pam_%": 21.4,
+      "dp_anomalia_conab_%": 21.8
+    },
+    "PR": {
+      "safras": 25,
+      "dif_media_produtividade_%": 1.1,
+      "dif_media_producao_%": 0.4,
+      "r_nivel": 0.994,
+      "r_variacao_anual": 0.995,
+      "dp_anomalia_pam_%": 12.6,
+      "dp_anomalia_conab_%": 13.1
+    },
+    "RO": {
+      "safras": 25,
+      "dif_media_produtividade_%": -0.4,
+      "dif_media_producao_%": 0.1,
+      "r_nivel": 0.86,
+      "r_variacao_anual": 0.416,
+      "dp_anomalia_pam_%": 4.1,
+      "dp_anomalia_conab_%": 4.7
+    },
+    "RR": {
+      "safras": 22,
+      "dif_media_produtividade_%": 4.0,
+      "dif_media_producao_%": 33.3,
+      "r_nivel": 0.397,
+      "r_variacao_anual": 0.214,
+      "dp_anomalia_pam_%": 11.2,
+      "dp_anomalia_conab_%": 7.0
+    },
+    "RS": {
+      "safras": 25,
+      "dif_media_produtividade_%": 3.2,
+      "dif_media_producao_%": 4.5,
+      "r_nivel": 0.988,
+      "r_variacao_anual": 0.997,
+      "dp_anomalia_pam_%": 28.1,
+      "dp_anomalia_conab_%": 26.5
+    },
+    "SC": {
+      "safras": 25,
+      "dif_media_produtividade_%": 1.6,
+      "dif_media_producao_%": 0.7,
+      "r_nivel": 0.983,
+      "r_variacao_anual": 0.959,
+      "dp_anomalia_pam_%": 12.1,
+      "dp_anomalia_conab_%": 11.5
+    },
+    "SP": {
+      "safras": 25,
+      "dif_media_produtividade_%": 1.2,
+      "dif_media_producao_%": 2.9,
+      "r_nivel": 0.962,
+      "r_variacao_anual": 0.939,
+      "dp_anomalia_pam_%": 8.6,
+      "dp_anomalia_conab_%": 10.1
+    },
+    "TO": {
+      "safras": 25,
+      "dif_media_produtividade_%": -0.1,
+      "dif_media_producao_%": 3.1,
+      "r_nivel": 0.918,
+      "r_variacao_anual": 0.891,
+      "dp_anomalia_pam_%": 6.6,
+      "dp_anomalia_conab_%": 9.6
+    }
+  },
+  "para_sinal_climatico": {
+    "safras": 24,
+    "anos": [
+      2001,
+      2024
+    ],
+    "variaveis": {
+      "precip_total": {
+        "rho_pam": 0.03,
+        "p_pam": 0.888,
+        "rho_conab": 0.115,
+        "p_conab": 0.593,
+        "dif_abs_rho_conab_menos_pam": 0.084,
+        "IC95": [
+          -0.352,
+          0.386
+        ]
+      },
+      "EVI_max": {
+        "rho_pam": -0.299,
+        "p_pam": 0.156,
+        "rho_conab": -0.222,
+        "p_conab": 0.298,
+        "dif_abs_rho_conab_menos_pam": -0.077,
+        "IC95": [
+          -0.472,
+          0.326
+        ]
+      },
+      "oni_djf": {
+        "rho_pam": 0.105,
+        "p_pam": 0.625,
+        "rho_conab": 0.123,
+        "p_conab": 0.568,
+        "dif_abs_rho_conab_menos_pam": 0.017,
+        "IC95": [
+          -0.309,
+          0.335
+        ]
+      },
+      "grad_atl": {
+        "rho_pam": 0.168,
+        "p_pam": 0.432,
+        "rho_conab": 0.081,
+        "p_conab": 0.707,
+        "dif_abs_rho_conab_menos_pam": -0.087,
+        "IC95": [
+          -0.42,
+          0.348
+        ]
+      }
+    },
+    "rho_entre_fontes": {
+      "rho": 0.397,
+      "p": 0.055
+    }
+  },
+  "para_safras_recentes": {
+    "2025": {
+      "conab_levantamentos_mil_t": {
+        "2025-02": 3901.5,
+        "2025-07": 4500.5,
+        "2025-08": 4500.5,
+        "2025-09": 4496.8,
+        "2025-10": 4496.8,
+        "2025-11": 4496.8,
+        "2025-12": 4496.8,
+        "2026-02": 4496.8,
+        "2026-03": 4496.8,
+        "2026-04": 4496.8,
+        "2026-05": 4496.8,
+        "2026-06": 4496.8,
+        "2026-07": 4496.8,
+        "2026-08": 4496.8,
+        "2026-09": 4496.8
+      },
+      "pam_mil_t": 4372.4,
+      "projecao_origem_2024_mil_t": {
+        "central": 4285.721,
+        "faixa80": [
+          3902.051,
+          4712.513
+        ]
+      }
+    },
+    "2026": {
+      "conab_levantamentos_mil_t": {
+        "2025-10": 4864.6,
+        "2025-11": 4864.6,
+        "2025-12": 4864.6,
+        "2026-02": 5000.1,
+        "2026-03": 5054.7,
+        "2026-04": 5276.0,
+        "2026-05": 5395.1,
+        "2026-06": 5395.1,
+        "2026-07": 5395.1,
+        "2026-08": 5395.1,
+        "2026-09": 5395.1,
+        "2026-10": 5395.1
+      },
+      "pam_mil_t": null,
+      "projecao_origem_2024_mil_t": {
+        "central": 4765.881,
+        "faixa80": [
+          3928.221,
+          6013.868
+        ]
+      },
+      "projecao_origem_2025_mil_t": {
+        "central": 4813.256,
+        "faixa80": [
+          4409.691,
+          5283.97
+        ]
+      }
+    }
+  }
+}

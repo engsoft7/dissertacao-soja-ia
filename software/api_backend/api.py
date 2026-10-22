@@ -3,6 +3,7 @@ from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
                       descricao_do_levantamento, nota_sobre_o_preco,
                       aviso_de_defasagem, meses_desde_o_levantamento,
                       buscar_cotacoes, aviso_sobre_o_custo)
+from validacao import metricas_validacao
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -85,7 +86,7 @@ async def app_lifespan(app: FastAPI):
     df = M.carregar(str(DADOS_PATH))
     AppState.df = df
     AppState.estimador = M.Estimador().treinar(df)
-    AppState.estimador.validar(df)  # Popula métricas de mae e rmse
+    AppState.metricas = AppState.estimador.validar(df)  # Popula métricas de mae e rmse
     AppState.last_year = int(df["ano"].max())
     print("Modelo carregado e treinado com sucesso.", flush=True)
     # Pre-populate finance cache in background
@@ -184,6 +185,7 @@ DADOS_PATH = ROOT_PATH / "pesquisa" / "dados" / "soja_para_painel.csv"
 class AppState:
     df = None
     estimador = None
+    metricas = None
     last_year = None
 
 # Startup phase handled via lifespan manager in app definition
@@ -307,7 +309,11 @@ def get_previsao(municipio: str):
         "municipio": municipio, 
         "historico": resultado,
         "elNinos": el_ninos,
-        "laNinas": la_ninas
+        "laNinas": la_ninas,
+        # Métricas da validação, para o aplicativo não precisar tê-las escritas
+        # no código: acompanham a base a cada safra nova, como no painel web.
+        "validacao": metricas_validacao(len(AppState.df), AppState.df["municipio"].nunique(),
+                                        AppState.metricas),
     }
 
 @app.get("/api/mapa/geo")

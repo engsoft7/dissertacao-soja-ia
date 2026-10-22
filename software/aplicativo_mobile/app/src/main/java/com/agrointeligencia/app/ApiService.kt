@@ -16,11 +16,29 @@ data class PrevisaoHistorico(
     val margem_erro: Double
 )
 
+/**
+ * Métricas da validação do modelo, enviadas pela API a partir de
+ * pesquisa/dados/metricas_validacao.json. Acompanham a base a cada safra nova,
+ * sem recompilar o aplicativo.
+ */
+data class ValidacaoModelo(
+    val r2: Double,
+    val r2_referencia: Double,
+    val rmse_kg_ha: Double,
+    val rrmse_pct: Double,
+    val registros: Int,
+    val municipios: Int
+)
+
 data class PrevisaoResponse(
     val municipio: String,
     val historico: List<PrevisaoHistorico>,
     val elNinos: List<Int>? = null,
-    val laNinas: List<Int>? = null
+    val laNinas: List<Int>? = null,
+    // Nulo quando a API é mais antiga que o aplicativo, ou na previsão guardada
+    // em cache por uma versão anterior: a tela diz que as métricas estão
+    // indisponíveis em vez de exibir números de outra base.
+    val validacao: ValidacaoModelo? = null
 )
 
 

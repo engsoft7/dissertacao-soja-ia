@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import android.graphics.Paint
 import kotlin.math.max
+import kotlin.math.roundToInt
 import androidx.core.view.WindowCompat
 import android.app.Activity
 import androidx.compose.ui.graphics.toArgb
@@ -528,7 +529,7 @@ fun AgroDashboard() {
                         }
                         3 -> { // Sobre
                             item {
-                                MetodologiaCard(kpis)
+                                MetodologiaCard(kpis, previsao?.validacao)
                             }
                         }
                         1 -> { // Mapa WebView
@@ -1133,7 +1134,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
 }
 
 @Composable
-fun MetodologiaCard(kpis: FinancaResponse?) {
+fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
     val isDark = isSystemInDarkTheme()
     Card(
         modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 24.dp),
@@ -1177,28 +1178,38 @@ fun MetodologiaCard(kpis: FinancaResponse?) {
             
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
             
-            // Métricas da validação temporal deixando um ano de fora por vez, sobre
-            // os 415 registros da base. São as mesmas da Tabela 6 da dissertação e do
-            // painel web; a fonte da verdade é pesquisa/dados/metricas_validacao.json.
+            // Métricas da validação temporal deixando um ano de fora por vez. Vêm
+            // da API, que as lê de pesquisa/dados/metricas_validacao.json, o mesmo
+            // arquivo que o painel web exibe: acompanham a base a cada safra nova.
             // O R² da referência aparece ao lado de propósito: o modelo empata com o
             // histórico municipal somado à tendência, e omitir isso superestimaria o
             // que a ferramenta entrega.
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column {
-                    Text(text = "R² do modelo", fontSize = 11.sp, color = Color.Gray)
-                    Text(text = "0,216", fontSize = 14.sp, color = (if(isDark) Color(0xFFbc8cff) else Color(0xFF7c3aed)), fontWeight = FontWeight.Bold)
+            if (validacao != null) {
+                val r2 = String.format("%.3f", validacao.r2).replace('.', ',')
+                val r2Ref = String.format("%.3f", validacao.r2_referencia).replace('.', ',')
+                val rrmse = String.format("%.1f", validacao.rrmse_pct).replace('.', ',')
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Column {
+                        Text(text = "R² do modelo", fontSize = 11.sp, color = Color.Gray)
+                        Text(text = r2, fontSize = 14.sp, color = (if(isDark) Color(0xFFbc8cff) else Color(0xFF7c3aed)), fontWeight = FontWeight.Bold)
+                    }
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(text = "R² da tendência (referência)", fontSize = 11.sp, color = Color.Gray)
+                        Text(text = r2Ref, fontSize = 14.sp, color = (if(isDark) Color(0xFF8b949e) else Color(0xFF57606a)), fontWeight = FontWeight.Bold)
+                    }
                 }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "R² da tendência (referência)", fontSize = 11.sp, color = Color.Gray)
-                    Text(text = "0,216", fontSize = 14.sp, color = (if(isDark) Color(0xFF8b949e) else Color(0xFF57606a)), fontWeight = FontWeight.Bold)
-                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "Erro típico de ± ${validacao.rmse_kg_ha.roundToInt()} kg/ha, ou $rrmse% da produtividade média, " +
+                           "sobre ${validacao.registros} registros de ${validacao.municipios} municípios.",
+                    fontSize = 11.sp, color = Color.Gray, lineHeight = 15.sp
+                )
+            } else {
+                Text(
+                    text = "Métricas de validação indisponíveis sem conexão com o servidor.",
+                    fontSize = 11.sp, color = Color.Gray, lineHeight = 15.sp
+                )
             }
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = "Erro típico de ± 416 kg/ha, ou 13,9% da produtividade média, " +
-                       "sobre 415 registros de 38 municípios.",
-                fontSize = 11.sp, color = Color.Gray, lineHeight = 15.sp
-            )
             
             Spacer(modifier = Modifier.height(20.dp))
             Text(

@@ -54,6 +54,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 
 // OS TRÊS NÚMEROS QUE DECIDEM A MARGEM SÃO DO PRODUTOR.
 //
@@ -153,28 +157,40 @@ private fun SharedPreferences.esquecerDoProdutor(vararg chaves: String) {
     editor.apply()
 }
 
+/**
+ * Cores do aplicativo. O texto secundário (onSurfaceVariant) e as linhas de
+ * grade e divisórias (outlineVariant) são definidos aqui, e não com Color.Gray
+ * espalhado pelas telas: o cinza fixo tinha contraste de 3,5:1 sobre o branco,
+ * abaixo dos 4,5:1 recomendados para texto pequeno; estes passam de 7:1.
+ */
+fun esquemaAgro(isDark: Boolean): ColorScheme = if (isDark) {
+    darkColorScheme(
+        background = Color(0xFF0F172A),
+        surface = Color(0xFF1E293B),
+        primary = Color(0xFF10B981),
+        onBackground = Color(0xFFE2E8F0),
+        onSurface = Color(0xFFE2E8F0),
+        onSurfaceVariant = Color(0xFFCBD5E1),
+        outlineVariant = Color(0xFF334155)
+    )
+} else {
+    lightColorScheme(
+        background = Color(0xFFF8FAFC),
+        surface = Color(0xFFFFFFFF),
+        primary = Color(0xFF047857),
+        onBackground = Color(0xFF1E293B),
+        onSurface = Color(0xFF1E293B),
+        onSurfaceVariant = Color(0xFF475569),
+        outlineVariant = Color(0xFFE2E8F0)
+    )
+}
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val isDark = isSystemInDarkTheme()
-            val colors = if (isDark) {
-                darkColorScheme(
-                    background = Color(0xFF0F172A),
-                    surface = Color(0xFF1E293B),
-                    primary = Color(0xFF10B981),
-                    onBackground = Color(0xFFE2E8F0),
-                    onSurface = Color(0xFFE2E8F0)
-                )
-            } else {
-                lightColorScheme(
-                    background = Color(0xFFF8FAFC),
-                    surface = Color(0xFFFFFFFF),
-                    primary = Color(0xFF059669),
-                    onBackground = Color(0xFF1E293B),
-                    onSurface = Color(0xFF1E293B)
-                )
-            }
+            val colors = esquemaAgro(isDark)
             MaterialTheme(
                 colorScheme = colors
             ) {
@@ -358,10 +374,10 @@ fun AgroDashboard() {
         ) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
-                    Icon(Icons.Filled.AddCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
+                    Icon(Icons.Filled.Agriculture, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "AgroInteligência Pro",
+                        text = "AgroInteligência",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.primary
@@ -376,8 +392,10 @@ fun AgroDashboard() {
                     }
                 }
                 
-                if (currentTab != 2) {
-                    Text(text = "Município Selecionado:", color = MaterialTheme.colorScheme.onBackground)
+                // O município só muda Resumo, Mapa e Histórico; em Mercado e
+                // Sobre o seletor ocupava a tela sem efeito.
+                if (currentTab in 0..2) {
+                    Text(text = "Município selecionado:", color = MaterialTheme.colorScheme.onBackground)
                     
                     ExposedDropdownMenuBox(
                         expanded = expanded,
@@ -411,7 +429,13 @@ fun AgroDashboard() {
                 }
             }
 
-            if (isLoading) {
+            if (currentTab == 4) {
+                // A cotação não depende da previsão do município: a aba abre
+                // mesmo quando a previsão ainda não carregou ou falhou.
+                item {
+                    MercadoCard()
+                }
+            } else if (isLoading) {
                 item {
                     CircularProgressIndicator(modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally))
                 }
@@ -435,7 +459,7 @@ fun AgroDashboard() {
                             )
                             Text(
                                 text = "Não foi possível sincronizar os dados meteorológicos e do mercado futuro. Verifique sua conexão.",
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 13.sp,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                 modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
@@ -478,7 +502,7 @@ fun AgroDashboard() {
                                         Icon(Icons.Filled.SettingsSuggest, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
                                         Spacer(Modifier.width(8.dp))
                                         Text(
-                                            text = "Simulador Climático (What-If)",
+                                            text = "Simulador de cenário climático",
                                             fontSize = 18.sp,
                                             fontWeight = FontWeight.SemiBold,
                                             color = MaterialTheme.colorScheme.onBackground
@@ -519,9 +543,9 @@ fun AgroDashboard() {
                                     text = "A estimativa das safras passadas parte do histórico " +
                                            "do município e da tendência, com o clima médio da série. " +
                                            "Ela não é uma previsão refeita ano a ano.",
-                                    fontSize = 11.sp,
-                                    color = Color.Gray,
-                                    lineHeight = 15.sp,
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    lineHeight = 16.sp,
                                     modifier = Modifier.padding(top = 6.dp, bottom = 4.dp)
                                 )
                             }
@@ -538,11 +562,6 @@ fun AgroDashboard() {
                                 MetodologiaCard(kpis, previsao?.validacao)
                             }
                         }
-                        4 -> { // Mercado
-                            item {
-                                MercadoCard()
-                            }
-                        }
                         1 -> { // Mapa WebView
                             item {
                                 if (isOfflineMode) {
@@ -556,9 +575,9 @@ fun AgroDashboard() {
                                         // Nunca houve imagem de satélite aqui: o mapa é vetorial,
                                         // com o contorno do Pará da malha do IBGE, rios do Natural
                                         // Earth e círculos coloridos pela produtividade observada.
-                                        Text("Mapa indisponível offline", fontWeight = FontWeight.Bold, color = Color.Gray, fontSize = 16.sp)
+                                        Text("Mapa indisponível offline", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Text("O mapa é desenhado pela API. Conecte-se para carregá-lo.", color = Color.Gray, fontSize = 14.sp)
+                                        Text("O mapa é desenhado pela API. Conecte-se para carregá-lo.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
                                     }
                                 } else {
                                     Card(
@@ -645,12 +664,12 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                 // A API envia 0.0 como sentinela de safra ainda não divulgada
                 // pela PAM; imprimir esse zero anunciaria colheita nula.
                 Text(
-                    text = if (observado) "%,d kg".format(historico.rendimento_real.toInt())
+                    text = if (observado) String.format(PT_BR, "%,d kg", historico.rendimento_real.toInt())
                            else "não divulgada",
                     fontWeight = FontWeight.Bold,
                     fontSize = if (observado) 16.sp else 12.sp,
                     maxLines = 1,
-                    color = if (observado) MaterialTheme.colorScheme.onSurface else Color.Gray
+                    color = if (observado) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -663,10 +682,10 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
             // município, e não o da safra: ela acompanha a tendência. Chamá-la
             // de "IA" sugeria uma previsão ano a ano que o modelo não faz.
             Text(
-                text = "Estimativa %,d kg · erro típico ±%,d kg/ha".format(
+                text = String.format(PT_BR, "Estimativa %,d kg · erro típico ±%,d kg/ha", 
                     historico.rendimento_predito.toInt(), historico.margem_erro.toInt()),
                 fontSize = 12.sp,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp)
             )
 
@@ -688,7 +707,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                 }
                 Text(
                     text = (if (observado) "Resultado a preços de hoje: "
-                            else "Resultado projetado: ") + "R$ %,d/ha".format(r.valor.toInt()),
+                            else "Resultado projetado: ") + String.format(PT_BR, "R$ %,d/ha", r.valor.toInt()),
                     fontSize = 13.sp,
                     color = color,
                     fontWeight = FontWeight.SemiBold,
@@ -696,10 +715,10 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                 )
                 if (r.sinalIncerto && outro != null) {
                     Text(
-                        text = "Pode ir de R$ %,d a R$ %,d conforme o rateio do custo, que a CONAB não publica aberto por item.".format(
+                        text = String.format(PT_BR, "Pode ir de R$ %,d a R$ %,d conforme o rateio do custo, que a CONAB não publica aberto por item.", 
                             minOf(r.valor, outro).toInt(), maxOf(r.valor, outro).toInt()),
-                        fontSize = 11.sp,
-                        color = Color.Gray,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
@@ -719,15 +738,15 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             val projYield = projecao.rendimento_predito
-            Text(text = "Rendimento Esperado", fontSize = 14.sp, color = Color.Gray)
+            Text(text = "Rendimento Esperado", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
-                    text = "${projYield.toInt()} kg/ha", 
+                    text = "${milhar(projYield)} kg/ha", 
                     fontSize = 28.sp, 
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Text(text = " (~ ${(projYield / 60).toInt()} sc/ha)", fontSize = 14.sp, color = Color.Gray, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
+                Text(text = " (~ ${(projYield / 60).toInt()} sc/ha)", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
             }
             
             if (ultimoReal != null) {
@@ -744,11 +763,11 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        Text(text = "Safra ${ultimoReal.ano} ($typeStr)", fontSize = 12.sp, color = Color.Gray)
-                        Text(text = "${pastYield.toInt()} kg/ha", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        Text(text = "Safra ${ultimoReal.ano} ($typeStr)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = "${milhar(pastYield)} kg/ha", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(text = "Variação (YoY)", fontSize = 12.sp, color = Color.Gray)
+                        Text(text = "Variação anual", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(text = "$sign${diffPct.toInt()}%", fontSize = 16.sp, color = color, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -950,14 +969,14 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                 }
             ).joinToString(" ")
             if (legenda.isNotBlank()) {
-                Text(text = legenda, fontSize = 11.sp, color = Color.Gray)
+                Text(text = legenda, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (seus.isNotEmpty()) {
                 Text(
                     text = "Informados em " + quando.format(java.util.Date(
                         maxOf(precoEm, custoEm, prodEm))) + ".",
-                    fontSize = 11.sp,
-                    color = Color.Gray
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 // Caminho de volta, para ninguém ficar preso a um número
                 // digitado errado sem saber de onde vinha o padrão.
@@ -972,7 +991,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     },
                     contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
                 ) {
-                    Text(text = "Voltar aos valores padrão", fontSize = 11.sp)
+                    Text(text = "Voltar aos valores padrão", fontSize = 12.sp)
                 }
             }
 
@@ -992,33 +1011,33 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
                     Text(text = if (temProd) "Receita Bruta" else "Receita Bruta Est.",
-                         fontSize = 12.sp, color = Color.Gray)
+                         fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "R$ ${receita.toInt()}/ha", fontSize = 18.sp, color = (if(isDark) Color(0xFF58a6ff) else Color(0xFF2563eb)), fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "Custo Operacional", fontSize = 12.sp, color = Color.Gray)
+                    Text(text = "Custo Operacional", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "R$ ${custo.toInt()}/ha", fontSize = 18.sp, color = Color(0xFFf85149), fontWeight = FontWeight.Bold)
                 }
             }
             
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text(text = "Lucro Líquido Proj.", fontSize = 13.sp, color = Color.Gray)
+                    Text(text = "Lucro Líquido Proj.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "R$ ${lucro.toInt()}/ha", fontSize = 22.sp, color = profitColor, fontWeight = FontWeight.ExtraBold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "ROI (Retorno)", fontSize = 13.sp, color = Color.Gray)
+                    Text(text = "ROI (Retorno)", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "${roi.toInt()}%", fontSize = 22.sp, color = profitColor, fontWeight = FontWeight.ExtraBold)
                 }
             }
             
             if (r.sinalIncerto && outroRateio != null) {
                 Text(
-                    text = "Atenção: com estes dados o resultado pode ir de R$ %,d a R$ %,d por hectare, conforme quanto do custo variável acompanha a área e quanto acompanha a produção. A CONAB publica só o total por saca, sem abrir por item. Informe o seu custeio para a conta parar de depender disso.".format(
+                    text = String.format(PT_BR, "Atenção: com estes dados o resultado pode ir de R$ %,d a R$ %,d por hectare, conforme quanto do custo variável acompanha a área e quanto acompanha a produção. A CONAB publica só o total por saca, sem abrir por item. Informe o seu custeio para a conta parar de depender disso.", 
                         minOf(lucro, outroRateio).toInt(), maxOf(lucro, outroRateio).toInt()),
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     color = if (isDark) Color(0xFFd29922) else Color(0xFFbf8700),
                     modifier = Modifier.padding(top = 12.dp)
                 )
@@ -1026,8 +1045,8 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
 
             Spacer(modifier = Modifier.height(16.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Simulação Inteligente", fontSize = 11.sp, color = Color.Gray)
-                Text(text = "Ponto Empate: ${(custo / preco).toInt()} sc/ha", fontSize = 11.sp, color = Color.Gray)
+                Text(text = "Simulação Inteligente", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = "Ponto Empate: ${(custo / preco).toInt()} sc/ha", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -1071,7 +1090,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Projeção Ajustada", fontSize = 14.sp, color = Color.Gray)
+                Text(text = "Projeção Ajustada", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (isSimulating) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                 }
@@ -1079,7 +1098,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
             
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
-                    text = "${simulado.toInt()} kg/ha", 
+                    text = "${milhar(simulado)} kg/ha", 
                     fontSize = 28.sp, 
                     fontWeight = FontWeight.Bold,
                     color = if (delta < 0) (if(isDark) Color(0xFFf85149) else Color(0xFFdc2626)) else if (delta > 0) (if(isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else MaterialTheme.colorScheme.primary
@@ -1087,13 +1106,13 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                 if (kotlin.math.abs(delta) > 1) {
                     val sign = if (delta >= 0) "+" else ""
                     val c = if (delta >= 0) (if(isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else (if(isDark) Color(0xFFf85149) else Color(0xFFdc2626))
-                    Text(text = " ($sign${delta.toInt()} kg/ha)", fontSize = 14.sp, color = c, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
+                    Text(text = " ($sign${milhar(delta)} kg/ha)", fontSize = 14.sp, color = c, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
             
-            Text(text = "Precipitação (${precipFactor.toInt()}%)", fontSize = 12.sp, color = Color.LightGray)
+            Text(text = "Precipitação (${precipFactor.toInt()}%)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Slider(
                 value = precipFactor,
                 onValueChange = { precipFactor = it },
@@ -1102,7 +1121,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                 steps = 19
             )
             
-            Text(text = "Desvio Térmico (${if (tempOffset > 0) "+" else ""}${String.format("%.1f", tempOffset)}°C)", fontSize = 12.sp, color = Color.LightGray)
+            Text(text = "Desvio Térmico (${if (tempOffset > 0) "+" else ""}${String.format("%.1f", tempOffset)}°C)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Slider(
                 value = tempOffset,
                 onValueChange = { tempOffset = it },
@@ -1127,7 +1146,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                                " A variação acima cabe dentro da margem de erro do " +
                                "modelo, de ± ${it.toInt()} kg/ha."
                            } ?: ""),
-                    fontSize = 11.sp, color = Color.Gray, lineHeight = 15.sp
+                    fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp
                 )
             }
             resposta?.fora_da_faixa?.takeIf { it.isNotEmpty() }?.let {
@@ -1135,9 +1154,9 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                 Text(
                     text = "Cenário fora da faixa observada na base; o resultado foi " +
                            "preso ao limite do que o modelo viu.",
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     color = if (isDark) Color(0xFFd29922) else Color(0xFF9a6700),
-                    lineHeight = 15.sp
+                    lineHeight = 16.sp
                 )
             }
         }
@@ -1166,18 +1185,18 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
             }
             Spacer(modifier = Modifier.height(16.dp))
             
-            Text(text = "Satélite: MODIS (Resolução 250m)", fontSize = 12.sp, color = Color.Gray)
-            Text(text = "Clima: CHIRPS (Chuva) & ERA5-Land (Temp.)", fontSize = 12.sp, color = Color.Gray)
-            Text(text = "Base Territorial: MapBiomas e IBGE (PAM)", fontSize = 12.sp, color = Color.Gray)
+            Text(text = "Satélite: MODIS (Resolução 250m)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = "Clima: CHIRPS (Chuva) & ERA5-Land (Temp.)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = "Base Territorial: MapBiomas e IBGE (PAM)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             // Preço e custo são constantes de um levantamento datado, não cotação
             // diária. Sem a praça e a data o número envelhece sem avisar — por isso
             // o rótulo vem da API, junto com a frase que diz onde o preço está na
             // série da praça: quando a CONAB publica levantamento novo, esta tela
             // acompanha sem recompilar o APK.
-            Text(text = "Preço e custo: " + (kpis?.fonte_preco ?: "CONAB (levantamento indisponível offline)"), fontSize = 12.sp, color = Color.Gray)
-            Text(text = "Preço de porteira, não cotação de bolsa. Ambos editáveis na tela Resumo.", fontSize = 12.sp, color = Color.Gray)
+            Text(text = "Preço e custo: " + (kpis?.fonte_preco ?: "CONAB (levantamento indisponível offline)"), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = "Preço de porteira, não cotação de bolsa. Ambos editáveis na tela Resumo.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             kpis?.nota_preco?.let {
-                Text(text = it, fontSize = 12.sp, color = Color.Gray)
+                Text(text = it, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             kpis?.aviso_preco?.let {
                 Text(
@@ -1187,7 +1206,7 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
                 )
             }
             
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
             
             // Métricas da validação temporal deixando um ano de fora por vez. Vêm
             // da API, que as lê de pesquisa/dados/metricas_validacao.json, o mesmo
@@ -1201,11 +1220,11 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
                 val rrmse = String.format("%.1f", validacao.rrmse_pct).replace('.', ',')
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Column {
-                        Text(text = "R² do modelo", fontSize = 11.sp, color = Color.Gray)
+                        Text(text = "R² do modelo", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(text = r2, fontSize = 14.sp, color = (if(isDark) Color(0xFFbc8cff) else Color(0xFF7c3aed)), fontWeight = FontWeight.Bold)
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(text = "R² da tendência (referência)", fontSize = 11.sp, color = Color.Gray)
+                        Text(text = "R² da tendência (referência)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(text = r2Ref, fontSize = 14.sp, color = (if(isDark) Color(0xFF8b949e) else Color(0xFF57606a)), fontWeight = FontWeight.Bold)
                     }
                 }
@@ -1213,12 +1232,12 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
                 Text(
                     text = "Erro típico de ± ${validacao.rmse_kg_ha.roundToInt()} kg/ha, ou $rrmse% da produtividade média, " +
                            "sobre ${validacao.registros} registros de ${validacao.municipios} municípios.",
-                    fontSize = 11.sp, color = Color.Gray, lineHeight = 15.sp
+                    fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp
                 )
             } else {
                 Text(
                     text = "Métricas de validação indisponíveis sem conexão com o servidor.",
-                    fontSize = 11.sp, color = Color.Gray, lineHeight = 15.sp
+                    fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp
                 )
             }
             
@@ -1226,7 +1245,7 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
             Text(
                 text = "Aviso Legal: Este é um projeto de pesquisa acadêmica em Inteligência Artificial. As estimativas projetadas pela IA e os valores financeiros não configuram recomendação de investimento ou consultoria agronômica. Consulte profissionais certificados antes de tomar decisões financeiras reais.",
                 fontSize = 12.sp,
-                color = Color.LightGray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                 lineHeight = 16.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Justify
@@ -1237,15 +1256,20 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
 
 
 
+// Números no formato brasileiro em qualquer aparelho: "3.230", e não "3,230"
+// num celular configurado em inglês.
+private val PT_BR = java.util.Locale("pt", "BR")
+
+fun milhar(v: Double): String = String.format(PT_BR, "%,d", v.roundToInt())
+
+fun reais(v: Double): String = String.format(PT_BR, "%,.2f", v)
+
 // Períodos da tela Mercado: chave da API e rótulo do botão.
 private val PERIODOS_MERCADO = listOf("1d" to "1D", "5d" to "5D", "1mo" to "1M", "6mo" to "6M")
 
-private fun reais(v: Double) = String.format("%.2f", v).replace('.', ',')
-
-@OptIn(ExperimentalMaterial3Api::class)
+/** Busca a cotação e entrega à tela; a tela em si é MercadoConteudo. */
 @Composable
 fun MercadoCard() {
-    val isDark = isSystemInDarkTheme()
     var periodo by remember { mutableStateOf("1d") }
     var mercado by remember { mutableStateOf<MercadoResponse?>(null) }
     var carregando by remember { mutableStateOf(true) }
@@ -1264,7 +1288,17 @@ fun MercadoCard() {
             kotlinx.coroutines.delay(60_000)
         }
     }
+    MercadoConteudo(mercado, carregando, periodo) { periodo = it }
+}
 
+/**
+ * A tela Mercado sem rede: recebe os dados prontos. Separada de MercadoCard
+ * para poder ser desenhada nas capturas de tela automáticas.
+ */
+@Composable
+fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: String, aoMudarPeriodo: (String) -> Unit) {
+    val isDark = isSystemInDarkTheme()
+    val secundaria = MaterialTheme.colorScheme.onSurfaceVariant
     Card(
         modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
         shape = RoundedCornerShape(16.dp),
@@ -1274,12 +1308,12 @@ fun MercadoCard() {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Soja em Chicago, em R$/saca", fontWeight = FontWeight.Bold, fontSize = 16.sp,
                  color = MaterialTheme.colorScheme.onSurface)
-            Text("CBOT, contrato mais próximo, convertido pelo dólar de cada momento",
-                 fontSize = 11.sp, color = Color.Gray)
+            Text("Bolsa de Chicago (CBOT), contrato mais próximo, convertido pelo dólar de cada momento",
+                 fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PERIODOS_MERCADO.forEach { (chave, rotulo) ->
-                    FilterChip(selected = periodo == chave, onClick = { periodo = chave },
+                    FilterChip(selected = periodo == chave, onClick = { aoMudarPeriodo(chave) },
                                label = { Text(rotulo) })
                 }
             }
@@ -1290,216 +1324,271 @@ fun MercadoCard() {
                     CircularProgressIndicator(modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally))
                 cot == null ->
                     Text("Cotação indisponível no momento. Tente de novo em alguns minutos.",
-                         fontSize = 13.sp, color = Color.Gray)
+                         fontSize = 13.sp, color = secundaria)
                 else -> {
                     val subiu = cot.variacao_periodo_pct >= 0
-                    val corVar = if (subiu) (if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a))
-                                 else (if (isDark) Color(0xFFf85149) else Color(0xFFcf222e))
+                    val corVar = if (subiu) (if (isDark) Color(0xFF3fb950) else Color(0xFF15803d))
+                                 else (if (isDark) Color(0xFFf85149) else Color(0xFFb91c1c))
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text("R$ ${reais(cot.ultimo_brl_saca)}", fontSize = 28.sp, fontWeight = FontWeight.Bold,
                              color = MaterialTheme.colorScheme.onSurface)
                         Spacer(Modifier.width(10.dp))
-                        Text((if (subiu) "+" else "") + String.format("%.2f", cot.variacao_periodo_pct).replace('.', ',') + "% no período",
-                             fontSize = 13.sp, color = corVar, modifier = Modifier.padding(bottom = 5.dp))
+                        Text((if (subiu) "▲ +" else "▼ ") + String.format(PT_BR, "%.2f", cot.variacao_periodo_pct) + "% no período",
+                             fontSize = 13.sp, color = corVar, fontWeight = FontWeight.SemiBold,
+                             modifier = Modifier.padding(bottom = 5.dp))
                     }
                     Text("Máxima R$ ${reais(cot.maxima_periodo)} · mínima R$ ${reais(cot.minima_periodo)}",
-                         fontSize = 12.sp, color = Color.Gray)
+                         fontSize = 12.sp, color = secundaria)
                     GraficoVelas(cot.velas, isDark, cot.periodo)
-                    val quando = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale("pt", "BR"))
+                    val quando = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", PT_BR)
                         .format(java.util.Date(cot.atualizado_em * 1000))
                     Text("Cotação de $quando, com atraso de cerca de ${cot.atraso_min} min. Não é tempo real.",
-                         fontSize = 11.sp, color = Color.Gray)
+                         fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
                     if (cot.ultimo_usd_bushel != null && cot.cambio != null) {
-                        Text("US$ ${reais(cot.ultimo_usd_bushel)}/bushel · dólar a R$ ${String.format("%.4f", cot.cambio).replace('.', ',')}",
-                             fontSize = 11.sp, color = Color.Gray)
+                        Text("US$ ${reais(cot.ultimo_usd_bushel)}/bushel · dólar a R$ ${String.format(PT_BR, "%.4f", cot.cambio)}",
+                             fontSize = 12.sp, color = secundaria)
                     }
                 }
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.DarkGray)
-            Text("Referências de preço físico", fontWeight = FontWeight.Bold, fontSize = 13.sp,
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
+            Text("Referências de preço físico", fontWeight = FontWeight.Bold, fontSize = 14.sp,
                  color = MaterialTheme.colorScheme.onSurface)
             mercado?.fisico?.let {
                 Text("${it.praca} (${it.uf}), ${it.tipo}: R$ ${reais(it.valor)}/sc, cotação do dia",
-                     fontSize = 12.sp, color = Color.Gray)
+                     fontSize = 13.sp, color = secundaria)
             }
             mercado?.conab_saca?.let {
                 Text("Porteira, ${mercado?.conab_fonte ?: "CONAB"}: R$ ${reais(it)}/sc, padrão da simulação",
-                     fontSize = 12.sp, color = Color.Gray)
+                     fontSize = 13.sp, color = secundaria)
             }
             Spacer(Modifier.height(8.dp))
             Text("Preço de bolsa não é preço de porteira: entre Chicago e a fazenda há câmbio, " +
                  "frete, prêmio de porto e base. Informação de mercado, não recomendação de compra ou venda.",
-                 fontSize = 11.sp, color = Color.Gray, lineHeight = 15.sp,
+                 fontSize = 12.sp, color = secundaria, lineHeight = 16.sp,
                  fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
         }
+    }
+}
+
+/** Amostra de cor e rótulo de uma legenda de gráfico. */
+@Composable
+private fun ItemLegenda(cor: Color, rotulo: String, faixa: Boolean = false, tracejada: Boolean = false) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 14.dp, top = 4.dp)) {
+        Canvas(modifier = Modifier.size(width = 18.dp, height = 12.dp)) {
+            if (faixa) {
+                drawRect(color = cor)
+            } else {
+                drawLine(
+                    color = cor, start = Offset(0f, size.height / 2), end = Offset(size.width, size.height / 2),
+                    strokeWidth = 3.dp.toPx(),
+                    pathEffect = if (tracejada) PathEffect.dashPathEffect(floatArrayOf(6f, 4f), 0f) else null
+                )
+            }
+        }
+        Spacer(Modifier.width(4.dp))
+        Text(rotulo, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
     if (velas.isEmpty()) return
-    val alta = if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
-    val baixa = if (isDark) Color(0xFFf85149) else Color(0xFFcf222e)
-    val textColor = if (isDark) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
+    val alta = if (isDark) Color(0xFF3fb950) else Color(0xFF15803d)
+    val baixa = if (isDark) Color(0xFFf85149) else Color(0xFFb91c1c)
+    val corTexto = MaterialTheme.colorScheme.onSurfaceVariant
+    val corGrade = MaterialTheme.colorScheme.outlineVariant
     val minP = velas.minOf { it.l }
     val maxP = velas.maxOf { it.h }
     val faixa = if (maxP > minP) maxP - minP else 1.0
-    val formato = java.text.SimpleDateFormat(if (periodo == "1d") "HH:mm" else "dd/MM", java.util.Locale("pt", "BR"))
+    val formato = java.text.SimpleDateFormat(if (periodo == "1d") "HH:mm" else "dd/MM", PT_BR)
+    var tocada by remember(velas) { mutableStateOf<Int?>(null) }
+    val descricao = "Gráfico de velas da soja em reais por saca, de R$ ${reais(velas.first().o)} " +
+                    "a R$ ${reais(velas.last().c)}; máxima R$ ${reais(maxP)}, mínima R$ ${reais(minP)}."
 
-    Canvas(modifier = Modifier.fillMaxWidth().height(220.dp).padding(top = 10.dp, bottom = 6.dp)) {
-        val padX = 100f
-        val padY = 40f
+    // A vela tocada, por extenso: o gráfico mostra a forma, e o número exato
+    // fica aqui em cima, legível.
+    val sel = tocada?.let { velas.getOrNull(it) }
+    Text(
+        text = sel?.let {
+            java.text.SimpleDateFormat("dd/MM HH:mm", PT_BR).format(java.util.Date(it.t * 1000)) +
+                " · abertura ${reais(it.o)} · máxima ${reais(it.h)} · mínima ${reais(it.l)} · fechamento ${reais(it.c)}"
+        } ?: "Toque numa vela para ver os valores.",
+        fontSize = 12.sp, color = corTexto, lineHeight = 16.sp,
+        modifier = Modifier.padding(top = 10.dp)
+    )
+    Canvas(
+        modifier = Modifier.fillMaxWidth().height(220.dp).padding(top = 6.dp, bottom = 6.dp)
+            .semantics { contentDescription = descricao }
+            .pointerInput(velas) {
+                detectTapGestures { pos ->
+                    val padX = 56.dp.toPx()
+                    val passo = (size.width - padX) / velas.size
+                    tocada = ((pos.x - padX) / passo).toInt().coerceIn(0, velas.size - 1)
+                }
+            }
+    ) {
+        val padX = 56.dp.toPx()
+        val padY = 22.dp.toPx()
         val w = size.width - padX
         val h = size.height - padY
         val passo = w / velas.size
         val corpo = (passo * 0.6f).coerceAtLeast(1f)
         fun y(p: Double) = (h - ((p - minP) / faixa * h)).toFloat()
-        val paint = Paint().apply { color = textColor; textSize = 24f }
+        val paint = Paint().apply { color = corTexto.toArgb(); textSize = 11.sp.toPx(); isAntiAlias = true }
 
         for (i in 0..3) {
             val p = minP + faixa * i / 3
             val yy = y(p)
-            drawLine(color = Color.Gray.copy(alpha = 0.2f), start = Offset(padX, yy), end = Offset(padX + w, yy), strokeWidth = 2f)
-            drawContext.canvas.nativeCanvas.drawText(reais(p), 0f, yy + 8f, paint)
+            drawLine(color = corGrade, start = Offset(padX, yy), end = Offset(padX + w, yy), strokeWidth = 1.dp.toPx())
+            drawContext.canvas.nativeCanvas.drawText(reais(p), 0f, yy + 4.dp.toPx(), paint)
+        }
+        tocada?.let {
+            val x = padX + passo * it + passo / 2
+            drawLine(color = corTexto.copy(alpha = 0.5f), start = Offset(x, 0f), end = Offset(x, h), strokeWidth = 1.dp.toPx())
         }
         velas.forEachIndexed { i, v ->
             val x = padX + passo * i + passo / 2
             val cor = if (v.c >= v.o) alta else baixa
-            drawLine(color = cor, start = Offset(x, y(v.h)), end = Offset(x, y(v.l)), strokeWidth = 2f)
+            drawLine(color = cor, start = Offset(x, y(v.h)), end = Offset(x, y(v.l)), strokeWidth = 1.dp.toPx())
             val topo = y(maxOf(v.o, v.c))
             val base = y(minOf(v.o, v.c))
-            drawRect(color = cor, topLeft = Offset(x - corpo / 2, topo), size = Size(corpo, (base - topo).coerceAtLeast(2f)))
+            drawRect(color = cor, topLeft = Offset(x - corpo / 2, topo), size = Size(corpo, (base - topo).coerceAtLeast(1.dp.toPx())))
         }
         listOf(0, velas.size / 2, velas.size - 1).distinct().forEach { i ->
-            val x = padX + passo * i + passo / 2
-            drawContext.canvas.nativeCanvas.drawText(formato.format(java.util.Date(velas[i].t * 1000)), x - 30f, h + 34f, paint)
+            val rotulo = formato.format(java.util.Date(velas[i].t * 1000))
+            val x = (padX + passo * i + passo / 2 - paint.measureText(rotulo) / 2)
+                .coerceIn(padX, size.width - paint.measureText(rotulo))
+            drawContext.canvas.nativeCanvas.drawText(rotulo, x, h + 16.dp.toPx(), paint)
         }
+    }
+    Row {
+        ItemLegenda(alta, "Fechou acima da abertura", faixa = true)
+        ItemLegenda(baixa, "Fechou abaixo", faixa = true)
     }
 }
 
 @Composable
 fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>, previsao: PrevisaoResponse?) {
-    val isDark = isSystemInDarkTheme()
-    val lineColorPre = if (isDark) Color(0xFF00E5FF) else Color(0xFF0284C7)
-    val lineColorReal = if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
-    val elNinoColor = if(isDark) Color(0x33FF5555) else Color(0x33FF4444)
-    val laNinaColor = if(isDark) Color(0x335555FF) else Color(0x334444FF)
-    
-    val textColor = if (isDark) android.graphics.Color.LTGRAY else android.graphics.Color.DKGRAY
-    val alertTextPaint = Paint().apply {
-        textSize = 22f
-        isFakeBoldText = true
-    }
-
     if (historico.isEmpty()) return
+    val isDark = isSystemInDarkTheme()
+    val corReal = if (isDark) Color(0xFF3fb950) else Color(0xFF15803d)
+    val corProj = if (isDark) Color(0xFF38BDF8) else Color(0xFF0369A1)
+    // Faixas claras e sem texto: com a classificação por safra, quase todas as
+    // safras têm El Niño ou La Niña, e um rótulo em cada uma cobria o gráfico.
+    val corNino = if (isDark) Color(0x40F87171) else Color(0x33EF4444)
+    val corNina = if (isDark) Color(0x4060A5FA) else Color(0x333B82F6)
+    val corTexto = MaterialTheme.colorScheme.onSurfaceVariant
+    val corGrade = MaterialTheme.colorScheme.outlineVariant
 
-    val minYear = historico.minOf { it.ano }
-    val maxYear = historico.maxOf { it.ano }
-    
-    val maxYield = kotlin.math.max(
-        historico.maxOf { it.rendimento_real },
-        historico.maxOf { if (it.rendimento_predito > 0) it.rendimento_predito else 0.0 }
-    ).toFloat()
-    
-    val yMax = maxYield * 1.15f
-    
-    val elNinos = previsao?.elNinos ?: emptyList()
-    val laNinas = previsao?.laNinas ?: emptyList()
+    val ordenado = remember(historico) { historico.sortedBy { it.ano } }
+    val minYear = ordenado.first().ano
+    val maxYear = ordenado.last().ano
+    val yMax = (max(ordenado.maxOf { it.rendimento_real }, ordenado.maxOf { max(it.rendimento_predito, 0.0) }) * 1.15)
+        .toFloat().coerceAtLeast(1f)
+    val elNinos = previsao?.elNinos.orEmpty()
+    val laNinas = previsao?.laNinas.orEmpty()
+    val ultimoObservado = ordenado.lastOrNull { it.rendimento_real > 0 }
+    val startPredYear = ultimoObservado?.ano ?: maxYear
+    var anoTocado by remember(historico) { mutableStateOf<Int?>(null) }
+
+    fun fase(ano: Int) = when (ano) { in elNinos -> " · El Niño"; in laNinas -> " · La Niña"; else -> "" }
+    val descricao = "Gráfico da produtividade de $minYear a $maxYear. " +
+        (ultimoObservado?.let { "Última safra observada, ${it.ano}: ${milhar(it.rendimento_real)} kg/ha. " } ?: "") +
+        "Projeção para $maxYear: ${milhar(ordenado.last().rendimento_predito)} kg/ha."
 
     Card(
-        modifier = Modifier.fillMaxWidth().height(300.dp).padding(vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text("Evolução Histórica e Projeção (kg/ha)", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(modifier = Modifier.height(16.dp))
-            Canvas(modifier = Modifier.fillMaxSize().padding(end = 16.dp, bottom = 8.dp)) {
-                val paddingX = 90f // Espaço para os números do eixo Y
-                val paddingY = 60f // Espaço inferior pros anos
-                val w = size.width - paddingX
-                val h = size.height - paddingY
-                val yearSpan = maxYear - minYear
-                if (yearSpan == 0) return@Canvas
-                
-                // Desenhar El Nino e La Nina
-                for (year in minYear..maxYear) {
-                    val x = paddingX + (year - minYear) * (w / yearSpan)
-                    if (year in elNinos) {
-                        drawRect(color = elNinoColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))
-                        drawContext.canvas.nativeCanvas.apply {
-                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor("#ff8888") else android.graphics.Color.parseColor("#cc0000")
-                            save()
-                            rotate(-90f, x, h / 2)
-                            drawText("EL NIÑO", x - 40f, (h / 2) - 15f, alertTextPaint)
-                            restore()
-                        }
-                    } else if (year in laNinas) {
-                        drawRect(color = laNinaColor, topLeft = Offset(x - 12f, 0f), size = Size(24f, h))
-                        drawContext.canvas.nativeCanvas.apply {
-                            alertTextPaint.color = if(isDark) android.graphics.Color.parseColor("#8888ff") else android.graphics.Color.parseColor("#0000cc")
-                            save()
-                            rotate(-90f, x, h / 2)
-                            drawText("LA NIÑA", x - 40f, (h / 2) - 15f, alertTextPaint)
-                            restore()
+            Text("Evolução histórica e projeção (kg/ha)", fontWeight = FontWeight.Bold, fontSize = 16.sp,
+                 color = MaterialTheme.colorScheme.onSurface)
+            val sel = anoTocado?.let { a -> ordenado.firstOrNull { it.ano == a } }
+            Text(
+                text = sel?.let {
+                    if (it.rendimento_real > 0)
+                        "${it.ano}: observado ${milhar(it.rendimento_real)} · estimado ${milhar(it.rendimento_predito)} kg/ha${fase(it.ano)}"
+                    else
+                        "${it.ano}: projeção ${milhar(it.rendimento_predito)} kg/ha (± ${milhar(it.margem_erro)})${fase(it.ano)}"
+                } ?: "Toque no gráfico para ver o valor de um ano.",
+                fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 4.dp)
+            )
+            Canvas(
+                modifier = Modifier.fillMaxWidth().height(220.dp).padding(top = 8.dp)
+                    .semantics { contentDescription = descricao }
+                    .pointerInput(ordenado) {
+                        detectTapGestures { pos ->
+                            val padX = 48.dp.toPx()
+                            val frac = ((pos.x - padX) / (size.width - padX)).coerceIn(0f, 1f)
+                            anoTocado = minYear + (frac * (maxYear - minYear)).roundToInt()
                         }
                     }
-                }
+            ) {
+                val padX = 48.dp.toPx()
+                val padY = 22.dp.toPx()
+                val w = size.width - padX
+                val h = size.height - padY
+                val span = (maxYear - minYear).coerceAtLeast(1)
+                fun x(ano: Int) = padX + (ano - minYear) * (w / span)
+                fun y(v: Double) = h - (v.toFloat() / yMax) * h
+                val paint = Paint().apply { color = corTexto.toArgb(); textSize = 11.sp.toPx(); isAntiAlias = true }
 
-                // Grid Horizontal e Y labels
-                val gridPaint = Paint().apply { color = textColor; textSize = 24f }
+                val largura = (w / span) * 0.85f
+                for (ano in minYear..maxYear) {
+                    val cor = when (ano) { in elNinos -> corNino; in laNinas -> corNina; else -> null } ?: continue
+                    drawRect(color = cor, topLeft = Offset(x(ano) - largura / 2, 0f), size = Size(largura, h))
+                }
                 for (i in 0..4) {
-                    val yLine = h - (i * (h / 4))
-                    val yieldVal = (i * (yMax / 4)).toInt()
-                    drawLine(color = Color.Gray.copy(alpha = 0.2f), start = Offset(paddingX, yLine), end = Offset(paddingX + w, yLine), strokeWidth = 2f)
-                    drawContext.canvas.nativeCanvas.drawText("$yieldVal", 0f, yLine + 8f, gridPaint)
+                    val v = yMax / 4 * i
+                    val yy = h - (i * (h / 4))
+                    drawLine(color = corGrade, start = Offset(padX, yy), end = Offset(padX + w, yy), strokeWidth = 1.dp.toPx())
+                    drawContext.canvas.nativeCanvas.drawText(milhar(v.toDouble()), 0f, yy + 4.dp.toPx(), paint)
                 }
-                
-                // X labels (anos) de 5 em 5
-                for (year in minYear..maxYear step 5) {
-                    val x = paddingX + (year - minYear) * (w / yearSpan)
-                    drawContext.canvas.nativeCanvas.drawText("$year", x - 20f, h + 45f, gridPaint)
+                val passoRotulo = if (span > 12) 5 else if (span > 6) 2 else 1
+                for (ano in minYear..maxYear) {
+                    if ((ano - minYear) % passoRotulo != 0 && ano != maxYear) continue
+                    val rotulo = "$ano"
+                    val xr = (x(ano) - paint.measureText(rotulo) / 2).coerceIn(padX, size.width - paint.measureText(rotulo))
+                    drawContext.canvas.nativeCanvas.drawText(rotulo, xr, h + 16.dp.toPx(), paint)
+                }
+                anoTocado?.let {
+                    drawLine(color = corTexto.copy(alpha = 0.5f), start = Offset(x(it), 0f), end = Offset(x(it), h), strokeWidth = 1.dp.toPx())
                 }
 
-                // Separar os dados em Real (passado) vs Predito (futuro)
-                val historicoOrdenado = historico.sortedBy { it.ano }
-                val lastRealItem = historicoOrdenado.lastOrNull { it.rendimento_real > 0 }
-                val startPredYear = lastRealItem?.ano ?: maxYear
-
-                // Desenhar linha REAL (Verde)
+                // Observado (linha cheia)
                 val pathReal = Path()
-                var firstReal = true
-                historicoOrdenado.filter { it.rendimento_real > 0 }.forEach { item ->
-                    val x = paddingX + (item.ano - minYear) * (w / yearSpan)
-                    val y = h - ((item.rendimento_real.toFloat() / yMax) * h)
-                    if (firstReal) { pathReal.moveTo(x, y); firstReal = false } 
-                    else { pathReal.lineTo(x, y) }
-                    drawCircle(color = lineColorReal, radius = 6f, center = Offset(x, y))
+                var primeiro = true
+                ordenado.filter { it.rendimento_real > 0 }.forEach { item ->
+                    val px = x(item.ano)
+                    val py = y(item.rendimento_real)
+                    if (primeiro) { pathReal.moveTo(px, py); primeiro = false } else pathReal.lineTo(px, py)
+                    drawCircle(color = corReal, radius = 3.dp.toPx(), center = Offset(px, py))
                 }
-                drawPath(path = pathReal, color = lineColorReal, style = Stroke(width = 6f))
+                drawPath(path = pathReal, color = corReal, style = Stroke(width = 2.5.dp.toPx()))
 
-                // Desenhar linha PREDIÇÃO (Azul tracejada), começa no ultimo real e vai pro futuro
+                // Projeção (tracejada), a partir do último ano observado
                 val pathPred = Path()
-                var firstPred = true
-                historicoOrdenado.filter { it.ano >= startPredYear }.forEach { item ->
-                    val x = paddingX + (item.ano - minYear) * (w / yearSpan)
-                    // Se for o ano de pivô (ultim real), plotamos o valor real para a linha azul conectar suavemente
-                    val valPlot = if (item.ano == startPredYear) item.rendimento_real else item.rendimento_predito
-                    val y = h - ((valPlot.toFloat() / yMax) * h)
-                    
-                    if (firstPred) { pathPred.moveTo(x, y); firstPred = false } 
-                    else { pathPred.lineTo(x, y) }
-                    
-                    if (item.ano > startPredYear) {
-                        drawCircle(color = lineColorPre, radius = 6f, center = Offset(x, y))
-                    }
+                primeiro = true
+                ordenado.filter { it.ano >= startPredYear }.forEach { item ->
+                    val valor = if (item.ano == startPredYear && item.rendimento_real > 0) item.rendimento_real else item.rendimento_predito
+                    val px = x(item.ano)
+                    val py = y(valor)
+                    if (primeiro) { pathPred.moveTo(px, py); primeiro = false } else pathPred.lineTo(px, py)
+                    if (item.ano > startPredYear) drawCircle(color = corProj, radius = 3.dp.toPx(), center = Offset(px, py))
                 }
-                drawPath(path = pathPred, color = lineColorPre, style = Stroke(
-                    width = 6f,
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(15f, 15f), 0f)
-                ))
+                drawPath(path = pathPred, color = corProj, style = Stroke(
+                    width = 2.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 10f), 0f)))
+            }
+            Row {
+                ItemLegenda(corReal, "Observado (IBGE)")
+                ItemLegenda(corProj, "Projeção", tracejada = true)
+            }
+            Row {
+                ItemLegenda(corNino, "Safra de El Niño", faixa = true)
+                ItemLegenda(corNina, "Safra de La Niña", faixa = true)
             }
         }
     }

@@ -461,9 +461,10 @@ O cálculo em Python reproduz os valores registrados das etiquetas `v2.4.5` e
 `v2.4.6`.
 
 O resumo criptográfico da `v2.4.7` foi calculado sobre o commit `348fccb`, que
-acrescenta o registro automático do DOI à revisão de interface. A preparação da versão altera apenas este `REGISTRO_INPI.md` e o
-`CITATION.cff`, de modo que o valor deve se manter na etiqueta; convém
-conferi-lo sobre uma cópia limpa dela depois de etiquetar.
+acrescenta o registro automático do DOI à revisão de interface. A preparação da
+versão altera apenas este `REGISTRO_INPI.md` e o `CITATION.cff`, de modo que o
+valor deve se manter na etiqueta; convém conferi-lo sobre uma cópia limpa dela
+depois de etiquetar.
 
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi

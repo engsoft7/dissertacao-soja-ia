@@ -106,8 +106,8 @@ class Estimador:
     é de 0,65 kg/ha em média, contra 94,0 kg/ha da Random Forest. O simulador
     de clima, portanto, quase não move a previsão. Isso não é defeito de
     implementação — é o achado da dissertação aparecendo no produto: sobre uma
-    variável-alvo que repete 40,1% das safras, não há o que o clima explique
-    além do que o histórico já explicava.
+    variável-alvo que repete o valor em 40,1% dos pares de safras sucessivas,
+    não há o que o clima explique além do que o histórico já explicava.
     """
 
     def __init__(self) -> None:

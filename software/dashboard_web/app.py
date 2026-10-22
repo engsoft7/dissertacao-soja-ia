@@ -1233,7 +1233,8 @@ if tela_atual == "📍 Inteligência Territorial":
             <div class="hero-proc" title="O modelo é treinado para prever o
                 resíduo entre a produtividade observada e o histórico do
                 município somado à tendência tecnológica. Sobre esta base, em
-                que 40,1% das safras repetem o valor da anterior, esse resíduo
+                que 40,1% dos pares de safras sucessivas repetem o valor da
+                anterior, esse resíduo
                 é quase todo ruído — daí a correção pequena.">
                 O modelo de IA foi aplicado e acrescentou
                 <b>{contrib_txt} kg/ha</b> ao histórico do
@@ -1383,7 +1384,7 @@ if tela_atual == "📈 Análise Histórica":
     st.plotly_chart(
         plot_produtividade(serie_plot, is_dark=is_dark, unidade=unidade,
                            projecao=projecao),
-        use_container_width=True, config=SEM_BARRA)
+        width="stretch", config=SEM_BARRA)
     st.caption(
         "O trecho tracejado é projeção, não safra publicada: são as três "
         "seguintes à última do IBGE, e o hover traz a margem de cada uma. "
@@ -1393,7 +1394,7 @@ if tela_atual == "📈 Análise Histórica":
 
     st.subheader("Expansão da área plantada")
     st.plotly_chart(plot_area(serie_plot, is_dark=is_dark),
-                    use_container_width=True, config=SEM_BARRA)
+                    width="stretch", config=SEM_BARRA)
 
     b1, b2 = st.columns(2)
     b1.download_button(
@@ -1487,7 +1488,7 @@ if tela_atual == "💰 Viabilidade Financeira":
         st.caption(fonte_preco)
     with col_eco2:
         custo_ha = st.number_input(
-            f"Custo Operacional base ({municipio.title()})",
+            f"Custo operacional de referência — {PRACA_CONAB} (R$/ha)",
             min_value=0,
             value=int(custos_locais["custo_ha"]),
             step=100)

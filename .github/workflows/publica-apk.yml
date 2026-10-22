@@ -36,6 +36,13 @@ on:
         description: "Etiqueta do Release a que anexar (ex.: v2.4.4); vazio só compila"
         required: false
         default: ""
+  # Chamado por publica-versao.yml logo depois de criar o Release: um Release
+  # criado pelo próprio Actions não dispara o evento "release" acima.
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
 
 permissions:
   contents: write

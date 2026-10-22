@@ -20,6 +20,17 @@ on:
       tag:
         description: "Etiqueta do Release (ex.: v2.4.7)"
         required: true
+  # Chamado por publica-versao.yml logo depois de criar o Release: um Release
+  # criado pelo próprio Actions não dispara o evento "release" acima.
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+      titulo:
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -49,7 +60,7 @@ jobs:
       - name: Registra a versão e o DOI
         id: doi
         env:
-          TITULO: ${{ github.event.release.name }}
+          TITULO: ${{ github.event.release.name || inputs.titulo }}
           PUBLICADO_EM: ${{ github.event.release.published_at }}
         run: |
           PUBLICADO=$(date -u -d "$PUBLICADO_EM" +%d/%m/%Y 2>/dev/null || date -u +%d/%m/%Y)

@@ -201,7 +201,8 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.3.9` (14/09/2026) — análises da revisão | 64 | 12.792 | `b9a4a09bca08161efdef3e8f746ff84c1d314c79a19e10335cc5a005a3e5305d` |
 | Tag `v2.4.0` (14/09/2026) — conferência de referências e primeiro teste do aplicativo | 74 | 14.683 | `f5e8d0673c108b8795467b04d7532a0be59dfb6632b6242e70852ce315ae28a6` |
 | Tag `v2.4.1` (18/09/2026) — correções do painel web | 77 | 15.288 | `d9f118ead8a19e172f87118c40b76b7378bb7979b9eab9aec400254ef74644a5` |
-| Tag `v2.4.2` (22/10/2026) — medição de custo e revisão para os artigos SBC | 79 | 15.815 | `859bcf907bb73422be18952970a0d0ee9d4fdfa1b75c6a5ebcf7da5b91d69a84` |
+| Tag `v2.4.2` (18/09/2026) — projeção no painel web | 77 | 15.384 | `7f04fddedf5d63285a1310cca9549e41fea47d646a3a22720e43e7d42f8168bb` |
+| Tag `v2.4.3` (22/10/2026) — medição de custo e revisão para os artigos SBC | 79 | 15.815 | `859bcf907bb73422be18952970a0d0ee9d4fdfa1b75c6a5ebcf7da5b91d69a84` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -272,9 +273,19 @@ fora do conjunto resumido — o mesmo que já ocorrera na `v2.3.8` e na `v2.4.0`
 Conferido depois de etiquetar, sobre uma cópia limpa da `v2.4.1`: o valor
 confere.
 
-A `v2.4.2` reúne a revisão feita para os dois artigos no modelo da SBC (ERAD e
-ERAMIA) e duas melhorias do painel. São dois arquivos-fonte novos e seis
-alterados em relação à `v2.4.1`.
+A `v2.4.2`, etiquetada em 18/09/2026 sobre o commit `b03cee5`, traz duas
+melhorias do painel: ele passa a desenhar a projeção das safras seguintes, como
+o aplicativo já fazia, e o cartão de projeção declara quanto o modelo acrescenta
+à referência, 0,65 kg/ha em média. Os dois arquivos-fonte alterados são
+`software/dashboard_web/app.py` e `software/dashboard_web/ui/charts.py`; nenhum
+entra. A versão foi publicada sem o commit de preparação que as anteriores
+tiveram, e por isso só entra neste registro agora, com o resumo recalculado em
+22/10/2026 sobre uma cópia limpa da etiqueta. O DOI de versão que o Zenodo lhe
+atribuiu está por conferir.
+
+A `v2.4.3` reúne a revisão feita para os dois artigos no modelo da SBC (ERAD e
+ERAMIA). São dois arquivos-fonte novos e quatro alterados em relação à
+`v2.4.2`.
 
 Os novos são a medição de custo e escalabilidade do estudo nacional,
 `pesquisa/03_analise_nacional/10_mede_custo_escalabilidade.py`, que ajusta os
@@ -294,11 +305,7 @@ os dez pares cuja safra anterior presente na base não é a do ano anterior e
 informam 147 de 367 ao lado dos 151 de 377. O quarto,
 `pesquisa/04_analise_para/02_desempenho_base_completa.py`, muda só a mensagem
 impressa quando o XGBoost diverge, que passa a indicar a versão 3.3.0 da
-biblioteca como a primeira que reproduz a Tabela 6. Os dois restantes,
-`software/dashboard_web/app.py` e `software/dashboard_web/ui/charts.py`, vêm de
-antes da revisão: o painel passa a desenhar a projeção das safras seguintes,
-como o aplicativo já fazia, e o cartão de projeção declara quanto o modelo
-acrescenta à referência, 0,65 kg/ha em média.
+biblioteca como a primeira que reproduz a Tabela 6.
 
 Nenhum código-fonte do aplicativo Android muda nesta versão. Os números da
 dissertação nas Tabelas 3, 5 e 6 tampouco: foram reproduzidos sobre ela com
@@ -306,15 +313,16 @@ scikit-learn 1.8.0 e XGBoost 3.4.1. O DOI de versão desta etiqueta será
 preenchido aqui quando o Zenodo o atribuir, no depósito disparado pela
 publicação do Release.
 
-O resumo criptográfico da `v2.4.2` foi calculado sobre o commit `9cf625c`. A
-preparação da versão altera apenas este `REGISTRO_INPI.md` e o `CITATION.cff`,
-que ficam fora do conjunto resumido, de modo que o valor deve se manter na
-etiqueta; como na `v2.4.1`, convém conferi-lo sobre uma cópia limpa dela depois
-de etiquetar.
+O resumo criptográfico da `v2.4.3` foi calculado sobre o commit `9cf625c` e
+conferido sobre o commit de merge `ac47b88`, onde dá o mesmo valor. A preparação
+da versão altera apenas este `REGISTRO_INPI.md` e o `CITATION.cff`, que ficam
+fora do conjunto resumido, de modo que o valor deve se manter na etiqueta; como
+na `v2.4.1`, convém conferi-lo sobre uma cópia limpa dela depois de etiquetar.
 
-Os treze valores anteriores ao da `v2.4.2` foram recalculados em 22/10/2026 a
-partir de cópias limpas dos respectivos commits, e conferem. A tag da defesa
-é a `v2.3.7`, e é do Release dela que sai o APK distribuído (`versionCode` 13, `versionName` 2.1.6,
+Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
+a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
+calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
+Release dela que sai o APK distribuído (`versionCode` 13, `versionName` 2.1.6,
 SHA-256 `5ee2ea9697b092c9b27fe76f3c1533eaf7aabb79e68c7b1d4700ced34bd18a21`).
 Esse binário não difere em comportamento do publicado na `v2.3.5`: nem a
 `v2.3.6` nem a `v2.3.7` alteram código do aplicativo — as duas mexem apenas na
@@ -544,6 +552,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
   10.5281/zenodo.22739059
 - **DOI da `v2.4.0`:** 10.5281/zenodo.22755108
 - **DOI da `v2.4.1`:** 10.5281/zenodo.22833602
-- **DOI da versão mais recente (`v2.4.2`):** a preencher após a publicação do Release
+- **DOI da `v2.4.2`:** a conferir no Zenodo (Release publicado em 18/09/2026)
+- **DOI da versão mais recente (`v2.4.3`):** a preencher após a publicação do Release
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

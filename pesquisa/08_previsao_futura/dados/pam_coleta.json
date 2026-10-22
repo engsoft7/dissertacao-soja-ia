@@ -1,0 +1,68 @@
+{
+  "fonte": "IBGE, PAM, SIDRA tabela 5457, produto soja (c782/40124)",
+  "coletado_em": "2026-10-22",
+  "urls": {
+    "municipios": "https://apisidra.ibge.gov.br/values/t/5457/n6/in%20n3%2015/v/112,214,215,216,8331/p/all/c782/40124?formato=json",
+    "uf": "https://apisidra.ibge.gov.br/values/t/5457/n3/all/v/112,214,215,216,8331/p/all/c782/40124?formato=json"
+  },
+  "municipios": {
+    "arquivo": "pam_para_municipios.csv",
+    "variaveis": {
+      "rendimento_kg_ha": {
+        "nome_ibge": "Rendimento médio da produção",
+        "unidade": "Quilogramas por Hectare"
+      },
+      "producao_t": {
+        "nome_ibge": "Quantidade produzida",
+        "unidade": "Toneladas"
+      },
+      "valor_mil_reais": {
+        "nome_ibge": "Valor da produção",
+        "unidade": "Mil Cruzeiros"
+      },
+      "area_colhida_ha": {
+        "nome_ibge": "Área colhida",
+        "unidade": "Hectares"
+      },
+      "area_plantada_ha": {
+        "nome_ibge": "Área plantada ou destinada à colheita",
+        "unidade": ""
+      }
+    },
+    "anos": [
+      2001,
+      2025
+    ],
+    "registros_com_producao": 586
+  },
+  "uf": {
+    "arquivo": "pam_uf.csv",
+    "variaveis": {
+      "rendimento_kg_ha": {
+        "nome_ibge": "Rendimento médio da produção",
+        "unidade": "Quilogramas por Hectare"
+      },
+      "producao_t": {
+        "nome_ibge": "Quantidade produzida",
+        "unidade": "Toneladas"
+      },
+      "valor_mil_reais": {
+        "nome_ibge": "Valor da produção",
+        "unidade": "Mil Cruzeiros"
+      },
+      "area_colhida_ha": {
+        "nome_ibge": "Área colhida",
+        "unidade": "Hectares"
+      },
+      "area_plantada_ha": {
+        "nome_ibge": "Área plantada ou destinada à colheita",
+        "unidade": ""
+      }
+    },
+    "anos": [
+      2001,
+      2025
+    ],
+    "registros_com_producao": 498
+  }
+}

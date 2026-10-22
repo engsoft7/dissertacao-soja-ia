@@ -1,0 +1,36 @@
+{
+  "coletado_em": "2026-10-22",
+  "safras": [
+    2001,
+    2025
+  ],
+  "municipios": 38,
+  "municipios_sem_par_no_gaul": [],
+  "mapbiomas": {
+    "colecao": 10.1,
+    "anos": [
+      1985,
+      2024
+    ]
+  },
+  "escalas_m": {
+    "clima": 5000,
+    "vegetacao": 250,
+    "lst": 1000
+  },
+  "unidades": {
+    "precip_mm": "mm/dia",
+    "*_k": "K",
+    "sw1/sw2": "m3/m3 (0-7 e 7-28 cm)",
+    "srad_j": "J/m2/dia",
+    "etp_m": "m/dia (negativo = evaporação)",
+    "evi/ndvi": "x10000",
+    "lst_dia": "K x 50 (fator 0,02)"
+  },
+  "linhas": {
+    "clima": 259578,
+    "veg": 9418,
+    "lst": 11001
+  },
+  "erros": []
+}

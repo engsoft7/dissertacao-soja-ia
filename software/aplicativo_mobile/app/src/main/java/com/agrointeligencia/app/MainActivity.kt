@@ -664,7 +664,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                 // A API envia 0.0 como sentinela de safra ainda não divulgada
                 // pela PAM; imprimir esse zero anunciaria colheita nula.
                 Text(
-                    text = if (observado) String.format(PT_BR, "%,d kg", historico.rendimento_real.toInt())
+                    text = if (observado) milhar(historico.rendimento_real) + " kg/ha"
                            else "não divulgada",
                     fontWeight = FontWeight.Bold,
                     fontSize = if (observado) 16.sp else 12.sp,
@@ -682,8 +682,8 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
             // município, e não o da safra: ela acompanha a tendência. Chamá-la
             // de "IA" sugeria uma previsão ano a ano que o modelo não faz.
             Text(
-                text = String.format(PT_BR, "Estimativa %,d kg · erro típico ±%,d kg/ha", 
-                    historico.rendimento_predito.toInt(), historico.margem_erro.toInt()),
+                text = String.format(PT_BR, "Estimativa %,d kg/ha · erro típico ± %,d kg/ha", 
+                    historico.rendimento_predito.roundToInt(), historico.margem_erro.roundToInt()),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp)
@@ -1248,7 +1248,7 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                 lineHeight = 16.sp,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Justify
+                textAlign = androidx.compose.ui.text.style.TextAlign.Start
             )
         }
     }
@@ -1484,8 +1484,13 @@ fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>, previsao: Pr
     val ordenado = remember(historico) { historico.sortedBy { it.ano } }
     val minYear = ordenado.first().ano
     val maxYear = ordenado.last().ano
-    val yMax = (max(ordenado.maxOf { it.rendimento_real }, ordenado.maxOf { max(it.rendimento_predito, 0.0) }) * 1.15)
-        .toFloat().coerceAtLeast(1f)
+    // Eixo em valores redondos e ajustado aos dados, e não de zero: com zero na
+    // base, toda a variação entre safras ficava espremida na metade de cima.
+    val valores = ordenado.flatMap { listOf(it.rendimento_real, it.rendimento_predito) }.filter { it > 0 }
+        .ifEmpty { listOf(0.0, 1000.0) }
+    val passoY = if (valores.max() - valores.min() > 2000) 1000.0 else 500.0
+    val yMin = (kotlin.math.floor(valores.min() / passoY) * passoY).toFloat()
+    val yMax = (kotlin.math.ceil(valores.max() / passoY) * passoY).toFloat().let { if (it <= yMin) yMin + passoY.toFloat() else it }
     val elNinos = previsao?.elNinos.orEmpty()
     val laNinas = previsao?.laNinas.orEmpty()
     val ultimoObservado = ordenado.lastOrNull { it.rendimento_real > 0 }
@@ -1533,23 +1538,34 @@ fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>, previsao: Pr
                 val h = size.height - padY
                 val span = (maxYear - minYear).coerceAtLeast(1)
                 fun x(ano: Int) = padX + (ano - minYear) * (w / span)
-                fun y(v: Double) = h - (v.toFloat() / yMax) * h
+                fun y(v: Double) = h - ((v.toFloat() - yMin) / (yMax - yMin)) * h
                 val paint = Paint().apply { color = corTexto.toArgb(); textSize = 11.sp.toPx(); isAntiAlias = true }
 
                 val largura = (w / span) * 0.85f
                 for (ano in minYear..maxYear) {
                     val cor = when (ano) { in elNinos -> corNino; in laNinas -> corNina; else -> null } ?: continue
-                    drawRect(color = cor, topLeft = Offset(x(ano) - largura / 2, 0f), size = Size(largura, h))
+                    // recortada à área do gráfico: a primeira e a última safra
+                    // não invadem a coluna dos números do eixo
+                    val esq = (x(ano) - largura / 2).coerceAtLeast(padX)
+                    val dir = (x(ano) + largura / 2).coerceAtMost(padX + w)
+                    drawRect(color = cor, topLeft = Offset(esq, 0f), size = Size(dir - esq, h))
                 }
-                for (i in 0..4) {
-                    val v = yMax / 4 * i
-                    val yy = h - (i * (h / 4))
+                var v = yMin
+                while (v <= yMax + 0.5f) {
+                    val yy = y(v.toDouble())
                     drawLine(color = corGrade, start = Offset(padX, yy), end = Offset(padX + w, yy), strokeWidth = 1.dp.toPx())
                     drawContext.canvas.nativeCanvas.drawText(milhar(v.toDouble()), 0f, yy + 4.dp.toPx(), paint)
+                    v += passoY.toFloat()
                 }
                 val passoRotulo = if (span > 12) 5 else if (span > 6) 2 else 1
-                for (ano in minYear..maxYear) {
-                    if ((ano - minYear) % passoRotulo != 0 && ano != maxYear) continue
+                // De passoRotulo em passoRotulo; o último ano sempre aparece e,
+                // se ficar perto demais do rótulo anterior, toma o lugar dele.
+                val anosRotulo = (minYear..maxYear step passoRotulo).toMutableList()
+                if (anosRotulo.last() != maxYear) {
+                    if (maxYear - anosRotulo.last() <= passoRotulo / 2) anosRotulo[anosRotulo.lastIndex] = maxYear
+                    else anosRotulo.add(maxYear)
+                }
+                for (ano in anosRotulo) {
                     val rotulo = "$ano"
                     val xr = (x(ano) - paint.measureText(rotulo) / 2).coerceIn(padX, size.width - paint.measureText(rotulo))
                     drawContext.canvas.nativeCanvas.drawText(rotulo, xr, h + 16.dp.toPx(), paint)

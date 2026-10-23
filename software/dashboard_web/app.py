@@ -1051,7 +1051,7 @@ def buscar_cotacao_fisica() -> dict | None:
                 if valor is not None else None)
 
 
-# Estimativa do preço no Pará: Chicago do último mês, hora a hora, com a base
+# Estimativa do preço no Pará: Chicago do último mês, dia a dia, com a base
 # mensal do Pará somada a cada vela. Dez minutos de cache: a cotação de bolsa
 # já vem com atraso de 10 a 15, e a base muda uma vez por dia.
 @st.cache_data(ttl=600)
@@ -1713,9 +1713,9 @@ if tela_atual == "💰 Viabilidade Financeira":
             # ImportError. Recarrega quando o módulo em memória está velho.
             import importlib
             import ui.charts as graficos
-            if not hasattr(graficos, "plot_para_horario"):
+            if not hasattr(graficos, "plot_para_diario"):
                 graficos = importlib.reload(graficos)
-            plot_para_mensal, plot_para_horario = graficos.plot_para_mensal, graficos.plot_para_horario
+            plot_para_mensal, plot_para_diario = graficos.plot_para_mensal, graficos.plot_para_diario
             ultimo = para["meses"][-1]
             mes_txt = pd.Timestamp(para["mes_base"] + "-01").strftime("%m/%Y")
             m1, m2, m3 = st.columns(3)
@@ -1734,11 +1734,11 @@ if tela_atual == "💰 Viabilidade Financeira":
                 f"entre as duas — em {mes_txt}, Pará {brl_md(ultimo['para'], 2)} e "
                 f"Chicago {brl_md(ultimo['chicago'], 2)}.")
             if cot_mes and cot_mes.get("velas"):
-                st.plotly_chart(plot_para_horario(cot_mes["velas"], is_dark=is_dark),
+                st.plotly_chart(plot_para_diario(cot_mes["velas"], is_dark=is_dark),
                                 width="stretch", config={"displayModeBar": False})
                 st.caption(
-                    f"Último mês, hora a hora. O Pará estimado é Chicago de cada momento "
-                    f"somado à base do mês — estimativa, não cotação de praça. Cotação "
+                    f"Último mês, dia a dia (fechamento de cada pregão). O Pará estimado é "
+                    f"Chicago de cada dia somado à base do mês — estimativa, não cotação de praça. Cotação "
                     f"de bolsa com atraso de cerca de {cot_mes.get('atraso_min', 10)} min.")
 
 

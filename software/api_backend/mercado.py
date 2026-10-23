@@ -24,8 +24,10 @@ import requests
 
 BUSHELS_POR_SACA = 60 / 27.2155
 URL = "https://query1.finance.yahoo.com/v8/finance/chart/{simbolo}"
-# período exibido -> granularidade das velas
-PERIODOS = {"1d": "5m", "5d": "15m", "1mo": "60m", "6mo": "1d"}
+# período exibido -> granularidade das velas. Entre 25 e 70 velas por tela: com
+# velas de 5 min no dia (cerca de 160) e de 1 h no mês (cerca de 150), cada
+# vela virava um risco de 2 px na largura de um celular.
+PERIODOS = {"1d": "15m", "5d": "60m", "1mo": "1d", "6mo": "1wk"}
 VALIDADE_S = 120
 _cache, _trava = {}, threading.Lock()
 

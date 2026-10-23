@@ -146,7 +146,7 @@ class CapturasDeTelaTest {
     @Config(qualifiers = "w411dp-h1400dp-xxhdpi")
     @Test fun mercado_claro() = captura("mercado", false) { MercadoConteudo(mercado, false, periodoMercado) {} }
 
-    @Config(qualifiers = "w411dp-h1400dp-xxhdpi-night")
+    @Config(qualifiers = "w411dp-h1400dp-night-xxhdpi")
     @Test fun mercado_escuro() = captura("mercado", true) { MercadoConteudo(mercado, false, periodoMercado) {} }
 
     @Test fun resumo_claro() = captura("resumo", false) { ResumoAgronomicoCard(projecao, ultimoReal) }

@@ -1339,7 +1339,7 @@ fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: Str
                     }
                     Text("Máxima R$ ${reais(cot.maxima_periodo)} · mínima R$ ${reais(cot.minima_periodo)}",
                          fontSize = 12.sp, color = secundaria)
-                    mercado?.para?.let { para -> para.estimado_brl_saca?.let { estimado ->
+                    mercado.para?.let { para -> para.estimado_brl_saca?.let { estimado ->
                         PrecoEstimadoPara(para, estimado, isDark)
                     } }
                     GraficoVelas(cot.velas, isDark, cot.periodo)
@@ -1585,7 +1585,7 @@ fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
             velas.forEachIndexed { i, v ->
                 val ponto = v.pa?.let { Offset(padX + passo * i + passo / 2, y(it)) }
                 if (ponto != null && anterior != null) {
-                    drawLine(color = cPara, start = anterior!!, end = ponto, strokeWidth = 2.dp.toPx(),
+                    drawLine(color = cPara, start = anterior, end = ponto, strokeWidth = 2.dp.toPx(),
                              pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f), 0f))
                 }
                 anterior = ponto

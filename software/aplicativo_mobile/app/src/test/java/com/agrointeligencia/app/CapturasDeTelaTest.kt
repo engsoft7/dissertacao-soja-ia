@@ -140,9 +140,13 @@ class CapturasDeTelaTest {
     @Config(qualifiers = "+night")
     @Test fun historico_escuro() = captura("historico", true) { HistoricoProdutividadeChart(historico, previsao) }
 
+    // A tela Mercado passa da altura do celular: no aplicativo ela rola, mas a
+    // captura só pega o que cabe na tela, e o fim saía espremido. Estas duas
+    // são desenhadas num celular mais alto.
+    @Config(qualifiers = "w411dp-h1400dp-xxhdpi")
     @Test fun mercado_claro() = captura("mercado", false) { MercadoConteudo(mercado, false, periodoMercado) {} }
 
-    @Config(qualifiers = "+night")
+    @Config(qualifiers = "w411dp-h1400dp-xxhdpi-night")
     @Test fun mercado_escuro() = captura("mercado", true) { MercadoConteudo(mercado, false, periodoMercado) {} }
 
     @Test fun resumo_claro() = captura("resumo", false) { ResumoAgronomicoCard(projecao, ultimoReal) }

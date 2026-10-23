@@ -1433,8 +1433,8 @@ fun GraficoMensalPara(meses: List<MesPara>, fonte: String, isDark: Boolean) {
          color = MaterialTheme.colorScheme.onSurface)
     val sel = tocado?.let { meses.getOrNull(it) } ?: ultimo
     Text(
-        "${mesCurto(sel.mes, anoCompleto = true)} · Pará R$ ${reais(sel.para)} · Chicago R$ ${reais(sel.chicago)} · " +
-            "base ${if (sel.base >= 0) "+" else "−"}R$ ${reais(kotlin.math.abs(sel.base))}",
+        "${mesCurto(sel.mes, anoCompleto = true)} · Pará ${reais(sel.para)} · Chicago ${reais(sel.chicago)} · " +
+            "base ${if (sel.base >= 0) "+" else "−"}${reais(kotlin.math.abs(sel.base))} (R$/sc)",
         fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 4.dp)
     )
     Canvas(

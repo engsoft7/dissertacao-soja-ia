@@ -1700,37 +1700,57 @@ if tela_atual == "💰 Viabilidade Financeira":
     # cotação de Chicago a base do Pará no mês (precos_para.py, no api_backend):
     # a média mensal do Pará publicada pela Agrolink menos a de Chicago em
     # reais. Sem a série, a seção some em vez de mostrar uma base inventada.
-    st.subheader("Preço da soja no Pará")
-    para, cot_mes = buscar_preco_para()
-    if not para or not para.get("meses"):
-        st.caption("A série mensal do Pará não pôde ser consultada agora; "
-                   "a estimativa volta quando a fonte responder.")
-    else:
-        from ui.charts import plot_para_mensal, plot_para_horario
-        ultimo = para["meses"][-1]
-        mes_txt = pd.Timestamp(para["mes_base"] + "-01").strftime("%m/%Y")
-        m1, m2, m3 = st.columns(3)
-        if para.get("estimado_brl_saca") is not None:
-            m1.metric("Pará, estimado agora", brl(para["estimado_brl_saca"], 2) + "/sc")
-        if cot_mes:
-            m2.metric("Chicago agora, em reais", brl(cot_mes["ultimo_brl_saca"], 2) + "/sc")
-        m3.metric(f"Base do Pará ({mes_txt})",
-                  ("+" if para["base_brl_saca"] >= 0 else "−") + brl(abs(para["base_brl_saca"]), 2) + "/sc")
-        st.plotly_chart(plot_para_mensal(para["meses"], is_dark=is_dark),
-                        width="stretch", config={"displayModeBar": False})
-        st.caption(
-            f"Médias mensais em reais por saca. Pará: {para['fonte']}; o mês corrente "
-            f"entra com a média parcial. Chicago: contrato mais próximo da CBOT, "
-            f"convertido pelo dólar de cada dia. A base de cada mês é a diferença "
-            f"entre as duas — em {mes_txt}, Pará {brl_md(ultimo['para'], 2)} e "
-            f"Chicago {brl_md(ultimo['chicago'], 2)}.")
-        if cot_mes and cot_mes.get("velas"):
-            st.plotly_chart(plot_para_horario(cot_mes["velas"], is_dark=is_dark),
+    def secao_preco_para():
+        st.subheader("Preço da soja no Pará")
+        para, cot_mes = buscar_preco_para()
+        if not para or not para.get("meses"):
+            st.caption("A série mensal do Pará não pôde ser consultada agora; "
+                       "a estimativa volta quando a fonte responder.")
+        else:
+            # O Streamlit Cloud, ao receber um push, roda o app.py novo mas mantém
+            # na memória os módulos já importados: ui.charts continuava sendo a
+            # versão de antes, sem estas duas funções, e a página caía com
+            # ImportError. Recarrega quando o módulo em memória está velho.
+            import importlib
+            import ui.charts as graficos
+            if not hasattr(graficos, "plot_para_horario"):
+                graficos = importlib.reload(graficos)
+            plot_para_mensal, plot_para_horario = graficos.plot_para_mensal, graficos.plot_para_horario
+            ultimo = para["meses"][-1]
+            mes_txt = pd.Timestamp(para["mes_base"] + "-01").strftime("%m/%Y")
+            m1, m2, m3 = st.columns(3)
+            if para.get("estimado_brl_saca") is not None:
+                m1.metric("Pará, estimado agora", brl(para["estimado_brl_saca"], 2) + "/sc")
+            if cot_mes:
+                m2.metric("Chicago agora, em reais", brl(cot_mes["ultimo_brl_saca"], 2) + "/sc")
+            m3.metric(f"Base do Pará ({mes_txt})",
+                      ("+" if para["base_brl_saca"] >= 0 else "−") + brl(abs(para["base_brl_saca"]), 2) + "/sc")
+            st.plotly_chart(plot_para_mensal(para["meses"], is_dark=is_dark),
                             width="stretch", config={"displayModeBar": False})
             st.caption(
-                f"Último mês, hora a hora. O Pará estimado é Chicago de cada momento "
-                f"somado à base do mês — estimativa, não cotação de praça. Cotação "
-                f"de bolsa com atraso de cerca de {cot_mes.get('atraso_min', 10)} min.")
+                f"Médias mensais em reais por saca. Pará: {para['fonte']}; o mês corrente "
+                f"entra com a média parcial. Chicago: contrato mais próximo da CBOT, "
+                f"convertido pelo dólar de cada dia. A base de cada mês é a diferença "
+                f"entre as duas — em {mes_txt}, Pará {brl_md(ultimo['para'], 2)} e "
+                f"Chicago {brl_md(ultimo['chicago'], 2)}.")
+            if cot_mes and cot_mes.get("velas"):
+                st.plotly_chart(plot_para_horario(cot_mes["velas"], is_dark=is_dark),
+                                width="stretch", config={"displayModeBar": False})
+                st.caption(
+                    f"Último mês, hora a hora. O Pará estimado é Chicago de cada momento "
+                    f"somado à base do mês — estimativa, não cotação de praça. Cotação "
+                    f"de bolsa com atraso de cerca de {cot_mes.get('atraso_min', 10)} min.")
+
+
+    # A estimativa do Pará é um acréscimo à página: se ela falhar, por fonte,
+    # formato ou módulo desatualizado no servidor, o simulador e o resto da
+    # página continuam. O erro vai para o log com o tipo e a mensagem, que o
+    # Streamlit Cloud esconde da tela.
+    try:
+        secao_preco_para()
+    except Exception as e:  # noqa: BLE001 — abrir a página vale mais
+        print(f"[painel] seção do Pará falhou: {type(e).__name__}: {e}", flush=True)
+        st.caption("A estimativa do preço no Pará está indisponível no momento.")
 
     st.divider()
 

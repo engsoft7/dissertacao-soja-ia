@@ -86,7 +86,14 @@ class CapturasDeTelaTest {
         val abre = base + 0.4 * sin(i * 1.3)
         val fecha = base + 0.4 * sin(i * 1.3 + 1)
         Vela(t = 1_792_670_400L + i * 300L, o = abre, h = maxOf(abre, fecha) + 0.3,
-             l = minOf(abre, fecha) - 0.3, c = fecha)
+             l = minOf(abre, fecha) - 0.3, c = fecha, pa = fecha - 1.2)
+    }
+
+    private val mesesExemplo = (0 until 12).map { k ->
+        val chicago = 128.0 + 6 * sin(k / 2.0)
+        val base = -6.0 + 5 * sin(k / 3.0)
+        MesPara(mes = String.format("%04d-%02d", 2025 + (k + 10) / 12, (k + 10) % 12 + 1),
+                para = chicago + base, chicago = chicago, base = base)
     }
 
     private val mercadoExemplo = MercadoResponse(
@@ -100,7 +107,12 @@ class CapturasDeTelaTest {
         ),
         fisico = CotacaoFisica(praca = "Paranaguá", uf = "PR", tipo = "porto", valor = 131.5),
         conab_saca = 105.09,
-        conab_fonte = "CONAB, Pedro Afonso (TO), março de 2026"
+        conab_fonte = "CONAB, Pedro Afonso (TO), março de 2026",
+        para = EstimativaPara(
+            fonte = "Agrolink, média mensal do Pará (praça publicada: Barcarena)",
+            mes_base = mesesExemplo.last().mes, base_brl_saca = -1.2,
+            meses = mesesExemplo, estimado_brl_saca = velas.last().c - 1.2
+        )
     )
 
     // ── dados reais, quando o script os gravou ────────────────────────────────

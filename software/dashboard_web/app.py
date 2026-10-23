@@ -1051,6 +1051,28 @@ def buscar_cotacao_fisica() -> dict | None:
                 if valor is not None else None)
 
 
+# Estimativa do preço no Pará: Chicago do último mês, hora a hora, com a base
+# mensal do Pará somada a cada vela. Dez minutos de cache: a cotação de bolsa
+# já vem com atraso de 10 a 15, e a base muda uma vez por dia.
+@st.cache_data(ttl=600)
+def buscar_preco_para():
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
+        import mercado
+        import precos_para
+        cot = mercado.cotacao("1mo")
+        para = precos_para.estima(cot, precos_para.serie_mensal())
+        if para is None:
+            return None, cot
+        pa = para.pop("velas_pa")
+        if cot and pa:
+            cot = {**cot, "velas": [{**v, "pa": p} for v, p in zip(cot["velas"], pa)]}
+        return para, cot
+    except Exception as e:  # noqa: BLE001 — abrir o painel vale mais
+        print(f"[painel] preço do Pará indisponível: {type(e).__name__}: {e}", flush=True)
+        return None, None
+
+
 COTACAO_FISICA = buscar_cotacao_fisica()
 PRECO_SACA_ONLINE = COTACAO_FISICA["valor"] if COTACAO_FISICA else None
 
@@ -1670,6 +1692,45 @@ if tela_atual == "💰 Viabilidade Financeira":
             f"aptidão boa. É referência fiscal, base de cálculo do ITR, e não "
             f"preço de mercado. É patrimônio: não entra na margem e não é campo "
             f"de simulação.")
+
+    st.divider()
+
+    # ── PREÇO DA SOJA NO PARÁ ────────────────────────────────────────────────
+    # Ninguém publica o físico paraense ao longo do dia. A estimativa soma à
+    # cotação de Chicago a base do Pará no mês (precos_para.py, no api_backend):
+    # a média mensal do Pará publicada pela Agrolink menos a de Chicago em
+    # reais. Sem a série, a seção some em vez de mostrar uma base inventada.
+    st.subheader("Preço da soja no Pará")
+    para, cot_mes = buscar_preco_para()
+    if not para or not para.get("meses"):
+        st.caption("A série mensal do Pará não pôde ser consultada agora; "
+                   "a estimativa volta quando a fonte responder.")
+    else:
+        from ui.charts import plot_para_mensal, plot_para_horario
+        ultimo = para["meses"][-1]
+        mes_txt = pd.Timestamp(para["mes_base"] + "-01").strftime("%m/%Y")
+        m1, m2, m3 = st.columns(3)
+        if para.get("estimado_brl_saca") is not None:
+            m1.metric("Pará, estimado agora", brl(para["estimado_brl_saca"], 2) + "/sc")
+        if cot_mes:
+            m2.metric("Chicago agora, em reais", brl(cot_mes["ultimo_brl_saca"], 2) + "/sc")
+        m3.metric(f"Base do Pará ({mes_txt})",
+                  ("+" if para["base_brl_saca"] >= 0 else "−") + brl(abs(para["base_brl_saca"]), 2) + "/sc")
+        st.plotly_chart(plot_para_mensal(para["meses"], is_dark=is_dark),
+                        width="stretch", config={"displayModeBar": False})
+        st.caption(
+            f"Médias mensais em R$ por saca. Pará: {para['fonte']}; o mês corrente "
+            f"entra com a média parcial. Chicago: contrato mais próximo da CBOT, "
+            f"convertido pelo dólar de cada dia. A base de cada mês é a diferença "
+            f"entre as duas — em {mes_txt}, Pará {brl_md(ultimo['para'], 2)} e "
+            f"Chicago {brl_md(ultimo['chicago'], 2)}.")
+        if cot_mes and cot_mes.get("velas"):
+            st.plotly_chart(plot_para_horario(cot_mes["velas"], is_dark=is_dark),
+                            width="stretch", config={"displayModeBar": False})
+            st.caption(
+                f"Último mês, hora a hora. O Pará estimado é Chicago de cada momento "
+                f"somado à base do mês — estimativa, não cotação de praça. Cotação "
+                f"de bolsa com atraso de cerca de {cot_mes.get('atraso_min', 10)} min.")
 
     st.divider()
 

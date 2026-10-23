@@ -154,7 +154,30 @@ data class SimulacaoResponse(
 data class PingResponse(val status: String, val model_loaded: Boolean)
 
 /** Uma vela da cotação de Chicago, já em R$/saca; t em segundos (Unix). */
-data class Vela(val t: Long, val o: Double, val h: Double, val l: Double, val c: Double)
+/**
+ * Uma vela de Chicago em R$/saca. "pa" é o preço estimado no Pará no mesmo
+ * instante: o fechamento somado à base do Pará no mês (ver EstimativaPara).
+ * Nulo quando a API não tem a base.
+ */
+data class Vela(val t: Long, val o: Double, val h: Double, val l: Double, val c: Double, val pa: Double? = null)
+
+/** Médias de um mês, em R$/saca: Pará (Agrolink), Chicago, e a base entre elas. */
+data class MesPara(val mes: String, val para: Double, val nacional: Double? = null, val chicago: Double, val base: Double)
+
+/**
+ * Preço estimado da soja no Pará. Ninguém publica o físico paraense ao longo
+ * do dia; a estimativa soma à cotação de Chicago a base do Pará, isto é, a
+ * diferença entre a média mensal do Pará publicada pela Agrolink e a média de
+ * Chicago em reais no mesmo mês. É estimativa, não cotação de praça.
+ */
+data class EstimativaPara(
+    val fonte: String,
+    val url: String? = null,
+    val mes_base: String,
+    val base_brl_saca: Double,
+    val meses: List<MesPara>? = null,
+    val estimado_brl_saca: Double? = null
+)
 
 /**
  * Soja na CBOT convertida para R$/saca pelo dólar de cada instante. Chega com
@@ -182,7 +205,10 @@ data class MercadoResponse(
     val cotacao: CotacaoBolsa? = null,
     val fisico: CotacaoFisica? = null,
     val conab_saca: Double? = null,
-    val conab_fonte: String? = null
+    val conab_fonte: String? = null,
+    // Nulo quando a API é mais antiga ou a fonte da base não respondeu: a tela
+    // omite a estimativa do Pará em vez de inventar uma base.
+    val para: EstimativaPara? = null
 )
 
 interface AgroApiService {

@@ -38,6 +38,25 @@ jobs:
         continue-on-error: true
         run: python pesquisa/07_referencias/confere_obras_classicas.py
 
+  # As listas inteiras da dissertação (principal e Apêndice B) e dos dois
+  # artigos, referência por referência: DOI resolvido, obra procurada quando
+  # não há DOI, endereço conferido quando é fonte institucional.
+  listas-completas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências
+        run: pip install --quiet requests
+
+      - name: Confere as quatro listas
+        continue-on-error: true
+        run: python pesquisa/07_referencias/confere_listas.py
+
   # Os três registros da distribuição por ano dos 53 estudos discordam entre si
   # nas safras recentes. Este job pergunta à editora de cada um.
   anos-da-revisao:

@@ -78,9 +78,11 @@ def primeiro_autor_confere(m: dict, texto: str) -> bool | None:
     autores = m.get("author") or []
     if not autores or not autores[0].get("family"):
         return None
-    familia = sem_acento(autores[0]["family"]).split()
-    alvo = sem_acento(texto[:200])
-    return any(parte in alvo for parte in familia if len(parte) > 2)
+    # Sobrenome por palavra inteira: "Lu", "Li", "Fu" e "Ma" têm duas letras,
+    # e um filtro por tamanho os tratava como divergência.
+    familia = re.findall(r"[a-z]+", sem_acento(autores[0]["family"]))
+    alvo = set(re.findall(r"[a-z]+", sem_acento(texto[:200])))
+    return any(parte in alvo for parte in familia)
 
 
 def get(url: str, **params):
@@ -127,10 +129,11 @@ def procura_sem_doi(texto: str) -> tuple[str, str]:
             melhor, nota = m, cob
     if melhor and nota >= 0.8 and anos(texto) & anos_depositados(melhor):
         return "ok", f"sem DOI impresso; a Crossref tem a obra: {melhor.get('DOI')}"
-    if melhor and nota >= 0.8:
-        return "??", (f"sem DOI impresso; obra achada ({melhor.get('DOI')}) com ano "
-                      f"{sorted(anos_depositados(melhor))}, texto diz {sorted(anos(texto))}")
-    return "--", "sem DOI e não localizada na Crossref (livro ou anais antigos?): conferir à mão"
+    # Título parecido com ano diferente é, na prática, outra obra: um capítulo
+    # que reproduz o título (Bergstra e Bengio, 2012) ou a mesma ideia noutro
+    # livro. Periódicos sem DOI, como o JMLR, e anais antigos caem aqui.
+    return "--", ("sem DOI e sem registro na Crossref com o mesmo ano (livro, relatório, "
+                  "anais antigos ou periódico sem DOI, como o JMLR): conferir à mão")
 
 
 def confere_endereco(texto: str) -> tuple[str, str]:
@@ -140,7 +143,10 @@ def confere_endereco(texto: str) -> tuple[str, str]:
     url = urls[0].rstrip(".,;")
     r = get(url)
     if r is None:
-        return "?", f"{url}: sem resposta"
+        return "?", f"{url}: sem resposta (fora do ar ou certificado TLS inválido)"
+    if r.status_code in (401, 403):
+        # IBGE e outros portais recusam robôs; 403 não quer dizer endereço morto.
+        return "?", f"{url}: HTTP {r.status_code} (o site recusa acesso automatizado; abrir no navegador)"
     if r.status_code >= 400:
         return "X", f"{url}: HTTP {r.status_code}"
     return "ok", f"{url}: HTTP {r.status_code}"

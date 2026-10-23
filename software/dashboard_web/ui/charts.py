@@ -236,8 +236,8 @@ def plot_para_mensal(meses: list[dict], is_dark: bool = True):
     return _layout_preco(fig, is_dark, "R$ por saca")
 
 
-def plot_para_horario(velas: list[dict], is_dark: bool = True):
-    """Chicago em R$ hora a hora e o Pará estimado (Chicago + base do mês)."""
+def plot_para_diario(velas: list[dict], is_dark: bool = True):
+    """Chicago em R$ dia a dia (fechamento) e o Pará estimado (Chicago + base do mês)."""
     df = pd.DataFrame(velas)
     df["data"] = pd.to_datetime(df["t"], unit="s", utc=True).dt.tz_convert("America/Belem")
     cinza = "#a1a1a6" if is_dark else "#6e6e73"

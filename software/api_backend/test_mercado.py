@@ -55,7 +55,7 @@ def test_resumo_declara_atraso_e_variacao_do_periodo():
                        resposta([100], [5.0]), "1d")
     assert r["atraso_min"] == 10
     assert r["variacao_periodo_pct"] == pytest.approx(10.0, abs=0.01)
-    assert r["intervalo"] == "5m"
+    assert r["intervalo"] == "15m"
 
 
 def test_fonte_fora_do_ar_nao_vira_cotacao(monkeypatch):
@@ -71,3 +71,14 @@ def test_fonte_fora_do_ar_nao_vira_cotacao(monkeypatch):
 def test_periodo_desconhecido_e_recusado():
     with pytest.raises(ValueError):
         mercado.cotacao("10y")
+
+
+def test_cada_periodo_cabe_numa_tela_de_celular():
+    """Velas por período, no pregão da CBOT (cerca de 13 h por dia útil):
+    entre 20 e 80, para cada vela ter largura legível."""
+    minutos = {"15m": 15, "60m": 60}
+    pregao_min = 13 * 60
+    assert 20 <= pregao_min / minutos[mercado.PERIODOS["1d"]] <= 80
+    assert 20 <= 5 * pregao_min / minutos[mercado.PERIODOS["5d"]] <= 80
+    assert mercado.PERIODOS["1mo"] == "1d"    # cerca de 22 pregões
+    assert mercado.PERIODOS["6mo"] == "1wk"   # cerca de 26 semanas

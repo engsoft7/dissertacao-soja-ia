@@ -1,0 +1,24 @@
+# Cotações físicas da soja no Pará.
+#
+# Por enquanto só diagnostica onde a série do físico paraense existe
+# (diagnostica_precos_para.py); roda quando o roteiro ou este workflow mudam.
+name: Preços da soja no Pará
+
+on:
+  push:
+    paths:
+      - "software/automacao_github/diagnostica_precos_para.py"
+      - ".github/workflows/precos-para.yml"
+  workflow_dispatch:
+
+jobs:
+  diagnostico:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet requests
+      - name: Procura praças do Pará nas fontes
+        run: python software/automacao_github/diagnostica_precos_para.py

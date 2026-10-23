@@ -1,8 +1,10 @@
 package com.agrointeligencia.app
 
+import android.widget.ImageView
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -10,13 +12,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.google.gson.Gson
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import java.io.File
 import kotlin.math.sin
 
 /**
@@ -28,6 +33,11 @@ import kotlin.math.sin
  * gráficos, faixas de El Niño cobrindo o histórico) passavam por revisão de
  * código sem que ninguém os visse. O workflow capturas.yml publica os PNGs
  * na branch capturas-de-tela.
+ *
+ * Os dados vêm de build/dados_capturas/, gravados pelo script
+ * automacao_github/dados_das_capturas.py com as respostas reais da API. Sem
+ * esses arquivos (rodando o teste sozinho, ou com o Yahoo fora do ar no caso
+ * do mercado), cada tela volta à série de exemplo abaixo.
  *
  * Não compara com imagens de referência: só grava. A conferência é visual.
  */
@@ -52,7 +62,7 @@ class CapturasDeTelaTest {
 
     // ── dados de exemplo, na ordem de grandeza da base real ──────────────────
 
-    private val historico = (2001..2027).map { ano ->
+    private val historicoExemplo = (2001..2027).map { ano ->
         val tendencia = 2400.0 + (ano - 2001) * 35.0
         val observado = ano <= 2024
         PrevisaoHistorico(
@@ -63,9 +73,9 @@ class CapturasDeTelaTest {
         )
     }
 
-    private val previsao = PrevisaoResponse(
+    private val previsaoExemplo = PrevisaoResponse(
         municipio = "Paragominas",
-        historico = historico,
+        historico = historicoExemplo,
         elNinos = listOf(2003, 2005, 2007, 2010, 2015, 2016, 2019, 2020, 2024),
         laNinas = listOf(2001, 2006, 2008, 2009, 2011, 2012, 2018, 2021, 2022, 2023),
         validacao = ValidacaoModelo(0.253, 0.253, 412.8, 13.6, 451, 38)
@@ -79,7 +89,7 @@ class CapturasDeTelaTest {
              l = minOf(abre, fecha) - 0.3, c = fecha)
     }
 
-    private val mercado = MercadoResponse(
+    private val mercadoExemplo = MercadoResponse(
         cotacao = CotacaoBolsa(
             fonte = "Yahoo Finance", periodo = "1d", intervalo = "5m", atraso_min = 10,
             atualizado_em = velas.last().t, ultimo_brl_saca = velas.last().c,
@@ -93,6 +103,24 @@ class CapturasDeTelaTest {
         conab_fonte = "CONAB, Pedro Afonso (TO), março de 2026"
     )
 
+    // ── dados reais, quando o script os gravou ────────────────────────────────
+
+    private inline fun <reified T> real(nome: String): T? =
+        File("build/dados_capturas/$nome.json").takeIf { it.exists() }
+            ?.let { Gson().fromJson(it.readText(), T::class.java) }
+
+    private val previsao: PrevisaoResponse = real("previsao") ?: previsaoExemplo
+    private val financas: FinancaResponse? = real("financas")
+    private val mercadoReal: MercadoResponse? = real("mercado")
+    private val mercado: MercadoResponse = mercadoReal ?: mercadoExemplo
+    private val periodoMercado = if (mercadoReal != null) "1mo" else "1d"
+
+    // A mesma escolha do AgroDashboard: a projeção é o ano mais adiante, e a
+    // comparação é com a última safra que tem produtividade divulgada.
+    private val historico = previsao.historico.sortedByDescending { it.ano }
+    private val projecao = historico.first()
+    private val ultimoReal = historico.drop(1).firstOrNull { it.rendimento_real > 0 }
+
     // ── capturas ──────────────────────────────────────────────────────────────
 
     @Test fun historico_claro() = captura("historico", false) { HistoricoProdutividadeChart(historico, previsao) }
@@ -100,27 +128,36 @@ class CapturasDeTelaTest {
     @Config(qualifiers = "+night")
     @Test fun historico_escuro() = captura("historico", true) { HistoricoProdutividadeChart(historico, previsao) }
 
-    @Test fun mercado_claro() = captura("mercado", false) { MercadoConteudo(mercado, false, "1d") {} }
+    @Test fun mercado_claro() = captura("mercado", false) { MercadoConteudo(mercado, false, periodoMercado) {} }
 
     @Config(qualifiers = "+night")
-    @Test fun mercado_escuro() = captura("mercado", true) { MercadoConteudo(mercado, false, "1d") {} }
+    @Test fun mercado_escuro() = captura("mercado", true) { MercadoConteudo(mercado, false, periodoMercado) {} }
 
-    @Test fun resumo_claro() = captura("resumo", false) {
-        ResumoAgronomicoCard(historico.last(), historico.first { it.ano == 2024 })
-    }
+    @Test fun resumo_claro() = captura("resumo", false) { ResumoAgronomicoCard(projecao, ultimoReal) }
 
     @Config(qualifiers = "+night")
-    @Test fun resumo_escuro() = captura("resumo", true) {
-        ResumoAgronomicoCard(historico.last(), historico.first { it.ano == 2024 })
+    @Test fun resumo_escuro() = captura("resumo", true) { ResumoAgronomicoCard(projecao, ultimoReal) }
+
+    @Test fun viabilidade_claro() = captura("viabilidade", false) {
+        financas?.let { ResumoFinanceiroCard(projecao, it) }
     }
 
     @Test fun cartoes_historico_claro() = captura("cartoes_historico", false) {
-        PrevisaoCard(historico.first { it.ano == 2024 }, null)
-        PrevisaoCard(historico.last(), null)
+        PrevisaoCard(projecao, financas)
+        ultimoReal?.let { PrevisaoCard(it, financas) }
     }
 
-    @Test fun sobre_claro() = captura("sobre", false) { MetodologiaCard(null, previsao.validacao) }
+    @Test fun sobre_claro() = captura("sobre", false) { MetodologiaCard(financas, previsao.validacao) }
 
     @Config(qualifiers = "+night")
-    @Test fun sobre_escuro() = captura("sobre", true) { MetodologiaCard(null, previsao.validacao) }
+    @Test fun sobre_escuro() = captura("sobre", true) { MetodologiaCard(financas, previsao.validacao) }
+
+    // O ícone do launcher, montado pelo próprio Android a partir do
+    // adaptive-icon: confere que as três camadas compilam e se encaixam.
+    @Test fun icone() = captura("icone", false) {
+        AndroidView(
+            factory = { ImageView(it).apply { setImageResource(R.mipmap.ic_launcher) } },
+            modifier = Modifier.size(192.dp)
+        )
+    }
 }

@@ -207,6 +207,9 @@ def _layout_preco(fig, is_dark: bool, titulo_y: str):
     return fig
 
 
+_MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+
+
 def cor_para(is_dark: bool) -> str:
     """Mesma cor da estimativa do Pará no aplicativo (corPara, MainActivity.kt)."""
     return "#58A6FF" if is_dark else "#1D4ED8"
@@ -226,7 +229,10 @@ def plot_para_mensal(meses: list[dict], is_dark: bool = True):
         x=df["data"], y=df["para"], name="Pará (média mensal)", mode="lines+markers",
         line=dict(color=cor_para(is_dark), width=3), customdata=df["base"],
         hovertemplate="Pará: R$ %{y:,.2f}<br>base: %{customdata:+,.2f}<extra></extra>"))
-    fig.update_xaxes(tickformat="%b/%y")
+    # Rótulos em português e um a cada três meses: o Plotly escreve "Oct/24".
+    marcas = df.iloc[::-3].iloc[::-1]  # termina no mês corrente
+    fig.update_xaxes(tickvals=marcas["data"],
+                     ticktext=[_MESES[int(m[5:]) - 1] + "/" + m[2:4] for m in marcas["mes"]])
     return _layout_preco(fig, is_dark, "R$ por saca")
 
 
@@ -245,5 +251,7 @@ def plot_para_horario(velas: list[dict], is_dark: bool = True):
             x=df["data"], y=df["pa"], name="Pará estimado", mode="lines",
             line=dict(color=cor_para(is_dark), width=2.5, dash="dash"),
             hovertemplate="Pará estimado: R$ %{y:,.2f}<extra></extra>"))
-    fig.update_xaxes(tickformat="%d/%m")
+    # Sem pregão no fim de semana: sem o salto, o gráfico ligava sexta a
+    # segunda com uma reta que parecia preço parado.
+    fig.update_xaxes(tickformat="%d/%m", rangebreaks=[dict(bounds=["sat", "mon"])])
     return _layout_preco(fig, is_dark, "R$ por saca")

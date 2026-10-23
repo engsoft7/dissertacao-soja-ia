@@ -1719,7 +1719,7 @@ if tela_atual == "💰 Viabilidade Financeira":
         st.plotly_chart(plot_para_mensal(para["meses"], is_dark=is_dark),
                         width="stretch", config={"displayModeBar": False})
         st.caption(
-            f"Médias mensais em R$ por saca. Pará: {para['fonte']}; o mês corrente "
+            f"Médias mensais em reais por saca. Pará: {para['fonte']}; o mês corrente "
             f"entra com a média parcial. Chicago: contrato mais próximo da CBOT, "
             f"convertido pelo dólar de cada dia. A base de cada mês é a diferença "
             f"entre as duas — em {mes_txt}, Pará {brl_md(ultimo['para'], 2)} e "

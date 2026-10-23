@@ -85,6 +85,35 @@ def agrolink():
             print("     ·", a[:300])
 
 
+def agrolink_estrutura():
+    """Como a Agrolink organiza as praças: linhas do Pará, preço, data e links de histórico."""
+    print("\n== Agrolink: estrutura da página de soja")
+    url = "https://www.agrolink.com.br/cotacoes/graos/soja/soja-em-grao-sc-60kg"
+    pag = baixa(url).text
+    ufs = sorted(set(re.findall(r"\(([A-Z]{2})\)", pag)))
+    print("  UFs na página:", ufs)
+    pa = sorted(set(re.findall(r"([A-ZÀ-Úa-zà-ú' .-]{3,40}) \(PA\)", pag)))
+    print("  praças do Pará:", pa)
+    i = pag.find("(PA)")
+    print("  HTML em volta da primeira praça do Pará:")
+    print(pag[max(0, i - 1500):i + 2500])
+    hist = sorted(set(re.findall(r'href="([^"]*historico[^"]*)"', pag)))
+    print("  links de histórico:", hist[:40])
+    datas = sorted(set(re.findall(r"\d{2}/\d{2}/\d{4}", pag)))
+    print("  datas na página:", datas[-10:])
+    for h in [x for x in hist if "/pa" in x.lower()][:3]:
+        u = h if h.startswith("http") else "https://www.agrolink.com.br" + h
+        try:
+            hp = baixa(u).text
+        except Exception as e:
+            print("  ", u, "erro", e)
+            continue
+        j = max(hp.find("Barcarena"), hp.find("<table"))
+        dh = sorted(set(re.findall(r"\d{2}/\d{2}/\d{4}", hp)))[-5:]
+        print(f"  histórico {u}: {len(hp)} bytes; datas {dh}")
+        print(hp[j:j + 2500])
+
+
 def conab():
     print("\n== CONAB: preços semanais e mensais")
     for nome in CONAB_ARQUIVOS:
@@ -111,7 +140,7 @@ def conab():
 
 
 if __name__ == "__main__":
-    for etapa in (noticias_agricolas, agrolink, conab):
+    for etapa in (agrolink_estrutura,):
         try:
             etapa()
         except Exception as e:  # um diagnóstico não para no primeiro erro

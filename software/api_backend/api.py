@@ -5,6 +5,7 @@ from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
                       buscar_cotacoes, aviso_sobre_o_custo)
 from validacao import metricas_validacao
 import mercado
+import precos_para
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -269,13 +270,24 @@ def get_mercado(periodo: str = "1d"):
     A cotação de bolsa vem com atraso de 10 a 15 minutos (ver mercado.py). As
     referências situam o número: o físico do dia na praça mais próxima do Pará
     e o preço de porteira do levantamento da CONAB, que é o padrão da simulação.
+
+    "para" traz a estimativa do preço no Pará (ver precos_para.py): cada vela
+    ganha "pa", a cotação de Chicago daquele instante somada à base do Pará no
+    mês, e o bloco traz a série mensal de onde a base sai.
     """
     if periodo not in mercado.PERIODOS:
         raise HTTPException(status_code=400,
                             detail=f"período deve ser um de {sorted(mercado.PERIODOS)}")
     fin = _get_cached_finance()
+    cotacao = mercado.cotacao(periodo)
+    para = precos_para.estima(cotacao, precos_para.serie_mensal())
+    if para is not None:
+        pa = para.pop("velas_pa")
+        if cotacao and pa:
+            cotacao = {**cotacao, "velas": [{**v, "pa": p} for v, p in zip(cotacao["velas"], pa)]}
     return {
-        "cotacao": mercado.cotacao(periodo),
+        "cotacao": cotacao,
+        "para": para,
         "fisico": fin.get("fisico"),
         "conab_saca": PRECO_RECEBIDO_CONAB_SACA,
         "conab_fonte": descricao_do_levantamento(),

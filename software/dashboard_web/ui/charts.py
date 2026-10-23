@@ -187,3 +187,71 @@ def plot_area(serie_plot: pd.DataFrame, is_dark: bool = True):
     )
     
     return fig
+
+
+def _layout_preco(fig, is_dark: bool, titulo_y: str):
+    font_color = "#a1a1a6" if is_dark else "#6e6e73"
+    grid_color = "rgba(255,255,255,0.09)" if is_dark else "rgba(0,0,0,0.08)"
+    fig.update_layout(
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, sans-serif", color=font_color),
+        xaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=True, gridwidth=1, gridcolor=grid_color, title=titulo_y,
+                   tickformat=",.0f"),
+        hovermode="x unified",
+        separators=",.",
+        legend=dict(orientation="h", yanchor="top", y=-0.18, xanchor="left", x=0),
+        margin=dict(t=30, b=80),
+    )
+    return fig
+
+
+_MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+
+
+def cor_para(is_dark: bool) -> str:
+    """Mesma cor da estimativa do Pará no aplicativo (corPara, MainActivity.kt)."""
+    return "#58A6FF" if is_dark else "#1D4ED8"
+
+
+def plot_para_mensal(meses: list[dict], is_dark: bool = True):
+    """Médias mensais do Pará e de Chicago em R$/saca; a distância entre as linhas é a base."""
+    df = pd.DataFrame(meses)
+    df["data"] = pd.to_datetime(df["mes"] + "-01")
+    cinza = "#a1a1a6" if is_dark else "#6e6e73"
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df["data"], y=df["chicago"], name="Chicago em R$", mode="lines+markers",
+        line=dict(color=cinza, width=2, dash="dash"),
+        hovertemplate="Chicago: R$ %{y:,.2f}<extra></extra>"))
+    fig.add_trace(go.Scatter(
+        x=df["data"], y=df["para"], name="Pará (média mensal)", mode="lines+markers",
+        line=dict(color=cor_para(is_dark), width=3), customdata=df["base"],
+        hovertemplate="Pará: R$ %{y:,.2f}<br>base: %{customdata:+,.2f}<extra></extra>"))
+    # Rótulos em português e um a cada três meses: o Plotly escreve "Oct/24".
+    marcas = df.iloc[::-3].iloc[::-1]  # termina no mês corrente
+    fig.update_xaxes(tickvals=marcas["data"],
+                     ticktext=[_MESES[int(m[5:]) - 1] + "/" + m[2:4] for m in marcas["mes"]])
+    return _layout_preco(fig, is_dark, "R$ por saca")
+
+
+def plot_para_horario(velas: list[dict], is_dark: bool = True):
+    """Chicago em R$ hora a hora e o Pará estimado (Chicago + base do mês)."""
+    df = pd.DataFrame(velas)
+    df["data"] = pd.to_datetime(df["t"], unit="s", utc=True).dt.tz_convert("America/Belem")
+    cinza = "#a1a1a6" if is_dark else "#6e6e73"
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df["data"], y=df["c"], name="Chicago em R$", mode="lines",
+        line=dict(color=cinza, width=1.5),
+        hovertemplate="Chicago: R$ %{y:,.2f}<extra></extra>"))
+    if "pa" in df and df["pa"].notna().any():
+        fig.add_trace(go.Scatter(
+            x=df["data"], y=df["pa"], name="Pará estimado", mode="lines",
+            line=dict(color=cor_para(is_dark), width=2.5, dash="dash"),
+            hovertemplate="Pará estimado: R$ %{y:,.2f}<extra></extra>"))
+    # Sem pregão no fim de semana: sem o salto, o gráfico ligava sexta a
+    # segunda com uma reta que parecia preço parado.
+    fig.update_xaxes(tickformat="%d/%m", rangebreaks=[dict(bounds=["sat", "mon"])])
+    return _layout_preco(fig, is_dark, "R$ por saca")

@@ -1,0 +1,32 @@
+# Confere, com as fontes de verdade, a base do Pará e o preço estimado.
+#
+# precos_para.py lê a média mensal do Pará na Agrolink e a de Chicago no Yahoo
+# e imprime a série com a base de cada mês e o preço estimado agora. O ambiente
+# de desenvolvimento não alcança essas fontes; o runner do Actions, sim. Roda
+# quando o módulo ou este workflow mudam, toda segunda-feira (para um formato
+# novo da fonte aparecer aqui antes de aparecer como gráfico vazio no
+# aplicativo) e sob demanda.
+name: Preços da soja no Pará
+
+on:
+  push:
+    paths:
+      - "software/api_backend/precos_para.py"
+      - "software/api_backend/mercado.py"
+      - ".github/workflows/precos-para.yml"
+  schedule:
+    - cron: "17 12 * * 1"
+  workflow_dispatch:
+
+jobs:
+  confere:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet requests
+      - name: Série mensal do Pará e preço estimado
+        working-directory: software/api_backend
+        run: python precos_para.py

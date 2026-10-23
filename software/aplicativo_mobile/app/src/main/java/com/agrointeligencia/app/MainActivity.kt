@@ -1339,6 +1339,9 @@ fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: Str
                     }
                     Text("Máxima R$ ${reais(cot.maxima_periodo)} · mínima R$ ${reais(cot.minima_periodo)}",
                          fontSize = 12.sp, color = secundaria)
+                    mercado.para?.let { para -> para.estimado_brl_saca?.let { estimado ->
+                        PrecoEstimadoPara(para, estimado, isDark)
+                    } }
                     GraficoVelas(cot.velas, isDark, cot.periodo)
                     val quando = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", PT_BR)
                         .format(java.util.Date(cot.atualizado_em * 1000))
@@ -1350,6 +1353,11 @@ fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: Str
                     }
                 }
             }
+
+            mercado?.para?.let { para -> para.meses?.takeIf { it.size >= 2 }?.let { meses ->
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                GraficoMensalPara(meses, para.fonte, isDark)
+            } }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
             Text("Referências de preço físico", fontWeight = FontWeight.Bold, fontSize = 14.sp,
@@ -1369,6 +1377,118 @@ fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: Str
                  fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
         }
     }
+}
+
+/** Cor da estimativa do Pará nos dois gráficos da tela Mercado. */
+fun corPara(isDark: Boolean) = if (isDark) Color(0xFF58A6FF) else Color(0xFF1D4ED8)
+
+private val MESES_CURTOS = listOf("jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez")
+
+/** "2026-10" -> "out/26"; com ano por extenso, "out/2026". */
+fun mesCurto(mes: String, anoCompleto: Boolean = false): String {
+    val (ano, m) = mes.split("-").let { it[0] to it[1].toInt() }
+    return MESES_CURTOS[m - 1] + "/" + if (anoCompleto) ano else ano.takeLast(2)
+}
+
+/**
+ * O preço estimado no Pará agora, com a conta à vista: Chicago deste momento
+ * mais a base do mês. A base tem sinal, e o sinal importa: Barcarena é porto
+ * de exportação e pode pagar acima de Chicago convertido.
+ */
+@Composable
+fun PrecoEstimadoPara(para: EstimativaPara, estimado: Double, isDark: Boolean) {
+    val cor = corPara(isDark)
+    val sinal = if (para.base_brl_saca >= 0) "+" else "−"
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = 10.dp)
+            .background(cor.copy(alpha = 0.08f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 12.dp, vertical = 10.dp)
+    ) {
+        Text("Pará, estimado agora", fontSize = 12.sp, color = cor, fontWeight = FontWeight.SemiBold)
+        Text("R$ ${reais(estimado)}/sc", fontSize = 22.sp, fontWeight = FontWeight.Bold,
+             color = MaterialTheme.colorScheme.onSurface)
+        Text("Chicago deste momento $sinal R$ ${reais(kotlin.math.abs(para.base_brl_saca))} de base do Pará " +
+             "(${mesCurto(para.mes_base, anoCompleto = true)}). Estimativa, não cotação de praça.",
+             fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
+    }
+}
+
+/**
+ * Médias mensais do Pará e de Chicago em R$/saca, de onde sai a base. A
+ * distância entre as duas linhas é a base de cada mês.
+ */
+@Composable
+fun GraficoMensalPara(meses: List<MesPara>, fonte: String, isDark: Boolean) {
+    val cPara = corPara(isDark)
+    val cChicago = MaterialTheme.colorScheme.onSurfaceVariant
+    val corTexto = MaterialTheme.colorScheme.onSurfaceVariant
+    val corGrade = MaterialTheme.colorScheme.outlineVariant
+    val minP = meses.minOf { minOf(it.para, it.chicago) }
+    val maxP = meses.maxOf { maxOf(it.para, it.chicago) }
+    val faixa = if (maxP > minP) maxP - minP else 1.0
+    var tocado by remember(meses) { mutableStateOf<Int?>(null) }
+    val ultimo = meses.last()
+
+    Text("Pará × Chicago, médias mensais", fontWeight = FontWeight.Bold, fontSize = 14.sp,
+         color = MaterialTheme.colorScheme.onSurface)
+    val sel = tocado?.let { meses.getOrNull(it) } ?: ultimo
+    Text(
+        "${mesCurto(sel.mes, anoCompleto = true)} · Pará ${reais(sel.para)} · Chicago ${reais(sel.chicago)} · " +
+            "base ${if (sel.base >= 0) "+" else "−"}${reais(kotlin.math.abs(sel.base))} (R$/sc)",
+        fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 4.dp)
+    )
+    Canvas(
+        modifier = Modifier.fillMaxWidth().height(180.dp).padding(top = 6.dp, bottom = 6.dp)
+            .semantics {
+                contentDescription = "Médias mensais da soja no Pará e em Chicago, em reais por saca, de " +
+                    "${mesCurto(meses.first().mes, true)} a ${mesCurto(ultimo.mes, true)}; no último mês, " +
+                    "Pará R$ ${reais(ultimo.para)} e Chicago R$ ${reais(ultimo.chicago)}."
+            }
+            .pointerInput(meses) {
+                detectTapGestures { pos ->
+                    val padX = 56.dp.toPx()
+                    val passo = (size.width - padX) / (meses.size - 1).coerceAtLeast(1)
+                    tocado = ((pos.x - padX) / passo).roundToInt().coerceIn(0, meses.size - 1)
+                }
+            }
+    ) {
+        val padX = 56.dp.toPx()
+        val padY = 22.dp.toPx()
+        val w = size.width - padX
+        val h = size.height - padY
+        val passo = w / (meses.size - 1).coerceAtLeast(1)
+        fun x(i: Int) = padX + passo * i
+        fun y(p: Double) = (h - ((p - minP) / faixa * h)).toFloat()
+        val paint = Paint().apply { color = corTexto.toArgb(); textSize = 11.sp.toPx(); isAntiAlias = true }
+        for (i in 0..3) {
+            val p = minP + faixa * i / 3
+            drawLine(color = corGrade, start = Offset(padX, y(p)), end = Offset(padX + w, y(p)), strokeWidth = 1.dp.toPx())
+            drawContext.canvas.nativeCanvas.drawText(reais(p), 0f, y(p) + 4.dp.toPx(), paint)
+        }
+        tocado?.let { drawLine(color = corTexto.copy(alpha = 0.5f), start = Offset(x(it), 0f), end = Offset(x(it), h), strokeWidth = 1.dp.toPx()) }
+        fun linha(valor: (MesPara) -> Double, cor: Color, tracejada: Boolean) {
+            for (i in 1 until meses.size) {
+                drawLine(color = cor, start = Offset(x(i - 1), y(valor(meses[i - 1]))), end = Offset(x(i), y(valor(meses[i]))),
+                         strokeWidth = 2.5.dp.toPx(),
+                         pathEffect = if (tracejada) PathEffect.dashPathEffect(floatArrayOf(10f, 8f), 0f) else null)
+            }
+            meses.forEachIndexed { i, m -> drawCircle(color = cor, radius = 3.dp.toPx(), center = Offset(x(i), y(valor(m)))) }
+        }
+        linha({ it.chicago }, cChicago, tracejada = true)
+        linha({ it.para }, cPara, tracejada = false)
+        listOf(0, meses.size / 2, meses.size - 1).distinct().forEach { i ->
+            val rotulo = mesCurto(meses[i].mes)
+            val xx = (x(i) - paint.measureText(rotulo) / 2).coerceIn(padX, size.width - paint.measureText(rotulo))
+            drawContext.canvas.nativeCanvas.drawText(rotulo, xx, h + 16.dp.toPx(), paint)
+        }
+    }
+    Row {
+        ItemLegenda(cPara, "Pará")
+        ItemLegenda(cChicago, "Chicago em R$", tracejada = true)
+    }
+    Text("Base = média do Pará − média de Chicago no mês. Fonte do Pará: $fonte; " +
+         "o mês corrente entra com a média parcial. Chicago: CBOT convertida pelo dólar de cada dia.",
+         fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 4.dp))
 }
 
 /** Amostra de cor e rótulo de uma legenda de gráfico. */
@@ -1398,8 +1518,12 @@ fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
     val baixa = if (isDark) Color(0xFFf85149) else Color(0xFFb91c1c)
     val corTexto = MaterialTheme.colorScheme.onSurfaceVariant
     val corGrade = MaterialTheme.colorScheme.outlineVariant
-    val minP = velas.minOf { it.l }
-    val maxP = velas.maxOf { it.h }
+    // A linha do Pará entra na escala: com base positiva ela fica acima das
+    // velas e sairia do quadro.
+    val comPara = velas.any { it.pa != null }
+    val cPara = corPara(isDark)
+    val minP = minOf(velas.minOf { it.l }, velas.mapNotNull { it.pa }.minOrNull() ?: Double.MAX_VALUE)
+    val maxP = maxOf(velas.maxOf { it.h }, velas.mapNotNull { it.pa }.maxOrNull() ?: -Double.MAX_VALUE)
     val faixa = if (maxP > minP) maxP - minP else 1.0
     val formato = java.text.SimpleDateFormat(if (periodo == "1d") "HH:mm" else "dd/MM", PT_BR)
     var tocada by remember(velas) { mutableStateOf<Int?>(null) }
@@ -1412,7 +1536,8 @@ fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
     Text(
         text = sel?.let {
             java.text.SimpleDateFormat("dd/MM HH:mm", PT_BR).format(java.util.Date(it.t * 1000)) +
-                " · abertura ${reais(it.o)} · máxima ${reais(it.h)} · mínima ${reais(it.l)} · fechamento ${reais(it.c)}"
+                " · abertura ${reais(it.o)} · máxima ${reais(it.h)} · mínima ${reais(it.l)} · fechamento ${reais(it.c)}" +
+                (it.pa?.let { pa -> " · Pará estimado ${reais(pa)}" } ?: "")
         } ?: "Toque numa vela para ver os valores.",
         fontSize = 12.sp, color = corTexto, lineHeight = 16.sp,
         modifier = Modifier.padding(top = 10.dp)
@@ -1455,6 +1580,17 @@ fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
             val base = y(minOf(v.o, v.c))
             drawRect(color = cor, topLeft = Offset(x - corpo / 2, topo), size = Size(corpo, (base - topo).coerceAtLeast(1.dp.toPx())))
         }
+        if (comPara) {
+            var anterior: Offset? = null
+            velas.forEachIndexed { i, v ->
+                val ponto = v.pa?.let { Offset(padX + passo * i + passo / 2, y(it)) }
+                if (ponto != null && anterior != null) {
+                    drawLine(color = cPara, start = anterior, end = ponto, strokeWidth = 2.dp.toPx(),
+                             pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 6f), 0f))
+                }
+                anterior = ponto
+            }
+        }
         listOf(0, velas.size / 2, velas.size - 1).distinct().forEach { i ->
             val rotulo = formato.format(java.util.Date(velas[i].t * 1000))
             val x = (padX + passo * i + passo / 2 - paint.measureText(rotulo) / 2)
@@ -1466,6 +1602,7 @@ fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
         ItemLegenda(alta, "Fechou acima da abertura", faixa = true)
         ItemLegenda(baixa, "Fechou abaixo", faixa = true)
     }
+    if (comPara) ItemLegenda(cPara, "Pará estimado (Chicago + base do mês)", tracejada = true)
 }
 
 @Composable

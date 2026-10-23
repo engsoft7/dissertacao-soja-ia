@@ -213,6 +213,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.8` (22/10/2026) — publicação e registro automáticos da versão | 102 | 19.139 | `0bd893a160fe63bb3a94239551deee7fa5c331c8ea0dfd70df04cb313e680cc7` |
 | Tag `v2.4.9` (23/10/2026) — ícone adaptativo do aplicativo (2.2.2) e capturas de tela com dados reais | 104 | 19.317 | `fbbe44202edc5fbb0ca0b92e79c48ff936289f1adc5bec3fd0b7e138da529b2a` |
 | Tag `v2.4.10` (23/10/2026) — preço estimado da soja no Pará no aplicativo (2.2.3) e no painel | 106 | 19.929 | `af102ab293729efef84e2fd8f08eed1a30ff0c04e30af2b72411c854757f1bbd` |
+| Tag `v2.4.11` (23/10/2026) — gráficos de mercado mais legíveis no aplicativo (2.2.4) e no painel | 107 | 20.087 | `fdb642d289f4d232aa25b52203cbb8e09a55adb01be412185cb48fd869420eeb` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -515,6 +516,23 @@ arquivos e 19.929 linhas. O DOI de versão desta etiqueta é
 10.5281/zenodo.23585430, atribuído pelo Zenodo no depósito disparado pela
 publicação do Release em 23/10/2026.
 
+A `v2.4.11` foi registrada pelo workflow `registra-doi.yml` na publicação do
+Release, em 23/10/2026, com o título “v2.4.11 — Gráficos de mercado mais
+legíveis no aplicativo (2.2.4) e no painel”. Em relação à `v2.4.10`, entra 1
+arquivo-fonte
+(`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/EixoRedondoTest.kt`);
+mudam 6 (`software/api_backend/mercado.py`,
+`software/api_backend/test_mercado.py`,
+`software/aplicativo_mobile/app/build.gradle.kts`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/MainActivity.kt`,
+`software/dashboard_web/app.py` e `software/dashboard_web/ui/charts.py`).
+
+O resumo criptográfico da `v2.4.11` foi calculado pelo mesmo workflow sobre uma
+cópia limpa da etiqueta (commit `053c55a`), com o critério do comando acima: 107
+arquivos e 20.087 linhas. O DOI de versão desta etiqueta é
+10.5281/zenodo.23592602, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 23/10/2026.
+
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
 calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
@@ -756,6 +774,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.7`:** 10.5281/zenodo.23576847
 - **DOI da `v2.4.8`:** 10.5281/zenodo.23577538
 - **DOI da `v2.4.9`:** 10.5281/zenodo.23583614
-- **DOI da versão mais recente (`v2.4.10`):** 10.5281/zenodo.23585430
+- **DOI da `v2.4.10`:** 10.5281/zenodo.23585430
+- **DOI da versão mais recente (`v2.4.11`):** 10.5281/zenodo.23592602
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

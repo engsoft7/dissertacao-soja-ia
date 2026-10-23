@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mesma folha, sem as nervuras, para os ícones temáticos do Android 13+: o sistema pinta a silhueta com a cor do tema. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54.0,52.0 A12.6,12.6 0 0,1 54.0,28.0 A12.6,12.6 0 0,1 54.0,52.0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M49.6,54.7 A10,10 0 0,1 32.8,45.7 A10,10 0 0,1 49.6,54.7 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M58.4,54.7 A10,10 0 0,1 75.2,45.7 A10,10 0 0,1 58.4,54.7 Z" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:pathData="M54,57 L54.0,52.0" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:pathData="M54,57 L49.6,54.7" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:pathData="M54,57 L58.4,54.7" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:pathData="M54,57 Q55.5,70 52,82" />
+</vector>

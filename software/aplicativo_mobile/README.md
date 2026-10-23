@@ -17,7 +17,7 @@ Aplicativo Android focado em Inteligência Artificial para estimar o rendimento 
 2. Crie ou selecione um **Keystore** com senha segura.
 3. Gere um **Android App Bundle (AAB)** para upload.
 4. Acesse o **Google Play Console**, crie uma nova aplicação ou selecione a existente.
-5. Faça upload do AAB, preencha as informações de listagem (descrição, screenshots, classificação indicativa, política de privacidade, etc.).
+5. Faça upload do AAB, preencha as informações de listagem (descrição, screenshots, classificação indicativa, política de privacidade, etc.). O ícone de 512 × 512 px que a loja pede está em `loja/icone_512.png`, desenhado com as mesmas camadas do ícone adaptativo (`res/drawable/ic_launcher_*.xml`); as capturas de tela atuais ficam na branch `capturas-de-tela`, geradas pelo workflow `capturas.yml`.
 6. Defina a versão (versãoCode e versionName já atualizadas) e envie para revisão.
 7. Após aprovação, o app estará disponível na Play Store.
 

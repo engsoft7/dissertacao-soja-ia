@@ -1,15 +1,21 @@
-# Capturas de tela do aplicativo, desenhadas sem emulador.
+# Capturas de tela do aplicativo e do painel.
 #
-# Roda os testes de CapturasDeTelaTest (Robolectric + Roborazzi), que desenham
-# as telas com dados de exemplo nos temas claro e escuro, e publica os PNGs na
+# Grava as respostas reais da API (dados_das_capturas.py), roda os testes de
+# CapturasDeTelaTest (Robolectric + Roborazzi), que desenham as telas do
+# aplicativo com essas respostas nos temas claro e escuro, e fotografa as três
+# páginas do painel num navegador (capturas_do_painel.py). Publica os PNGs na
 # branch capturas-de-tela, que é sobrescrita a cada execução. Assim quem revisa
-# uma mudança de interface vê o resultado sem compilar o aplicativo.
+# uma mudança de interface vê o resultado sem compilar o aplicativo, e os
+# slides e o Anexo do produto técnico têm de onde tirar telas atuais.
 name: Capturas de tela do aplicativo
 
 on:
   push:
     paths:
       - "software/aplicativo_mobile/**"
+      - "software/api_backend/**"
+      - "software/dashboard_web/**"
+      - "software/automacao_github/dados_das_capturas.py"
       - ".github/workflows/capturas.yml"
   workflow_dispatch:
 
@@ -26,6 +32,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências da API e do painel
+        run: |
+          pip install --quiet -r software/api_backend/requirements.txt \
+            -r software/dashboard_web/requirements.txt httpx playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Grava as respostas reais da API
+        run: python software/automacao_github/dados_das_capturas.py
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -37,20 +56,34 @@ jobs:
         working-directory: software/aplicativo_mobile
         run: ./gradlew --no-daemon testDebugUnitTest --tests "*CapturasDeTelaTest*"
 
+      # Um painel que não sobe não deve impedir a publicação das telas do
+      # aplicativo; a falha fica marcada no passo.
+      - name: Fotografa o painel
+        continue-on-error: true
+        working-directory: software/dashboard_web
+        run: python capturas_do_painel.py --pasta "$RUNNER_TEMP/painel"
+
       - name: Publica na branch capturas-de-tela
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           origem="$GITHUB_WORKSPACE/software/aplicativo_mobile/app/build/capturas"
           ls "$origem"/*.png
+          dados="$GITHUB_WORKSPACE/software/aplicativo_mobile/app/build/dados_capturas"
           destino="$RUNNER_TEMP/capturas"
           mkdir -p "$destino" && cp "$origem"/*.png "$destino"/
+          cp "$RUNNER_TEMP"/painel/*.png "$destino"/ 2>/dev/null || true
           cd "$destino"
           {
-            echo "# Capturas de tela do aplicativo"
+            echo "# Capturas de tela do aplicativo e do painel"
             echo
-            echo "Geradas pelo workflow capturas.yml a partir de \`${GITHUB_REF_NAME}\` (\`${GITHUB_SHA::7}\`)."
-            echo "Dados de exemplo; telas desenhadas pelo Robolectric num celular de 411 x 891 dp."
+            echo "Geradas pelo workflow capturas.yml a partir de \`${GITHUB_REF_NAME}\` (\`${GITHUB_SHA::7}\`) em $(date -u +%d/%m/%Y)."
+            if [ -f "$dados/previsao.json" ]; then
+              echo "Aplicativo com as respostas reais da API para Paragominas$([ -f "$dados/mercado.json" ] || echo ', exceto o mercado, com dados de exemplo porque a cotação não respondeu'); telas desenhadas pelo Robolectric num celular de 411 x 891 dp."
+            else
+              echo "Aplicativo com dados de exemplo (a API não respondeu); telas desenhadas pelo Robolectric num celular de 411 x 891 dp."
+            fi
+            echo "Painel fotografado no Chromium, 1440 px de largura, com a base do produto."
             echo
             for f in *.png; do echo "## ${f%.png}"; echo; echo "![${f%.png}]($f)"; echo; done
           } > README.md

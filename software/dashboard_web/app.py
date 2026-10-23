@@ -1706,7 +1706,15 @@ if tela_atual == "💰 Viabilidade Financeira":
         st.caption("A série mensal do Pará não pôde ser consultada agora; "
                    "a estimativa volta quando a fonte responder.")
     else:
-        from ui.charts import plot_para_mensal, plot_para_horario
+        # O Streamlit Cloud, ao receber um push, roda o app.py novo mas mantém
+        # na memória os módulos já importados: ui.charts continuava sendo a
+        # versão de antes, sem estas duas funções, e a página caía com
+        # ImportError. Recarrega quando o módulo em memória está velho.
+        import importlib
+        import ui.charts as graficos
+        if not hasattr(graficos, "plot_para_horario"):
+            graficos = importlib.reload(graficos)
+        plot_para_mensal, plot_para_horario = graficos.plot_para_mensal, graficos.plot_para_horario
         ultimo = para["meses"][-1]
         mes_txt = pd.Timestamp(para["mes_base"] + "-01").strftime("%m/%Y")
         m1, m2, m3 = st.columns(3)

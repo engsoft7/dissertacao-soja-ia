@@ -239,9 +239,59 @@ def commons():
     print(f"  total por licença: {json.dumps(contagem, ensure_ascii=False)}")
 
 
+ABERTAS_HF = [
+    "Project-AgML/YOLOPOD_Soyabean_Pod_Counting_Dataset",
+    "Project-AgML/mtl_plotcounter_soybean_detection",
+    "pspawar71/SOYBEAN_UAV_RGB",
+    "lisawen/soybean_dataset",
+]
+
+
+def detalhes_abertas():
+    """O que há dentro das bases de licença aberta achadas na primeira rodada."""
+    print("\n===== Bases abertas: conteúdo =====")
+    for nome in ABERTAS_HF:
+        print(f"\n--- Hugging Face {nome}")
+        r = get(f"https://huggingface.co/api/datasets/{nome}")
+        if r is None or r.status_code != 200:
+            print(f"    HTTP {cod(r)}")
+            continue
+        d = r.json()
+        arquivos = [s_["rfilename"] for s_ in d.get("siblings", [])]
+        print(f"    licença: {[t for t in d.get('tags', []) if t.startswith('license:')]}; "
+              f"{len(arquivos)} arquivos; exemplos: {arquivos[:8]}")
+        rd = get(f"https://huggingface.co/datasets/{nome}/raw/main/README.md")
+        if rd is not None and rd.status_code == 200:
+            print("    README: " + re.sub(r"\s+", " ", rd.text)[:1800])
+    print("\n--- Zenodo 18898644 (SP-YOLO)")
+    r = get("https://zenodo.org/api/records/18898644")
+    if r is not None and r.status_code == 200:
+        md = r.json().get("metadata", {})
+        print(f"    {md.get('title')} | licença {(md.get('license') or {}).get('id')} | {md.get('publication_date')}")
+        print("    descrição: " + re.sub(r"\s+", " ", texto_limpo(md.get("description") or ""))[:1800])
+        for f in r.json().get("files", [])[:20]:
+            print(f"    arquivo: {f.get('key')} ({(f.get('size') or 0) / 1e6:.1f} MB)")
+    else:
+        print(f"    HTTP {cod(r)}")
+    print("\n--- GitHub raulsteinmetz/soy-segmentation-ds (GrowingSoy)")
+    rd = get("https://api.github.com/repos/raulsteinmetz/soy-segmentation-ds/readme",
+             headers={**GH, "Accept": "application/vnd.github.raw"})
+    if rd is not None and rd.status_code == 200:
+        print("    README: " + re.sub(r"\s+", " ", rd.text)[:1800])
+    arv = get("https://api.github.com/repos/raulsteinmetz/soy-segmentation-ds/git/trees/HEAD?recursive=1", headers=GH)
+    if arv is not None and arv.status_code == 200:
+        itens = arv.json().get("tree", [])
+        ext = {}
+        for it in itens:
+            if it.get("type") == "blob":
+                e = it["path"].rsplit(".", 1)[-1].lower()
+                ext[e] = ext.get(e, 0) + 1
+        print(f"    arquivos por extensão: {ext}")
+
+
 def main():
     linhas = repos()
-    for etapa in (paginas, arxiv, zenodo, figshare, huggingface, commons):
+    for etapa in (detalhes_abertas, paginas, arxiv, zenodo, figshare, huggingface, commons):
         try:
             etapa()
         except Exception as e:  # uma fonte fora do ar não esconde as outras

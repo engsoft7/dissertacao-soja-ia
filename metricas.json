@@ -1,0 +1,392 @@
+{
+  "base": {
+    "repositorio": "Project-AgML/YOLOPOD_Soyabean_Pod_Counting_Dataset",
+    "revisao": "4160b98b1cec6343313d611455cbfe396ef0ef41",
+    "licenca": "CC BY 4.0",
+    "citacao": "Xiang S, Wang S, Xu M, Wang W, Liu W (2023). YOLO POD: a fast and accurate multi-task model for dense Soybean Pod counting. Plant Methods 19:8. doi:10.1186/s13007-023-00985-4"
+  },
+  "estatisticas": {
+    "imagens": 1448,
+    "vagens": 72709,
+    "por_local": {
+      "chongzhou": 570,
+      "renshou": 878
+    },
+    "vagens_por_imagem": {
+      "media": 50.21339779005525,
+      "mediana": 42.0,
+      "min": 8,
+      "max": 183
+    },
+    "largura_imagem_px": {
+      "min": 2352,
+      "mediana": 5184.0,
+      "max": 5184
+    },
+    "lado_maior_da_vagem_px": {
+      "p10": 102.0,
+      "mediana": 170.0,
+      "p90": 263.0
+    }
+  },
+  "separacao": {
+    "treino": 1014,
+    "validacao": 216,
+    "teste": 218
+  },
+  "configuracao": {
+    "saida": "/home/runner/work/_temp/modelo",
+    "dados": "dados_yolopod",
+    "lado": 768,
+    "recorte": 384,
+    "lote": 8,
+    "epocas": 40,
+    "minutos": 270.0,
+    "semente": 42,
+    "passo": 8,
+    "fator": 100.0,
+    "raio_px": 15.11111111111111,
+    "limiar_picos": 0.05
+  },
+  "validacao": {
+    "imagens": 216,
+    "vagens": 10729,
+    "mae": 2.7148673666848078,
+    "rmse": 3.7781333453556893,
+    "vies": 0.24211348869182445,
+    "erro_relativo_medio": 0.05618427424684613,
+    "erro_relativo_mediano": 0.046111516656824836,
+    "r2": 0.9778667198322283,
+    "erro_relativo_do_total": 0.0048743138743064665,
+    "localizacao": {
+      "precisao": 0.989787049109083,
+      "revocacao": 0.4245502842762606,
+      "raio_px": 15.11111111111111,
+      "limiar": 0.05
+    }
+  },
+  "teste": {
+    "imagens": 218,
+    "vagens": 10768,
+    "mae": 2.816744327545166,
+    "rmse": 4.720022602348367,
+    "vies": -0.3546990254603395,
+    "erro_relativo_medio": 0.05609613776374657,
+    "erro_relativo_mediano": 0.04331552380521879,
+    "r2": 0.9688918075967434,
+    "erro_relativo_do_total": 0.00718094238023347,
+    "localizacao": {
+      "precisao": 0.9912082957619477,
+      "revocacao": 0.40833952451708766,
+      "raio_px": 15.11111111111111,
+      "limiar": 0.05
+    }
+  },
+  "teste_por_local": {
+    "chongzhou": {
+      "imagens": 86,
+      "mae": 1.6887766039648722,
+      "erro_relativo_medio": 0.05483201283802292
+    },
+    "renshou": {
+      "imagens": 132,
+      "mae": 3.5516323898777817,
+      "erro_relativo_medio": 0.05691973430626347
+    }
+  },
+  "referencia_ingenua_teste": {
+    "mae": 20.822593778839366,
+    "erro_relativo_medio": 0.5411782842761717,
+    "media_do_treino": 50.50493096646943
+  },
+  "historico": [
+    {
+      "epoca": 1,
+      "perda": 13.960507267997379,
+      "val_mae": 11.609433152057507,
+      "val_erro_relativo": 0.20046508536652002,
+      "segundos": 82.71695876121521
+    },
+    {
+      "epoca": 2,
+      "perda": 9.843902269999186,
+      "val_mae": 8.53553600664492,
+      "val_erro_relativo": 0.18624563827135143,
+      "segundos": 83.47982573509216
+    },
+    {
+      "epoca": 3,
+      "perda": 8.130450719878787,
+      "val_mae": 4.222317713278311,
+      "val_erro_relativo": 0.08463840457166097,
+      "segundos": 84.05809760093689
+    },
+    {
+      "epoca": 4,
+      "perda": 7.617589785939171,
+      "val_mae": 4.104681725855227,
+      "val_erro_relativo": 0.08781831506662643,
+      "segundos": 84.67966413497925
+    },
+    {
+      "epoca": 5,
+      "perda": 6.481107901013087,
+      "val_mae": 7.9739758306079445,
+      "val_erro_relativo": 0.1548033689164706,
+      "segundos": 86.45058584213257
+    },
+    {
+      "epoca": 6,
+      "perda": 6.5039896870416305,
+      "val_mae": 8.292254540655348,
+      "val_erro_relativo": 0.15590748315391043,
+      "segundos": 85.67605710029602
+    },
+    {
+      "epoca": 7,
+      "perda": 6.405566423658341,
+      "val_mae": 3.512743009461297,
+      "val_erro_relativo": 0.07338800051582833,
+      "segundos": 83.23708987236023
+    },
+    {
+      "epoca": 8,
+      "perda": 6.079415001566448,
+      "val_mae": 3.9602348892777055,
+      "val_erro_relativo": 0.07659566427124197,
+      "segundos": 84.69751143455505
+    },
+    {
+      "epoca": 9,
+      "perda": 6.276497873048934,
+      "val_mae": 5.231785337130229,
+      "val_erro_relativo": 0.09389607606963687,
+      "segundos": 84.29656410217285
+    },
+    {
+      "epoca": 10,
+      "perda": 5.8437787218699375,
+      "val_mae": 10.096902317470974,
+      "val_erro_relativo": 0.23536733873455346,
+      "segundos": 84.56239795684814
+    },
+    {
+      "epoca": 11,
+      "perda": 5.676449022595844,
+      "val_mae": 4.7564095965138184,
+      "val_erro_relativo": 0.0890600738433559,
+      "segundos": 83.76362466812134
+    },
+    {
+      "epoca": 12,
+      "perda": 5.604844668554882,
+      "val_mae": 6.79547025097741,
+      "val_erro_relativo": 0.12743189829891788,
+      "segundos": 84.27929997444153
+    },
+    {
+      "epoca": 13,
+      "perda": 5.510400864813063,
+      "val_mae": 4.051231101707176,
+      "val_erro_relativo": 0.07252146959251293,
+      "segundos": 85.76209855079651
+    },
+    {
+      "epoca": 14,
+      "perda": 5.311199521261548,
+      "val_mae": 3.905113551351759,
+      "val_erro_relativo": 0.08211411462433532,
+      "segundos": 85.41924262046814
+    },
+    {
+      "epoca": 15,
+      "perda": 5.2563398064128934,
+      "val_mae": 3.291144190011201,
+      "val_erro_relativo": 0.07131815692848066,
+      "segundos": 85.83957743644714
+    },
+    {
+      "epoca": 16,
+      "perda": 4.956787792463151,
+      "val_mae": 4.9043010826464055,
+      "val_erro_relativo": 0.08481784577499668,
+      "segundos": 84.90284943580627
+    },
+    {
+      "epoca": 17,
+      "perda": 4.9349871098049105,
+      "val_mae": 4.394694655029862,
+      "val_erro_relativo": 0.10402716746085945,
+      "segundos": 86.00756072998047
+    },
+    {
+      "epoca": 18,
+      "perda": 4.565412849660904,
+      "val_mae": 4.088560687171088,
+      "val_erro_relativo": 0.09529369828293542,
+      "segundos": 86.22373938560486
+    },
+    {
+      "epoca": 19,
+      "perda": 4.764128999104575,
+      "val_mae": 4.425489491886562,
+      "val_erro_relativo": 0.09494375708728053,
+      "segundos": 84.41105699539185
+    },
+    {
+      "epoca": 20,
+      "perda": 5.0083538047851075,
+      "val_mae": 3.1447614343078047,
+      "val_erro_relativo": 0.061555205370520845,
+      "segundos": 83.9710648059845
+    },
+    {
+      "epoca": 21,
+      "perda": 4.47127828522334,
+      "val_mae": 2.9492776923709445,
+      "val_erro_relativo": 0.06295798596215042,
+      "segundos": 85.24259972572327
+    },
+    {
+      "epoca": 22,
+      "perda": 4.471284548441569,
+      "val_mae": 3.0880908083032677,
+      "val_erro_relativo": 0.06305797577138994,
+      "segundos": 82.87307000160217
+    },
+    {
+      "epoca": 23,
+      "perda": 4.487017165100764,
+      "val_mae": 3.653396407763163,
+      "val_erro_relativo": 0.07750059733588588,
+      "segundos": 83.21243453025818
+    },
+    {
+      "epoca": 24,
+      "perda": 4.190931332489801,
+      "val_mae": 4.408519930309719,
+      "val_erro_relativo": 0.09611281734665021,
+      "segundos": 83.48955821990967
+    },
+    {
+      "epoca": 25,
+      "perda": 4.142790879522051,
+      "val_mae": 4.191345051482871,
+      "val_erro_relativo": 0.08677671751194352,
+      "segundos": 84.70726108551025
+    },
+    {
+      "epoca": 26,
+      "perda": 4.236432924157097,
+      "val_mae": 3.5068188861564353,
+      "val_erro_relativo": 0.06608878976582054,
+      "segundos": 90.5721423625946
+    },
+    {
+      "epoca": 27,
+      "perda": 3.9681107997894287,
+      "val_mae": 3.2239427125012434,
+      "val_erro_relativo": 0.06972955674178681,
+      "segundos": 88.14316940307617
+    },
+    {
+      "epoca": 28,
+      "perda": 3.930957703363328,
+      "val_mae": 3.113234277124758,
+      "val_erro_relativo": 0.06460411487284475,
+      "segundos": 88.44861459732056
+    },
+    {
+      "epoca": 29,
+      "perda": 3.863653182037293,
+      "val_mae": 2.9553520017200046,
+      "val_erro_relativo": 0.06204652119340125,
+      "segundos": 87.91741013526917
+    },
+    {
+      "epoca": 30,
+      "perda": 3.927173171724592,
+      "val_mae": 2.8942431299774736,
+      "val_erro_relativo": 0.057577637949525785,
+      "segundos": 89.06044912338257
+    },
+    {
+      "epoca": 31,
+      "perda": 3.691831144075545,
+      "val_mae": 3.054082755689268,
+      "val_erro_relativo": 0.06391169884896102,
+      "segundos": 91.75688028335571
+    },
+    {
+      "epoca": 32,
+      "perda": 3.6210144975828746,
+      "val_mae": 2.7265965232142695,
+      "val_erro_relativo": 0.055388363286110284,
+      "segundos": 88.59965372085571
+    },
+    {
+      "epoca": 33,
+      "perda": 3.6321519651110212,
+      "val_mae": 2.9062590069240994,
+      "val_erro_relativo": 0.06000540556596236,
+      "segundos": 85.88497185707092
+    },
+    {
+      "epoca": 34,
+      "perda": 3.6186947586044433,
+      "val_mae": 2.7462148357320717,
+      "val_erro_relativo": 0.056245179601670706,
+      "segundos": 86.42309379577637
+    },
+    {
+      "epoca": 35,
+      "perda": 3.522732637231312,
+      "val_mae": 2.7889787753423056,
+      "val_erro_relativo": 0.055726073452921215,
+      "segundos": 87.67118382453918
+    },
+    {
+      "epoca": 36,
+      "perda": 3.4805030624071756,
+      "val_mae": 2.736938639923378,
+      "val_erro_relativo": 0.056161020864140196,
+      "segundos": 86.1305181980133
+    },
+    {
+      "epoca": 37,
+      "perda": 3.4407295982042947,
+      "val_mae": 2.763144029511346,
+      "val_erro_relativo": 0.05698120878210469,
+      "segundos": 86.59432697296143
+    },
+    {
+      "epoca": 38,
+      "perda": 3.4843397670321994,
+      "val_mae": 2.7148673666848078,
+      "val_erro_relativo": 0.05618427424684613,
+      "segundos": 88.8684630393982
+    },
+    {
+      "epoca": 39,
+      "perda": 3.4338882631725736,
+      "val_mae": 2.7169796140105635,
+      "val_erro_relativo": 0.05577022477659404,
+      "segundos": 86.6815550327301
+    },
+    {
+      "epoca": 40,
+      "perda": 3.409746005421593,
+      "val_mae": 2.7217778894636364,
+      "val_erro_relativo": 0.05567041786285167,
+      "segundos": 86.73126792907715
+    }
+  ],
+  "onnx_diferenca_maxima": 1.1771917343139648e-06,
+  "ambiente": {
+    "python": "3.11.17",
+    "torch": "2.14.1+cpu",
+    "torchvision": "0.29.1+cpu",
+    "numpy": "2.4.6"
+  },
+  "minutos": 64.11163675785065
+}

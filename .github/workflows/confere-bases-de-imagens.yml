@@ -14,7 +14,8 @@ name: Confere bases de imagens
 on:
   push:
     paths:
-      - 'pesquisa/09_contagem_por_imagem/*.py'
+      - 'pesquisa/09_contagem_por_imagem/confere_bases_de_imagens.py'
+      - 'pesquisa/09_contagem_por_imagem/varre_literatura.py'
       - '.github/workflows/confere-bases-de-imagens.yml'
   workflow_dispatch:
 

@@ -62,24 +62,63 @@ def baixa_base(pasta: Path):
 
 
 def le_coco(raiz: Path):
+    """Imagens com os centros das vagens, casando o nome do índice COCO com o arquivo.
+
+    O nome no índice pode vir com ou sem a pasta "images/" e com ou sem a
+    localidade; casa pelo caminho relativo, depois pelos dois últimos níveis,
+    depois pelo nome do arquivo quando ele é único. Sem casar quase tudo, para
+    com um diagnóstico em vez de treinar com meia base.
+    """
     coco = json.loads((raiz / "annotations.json").read_text())
+    arquivos = [c for c in raiz.rglob("*") if c.suffix.lower() in (".jpg", ".jpeg", ".png")]
+    por_rel = {c.relative_to(raiz).as_posix().lower(): c for c in arquivos}
+    por_dois = {"/".join(c.relative_to(raiz).parts[-2:]).lower(): c for c in arquivos}
+    nomes = {}
+    for c in arquivos:
+        nomes.setdefault(c.name.lower(), []).append(c)
+
+    def acha(im):
+        nome = str(im.get("file_name") or im.get("path") or "").replace("\\", "/").lstrip("./").lower()
+        for chave in (nome, "images/" + nome):
+            if chave in por_rel:
+                return por_rel[chave]
+        dois = "/".join(nome.split("/")[-2:])
+        if dois in por_dois:
+            return por_dois[dois]
+        for campo in ("location", "local", "folder", "subset", "site", "source"):
+            if im.get(campo):
+                chave = f"{str(im[campo]).lower()}/{nome.split('/')[-1]}"
+                if chave in por_dois:
+                    return por_dois[chave]
+        candidatos = nomes.get(nome.split("/")[-1], [])
+        return candidatos[0] if len(candidatos) == 1 else None
+
     por_imagem = {}
     for a in coco["annotations"]:
         x, y, w, h = a["bbox"]
         por_imagem.setdefault(a["image_id"], []).append((x + w / 2, y + h / 2, w, h))
-    itens = []
+    itens, perdidas = [], []
     for im in coco["images"]:
-        caminho = None
-        for c in (raiz / im["file_name"], raiz / "images" / im["file_name"]):
-            if c.exists():
-                caminho = c
-                break
+        caminho = acha(im)
         if caminho is None:
+            perdidas.append(im)
             continue
         partes = [p.lower() for p in caminho.parts]
         local = "chongzhou" if "chongzhou" in partes else "renshou" if "renshou" in partes else "outro"
-        itens.append({"arquivo": caminho, "largura": im["width"], "altura": im["height"],
+        largura, altura = im.get("width"), im.get("height")
+        if not largura or not altura:
+            with Image.open(caminho) as f:
+                largura, altura = f.size
+        itens.append({"arquivo": caminho, "largura": largura, "altura": altura,
                       "caixas": por_imagem.get(im["id"], []), "local": local})
+    if len(itens) < 0.9 * len(coco["images"]):
+        print("DIAGNÓSTICO: chaves do COCO:", list(coco.keys()))
+        print("  primeiras imagens:", json.dumps(coco["images"][:3], ensure_ascii=False))
+        print("  primeira anotação:", json.dumps(coco["annotations"][:1], ensure_ascii=False))
+        print("  arquivos achados:", len(arquivos), [c.relative_to(raiz).as_posix() for c in arquivos[:6]])
+        raise SystemExit(f"só {len(itens)} de {len(coco['images'])} imagens casaram com o índice")
+    if perdidas:
+        print(f"aviso: {len(perdidas)} imagens do índice sem arquivo")
     return itens
 
 

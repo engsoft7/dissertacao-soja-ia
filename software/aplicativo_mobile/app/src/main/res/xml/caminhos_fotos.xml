@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pasta do cache onde a câmera do celular grava as fotos da Estimativa no
+     campo. O FileProvider entrega à câmera um endereço só para esta pasta. -->
+<paths>
+    <cache-path name="fotos" path="fotos/" />
+</paths>

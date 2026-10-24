@@ -47,6 +47,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -228,7 +231,9 @@ fun AgroDashboard() {
     var isLoading by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
-    var currentTab by remember { mutableStateOf(0) }
+    // Salvável: a câmera da Estimativa no campo pode levar o Android a
+    // encerrar o app, e na volta ele precisa reabrir na mesma tela.
+    var currentTab by rememberSaveable { mutableStateOf(0) }
     var isOfflineMode by remember { mutableStateOf(false) }
     
     val context = LocalContext.current
@@ -296,6 +301,10 @@ fun AgroDashboard() {
     LaunchedEffect(Unit) {
         loadData()
     }
+
+    // A Estimativa no campo não tem item na barra de baixo; o voltar do
+    // celular leva de volta ao Resumo, de onde ela é aberta.
+    BackHandler(enabled = currentTab == 5) { currentTab = 0 }
     
     LaunchedEffect(selectedMunicipio) {
         selectedMunicipio?.let { mun ->
@@ -435,6 +444,20 @@ fun AgroDashboard() {
                 item {
                     MercadoCard()
                 }
+            } else if (currentTab == 5) {
+                // Como o Mercado, não depende da previsão: a contagem no campo
+                // funciona sem rede. A previsão, se houver, entra para comparação.
+                item {
+                    val projecao = previsao?.historico?.maxByOrNull { it.ano }
+                    EstimativaCampoTela(
+                        precoPadrao = sharedPrefs.valorDoProdutor(PREF_PRECO) ?: kpis?.soja_preco_saca,
+                        fontePreco = if (sharedPrefs.valorDoProdutor(PREF_PRECO) != null) "Seu preço, informado na Viabilidade."
+                                     else kpis?.fonte_preco?.let { "Preço de referência: $it." },
+                        referenciaKgHa = projecao?.rendimento_predito,
+                        rotuloReferencia = projecao?.let { "${previsao?.municipio ?: selectedMunicipio} em ${it.ano}" },
+                        aoVoltar = { currentTab = 0 }
+                    )
+                }
             } else if (isLoading) {
                 item {
                     CircularProgressIndicator(modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally))
@@ -481,6 +504,9 @@ fun AgroDashboard() {
 
                     when (currentTab) {
                         0 -> { // Resumo
+                            item {
+                                AtalhoEstimativaCampo { currentTab = 5 }
+                            }
                             item {
                                 if (projecao != null) {
                                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 4.dp)) {
@@ -619,6 +645,29 @@ fun AgroDashboard() {
                     }
                 }
             }
+        }
+    }
+}
+
+/** Entrada da Estimativa no campo, no alto do Resumo. */
+@Composable
+fun AtalhoEstimativaCampo(aoAbrir: () -> Unit) {
+    Card(
+        onClick = aoAbrir,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)) {
+            Icon(Icons.Filled.CameraAlt, contentDescription = null, tint = MaterialTheme.colorScheme.primary,
+                 modifier = Modifier.size(28.dp))
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Estimativa no campo", fontWeight = FontWeight.SemiBold, fontSize = 16.sp,
+                     color = MaterialTheme.colorScheme.onSurface)
+                Text("Fotografe, conte plantas e vagens e veja a produtividade da sua lavoura.",
+                     fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
+            }
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         }
     }
 }

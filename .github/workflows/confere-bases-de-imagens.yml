@@ -16,6 +16,7 @@ on:
     paths:
       - 'pesquisa/09_contagem_por_imagem/confere_bases_de_imagens.py'
       - 'pesquisa/09_contagem_por_imagem/varre_literatura.py'
+      - 'pesquisa/09_contagem_por_imagem/confere_inacessiveis.py'
       - '.github/workflows/confere-bases-de-imagens.yml'
   workflow_dispatch:
 
@@ -59,3 +60,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: python pesquisa/09_contagem_por_imagem/varre_literatura.py
+
+  inacessiveis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências
+        run: pip install --quiet requests pypdf
+
+      - name: Segunda tentativa nos trabalhos sem texto
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python pesquisa/09_contagem_por_imagem/confere_inacessiveis.py

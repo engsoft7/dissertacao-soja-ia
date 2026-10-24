@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pasta do cache onde a câmera do celular grava as fotos da Estimativa no
-     campo. O FileProvider entrega à câmera um endereço só para esta pasta. -->
+<!-- Pastas do cache que o FileProvider pode entregar a outro aplicativo:
+     fotos/, onde a câmera do celular grava as fotos da Estimativa no campo,
+     e exportar/, onde fica o .zip das fotos marcadas para compartilhar. -->
 <paths>
     <cache-path name="fotos" path="fotos/" />
+    <cache-path name="exportar" path="exportar/" />
 </paths>

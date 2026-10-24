@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -60,6 +61,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Locale
@@ -169,7 +171,14 @@ fun EstimativaCampoTela(
             fontSize = 13.sp, lineHeight = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        NovoPonto(numero = pontos.size + 1, parametros = parametros) { pontos.add(it) }
+        var fotosGuardadas by remember { mutableIntStateOf(0) }
+        LaunchedEffect(Unit) { fotosGuardadas = withContext(Dispatchers.IO) { contaAmostras(context) } }
+
+        NovoPonto(
+            numero = pontos.size + 1,
+            parametros = parametros,
+            aoGuardarFotos = { fotosGuardadas = contaAmostras(context) },
+        ) { pontos.add(it) }
 
         if (pontos.isNotEmpty()) {
             CartaoCampo("Pontos guardados", Icons.Filled.DoneAll) {
@@ -197,11 +206,12 @@ fun EstimativaCampoTela(
 
         CartaoCampo("Cultivar e espaçamento", Icons.Filled.Tune) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                CampoNumero(espacamento, { espacamento = it }, "Entre linhas (m)", Modifier.weight(1f))
+                CampoNumero(espacamento, { espacamento = it }, "Entre linhas", Modifier.weight(1f))
                 CampoNumero(graos, { graos = it }, "Grãos/vagem", Modifier.weight(1f))
                 CampoNumero(pesoMil, { pesoMil = it }, "Mil grãos (g)", Modifier.weight(1f), inteiro = true)
             }
-            Nota("Grãos por vagem e peso de mil grãos mudam com a cultivar e com o ano. Os valores " +
+            Nota("Espaçamento entre linhas em metros (0,45 = 45 cm). " +
+                 "Grãos por vagem e peso de mil grãos mudam com a cultivar e com o ano. Os valores " +
                  "iniciais são típicos; se você conhece os da sua cultivar, use os seus.")
         }
 
@@ -222,6 +232,8 @@ fun EstimativaCampoTela(
             }
         }
 
+        FotosParaTreino(fotosGuardadas) { fotosGuardadas = it }
+
         ResultadoCampo(
             estimativa = estimaLavoura(pontos, parametros),
             areaHa = areaHa,
@@ -236,7 +248,14 @@ fun EstimativaCampoTela(
 
 /** O ponto que está sendo amostrado: as duas fotos e as quatro contagens. */
 @Composable
-private fun NovoPonto(numero: Int, parametros: ParametrosCampo, aoGuardar: (PontoAmostra) -> Unit) {
+private fun NovoPonto(
+    numero: Int,
+    parametros: ParametrosCampo,
+    aoGuardarFotos: () -> Unit,
+    aoGuardar: (PontoAmostra) -> Unit,
+) {
+    val context = LocalContext.current
+    val escopo = rememberCoroutineScope()
     var fotoLinha by rememberSaveable { mutableStateOf<String?>(null) }
     var fotoVagens by rememberSaveable { mutableStateOf<String?>(null) }
     val marcasLinha = remember { mutableStateListOf<Offset>() }
@@ -288,6 +307,27 @@ private fun NovoPonto(numero: Int, parametros: ParametrosCampo, aoGuardar: (Pont
         Button(
             onClick = {
                 aoGuardar(ponto)
+                // As fotos marcadas vão para o material de treino da contagem
+                // automática. Copia tudo antes de limpar a tela.
+                val contexto = mapOf(
+                    "metros_de_linha" to ponto.metrosDeLinha,
+                    "plantas_arrancadas" to ponto.arrancadas.toDouble(),
+                    "espacamento_m" to parametros.espacamento,
+                )
+                val fotos = listOfNotNull(
+                    fotoLinha?.let { Triple(it, "planta", marcasLinha.map { m -> m.x to m.y }) to ponto.plantas },
+                    fotoVagens?.let { Triple(it, "vagem", marcasVagens.map { m -> m.x to m.y }) to ponto.vagens },
+                ).filter { it.first.third.isNotEmpty() }
+                if (fotos.isNotEmpty()) {
+                    escopo.launch {
+                        withContext(Dispatchers.IO) {
+                            for ((foto, contagem) in fotos) {
+                                guardaAmostra(context, Uri.parse(foto.first), foto.second, foto.third, contagem, contexto)
+                            }
+                        }
+                        aoGuardarFotos()
+                    }
+                }
                 fotoLinha = null; fotoVagens = null
                 marcasLinha.clear(); marcasVagens.clear()
                 plantas = ""; vagens = ""
@@ -464,7 +504,7 @@ private fun ContadorNaFoto(foto: ImageBitmap, marcas: SnapshotStateList<Offset>,
  * orientação no EXIF, e o BitmapFactory a ignora. Uma foto de 12 MP inteira
  * ocuparia quase 50 MB de memória só para ser tocada.
  */
-private fun carregaFoto(context: Context, uri: Uri, maxLado: Int = 2048): Bitmap? {
+internal fun carregaFoto(context: Context, uri: Uri, maxLado: Int = 2048): Bitmap? {
     val cr = context.contentResolver
     return try {
         val limites = BitmapFactory.Options().apply { inJustDecodeBounds = true }
@@ -576,6 +616,77 @@ private fun MedicaoGps(aoConcluir: (Double) -> Unit, aoCancelar: () -> Unit) {
     }
 }
 
+/**
+ * As fotos marcadas guardadas no celular, para treinar a contagem automática.
+ * Exportar gera um .zip e abre o compartilhamento do Android: o produtor
+ * escolhe para onde mandar (Drive, e-mail, WhatsApp).
+ */
+@Composable
+private fun FotosParaTreino(quantas: Int, aoMudar: (Int) -> Unit) {
+    val context = LocalContext.current
+    val escopo = rememberCoroutineScope()
+    var confirmarApagar by remember { mutableStateOf(false) }
+    var aviso by remember { mutableStateOf<String?>(null) }
+
+    CartaoCampo("Fotos para treinar a contagem automática", Icons.Filled.School) {
+        Nota(
+            if (quantas == 0)
+                "Cada foto em que você marca plantas ou vagens fica guardada no celular, com as marcações, " +
+                "quando você guarda o ponto. Elas servem para treinar um modelo que conte sozinho. " +
+                "Marque todas as plantas ou vagens da foto, não só algumas."
+            else
+                "$quantas ${if (quantas == 1) "foto marcada guardada" else "fotos marcadas guardadas"} " +
+                "no celular (${decimal(tamanhoAmostrasMb(context), 1)} MB). Ficam só aqui até você exportar."
+        )
+        if (quantas > 0) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+                Button(onClick = {
+                    escopo.launch {
+                        val zip = withContext(Dispatchers.IO) { empacotaAmostras(context) }
+                        if (zip == null) { aviso = "Não há fotos para exportar."; return@launch }
+                        val uri = FileProvider.getUriForFile(context, context.packageName + ".fotos", zip)
+                        val envio = Intent(Intent.ACTION_SEND).apply {
+                            type = "application/zip"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            putExtra(Intent.EXTRA_SUBJECT, "Fotos marcadas de soja (AgroInteligência)")
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        try {
+                            context.startActivity(Intent.createChooser(envio, "Enviar as fotos marcadas"))
+                        } catch (_: ActivityNotFoundException) {
+                            aviso = "Nenhum aplicativo para compartilhar o arquivo."
+                        }
+                    }
+                }) {
+                    Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Exportar (.zip)")
+                }
+                TextButton(onClick = { confirmarApagar = true }) { Text("Apagar") }
+            }
+        }
+        aviso?.let { Nota(it) }
+    }
+
+    if (confirmarApagar) {
+        AlertDialog(
+            onDismissRequest = { confirmarApagar = false },
+            title = { Text("Apagar as fotos marcadas?") },
+            text = { Text("As $quantas fotos e as marcações saem do celular. Exporte antes se quiser guardá-las.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmarApagar = false
+                    escopo.launch {
+                        withContext(Dispatchers.IO) { apagaAmostras(context) }
+                        aoMudar(0)
+                    }
+                }) { Text("Apagar") }
+            },
+            dismissButton = { TextButton(onClick = { confirmarApagar = false }) { Text("Cancelar") } }
+        )
+    }
+}
+
 @Composable
 private fun ResultadoCampo(
     estimativa: Estimativa?,
@@ -615,7 +726,8 @@ private fun ResultadoCampo(
             Text("${milhar(sacas)} sacas em ${decimal(areaHa, 2)} ha", fontSize = 16.sp,
                  fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
             if (valorPreco != null) {
-                Text("R$ ${reais(sacas * valorPreco)} no talhão · R$ ${reais(estimativa.scHa * valorPreco)}/ha",
+                // Total sem centavos: a estimativa não tem essa precisão.
+                Text("R$ ${milhar(sacas * valorPreco)} no talhão · R$ ${reais(estimativa.scHa * valorPreco)}/ha",
                      fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
             }
         } else if (valorPreco != null) {

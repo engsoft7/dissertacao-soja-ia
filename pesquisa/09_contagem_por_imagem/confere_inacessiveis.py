@@ -94,8 +94,41 @@ def texto_de(r):
     return texto_limpo(r.text), "html"
 
 
+# Siglas de DOI da MDPI cujo nome na CDN de PDFs é outro.
+SIGLA_MDPI = {"rs": "remotesensing"}
+
+
+def pdf_mdpi(doi):
+    """PDF na CDN da MDPI (mdpi-res.com), que não passa pela proteção do site.
+
+    10.3390/agriculture14081347 → agriculture-14-01347: revista, volume,
+    número (ignorado) e artigo com cinco dígitos.
+    """
+    m = re.fullmatch(r"10\.3390/([a-z]+?)(\d{1,2})(\d{2})(\d{4})", doi)
+    if not m:
+        return None
+    sigla, vol, _, art = m.groups()
+    revista = SIGLA_MDPI.get(sigla, sigla)
+    nome = f"{revista}-{int(vol):02d}-{int(art):05d}"
+    return f"https://mdpi-res.com/d_attachment/{revista}/{nome}/article_deploy/{nome}.pdf"
+
+
+def pdf_semantic_scholar(doi):
+    try:
+        r = requests.get(f"https://api.semanticscholar.org/graph/v1/paper/DOI:{doi}",
+                         params={"fields": "openAccessPdf"}, timeout=30)
+        if r.status_code == 200:
+            return ((r.json().get("openAccessPdf") or {}).get("url")) or None
+    except requests.RequestException:
+        pass
+    return None
+
+
 def candidatos(doi, w):
     urls = []
+    for extra in (pdf_mdpi(doi), pdf_semantic_scholar(doi)):
+        if extra:
+            urls.append(extra)
     for loc in ([w.get("best_oa_location")] if w.get("best_oa_location") else []) + (w.get("locations") or []):
         for campo in ("pdf_url", "landing_page_url"):
             u = (loc or {}).get(campo)
@@ -111,7 +144,27 @@ def candidatos(doi, w):
     return urls
 
 
+# Repositórios citados por trabalhos fechados, achados por busca na web.
+REPOS_EXTRAS = ["johnhamtom/soybean_counting_SPCN", "SkyCol/soybean_phenotyping_platform"]
+
+
 def main():
+    print("===== Repositórios achados por busca =====")
+    gh = {"Accept": "application/vnd.github+json"}
+    if os.environ.get("GITHUB_TOKEN"):
+        gh["Authorization"] = f"Bearer {os.environ['GITHUB_TOKEN']}"
+    for nome in REPOS_EXTRAS:
+        r = requests.get(f"https://api.github.com/repos/{nome}", headers=gh, timeout=30)
+        if r.status_code != 200:
+            print(f"  {nome}: HTTP {r.status_code}")
+            continue
+        d = r.json()
+        print(f"  {nome}: licença {(d.get('license') or {}).get('spdx_id') or 'nenhuma'}; {d.get('size')} KB; "
+              f"{d.get('description')}")
+        rd = requests.get(f"https://api.github.com/repos/{nome}/readme",
+                          headers={**gh, "Accept": "application/vnd.github.raw"}, timeout=30)
+        if rd.status_code == 200:
+            print("    README: " + re.sub(r"\s+", " ", rd.text)[:1500])
     resumo = []
     for doi in DOIS:
         r = requests.get(f"https://api.openalex.org/works/doi:{doi}", timeout=30)

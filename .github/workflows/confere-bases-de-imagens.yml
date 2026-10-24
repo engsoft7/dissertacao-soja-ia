@@ -1,0 +1,39 @@
+# Confere a licença das bases públicas de imagens de soja candidatas ao treino
+# da contagem automática (Estimativa no campo do aplicativo).
+#
+# Existe porque o ambiente de desenvolvimento não alcança Kaggle, Roboflow,
+# arXiv, MDPI nem Hugging Face, negados por política de rede. Só lê
+# metadados: nenhuma imagem é baixada.
+#
+# Roda quando o próprio script muda, e sob demanda. O gatilho por caminho
+# existe porque workflow_dispatch só alcança workflows que já estão no branch
+# padrão, e este nasceu num branch de trabalho.
+name: Confere bases de imagens
+
+on:
+  push:
+    paths:
+      - 'pesquisa/09_contagem_por_imagem/confere_bases_de_imagens.py'
+      - '.github/workflows/confere-bases-de-imagens.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  licencas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências
+        run: pip install --quiet requests
+
+      - name: Consulta as fontes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python pesquisa/09_contagem_por_imagem/confere_bases_de_imagens.py

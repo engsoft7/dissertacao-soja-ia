@@ -40,8 +40,14 @@ FRASES = [
     "soybean emergence UAV counting", "soybean yield estimation pods image",
 ]
 SOJA = re.compile(r"soy", re.I)
-ALVO = re.compile(r"\bpods?\b|seed[s]? count|seedling|stand count|plant count|counting|emergence|plant density", re.I)
-IMAGEM = re.compile(r"imag|vision|deep|yolo|detect|uav|drone|camera|cnn|network|segment|phenotyp", re.I)
+# Contar ou localizar o objeto: "pod counting", "detection of soybean pods",
+# "seedling count", "stand count". Genética de componentes de rendimento
+# (QTL, genes) fala de vagens e grãos sem nenhuma imagem, e fica de fora.
+ALVO = re.compile(r"(pods?|seeds?|seedlings?|plants?|stand)\b[^.]{0,50}?(count|detect|segment|recogni|locali)|"
+                  r"(count|detect|segment|recogni|locali)\w*[^.]{0,50}?\b(pods?|seeds?|seedlings?|plants?|stand)\b", re.I)
+IMAGEM = re.compile(r"deep learning|image|imagery|machine vision|computer vision|yolo|\bcnn\b|convolution|"
+                    r"\buav\b|drone|transformer|neural network|camera", re.I)
+FORA = re.compile(r"\bQTL|\bgene\b|genes\b|transcript|genom|metabol|proteom|GWAS|marker", re.I)
 LINKS = re.compile(r"https?://(?:www\.)?(?:github\.com|gitee\.com|zenodo\.org|doi\.org/10\.5281|figshare\.com|"
                    r"[a-z]+\.figshare\.com|huggingface\.co|kaggle\.com|universe\.roboflow\.com|data\.mendeley\.com|"
                    r"doi\.org/10\.17632|pan\.baidu\.com|drive\.google\.com|ieee-dataport\.org|datadryad\.org|"
@@ -51,9 +57,14 @@ SECAO = re.compile(r"(data availability|availability of data|data and code avail
 PEDIDO = re.compile(r"reasonable request|upon request|on request|request to the corresponding|"
                     r"available from the corresponding|contact the (?:corresponding )?author", re.I)
 NEGADO = re.compile(r"not publicly available|cannot be shared|are not available|confidential|privacy", re.I)
+# Links que toda página da editora ou do arXiv carrega (scripts, menus, ajuda)
+# e ferramentas de terceiros citadas no método: não são os dados do trabalho.
 IGNORAR = re.compile(r"github\.com/(?:arXiv|brucemiller|ultralytics|pytorch|open-mmlab|facebookresearch|"
                      r"tensorflow|wkentaro|tzutalin|heartexlabs|HumanSignal|WongKinYiu|AlexeyAB|"
-                     r"TencentYoutuResearch|cocodataset)", re.I)
+                     r"TencentYoutuResearch|cocodataset|newrelic|ncbi|PLOS)\b|"
+                     r"(?:widgets|api|info)\.figshare\.com|figshare\.com/(?:terms|browse|search|authors|$)|"
+                     r"figshare\.com/?$|scielo\.figshare\.com/?(?:$|bra-pat)|ndownloader|"
+                     r"huggingface\.co/(?:docs|huggingface)|pan\.baidu\.com/?$|github\.com/?$", re.I)
 
 
 def get(url, headers=None, **kw):
@@ -94,7 +105,8 @@ def busca_openalex():
             d = r.json()
             for w in d.get("results", []):
                 texto = (w.get("title") or "") + " " + resumo(w)
-                if SOJA.search(texto) and ALVO.search(texto) and IMAGEM.search(texto):
+                if (SOJA.search(w.get("title") or "") and ALVO.search(texto) and IMAGEM.search(texto)
+                        and not FORA.search(w.get("title") or "")):
                     achados[w["id"]] = w
             cursor = d.get("meta", {}).get("next_cursor")
             if not cursor:
@@ -149,7 +161,13 @@ def disponibilidade(w):
                 links.add(l)
         m = SECAO.search(texto)
         if m:
-            declaracao = texto[m.start(): m.start() + 450]
+            declaracao = texto[m.start(): m.start() + 600]
+            # Links escritos na própria declaração valem mais que os do resto
+            # da página: são os que o autor indicou como os dados.
+            for l in LINKS.findall(declaracao):
+                l = l.rstrip(".,;")
+                if not IGNORAR.search(l):
+                    links.add("★" + l)
         origem = tipo
         if declaracao or links:
             break
@@ -208,7 +226,7 @@ def main():
     trabalhos.sort(key=lambda w: (-(w.get("publication_year") or 0), -(w.get("cited_by_count") or 0)))
     print(f"\n{len(trabalhos)} trabalhos relevantes\n")
 
-    linhas, contagem = [], {}
+    linhas, contagem, porclasse = [], {}, {}
     for i, w in enumerate(trabalhos, 1):
         classe, links, declaracao, origem = disponibilidade(w)
         contagem[classe] = contagem.get(classe, 0) + 1
@@ -217,18 +235,28 @@ def main():
         print(f"     {venue[:60]} | {w.get('doi')} | citado {w.get('cited_by_count')} | {classe} ({origem or '-'})")
         if declaracao:
             print(f"     declaração: {declaracao[:350]}")
+        # Com e sem estrela é o mesmo link; fica a versão marcada.
+        marcados = {l[1:] for l in links if l.startswith("★")}
+        links = sorted(l for l in links if l.startswith("★") or l not in marcados)
         lics = []
-        for l in links[:6]:
-            lic = licenca_do_link(l)
+        for l in links[:8]:
+            lic = licenca_do_link(l.lstrip("★"))
             lics.append(f"{l} [{lic}]")
             print(f"     dados: {l}  →  {lic}")
         if links:
             linhas.append((w.get("publication_year"), (w.get("title") or "")[:90], w.get("doi") or "", lics))
+        porclasse.setdefault(classe, []).append(f"{w.get('publication_year')} {(w.get('title') or '')[:100]} ({w.get('doi')})")
         time.sleep(0.2)
 
     print("\n===== Resumo =====")
     print(json.dumps(contagem, ensure_ascii=False))
-    print("\n===== Trabalhos com link de dados =====")
+    for classe, itens in porclasse.items():
+        if classe == "link público":
+            continue
+        print(f"\n===== {classe} ({len(itens)}) =====")
+        for it in itens:
+            print("  " + it)
+    print("\n===== Trabalhos com link de dados (★ = link escrito na declaração de dados) =====")
     tabela = ["| Ano | Trabalho | DOI | Dados e licença |", "|---|---|---|---|"]
     for ano, titulo, doi, lics in linhas:
         print(f"{ano} | {titulo} | {doi}")

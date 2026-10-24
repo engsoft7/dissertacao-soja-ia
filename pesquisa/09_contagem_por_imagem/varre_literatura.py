@@ -47,7 +47,10 @@ ALVO = re.compile(r"(pods?|seeds?|seedlings?|plants?|stand)\b[^.]{0,50}?(count|d
                   r"(count|detect|segment|recogni|locali)\w*[^.]{0,50}?\b(pods?|seeds?|seedlings?|plants?|stand)\b", re.I)
 IMAGEM = re.compile(r"deep learning|image|imagery|machine vision|computer vision|yolo|\bcnn\b|convolution|"
                     r"\buav\b|drone|transformer|neural network|camera", re.I)
-FORA = re.compile(r"\bQTL|\bgene\b|genes\b|transcript|genom|metabol|proteom|GWAS|marker", re.I)
+FORA = re.compile(r"\bQTL|\bgene\b|genes\b|transcript|genom|metabol|proteom|GWAS|marker|disease|leaf|leaves|"
+                  r"pest|aphid|nematode|\broots?\b|weed|fung|viabil|vigor|hyperspectral|spectral|quality|defect", re.I)
+# O título precisa nomear o objeto contado: vagem, grão, plântula, planta, estande.
+NO_TITULO = re.compile(r"\bpods?\b|seeds?\b|seedling|stand|emergence|count|plant number|plant density", re.I)
 LINKS = re.compile(r"https?://(?:www\.)?(?:github\.com|gitee\.com|zenodo\.org|doi\.org/10\.5281|figshare\.com|"
                    r"[a-z]+\.figshare\.com|huggingface\.co|kaggle\.com|universe\.roboflow\.com|data\.mendeley\.com|"
                    r"doi\.org/10\.17632|pan\.baidu\.com|drive\.google\.com|ieee-dataport\.org|datadryad\.org|"
@@ -93,7 +96,7 @@ def busca_openalex():
     achados = {}
     for frase in FRASES:
         cursor = "*"
-        for _ in range(2):  # até 400 por frase
+        for _ in range(1):  # 200 por frase; a paginação por cursor passou a exigir chave
             r = get("https://api.openalex.org/works", params={
                 "search": frase, "filter": "from_publication_date:2015-01-01",
                 "per-page": 200, "cursor": cursor,
@@ -105,8 +108,9 @@ def busca_openalex():
             d = r.json()
             for w in d.get("results", []):
                 texto = (w.get("title") or "") + " " + resumo(w)
-                if (SOJA.search(w.get("title") or "") and ALVO.search(texto) and IMAGEM.search(texto)
-                        and not FORA.search(w.get("title") or "")):
+                titulo = w.get("title") or ""
+                if (SOJA.search(titulo) and NO_TITULO.search(titulo) and ALVO.search(texto)
+                        and IMAGEM.search(texto) and not FORA.search(titulo)):
                     achados[w["id"]] = w
             cursor = d.get("meta", {}).get("next_cursor")
             if not cursor:
@@ -125,8 +129,21 @@ def fontes_de_texto(w):
     """URLs de texto completo a tentar, da mais à menos legível por máquina."""
     urls = []
     pmcid = (w.get("ids") or {}).get("pmcid")
+    if not pmcid and w.get("doi"):
+        # O OpenAlex nem sempre traz o PMCID; o Europe PMC acha pelo DOI.
+        doi = w["doi"].replace("https://doi.org/", "")
+        r = get("https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+                params={"query": f'DOI:"{doi}"', "format": "json", "resultType": "lite"})
+        if r is not None and r.status_code == 200:
+            for res in r.json().get("resultList", {}).get("result", []):
+                if res.get("pmcid"):
+                    pmcid = res["pmcid"]
+                    break
     if pmcid:
+        # No OpenAlex o PMCID vem como URL e sem o prefixo "PMC", que o
+        # Europe PMC exige.
         n = pmcid.rstrip("/").split("/")[-1]
+        n = n if n.upper().startswith("PMC") else "PMC" + n
         urls.append(("europepmc", f"https://www.ebi.ac.uk/europepmc/webservices/rest/{n}/fullTextXML"))
     for loc in w.get("locations") or []:
         u = (loc.get("landing_page_url") or "")

@@ -117,9 +117,15 @@ do modelo atual.
     - a melhor versão para contar (v1) erra 5,6% da contagem (R² de 0,969);
     - a melhor para localizar cada vagem (v2) acha 61% delas, com 84% de
       marcas certas.
+  - O aplicativo 2.4.0 roda os dois no celular (LiteRT, sem internet), como
+    sugestão que o produtor confere: v1 dá o número, v2 as marcas. A
+    conversão foi conferida nas mesmas 218 fotos de teste pelo caminho que a
+    foto faz no celular (`converte_para_celular.py`): 5,6% de erro na
+    contagem e marcas com 85% de acerto que acham 60% das vagens; com a foto
+    de cabeça para baixo, o resultado é o mesmo. Fotos com marcas só do
+    contador, sem conferência do produtor, não entram no material de treino.
 - **Falta.** Medir o erro em fotos do Pará marcadas no aplicativo e, depois,
-  contra a colheita pesada (o critério acima). Ligar o modelo ao aplicativo
-  como sugestão que o produtor confere (LiteRT).
+  contra a colheita pesada (o critério acima).
 
 ## 6. Estimativa por drone
 

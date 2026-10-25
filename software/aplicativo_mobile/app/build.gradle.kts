@@ -36,8 +36,8 @@ android {
         applicationId = "com.agrointeligencia.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 20
-        versionName = "2.3.0"
+        versionCode = 21
+        versionName = "2.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -69,6 +69,11 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    // Os modelos do contador de vagens vão sem compressão: pesos em ponto
+    // flutuante quase não comprimem, e assim o app não gasta tempo abrindo.
+    androidResources {
+        noCompress += "tflite"
+    }
     // Capturas de tela automáticas (CapturasDeTelaTest): o Robolectric desenha
     // as telas na JVM, sem emulador, e o Roborazzi grava cada uma em PNG.
     testOptions {
@@ -98,6 +103,9 @@ dependencies {
 
     // Extended Icons
     implementation(libs.androidx.material.icons.extended)
+
+    // Contador automático de vagens (ContadorVagens.kt): LiteRT, Apache-2.0
+    implementation(libs.litert)
 
     testImplementation(libs.junit)
     testImplementation(libs.androidx.junit)

@@ -18,11 +18,6 @@ https://www.jmlr.org/papers/v12/pedregosa11a.html
 https://papers.nips.cc/paper_files/paper/2010/file/fe73f687e5bc5280214e0486b273a5f9-Bibtex.bib
 https://papers.nips.cc/paper/1238-support-vector-regression-machines
 https://papers.nips.cc/paper/1866-using-the-nystrom-method-to-speed-up-kernel-machines
-https://openlibrary.org/search.json?q=deep+learning+goodfellow+bengio+courville&fields=title,author_name,publisher,first_publish_year,publish_year
-https://openlibrary.org/search.json?q=machine+learning+tom+mitchell&fields=title,author_name,publisher,first_publish_year,publish_year
-https://openlibrary.org/search.json?q=artificial+intelligence+a+modern+approach+russell+norvig&fields=title,author_name,publisher,first_publish_year,publish_year,edition_count
-https://openlibrary.org/search.json?q=stages+of+soybean+development+fehr+caviness&fields=title,author_name,publisher,first_publish_year,publish_year
-https://www.google.com/search?q=%22Procedures+for+performing+systematic+reviews%22+Kitchenham+TR%2FSE-0401
 https://brasil.mapbiomas.org/
 https://www.conab.gov.br/
 https://portaldeinformacoes.conab.gov.br/custos-de-producao.html
@@ -49,3 +44,17 @@ https://drive.google.com/uc?export=download&id=1wA3Ag6sLmSFdJyucET-2idlgIYGfgspS
 https://drive.google.com/uc?export=download&id=1xKFRIDCMUNNi0lN8yL5julMfSzCHmwLM
 https://drive.google.com/uc?export=download&id=1xMd84XHyNTIFQj0MR8hS5MOZDnVORpKx
 https://drive.google.com/uc?export=download&id=1xbrlf0jPU4LoM5zh0kxj08c9JJjpVIBN
+#
+# Segunda leva: páginas dos anais (dblp), livros por ISBN e endereços novos
+https://dblp.org/search/publ/api?q=Learning%20To%20Count%20Objects%20in%20Images%20Lempitsky&format=json
+https://dblp.org/search/publ/api?q=Support%20Vector%20Regression%20Machines%20Drucker&format=json
+https://dblp.org/search/publ/api?q=Using%20the%20Nystrom%20Method%20to%20Speed%20Up%20Kernel%20Machines&format=json
+https://openlibrary.org/isbn/9780262035613.json
+https://openlibrary.org/isbn/9780070428072.json
+https://openlibrary.org/isbn/9780134610993.json
+https://openlibrary.org/search.json?q=stages%20of%20soybean%20development&author=fehr
+https://openlibrary.org/search.json?q=procedures%20for%20performing%20systematic%20reviews%20kitchenham
+https://www.gov.br/conab/pt-br
+https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao
+https://mapbiomas.org/
+https://brasil.mapbiomas.org/colecoes-mapbiomas/

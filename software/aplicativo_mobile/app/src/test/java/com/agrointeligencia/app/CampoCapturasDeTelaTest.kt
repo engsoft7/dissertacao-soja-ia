@@ -18,7 +18,9 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * Captura da Estimativa no campo, com cinco pontos de exemplo. Fica fora de
+ * Captura da Estimativa no campo, com cinco pontos de exemplo. O preço e a
+ * previsão do município são os que o app mostra para Paragominas: o preço
+ * recebido do levantamento da CONAB e a projeção do Resumo. Fica fora de
  * CapturasDeTelaTest, mas com o nome terminado igual, para o filtro
  * "*CapturasDeTelaTest*" do capturas.yml também desenhá-la.
  */
@@ -47,10 +49,10 @@ class CampoCapturasDeTelaTest {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         EstimativaCampoTela(
-                            precoPadrao = 128.40,
-                            fontePreco = "Preço de referência: CONAB, Paragominas.",
-                            referenciaKgHa = 3520.0,
-                            rotuloReferencia = "Paragominas em 2027",
+                            precoPadrao = 105.09,
+                            fontePreco = "Preço de referência: CONAB, Pedro Afonso (TO), março de 2026.",
+                            referenciaKgHa = 3318.0,
+                            rotuloReferencia = "Paragominas em 2026",
                             aoVoltar = {},
                             inicial = exemplo,
                         )

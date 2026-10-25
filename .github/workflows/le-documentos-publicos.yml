@@ -21,14 +21,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Instala o extrator de PDF
-        run: sudo apt-get install -y -qq poppler-utils >/dev/null
+        run: pip install --quiet pypdf
 
       - name: Baixa e extrai o texto
         run: |
           mkdir -p "$RUNNER_TEMP/lidos"
           python3 - "$RUNNER_TEMP/lidos" <<'PY'
-          import hashlib, html, re, subprocess, sys, urllib.parse, urllib.request
+          import html, re, sys, urllib.parse, urllib.request
+          from pypdf import PdfReader
           from pathlib import Path
           destino = Path(sys.argv[1])
           urls = [l.strip() for l in open("pesquisa/07_referencias/documentos_publicos.txt", encoding="utf-8")
@@ -46,8 +51,7 @@ jobs:
                   continue
               if dados[:4] == b"%PDF" or "pdf" in tipo:
                   (destino / f"{nome}.pdf").write_bytes(dados)
-                  texto = subprocess.run(["pdftotext", "-layout", str(destino / f"{nome}.pdf"), "-"],
-                                         capture_output=True, text=True).stdout
+                  texto = "\n\n".join((pg.extract_text() or "") for pg in PdfReader(str(destino / f"{nome}.pdf")).pages)
               else:
                   pagina = dados.decode("utf-8", "replace")
                   links = sorted({urllib.parse.urljoin(final, h) for h in re.findall(r'href="([^"#]+)"', pagina)})

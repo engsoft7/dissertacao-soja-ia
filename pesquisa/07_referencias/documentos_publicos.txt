@@ -97,3 +97,9 @@ navegador https://www.embrapa.br/busca-de-noticias/-/noticia/17950762/tecnologia
 # Coordenadas das sedes municipais do Pará no Wikidata (código IBGE, P1585), para
 # conferir pesquisa/dados/municipios_para.csv: Pau D'Arco estava fora do lugar.
 https://query.wikidata.org/sparql?format=json&query=SELECT%20%3Fibge%20%3Fnome%20%3Fcoord%20WHERE%20%7B%20%3Fm%20wdt%3AP1585%20%3Fibge%20.%20FILTER%28STRSTARTS%28%3Fibge%2C%20%2215%22%29%29%20%3Fm%20wdt%3AP625%20%3Fcoord%20.%20%3Fm%20rdfs%3Alabel%20%3Fnome%20.%20FILTER%28LANG%28%3Fnome%29%3D%22pt%22%29%20%7D
+#
+# Sétima leva: FAO-56 (Allen et al., 1998), citado na tela Tempo pela
+# evapotranspiração de referência e pela conversão do vento de 10 m para 2 m (eq. 47).
+https://www.fao.org/4/x0490e/x0490e00.htm
+https://www.fao.org/4/x0490e/x0490e07.htm
+https://openlibrary.org/search.json?q=crop+evapotranspiration+guidelines+for+computing+crop+water+requirements&fields=title,author_name,publish_year,publisher,isbn,number_of_pages_median

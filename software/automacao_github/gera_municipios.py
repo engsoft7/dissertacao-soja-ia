@@ -26,6 +26,16 @@ BASE = RAIZ / "pesquisa" / "dados" / "soja_para_painel.csv"
 SAIDA = RAIZ / "pesquisa" / "dados" / "municipios_para.csv"
 
 IBGE = "https://servicodados.ibge.gov.br/api/v1/localidades/estados/15/municipios"
+
+# Sedes que o dataset de coordenadas põe fora do lugar, conferidas em 25/10/2026
+# no Wikidata (código IBGE, P1585) e em outras duas fontes. Pau D'Arco vinha no
+# nordeste do estado, a 775 km da sede; Dom Eliseu, a cerca de 30 km. A tela
+# Tempo do aplicativo tira daqui a previsão de cada município, e o mapa, a
+# posição dos pontos.
+CORRECOES = {
+    1505551: ("-7.83874", "-50.04423"),  # Pau D'Arco: 7°50' S, 50°03' W
+    1502939: ("-4.285", "-47.505"),      # Dom Eliseu: 4°17'06" S, 47°30'18" W
+}
 COORDS = ("https://raw.githubusercontent.com/kelvins/municipios-brasileiros/"
           "main/csv/municipios.csv")
 
@@ -43,7 +53,7 @@ def main() -> int:
     linhas = []
     for cod in codigos:
         nome = nomes.get(cod)
-        lat, lon = coords.get(cod, ("", ""))
+        lat, lon = CORRECOES.get(cod) or coords.get(cod, ("", ""))
         if not nome or not lat:
             print(f"AVISO: faltou dado para {cod} (nome={nome!r}, lat={lat!r})")
         linhas.append({"cod_ibge7": cod, "municipio": nome or "",

@@ -13,7 +13,7 @@ Aplicativo Android focado em Inteligência Artificial para estimar o rendimento 
 ## Requisitos
 - Android 8.0 (API 26) ou superior.
 - Conexão de Internet (a Estimativa no campo funciona sem ela).
-- Localização só para medir a área com o GPS e, se o produtor pedir, para a previsão do tempo no lugar dele, com a tela aberta; a câmera é a do próprio celular, sem permissão de câmera. Para a previsão, a posição sai do celular arredondada a cerca de 1 km, para o Open-Meteo e para a API do produto (avisos do INMET); a política de privacidade da loja precisa dizer isso.
+- Localização só para medir a área com o GPS e, se o produtor pedir, para a previsão do tempo no lugar dele, com a tela aberta; a câmera é a do próprio celular, sem permissão de câmera. Para a previsão, a posição sai do celular arredondada a cerca de 1 km, para o Open-Meteo e para a API do produto (avisos do INMET); o rascunho da política de privacidade está em [`loja/politica_de_privacidade.md`](loja/politica_de_privacidade.md), para o autor revisar e hospedar.
 
 ## Publicação na Play Store
 1. No Android Studio, vá em **Build > Generate Signed Bundle / APK**.

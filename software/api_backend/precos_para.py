@@ -166,8 +166,9 @@ if __name__ == "__main__":  # diagnóstico manual e no GitHub Actions
             print(f"Agrolink: HTTP {r.status_code}, {len(r.text)} caracteres, {len(hist)} meses lidos; "
                   f"últimos: {hist[-3:]}")
             if not hist:
-                i = r.text.find("/2026")
-                print("trecho da página:", r.text[max(0, i - 600):i + 600] if i >= 0 else r.text[:1200])
+                for marca in ("<table", "Set/2026", "set/2026", "__NEXT_DATA__", "mediaEstadual", "140,86", "140.86"):
+                    i = r.text.find(marca)
+                    print(f"--- {marca} em {i}:", r.text[max(0, i - 300):i + 900] if i >= 0 else "")
         except Exception as e:
             print(f"Agrolink: {type(e).__name__}: {e}")
         try:

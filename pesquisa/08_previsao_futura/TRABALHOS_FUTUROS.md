@@ -103,6 +103,23 @@ do modelo atual.
   RMSE em kg/ha.
 - **Critério.** Erro de produtividade menor que o da PAM contra a colheita
   pesada nas mesmas parcelas.
+- **Feito em 24 e 25/10/2026.**
+  - O aplicativo 2.3.0 traz a tela Estimativa no campo. A contagem de plantas
+    e de vagens é feita por toque na foto, e a área é medida pelo GPS. Cada
+    foto marcada fica guardada no aparelho (imagem e pontos em JSON) e sai dele
+    num `.zip`, só quando o produtor exporta.
+  - Levantamento das bases públicas em
+    `pesquisa/09_contagem_por_imagem/LEVANTAMENTO_DE_BASES.md`. Para vagens, só
+    a YOLO POD tem licença aberta (CC BY 4.0, 1.448 fotos de plantas arrancadas
+    sobre pano escuro, 72.709 vagens).
+  - Contador por mapa de densidade (MobileNetV3, `treina_contador_vagens.py`,
+    treinado no Actions). No teste da YOLO POD:
+    - a melhor versão para contar (v1) erra 5,6% da contagem (R² de 0,969);
+    - a melhor para localizar cada vagem (v2) acha 61% delas, com 84% de
+      marcas certas.
+- **Falta.** Medir o erro em fotos do Pará marcadas no aplicativo e, depois,
+  contra a colheita pesada (o critério acima). Ligar o modelo ao aplicativo
+  como sugestão que o produtor confere (LiteRT).
 
 ## 6. Estimativa por drone
 
@@ -115,7 +132,36 @@ do modelo atual.
 - **Uso na pesquisa principal.** Medidas de talhão agregadas por município
   formam uma fonte independente para o item 4.
 
-## 7. Aplicativo assinado automaticamente
+## 7. Contagem por foto que aprende a cada safra
+
+Hoje o aprendizado é por versões e passa por uma pessoa. O produtor exporta as
+fotos marcadas, o modelo é treinado de novo no Actions e chega ao celular numa
+versão nova do aplicativo. O plano para torná-lo quase automático:
+
+1. **Envio opcional, com consentimento.** Um botão "Ajudar a melhorar a
+   contagem" envia as fotos marcadas para a API. A imagem já é regravada pelo
+   aplicativo, sem os metadados de localização da câmera. O envio exige
+   armazenamento persistente (o plano gratuito do Render não guarda arquivos)
+   e a atualização da política de privacidade na Play Store (LGPD).
+2. **Treino periódico no Actions.** Mensalmente, ou a cada N fotos novas,
+   treinar com a YOLO POD somada às fotos do Pará. Separar treino e teste por
+   fazenda e por safra, nunca por foto.
+3. **Portão de qualidade.** Um conjunto fixo de fotos do Pará, marcadas com
+   cuidado e que nunca entram no treino, decide a publicação: o modelo novo só
+   substitui o atual se errar menos nele. Isso impede que marcações apressadas
+   ou fotos ruins piorem o modelo sem que ninguém perceba.
+4. **Entrega sem nova versão do aplicativo.** O aplicativo consulta a API e
+   baixa o modelo novo, com a versão e o erro medido no portão.
+
+- **Primeiro passo.** Fazer à mão um ciclo completo (exportar, treinar, medir,
+  publicar) com as primeiras 50 a 100 fotos do Pará. Automatizar só se o ciclo
+  manual reduzir o erro.
+- **Critério.** O erro da contagem no conjunto do portão cai, ou não sobe, a
+  cada versão publicada.
+- **Fora do escopo.** O aprendizado dentro do próprio aparelho (federado). É
+  pesado para o celular e difícil de controlar contra marcações erradas.
+
+## 8. Aplicativo assinado automaticamente
 
 O workflow `publica-apk.yml` já compila, assina e anexa o APK ao Release, mas
 fica inativo sem os quatro segredos da chave. Ativar só com o aplicativo no

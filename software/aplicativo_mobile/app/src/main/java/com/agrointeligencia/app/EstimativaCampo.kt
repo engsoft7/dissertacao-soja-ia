@@ -45,6 +45,7 @@ import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -75,9 +76,11 @@ import java.util.Locale
 // contagem, faz a conta (CampoCalculo.kt) e leva o resultado a sacas e reais.
 //
 // A contagem é do produtor: ele toca em cada planta ou vagem na foto, e o app
-// só soma. Um modelo que conte sozinho pode vir depois, mas só quando tiver
-// sido treinado e conferido com fotos de lavouras de verdade; até lá, um
-// número inventado por um modelo sem validação seria pior que nenhum.
+// só soma. Nas vagens, o contador automático (ContadorVagens.kt) pode
+// preencher o número e sugerir as marcas, mas foi treinado com fotos da China
+// e ainda não foi conferido em lavouras do Pará: a tela diz isso, e o
+// produtor confere tocando na foto. Foto com marcas só do contador, sem
+// conferência, não vai para o material de treino.
 
 private const val PREF_CAMPO = "estimativa_campo"
 // Precisão mínima para aceitar um canto do talhão. Com 20 m de erro em cada
@@ -264,6 +267,10 @@ private fun NovoPonto(
     var metros by rememberSaveable { mutableStateOf("1") }
     var arrancadas by rememberSaveable { mutableStateOf("5") }
     var vagens by rememberSaveable { mutableStateOf("") }
+    // O que o contador automático achou na foto das vagens, e se o produtor
+    // já mexeu nas marcas depois disso.
+    var automatica by remember { mutableStateOf<ContagemAutomatica?>(null) }
+    var conferida by remember { mutableStateOf(false) }
 
     val ponto = PontoAmostra(
         plantas = plantas.numero()?.toInt() ?: 0,
@@ -287,10 +294,20 @@ private fun NovoPonto(
         Spacer(Modifier.height(16.dp))
         Text("2. Vagens por planta", fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
              color = MaterialTheme.colorScheme.onSurface)
-        Nota("Arranque algumas plantas seguidas da mesma linha, deite sobre um pano claro e " +
-             "fotografe. Toque em cada vagem com grão; use dois dedos para ampliar a foto.")
-        FotoParaContar("vagens", fotoVagens, { fotoVagens = it; marcasVagens.clear() }, marcasVagens,
-                       Color(0xFFD97706)) { vagens = it.toString() }
+        Nota("Arranque algumas plantas seguidas da mesma linha, deite sobre um pano escuro, " +
+             "sem sobrepor, e fotografe de cima. Toque em cada vagem com grão, ou use Contar sozinho " +
+             "e confira; dois dedos ampliam a foto.")
+        FotoParaContar(
+            "vagens", fotoVagens,
+            { fotoVagens = it; marcasVagens.clear(); automatica = null; conferida = false },
+            marcasVagens, Color(0xFFD97706),
+            automatica = automatica,
+            conferida = conferida,
+            aoContarSozinho = { r -> automatica = r; conferida = false; vagens = r.vagens.toString() },
+        ) {
+            vagens = it.toString()
+            if (automatica != null) conferida = true
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
             CampoNumero(arrancadas, { arrancadas = it }, "Plantas arrancadas", Modifier.weight(1f), inteiro = true)
             CampoNumero(vagens, { vagens = it }, "Vagens contadas", Modifier.weight(1f), inteiro = true)
@@ -314,15 +331,22 @@ private fun NovoPonto(
                     "plantas_arrancadas" to ponto.arrancadas.toDouble(),
                     "espacamento_m" to parametros.espacamento,
                 )
+                // Marcas só do contador, que o produtor não conferiu, ensinariam
+                // o modelo com os próprios erros: essa foto fica de fora.
+                val auto = automatica
+                val origemVagens = if (auto == null) MarcasDe.PRODUTOR else MarcasDe.CONTADOR_CONFERIDO
                 val fotos = listOfNotNull(
-                    fotoLinha?.let { Triple(it, "planta", marcasLinha.map { m -> m.x to m.y }) to ponto.plantas },
-                    fotoVagens?.let { Triple(it, "vagem", marcasVagens.map { m -> m.x to m.y }) to ponto.vagens },
+                    fotoLinha?.let { Triple(it, "planta", marcasLinha.map { m -> m.x to m.y }) to (ponto.plantas to MarcasDe.PRODUTOR) },
+                    fotoVagens?.takeIf { auto == null || conferida }
+                        ?.let { Triple(it, "vagem", marcasVagens.map { m -> m.x to m.y }) to (ponto.vagens to origemVagens) },
                 ).filter { it.first.third.isNotEmpty() }
                 if (fotos.isNotEmpty()) {
                     escopo.launch {
                         withContext(Dispatchers.IO) {
                             for ((foto, contagem) in fotos) {
-                                guardaAmostra(context, Uri.parse(foto.first), foto.second, foto.third, contagem, contexto)
+                                val (informada, origem) = contagem
+                                guardaAmostra(context, Uri.parse(foto.first), foto.second, foto.third, informada, contexto,
+                                              origem, if (origem == MarcasDe.CONTADOR_CONFERIDO) auto else null)
                             }
                         }
                         aoGuardarFotos()
@@ -331,6 +355,7 @@ private fun NovoPonto(
                 fotoLinha = null; fotoVagens = null
                 marcasLinha.clear(); marcasVagens.clear()
                 plantas = ""; vagens = ""
+                automatica = null; conferida = false
             },
             enabled = ponto.valido(),
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp)
@@ -346,6 +371,10 @@ private fun NovoPonto(
  * A câmera é a do próprio celular (ACTION_IMAGE_CAPTURE), que grava num
  * arquivo do cache do app entregue por FileProvider. Assim o app não precisa
  * da permissão de câmera nem de biblioteca de câmera.
+ *
+ * Com [aoContarSozinho], aparece o botão do contador automático: ele troca as
+ * marcas pelas sugeridas e devolve a contagem; [aoContar] continua valendo
+ * para cada toque do produtor depois disso.
  */
 @Composable
 private fun FotoParaContar(
@@ -354,9 +383,15 @@ private fun FotoParaContar(
     aoTrocarFoto: (String?) -> Unit,
     marcas: SnapshotStateList<Offset>,
     cor: Color,
+    automatica: ContagemAutomatica? = null,
+    conferida: Boolean = false,
+    aoContarSozinho: ((ContagemAutomatica) -> Unit)? = null,
     aoContar: (Int) -> Unit,
 ) {
     val context = LocalContext.current
+    val escopo = rememberCoroutineScope()
+    var contando by remember(foto) { mutableStateOf(false) }
+    var falhou by remember(foto) { mutableStateOf(false) }
     // O Android pode encerrar o app enquanto a câmera está aberta; o endereço
     // da foto pendente precisa sobreviver a isso.
     var pendente by rememberSaveable { mutableStateOf<String?>(null) }
@@ -403,6 +438,38 @@ private fun FotoParaContar(
             Nota("Abrindo a foto…")
         } else {
             Spacer(Modifier.height(8.dp))
+            if (aoContarSozinho != null) {
+                FilledTonalButton(
+                    onClick = {
+                        contando = true
+                        falhou = false
+                        escopo.launch {
+                            val r = withContext(Dispatchers.Default) { contaVagens(context, img.asAndroidBitmap()) }
+                            contando = false
+                            if (r == null) {
+                                falhou = true
+                            } else {
+                                marcas.clear()
+                                marcas.addAll(r.marcas.map { (x, y) -> Offset(x, y) })
+                                aoContarSozinho(r)
+                            }
+                        }
+                    },
+                    enabled = !contando,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                ) {
+                    if (contando) {
+                        CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Contando…")
+                    } else {
+                        Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(if (automatica == null) "Contar sozinho (teste)" else "Contar sozinho de novo")
+                    }
+                }
+                if (falhou) Nota("Não foi possível contar sozinho neste celular. Conte tocando nas vagens.")
+            }
             ContadorNaFoto(img, marcas, cor) { aoContar(marcas.size) }
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Text("${marcas.size} marcadas", fontWeight = FontWeight.Bold, fontSize = 14.sp,
@@ -410,6 +477,18 @@ private fun FotoParaContar(
                 TextButton(onClick = { if (marcas.isNotEmpty()) { marcas.removeAt(marcas.lastIndex); aoContar(marcas.size) } },
                            enabled = marcas.isNotEmpty()) { Text("Desfazer") }
                 TextButton(onClick = { marcas.clear(); aoContar(0) }, enabled = marcas.isNotEmpty()) { Text("Limpar") }
+            }
+            automatica?.let { a ->
+                Nota(
+                    if (!conferida)
+                        "O contador estimou ${a.vagens} vagens e marcou ${a.marcas.size} onde as viu. Ele aprendeu " +
+                        "com fotos de plantas da China, onde erra em média 6%, e ainda não foi conferido em " +
+                        "lavouras do Pará. Confira: toque nas vagens sem marca e nas marcas erradas. " +
+                        "A partir do primeiro toque, vale a contagem das marcas."
+                    else
+                        "Contagem conferida por você, a partir das marcas do contador (que estimou ${a.vagens})."
+                )
+                Nota("Contador treinado com a base YOLO POD (Xiang et al., 2023, Plant Methods), licença CC BY 4.0.")
             }
         }
     }

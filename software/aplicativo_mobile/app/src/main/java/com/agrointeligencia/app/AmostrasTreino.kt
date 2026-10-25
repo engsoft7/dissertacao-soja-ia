@@ -25,6 +25,14 @@ import java.util.zip.ZipOutputStream
 
 private const val PASTA = "amostras_treino"
 
+/** De onde vieram as marcas de uma foto. */
+internal object MarcasDe {
+    /** Todas tocadas pelo produtor. */
+    const val PRODUTOR = "produtor"
+    /** Sugeridas pelo contador automático e depois conferidas pelo produtor. */
+    const val CONTADOR_CONFERIDO = "contador_conferido"
+}
+
 /** Uma foto marcada, como vai no JSON ao lado da imagem. */
 data class AnotacaoFoto(
     val imagem: String,
@@ -39,6 +47,11 @@ data class AnotacaoFoto(
     val contexto: Map<String, Double>,
     val data: String,
     val versao_app: String,
+    /** "produtor" ou "contador_conferido" (ver MarcasDe). */
+    val origem_das_marcas: String = MarcasDe.PRODUTOR,
+    /** Quando o contador automático foi usado: o número que ele deu e quantas marcas sugeriu. */
+    val contagem_automatica: Int? = null,
+    val marcas_sugeridas: Int? = null,
 )
 
 /** Marcas em coordenadas da foto (0 a 1) para pixels. */
@@ -64,6 +77,8 @@ internal fun guardaAmostra(
     marcas: List<Pair<Float, Float>>,
     contagemInformada: Int?,
     contexto: Map<String, Double>,
+    origem: String = MarcasDe.PRODUTOR,
+    automatica: ContagemAutomatica? = null,
 ): Boolean {
     if (marcas.isEmpty()) return false
     val bmp = carregaFoto(context, foto) ?: return false
@@ -82,6 +97,9 @@ internal fun guardaAmostra(
         contexto = contexto,
         data = iso.format(agora),
         versao_app = BuildConfig.VERSION_NAME,
+        origem_das_marcas = origem,
+        contagem_automatica = automatica?.vagens,
+        marcas_sugeridas = automatica?.marcas?.size,
     )
     File(dir, "$nome.json").writeText(GsonBuilder().setPrettyPrinting().create().toJson(anotacao))
     return true
@@ -107,6 +125,12 @@ Cada foto (.jpg) tem ao lado um .json com o mesmo nome:
                       objetos sem marca
   contexto            metros de linha, plantas arrancadas, espaçamento etc.
   data, versao_app
+  origem_das_marcas   "produtor" (todas tocadas por ele) ou "contador_conferido"
+                      (sugeridas pelo contador automático e conferidas pelo
+                      produtor); fotos com marcas só do contador não entram
+  contagem_automatica, marcas_sugeridas
+                      o número que o contador deu e quantas marcas ele sugeriu,
+                      quando foi usado
 
 As imagens já estão de pé (orientação EXIF aplicada) e reduzidas a no máximo
 2048 px no lado maior: são exatamente as que foram tocadas.

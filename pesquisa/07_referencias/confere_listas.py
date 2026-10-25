@@ -61,11 +61,19 @@ def doi_do_texto(texto: str) -> str | None:
 
 
 def anos_depositados(m: dict) -> set[int]:
+    """Anos da obra na Crossref, incluindo o do fascículo.
+
+    Artigo publicado on-line em dezembro e incluído no volume do ano seguinte
+    (comum na MDPI) tem "issued" no ano anterior; a referência ABNT cita o ano
+    do volume, que a Crossref guarda em "journal-issue".
+    """
     saida = set()
-    for campo in ("published-print", "published-online", "issued", "published"):
-        parte = m.get(campo, {}).get("date-parts", [[None]])[0]
-        if parte and parte[0]:
-            saida.add(int(parte[0]))
+    fontes = [m] + ([m["journal-issue"]] if isinstance(m.get("journal-issue"), dict) else [])
+    for fonte in fontes:
+        for campo in ("published-print", "published-online", "issued", "published"):
+            parte = (fonte.get(campo) or {}).get("date-parts", [[None]])[0]
+            if parte and parte[0]:
+                saida.add(int(parte[0]))
     return saida
 
 

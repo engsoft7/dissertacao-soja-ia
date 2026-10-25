@@ -1,9 +1,31 @@
 # Uma URL por linha. O workflow le-documentos-publicos.yml baixa cada uma,
 # extrai o texto e publica na branch documentos-lidos (o ambiente de
 # desenvolvimento não alcança estes sites).
-https://ppca.propesp.ufpa.br/
-https://ppca.propesp.ufpa.br/index.php/br/
-https://ppca.propesp.ufpa.br/ARQUIVOS/documentos/Regimento PPCA.pdf
+#
+# PPCA: regimento, normas e legislação
+https://ppca.propesp.ufpa.br/index.php/br/documentos/regimento-e-normas
+https://ppca.propesp.ufpa.br/index.php/br/documentos/legislacao
+https://ppca.propesp.ufpa.br/index.php/br/documentos/formularios
+https://ppca.propesp.ufpa.br/index.php/br/documentos/manuais
 https://sege.ufpa.br/boletim_interno/downloads/resolucoes/consepe/2017/4882 Regimento PPCA.pdf
-https://papers.nips.cc/paper/4043-learning-to-count-objects-in-images
-https://repositorio.ufu.br/bitstream/123456789/43276/3/Especializa%c3%a7%c3%a3oEstimativaProdutividade.pdf
+#
+# Referências que a Crossref não alcança (sem DOI) ou que divergiram
+https://api.crossref.org/works/10.3390/rs17010107
+https://api.crossref.org/works/10.3390/computation13010004
+https://www.jmlr.org/papers/v13/bergstra12a.html
+https://www.jmlr.org/papers/v11/cawley10a.html
+https://www.jmlr.org/papers/v12/pedregosa11a.html
+https://papers.nips.cc/paper_files/paper/2010/file/fe73f687e5bc5280214e0486b273a5f9-Bibtex.bib
+https://papers.nips.cc/paper/1238-support-vector-regression-machines
+https://papers.nips.cc/paper/1866-using-the-nystrom-method-to-speed-up-kernel-machines
+https://openlibrary.org/search.json?q=deep+learning+goodfellow+bengio+courville&fields=title,author_name,publisher,first_publish_year,publish_year
+https://openlibrary.org/search.json?q=machine+learning+tom+mitchell&fields=title,author_name,publisher,first_publish_year,publish_year
+https://openlibrary.org/search.json?q=artificial+intelligence+a+modern+approach+russell+norvig&fields=title,author_name,publisher,first_publish_year,publish_year,edition_count
+https://openlibrary.org/search.json?q=stages+of+soybean+development+fehr+caviness&fields=title,author_name,publisher,first_publish_year,publish_year
+https://www.google.com/search?q=%22Procedures+for+performing+systematic+reviews%22+Kitchenham+TR%2FSE-0401
+https://brasil.mapbiomas.org/
+https://www.conab.gov.br/
+https://portaldeinformacoes.conab.gov.br/custos-de-producao.html
+https://sidra.ibge.gov.br/pesquisa/pam/tabelas
+https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/PA
+https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/LA

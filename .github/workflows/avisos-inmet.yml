@@ -1,0 +1,29 @@
+# Confere a leitura dos avisos do INMET que a tela Tempo do aplicativo mostra.
+#
+# avisos_inmet.py baixa a lista de avisos ativos e imprime os que atingem
+# Paragominas e Santarém. O ambiente de desenvolvimento não alcança a fonte; o
+# runner do Actions, sim. Roda quando o módulo muda, toda segunda-feira (para
+# um formato novo aparecer aqui antes de sumir da tela) e sob demanda.
+name: Avisos do INMET
+
+on:
+  push:
+    paths:
+      - "software/api_backend/avisos_inmet.py"
+      - ".github/workflows/avisos-inmet.yml"
+  schedule:
+    - cron: "23 12 * * 1"
+  workflow_dispatch:
+
+jobs:
+  confere:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet requests
+      - name: Avisos ativos e os de dois municípios do Pará
+        working-directory: software/api_backend
+        run: python avisos_inmet.py

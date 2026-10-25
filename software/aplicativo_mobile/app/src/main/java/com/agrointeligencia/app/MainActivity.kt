@@ -240,6 +240,11 @@ fun AgroDashboard() {
     val haptic = LocalHapticFeedback.current
     val sharedPrefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
     val gson = remember { Gson() }
+    // Previsão do tempo (Tempo.kt): vem do Open-Meteo, e não da API, e por
+    // isso carrega mesmo com a API dormindo. Serve o cartão do Resumo e a tela.
+    val tempo = remember { EstadoTempo(sharedPrefs) }
+    val lugarTempo = tempo.lugarPara(selectedMunicipio)
+    LaunchedEffect(lugarTempo) { lugarTempo?.let { tempo.carrega(it) } }
     
     fun loadData() {
         errorMsg = null
@@ -302,9 +307,9 @@ fun AgroDashboard() {
         loadData()
     }
 
-    // A Estimativa no campo não tem item na barra de baixo; o voltar do
-    // celular leva de volta ao Resumo, de onde ela é aberta.
-    BackHandler(enabled = currentTab == 5) { currentTab = 0 }
+    // A Estimativa no campo e o Tempo não têm item na barra de baixo; o voltar
+    // do celular leva de volta ao Resumo, de onde eles são abertos.
+    BackHandler(enabled = currentTab == 5 || currentTab == 6) { currentTab = 0 }
     
     LaunchedEffect(selectedMunicipio) {
         selectedMunicipio?.let { mun ->
@@ -436,6 +441,12 @@ fun AgroDashboard() {
                         }
                     }
                 }
+
+                // Fora do bloco da previsão de produtividade: o tempo aparece
+                // mesmo enquanto a API acorda ou quando ela falha.
+                if (currentTab == 0) {
+                    TempoResumoCard(tempo) { currentTab = 6 }
+                }
             }
 
             if (currentTab == 4) {
@@ -457,6 +468,10 @@ fun AgroDashboard() {
                         rotuloReferencia = projecao?.let { "${previsao?.municipio ?: selectedMunicipio} em ${it.ano}" },
                         aoVoltar = { currentTab = 0 }
                     )
+                }
+            } else if (currentTab == 6) {
+                item {
+                    TempoTela(tempo, selectedMunicipio) { currentTab = 0 }
                 }
             } else if (isLoading) {
                 item {

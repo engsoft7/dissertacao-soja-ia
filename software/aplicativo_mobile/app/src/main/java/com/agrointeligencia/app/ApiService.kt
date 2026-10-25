@@ -211,6 +211,30 @@ data class MercadoResponse(
     val para: EstimativaPara? = null
 )
 
+/**
+ * Aviso meteorológico do INMET para o lugar (ver avisos_inmet.py na API).
+ * "nivel" vai de 1 (perigo potencial) a 3 (grande perigo); "cor" é a do INMET.
+ */
+data class AvisoMeteorologico(
+    val id: String,
+    val evento: String? = null,
+    val severidade: String? = null,
+    val nivel: Int? = null,
+    val cor: String? = null,
+    val inicio: String? = null,
+    val fim: String? = null,
+    val riscos: List<String>? = null,
+    val instrucoes: List<String>? = null
+)
+
+/** "disponivel" falso quando o INMET não respondeu: a tela não diz "nenhum aviso" sem saber. */
+data class AvisosResponse(
+    val fonte: String? = null,
+    val disponivel: Boolean = false,
+    val lido_em: Long? = null,
+    val avisos: List<AvisoMeteorologico>? = null
+)
+
 interface AgroApiService {
     @retrofit2.http.POST("api/simulacao")
     suspend fun simularCenario(@retrofit2.http.Body request: SimulacaoRequest): SimulacaoResponse
@@ -229,6 +253,15 @@ interface AgroApiService {
 
     @GET("api/mercado")
     suspend fun getMercado(@retrofit2.http.Query("periodo") periodo: String): MercadoResponse
+
+    // Parâmetros nulos ficam fora da consulta: o GPS da fazenda vai sem
+    // geocódigo, e a API decide pelo polígono do aviso.
+    @GET("api/avisos")
+    suspend fun getAvisos(
+        @retrofit2.http.Query("lat") lat: Double?,
+        @retrofit2.http.Query("lon") lon: Double?,
+        @retrofit2.http.Query("geocode") geocode: String?
+    ): AvisosResponse
 }
 
 object RetrofitClient {

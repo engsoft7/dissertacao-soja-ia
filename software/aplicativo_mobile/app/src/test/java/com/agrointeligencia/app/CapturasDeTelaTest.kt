@@ -127,6 +127,32 @@ class CapturasDeTelaTest {
     private val mercado: MercadoResponse = mercadoReal ?: mercadoExemplo
     private val periodoMercado = if (mercadoReal != null) "1mo" else "1d"
 
+    // Tempo: a resposta do Open-Meteo gravada pelo script, ou a de Paragominas
+    // lida em 25/10/2026 (src/test/resources). O "agora" é o da própria
+    // resposta, para a janela de pulverização começar na hora certa.
+    private val tempo: PrevisaoTempo = real("tempo") ?: Gson().fromJson(
+        javaClass.classLoader!!.getResource("openmeteo_paragominas_2026-10-25.json")!!.readText(),
+        PrevisaoTempo::class.java
+    )
+    private val agoraTempo = java.time.LocalDateTime.parse(tempo.current!!.time!!)
+    private val avisos: AvisosResponse = real("avisos") ?: AvisosResponse(disponivel = true, avisos = emptyList())
+
+    // Um aviso real do INMET (tempestade de 26/10/2026 no sul do Pará), só
+    // para desenhar o cartão: Paragominas não tinha aviso naquele dia.
+    private val avisoExemplo = AvisosResponse(
+        fonte = "INMET", disponivel = true, avisos = listOf(
+            AvisoMeteorologico(
+                id = "56174", evento = "Tempestade", severidade = "Perigo Potencial", nivel = 1, cor = "#FFFE00",
+                inicio = "2026-10-26 00:00", fim = "2026-10-26 23:59",
+                riscos = listOf("Chuva entre 20 e 30 mm/h ou até 50 mm/dia, ventos intensos (40-60 km/h), e queda de " +
+                    "granizo. Baixo risco de corte de energia elétrica, estragos em plantações, queda de galhos de " +
+                    "árvores e de alagamentos."),
+                instrucoes = listOf("Evite usar aparelhos eletrônicos ligados à tomada.",
+                    "Obtenha mais informações junto à Defesa Civil (telefone 199) e ao Corpo de Bombeiros (telefone 193).")
+            )
+        )
+    )
+
     // A mesma escolha do AgroDashboard: a projeção é o ano mais adiante, e a
     // comparação é com a última safra que tem produtividade divulgada.
     private val historico = previsao.historico.sortedByDescending { it.ano }
@@ -167,6 +193,19 @@ class CapturasDeTelaTest {
 
     @Config(qualifiers = "+night")
     @Test fun sobre_escuro() = captura("sobre", true) { MetodologiaCard(financas, previsao.validacao) }
+
+    // A tela Tempo é longa: desenhada num celular alto, como a do Mercado.
+    @Config(qualifiers = "w411dp-h2100dp-xxhdpi")
+    @Test fun tempo_claro() = captura("tempo", false) {
+        TempoConteudo(tempo, avisos, SEDES_MUNICIPAIS["Paragominas"], agoraTempo, null, false, false)
+    }
+
+    @Config(qualifiers = "w411dp-h2100dp-night-xxhdpi")
+    @Test fun tempo_escuro() = captura("tempo", true) {
+        TempoConteudo(tempo, avisos, SEDES_MUNICIPAIS["Paragominas"], agoraTempo, null, false, false)
+    }
+
+    @Test fun aviso_inmet_claro() = captura("aviso_inmet", false) { CartaoAvisos(avisoExemplo) }
 
     // O ícone do launcher, montado pelo próprio Android a partir do
     // adaptive-icon: confere que as três camadas compilam e se encaixam.

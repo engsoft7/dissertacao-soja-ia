@@ -6,6 +6,7 @@ from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
 from validacao import metricas_validacao
 import mercado
 import precos_para
+import avisos_inmet
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -292,6 +293,18 @@ def get_mercado(periodo: str = "1d"):
         "conab_saca": PRECO_RECEBIDO_CONAB_SACA,
         "conab_fonte": descricao_do_levantamento(),
     }
+
+@app.get("/api/avisos")
+def get_avisos(lat: float | None = None, lon: float | None = None, geocode: str | None = None):
+    """Avisos meteorológicos do INMET que atingem o lugar (ver avisos_inmet.py).
+
+    O aplicativo manda o ponto (a sede do município ou o GPS da fazenda) e,
+    quando há, o geocódigo IBGE do município. A previsão do tempo em si o
+    aplicativo busca direto no Open-Meteo: não depende desta API acordar.
+    """
+    if (lat is None or lon is None) and not geocode:
+        raise HTTPException(status_code=400, detail="informe lat e lon, ou geocode")
+    return avisos_inmet.avisos(lat, lon, geocode)
 
 @app.get("/api/previsao/{municipio}")
 def get_previsao(municipio: str):

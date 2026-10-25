@@ -215,6 +215,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.10` (23/10/2026) — preço estimado da soja no Pará no aplicativo (2.2.3) e no painel | 106 | 19.929 | `af102ab293729efef84e2fd8f08eed1a30ff0c04e30af2b72411c854757f1bbd` |
 | Tag `v2.4.11` (23/10/2026) — gráficos de mercado mais legíveis no aplicativo (2.2.4) e no painel | 107 | 20.087 | `fdb642d289f4d232aa25b52203cbb8e09a55adb01be412185cb48fd869420eeb` |
 | Tag `v2.4.12` (25/10/2026) — estimativa no campo por foto e GPS no aplicativo (2.3.0), contador de vagens e LSTM no recorte nacional | 119 | 23.198 | `4d1c23effae508d8d5dce1f3b58a2d2f611cea7406acad4a4651410c3bf7f314` |
+| Tag `v2.4.13` (25/10/2026) — contador automático de vagens no aplicativo (2.4.0) e preço estimado do Pará de volta | 123 | 23.950 | `35877615a2cd9b2e713013754bf46e32f02bedbf7979538f4f1da07824811140` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -560,6 +561,30 @@ arquivos e 23.198 linhas. O DOI de versão desta etiqueta é
 10.5281/zenodo.23641635, atribuído pelo Zenodo no depósito disparado pela
 publicação do Release em 25/10/2026.
 
+A `v2.4.13` foi registrada pelo workflow `registra-doi.yml` na publicação do
+Release, em 25/10/2026, com o título “v2.4.13 — Contador automático de vagens no
+aplicativo (2.4.0) e preço estimado do Pará de volta”. Em relação à `v2.4.12`,
+entram 4 arquivos-fonte
+(`pesquisa/09_contagem_por_imagem/converte_para_celular.py`,
+`software/aplicativo_mobile/app/src/androidTest/java/com/agrointeligencia/app/ContadorVagensAparelhoTest.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/ContadorVagens.kt`
+e
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/ContadorVagensTest.kt`);
+mudam 8 (`software/api_backend/mercado.py`,
+`software/api_backend/precos_para.py`, `software/api_backend/test_mercado.py`,
+`software/api_backend/test_precos_para.py`,
+`software/aplicativo_mobile/app/build.gradle.kts`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/AmostrasTreino.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/EstimativaCampo.kt`
+e
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/CampoCapturasDeTelaTest.kt`).
+
+O resumo criptográfico da `v2.4.13` foi calculado pelo mesmo workflow sobre uma
+cópia limpa da etiqueta (commit `24375a9`), com o critério do comando acima: 123
+arquivos e 23.950 linhas. O DOI de versão desta etiqueta é
+10.5281/zenodo.23644764, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 25/10/2026.
+
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
 calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
@@ -803,6 +828,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.9`:** 10.5281/zenodo.23583614
 - **DOI da `v2.4.10`:** 10.5281/zenodo.23585430
 - **DOI da `v2.4.11`:** 10.5281/zenodo.23592602
-- **DOI da versão mais recente (`v2.4.12`):** 10.5281/zenodo.23641635
+- **DOI da `v2.4.12`:** 10.5281/zenodo.23641635
+- **DOI da versão mais recente (`v2.4.13`):** 10.5281/zenodo.23644764
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

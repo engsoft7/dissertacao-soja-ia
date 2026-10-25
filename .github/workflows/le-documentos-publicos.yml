@@ -54,7 +54,9 @@ jobs:
                   texto = "\n\n".join((pg.extract_text() or "") for pg in PdfReader(str(destino / f"{nome}.pdf")).pages)
               else:
                   pagina = dados.decode("utf-8", "replace")
-                  links = sorted({urllib.parse.urljoin(final, h) for h in re.findall(r'href="([^"#]+)"', pagina)})
+                  ancoras = re.findall(r'(?is)<a[^>]+href="([^"#]+)"[^>]*>(.*?)</a>', pagina)
+                  limpa = lambda t: re.sub(r"<[^>]+>|[ \t\r\n]+", " ", t).strip()[:120]
+                  links = sorted({urllib.parse.urljoin(final, h) + "  [" + limpa(t) + "]" for h, t in ancoras})
                   corpo = re.sub(r"(?is)<(script|style).*?</\1>", " ", pagina)
                   texto = html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", corpo)))
                   texto += "\n\nLINKS:\n" + "\n".join(links)

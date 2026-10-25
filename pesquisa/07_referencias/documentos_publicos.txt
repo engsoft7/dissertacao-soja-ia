@@ -29,3 +29,23 @@ https://portaldeinformacoes.conab.gov.br/custos-de-producao.html
 https://sidra.ibge.gov.br/pesquisa/pam/tabelas
 https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/PA
 https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/LA
+#
+# Arquivos do Google Drive listados em Regimento e Normas do PPCA (resoluções e instruções normativas)
+https://drive.google.com/uc?export=download&id=12j5OGn2X6hPsgWf30FlC16ECuM5pi6K2
+https://drive.google.com/uc?export=download&id=12jp4zNxjmldDYqPCyQuoxZ4j3-BchnwG
+https://drive.google.com/uc?export=download&id=1FPU7miXjTgMc1RaG8ebcZMi2iC8sk1Xy
+https://drive.google.com/uc?export=download&id=1KIdYDa3LOaNQjgAB_1SFX_wieDfvrqfM
+https://drive.google.com/uc?export=download&id=1PiAN2_uUcPvCNADsrA4Zsa-GVBMF6tXF
+https://drive.google.com/uc?export=download&id=1YWjEqvoXK_HIMJ9lhiTr_WZlxqaeppVX
+https://drive.google.com/uc?export=download&id=1aJZP322Tb6E9sbjuATdpUH4JztxNzcsF
+https://drive.google.com/uc?export=download&id=1aYvVvBFaf_y_R25sEuH8iH7J00tArBG9
+https://drive.google.com/uc?export=download&id=1bmMg1AGucLQ2V_tuOR4EGN14Z8hGI_Qq
+https://drive.google.com/uc?export=download&id=1fEyzKZDTRzorj848MsRkydrPxfHqeD0o
+https://drive.google.com/uc?export=download&id=1kLQFBEgwIIOYdyY2tobXSJkqmxb12UdP
+https://drive.google.com/uc?export=download&id=1kPUYZ8ZwRVmztPA_skUoMCWBbleWCSaU
+https://drive.google.com/uc?export=download&id=1lvMbaIHVrTjPuEmy9ZRki3KfwS-kV_qM
+https://drive.google.com/uc?export=download&id=1pjs9zbrqKYnOzn1IXTkXx94tAHK7uS4U
+https://drive.google.com/uc?export=download&id=1wA3Ag6sLmSFdJyucET-2idlgIYGfgspS
+https://drive.google.com/uc?export=download&id=1xKFRIDCMUNNi0lN8yL5julMfSzCHmwLM
+https://drive.google.com/uc?export=download&id=1xMd84XHyNTIFQj0MR8hS5MOZDnVORpKx
+https://drive.google.com/uc?export=download&id=1xbrlf0jPU4LoM5zh0kxj08c9JJjpVIBN

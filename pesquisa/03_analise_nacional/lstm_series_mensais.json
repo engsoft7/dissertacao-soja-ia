@@ -1,0 +1,415 @@
+{
+ "nota": "Gerado por 11_lstm_series_mensais.py (busca em 2001-2015; avaliação leave-one-year-out 2016-2020). Versões: scikit-learn 1.8.0, xgboost 3.4.1, torch 2.14.1 (CPU).",
+ "busca": {
+  "melhor": {
+   "config": {
+    "oculto": 64,
+    "camadas": 1,
+    "dropout": 0.2,
+    "lr": 0.001,
+    "decaimento": 0.0001
+   },
+   "rmse_val": 412.4
+  },
+  "todas": [
+   {
+    "config": {
+     "oculto": 64,
+     "camadas": 1,
+     "dropout": 0.2,
+     "lr": 0.001,
+     "decaimento": 0.0001
+    },
+    "rmse_val": 412.4
+   },
+   {
+    "config": {
+     "oculto": 128,
+     "camadas": 1,
+     "dropout": 0.4,
+     "lr": 0.001,
+     "decaimento": 0.0
+    },
+    "rmse_val": 417.7
+   },
+   {
+    "config": {
+     "oculto": 64,
+     "camadas": 1,
+     "dropout": 0.4,
+     "lr": 0.003,
+     "decaimento": 0.0001
+    },
+    "rmse_val": 422.2
+   },
+   {
+    "config": {
+     "oculto": 128,
+     "camadas": 1,
+     "dropout": 0.2,
+     "lr": 0.001,
+     "decaimento": 0.0001
+    },
+    "rmse_val": 422.8
+   },
+   {
+    "config": {
+     "oculto": 128,
+     "camadas": 2,
+     "dropout": 0.0,
+     "lr": 0.003,
+     "decaimento": 0.0001
+    },
+    "rmse_val": 424.3
+   },
+   {
+    "config": {
+     "oculto": 32,
+     "camadas": 2,
+     "dropout": 0.2,
+     "lr": 0.001,
+     "decaimento": 0.0001
+    },
+    "rmse_val": 426.0
+   },
+   {
+    "config": {
+     "oculto": 128,
+     "camadas": 1,
+     "dropout": 0.2,
+     "lr": 0.001,
+     "decaimento": 0.001
+    },
+    "rmse_val": 429.0
+   },
+   {
+    "config": {
+     "oculto": 128,
+     "camadas": 1,
+     "dropout": 0.4,
+     "lr": 0.003,
+     "decaimento": 0.001
+    },
+    "rmse_val": 431.1
+   },
+   {
+    "config": {
+     "oculto": 64,
+     "camadas": 2,
+     "dropout": 0.4,
+     "lr": 0.003,
+     "decaimento": 0.001
+    },
+    "rmse_val": 433.7
+   },
+   {
+    "config": {
+     "oculto": 128,
+     "camadas": 1,
+     "dropout": 0.0,
+     "lr": 0.003,
+     "decaimento": 0.001
+    },
+    "rmse_val": 436.3
+   },
+   {
+    "config": {
+     "oculto": 32,
+     "camadas": 2,
+     "dropout": 0.4,
+     "lr": 0.001,
+     "decaimento": 0.0001
+    },
+    "rmse_val": 437.8
+   },
+   {
+    "config": {
+     "oculto": 64,
+     "camadas": 1,
+     "dropout": 0.0,
+     "lr": 0.003,
+     "decaimento": 0.001
+    },
+    "rmse_val": 440.0
+   },
+   {
+    "config": {
+     "oculto": 128,
+     "camadas": 2,
+     "dropout": 0.2,
+     "lr": 0.003,
+     "decaimento": 0.0001
+    },
+    "rmse_val": 440.2
+   },
+   {
+    "config": {
+     "oculto": 128,
+     "camadas": 1,
+     "dropout": 0.0,
+     "lr": 0.003,
+     "decaimento": 0.0001
+    },
+    "rmse_val": 444.1
+   },
+   {
+    "config": {
+     "oculto": 32,
+     "camadas": 2,
+     "dropout": 0.4,
+     "lr": 0.001,
+     "decaimento": 0.0
+    },
+    "rmse_val": 446.2
+   },
+   {
+    "config": {
+     "oculto": 32,
+     "camadas": 2,
+     "dropout": 0.0,
+     "lr": 0.003,
+     "decaimento": 0.001
+    },
+    "rmse_val": 466.9
+   }
+  ]
+ },
+ "tabela3": {
+  "protocolo": "Tabela 3 (subamostra de 7.000; SVR 5.000)",
+  "config_lstm": {
+   "oculto": 64,
+   "camadas": 1,
+   "dropout": 0.2,
+   "lr": 0.001,
+   "decaimento": 0.0001
+  },
+  "modelos": {
+   "Random Forest": {
+    "RMSE_pool": 476.0,
+    "MAE_pool": 353.5,
+    "R2_pool": 0.387
+   },
+   "XGBoost": {
+    "RMSE_pool": 480.6,
+    "MAE_pool": 352.8,
+    "R2_pool": 0.374
+   },
+   "SVR": {
+    "RMSE_pool": 460.7,
+    "MAE_pool": 339.6,
+    "R2_pool": 0.425
+   },
+   "MLP": {
+    "RMSE_pool": 549.6,
+    "MAE_pool": 409.6,
+    "R2_pool": 0.182
+   },
+   "LSTM (conjunto de 5 sementes)": {
+    "RMSE_pool": 477.3,
+    "MAE_pool": 355.4,
+    "R2_pool": 0.383
+   }
+  },
+  "lstm_por_semente": {
+   "RMSE": [
+    499.4,
+    494.2,
+    489.4,
+    485.7,
+    484.2
+   ],
+   "R2": [
+    0.325,
+    0.339,
+    0.351,
+    0.361,
+    0.365
+   ],
+   "RMSE_media": 490.6,
+   "RMSE_dp": 5.6,
+   "R2_media": 0.348,
+   "R2_dp": 0.015
+  },
+  "por_safra_R2": {
+   "Random Forest": {
+    "2016": -0.065,
+    "2017": 0.201,
+    "2018": 0.234,
+    "2019": 0.311,
+    "2020": 0.55
+   },
+   "XGBoost": {
+    "2016": 0.032,
+    "2017": 0.227,
+    "2018": 0.219,
+    "2019": 0.366,
+    "2020": 0.465
+   },
+   "SVR": {
+    "2016": 0.077,
+    "2017": 0.271,
+    "2018": 0.224,
+    "2019": 0.388,
+    "2020": 0.552
+   },
+   "MLP": {
+    "2016": -0.443,
+    "2017": 0.054,
+    "2018": 0.16,
+    "2019": 0.268,
+    "2020": 0.257
+   },
+   "LSTM (conjunto de 5 sementes)": {
+    "2016": 0.061,
+    "2017": 0.241,
+    "2018": 0.161,
+    "2019": 0.398,
+    "2020": 0.477
+   }
+  },
+  "lstm_menos_svr": {
+   "dRMSE": 16.6,
+   "dRMSE_IC95": [
+    11.4,
+    21.9
+   ],
+   "dR2": -0.042,
+   "dR2_IC95": [
+    -0.056,
+    -0.029
+   ]
+  },
+  "lstm_semente_42_menos_svr": {
+   "dRMSE": 38.7,
+   "dRMSE_IC95": [
+    32.7,
+    44.2
+   ],
+   "dR2": -0.101,
+   "dR2_IC95": [
+    -0.117,
+    -0.083
+   ]
+  },
+  "criterio": "SVR supera a LSTM"
+ },
+ "base_completa": {
+  "protocolo": "base completa",
+  "config_lstm": {
+   "oculto": 64,
+   "camadas": 1,
+   "dropout": 0.2,
+   "lr": 0.001,
+   "decaimento": 0.0001
+  },
+  "modelos": {
+   "Random Forest": {
+    "RMSE_pool": 476.1,
+    "MAE_pool": 353.5,
+    "R2_pool": 0.386
+   },
+   "XGBoost": {
+    "RMSE_pool": 467.1,
+    "MAE_pool": 346.2,
+    "R2_pool": 0.409
+   },
+   "SVR": {
+    "RMSE_pool": 465.7,
+    "MAE_pool": 343.0,
+    "R2_pool": 0.413
+   },
+   "MLP": {
+    "RMSE_pool": 535.3,
+    "MAE_pool": 404.8,
+    "R2_pool": 0.224
+   },
+   "LSTM (conjunto de 5 sementes)": {
+    "RMSE_pool": 456.6,
+    "MAE_pool": 344.0,
+    "R2_pool": 0.435
+   }
+  },
+  "lstm_por_semente": {
+   "RMSE": [
+    463.1,
+    487.3,
+    486.6,
+    474.9,
+    495.2
+   ],
+   "R2": [
+    0.419,
+    0.357,
+    0.359,
+    0.389,
+    0.336
+   ],
+   "RMSE_media": 481.4,
+   "RMSE_dp": 11.2,
+   "R2_media": 0.372,
+   "R2_dp": 0.029
+  },
+  "por_safra_R2": {
+   "Random Forest": {
+    "2016": -0.054,
+    "2017": 0.21,
+    "2018": 0.215,
+    "2019": 0.354,
+    "2020": 0.532
+   },
+   "XGBoost": {
+    "2016": 0.054,
+    "2017": 0.212,
+    "2018": 0.226,
+    "2019": 0.43,
+    "2020": 0.519
+   },
+   "SVR": {
+    "2016": -0.009,
+    "2017": 0.297,
+    "2018": 0.212,
+    "2019": 0.442,
+    "2020": 0.526
+   },
+   "MLP": {
+    "2016": -0.405,
+    "2017": -0.331,
+    "2018": 0.158,
+    "2019": 0.334,
+    "2020": 0.421
+   },
+   "LSTM (conjunto de 5 sementes)": {
+    "2016": -0.063,
+    "2017": 0.177,
+    "2018": 0.199,
+    "2019": 0.432,
+    "2020": 0.637
+   }
+  },
+  "lstm_menos_svr": {
+   "dRMSE": -9.1,
+   "dRMSE_IC95": [
+    -14.7,
+    -3.7
+   ],
+   "dR2": 0.023,
+   "dR2_IC95": [
+    0.009,
+    0.036
+   ]
+  },
+  "lstm_semente_42_menos_svr": {
+   "dRMSE": -2.7,
+   "dRMSE_IC95": [
+    -10.1,
+    4.6
+   ],
+   "dR2": 0.007,
+   "dR2_IC95": [
+    -0.012,
+    0.025
+   ]
+  },
+  "criterio": "LSTM supera o SVR"
+ }
+}

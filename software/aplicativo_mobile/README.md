@@ -6,11 +6,13 @@ Aplicativo Android focado em Inteligência Artificial para estimar o rendimento 
 - **Resumo Agronômico:** Visualize as expectativas de rendimento por hectare e estimativas de performance (em sacas) para o município selecionado.
 - **Simulador Climático:** Altere fatores de temperatura e precipitação para projetar impactos diretos no seu rendimento da safra.
 - **Viabilidade Financeira:** Projeções financeiras como margem de lucro por hectare e ROI com base em cotações e custos de produção.
+- **Estimativa no campo:** O produtor fotografa uma linha da lavoura e algumas plantas arrancadas, toca em cada planta e vagem para contar, e o app calcula a produtividade do talhão por componentes de rendimento (plantas/m² × vagens/planta × grãos/vagem × peso de mil grãos), em sacas e em reais. A área pode ser digitada ou medida marcando os cantos do talhão com o GPS. A contagem é manual: a contagem automática por IA depende de um modelo treinado e conferido com fotos de lavouras reais. Para isso, cada foto marcada fica guardada no celular com as marcações (pontos em pixels, num JSON ao lado da imagem), e o produtor pode exportar tudo num .zip pelo compartilhamento do Android; nada sai do aparelho sem que ele exporte.
 - **Integração Real-Time:** Conexão direta com modelo preditivo em FastAPI hospedado no Render, com dados atualizados pelas fontes MapBiomas, CHIRPS e ERA5-Land.
 
 ## Requisitos
 - Android 8.0 (API 26) ou superior.
-- Conexão de Internet.
+- Conexão de Internet (a Estimativa no campo funciona sem ela).
+- Localização só para medir a área com o GPS, com a tela aberta; a câmera é a do próprio celular, sem permissão de câmera.
 
 ## Publicação na Play Store
 1. No Android Studio, vá em **Build > Generate Signed Bundle / APK**.

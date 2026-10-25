@@ -1,0 +1,79 @@
+# Confere a licença das bases públicas de imagens de soja candidatas ao treino
+# da contagem automática (Estimativa no campo do aplicativo) e varre a
+# literatura atrás dos trabalhos que publicaram dados.
+#
+# Existe porque o ambiente de desenvolvimento não alcança Kaggle, Roboflow,
+# arXiv, MDPI nem Hugging Face, negados por política de rede. Só lê
+# metadados: nenhuma imagem é baixada.
+#
+# Roda quando o próprio script muda, e sob demanda. O gatilho por caminho
+# existe porque workflow_dispatch só alcança workflows que já estão no branch
+# padrão, e este nasceu num branch de trabalho.
+name: Confere bases de imagens
+
+on:
+  push:
+    paths:
+      - 'pesquisa/09_contagem_por_imagem/confere_bases_de_imagens.py'
+      - 'pesquisa/09_contagem_por_imagem/varre_literatura.py'
+      - 'pesquisa/09_contagem_por_imagem/confere_inacessiveis.py'
+      - '.github/workflows/confere-bases-de-imagens.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  licencas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências
+        run: pip install --quiet requests
+
+      # continue-on-error: uma fonte fora do ar não deve esconder o que a
+      # outra etapa encontrou. O log é o produto deste job.
+      - name: Consulta as bases de imagens
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python pesquisa/09_contagem_por_imagem/confere_bases_de_imagens.py
+
+  literatura:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências
+        run: pip install --quiet requests
+
+      - name: Varre a literatura (OpenAlex e texto completo)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python pesquisa/09_contagem_por_imagem/varre_literatura.py
+
+  inacessiveis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instala dependências
+        run: pip install --quiet requests pypdf
+
+      - name: Segunda tentativa nos trabalhos sem texto
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python pesquisa/09_contagem_por_imagem/confere_inacessiveis.py

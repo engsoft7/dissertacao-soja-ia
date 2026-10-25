@@ -350,6 +350,10 @@ def main():
     ap.add_argument("--recorte", type=int, default=448)
     ap.add_argument("--passo", type=int, choices=(4, 8), default=4)
     ap.add_argument("--sigma", type=float, default=6.0, help="sigma da gaussiana de cada vagem, em pixels")
+    ap.add_argument("--sorteio-por-vagens", action="store_true",
+                    help="sorteia as fotos com peso proporcional à raiz do número de vagens (usado na v2)")
+    ap.add_argument("--peso-contagem", type=float, default=0.03,
+                    help="peso do erro na contagem total do recorte (0,01 na v1 e na v2)")
     ap.add_argument("--lote", type=int, default=8)
     ap.add_argument("--epocas", type=int, default=36)
     ap.add_argument("--minutos", type=float, default=280)
@@ -381,14 +385,19 @@ def main():
     corpo = [p for n, p in modelo.named_parameters() if n.startswith("ate")]
     otim = torch.optim.AdamW([{"params": corpo, "lr": 3e-4}, {"params": cabeca, "lr": 1e-3}], weight_decay=1e-4)
     agenda = torch.optim.lr_scheduler.CosineAnnealingLR(otim, T_max=args.epocas)
-    # Plantas carregadas são sorteadas mais vezes (peso proporcional à raiz
-    # do número de vagens): na versão 1 eram poucas no treino, e o modelo
-    # contava de 17% a 28% a menos nas fotos com mais de 90 vagens.
-    pesos = [math.sqrt(len(p) + 1) for _, p in cache["treino"]]
-    sorteio = torch.utils.data.WeightedRandomSampler(pesos, num_samples=len(pesos), replacement=True)
+    # Na v2 as plantas carregadas eram sorteadas mais vezes (peso proporcional
+    # à raiz do número de vagens). A localização melhorou, mas o modelo passou
+    # a contar 6,4% a mais nas plantas com até 50 vagens, que são dois terços
+    # do teste. Ficou como opção, desligada por padrão.
     conjunto = Recortes(cache["treino"], args.recorte, args.sigma)
-    carregador = torch.utils.data.DataLoader(conjunto, batch_size=args.lote, sampler=sorteio,
-                                             num_workers=0, drop_last=True)
+    if args.sorteio_por_vagens:
+        pesos = [math.sqrt(len(p) + 1) for _, p in cache["treino"]]
+        sorteio = torch.utils.data.WeightedRandomSampler(pesos, num_samples=len(pesos), replacement=True)
+        carregador = torch.utils.data.DataLoader(conjunto, batch_size=args.lote, sampler=sorteio,
+                                                 num_workers=0, drop_last=True)
+    else:
+        carregador = torch.utils.data.DataLoader(conjunto, batch_size=args.lote, shuffle=True,
+                                                 num_workers=0, drop_last=True)
 
     melhor, historico = float("inf"), []
     for epoca in range(1, args.epocas + 1):
@@ -397,7 +406,11 @@ def main():
         perdas = []
         for x, alvo in carregador:
             pred = modelo(x)
-            perda = F.mse_loss(pred, alvo) + 0.01 * F.l1_loss(pred.sum((1, 2, 3)), alvo.sum((1, 2, 3)))
+            # O segundo termo pesa o erro na contagem do recorte inteiro. Com o
+            # mapa 1/4 cada vagem se espalha por mais células, o erro célula a
+            # célula fica pequeno, e a soma (a contagem) precisa de mais peso.
+            perda = (F.mse_loss(pred, alvo)
+                     + args.peso_contagem * F.l1_loss(pred.sum((1, 2, 3)), alvo.sum((1, 2, 3))))
             otim.zero_grad()
             perda.backward()
             otim.step()

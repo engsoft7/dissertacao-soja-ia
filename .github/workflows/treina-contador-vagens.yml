@@ -20,7 +20,7 @@ on:
         default: "36"
       versao:
         description: "Pasta da versão na branch modelo-contagem-vagens"
-        default: "v2"
+        default: "v3"
 
 permissions:
   contents: write
@@ -69,7 +69,7 @@ jobs:
       - name: Publica na branch modelo-contagem-vagens
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSAO: ${{ github.event.inputs.versao || 'v2' }}
+          VERSAO: ${{ github.event.inputs.versao || 'v3' }}
         run: |
           url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           destino="$RUNNER_TEMP/branch"

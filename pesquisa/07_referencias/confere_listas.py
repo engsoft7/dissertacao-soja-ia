@@ -38,7 +38,7 @@ CROSSREF = "https://api.crossref.org/works"
 MAILTO = os.environ.get("CROSSREF_MAILTO", "")
 UA = {"User-Agent": "dissertacao-soja-ia/1.0" + (f" (mailto:{MAILTO})" if MAILTO else "")}
 INSTITUCIONAIS = ("INSTITUTO BRASILEIRO", "COMPANHIA NACIONAL", "BRASIL.", "NATIONAL AERONAUTICS",
-                  "MAPBIOMAS", "AGROLINK")
+                  "MAPBIOMAS", "AGROLINK", "INSTITUTO NACIONAL DE METEOROLOGIA", "OPEN-METEO")
 VAZIAS = {"the", "and", "for", "with", "from", "using", "uma", "para", "com", "dos", "das", "por"}
 
 

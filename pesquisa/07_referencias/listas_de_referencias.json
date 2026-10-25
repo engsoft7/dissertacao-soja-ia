@@ -1,13 +1,15 @@
 {
  "gerado_em": "2026-10-25",
- "fonte": "versões do Google Drive de 23/10/2026; lista principal da dissertação atualizada em 25/10/2026 (entram XIANG et al., 2023; BOARD; KAHLON, 2011; FEHR; CAVINESS, 1977; LEMPITSKY; ZISSERMAN, 2010; endereços da CONAB atualizados para gov.br/conab)",
+ "fonte": "versões do Google Drive de 23/10/2026; lista principal da dissertação atualizada em 25/10/2026 (entram XIANG et al., 2023; BOARD; KAHLON, 2011; FEHR; CAVINESS, 1977; LEMPITSKY; ZISSERMAN, 2010; endereços da CONAB atualizados para gov.br/conab; em 25/10/2026 também ADEGAS; GAZZIERO, 2020, ALLEN et al., 1998, INMET, 2026, e OPEN-METEO, 2026, da tela Tempo do aplicativo, e BOARD antes de BRASIL)",
  "listas": {
   "dissertacao_referencias": [
+   "ADEGAS, F. S.; GAZZIERO, D. L. P. Tecnologia de aplicação de agrotóxicos. In: SEIXAS, C. D. S. et al. (ed.). Tecnologias de produção de soja. Londrina: Embrapa Soja, 2020. p. 281-292. (Sistemas de Produção, 17).",
    "AGROLINK. Cotações: soja em grão, saca de 60 kg — histórico de preços do Pará. [S. l.]: Agrolink, 2026. Disponível em: https://www.agrolink.com.br/cotacoes/historico/pa/soja-em-grao-sc-60kg. Acesso em: 23 out. 2026.",
+   "ALLEN, R. G. et al. Crop evapotranspiration: guidelines for computing crop water requirements. Rome: FAO, 1998. 300 p. (FAO Irrigation and Drainage Paper, 56).",
    "BARBOSA DOS SANTOS, V.; SANTOS, A. M. F. D.; ROLIM, G. D. S. Estimation and forecasting of soybean yield using artificial neural networks. Agronomy Journal, v. 113, p. 3193-3209, 2021. DOI: 10.1002/agj2.20729.",
    "BERGSTRA, J.; BENGIO, Y. Random search for hyper-parameter optimization. Journal of Machine Learning Research, v. 13, p. 281-305, 2012.",
-   "BRASIL. Ministério da Fazenda. Secretaria Especial da Receita Federal do Brasil. Tabela de valores de terra nua: exercício 2026. Brasília, DF: RFB, 2026. Disponível em: https://www.gov.br/receitafederal/pt-br/canais_atendimento/fale-conosco/cidadao/imovel-rural-cadastros-e-declaracao/valor-da-terra-nua-vtn. Acesso em: 30 ago. 2026.",
    "BOARD, J. E.; KAHLON, C. S. Soybean yield formation: what controls it and how it can be improved. In: EL-SHEMY, H. A. (ed.). Soybean physiology and biochemistry. Rijeka: InTech, 2011. p. 1-36. DOI: 10.5772/17596.",
+   "BRASIL. Ministério da Fazenda. Secretaria Especial da Receita Federal do Brasil. Tabela de valores de terra nua: exercício 2026. Brasília, DF: RFB, 2026. Disponível em: https://www.gov.br/receitafederal/pt-br/canais_atendimento/fale-conosco/cidadao/imovel-rural-cadastros-e-declaracao/valor-da-terra-nua-vtn. Acesso em: 30 ago. 2026.",
    "BREIMAN, L. Random forests. Machine Learning, v. 45, n. 1, p. 5-32, 2001.",
    "CHEN, T.; GUESTRIN, C. XGBoost: a scalable tree boosting system. In: ACM SIGKDD INTERNATIONAL CONFERENCE ON KNOWLEDGE DISCOVERY AND DATA MINING, 22., 2016, San Francisco. Proceedings [...]. New York: ACM, 2016. p. 785-794.",
    "COMPANHIA NACIONAL DE ABASTECIMENTO (CONAB). Acompanhamento da safra brasileira de grãos. Brasília, DF: CONAB, 2024. Disponível em: https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras. Acesso em: 25 out. 2026.",
@@ -22,6 +24,7 @@
    "INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA (IBGE). Produção Agrícola Municipal: PAM. Rio de Janeiro: IBGE, 2024. Disponível em: https://sidra.ibge.gov.br. Acesso em: 19 ago. 2026.",
    "INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA (IBGE). Levantamento Sistemático da Produção Agrícola – setembro de 2026: conceitos e métodos. Rio de Janeiro: IBGE, 2026a. Disponível em: https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/LA. Acesso em: 25 out. 2026.",
    "INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA (IBGE). Produção Agrícola Municipal – 2025: conceitos e métodos. Rio de Janeiro: IBGE, [2026b]. Disponível em: https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/PA. Acesso em: 25 out. 2026.",
+   "INSTITUTO NACIONAL DE METEOROLOGIA (INMET). Avisos meteorológicos ativos. Brasília: INMET, 2026. Disponível em: https://apiprevmet3.inmet.gov.br/avisos/ativos. Acesso em: 25 out. 2026.",
    "KHAKI, S.; WANG, L. Crop yield prediction using deep neural networks. Frontiers in Plant Science, v. 10, art. 621, 2019.",
    "KHAKI, S.; WANG, L.; ARCHONTOULIS, S. V. A CNN-RNN framework for crop yield prediction. Frontiers in Plant Science, v. 10, art. 1750, 2020.",
    "KITCHENHAM, B. Procedures for performing systematic reviews. Keele: Keele University, 2004. (Technical Report TR/SE-0401).",
@@ -34,6 +37,7 @@
    "MITCHELL, T. M. Machine learning. New York: McGraw-Hill, 1997.",
    "MUÑOZ-SABATER, J. et al. ERA5-Land: a state-of-the-art global reanalysis dataset for land applications. Earth System Science Data, v. 13, n. 9, p. 4349-4383, 2021.",
    "NATIONAL AERONAUTICS AND SPACE ADMINISTRATION (NASA). POWER: Prediction of Worldwide Energy Resources. [S. l.]: NASA, 2024. Disponível em: https://power.larc.nasa.gov. Acesso em: 19 ago. 2026.",
+   "OPEN-METEO. Weather Forecast API. Bürglen: Open-Meteo, 2026. Disponível em: https://open-meteo.com/en/docs. Acesso em: 25 out. 2026.",
    "PAGE, M. J. et al. The PRISMA 2020 statement: an updated guideline for reporting systematic reviews. BMJ, v. 372, art. n71, 2021.",
    "RICHETTI, J. et al. Using phenology-based enhanced vegetation index and machine learning for soybean yield estimation in Paraná State, Brazil. Journal of Applied Remote Sensing, v. 12, n. 2, art. 026029, 2018.",
    "RUSSELL, S. J.; NORVIG, P. Artificial intelligence: a modern approach. 4. ed. Hoboken: Pearson, 2021.",

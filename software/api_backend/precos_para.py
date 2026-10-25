@@ -159,6 +159,22 @@ if __name__ == "__main__":  # diagnóstico manual e no GitHub Actions
     s = serie_mensal()
     if not s:
         print("::warning::série mensal do Pará indisponível")
+        # Qual das duas pontas falhou: a tabela da Agrolink ou as médias de Chicago.
+        try:
+            r = requests.get(URL_AGROLINK, headers=UA, timeout=15)
+            hist = le_historico(r.text)
+            print(f"Agrolink: HTTP {r.status_code}, {len(r.text)} caracteres, {len(hist)} meses lidos; "
+                  f"últimos: {hist[-3:]}")
+            if not hist:
+                i = r.text.find("/2026")
+                print("trecho da página:", r.text[max(0, i - 600):i + 600] if i >= 0 else r.text[:1200])
+        except Exception as e:
+            print(f"Agrolink: {type(e).__name__}: {e}")
+        try:
+            ch = _baixa_chicago_diario()
+            print(f"Chicago: {len(ch)} meses; últimos: {sorted(ch.items())[-3:]}")
+        except Exception as e:
+            print(f"Chicago: {type(e).__name__}: {e}")
         raise SystemExit(1)
     print(f"{len(s)} meses; fonte: {FONTE}")
     for linha in s:

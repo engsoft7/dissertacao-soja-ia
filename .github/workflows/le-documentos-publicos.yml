@@ -25,8 +25,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Instala o extrator de PDF
-        run: pip install --quiet pypdf
+      - name: Instala o extrator de PDF e o navegador
+        run: |
+          pip install --quiet pypdf playwright
+          python -m playwright install --with-deps chromium >/dev/null
 
       - name: Baixa e extrai o texto
         run: |
@@ -36,8 +38,10 @@ jobs:
           from pypdf import PdfReader
           from pathlib import Path
           destino = Path(sys.argv[1])
-          urls = [l.strip() for l in open("pesquisa/07_referencias/documentos_publicos.txt", encoding="utf-8")
-                  if l.strip() and not l.startswith("#")]
+          linhas = [l.strip() for l in open("pesquisa/07_referencias/documentos_publicos.txt", encoding="utf-8")
+                    if l.strip() and not l.startswith("#")]
+          urls = [l for l in linhas if not l.startswith("navegador ")]
+          no_navegador = [l.split(" ", 1)[1] for l in linhas if l.startswith("navegador ")]
           indice = []
           for url in urls:
               nome = re.sub(r"[^A-Za-z0-9]+", "_", urllib.parse.unquote(url).split("//", 1)[1])[:80].strip("_")
@@ -62,6 +66,23 @@ jobs:
                   texto += "\n\nLINKS:\n" + "\n".join(links)
               (destino / f"{nome}.txt").write_text(texto, encoding="utf-8")
               indice.append(f"OK      {url}  ->  {nome}.txt ({len(texto)} caracteres)")
+          # Sites que recusam acesso automatizado: abertos no Chromium, como num navegador comum.
+          if no_navegador:
+              from playwright.sync_api import sync_playwright
+              with sync_playwright() as pw:
+                  nav = pw.chromium.launch()
+                  pagina_nav = nav.new_page(locale="pt-BR")
+                  for url in no_navegador:
+                      nome = "navegador_" + re.sub(r"[^A-Za-z0-9]+", "_", url.split("//", 1)[1])[:70].strip("_")
+                      try:
+                          resp = pagina_nav.goto(url, wait_until="networkidle", timeout=90000)
+                          pagina_nav.wait_for_timeout(3000)
+                          texto = pagina_nav.inner_text("body")
+                          (destino / f"{nome}.txt").write_text(texto, encoding="utf-8")
+                          indice.append(f"OK      {url}  ->  {nome}.txt (HTTP {resp.status if resp else '?'}, {len(texto)} caracteres, navegador)")
+                      except Exception as e:
+                          indice.append(f"FALHOU  {url}  navegador: {type(e).__name__}: {e}")
+                  nav.close()
           (destino / "INDICE.txt").write_text("\n".join(indice) + "\n", encoding="utf-8")
           print("\n".join(indice))
           PY

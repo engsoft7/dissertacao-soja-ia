@@ -67,3 +67,16 @@ https://www.googleapis.com/books/v1/volumes?q=intitle:%22stages%20of%20soybean%2
 https://www.googleapis.com/books/v1/volumes?q=intitle:%22procedures%20for%20performing%20systematic%20reviews%22
 https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras
 https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos
+#
+# Quarta leva: IBGE num navegador de verdade (o site recusa acesso automatizado),
+# API do SIDRA e os dois relatórios técnicos (Kitchenham, 2004; Fehr e Caviness, 1977).
+# Linhas que começam com "navegador " são abertas no Chromium.
+navegador https://sidra.ibge.gov.br/pesquisa/pam/tabelas
+navegador https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/PA
+navegador https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/LA
+https://apisidra.ibge.gov.br/values/t/1612/n3/15/v/112/p/2024/c81/2713
+https://api.openalex.org/works?search=stages%20of%20soybean%20development&filter=publication_year:1977&select=display_name,publication_year,authorships,primary_location,type
+https://api.openalex.org/works?search=procedures%20for%20performing%20systematic%20reviews&filter=publication_year:2004&select=display_name,publication_year,authorships,primary_location,type
+https://html.duckduckgo.com/html/?q=%22Procedures%20for%20performing%20systematic%20reviews%22%20Kitchenham%20TR%2FSE-0401
+https://html.duckduckgo.com/html/?q=%22Stages%20of%20soybean%20development%22%20Fehr%20Caviness%20%22Special%20Report%2080%22
+https://www.inf.ufsc.br/~aldo.vw/kitchenham.pdf

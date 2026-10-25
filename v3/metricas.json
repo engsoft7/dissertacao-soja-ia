@@ -1,0 +1,367 @@
+{
+  "base": {
+    "repositorio": "Project-AgML/YOLOPOD_Soyabean_Pod_Counting_Dataset",
+    "revisao": "4160b98b1cec6343313d611455cbfe396ef0ef41",
+    "licenca": "CC BY 4.0",
+    "citacao": "Xiang S, Wang S, Xu M, Wang W, Liu W (2023). YOLO POD: a fast and accurate multi-task model for dense Soybean Pod counting. Plant Methods 19:8. doi:10.1186/s13007-023-00985-4"
+  },
+  "estatisticas": {
+    "imagens": 1448,
+    "vagens": 72709,
+    "por_local": {
+      "chongzhou": 570,
+      "renshou": 878
+    },
+    "vagens_por_imagem": {
+      "media": 50.21339779005525,
+      "mediana": 42.0,
+      "min": 8,
+      "max": 183
+    },
+    "largura_imagem_px": {
+      "min": 2352,
+      "mediana": 5184.0,
+      "max": 5184
+    },
+    "lado_maior_da_vagem_px": {
+      "p10": 102.0,
+      "mediana": 170.0,
+      "p90": 263.0
+    }
+  },
+  "separacao": {
+    "treino": 1014,
+    "validacao": 216,
+    "teste": 218
+  },
+  "configuracao": {
+    "saida": "/home/runner/work/_temp/modelo",
+    "dados": "dados_yolopod",
+    "lado": 1024,
+    "recorte": 448,
+    "passo": 4,
+    "sigma": 6.0,
+    "sorteio_por_vagens": false,
+    "peso_contagem": 0.03,
+    "lote": 8,
+    "epocas": 36,
+    "minutos": 280.0,
+    "semente": 42,
+    "fator": 100.0,
+    "raio_px": 20.14814814814815,
+    "limiar_picos": 0.02
+  },
+  "validacao": {
+    "imagens": 216,
+    "vagens": 10729,
+    "mae": 3.538295962192394,
+    "rmse": 5.010150930394076,
+    "vies": -1.0430472294489543,
+    "erro_relativo_medio": 0.07433340897811481,
+    "erro_relativo_mediano": 0.055558297572991786,
+    "r2": 0.9610782072250948,
+    "erro_relativo_do_total": 0.020998993527912586,
+    "localizacao": {
+      "precisao": 0.6107166446499339,
+      "revocacao": 0.6894398359586168,
+      "raio_px": 20.14814814814815,
+      "limiar": 0.02
+    }
+  },
+  "teste": {
+    "imagens": 218,
+    "vagens": 10768,
+    "mae": 3.6911189665488147,
+    "rmse": 5.981871137176639,
+    "vies": -1.6571504172928837,
+    "erro_relativo_medio": 0.07651515707338397,
+    "erro_relativo_mediano": 0.05379523887290611,
+    "r2": 0.9500355943053137,
+    "erro_relativo_do_total": 0.03354929336644211,
+    "localizacao": {
+      "precisao": 0.6348221309326108,
+      "revocacao": 0.674498514115899,
+      "raio_px": 20.14814814814815,
+      "limiar": 0.02
+    }
+  },
+  "teste_por_local": {
+    "chongzhou": {
+      "imagens": 86,
+      "mae": 2.3827192173447718,
+      "erro_relativo_medio": 0.08893879582768713
+    },
+    "renshou": {
+      "imagens": 132,
+      "mae": 4.543561227393873,
+      "erro_relativo_medio": 0.06842096818800465
+    }
+  },
+  "referencia_ingenua_teste": {
+    "mae": 20.822593778839366,
+    "erro_relativo_medio": 0.5411782842761717,
+    "media_do_treino": 50.50493096646943
+  },
+  "historico": [
+    {
+      "epoca": 1,
+      "perda": 32.770589881473114,
+      "val_mae": 21.687354388060392,
+      "val_erro_relativo": 0.5574858081510711,
+      "segundos": 89.66290330886841
+    },
+    {
+      "epoca": 2,
+      "perda": 18.935435518385873,
+      "val_mae": 11.15702975237811,
+      "val_erro_relativo": 0.3250306010140432,
+      "segundos": 88.92262697219849
+    },
+    {
+      "epoca": 3,
+      "perda": 16.552223655912613,
+      "val_mae": 10.645740968209726,
+      "val_erro_relativo": 0.30449369770512186,
+      "segundos": 89.29146718978882
+    },
+    {
+      "epoca": 4,
+      "perda": 13.776347277656434,
+      "val_mae": 7.670872644141868,
+      "val_erro_relativo": 0.21136015543536107,
+      "segundos": 89.87175154685974
+    },
+    {
+      "epoca": 5,
+      "perda": 14.326263071998717,
+      "val_mae": 7.334875327569467,
+      "val_erro_relativo": 0.16309616454620304,
+      "segundos": 89.7685112953186
+    },
+    {
+      "epoca": 6,
+      "perda": 13.452274439826844,
+      "val_mae": 5.985089752409193,
+      "val_erro_relativo": 0.15970702521859306,
+      "segundos": 90.38077878952026
+    },
+    {
+      "epoca": 7,
+      "perda": 13.451842682702202,
+      "val_mae": 5.771271184638694,
+      "val_erro_relativo": 0.15525370798296617,
+      "segundos": 90.04202723503113
+    },
+    {
+      "epoca": 8,
+      "perda": 11.590893435099769,
+      "val_mae": 6.2203886773851185,
+      "val_erro_relativo": 0.16972669325655745,
+      "segundos": 91.09981989860535
+    },
+    {
+      "epoca": 9,
+      "perda": 10.987918658862037,
+      "val_mae": 6.4409174565915706,
+      "val_erro_relativo": 0.17529169626443025,
+      "segundos": 91.7270290851593
+    },
+    {
+      "epoca": 10,
+      "perda": 10.397570519220261,
+      "val_mae": 3.8847042013097695,
+      "val_erro_relativo": 0.08403449382285351,
+      "segundos": 90.90646815299988
+    },
+    {
+      "epoca": 11,
+      "perda": 11.03275177970765,
+      "val_mae": 5.287763728035821,
+      "val_erro_relativo": 0.10323728568469856,
+      "segundos": 91.19338321685791
+    },
+    {
+      "epoca": 12,
+      "perda": 11.406251139110989,
+      "val_mae": 5.20844742986891,
+      "val_erro_relativo": 0.10618505208818727,
+      "segundos": 93.65906476974487
+    },
+    {
+      "epoca": 13,
+      "perda": 9.166686207529098,
+      "val_mae": 4.5145994468971535,
+      "val_erro_relativo": 0.10629060280633593,
+      "segundos": 97.56426954269409
+    },
+    {
+      "epoca": 14,
+      "perda": 9.073626067903307,
+      "val_mae": 6.215781988920988,
+      "val_erro_relativo": 0.16071384188464677,
+      "segundos": 96.79148721694946
+    },
+    {
+      "epoca": 15,
+      "perda": 9.385766335896083,
+      "val_mae": 3.6959756480322943,
+      "val_erro_relativo": 0.08844472012095694,
+      "segundos": 97.54668998718262
+    },
+    {
+      "epoca": 16,
+      "perda": 8.871280346597944,
+      "val_mae": 4.720221722567523,
+      "val_erro_relativo": 0.11831318829821333,
+      "segundos": 96.46562075614929
+    },
+    {
+      "epoca": 17,
+      "perda": 8.730624125117348,
+      "val_mae": 5.251126324688947,
+      "val_erro_relativo": 0.13455886001072084,
+      "segundos": 97.59073829650879
+    },
+    {
+      "epoca": 18,
+      "perda": 8.685029092289152,
+      "val_mae": 3.708559998759517,
+      "val_erro_relativo": 0.09026896439720211,
+      "segundos": 97.11626553535461
+    },
+    {
+      "epoca": 19,
+      "perda": 8.475812726550632,
+      "val_mae": 4.019903492044519,
+      "val_erro_relativo": 0.09151446591449318,
+      "segundos": 90.54810357093811
+    },
+    {
+      "epoca": 20,
+      "perda": 8.396702934825232,
+      "val_mae": 6.427022148061682,
+      "val_erro_relativo": 0.16399087003265111,
+      "segundos": 96.81019878387451
+    },
+    {
+      "epoca": 21,
+      "perda": 7.577735600017366,
+      "val_mae": 4.672636800342136,
+      "val_erro_relativo": 0.11229455625638333,
+      "segundos": 98.58192253112793
+    },
+    {
+      "epoca": 22,
+      "perda": 7.8170273209375045,
+      "val_mae": 3.763696454189442,
+      "val_erro_relativo": 0.08086070789966206,
+      "segundos": 94.92956709861755
+    },
+    {
+      "epoca": 23,
+      "perda": 7.200242727521866,
+      "val_mae": 3.538295962192394,
+      "val_erro_relativo": 0.07433340897811481,
+      "segundos": 91.63964581489563
+    },
+    {
+      "epoca": 24,
+      "perda": 6.944835986409869,
+      "val_mae": 4.732772977263839,
+      "val_erro_relativo": 0.09517825310050318,
+      "segundos": 92.21873354911804
+    },
+    {
+      "epoca": 25,
+      "perda": 7.141409995063903,
+      "val_mae": 4.248260171325119,
+      "val_erro_relativo": 0.08225419587669129,
+      "segundos": 92.68542981147766
+    },
+    {
+      "epoca": 26,
+      "perda": 7.071222994062635,
+      "val_mae": 3.7465233979401766,
+      "val_erro_relativo": 0.09458148396196236,
+      "segundos": 93.03752899169922
+    },
+    {
+      "epoca": 27,
+      "perda": 6.949837981708466,
+      "val_mae": 3.863112961804425,
+      "val_erro_relativo": 0.09569761259223812,
+      "segundos": 91.23924541473389
+    },
+    {
+      "epoca": 28,
+      "perda": 6.745185774470133,
+      "val_mae": 3.802803737145883,
+      "val_erro_relativo": 0.08846689646988032,
+      "segundos": 93.9980628490448
+    },
+    {
+      "epoca": 29,
+      "perda": 7.020040020110115,
+      "val_mae": 4.307446788858484,
+      "val_erro_relativo": 0.11181787683297718,
+      "segundos": 92.77973341941833
+    },
+    {
+      "epoca": 30,
+      "perda": 6.094082610947745,
+      "val_mae": 3.913940774069892,
+      "val_erro_relativo": 0.08997559373318265,
+      "segundos": 95.80308294296265
+    },
+    {
+      "epoca": 31,
+      "perda": 6.242707358466254,
+      "val_mae": 3.886616340389958,
+      "val_erro_relativo": 0.09754262121539971,
+      "segundos": 98.23227572441101
+    },
+    {
+      "epoca": 32,
+      "perda": 5.780476369555035,
+      "val_mae": 3.9615736537509494,
+      "val_erro_relativo": 0.09957507150369638,
+      "segundos": 96.52783012390137
+    },
+    {
+      "epoca": 33,
+      "perda": 5.889596838799734,
+      "val_mae": 3.9214143841354936,
+      "val_erro_relativo": 0.09586310103549901,
+      "segundos": 96.32397031784058
+    },
+    {
+      "epoca": 34,
+      "perda": 5.715786653851706,
+      "val_mae": 3.7983122357615717,
+      "val_erro_relativo": 0.09295418590147807,
+      "segundos": 96.94854140281677
+    },
+    {
+      "epoca": 35,
+      "perda": 5.552986408036853,
+      "val_mae": 3.5914759415167348,
+      "val_erro_relativo": 0.08578892116645002,
+      "segundos": 96.14997172355652
+    },
+    {
+      "epoca": 36,
+      "perda": 5.716377371833438,
+      "val_mae": 3.718149291144477,
+      "val_erro_relativo": 0.09059659978327682,
+      "segundos": 91.48328518867493
+    }
+  ],
+  "onnx_diferenca_maxima": 3.0472874641418457e-06,
+  "ambiente": {
+    "python": "3.11.17",
+    "torch": "2.14.1+cpu",
+    "torchvision": "0.29.1+cpu",
+    "numpy": "2.4.6"
+  },
+  "minutos": 60.841204925378165
+}

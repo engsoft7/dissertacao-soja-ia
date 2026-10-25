@@ -216,6 +216,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.11` (23/10/2026) — gráficos de mercado mais legíveis no aplicativo (2.2.4) e no painel | 107 | 20.087 | `fdb642d289f4d232aa25b52203cbb8e09a55adb01be412185cb48fd869420eeb` |
 | Tag `v2.4.12` (25/10/2026) — estimativa no campo por foto e GPS no aplicativo (2.3.0), contador de vagens e LSTM no recorte nacional | 119 | 23.198 | `4d1c23effae508d8d5dce1f3b58a2d2f611cea7406acad4a4651410c3bf7f314` |
 | Tag `v2.4.13` (25/10/2026) — contador automático de vagens no aplicativo (2.4.0) e preço estimado do Pará de volta | 123 | 23.950 | `35877615a2cd9b2e713013754bf46e32f02bedbf7979538f4f1da07824811140` |
+| Tag `v2.4.14` (25/10/2026) — tempo na lavoura no aplicativo (2.5.0): janela de pulverização, avisos do INMET e previsão de 7 dias; sedes corrigidas e só HTTPS | 129 | 25.618 | `b4201dec3536366fdd4c50275b32c5f00b0ac30f85eb01dd3fdefa4ac679e009` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -585,6 +586,30 @@ arquivos e 23.950 linhas. O DOI de versão desta etiqueta é
 10.5281/zenodo.23644764, atribuído pelo Zenodo no depósito disparado pela
 publicação do Release em 25/10/2026.
 
+A `v2.4.14` foi registrada pelo workflow `registra-doi.yml` na publicação do
+Release, em 25/10/2026, com o título “v2.4.14 — Tempo na lavoura no aplicativo
+(2.5.0): janela de pulverização, avisos do INMET e previsão de 7 dias; sedes
+corrigidas e só HTTPS”. Em relação à `v2.4.13`, entram 6 arquivos-fonte
+(`software/api_backend/avisos_inmet.py`,
+`software/api_backend/test_avisos_inmet.py`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Tempo.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/TempoCalculo.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/TempoCalculoTest.kt`
+e `software/automacao_github/test_gera_municipios.py`); mudam 8
+(`pesquisa/07_referencias/confere_listas.py`, `software/api_backend/api.py`,
+`software/aplicativo_mobile/app/build.gradle.kts`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/ApiService.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/MainActivity.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/CapturasDeTelaTest.kt`,
+`software/automacao_github/dados_das_capturas.py` e
+`software/automacao_github/gera_municipios.py`).
+
+O resumo criptográfico da `v2.4.14` foi calculado pelo mesmo workflow sobre uma
+cópia limpa da etiqueta (commit `bf13d69`), com o critério do comando acima: 129
+arquivos e 25.618 linhas. O DOI de versão desta etiqueta é
+10.5281/zenodo.23652157, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 25/10/2026.
+
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
 calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
@@ -829,6 +854,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.10`:** 10.5281/zenodo.23585430
 - **DOI da `v2.4.11`:** 10.5281/zenodo.23592602
 - **DOI da `v2.4.12`:** 10.5281/zenodo.23641635
-- **DOI da versão mais recente (`v2.4.13`):** 10.5281/zenodo.23644764
+- **DOI da `v2.4.13`:** 10.5281/zenodo.23644764
+- **DOI da versão mais recente (`v2.4.14`):** 10.5281/zenodo.23652157
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

@@ -634,11 +634,18 @@ private fun CartaoAgora(a: TempoAtual, hoje: DiaTempo?) {
                 Medida("Sol", if (d.nascer != null && d.por != null) "${d.nascer} – ${d.por}" else "–", Modifier.weight(1f))
             }
         }
-        Text("Vento a 10 m de altura, como os modelos publicam. UV pela escala da OMS: acima de 8, " +
-             "proteja quem trabalha ao sol.",
+        Text("Vento a 10 m de altura, como os modelos publicam. UV pela escala da OMS: de 8 para cima " +
+             "(muito alto), proteja quem trabalha ao sol.",
              fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 14.sp,
              modifier = Modifier.padding(top = 8.dp))
     }
+}
+
+/** "2026-10-26 00:00", como o INMET publica, para "26/10 às 00:00". */
+internal fun dataDoAviso(t: String?): String {
+    val m = Regex("""(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})""").find(t ?: "") ?: return t ?: "?"
+    val (_, mes, dia, hm) = m.destructured
+    return "$dia/$mes às $hm"
 }
 
 private fun corDoAviso(cor: String?, padrao: Color): Color =
@@ -654,7 +661,8 @@ internal fun CartaoAvisos(avisos: AvisosResponse?) {
             else -> "Nenhum aviso meteorológico do INMET para este lugar."
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            Icon(if (avisos?.disponivel == true) Icons.Filled.CheckCircle else Icons.Filled.Warning, contentDescription = null,
+                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                  modifier = Modifier.size(16.dp))
             Spacer(Modifier.width(6.dp))
             Text(texto, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -672,7 +680,7 @@ internal fun CartaoAvisos(avisos: AvisosResponse?) {
                 Column(Modifier.weight(1f)) {
                     Text("${a.evento ?: "Aviso"} · ${a.severidade ?: ""}".trimEnd(' ', '·'), fontWeight = FontWeight.SemiBold,
                          fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
-                    Text("De ${a.inicio ?: "?"} a ${a.fim ?: "?"}", fontSize = 12.sp,
+                    Text("De ${dataDoAviso(a.inicio)} a ${dataDoAviso(a.fim)}", fontSize = 12.sp,
                          color = MaterialTheme.colorScheme.onSurfaceVariant)
                     a.riscos?.firstOrNull()?.let {
                         Text(it, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface, lineHeight = 16.sp)

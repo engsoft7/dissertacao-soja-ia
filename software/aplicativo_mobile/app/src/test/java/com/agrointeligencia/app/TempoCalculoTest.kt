@@ -127,6 +127,13 @@ class TempoCalculoTest {
     }
 
     @Test
+    fun data_do_aviso_do_inmet() {
+        assertEquals("26/10 às 00:00", dataDoAviso("2026-10-26 00:00"))
+        assertEquals("formato novo", dataDoAviso("formato novo"))
+        assertEquals("?", dataDoAviso(null))
+    }
+
+    @Test
     fun posicao_arredondada_a_um_quilometro() {
         assertEquals(-3.0, arredonda(-3.00212), 1e-9)
         assertEquals(-47.35, arredonda(-47.3527), 1e-9)

@@ -58,3 +58,12 @@ https://www.gov.br/conab/pt-br
 https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao
 https://mapbiomas.org/
 https://brasil.mapbiomas.org/colecoes-mapbiomas/
+#
+# Terceira leva: páginas dos anais (Semantic Scholar), relatórios técnicos (Google Livros) e safras da CONAB
+https://api.semanticscholar.org/graph/v1/paper/search?query=Learning%20to%20count%20objects%20in%20images&fields=title,year,venue,journal,externalIds,authors&limit=3
+https://api.semanticscholar.org/graph/v1/paper/search?query=Support%20vector%20regression%20machines%20Drucker&fields=title,year,venue,journal,externalIds,authors&limit=3
+https://api.semanticscholar.org/graph/v1/paper/search?query=Using%20the%20Nystrom%20method%20to%20speed%20up%20kernel%20machines&fields=title,year,venue,journal,externalIds,authors&limit=3
+https://www.googleapis.com/books/v1/volumes?q=intitle:%22stages%20of%20soybean%20development%22
+https://www.googleapis.com/books/v1/volumes?q=intitle:%22procedures%20for%20performing%20systematic%20reviews%22
+https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras
+https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos

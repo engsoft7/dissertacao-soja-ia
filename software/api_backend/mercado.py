@@ -28,6 +28,11 @@ URL = "https://query1.finance.yahoo.com/v8/finance/chart/{simbolo}"
 # velas de 5 min no dia (cerca de 160) e de 1 h no mês (cerca de 150), cada
 # vela virava um risco de 2 px na largura de um celular.
 PERIODOS = {"1d": "15m", "5d": "60m", "1mo": "1d", "6mo": "1wk"}
+# O 1D é o último pregão, e não as últimas 24 h: no fim de semana e nos
+# feriados a fonte devolve um dia vazio, e a tela abria sem cotação nenhuma.
+# Pede-se então a semana e guarda-se o que vem depois da última pausa longa.
+# A CBOT para todo dia das 13h20 às 19h de Chicago (5h40), e no fim de semana.
+PAUSA_ENTRE_PREGOES_S = 5 * 3600
 VALIDADE_S = 120
 _cache, _trava = {}, threading.Lock()
 
@@ -66,8 +71,19 @@ def velas_em_reais(soja, cambio):
     return velas
 
 
+def ultimo_pregao(velas):
+    """As velas depois da última pausa de 5 h ou mais: o pregão em curso ou o último."""
+    inicio = 0
+    for i in range(1, len(velas)):
+        if velas[i]["t"] - velas[i - 1]["t"] >= PAUSA_ENTRE_PREGOES_S:
+            inicio = i
+    return velas[inicio:]
+
+
 def resumo(soja, cambio, periodo):
     velas = velas_em_reais(soja, cambio)
+    if periodo == "1d":
+        velas = ultimo_pregao(velas)
     meta = _serie(soja)[5]
     meta_c = _serie(cambio)[5]
     if not velas:
@@ -91,8 +107,9 @@ def resumo(soja, cambio, periodo):
 
 
 def _baixa(simbolo, periodo):
+    alcance = "5d" if periodo == "1d" else periodo  # ver PAUSA_ENTRE_PREGOES_S
     r = requests.get(URL.format(simbolo=simbolo),
-                     params={"range": periodo, "interval": PERIODOS[periodo]},
+                     params={"range": alcance, "interval": PERIODOS[periodo]},
                      headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
     r.raise_for_status()
     return r.json()

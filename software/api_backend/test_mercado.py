@@ -58,6 +58,22 @@ def test_resumo_declara_atraso_e_variacao_do_periodo():
     assert r["intervalo"] == "15m"
 
 
+def test_1d_no_fim_de_semana_mostra_o_ultimo_pregao():
+    """Sexta das 19h de quinta às 13h20, fim de semana sem negócio: no domingo,
+    o 1D é o pregão de sexta, e não um dia vazio."""
+    h = 3600
+    quinta = [0, 900, 1800]                                # pregão de quinta
+    sexta = [x + 10 * h for x in (0, 900, 1800, 2700)]     # depois da pausa diária (5h40)
+    soja = resposta(quinta + sexta, [1000.0] * 3 + [1000.0, 1010.0, 1020.0, 1030.0])
+    r = mercado.resumo(soja, resposta([0], [5.0]), "1d")
+    assert [v["t"] for v in r["velas"]] == sexta
+    assert r["variacao_periodo_pct"] == pytest.approx(3.0, abs=0.01)
+
+
+def test_minutos_sem_negocio_nao_partem_o_pregao():
+    assert len(mercado.ultimo_pregao([{"t": t} for t in (0, 900, 900 + 2 * 3600)])) == 3
+
+
 def test_fonte_fora_do_ar_nao_vira_cotacao(monkeypatch):
     mercado._cache.clear()
 

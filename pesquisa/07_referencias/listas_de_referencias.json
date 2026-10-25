@@ -1,6 +1,6 @@
 {
- "gerado_em": "2026-10-23",
- "fonte": "versões do Google Drive de 23/10/2026 (dissertação com as alterações deste dia)",
+ "gerado_em": "2026-10-25",
+ "fonte": "versões do Google Drive de 23/10/2026; lista principal da dissertação atualizada em 25/10/2026 (entra XIANG et al., 2023)",
  "listas": {
   "dissertacao_referencias": [
    "AGROLINK. Cotações: soja em grão, saca de 60 kg — histórico de preços do Pará. [S. l.]: Agrolink, 2026. Disponível em: https://www.agrolink.com.br/cotacoes/historico/pa/soja-em-grao-sc-60kg. Acesso em: 23 out. 2026.",
@@ -43,6 +43,7 @@
    "VAPNIK, V. N. The nature of statistical learning theory. New York: Springer-Verlag, 1995.",
    "VON BLOH, M. et al. Machine learning for soybean yield forecasting in Brazil. Agricultural and Forest Meteorology, v. 341, art. 109670, 2023. Conjunto de dados e código disponíveis em: https://github.com/maltevb/ML_Soybean_Yield_Forecasting_Brazil. Acesso em: 19 ago. 2026.",
    "WANG, A. X. et al. Deep transfer learning for crop yield prediction with remote sensing data. In: ACM SIGCAS CONFERENCE ON COMPUTING AND SUSTAINABLE SOCIETIES (COMPASS), 1., 2018, Menlo Park. Proceedings [...]. New York: ACM, 2018. p. 1-5.",
+   "XIANG, S.; WANG, S.; XU, M.; WANG, W.; LIU, W. YOLO POD: a fast and accurate multi-task model for dense soybean pod counting. Plant Methods, v. 19, art. 8, 2023. DOI: 10.1186/s13007-023-00985-4.",
    "YOU, J. et al. Deep Gaussian process for crop yield prediction based on remote sensing data. In: AAAI CONFERENCE ON ARTIFICIAL INTELLIGENCE, 31., 2017, San Francisco. Proceedings [...]. Palo Alto: AAAI Press, 2017. p. 4559-4566."
   ],
   "dissertacao_apendice_b": [

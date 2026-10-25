@@ -38,6 +38,32 @@ HTML = """
 """
 
 
+# A mesma página no formato publicado desde 25/10/2026: um ano por linha, um mês
+# por coluna, só a média estadual, com o valor também no title da célula. Uma
+# segunda tabela com o mesmo tipo de célula (outro produto) não pode entrar.
+HTML_NOVO = """
+<h2>Médias mensais</h2><div class="hidden lg:block"><table class="w-full table-fixed">
+<caption class="sr-only">Médias mensais de <!-- -->Soja em Grão Sc 60Kg<!-- --> em <!-- -->PA<!-- -->.</caption>
+<thead><tr><th scope="col">Ano</th><th scope="col">Jan</th></tr></thead><tbody>
+<tr><th scope="row">2026</th>
+<td class="px-1" title="Ago/2026: R$ 1.340,07">1.340,07</td>
+<td class="px-1" title="Set/2026: R$ 144,10">144,10</td>
+<td class="px-1" title="Out/2026: R$ 140,86">140,86</td>
+<td class="px-1">·</td><td class="px-2 font-bold">127,81</td></tr>
+<tr><th scope="row">2025</th>
+<td class="px-1" title="Dez/2025: R$ 118,50">118,50</td></tr>
+</tbody></table></div>
+<table><tr><td title="Out/2026: R$ 99,00">99,00</td></tr></table>
+"""
+
+
+def test_le_o_formato_novo_da_pagina():
+    h = pp.le_historico(HTML_NOVO)
+    assert [l["mes"] for l in h] == ["2025-12", "2026-09", "2026-10"]
+    assert h[-1]["para"] == pytest.approx(140.86)
+    assert h[-1]["nacional"] is None
+
+
 def ts(ano, mes, dia, hora=15):
     return int(datetime(ano, mes, dia, hora, tzinfo=timezone.utc).timestamp())
 

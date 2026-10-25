@@ -18,6 +18,12 @@ frete, prêmio de porto e época da safra.
 O mês corrente entra com a média parcial que a Agrolink publica até a véspera,
 comparada com a média de Chicago nos mesmos dias de pregão do mês.
 
+A página mudou de formato em 25/10/2026: a tabela "mês/ano | estadual |
+nacional" deu lugar a uma grade com um ano por linha e um mês por coluna, só
+com a média estadual, e o valor de cada célula repetido no atributo title
+("Out/2026: R$ 140,86"). O leitor aceita os dois formatos; no novo, a média
+nacional fica sem valor.
+
 Fonte: https://www.agrolink.com.br/cotacoes/historico/pa/soja-em-grao-sc-60kg
 """
 from __future__ import annotations
@@ -43,18 +49,47 @@ PRECO_MIN, PRECO_MAX = 40.0, 400.0
 _cache, _trava = {}, threading.Lock()
 
 
-def le_historico(html: str) -> list[dict]:
-    """Linhas 'M/AAAA | estadual | nacional' da tabela da Agrolink, do mais antigo ao mais novo."""
+MESES_PT = {m: i for i, m in enumerate(
+    ("jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"), start=1)}
+
+
+def _numero(texto: str) -> float:
+    return float(texto.replace(".", "").replace(",", "."))
+
+
+def _le_formato_antigo(html: str) -> list[tuple]:
+    """Linhas 'M/AAAA | estadual | nacional', como a Agrolink publicava até 23/10/2026."""
     linhas = []
     padrao = re.compile(
         r"<th[^>]*>\s*(\d{1,2})/(\d{4})\s*</th>\s*<td[^>]*>\s*([\d.]+,\d+)\s*</td>\s*"
         r"<td[^>]*>\s*([\d.]+,\d+)\s*</td>", re.DOTALL)
     for m in padrao.finditer(html):
-        mes, ano = int(m.group(1)), int(m.group(2))
-        para, nacional = (float(x.replace(".", "").replace(",", ".")) for x in m.group(3, 4))
+        linhas.append((int(m.group(2)), int(m.group(1)), _numero(m.group(3)), _numero(m.group(4))))
+    return linhas
+
+
+def _le_formato_novo(html: str) -> list[tuple]:
+    """Grade ano × mês, com 'Mmm/AAAA: R$ valor' no title de cada célula (desde 25/10/2026).
+
+    Lê só a primeira tabela que tem essas células: é a das médias mensais do
+    estado; o resto da página traz outros números.
+    """
+    padrao = re.compile(r'title="([A-Za-zÇç]{3})/(\d{4}):\s*R\$\s*([\d.]+,\d+)"')
+    for tabela in re.findall(r"<table.*?</table>", html, re.DOTALL):
+        achados = padrao.findall(tabela)
+        if achados:
+            return [(int(ano), MESES_PT.get(mes.lower(), 0), _numero(valor), None)
+                    for mes, ano, valor in achados]
+    return []
+
+
+def le_historico(html: str) -> list[dict]:
+    """Médias mensais do Pará (e a nacional, quando publicada), do mês mais antigo ao mais novo."""
+    linhas = []
+    for ano, mes, para, nacional in _le_formato_antigo(html) or _le_formato_novo(html):
         if 1 <= mes <= 12 and PRECO_MIN <= para <= PRECO_MAX:
             linhas.append({"mes": f"{ano:04d}-{mes:02d}", "para": round(para, 2),
-                           "nacional": round(nacional, 2)})
+                           "nacional": None if nacional is None else round(nacional, 2)})
     unicos = {l["mes"]: l for l in linhas}
     return [unicos[k] for k in sorted(unicos)]
 
@@ -159,6 +194,22 @@ if __name__ == "__main__":  # diagnóstico manual e no GitHub Actions
     s = serie_mensal()
     if not s:
         print("::warning::série mensal do Pará indisponível")
+        # Qual das duas pontas falhou: a tabela da Agrolink ou as médias de Chicago.
+        try:
+            r = requests.get(URL_AGROLINK, headers=UA, timeout=15)
+            hist = le_historico(r.text)
+            print(f"Agrolink: HTTP {r.status_code}, {len(r.text)} caracteres, {len(hist)} meses lidos; "
+                  f"últimos: {hist[-3:]}")
+            if not hist:
+                i = r.text.find("<table")
+                print("primeira tabela da página:", r.text[i:i + 1500] if i >= 0 else "nenhuma")
+        except Exception as e:
+            print(f"Agrolink: {type(e).__name__}: {e}")
+        try:
+            ch = _baixa_chicago_diario()
+            print(f"Chicago: {len(ch)} meses; últimos: {sorted(ch.items())[-3:]}")
+        except Exception as e:
+            print(f"Chicago: {type(e).__name__}: {e}")
         raise SystemExit(1)
     print(f"{len(s)} meses; fonte: {FONTE}")
     for linha in s:

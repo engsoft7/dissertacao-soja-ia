@@ -61,11 +61,19 @@ def doi_do_texto(texto: str) -> str | None:
 
 
 def anos_depositados(m: dict) -> set[int]:
+    """Anos da obra na Crossref, incluindo o do fascículo.
+
+    Artigo publicado on-line em dezembro e incluído no volume do ano seguinte
+    (comum na MDPI) tem "issued" no ano anterior; a referência ABNT cita o ano
+    do volume, que a Crossref guarda em "journal-issue".
+    """
     saida = set()
-    for campo in ("published-print", "published-online", "issued", "published"):
-        parte = m.get(campo, {}).get("date-parts", [[None]])[0]
-        if parte and parte[0]:
-            saida.add(int(parte[0]))
+    fontes = [m] + ([m["journal-issue"]] if isinstance(m.get("journal-issue"), dict) else [])
+    for fonte in fontes:
+        for campo in ("published-print", "published-online", "issued", "published"):
+            parte = (fonte.get(campo) or {}).get("date-parts", [[None]])[0]
+            if parte and parte[0]:
+                saida.add(int(parte[0]))
     return saida
 
 
@@ -154,17 +162,25 @@ def confere_endereco(texto: str) -> tuple[str, str]:
 
 def main() -> int:
     dados = json.loads((AQUI / "listas_de_referencias.json").read_text(encoding="utf-8"))
+    # Referências sem DOI que já foram conferidas à mão, com a fonte (ver o arquivo).
+    a_mao = {k: v for k, v in json.loads((AQUI / "conferidas_a_mao.json").read_text(encoding="utf-8")).items()
+             if not k.startswith("_")}
     resumo = []
     for nome, lista in dados["listas"].items():
         print(f"\n===== {nome}: {len(lista)} referências =====\n")
         contagem = {}
         for texto in lista:
+            conferida = next((v for k, v in a_mao.items() if texto.startswith(k)), None)
             if texto.upper().startswith(INSTITUCIONAIS):
                 marca, nota = confere_endereco(texto)
+                if marca == "?" and conferida:
+                    marca, nota = "ok", f"conferida à mão: {conferida}"
             elif (doi := doi_do_texto(texto)):
                 marca, nota = confere_com_doi(texto, doi)
             else:
                 marca, nota = procura_sem_doi(texto)
+                if marca == "--" and conferida:
+                    marca, nota = "ok", f"conferida à mão: {conferida}"
             contagem[marca] = contagem.get(marca, 0) + 1
             print(f"{marca:>2}  {texto[:110]}")
             print(f"    {nota}")

@@ -112,8 +112,10 @@ do modelo atual.
     `pesquisa/09_contagem_por_imagem/LEVANTAMENTO_DE_BASES.md`. Para vagens, só
     a YOLO POD tem licença aberta (CC BY 4.0, 1.448 fotos de plantas arrancadas
     sobre pano escuro, 72.709 vagens).
-  - Contador por mapa de densidade (MobileNetV3, `treina_contador_vagens.py`,
-    treinado no Actions). No teste da YOLO POD:
+  - Contador por mapa de densidade (Lempitsky e Zisserman, 2010; MobileNetV3,
+    `treina_contador_vagens.py`, treinado no Actions). No teste da YOLO POD,
+    com fotos separadas do treino mas das mesmas duas localidades (um erro
+    medido dentro da base, que tende a ser menor que o de outra região):
     - a melhor versão para contar (v1) erra 5,6% da contagem (R² de 0,969);
     - a melhor para localizar cada vagem (v2) acha 61% delas, com 84% de
       marcas certas.

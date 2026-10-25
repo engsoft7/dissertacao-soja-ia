@@ -1,0 +1,84 @@
+# Uma URL por linha. O workflow le-documentos-publicos.yml baixa cada uma,
+# extrai o texto e publica na branch documentos-lidos (o ambiente de
+# desenvolvimento não alcança estes sites).
+#
+# PPCA: regimento, normas e legislação
+https://ppca.propesp.ufpa.br/index.php/br/documentos/regimento-e-normas
+https://ppca.propesp.ufpa.br/index.php/br/documentos/legislacao
+https://ppca.propesp.ufpa.br/index.php/br/documentos/formularios
+https://ppca.propesp.ufpa.br/index.php/br/documentos/manuais
+https://sege.ufpa.br/boletim_interno/downloads/resolucoes/consepe/2017/4882 Regimento PPCA.pdf
+#
+# Referências que a Crossref não alcança (sem DOI) ou que divergiram
+https://api.crossref.org/works/10.3390/rs17010107
+https://api.crossref.org/works/10.3390/computation13010004
+https://www.jmlr.org/papers/v13/bergstra12a.html
+https://www.jmlr.org/papers/v11/cawley10a.html
+https://www.jmlr.org/papers/v12/pedregosa11a.html
+https://papers.nips.cc/paper_files/paper/2010/file/fe73f687e5bc5280214e0486b273a5f9-Bibtex.bib
+https://papers.nips.cc/paper/1238-support-vector-regression-machines
+https://papers.nips.cc/paper/1866-using-the-nystrom-method-to-speed-up-kernel-machines
+https://brasil.mapbiomas.org/
+https://www.conab.gov.br/
+https://portaldeinformacoes.conab.gov.br/custos-de-producao.html
+https://sidra.ibge.gov.br/pesquisa/pam/tabelas
+https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/PA
+https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/LA
+#
+# Arquivos do Google Drive listados em Regimento e Normas do PPCA (resoluções e instruções normativas)
+https://drive.google.com/uc?export=download&id=12j5OGn2X6hPsgWf30FlC16ECuM5pi6K2
+https://drive.google.com/uc?export=download&id=12jp4zNxjmldDYqPCyQuoxZ4j3-BchnwG
+https://drive.google.com/uc?export=download&id=1FPU7miXjTgMc1RaG8ebcZMi2iC8sk1Xy
+https://drive.google.com/uc?export=download&id=1KIdYDa3LOaNQjgAB_1SFX_wieDfvrqfM
+https://drive.google.com/uc?export=download&id=1PiAN2_uUcPvCNADsrA4Zsa-GVBMF6tXF
+https://drive.google.com/uc?export=download&id=1YWjEqvoXK_HIMJ9lhiTr_WZlxqaeppVX
+https://drive.google.com/uc?export=download&id=1aJZP322Tb6E9sbjuATdpUH4JztxNzcsF
+https://drive.google.com/uc?export=download&id=1aYvVvBFaf_y_R25sEuH8iH7J00tArBG9
+https://drive.google.com/uc?export=download&id=1bmMg1AGucLQ2V_tuOR4EGN14Z8hGI_Qq
+https://drive.google.com/uc?export=download&id=1fEyzKZDTRzorj848MsRkydrPxfHqeD0o
+https://drive.google.com/uc?export=download&id=1kLQFBEgwIIOYdyY2tobXSJkqmxb12UdP
+https://drive.google.com/uc?export=download&id=1kPUYZ8ZwRVmztPA_skUoMCWBbleWCSaU
+https://drive.google.com/uc?export=download&id=1lvMbaIHVrTjPuEmy9ZRki3KfwS-kV_qM
+https://drive.google.com/uc?export=download&id=1pjs9zbrqKYnOzn1IXTkXx94tAHK7uS4U
+https://drive.google.com/uc?export=download&id=1wA3Ag6sLmSFdJyucET-2idlgIYGfgspS
+https://drive.google.com/uc?export=download&id=1xKFRIDCMUNNi0lN8yL5julMfSzCHmwLM
+https://drive.google.com/uc?export=download&id=1xMd84XHyNTIFQj0MR8hS5MOZDnVORpKx
+https://drive.google.com/uc?export=download&id=1xbrlf0jPU4LoM5zh0kxj08c9JJjpVIBN
+#
+# Segunda leva: páginas dos anais (dblp), livros por ISBN e endereços novos
+https://dblp.org/search/publ/api?q=Learning%20To%20Count%20Objects%20in%20Images%20Lempitsky&format=json
+https://dblp.org/search/publ/api?q=Support%20Vector%20Regression%20Machines%20Drucker&format=json
+https://dblp.org/search/publ/api?q=Using%20the%20Nystrom%20Method%20to%20Speed%20Up%20Kernel%20Machines&format=json
+https://openlibrary.org/isbn/9780262035613.json
+https://openlibrary.org/isbn/9780070428072.json
+https://openlibrary.org/isbn/9780134610993.json
+https://openlibrary.org/search.json?q=stages%20of%20soybean%20development&author=fehr
+https://openlibrary.org/search.json?q=procedures%20for%20performing%20systematic%20reviews%20kitchenham
+https://www.gov.br/conab/pt-br
+https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao
+https://mapbiomas.org/
+https://brasil.mapbiomas.org/colecoes-mapbiomas/
+#
+# Terceira leva: páginas dos anais (Semantic Scholar), relatórios técnicos (Google Livros) e safras da CONAB
+https://api.semanticscholar.org/graph/v1/paper/search?query=Learning%20to%20count%20objects%20in%20images&fields=title,year,venue,journal,externalIds,authors&limit=3
+https://api.semanticscholar.org/graph/v1/paper/search?query=Support%20vector%20regression%20machines%20Drucker&fields=title,year,venue,journal,externalIds,authors&limit=3
+https://api.semanticscholar.org/graph/v1/paper/search?query=Using%20the%20Nystrom%20method%20to%20speed%20up%20kernel%20machines&fields=title,year,venue,journal,externalIds,authors&limit=3
+https://www.googleapis.com/books/v1/volumes?q=intitle:%22stages%20of%20soybean%20development%22
+https://www.googleapis.com/books/v1/volumes?q=intitle:%22procedures%20for%20performing%20systematic%20reviews%22
+https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras
+https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos
+#
+# Quarta leva: IBGE num navegador de verdade (o site recusa acesso automatizado),
+# API do SIDRA e os dois relatórios técnicos (Kitchenham, 2004; Fehr e Caviness, 1977).
+# Linhas que começam com "navegador " são abertas no Chromium.
+https://apisidra.ibge.gov.br/values/t/1612/n3/15/v/112/p/2024/c81/2713
+https://api.openalex.org/works?search=stages%20of%20soybean%20development&filter=publication_year:1977&select=display_name,publication_year,authorships,primary_location,type
+https://api.openalex.org/works?search=procedures%20for%20performing%20systematic%20reviews&filter=publication_year:2004&select=display_name,publication_year,authorships,primary_location,type
+https://html.duckduckgo.com/html/?q=%22Procedures%20for%20performing%20systematic%20reviews%22%20Kitchenham%20TR%2FSE-0401
+https://html.duckduckgo.com/html/?q=%22Stages%20of%20soybean%20development%22%20Fehr%20Caviness%20%22Special%20Report%2080%22
+https://www.inf.ufsc.br/~aldo.vw/kitchenham.pdf
+#
+# Quinta leva: metadados do IBGE pela API de serviços (as páginas não abrem dos servidores do GitHub)
+https://servicodados.ibge.gov.br/api/v2/metadados/pesquisas/PA
+https://servicodados.ibge.gov.br/api/v2/metadados/pesquisas/LA
+https://servicodados.ibge.gov.br/api/v2/metadados/pesquisas

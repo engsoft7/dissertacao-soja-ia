@@ -392,6 +392,7 @@ private fun FotoParaContar(
     val escopo = rememberCoroutineScope()
     var contando by remember(foto) { mutableStateOf(false) }
     var falhou by remember(foto) { mutableStateOf(false) }
+    val fotoAtual by rememberUpdatedState(foto)
     // O Android pode encerrar o app enquanto a câmera está aberta; o endereço
     // da foto pendente precisa sobreviver a isso.
     var pendente by rememberSaveable { mutableStateOf<String?>(null) }
@@ -443,8 +444,11 @@ private fun FotoParaContar(
                     onClick = {
                         contando = true
                         falhou = false
+                        val contada = foto
                         escopo.launch {
                             val r = withContext(Dispatchers.Default) { contaVagens(context, img.asAndroidBitmap()) }
+                            // Se o produtor trocou a foto enquanto contava, o resultado é de outra foto.
+                            if (fotoAtual != contada) return@launch
                             contando = false
                             if (r == null) {
                                 falhou = true

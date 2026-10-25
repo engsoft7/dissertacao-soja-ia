@@ -1,0 +1,804 @@
+SERVIÇO PÚBLICO FEDERAL 
+MINISTÉRIO DA EDUCAÇÃO 
+UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Avenida Brasília s/n              Vila Permanente             CEP 68455-901          Tucuruí-PA 
+www.ndae.ufpa.br      ndae@ufpa.br   /  academicandae@ufpa.br   
+www.ppca.propesp.ufpa.br                        ppca.ufpa@gmail.com 
+ 
+              
+ 
+ 
+ 
+ 
+ 
+INSTRUÇÃO NORMATIVA Nº 001/2023 – PPCA/NDAE/UFPA 
+ 
+Estabelece os procedimentos   para as 
+Defesas de Qualificação, Dissertação de 
+Mestrado e Integralização Curricular, no  
+âmbito do Programa de Pós -graduação em 
+Computação Aplicada – PPCA/NDAE/UFPA. 
+ 
+ 
+A Coordenação do Programa de Pós -Graduação em Computação Aplicada – PPCA, da 
+Universidade Federal do Pará – UFPA, no uso de suas atribuições que lhe conferem o Estatuto 
+e o Regimento Geral da UFPA, assim como o Regimento Geral dos cursos de Pós -Graduação 
+Stricto Sensu da UFPA e o Regimento Interno do PPCA estabelece a seguinte Instrução 
+Normativa: 
+DA DEFESA DE QUALIFICAÇÃO 
+Art. 1º. O/a discente deverá realizar a defesa de qualificação em até 12 (doze) meses após o 
+ingresso no curso. 
+§ 1º Não há prorrogação para a defesa de qualificação e a não realização no prazo poderá 
+implicar no desligamento do/a discente, conforme regimento interno. 
+§ 2º Para qualificar, o/a discente deverá ter integralizado as atividades “Orientação em 
+Pesquisa I” e “Orientação em Pesquisa II”. 
+§ 3º O/a discente poderá cumprir a qualificação apresentando texto em formato de 
+monografia/dissertação ou agregação de artigos. 
+Art. 2º . O/a discente/DOCENTE  deverá solicitar ao Colegiado do PPCA, via Requerimento 
+protocolado no SAGITTA, a homologação das informações referentes à Defesa de Qualificação, 
+mencionando tema, banca examinadora, data de defesa e outras, conforme documento 
+disponibilizado pela Secretaria Acadêmica. 
+ 
+
+SERVIÇO PÚBLICO FEDERAL 
+MINISTÉRIO DA EDUCAÇÃO 
+UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Avenida Brasília s/n              Vila Permanente             CEP 68455-901          Tucuruí-PA 
+www.ndae.ufpa.br      ndae@ufpa.br   /  academicandae@ufpa.br   
+www.ppca.propesp.ufpa.br                        ppca.ufpa@gmail.com 
+ 
+              
+ 
+ 
+ 
+ 
+COMISSÃO EXAMINADORA DE DEFESA DE QUALIFICAÇÃO 
+Art. 3º. A Comissão Examinadora será constituída da seguinte forma: 
+I. Pelo/a Orientador/a; 
+II. Pelo/a Coorientador/a (opcional); 
+III. Por 01 Examinador/a Interno/a; 
+IV. Se possível, por 01 (um) Examinador/a Externo/a ao Programa, vinculado à PPG. 
+§ 1º Os/as membros da banca examinadora devem ser docentes ou especialistas  de 
+reconhecida competência com título de Doutor. 
+§ 2º Em caso de impossibilidade de participação do/a Examinador/a Externo/a, mencionado no 
+IV, este/a deverá ser substituído/a por 01 (um) examinador/a interno/a. 
+§ 3º É obrigatória a indicação de 01 (um) membro interno para atuar como suplente na 
+Comissão Examinadora. 
+§ 4º A substituição de membro titular pelo suplente deve ser comunicada à Coordenação do 
+Programa e à Secretaria Acadêmica com, pelo menos, 03 (três) dias antes da defesa. 
+DOCUMENTOS A SEREM PROTOCOLADOS, ENTREGA PARA BANCA E ESTRUTURAÇÃO DO 
+TEXTO DE QUALIFICAÇÃO 
+Art. 4º. O requerimento deve ser entregue à Secretaria Acadêmica, via SAGITTA, no prazo de  
+20 (vinte) dias antes da realização da Reunião do Colegiado.  
+Art. 5º . Após a homologação pelo Colegiado, o/a discente deverá entregar à Secretaria 
+Acadêmica, 15 (quinze) dias antes da Defesa, os seguintes documentos: 
+I. Para a defesa em formato de monografia é necessário entregar 02 (duas) versões 
+digitais, sendo uma em documento editável e outra em Portable Document Format (PDF) 
+(Obrigatório).  
+II. Para a defesa em formato de agregação de artigos é necessário entregar Cópia e 
+comprovante de submissão do primeiro artigo e cópia do segundo artigo em seu estágio atual.  
+Art. 6º. Após a homologação pelo Colegiado, a entrega do texto na versão digital (artigos ou 
+
+SERVIÇO PÚBLICO FEDERAL 
+MINISTÉRIO DA EDUCAÇÃO 
+UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Avenida Brasília s/n              Vila Permanente             CEP 68455-901          Tucuruí-PA 
+www.ndae.ufpa.br      ndae@ufpa.br   /  academicandae@ufpa.br   
+www.ppca.propesp.ufpa.br                        ppca.ufpa@gmail.com 
+ 
+              
+ 
+ 
+ 
+ 
+monografia) para todos/as os/as membros da banca avaliadora, (inclusive orientador/a), é 
+responsabilidade do/a discente, sendo que o prazo para esta entrega, deve ser com no mínimo 
+de 10 (dez) dias de antecedência em relação à data da defesa. Se algum membro da banca 
+solicitar versão impressa do trabalho, o/a discente deve providenciar a impressão e a entrega. 
+Art. 7º. Ao encaminhar o texto para todos os/as membros da banca avaliadora, é obrigatório o 
+envio de uma versão digital dos documentos (artigos ou monografia) para o e -mail da 
+secretaria acadêmica do NDAE para fins de cadastramento da defesa no SIGAA. 
+Art. 8º . O texto para a Defesa de Qualificação em formato de monografia deve possuir a 
+seguinte estrutura: 
+I. Capa (obrigatório); 
+II. Contracapa (obrigatório); 
+III. Resumo (obrigatório); 
+IV. Sumário (obrigatório); 
+V. Introdução (obrigatório); 
+VI. Fundamentação Teórica (obrigatório); 
+VII. Metodologia (obrigatório); 
+VIII. Resultados (parciais e/ou esperados) – (opcional); 
+IX. Cronograma (obrigatório); 
+X. Projeções de Publicações (obrigatório); 
+XI. Referências (obrigatório); 
+Parágrafo único. A norma referente à padronização de trabalho acadêmico encontra-se anexa 
+a esta instrução normativa. 
+Art. 9º. O texto para a Defesa de Qualificação em formato de agregação de artigo deve possuir 
+a estrutura exigida pelo periódico/conferência a ser submetido. 
+Paragrafo único: A agregação de artigos compreende a produção da revisão sistemática da 
+literatura feita na OPI mais o ínicio do segundo artigo contendo introdução, trabalhos 
+correlatos e metodologia do trabalho, desenvolvido na OPII. 
+
+SERVIÇO PÚBLICO FEDERAL 
+MINISTÉRIO DA EDUCAÇÃO 
+UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Avenida Brasília s/n              Vila Permanente             CEP 68455-901          Tucuruí-PA 
+www.ndae.ufpa.br      ndae@ufpa.br   /  academicandae@ufpa.br   
+www.ppca.propesp.ufpa.br                        ppca.ufpa@gmail.com 
+ 
+              
+ 
+ 
+ 
+ 
+REALIZAÇÃO DA DEFESA DE QUALIFICAÇÃO 
+Art. 10 . O/a discente deve realizar a Defesa em até 30 (trinta) dias após a  aprovação da 
+solicitação no Colegiado. 
+Art. 11. O/a Orientador/a pode solicitar o cancelamento da defesa, no prazo máximo  de 03 
+(três) dias antes da defesa e informar à Coordenação e Secretaria Acadêmica do Programa. 
+Art. 12. Na Defesa, o/a Presidente da Banca inicia a sessão e o/a discente possui 30 (trinta) 
+minutos para a apresentação. Após isso, serão feitas as ponderações dos/as examinadores/as, 
+seguidas pelas considerações do/a avaliado/a. Ao  final, a banca emite o parec er e os/as 
+membros e discente assinam a Ata. 
+§ 1º No caso de participação do/a Coorientador/a na banca examinadora, o mesmo  terá igual 
+direito à arguição que os demais membros. Entretanto seu voto/conceito será definido em 
+conjunto com orientador/a, contabilizando 01 (um) voto único para ambos, prof erido pelo/a 
+orientador/a. 
+§ 2º É facultada a participação de qualquer integrante da defesa de Qualificação (mestrando 
+ou banca examinadora) através de videoconferência.  
+Art. 13 . O parecer deve ser unânime e contemplar apenas duas situações: Aprovado ou 
+Reprovado. 
+Parágrafo Único. É facultada a emissão de recomendações sobre o trabalho na  Ata de Defesa.  
+Art. 14. Em caso de Reprovação, o/a discente deverá solicitar, novamente, a defesa de 
+qualificação conforme os procedimentos definidos acima, num prazo máximo de 03 (três) 
+meses. 
+Art. 15. De posse da Ata e lista de Frequência, a Secretaria Acadêmica realizará o lançamento 
+do conceito no SIGAA e encaminhará as declarações da Comissão Examinadora e do público 
+ouvinte.  
+I. O lançamento do conceito no SIGAA será feito em até 03 (três) dias após a devolutiva da Ata 
+de Defesa de Qualificação devidamente preenchida e assinada.  
+II. A entrega das declarações será feita, via e-mail, em até 05 (cinco) dias após a defesa, 
+
+SERVIÇO PÚBLICO FEDERAL 
+MINISTÉRIO DA EDUCAÇÃO 
+UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Avenida Brasília s/n              Vila Permanente             CEP 68455-901          Tucuruí-PA 
+www.ndae.ufpa.br      ndae@ufpa.br   /  academicandae@ufpa.br   
+www.ppca.propesp.ufpa.br                        ppca.ufpa@gmail.com 
+ 
+              
+ 
+ 
+ 
+ 
+considerando a devolutiva da Ata com as devidas assinaturas.  
+III. É responsabilidade do/a presidente da banca a devolução, em até 03 dias após a 
+defesa, da ata devidamente assinada (de próprio punho ou eletronicamente) pela comissão 
+examinadora. 
+DA DEFESA DE DISSERTAÇÃO DE MESTRADO 
+Art. 16. O/a discente deverá realizar a defesa de dissertação em até 24 (vinte e quatro) meses 
+após o ingresso no curso. 
+§ 2º Para defender, o/a discente deverá ter integralizado as atividades “Orientação em 
+Pesquisa III” e “Orientação em Pesquisa IV”. 
+Art. 17 . O/a discente /DOCENTE deverá solicitar ao Colegiado do PPCA, via Requerimento 
+protocolado no SAGITTA, a homologação das informações referentes à Defesa de Dissertação, 
+mencionando tema, banca examinadora, data de defesa e outras, conforme documento 
+disponibilizado pela Secretaria Acadêmica.  
+Art. 18 . Após a homologação pelo Colegiado, o/a discente deverá entregar à Secretaria 
+Acadêmica, 15 (quinze) dias antes da Defesa, os seguintes documentos: 
+I. Para a defesa em formato de monografia é necessário entregar 02 (duas) versões 
+digitais, sendo uma em documento editável e outra em Portable Document Format (PDF) 
+(Obrigatório).  
+II. Para a defesa em formato de agregação de artigos é necessário entregar Cópias e 
+comprovantes de submissão de dois artigos desenvolvidos nas OP III e IV. 
+COMISSÃO EXAMINADORA 
+Art. 19. A Comissão Examinadora será constituída da seguinte forma: 
+I. Pelo/a Orientador/a; 
+II. Pelo/a Coorientador/a (opcional); 
+III. Por 01 (um) Examinador/a Interno/a; 
+IV. Por 01 (um) Examinador/a Externo/a, preferencialmente de outra Instituição, 
+
+SERVIÇO PÚBLICO FEDERAL 
+MINISTÉRIO DA EDUCAÇÃO 
+UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Avenida Brasília s/n              Vila Permanente             CEP 68455-901          Tucuruí-PA 
+www.ndae.ufpa.br      ndae@ufpa.br   /  academicandae@ufpa.br   
+www.ppca.propesp.ufpa.br                        ppca.ufpa@gmail.com 
+ 
+              
+ 
+ 
+ 
+ 
+vinculado à PPG. 
+§ 1º Os/as membros da banca examinadora devem ser docentes ou especialistas de 
+reconhecida competência com título de Doutor/a. 
+§ 2º É obrigatória a indicação de 01 (um) membro externo/a e 01 (um) interno/a para atuarem 
+como suplentes na Comissão Examinadora. 
+§ 3º A substituição de membro titular pelo/a suplente deve ser comunicada à Coordenação do 
+Programa e à Secretaria Acadêmica com, pelo menos, 03 (três) dias antes da defesa. 
+Art. 20. São válidos para a Defesa de Dissertação os artigos: 4º, 6º e 7º. 
+PRODECIMENTOS DA DEFESA DE DISSERTAÇÃO 
+Art. 21. A estrutura da Dissertação em formato de monografia deve contemplar o anexo I desta 
+Instrução Normativa. 
+Art. 22. A estrutura da Dissertação em formato de agregação de artigos deve contemplar o 
+anexo II desta Instrução Normativa. 
+Paragrafo único: Para a defesa final exige -se cópias e comprovantes de submissão de dois 
+artigos que foram desenvolvidos durante as OP III e OP IV. A agregação de artigos compreende 
+a atualização do segundo artigo  incluindo: introdução, trabalho correlatos, metodologia do 
+trabalho e resultados preliminares da pesquisa (OP III); e um terceiro artigo com atualização do 
+segundo artigo incluindo os resultados finais e conclusões (OP IV). 
+Art. 23. Na Defesa, o/a Presidente da Banca inicia a sessão e o/a discente possui 45 (quarenta 
+e cinco) minutos para a apresentação. Após isso, serão feitas as ponderações dos/as 
+examinadores/as, seguidas pelas considerações do/a avaliado/a. Ao  final, a banca emi te o 
+parecer e os/as membros e discente assinam a Ata. 
+§ 1º No caso de participação do/a Coorientador/a na banca examinadora, o mesmo  terá igual 
+direito à arguição que os demais membros. Entretanto seu voto/conceito será definido em 
+conjunto com orientador/a, contabilizando 01 (um) voto único para ambos, prof erido pelo/a 
+orientador/a. 
+§ 2º É facultada a participação de qualquer integrante da defesa de Dissertação  (mestrando 
+
+SERVIÇO PÚBLICO FEDERAL 
+MINISTÉRIO DA EDUCAÇÃO 
+UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Avenida Brasília s/n              Vila Permanente             CEP 68455-901          Tucuruí-PA 
+www.ndae.ufpa.br      ndae@ufpa.br   /  academicandae@ufpa.br   
+www.ppca.propesp.ufpa.br                        ppca.ufpa@gmail.com 
+ 
+              
+ 
+ 
+ 
+ 
+ou banca examinadora) através de videoconferência.  
+Art. 24.  Em caso de Reprovação, o/a discente deverá solicitar, novamente, a Defesa de 
+Dissertação conforme os procedimentos definidos acima, num prazo de 06 (seis) meses. 
+DA HOMOLOGAÇÃO DA DEFESA E INTEGRALIZAÇÃO CURRICULAR 
+Art. 25. Após a defesa, o/a discente terá 45 (quarenta e cinco) dias para entregar o trabalho 
+final e solicitar a homologação da Dissertação para o Colegiado do PPCA, a fim de que sejam 
+tomadas as devidas providências para a integralização curricular. 
+Parágrafo Único: São documentos necessários para a Homologação da Dissertação: 
+a) Duas versões digitais, sendo uma no formato editável e outra em Portable Document 
+Format (PDF), da dissertação com ficha catalográfica (https://bcficat.ufpa.br/ ) e assinatura da 
+banca examinadora na folha de aprovação; 
+b) Termo de Autorização de Entrega de Dissertação (Orientador/a); 
+c) Termo de Divulgação de dissertação e imagem; 
+d) Termo de Autorização e Declaração de distribuição não exclusiva para publicação 
+digital no portal institucional de acesso aberto da UFPA 
+(https://bdm.ufpa.br:8443/TermodeAutorizacaoeDeclaracaodeAutoria.pdf);  
+e) Declaração de Autoria 
+(https://bdm.ufpa.br:8443/TermodeAutorizacaoeDeclaracaodeAutoria.pdf);  
+f) Documento de Regularidade com a Biblioteca 
+(https://sagitta.ufpa.br/sagitta/chamada/chamada.jsf?idServico=448); 
+g) Cópia de RG; 
+h) Cópia de CPF; 
+i)             Comprovante de Submissão de Artigo em periódico ou conferência conforme 
+deliberação do colegiado; 
+j)              Artigo completo submetido; 
+k) Um produto técnico/tecnológico conforme normativa  prevista na  Resolução 
+001/2023 do PPCA; 
+
+SERVIÇO PÚBLICO FEDERAL 
+MINISTÉRIO DA EDUCAÇÃO 
+UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Avenida Brasília s/n              Vila Permanente             CEP 68455-901          Tucuruí-PA 
+www.ndae.ufpa.br      ndae@ufpa.br   /  academicandae@ufpa.br   
+www.ppca.propesp.ufpa.br                        ppca.ufpa@gmail.com 
+ 
+              
+ 
+ 
+ 
+ 
+l)              Currículo Lattes atualizado; 
+Art. 26. É responsabilidade do/a discente solicitar atualização de seus dados pessoais no SIGAA 
+para que o diploma não seja emitido com informações incorretas. 
+Art. 27. A Coordenação do Programa e Secretaria Acadêmica providenciarão a expedição do 
+diploma e histórico escolar junto à PROPESP e ao CIAC. 
+Art. 28. O Colegiado do Programa decidirá os casos omissos a esta Instrução Normativa. 
+Art. 29 . Esta instrução normativa entrará em vigor a partir da data de sua aprovação pelo 
+Colegiado do PPCA. 
+Tucuruí (PA), 02 de outubro de 2023. 
+ 
+ 
+ 
+Prof. Dr. Marcos Tulio Amaris González 
+Coordenador do Programa de Pós-Graduação 
+em Computação Aplicada 
+PPCA / NDAE / UFPA
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+A N E X O 
+ 
+ 
+  
+ 
+
+ 
+ 
+ 
+ 
+ 
+UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+NOME DO AUTOR 
+(FONTE 12 – CAIXA ALTA) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+TÍTULO DO TRABALHO (FONTE 12 – CAIXA ALTA - NEGRITO) 
+Subtítulo do Trabalho (se houver, sem negrito, caixa baixa) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Local (Centralizado, Fonte 12, caixa baixa) 
+Ano (Centralizado , Fonte 12, caixa baixa)
+
+
+ 
+ 
+ 
+NOME DO AUTOR (FONTE 12 – CAIXA ALTA) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+TÍTULO DO TRABALHO (FONTE 12 – CAIXA ALTA – NEGRITO) 
+Subtítulo do Trabalho (se houver, sem negrito, caixa baixa) 
+ 
+ 
+MODELO PARA QUALIFICAÇÃO: Texto 
+dissertativo apresentado ao Programa de 
+Pós-Graduação em Computação Aplicada do 
+Núcleo de Desenvolvimento Amazônico em 
+Engenharia, da Universidade Federal do 
+Pará, como requisito para a obtenção de 
+créditos referentes à Qualificação. 
+ 
+Nome do orientador e, se houver, do co - 
+orientador. (FONTE 10 – espaçamento 
+simples) 8 cm da margem esquerda) 
+ 
+ 
+MODELO PARA DISSERTAÇÃO FINAL: 
+Dissertação apresentada ao Programa de 
+Pós-Graduação em Computação Aplicada do 
+Núcleo de Desenvolvimento Amazônico em 
+Engenharia, da Universidade Federal do 
+Pará, como requisito para a obtenção do 
+título de Mestre em Computação Aplicada. 
+ 
+Nome do orientador e, se houver, do co - 
+orientador. (FONTE 10 – espaçamento 
+simples) 8 cm da margem esquerda) 
+ 
+ 
+ 
+ 
+ 
+ 
+Local (Centralizado, Fonte 12, caixa baixa) 
+Ano (Centralizado , Fonte 12, caixa baixa)
+
+ 
+ 
+ 
+FICHA CATALOGRÁFICA (Expedida pelo sistema on-line da biblioteca - 
+https://bcficat.ufpa.br/ PARA    VERSÃO FINAL DA DISSERTAÇÃO) 
+ 
+(Inserir no verso da Folha de Rosto)
+
+ 
+ 
+ 
+Errata (opcional)
+
+ 
+ 
+ 
+NOME DO AUTOR 
+(FONTE 12 – CAIXA ALTA) 
+ 
+ 
+TÍTULO DO TRABALHO (FONTE 12 – CAIXA ALTA - NEGRITO) 
+Subtítulo do Trabalho (se houver, sem negrito, caixa baixa) 
+MODELO PARA QUALIFICAÇÃO: Texto 
+dissertativo apresentado ao Programa de 
+Pós-Graduação em Computação Aplicada do 
+Núcleo de Desenvolvimento Amazônico em 
+Engenharia, da Universidade Federal do 
+Pará, como requisito para a obtenção de 
+créditos referentes à Qualificação. 
+ 
+Nome do orientador e, se houver, do co - 
+orientador. (FONTE 10 – espaçamento 
+simples) 8 cm da margem esquerda) 
+MODELO PARA DISSERTAÇÃO FINAL: 
+Dissertação apresentada ao Programa de 
+Pós-Graduação em Computação Aplicada do 
+Núcleo de Desenvolvimento Amazônico em 
+Engenharia, da Universidade Federal do 
+Pará, como requisito para a obtenção do 
+título de Mestre em Computação Aplicada. 
+ 
+Nome do orientador e, se houver, do co - 
+orientador. (FONTE 10 – espaçamento 
+simples) 8 cm da margem esquerda) 
+ 
+Aprovada em de de . 
+(Fonte 12, alinhado à esquerda). 
+ 
+BANCA EXAMINADORA: 
+ 
+Titulação / Nome do Professor / INSTITUIÇÃO - Orientador 
+Titulação / Nome do Professor / INSTITUIÇÃO 
+Titulação / Nome do Professor / INSTITUIÇÃO
+
+ 
+ 
+ 
+Dedicatória 
+(Opcional – sem título) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Texto no qual o autor do trabalho 
+homenageia ou dedica o seu 
+trabalho a alguém. 
+(Fonte 12. Espaçamento 1,5, 
+alinhado à esquerda. Recuo de 8 cm 
+à margem esquerda)
+
+ 
+ 
+ 
+AGRADECIMENTOS 
+ 
+(Opcional. Título em caixa alta e centralizado. Texto Fonte 12, espaçamento 
+1,5) 
+ 
+Os agradecimentos devem ser dirigidos àqueles que contribuíram de 
+maneira relevante à elaboração do trabalho.
+
+ 
+ 
+ 
+Epígrafe 
+(opcional, sem título) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+É um item onde o autor 
+apresenta a citação de um texto que 
+seja relacionado com o tema do 
+trabalho, seguido da indicação de 
+autoria do mesmo. 
+(Fonte 12. Espaçamento 1,5, 
+alinhado à esquerda. Recuo de 8 cm 
+à margem esquerda).
+
+ 
+ 
+ 
+RESUMO 
+ 
+ 
+(Obrigatório. Título centralizado, caixa-alta. Texto em parágrafo único, entre 150 a 500 
+palavras, fonte: 11, espaçamento 1,5. Utilizar a terceira pessoa do singular, verbos na 
+voz ativa). 
+ 
+ 
+Palavras-chave: separadas entre si por ponto e também finalizadas por ponto.
+
+ 
+ 
+ 
+ABSTRACT 
+ 
+(Obrigatório. Todas as observações feitas para o resumo valem para o resumo 
+em língua estrangeira).
+
+ 
+ 
+ 
+LISTA DE ILUSTRAÇÕES 
+ 
+ 
+(Opcional. Título centralizado, negrito. Texto: fonte 12, justificado) 
+ 
+ 
+Quadro 1 – Xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 2
+
+ 
+ 
+ 
+LISTA DE TABELAS 
+ 
+ 
+(Opcional. Título centralizado, negrito. Texto: fonte 12, justificado) 
+Tabela 1 – Xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 6
+
+ 
+ 
+ 
+LISTA DE ABREVIATURAS 
+ 
+ 
+(Opcional. Título centralizado, negrito. Texto: fonte 12, justificado). 
+ 
+ 
+Eng. – Engenharia.
+
+ 
+ 
+ 
+LISTA DE SIGLAS 
+ 
+ 
+(Opcional. Título centralizado, negrito. Texto: fonte 12, justificado). 
+ 
+ 
+NDAE – Núcleo de Desenvolvimento Amazônico em Engenharia.
+
+ 
+ 
+ 
+LISTA DE SÍMBOLOS 
+ 
+ 
+(Opcional. Título centralizado, negrito. Texto: fonte 12, justificado). 
+ 
+ 
+Rad - radiano 
+ 
+$ - subcampo
+
+ 
+ 
+ 
+SUMÁRIO 
+ 
+(Obrigatório. Ver NBR 6027/2012)
+
+ 
+ 
+ 
+ELEMENTOS TEXTUAIS 
+ 
+ 
+Regras gerais – NBR 14724/2011 
+ 
+Fonte: Cor: preta. Papel branco ou reciclado. 
+ 
+Formato: A4 (21cm x 29,7cm) 
+ 
+Margens: 03 cm Esquerda e Superior / 02 cm: Direita e inferior. 
+ 
+Tamanho da fonte : 12. Exceções: citações com mais de três linhas, notas de 
+rodapé, paginação, dados internacionais de catalogação na publicação, 
+legendas e fontes das ilustrações e das tabelas, que devem ser em tamanho 
+menor e uniforme. 
+Espaçamento: 1,5 entre as linhas, excetuando -se as citações de mais de três 
+linhas, notas de rodapé, referências, legendas das ilustrações e das tabelas, 
+natureza (tipo do trabalho, objetivo, nome da instituição a que é submetido e área 
+de concentração), que devem ser digitados em espaço simples. As referencias, 
+ao final do trabalho, devem ser separadas entre si por um espaço simples em 
+branco. 
+Notas de rodapé : Digitadas dentro das margens. Espaçamento entre linhas: 
+simples 
+Paginação: Páginas pré -textuais devem ser contadas, mas não numeradas. 
+Numera-se a partir da primeira folha da parte textual. Algarismos arábicos. Canto 
+superior direito. 
+Citações: Apresentadas conforme a NBR 10520/2023. 
+ 
+Numeração progressiva das seções: Ver NBR 6024/2012.
+
+ 
+ 
+ 
+ELEMENTOS PÓS-TEXTUAIS 
+ 
+ 
+REFERÊNCIAS BIBLIOGRÁFICAS: Obrigatório. Ver NBR 6023/2002. 
+ 
+ 
+APÊNDICES: Opcional. Título em caixa alta, negrito, centralizado, seguido das 
+letras do alfabeto (APÊNDICE A, APÊNDICE B...). O nome do documento fica 
+em caixa baixa. As páginas devem ser numeradas, constar no Sumário. 
+ 
+ 
+ANEXOS: opcional. Título em caixa alta, negrito, centralizado. Os anexos devem 
+ser identificados por meio de letras maiúsculas consecutivas, travessão e seus 
+respectivos títulos. As páginas devem ser numeradas, constar no Sumário. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

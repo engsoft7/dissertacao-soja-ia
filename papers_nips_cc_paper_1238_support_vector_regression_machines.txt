@@ -1,0 +1,8 @@
+ Support Vector Regression Machines NeurIPS Proceedings Search Support Vector Regression Machines Harris Drucker, Christopher J. C. Burges, Linda Kaufman, Alex J. Smola, Vladimir Vapnik Advances in Neural Information Processing Systems 9 (NIPS 1996) Bibtex Metadata Paper Abstract A new regression technique based on Vapnik's concept of support vectors is introduced. We compare support vector regression (SVR) with a committee regression technique (bagging) based on regression trees and ridge regression done in feature space. On the basis of these experiments, it is expected that SVR will have advantages in high dimensionality space because SVR optimization does not depend on the dimensionality of the input space. Name Change Policy × Requests for name changes in the electronic proceedings will be accepted with no questions asked. However name changes may cause bibliographic tracking issues. Authors are asked to consider this carefully and discuss it with their co-authors prior to requesting a name change in the electronic proceedings. Use the "Report an Issue" link to request a name change. Report an Issue    |    Name Change Policy Do not remove: This comment is monitored to verify that the site is working properly 
+
+LINKS:
+https://neurips.cc/Help/Contact?select=Conference  [Report an Issue]
+https://papers.nips.cc/  [NeurIPS Proceedings]
+https://papers.nips.cc/admin/login/?next=/admin/  []
+https://papers.nips.cc/admin/logout/?nextp=/admin  []
+https://papers.nips.cc/paper_files/paper/1996  [Advances in Neural Information Processing Systems 9 (NIPS 1996)]

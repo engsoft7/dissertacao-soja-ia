@@ -1,0 +1,346 @@
+ UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA - NDAE 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA – PPCA  
+ 
+  
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Rodovia BR 422, Km 13, Canteiro de Obras              Vila Permanente             
+CEP 68464-000          Tucuruí-PA www.ppca.propesp.ufpa / 
+academicandae@ufpa.br / ppca.ufpa@gmail.com              
+ 
+ 
+Resolução nº 01/2023 – PPCA/NDAE/UFPA. 
+ 
+Regulamenta os critérios para a definição da carteira 
+de produção técnica, oriundos d as atividades 
+vinculadas a Dissertação produzidas no Programa de 
+Pós-Graduação em Computação Aplicada – PPCA da 
+UFPA. 
+ 
+O Colegiado do Programa de Pós -graduação em Computação Aplicada , do Núcleo de 
+Desenvolvimento Amazônico em Engenharia da Universidade Federal do Pará, em reunião realizada 
+no dia 02 de outubro de 2023, 
+ 
+RESOLVE: 
+ 
+Instituir uma Carteira de produção técnica proveniente dos resultados de pesquisa de mestrado do 
+Programa de Pós-graduação em Computação Aplicada a partir dos critérios e normas a seguir: 
+ 
+Art. 1º - Do objetivo: A Carteira de produção técnica tem por objetivo estruturar os resultados 
+aplicáveis que são derivados das pesquisas de dissertações de modo que o PPCA possa oferecer à 
+sociedade amazônica produtos técnicos e tecnológicos que responda m demandas relacionadas à 
+segurança de barragens e planejamento e gestão ambiental; 
+ 
+Art. 2º - Dos significados de produtos técnicos e tecnológicos: Os produtos técnicos e tecnológicos 
+previstos nesta Resolução seguem as orientações do Grupo de Trabalho de  Produção Técnica da 
+CAPES (Portaria CAPES 171/2018 – Instituição do GT Produção Técnica), que teve como objetivo o 
+desenvolvimento de uma metodologia de avaliação da produção Técnica e Tecnológica; 
+ 
+a) PRODUTO TÉCNICO : é o resultado palpável , produto tangível,  de uma atividade docente ou 
+discente, podendo ser realizado de forma individual ou em grupo.  
+ 
+b) PRODUTO TECNOLÓGICO: é um “objeto tangível” com elevado grau de novidade  fruto da 
+aplicação de novos conhecimentos científicos, técnicas e expertises desenvolvidas no âmbito  da 
+pesquisa na Pós-graduação, usados diretamente na solução de problemas de empresas produtoras 
+de bens ou na prestação de serviços à população visando o bem-estar social. 
+ 
+§ 1º Consideram -se produtos técnicos/tecnológicos qualificáveis para a área de Ciência da 
+Computação:  
+ 
+Nº PRODUTO SUBTIPOS 
+1 Produto bibliográfico 
+ 
+ 
+ 
+ 
+Artigo publicado em revista técnica 
+Artigo em jornal ou revista de divulgação 
+Resenha ou crítica artística 
+Texto em catálogo de exposição ou de programa de 
+espetáculo 
+
+ UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA - NDAE 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA – PPCA  
+ 
+  
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Rodovia BR 422, Km 13, Canteiro de Obras              Vila Permanente             
+CEP 68464-000          Tucuruí-PA www.ppca.propesp.ufpa / 
+academicandae@ufpa.br / ppca.ufpa@gmail.com              
+ 
+ 
+ 
+ 
+2 Ativos de Propriedade 
+Intelectual 
+Patente depositada, concedida ou licenciada 
+Desenho Industrial 
+Indicação geográfica 
+Marca 
+Topografia de circuito integrado 
+3 Tecnologia social  
+4 Curso de formação 
+profissional 
+Atividade docente de capacitação, em diferentes níveis 
+realizada 
+Atividade de capacitação criada, em diferentes níveis 
+Atividade de capacitação organizada, em diferentes 
+níveis 
+5 Produto de editoração Livro, catálogo, coletânea e enciclopédia organizada 
+Revista, anais (incluindo editoria e corpo editorial) 
+organizada 
+Catálogo de produção artística organizado 
+7 Software/Aplicativo 
+(Programa de computador) 
+ 
+8 Evento organizado Internacional e Nacional 
+9 Norma ou Marco regulatórias Norma ou marco regulatório elaborado 
+Estudos de regulamentação 
+Elaboração de anteprojeto de normas ou de 
+modificações de marco regulatório 
+Estudos apresentados em audiência pública 
+Sentenças arbitrais, estudos de caso, estudos de 
+jurisprudência e peças processuais 
+15 Base de dados 
+técnico-científica 
+ 
+21 Empresa ou Organização social 
+inovadora 
+ 
+ 
+ 
+§ 2º A diferenciação entre produto técnico e tecnológico se dará pelo grau de inovação e ineditismo 
+do conhecimento mobilizado para sua  elaboração/construção em função da complexidade do 
+problema a ser resolvido. Problemas  complexos envolvem sinergia e/ou associação de diferentes 
+tipos de conhecimentos e interação/demanda/envolvimento de múltiplos atores. 
+ 
+§ 3º O detalhamento de cada produção técnica, considerando a definição, exemplos, campos 
+descritivos e outras informações relevantes encontram -se no documento: RELATÓRIO DE GRUPO 
+DE TRABALHO – Publicação que divulga os resultados de estudos e proposições advindos de Grupos 
+de Trabalho criados pela CAPES, com a finalidade de aprimoramento do processo e de instrumentos 
+relacionados a avaliação da pós -graduação. As publicações estão disponíveis para download 
+
+ UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA - NDAE 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA – PPCA  
+ 
+  
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Rodovia BR 422, Km 13, Canteiro de Obras              Vila Permanente             
+CEP 68464-000          Tucuruí-PA www.ppca.propesp.ufpa / 
+academicandae@ufpa.br / ppca.ufpa@gmail.com              
+ 
+gratuito no formato PDF ( https://www.gov.br/capes/pt-br/acesso-a-informacao/acoes-e-
+programas/avaliacao/relatorios-tecnicos-e-grupos-de-trabalho – Arquivo 3. Produção técnica). 
+ 
+Art. 3º - Todos os produtos elaborados devem fazer parte do trabalho final de curso, buscando 
+atender à uma demanda social, organizacional ou de mercado que seja  específica e apresente 
+relevância/utilidade; 
+ 
+Parágrafo único: Relevância/Utilidade é a importância que se atribui ao resultado (Produtos)  de 
+um processo ou conjunto de atividades. A importância é atribuição do cliente/receptor e não  do 
+executor, ou seja, a importância depende da utilidade que o cliente externo possa enxergar  ao 
+buscar satisfazer uma dada necessidade ou problema. 
+ 
+Art. 4º - Os produtos elencados nesta resolução deverão ser orientados pelo mesmo docente  
+credenciado no Programa para orientação da dissertação, seguindo o formato definido  no 
+Regimento Interno do PPCA; 
+ 
+Art. 5º - O tipo de produto selecionado, funcionalidade e resultados, dependerão da temática  da 
+pesquisa que será desenvolvida durante o tempo de permanência do discente no mestrado, de 
+acordo com a melhor forma de disponibilidade para o público-alvo final. 
+ 
+Art. 6º - O tipo de produto que será elaborado, como resultado das pesquisas realizadas no PPCA, 
+deverá informar, dentro de um formulário próprio, os seguintes itens: 
+ 
+1) Aderência: relação/afinidade da produção com o programa 
+a) Projeto de pesquisa vinculado à produção 
+b) Linha de pesquisa, de atuação ou área de concentração vinculada à produção 
+2) Impacto : Mudanças causadas pelo produto técnico e tecnológico no ambiente em que está 
+inserido. Necessário declarar o motivo da criação, a relevância da demanda e o foco de aplicação 
+do produto. Deve ser discriminado: 
+a) Demanda: espontânea, contratada ou por concorrência. 
+b) Resultado da pesquisa aplicada: foco de aplicação inicialmente definido, ou solução de um 
+problema previamente identificado. 
+c) Área impactada pela produção: área social, econômica, jurídica etc. 
+3) Aplicabilidade: Facilidade de emprego da produção técnica/tecnológica e reprodutibilidade. 
+Deve ser discriminado: 
+a) Abrangência realizada: local, regional, nacional, internacional etc. 
+b) Abrangência potencial: local, regional, nacional, internacional etc. 
+c) Reprodutibilidade: restrita, irrestrita, ampliável. 
+4) Inovação: Potencial do conhecimento inédito na criação e desenvolvimento do produto. 
+Classifica-se em teor de inovação: 
+a) Alto – inovação radical, mudança de paradigma; 
+b) Médio – inovação incremental, uso de conhecimentos pré-estabelecidos; 
+c) Baixo – Inovação adaptativa, modificação de conhecimento pré-existente; 
+d) Ausente 
+5) Complexidade: Potencial de aplicação dos produtos técnico -tecnológicos considerados os 
+
+ UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA - NDAE 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA – PPCA  
+ 
+  
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Rodovia BR 422, Km 13, Canteiro de Obras              Vila Permanente             
+CEP 68464-000          Tucuruí-PA www.ppca.propesp.ufpa / 
+academicandae@ufpa.br / ppca.ufpa@gmail.com              
+ 
+critérios para descrição/avaliação destes PTTs. Classifica-se em: 
+a) Alta: associação de diferentes novos conhecimentos e atores (laboratórios, empresas etc.) para 
+solução de problemas. 
+b) Média: combinação de conhecimentos pré -estabelecidos e estáveis por diferentes atores 
+(laboratórios, empresas etc.). 
+c) Baixa: alteração/adaptação de conhecimento existente por atores diferentes ou não. 
+d) Ausente 
+ 
+Parágrafo único: Esse formulário deve ser entregue no mesmo ato de depósito da dissertação. 
+ 
+Parágrafo único: Qualquer outro tipo de Produto Técnico que não está contida nesta listagem, ou 
+que siga as orientações do relatório do Grupo de Trabalho da CAPES  sobre Produção  Técnica, 
+poderão ser debatidos e deliberados em reunião do Colegiado do PPCA. 
+ 
+Art. 7º - Os produtos gerados pela pesquisa de Mestrado deverão ser detalhados  no corpo da 
+dissertação, porém, deverão ser entregues em arquivo separado (impresso ou  digital), da 
+Dissertação e farão parte de um banco de produtos, que será disponibilizado  na internet para 
+acesso ao público. 
+ 
+Parágrafo único: Em se tratando de livros, cartilhas ou outra produção bibliográfica em  formato 
+impresso, deverão ser entregues em separado da dissertação, como um documento independente, 
+com ficha catalográfica e ISBN próprios. 
+ 
+Art. 8º - Os casos não previstos nesta resolução serão deliberados pelo Conselho do Programa  de 
+Pós-graduação em Computação Aplicada – PPCA/UFPA. 
+ 
+ 
+            Tucuruí (PA), 02 de outubro de 2023. 
+ 
+ 
+Prof. Dr. Marcos Tulio Amaris Gonzalez 
+Coordenador do Programa de Pós-Graduação 
+em Computação Aplicada 
+PPCA / NDAE / UFPA 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+ UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA - NDAE 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA – PPCA  
+ 
+  
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Rodovia BR 422, Km 13, Canteiro de Obras              Vila Permanente             
+CEP 68464-000          Tucuruí-PA www.ppca.propesp.ufpa / 
+academicandae@ufpa.br / ppca.ufpa@gmail.com              
+ 
+ 
+ANEXO 01 – DESCRIÇÃO  DO PRODUTO TÉCNICO/TECNOLÓGICO 
+ 
+INFORMAÇÕES GERAIS 
+Nome do Produto:  
+Tipo:  
+Subtipo:  
+Autoria:  
+Orientação:  
+Coorientação (se 
+houver): 
+ 
+Público usuário:  
+Meio de 
+Divulgação: 
+ 
+Local ou endereço 
+de acesso (sites, 
+repositórios etc): 
+ 
+INFORMAÇÕES DESCRITIVAS (breve descrição sobre os itens) 
+1) Aderência: relação/afinidade da produção com o programa 
+a) Projeto de pesquisa vinculado à produção 
+b) Linha de pesquisa, de atuação ou área de concentração vinculada à produção. 
+Escreva aqui: 
+2) Impacto: Mudanças causadas pelo produto técnico e tecnológico no ambiente em que está 
+inserido. Necessário declarar o motivo da criação, a relevância da demanda e o foco de aplicação 
+do produto. Deve ser discriminado: 
+a) Demanda: espontânea, contratada ou por concorrência. 
+b) Resultado da pesquisa aplicada: foco de aplicação inicialmente definido, ou solução de um 
+problema previamente identificado. 
+c) Área impactada pela produção: área social, econômica, jurídica etc. 
+ 
+Escreva aqui: 
+3) Aplicabilidade: Facilidade de emprego da produção técnica/tecnológica e reprodutibilidade. 
+Deve ser discriminado: 
+a) Abrangência realizada: local, regional, nacional, internacional etc. 
+b) Abrangência potencial: local, regional, nacional, internacional etc. 
+c) Reprodutibilidade: restrita, irrestrita, ampliável. 
+ 
+Escreva aqui: 
+4) Inovação: Potencial do conhecimento inédito na criação e desenvolvimento do produto. 
+Classifica-se em teor de inovação: 
+a) Alto – inovação radical, mudança de paradigma; 
+b) Médio – inovação incremental, uso de conhecimentos pré-estabelecidos; 
+c) Baixo – Inovação adaptativa, modificação de conhecimento pré-existente; 
+d) Ausente 
+Escreva aqui: 
+
+ UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA - NDAE 
+PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO APLICADA – PPCA  
+ 
+  
+ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA  
+Rodovia BR 422, Km 13, Canteiro de Obras              Vila Permanente             
+CEP 68464-000          Tucuruí-PA www.ppca.propesp.ufpa / 
+academicandae@ufpa.br / ppca.ufpa@gmail.com              
+ 
+5) Complexidade: Potencial de aplicação dos produtos técnico -tecnológicos considerados os 
+critérios para descrição/avaliação destes PTTs. Classifica-se em: 
+a) Alta: associação de diferentes novos conhecimentos e atores (laboratórios, empresas etc.) 
+para solução de problemas. 
+b) Média: combinação de conhecimentos pré -estabelecidos e estáveis por diferentes atores 
+(laboratórios, empresas etc.). 
+c) Baixa: alteração/adaptação de conhecimento existente por atores diferentes ou não. 
+d) Ausente 
+ 
+Escreva aqui: 
+OUTRAS INFORMAÇÕES QUE JULGAR RELEVANTES SOBRE O PRODUTO 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

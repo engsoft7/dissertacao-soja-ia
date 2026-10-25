@@ -1,0 +1,77 @@
+OK      https://ppca.propesp.ufpa.br/index.php/br/documentos/regimento-e-normas  ->  ppca_propesp_ufpa_br_index_php_br_documentos_regimento_e_normas.txt (11085 caracteres)
+OK      https://ppca.propesp.ufpa.br/index.php/br/documentos/legislacao  ->  ppca_propesp_ufpa_br_index_php_br_documentos_legislacao.txt (8330 caracteres)
+OK      https://ppca.propesp.ufpa.br/index.php/br/documentos/formularios  ->  ppca_propesp_ufpa_br_index_php_br_documentos_formularios.txt (7037 caracteres)
+OK      https://ppca.propesp.ufpa.br/index.php/br/documentos/manuais  ->  ppca_propesp_ufpa_br_index_php_br_documentos_manuais.txt (6545 caracteres)
+OK      https://sege.ufpa.br/boletim_interno/downloads/resolucoes/consepe/2017/4882 Regimento PPCA.pdf  ->  sege_ufpa_br_boletim_interno_downloads_resolucoes_consepe_2017_4882_Regimento_PP.txt (52706 caracteres)
+OK      https://api.crossref.org/works/10.3390/rs17010107  ->  api_crossref_org_works_10_3390_rs17010107.txt (19284 caracteres)
+OK      https://api.crossref.org/works/10.3390/computation13010004  ->  api_crossref_org_works_10_3390_computation13010004.txt (15370 caracteres)
+OK      https://www.jmlr.org/papers/v13/bergstra12a.html  ->  www_jmlr_org_papers_v13_bergstra12a_html.txt (3518 caracteres)
+OK      https://www.jmlr.org/papers/v11/cawley10a.html  ->  www_jmlr_org_papers_v11_cawley10a_html.txt (3435 caracteres)
+OK      https://www.jmlr.org/papers/v12/pedregosa11a.html  ->  www_jmlr_org_papers_v12_pedregosa11a_html.txt (2470 caracteres)
+OK      https://papers.nips.cc/paper_files/paper/2010/file/fe73f687e5bc5280214e0486b273a5f9-Bibtex.bib  ->  papers_nips_cc_paper_files_paper_2010_file_fe73f687e5bc5280214e0486b273a5f9_Bibt.txt (488 caracteres)
+OK      https://papers.nips.cc/paper/1238-support-vector-regression-machines  ->  papers_nips_cc_paper_1238_support_vector_regression_machines.txt (1578 caracteres)
+OK      https://papers.nips.cc/paper/1866-using-the-nystrom-method-to-speed-up-kernel-machines  ->  papers_nips_cc_paper_1866_using_the_nystrom_method_to_speed_up_kernel_machines.txt (1153 caracteres)
+OK      https://brasil.mapbiomas.org/  ->  brasil_mapbiomas_org.txt (30883 caracteres)
+FALHOU  https://www.conab.gov.br/  URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'www.conab.gov.br'. (_ssl.c:1016)>
+FALHOU  https://portaldeinformacoes.conab.gov.br/custos-de-producao.html  URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'portaldeinformacoes.conab.gov.br'. (_ssl.c:1016)>
+FALHOU  https://sidra.ibge.gov.br/pesquisa/pam/tabelas  HTTPError: HTTP Error 403: Forbidden
+FALHOU  https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/PA  HTTPError: HTTP Error 403: Forbidden
+FALHOU  https://metadados.ibge.gov.br/consulta/estatisticos/operacoes-estatisticas/LA  HTTPError: HTTP Error 403: Forbidden
+OK      https://drive.google.com/uc?export=download&id=12j5OGn2X6hPsgWf30FlC16ECuM5pi6K2  ->  drive_google_com_uc_export_download_id_12j5OGn2X6hPsgWf30FlC16ECuM5pi6K2.txt (28598 caracteres)
+OK      https://drive.google.com/uc?export=download&id=12jp4zNxjmldDYqPCyQuoxZ4j3-BchnwG  ->  drive_google_com_uc_export_download_id_12jp4zNxjmldDYqPCyQuoxZ4j3_BchnwG.txt (9323 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1FPU7miXjTgMc1RaG8ebcZMi2iC8sk1Xy  ->  drive_google_com_uc_export_download_id_1FPU7miXjTgMc1RaG8ebcZMi2iC8sk1Xy.txt (3423 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1KIdYDa3LOaNQjgAB_1SFX_wieDfvrqfM  ->  drive_google_com_uc_export_download_id_1KIdYDa3LOaNQjgAB_1SFX_wieDfvrqfM.txt (10087 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1PiAN2_uUcPvCNADsrA4Zsa-GVBMF6tXF  ->  drive_google_com_uc_export_download_id_1PiAN2_uUcPvCNADsrA4Zsa_GVBMF6tXF.txt (13438 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1YWjEqvoXK_HIMJ9lhiTr_WZlxqaeppVX  ->  drive_google_com_uc_export_download_id_1YWjEqvoXK_HIMJ9lhiTr_WZlxqaeppVX.txt (525 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1aJZP322Tb6E9sbjuATdpUH4JztxNzcsF  ->  drive_google_com_uc_export_download_id_1aJZP322Tb6E9sbjuATdpUH4JztxNzcsF.txt (18754 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1aYvVvBFaf_y_R25sEuH8iH7J00tArBG9  ->  drive_google_com_uc_export_download_id_1aYvVvBFaf_y_R25sEuH8iH7J00tArBG9.txt (734 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1bmMg1AGucLQ2V_tuOR4EGN14Z8hGI_Qq  ->  drive_google_com_uc_export_download_id_1bmMg1AGucLQ2V_tuOR4EGN14Z8hGI_Qq.txt (14559 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1fEyzKZDTRzorj848MsRkydrPxfHqeD0o  ->  drive_google_com_uc_export_download_id_1fEyzKZDTRzorj848MsRkydrPxfHqeD0o.txt (2952 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1kLQFBEgwIIOYdyY2tobXSJkqmxb12UdP  ->  drive_google_com_uc_export_download_id_1kLQFBEgwIIOYdyY2tobXSJkqmxb12UdP.txt (2520 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1kPUYZ8ZwRVmztPA_skUoMCWBbleWCSaU  ->  drive_google_com_uc_export_download_id_1kPUYZ8ZwRVmztPA_skUoMCWBbleWCSaU.txt (23584 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1lvMbaIHVrTjPuEmy9ZRki3KfwS-kV_qM  ->  drive_google_com_uc_export_download_id_1lvMbaIHVrTjPuEmy9ZRki3KfwS_kV_qM.txt (2014 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1pjs9zbrqKYnOzn1IXTkXx94tAHK7uS4U  ->  drive_google_com_uc_export_download_id_1pjs9zbrqKYnOzn1IXTkXx94tAHK7uS4U.txt (2894 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1wA3Ag6sLmSFdJyucET-2idlgIYGfgspS  ->  drive_google_com_uc_export_download_id_1wA3Ag6sLmSFdJyucET_2idlgIYGfgspS.txt (7310 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1xKFRIDCMUNNi0lN8yL5julMfSzCHmwLM  ->  drive_google_com_uc_export_download_id_1xKFRIDCMUNNi0lN8yL5julMfSzCHmwLM.txt (3037525 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1xMd84XHyNTIFQj0MR8hS5MOZDnVORpKx  ->  drive_google_com_uc_export_download_id_1xMd84XHyNTIFQj0MR8hS5MOZDnVORpKx.txt (2136 caracteres)
+OK      https://drive.google.com/uc?export=download&id=1xbrlf0jPU4LoM5zh0kxj08c9JJjpVIBN  ->  drive_google_com_uc_export_download_id_1xbrlf0jPU4LoM5zh0kxj08c9JJjpVIBN.txt (52706 caracteres)
+OK      https://dblp.org/search/publ/api?q=Learning%20To%20Count%20Objects%20in%20Images%20Lempitsky&format=json  ->  dblp_org_search_publ_api_q_Learning_To_Count_Objects_in_Images_Lempitsky_format.txt (1806 caracteres)
+OK      https://dblp.org/search/publ/api?q=Support%20Vector%20Regression%20Machines%20Drucker&format=json  ->  dblp_org_search_publ_api_q_Support_Vector_Regression_Machines_Drucker_format_jso.txt (1806 caracteres)
+OK      https://dblp.org/search/publ/api?q=Using%20the%20Nystrom%20Method%20to%20Speed%20Up%20Kernel%20Machines&format=json  ->  dblp_org_search_publ_api_q_Using_the_Nystrom_Method_to_Speed_Up_Kernel_Machines.txt (1806 caracteres)
+OK      https://openlibrary.org/isbn/9780262035613.json  ->  openlibrary_org_isbn_9780262035613_json.txt (815 caracteres)
+OK      https://openlibrary.org/isbn/9780070428072.json  ->  openlibrary_org_isbn_9780070428072_json.txt (847 caracteres)
+OK      https://openlibrary.org/isbn/9780134610993.json  ->  openlibrary_org_isbn_9780134610993_json.txt (1104 caracteres)
+OK      https://openlibrary.org/search.json?q=stages%20of%20soybean%20development&author=fehr  ->  openlibrary_org_search_json_q_stages_of_soybean_development_author_fehr.txt (194 caracteres)
+OK      https://openlibrary.org/search.json?q=procedures%20for%20performing%20systematic%20reviews%20kitchenham  ->  openlibrary_org_search_json_q_procedures_for_performing_systematic_reviews_kitch.txt (220 caracteres)
+OK      https://www.gov.br/conab/pt-br  ->  www_gov_br_conab_pt_br.txt (42419 caracteres)
+OK      https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao  ->  www_gov_br_conab_pt_br_atuacao_informacoes_agropecuarias_custos_de_producao.txt (34347 caracteres)
+OK      https://mapbiomas.org/  ->  mapbiomas_org.txt (18193 caracteres)
+FALHOU  https://brasil.mapbiomas.org/colecoes-mapbiomas/  HTTPError: HTTP Error 404: Not Found
+FALHOU  https://api.semanticscholar.org/graph/v1/paper/search?query=Learning%20to%20count%20objects%20in%20images&fields=title,year,venue,journal,externalIds,authors&limit=3  HTTPError: HTTP Error 429: 
+FALHOU  https://api.semanticscholar.org/graph/v1/paper/search?query=Support%20vector%20regression%20machines%20Drucker&fields=title,year,venue,journal,externalIds,authors&limit=3  HTTPError: HTTP Error 429: 
+FALHOU  https://api.semanticscholar.org/graph/v1/paper/search?query=Using%20the%20Nystrom%20method%20to%20speed%20up%20kernel%20machines&fields=title,year,venue,journal,externalIds,authors&limit=3  HTTPError: HTTP Error 429: 
+FALHOU  https://www.googleapis.com/books/v1/volumes?q=intitle:%22stages%20of%20soybean%20development%22  HTTPError: HTTP Error 429: Too Many Requests
+FALHOU  https://www.googleapis.com/books/v1/volumes?q=intitle:%22procedures%20for%20performing%20systematic%20reviews%22  HTTPError: HTTP Error 429: Too Many Requests
+OK      https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras  ->  www_gov_br_conab_pt_br_atuacao_informacoes_agropecuarias_safras.txt (36959 caracteres)
+OK      https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras/safra-de-graos  ->  www_gov_br_conab_pt_br_atuacao_informacoes_agropecuarias_safras_safra_de_graos.txt (35539 caracteres)
+OK      https://apisidra.ibge.gov.br/values/t/1612/n3/15/v/112/p/2024/c81/2713  ->  apisidra_ibge_gov_br_values_t_1612_n3_15_v_112_p_2024_c81_2713.txt (659 caracteres)
+OK      https://api.openalex.org/works?search=stages%20of%20soybean%20development&filter=publication_year:1977&select=display_name,publication_year,authorships,primary_location,type  ->  api_openalex_org_works_search_stages_of_soybean_development_filter_publication_y.txt (78144 caracteres)
+OK      https://api.openalex.org/works?search=procedures%20for%20performing%20systematic%20reviews&filter=publication_year:2004&select=display_name,publication_year,authorships,primary_location,type  ->  api_openalex_org_works_search_procedures_for_performing_systematic_reviews_filte.txt (158289 caracteres)
+OK      https://html.duckduckgo.com/html/?q=%22Procedures%20for%20performing%20systematic%20reviews%22%20Kitchenham%20TR%2FSE-0401  ->  html_duckduckgo_com_html_q_Procedures_for_performing_systematic_reviews_Kitchenh.txt (395 caracteres)
+OK      https://html.duckduckgo.com/html/?q=%22Stages%20of%20soybean%20development%22%20Fehr%20Caviness%20%22Special%20Report%2080%22  ->  html_duckduckgo_com_html_q_Stages_of_soybean_development_Fehr_Caviness_Special_R.txt (395 caracteres)
+OK      https://www.inf.ufsc.br/~aldo.vw/kitchenham.pdf  ->  www_inf_ufsc_br_aldo_vw_kitchenham_pdf.txt (80046 caracteres)
+FALHOU  https://servicodados.ibge.gov.br/api/v2/metadados/pesquisas/PA  URLError: <urlopen error timed out>
+FALHOU  https://servicodados.ibge.gov.br/api/v2/metadados/pesquisas/LA  URLError: <urlopen error timed out>
+FALHOU  https://servicodados.ibge.gov.br/api/v2/metadados/pesquisas  URLError: <urlopen error timed out>
+OK      https://open-meteo.com/en/docs  ->  open_meteo_com_en_docs.txt (59227 caracteres)
+OK      https://open-meteo.com/en/terms  ->  open_meteo_com_en_terms.txt (12131 caracteres)
+OK      https://open-meteo.com/en/license  ->  open_meteo_com_en_license.txt (10 caracteres)
+OK      https://api.open-meteo.com/v1/forecast?latitude=-2.99&longitude=-47.35&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,precipitation,wind_speed_10m,wind_gusts_10m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,et0_fao_evapotranspiration,uv_index_max,sunrise,sunset&past_days=7&forecast_days=7&timezone=America%2FBelem  ->  api_open_meteo_com_v1_forecast_latitude_2_99_longitude_47_35_current_temperature.txt (18327 caracteres)
+OK      https://apiprevmet3.inmet.gov.br/avisos/ativos  ->  apiprevmet3_inmet_gov_br_avisos_ativos.txt (359651 caracteres)
+OK      https://www.embrapa.br/busca-de-noticias/-/noticia/17950762/tecnologia-de-aplicacao-de-agrotoxicos-garante-eficiencia-na-producao-de-soja  ->  www_embrapa_br_busca_de_noticias_noticia_17950762_tecnologia_de_aplicacao_de_agr.txt (9062 caracteres)
+OK      https://ainfo.cnptia.embrapa.br/digital/bitstream/item/223209/1/SP-17-2020-online-1.pdf  ->  ainfo_cnptia_embrapa_br_digital_bitstream_item_223209_1_SP_17_2020_online_1_pdf.txt (652298 caracteres)
+OK      https://query.wikidata.org/sparql?format=json&query=SELECT%20%3Fibge%20%3Fnome%20%3Fcoord%20WHERE%20%7B%20%3Fm%20wdt%3AP1585%20%3Fibge%20.%20FILTER%28STRSTARTS%28%3Fibge%2C%20%2215%22%29%29%20%3Fm%20wdt%3AP625%20%3Fcoord%20.%20%3Fm%20rdfs%3Alabel%20%3Fnome%20.%20FILTER%28LANG%28%3Fnome%29%3D%22pt%22%29%20%7D  ->  query_wikidata_org_sparql_format_json_query_SELECT_ibge_nome_coord_WHERE_m_wdt_P.txt (40153 caracteres)
+OK      https://www.fao.org/4/x0490e/x0490e00.htm  ->  www_fao_org_4_x0490e_x0490e00_htm.txt (7573 caracteres)
+OK      https://www.fao.org/4/x0490e/x0490e07.htm  ->  www_fao_org_4_x0490e_x0490e07_htm.txt (75137 caracteres)
+OK      https://openlibrary.org/search.json?q=crop+evapotranspiration+guidelines+for+computing+crop+water+requirements&fields=title,author_name,publish_year,publisher,isbn,number_of_pages_median  ->  openlibrary_org_search_json_q_crop_evapotranspiration_guidelines_for_computing_c.txt (950 caracteres)
+OK      https://www.embrapa.br/busca-de-noticias/-/noticia/17950762/tecnologia-de-aplicacao-de-agrotoxicos-garante-eficiencia-na-producao-de-soja  ->  navegador_www_embrapa_br_busca_de_noticias_noticia_17950762_tecnologia_de_aplica.txt (HTTP 200, 2367 caracteres, navegador)

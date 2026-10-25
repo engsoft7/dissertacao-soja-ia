@@ -1,0 +1,73 @@
+# Baixa as páginas e os PDFs listados em pesquisa/07_referencias/documentos_publicos.txt,
+# extrai o texto e publica tudo na branch documentos-lidos: regimentos e
+# resoluções do programa e fontes citadas que o ambiente de desenvolvimento
+# não alcança. Cada documento vira um .txt; as páginas web trazem também a
+# lista de links, para achar os documentos que elas apontam.
+name: Lê documentos públicos
+
+on:
+  push:
+    paths:
+      - 'pesquisa/07_referencias/documentos_publicos.txt'
+      - '.github/workflows/le-documentos-publicos.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  le:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instala o extrator de PDF
+        run: sudo apt-get install -y -qq poppler-utils >/dev/null
+
+      - name: Baixa e extrai o texto
+        run: |
+          mkdir -p "$RUNNER_TEMP/lidos"
+          python3 - "$RUNNER_TEMP/lidos" <<'PY'
+          import hashlib, html, re, subprocess, sys, urllib.parse, urllib.request
+          from pathlib import Path
+          destino = Path(sys.argv[1])
+          urls = [l.strip() for l in open("pesquisa/07_referencias/documentos_publicos.txt", encoding="utf-8")
+                  if l.strip() and not l.startswith("#")]
+          indice = []
+          for url in urls:
+              nome = re.sub(r"[^A-Za-z0-9]+", "_", urllib.parse.unquote(url).split("//", 1)[1])[:80].strip("_")
+              alvo = urllib.parse.quote(url, safe=":/?=&%#")
+              try:
+                  req = urllib.request.Request(alvo, headers={"User-Agent": "Mozilla/5.0"})
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      dados, tipo, final = r.read(), r.headers.get("Content-Type", ""), r.geturl()
+              except Exception as e:
+                  indice.append(f"FALHOU  {url}  {type(e).__name__}: {e}")
+                  continue
+              if dados[:4] == b"%PDF" or "pdf" in tipo:
+                  (destino / f"{nome}.pdf").write_bytes(dados)
+                  texto = subprocess.run(["pdftotext", "-layout", str(destino / f"{nome}.pdf"), "-"],
+                                         capture_output=True, text=True).stdout
+              else:
+                  pagina = dados.decode("utf-8", "replace")
+                  links = sorted({urllib.parse.urljoin(final, h) for h in re.findall(r'href="([^"#]+)"', pagina)})
+                  corpo = re.sub(r"(?is)<(script|style).*?</\1>", " ", pagina)
+                  texto = html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", corpo)))
+                  texto += "\n\nLINKS:\n" + "\n".join(links)
+              (destino / f"{nome}.txt").write_text(texto, encoding="utf-8")
+              indice.append(f"OK      {url}  ->  {nome}.txt ({len(texto)} caracteres)")
+          (destino / "INDICE.txt").write_text("\n".join(indice) + "\n", encoding="utf-8")
+          print("\n".join(indice))
+          PY
+
+      - name: Publica na branch documentos-lidos
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          cd "$RUNNER_TEMP/lidos"
+          git init -q -b documentos-lidos
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Documentos lidos em ${GITHUB_REF_NAME} (${GITHUB_SHA::7})"
+          git push -q -f "$url" HEAD:documentos-lidos

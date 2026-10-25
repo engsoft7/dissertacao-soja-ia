@@ -1,0 +1,9 @@
+# Uma URL por linha. O workflow le-documentos-publicos.yml baixa cada uma,
+# extrai o texto e publica na branch documentos-lidos (o ambiente de
+# desenvolvimento não alcança estes sites).
+https://ppca.propesp.ufpa.br/
+https://ppca.propesp.ufpa.br/index.php/br/
+https://ppca.propesp.ufpa.br/ARQUIVOS/documentos/Regimento PPCA.pdf
+https://sege.ufpa.br/boletim_interno/downloads/resolucoes/consepe/2017/4882 Regimento PPCA.pdf
+https://papers.nips.cc/paper/4043-learning-to-count-objects-in-images
+https://repositorio.ufu.br/bitstream/123456789/43276/3/Especializa%c3%a7%c3%a3oEstimativaProdutividade.pdf

@@ -9,5 +9,9 @@
  "LEMPITSKY, V.; ZISSERMAN, A.": "autores, título, NeurIPS v. 23, 2010, Curran Associates: BibTeX oficial do NeurIPS; páginas não publicadas no BibTeX",
  "GOODFELLOW, I.; BENGIO, Y.; COURVILLE, A.": "título e editora (MIT Press), ISBN 9780262035613: openlibrary.org",
  "MITCHELL, T. M.": "título, editora (McGraw-Hill) e ano (1997), ISBN 9780070428072: openlibrary.org",
- "RUSSELL, S. J.; NORVIG, P.": "título, 4. ed., editora (Pearson), classificação LC de 2021, ISBN 9780134610993: openlibrary.org"
+ "RUSSELL, S. J.; NORVIG, P.": "título, 4. ed., editora (Pearson), classificação LC de 2021, ISBN 9780134610993: openlibrary.org",
+ "KITCHENHAM, B.": "título, Keele University Technical Report TR/SE-0401, julho de 2004: o próprio relatório (inf.ufsc.br/~aldo.vw/kitchenham.pdf)",
+ "FEHR, W. R.; CAVINESS, C. E.": "autores, título, 1977, Iowa State University: OpenAlex (repositório digital da Iowa State University)",
+ "INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA (IBGE). Produção Agrícola Municipal: PAM.": "a PAM responde pela API oficial do SIDRA (apisidra.ibge.gov.br, tabela 1612: soja no Pará, 2024, 3.147 kg/ha); a página sidra.ibge.gov.br recusa os servidores do GitHub",
+ "IBGE (2024). Produção Agrícola Municipal: PAM.": "a PAM responde pela API oficial do SIDRA (apisidra.ibge.gov.br, tabela 1612)"
 }

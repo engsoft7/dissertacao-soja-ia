@@ -170,13 +170,15 @@ def main() -> int:
         print(f"\n===== {nome}: {len(lista)} referências =====\n")
         contagem = {}
         for texto in lista:
+            conferida = next((v for k, v in a_mao.items() if texto.startswith(k)), None)
             if texto.upper().startswith(INSTITUCIONAIS):
                 marca, nota = confere_endereco(texto)
+                if marca == "?" and conferida:
+                    marca, nota = "ok", f"conferida à mão: {conferida}"
             elif (doi := doi_do_texto(texto)):
                 marca, nota = confere_com_doi(texto, doi)
             else:
                 marca, nota = procura_sem_doi(texto)
-                conferida = next((v for k, v in a_mao.items() if texto.startswith(k)), None)
                 if marca == "--" and conferida:
                     marca, nota = "ok", f"conferida à mão: {conferida}"
             contagem[marca] = contagem.get(marca, 0) + 1

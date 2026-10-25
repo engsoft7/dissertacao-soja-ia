@@ -1,0 +1,72 @@
+# Converte o contador de vagens (v1 e v2) para LiteRT, o formato que roda no
+# celular, e confere a conversão nas fotos de teste da YOLO POD pelo mesmo
+# caminho que a foto faz no app. Publica os .tflite e a conferência em
+# celular/ na branch modelo-contagem-vagens; é de lá que os arquivos vão para
+# app/src/main/assets.
+#
+# Roda no Actions porque o ambiente de desenvolvimento não alcança o Hugging
+# Face. Roda quando o script de conversão ou este arquivo mudam, e sob demanda.
+name: Converte contador de vagens para o celular
+
+on:
+  push:
+    paths:
+      - 'pesquisa/09_contagem_por_imagem/converte_para_celular.py'
+      - '.github/workflows/converte-contador-celular.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  conversao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Busca os modelos treinados
+        run: git fetch -q --depth 1 origin modelo-contagem-vagens && git worktree add -q "$RUNNER_TEMP/modelos" FETCH_HEAD
+
+      # As mesmas versões com que a conversão foi ensaiada. PyTorch só de CPU.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Instala dependências
+        run: |
+          pip install --quiet torch==2.14.1 torchvision==0.29.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install --quiet litert-torch==0.10.0 ai-edge-litert==2.3.0 scipy pillow huggingface_hub
+
+      - name: Guarda a base entre execuções
+        uses: actions/cache@v4
+        with:
+          path: dados_yolopod
+          key: yolopod-v1
+
+      - name: Converte e confere
+        run: |
+          python pesquisa/09_contagem_por_imagem/converte_para_celular.py \
+            --modelos "$RUNNER_TEMP/modelos" --dados dados_yolopod --saida "$RUNNER_TEMP/celular"
+
+      - name: Guarda os arquivos da conversão
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contador-vagens-celular
+          path: ${{ runner.temp }}/celular
+          if-no-files-found: ignore
+
+      - name: Publica na branch modelo-contagem-vagens
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          destino="$RUNNER_TEMP/branch"
+          git clone -q --depth 1 -b modelo-contagem-vagens "$url" "$destino"
+          cd "$destino"
+          rm -rf celular && mkdir -p celular && cp -r "$RUNNER_TEMP/celular/." celular/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Contador de vagens para o celular, convertido em ${GITHUB_REF_NAME} (${GITHUB_SHA::7})"
+          git push -q "$url" HEAD:modelo-contagem-vagens

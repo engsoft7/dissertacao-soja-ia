@@ -17,7 +17,10 @@ on:
     inputs:
       epocas:
         description: "Épocas de treino"
-        default: "40"
+        default: "36"
+      versao:
+        description: "Pasta da versão na branch modelo-contagem-vagens"
+        default: "v2"
 
 permissions:
   contents: write
@@ -50,7 +53,7 @@ jobs:
         run: |
           python pesquisa/09_contagem_por_imagem/treina_contador_vagens.py \
             --saida "$RUNNER_TEMP/modelo" --dados dados_yolopod \
-            --epocas "${{ github.event.inputs.epocas || '40' }}" --minutos 270
+            --epocas "${{ github.event.inputs.epocas || '36' }}" --minutos 280
 
       - name: Guarda os arquivos do treino
         if: always()
@@ -60,13 +63,27 @@ jobs:
           path: ${{ runner.temp }}/modelo
           if-no-files-found: ignore
 
+      # Cada versão fica na sua pasta, e as anteriores continuam lá para
+      # comparação. A versão 1 foi publicada na raiz da branch; na primeira
+      # publicação depois dela, seus arquivos passam para v1/.
       - name: Publica na branch modelo-contagem-vagens
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ github.event.inputs.versao || 'v2' }}
         run: |
-          cd "$RUNNER_TEMP/modelo"
-          git init -q -b modelo-contagem-vagens
+          url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          destino="$RUNNER_TEMP/branch"
+          if git clone -q --depth 1 -b modelo-contagem-vagens "$url" "$destino"; then
+            cd "$destino"
+            if [ -f LEIAME.md ]; then
+              mkdir -p v1
+              git mv LEIAME.md contador_vagens.onnx contador_vagens.pt metricas.json teste_por_imagem.json exemplos v1/
+            fi
+          else
+            mkdir -p "$destino" && cd "$destino" && git init -q -b modelo-contagem-vagens
+          fi
+          rm -rf "$VERSAO" && mkdir -p "$VERSAO" && cp -r "$RUNNER_TEMP/modelo/." "$VERSAO/"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add . && git commit -q -m "Contador de vagens treinado em ${GITHUB_REF_NAME} (${GITHUB_SHA::7})"
-          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" modelo-contagem-vagens
+          git add -A && git commit -q -m "Contador de vagens ${VERSAO} treinado em ${GITHUB_REF_NAME} (${GITHUB_SHA::7})"
+          git push -q "$url" HEAD:modelo-contagem-vagens

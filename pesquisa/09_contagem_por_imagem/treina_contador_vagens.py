@@ -9,13 +9,13 @@ Renshou, China), com 72.709 vagens marcadas por retângulo.
 
 Modelo: contagem por mapa de densidade. Cada vagem vira um ponto (o centro do
 retângulo, o mesmo tipo de marca que o produtor faz tocando na foto), o ponto
-vira uma pequena gaussiana num mapa oito vezes menor que a imagem, e a rede
+vira uma pequena gaussiana num mapa quatro vezes menor que a imagem (oito na versão 1), e a rede
 aprende a desenhar esse mapa. A soma do mapa é a contagem; os máximos locais
 são as vagens, que o app pode mostrar como marcas sugeridas para o produtor
 conferir.
 
 A rede é a MobileNetV3-Large do torchvision (licença BSD, pesos do ImageNet)
-com uma cabeça leve que junta as escalas 1/8 e 1/16. Não usa a biblioteca
+com uma cabeça leve que junta as escalas 1/16, 1/8 e 1/4. Não usa a biblioteca
 Ultralytics: a licença dela (AGPL-3.0) alcançaria o aplicativo.
 
 Avaliação: separação fixa (semente 42) de 70/15/15 por localidade; o modelo
@@ -46,7 +46,7 @@ from scipy.ndimage import gaussian_filter, maximum_filter
 from scipy.optimize import linear_sum_assignment
 
 REPO = "Project-AgML/YOLOPOD_Soyabean_Pod_Counting_Dataset"
-PASSO = 8          # o mapa de densidade tem 1/8 da resolução da imagem
+PASSO = 4          # o mapa de densidade tem 1/PASSO da resolução da imagem (--passo)
 FATOR = 100.0      # escala do mapa no treino; a contagem é soma / FATOR
 MEDIA = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 DESVIO = np.array([0.229, 0.224, 0.225], dtype=np.float32)
@@ -165,8 +165,9 @@ def carrega(item, lado):
     return np.asarray(img), pts
 
 
-def mapa_de_densidade(pts, altura, largura, sigma=1.0):
-    """Um por vaga, espalhado bilinearmente no mapa 1/8 e suavizado."""
+def mapa_de_densidade(pts, altura, largura, sigma_px=6.0):
+    """Um por vagem, espalhado bilinearmente no mapa 1/PASSO e suavizado por
+    uma gaussiana de sigma_px pixels da imagem."""
     h, w = altura // PASSO, largura // PASSO
     d = np.zeros((h, w), dtype=np.float32)
     for x, y in pts:
@@ -177,7 +178,7 @@ def mapa_de_densidade(pts, altura, largura, sigma=1.0):
                              (0, 1, (1 - fx) * fy), (1, 1, fx * fy)):
             xx, yy = min(max(x0 + dx, 0), w - 1), min(max(y0 + dy, 0), h - 1)
             d[yy, xx] += peso
-    return gaussian_filter(d, sigma, mode="constant")
+    return gaussian_filter(d, sigma_px / PASSO, mode="constant")
 
 
 def tensor(img):
@@ -188,8 +189,8 @@ def tensor(img):
 class Recortes(torch.utils.data.Dataset):
     """Recortes aleatórios com espelhamento e variação de luz, para o treino."""
 
-    def __init__(self, cache, recorte):
-        self.cache, self.recorte = cache, recorte
+    def __init__(self, cache, recorte, sigma_px=6.0):
+        self.cache, self.recorte, self.sigma_px = cache, recorte, sigma_px
 
     def __len__(self):
         return len(self.cache)
@@ -216,19 +217,30 @@ class Recortes(torch.utils.data.Dataset):
             pil = ImageEnhance.Contrast(pil).enhance(random.uniform(0.7, 1.3))
             pil = ImageEnhance.Color(pil).enhance(random.uniform(0.7, 1.3))
             img = np.asarray(pil)
-        alvo = mapa_de_densidade(p, r, r) * FATOR
+        alvo = mapa_de_densidade(p, r, r, self.sigma_px) * FATOR
         return tensor(np.ascontiguousarray(img)), torch.from_numpy(alvo)[None]
 
 
 # ── modelo ───────────────────────────────────────────────────────────────────
 
 class ContadorDeVagens(nn.Module):
-    def __init__(self, pesos_imagenet=True):
+    """MobileNetV3 com cabeça que junta as escalas 1/16, 1/8 e, com passo 4, 1/4.
+
+    A versão 1 (passo 8) contava bem, mas vagens encostadas caíam na mesma
+    célula do mapa e viravam um ponto só: localizava 41% das vagens. Com passo
+    4 a célula tem a metade do lado, e a escala 1/4 traz o detalhe da borda
+    de cada vagem.
+    """
+
+    def __init__(self, pesos_imagenet=True, passo=PASSO):
         super().__init__()
         pesos = torchvision.models.MobileNet_V3_Large_Weights.IMAGENET1K_V2 if pesos_imagenet else None
         f = torchvision.models.mobilenet_v3_large(weights=pesos).features
-        self.ate8 = f[:7]      # 40 canais, 1/8
+        self.passo = passo
+        self.ate4 = f[:4]      # 24 canais, 1/4
+        self.ate8 = f[4:7]     # 40 canais, 1/8
         self.ate16 = f[7:13]   # 112 canais, 1/16
+        self.lat4 = nn.Conv2d(24, 64, 1)
         self.lat8 = nn.Conv2d(40, 64, 1)
         self.lat16 = nn.Conv2d(112, 64, 1)
         self.cabeca = nn.Sequential(
@@ -243,21 +255,24 @@ class ContadorDeVagens(nn.Module):
         # treino, e o modelo que acertava em modo de treino errava tudo em modo
         # de avaliação (conferido com dados sintéticos antes de rodar a base).
         super().train(modo)
-        for m in list(self.ate8.modules()) + list(self.ate16.modules()):
+        for m in list(self.ate4.modules()) + list(self.ate8.modules()) + list(self.ate16.modules()):
             if isinstance(m, nn.BatchNorm2d):
                 m.eval()
         return self
 
     def forward(self, x):
-        c8 = self.ate8(x)
+        c4 = self.ate4(x)
+        c8 = self.ate8(c4)
         c16 = self.ate16(c8)
         p = self.lat8(c8) + F.interpolate(self.lat16(c16), size=c8.shape[-2:], mode="bilinear", align_corners=False)
+        if self.passo == 4:
+            p = self.lat4(c4) + F.interpolate(p, size=c4.shape[-2:], mode="bilinear", align_corners=False)
         return self.cabeca(p)  # densidade × FATOR; negativos são cortados na inferência
 
 
 @torch.no_grad()
 def prediz(modelo, img):
-    """Densidade (1/8) e contagem de uma imagem inteira já reduzida."""
+    """Densidade (1/PASSO) e contagem de uma imagem inteira já reduzida."""
     h, w = img.shape[:2]
     H, W = math.ceil(h / 32) * 32, math.ceil(w / 32) * 32
     x = torch.zeros(1, 3, H, W)
@@ -331,13 +346,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--saida", default="saida")
     ap.add_argument("--dados", default="dados_yolopod")
-    ap.add_argument("--lado", type=int, default=768)
-    ap.add_argument("--recorte", type=int, default=384)
+    ap.add_argument("--lado", type=int, default=1024)
+    ap.add_argument("--recorte", type=int, default=448)
+    ap.add_argument("--passo", type=int, choices=(4, 8), default=4)
+    ap.add_argument("--sigma", type=float, default=6.0, help="sigma da gaussiana de cada vagem, em pixels")
     ap.add_argument("--lote", type=int, default=8)
-    ap.add_argument("--epocas", type=int, default=40)
-    ap.add_argument("--minutos", type=float, default=270)
+    ap.add_argument("--epocas", type=int, default=36)
+    ap.add_argument("--minutos", type=float, default=280)
     ap.add_argument("--semente", type=int, default=42)
     args = ap.parse_args()
+    global PASSO
+    PASSO = args.passo
 
     inicio = time.time()
     random.seed(args.semente); np.random.seed(args.semente); torch.manual_seed(args.semente)
@@ -357,13 +376,19 @@ def main():
     cache = {k: [carrega(i, args.lado) for i in v] for k, v in partes.items()}
     print(f"imagens carregadas em {time.time() - inicio:.0f} s")
 
-    modelo = ContadorDeVagens()
+    modelo = ContadorDeVagens(passo=PASSO)
     cabeca = [p for n, p in modelo.named_parameters() if not n.startswith("ate")]
     corpo = [p for n, p in modelo.named_parameters() if n.startswith("ate")]
     otim = torch.optim.AdamW([{"params": corpo, "lr": 3e-4}, {"params": cabeca, "lr": 1e-3}], weight_decay=1e-4)
     agenda = torch.optim.lr_scheduler.CosineAnnealingLR(otim, T_max=args.epocas)
-    carregador = torch.utils.data.DataLoader(Recortes(cache["treino"], args.recorte), batch_size=args.lote,
-                                             shuffle=True, num_workers=0, drop_last=True)
+    # Plantas carregadas são sorteadas mais vezes (peso proporcional à raiz
+    # do número de vagens): na versão 1 eram poucas no treino, e o modelo
+    # contava de 17% a 28% a menos nas fotos com mais de 90 vagens.
+    pesos = [math.sqrt(len(p) + 1) for _, p in cache["treino"]]
+    sorteio = torch.utils.data.WeightedRandomSampler(pesos, num_samples=len(pesos), replacement=True)
+    conjunto = Recortes(cache["treino"], args.recorte, args.sigma)
+    carregador = torch.utils.data.DataLoader(conjunto, batch_size=args.lote, sampler=sorteio,
+                                             num_workers=0, drop_last=True)
 
     melhor, historico = float("inf"), []
     for epoca in range(1, args.epocas + 1):
@@ -393,7 +418,7 @@ def main():
     modelo.load_state_dict(torch.load(saida / "contador_vagens.pt"))
     # O limiar dos picos é escolhido na validação, nunca no teste.
     melhor_lim, melhor_f1 = 0.08, -1
-    for lim in (0.03, 0.05, 0.08, 0.12, 0.16, 0.2):
+    for lim in (0.01, 0.02, 0.03, 0.05, 0.08, 0.12, 0.16):
         mv, _ = avalia(modelo, cache["validacao"], partes["validacao"], raio, lim)
         p, r = mv["localizacao"]["precisao"], mv["localizacao"]["revocacao"]
         f1 = 2 * p * r / (p + r) if p + r else 0
@@ -459,7 +484,8 @@ def main():
     lt = mtes["localizacao"]
     (saida / "LEIAME.md").write_text(f"""# Contador de vagens de soja (YOLO POD)
 
-Gerado por `pesquisa/09_contagem_por_imagem/treina_contador_vagens.py` em {time.strftime('%d/%m/%Y')}.
+Gerado por `pesquisa/09_contagem_por_imagem/treina_contador_vagens.py` em {time.strftime('%d/%m/%Y')}:
+lado {args.lado} px, mapa 1/{PASSO}, sigma {args.sigma:g} px, {len(historico)} épocas.
 
 ## Base
 
@@ -484,15 +510,15 @@ Por localidade: {json.dumps(por_local, ensure_ascii=False)}
 
 ## Limites
 
-As fotos da base são de plantas em pé no campo, na China. As do aplicativo são de plantas
-arrancadas sobre pano, no Pará. Este erro vale para a base; o erro nas fotos do aplicativo
+As fotos da base são de plantas arrancadas e deitadas sobre pano escuro, como pede a tela do
+aplicativo, mas de cultivares e câmeras da China. Este erro vale para a base; o erro nas fotos do aplicativo
 precisa ser medido com fotos marcadas pelo produtor antes de o modelo entrar no app.
 
 ## Arquivos
 
 - `contador_vagens.pt`: pesos (PyTorch); `contador_vagens.onnx`: o mesmo modelo em ONNX
   (entrada `imagem` 1×3×H×W normalizada pelo ImageNet, H e W múltiplos de 32; saída `densidade`
-  1×1×H/8×W/8 multiplicada por {FATOR:.0f}: contagem = soma ÷ {FATOR:.0f}).
+  1×1×H/{PASSO}×W/{PASSO} multiplicada por {FATOR:.0f}: contagem = soma ÷ {FATOR:.0f}).
 - `metricas.json`, `teste_por_imagem.json`, `exemplos/` (três melhores e três piores fotos do teste).
 """, encoding="utf-8")
 

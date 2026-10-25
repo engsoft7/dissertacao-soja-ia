@@ -1,0 +1,13 @@
+{
+ "_leia": "Referências sem DOI conferidas à mão em 25/10/2026 nas páginas que o workflow le-documentos-publicos.yml baixou (branch documentos-lidos). Chave: começo da referência; valor: o que foi conferido e onde. O que não foi possível conferir fica de fora e continua marcado para conferir à mão.",
+ "BERGSTRA, J.; BENGIO, Y.": "autores, título, v. 13, p. 281-305, 2012: jmlr.org/papers/v13/bergstra12a.html",
+ "Bergstra, J. e Bengio, Y.": "autores, título, 13:281-305, 2012: jmlr.org/papers/v13/bergstra12a.html",
+ "Cawley, G. C. e Talbot, N. L. C.": "autores, título, 11:2079-2107, 2010: jmlr.org/papers/v11/cawley10a.html",
+ "Pedregosa, F. et al.": "autores, título, 12:2825-2830, 2011: jmlr.org/papers/v12/pedregosa11a.html",
+ "DRUCKER, H.; BURGES, C. J. C.": "autores, título, NIPS 9 (1996): papers.nips.cc/paper/1238; páginas não publicadas na página do NeurIPS",
+ "Williams, C. K. I. e Seeger, M.": "autores, título, NIPS 13 (2000): papers.nips.cc/paper/1866; páginas não publicadas na página do NeurIPS",
+ "LEMPITSKY, V.; ZISSERMAN, A.": "autores, título, NeurIPS v. 23, 2010, Curran Associates: BibTeX oficial do NeurIPS; páginas não publicadas no BibTeX",
+ "GOODFELLOW, I.; BENGIO, Y.; COURVILLE, A.": "título e editora (MIT Press), ISBN 9780262035613: openlibrary.org",
+ "MITCHELL, T. M.": "título, editora (McGraw-Hill) e ano (1997), ISBN 9780070428072: openlibrary.org",
+ "RUSSELL, S. J.; NORVIG, P.": "título, 4. ed., editora (Pearson), classificação LC de 2021, ISBN 9780134610993: openlibrary.org"
+}

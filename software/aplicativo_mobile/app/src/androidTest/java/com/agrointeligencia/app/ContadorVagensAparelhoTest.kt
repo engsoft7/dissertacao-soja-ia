@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -35,7 +36,7 @@ class ContadorVagensAparelhoTest {
         assertNotNull("o modelo não rodou neste aparelho", r)
         assertEquals(188.0, r!!.vagens.toDouble(), 6.0)
         assertEquals(131.0, r.marcas.size.toDouble(), 13.0)
-        r.marcas.forEach { (x, y) -> assert(x in 0f..1f && y in 0f..1f) }
+        assertTrue(r.marcas.all { (x, y) -> x in 0f..1f && y in 0f..1f })
     }
 
     @Test

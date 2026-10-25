@@ -1,6 +1,6 @@
 {
  "gerado_em": "2026-10-25",
- "fonte": "versões do Google Drive de 23/10/2026; lista principal da dissertação atualizada em 25/10/2026 (entram XIANG et al., 2023; BOARD; KAHLON, 2011; FEHR; CAVINESS, 1977; LEMPITSKY; ZISSERMAN, 2010)",
+ "fonte": "versões do Google Drive de 23/10/2026; lista principal da dissertação atualizada em 25/10/2026 (entram XIANG et al., 2023; BOARD; KAHLON, 2011; FEHR; CAVINESS, 1977; LEMPITSKY; ZISSERMAN, 2010; endereços da CONAB atualizados para gov.br/conab)",
  "listas": {
   "dissertacao_referencias": [
    "AGROLINK. Cotações: soja em grão, saca de 60 kg — histórico de preços do Pará. [S. l.]: Agrolink, 2026. Disponível em: https://www.agrolink.com.br/cotacoes/historico/pa/soja-em-grao-sc-60kg. Acesso em: 23 out. 2026.",
@@ -10,8 +10,8 @@
    "BOARD, J. E.; KAHLON, C. S. Soybean yield formation: what controls it and how it can be improved. In: EL-SHEMY, H. A. (ed.). Soybean physiology and biochemistry. Rijeka: InTech, 2011. p. 1-36. DOI: 10.5772/17596.",
    "BREIMAN, L. Random forests. Machine Learning, v. 45, n. 1, p. 5-32, 2001.",
    "CHEN, T.; GUESTRIN, C. XGBoost: a scalable tree boosting system. In: ACM SIGKDD INTERNATIONAL CONFERENCE ON KNOWLEDGE DISCOVERY AND DATA MINING, 22., 2016, San Francisco. Proceedings [...]. New York: ACM, 2016. p. 785-794.",
-   "COMPANHIA NACIONAL DE ABASTECIMENTO (CONAB). Acompanhamento da safra brasileira de grãos. Brasília, DF: CONAB, 2024. Disponível em: https://www.conab.gov.br. Acesso em: 19 ago. 2026.",
-   "COMPANHIA NACIONAL DE ABASTECIMENTO (CONAB). Custos de produção agrícola: soja — Pedro Afonso (TO). Levantamento de março de 2026. Brasília, DF: CONAB, 2026. Disponível em: https://portaldeinformacoes.conab.gov.br/custos-de-producao.html. Acesso em: 30 ago. 2026.",
+   "COMPANHIA NACIONAL DE ABASTECIMENTO (CONAB). Acompanhamento da safra brasileira de grãos. Brasília, DF: CONAB, 2024. Disponível em: https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/safras. Acesso em: 25 out. 2026.",
+   "COMPANHIA NACIONAL DE ABASTECIMENTO (CONAB). Custos de produção agrícola: soja — Pedro Afonso (TO). Levantamento de março de 2026. Brasília, DF: CONAB, 2026. Disponível em: https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao. Acesso em: 25 out. 2026.",
    "DRUCKER, H.; BURGES, C. J. C.; KAUFMAN, L.; SMOLA, A.; VAPNIK, V. Support vector regression machines. In: CONFERENCE ON NEURAL INFORMATION PROCESSING SYSTEMS, 9., 1996. Advances in Neural Information Processing Systems 9. Cambridge: MIT Press, 1997. p. 155-161.",
    "FEHR, W. R.; CAVINESS, C. E. Stages of soybean development. Ames: Iowa State University of Science and Technology, 1977. 11 p. (Special Report, 80).",
    "FUNK, C. et al. The climate hazards infrared precipitation with stations: a new environmental record for monitoring extremes. Scientific Data, v. 2, art. 150066, 2015.",

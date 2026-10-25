@@ -94,3 +94,6 @@ https://apiprevmet3.inmet.gov.br/avisos/ativos
 https://www.embrapa.br/busca-de-noticias/-/noticia/17950762/tecnologia-de-aplicacao-de-agrotoxicos-garante-eficiencia-na-producao-de-soja
 https://ainfo.cnptia.embrapa.br/digital/bitstream/item/223209/1/SP-17-2020-online-1.pdf
 navegador https://www.embrapa.br/busca-de-noticias/-/noticia/17950762/tecnologia-de-aplicacao-de-agrotoxicos-garante-eficiencia-na-producao-de-soja
+# Coordenadas das sedes municipais do Pará no Wikidata (código IBGE, P1585), para
+# conferir pesquisa/dados/municipios_para.csv: Pau D'Arco estava fora do lugar.
+https://query.wikidata.org/sparql?format=json&query=SELECT%20%3Fibge%20%3Fnome%20%3Fcoord%20WHERE%20%7B%20%3Fm%20wdt%3AP1585%20%3Fibge%20.%20FILTER%28STRSTARTS%28%3Fibge%2C%20%2215%22%29%29%20%3Fm%20wdt%3AP625%20%3Fcoord%20.%20%3Fm%20rdfs%3Alabel%20%3Fnome%20.%20FILTER%28LANG%28%3Fnome%29%3D%22pt%22%29%20%7D

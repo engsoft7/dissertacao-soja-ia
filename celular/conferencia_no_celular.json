@@ -1,0 +1,126 @@
+{
+  "base": {
+    "repositorio": "Project-AgML/YOLOPOD_Soyabean_Pod_Counting_Dataset",
+    "revisao": "4160b98b1cec6343313d611455cbfe396ef0ef41",
+    "licenca": "CC BY 4.0",
+    "fotos_de_teste": 218
+  },
+  "conversao": {
+    "v1": {
+      "papel": "contagem",
+      "passo": 8,
+      "lado": 768,
+      "arquivo": "contador_vagens_v1.tflite",
+      "bytes": 3522968,
+      "entrada": [
+        1,
+        3,
+        576,
+        768
+      ],
+      "saida": [
+        1,
+        1,
+        72,
+        96
+      ],
+      "limiar_picos": 0.05,
+      "diferenca_maxima_para_o_pytorch": 5.510635673999786e-06,
+      "teste_publicado": {
+        "imagens": 218,
+        "vagens": 10768,
+        "mae": 2.816744327545166,
+        "rmse": 4.720022602348367,
+        "vies": -0.3546990254603395,
+        "erro_relativo_medio": 0.05609613776374657,
+        "erro_relativo_mediano": 0.04331552380521879,
+        "r2": 0.9688918075967434,
+        "erro_relativo_do_total": 0.00718094238023347,
+        "localizacao": {
+          "precisao": 0.9912082957619477,
+          "revocacao": 0.40833952451708766,
+          "raio_px": 15.11111111111111,
+          "limiar": 0.05
+        }
+      }
+    },
+    "v2": {
+      "papel": "marcas",
+      "passo": 4,
+      "lado": 1024,
+      "arquivo": "contador_vagens_v2.tflite",
+      "bytes": 3530796,
+      "entrada": [
+        1,
+        3,
+        768,
+        1024
+      ],
+      "saida": [
+        1,
+        1,
+        192,
+        256
+      ],
+      "limiar_picos": 0.02,
+      "diferenca_maxima_para_o_pytorch": 2.9087066650390625e-05,
+      "teste_publicado": {
+        "imagens": 218,
+        "vagens": 10768,
+        "mae": 3.5478571270583967,
+        "rmse": 5.652539248007803,
+        "vies": -0.7498127998562034,
+        "erro_relativo_medio": 0.08294621664629317,
+        "erro_relativo_mediano": 0.05668719725175338,
+        "r2": 0.9553857298383547,
+        "erro_relativo_do_total": 0.015180088258604415,
+        "localizacao": {
+          "precisao": 0.8429794301775904,
+          "revocacao": 0.6127414561664191,
+          "raio_px": 20.14814814814815,
+          "limiar": 0.02
+        }
+      }
+    }
+  },
+  "no_celular": {
+    "contagem_v1": {
+      "mae": 2.8358244939681585,
+      "vies": -0.4810861360042467,
+      "erro_relativo_medio": 0.05631291970461587,
+      "erro_relativo_mediano": 0.04140960879442168,
+      "r2": 0.9670962697474681,
+      "erro_relativo_do_total": 0.009739671029803658
+    },
+    "contagem_v2": {
+      "mae": 4.321882864750854,
+      "vies": -2.5463782450474732,
+      "erro_relativo_medio": 0.08926851754705814,
+      "erro_relativo_mediano": 0.06307196450400186,
+      "r2": 0.936240863544418,
+      "erro_relativo_do_total": 0.05155186268762529
+    },
+    "marcas_v2": {
+      "precisao": 0.8506109578242018,
+      "revocacao": 0.6012258543833581
+    }
+  },
+  "foto_de_cabeca_para_baixo": {
+    "contagem_v1": {
+      "mae": 2.6762291925762773,
+      "vies": -0.4876643758301341,
+      "erro_relativo_medio": 0.051989974410345335,
+      "erro_relativo_mediano": 0.03822252057122846,
+      "r2": 0.9699425025559604,
+      "erro_relativo_do_total": 0.009872848619146474
+    },
+    "marcas_v2": {
+      "precisao": 0.8515365172276174,
+      "revocacao": 0.5944465081723626
+    }
+  },
+  "segundos_por_foto_neste_computador": {
+    "v1": 0.02612590789794922,
+    "v2": 0.0712212324142456
+  }
+}

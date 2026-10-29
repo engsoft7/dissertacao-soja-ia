@@ -73,7 +73,13 @@ esperava: o modelo ajusta o resíduo sobre a média do município, que já absor
 o que é fixo nele. A Tabela 6 refeita sem o solo reproduz os valores publicados
 de RF, SVR e MLP; o XGBoost difere (433,2 contra 439,5) pela versão da
 biblioteca no Actions. No recorte nacional, onde o modelo não vê a média do
-município, o teste está em execução (`13_variaveis_extras.py solo`).
+município, os quatro modelos melhoram com o solo, e nenhum intervalo inclui o zero
+(diferença de RMSE, com − sem, IC95 por reamostragem de municípios, nos 23.820
+registros dos 1.191 municípios pareados ao GAUL): RF −4,0 kg/ha (−5,5 a −2,6),
+XGBoost −4,4 (−6,0 a −3,1), SVR −1,8 (−2,9 a −0,8) e MLP −11,1 (−15,1 a −7,0).
+O ganho é real e pequeno: no melhor modelo, o SVR, 0,4% do erro (de 449,5 para
+447,6 kg/ha). O contraste com o Pará vem do desenho, não do dado: lá o modelo
+corrige a média do município, que já carrega o solo; aqui ele não a vê.
 
 **Feito em 29/10/2026, Tabela 3 sem subamostragem**
 (`03_analise_nacional/12_sem_subamostragem.py`): os mesmos modelos e

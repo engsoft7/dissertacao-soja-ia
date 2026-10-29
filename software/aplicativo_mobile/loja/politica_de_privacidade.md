@@ -1,12 +1,12 @@
 # Política de privacidade do aplicativo AgroInteligência
 
 > **Rascunho para o autor revisar.** Descreve o que o aplicativo faz com os
-> dados na versão 2.5.0, conferido no código. Antes de publicar: preencher o
+> dados na versão 2.6.0, conferido no código. Antes de publicar: preencher o
 > contato, revisar o texto e hospedar a página num endereço público (a Play
 > Store pede o link no Play Console). Se o aplicativo mudar o que envia ou
 > guarda, esta página muda junto.
 
-Última atualização: 25 de outubro de 2026.
+Última atualização: 29 de outubro de 2026.
 
 O AgroInteligência é um aplicativo gratuito, sem anúncios e sem cadastro,
 desenvolvido como produto técnico de dissertação do Programa de Pós-Graduação
@@ -36,6 +36,7 @@ nem de publicidade.
 | Nome do município escolhido | estimativa de produtividade, histórico, mapa, finanças | API do produto (servidor no Render) |
 | Posição aproximada, arredondada a cerca de 1 km: a sede do município ou, se o produtor escolher "Minha localização", a posição do GPS | previsão do tempo e janela de pulverização | Open-Meteo (open-meteo.com) |
 | A mesma posição aproximada e, quando é a sede, o código IBGE do município | avisos meteorológicos do INMET para o lugar | API do produto, que consulta o INMET |
+| Nada além da própria consulta, uma vez por dia | saber se há versão nova do modelo de contagem de vagens e, se houver, baixá-la | API do produto e GitHub (raw.githubusercontent.com) |
 
 Como em qualquer acesso à Internet, os servidores que recebem essas
 requisições registram o endereço IP do aparelho. A API do produto usa a
@@ -53,7 +54,10 @@ celular; a previsão volta então à sede do município.
 
 - **Localização:** medir a área do talhão e, se o produtor pedir, a previsão
   do tempo no lugar dele. Só com o aplicativo aberto.
-- **Internet:** buscar estimativas, cotações, previsão do tempo e avisos.
+- **Internet:** buscar estimativas, cotações, previsão do tempo, avisos e
+  versões novas do modelo de contagem de vagens. O modelo baixado só é usado
+  depois de conferido (tamanho e resumo SHA-256 anunciados); as fotos
+  continuam no celular.
 
 O aplicativo não pede permissão de câmera (usa o aplicativo de câmera do
 próprio Android), de contatos, de microfone nem de arquivos fora da pasta dele.

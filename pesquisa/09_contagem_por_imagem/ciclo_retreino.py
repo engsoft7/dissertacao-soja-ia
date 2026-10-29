@@ -28,12 +28,22 @@ de conversão, de que só importa as rotinas:
             na validação do Pará; mede no teste do Pará e no da YOLO POD, antes
             e depois. O modelo novo só vale se melhorar no Pará sem piorar na
             YOLO POD além da margem dada (--tolerancia).
+  publica   com a v1 e a v2 aprovadas e já gravadas na branch
+            modelo-contagem-vagens, escreve o anúncio que a API serve em
+            /api/contador (software/api_backend/contador_modelo.json): versão,
+            endereço preso ao commit, tamanho e SHA-256 de cada arquivo, e a
+            frase que o aplicativo mostra. O aplicativo (AtualizaContador.kt)
+            baixa e confere sozinho, sem versão nova. Não use Release: cada
+            Release publicado gera um depósito novo no Zenodo.
 
 Uso:
     python ciclo_retreino.py junta fotos_marcadas_2027-03-02.zip --lote "Fazenda Boa Vista" --base base_para
     python ciclo_retreino.py mede --base base_para --assets <app/src/main/assets>
     python ciclo_retreino.py retreina --base base_para --modelos <branch> --versao v1 \
         [--yolopod dados_yolopod] --saida retreino_v1
+    python ciclo_retreino.py publica --versao 2 --commit <sha da branch> --pasta celular_v2 \
+        --v1 retreino_v1/contador_vagens_v1.tflite --v2 retreino_v2/contador_vagens_v2.tflite \
+        --nota "Aprendeu também com N fotos de lavouras do Pará, onde erra em média X%."
 
 Fotos de pessoas, documentos ou qualquer coisa que não seja vagem de soja não
 devem entrar: confira as miniaturas que `junta` grava em base_para/revisar/
@@ -300,6 +310,30 @@ def retreina(args):
     print(json.dumps({k: resultado[k] for k in ("fotos_para", "aprovado", "criterio")}, indent=2, ensure_ascii=False))
 
 
+def publica(args):
+    """Anúncio do modelo novo para a API, com os endereços presos ao commit."""
+    import re
+    if not re.fullmatch(r"[0-9a-f]{40}", args.commit):
+        raise SystemExit("--commit precisa ser o resumo inteiro (40 dígitos) do commit na branch modelo-contagem-vagens")
+    destino = Path(args.anuncio)
+    atual = json.loads(destino.read_text(encoding="utf-8")) if destino.exists() else {"versao": 0}
+    if args.versao <= atual["versao"]:
+        raise SystemExit(f"a versão {args.versao} não é maior que a anunciada ({atual['versao']})")
+    arquivos = {}
+    for versao, caminho in (("v1", args.v1), ("v2", args.v2)):
+        dados = Path(caminho).read_bytes()
+        nome = f"contador_vagens_{versao}.tflite"
+        arquivos[nome] = {
+            "url": f"https://raw.githubusercontent.com/engsoft7/dissertacao-soja-ia/{args.commit}/"
+                   f"{args.pasta.strip('/')}/{nome}",
+            "sha256": hashlib.sha256(dados).hexdigest(), "bytes": len(dados)}
+    anuncio = {"versao": args.versao, "app_minimo": args.app_minimo, "arquivos": arquivos, "nota": args.nota,
+               "descricao": f"Versão {args.versao}, publicada por ciclo_retreino.py publica."}
+    destino.write_text(json.dumps(anuncio, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(json.dumps(anuncio, indent=2, ensure_ascii=False))
+    print("Confira os endereços (curl -I) antes de levar o anúncio à main: o aplicativo baixa o que estiver lá.")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="passo", required=True)
@@ -326,13 +360,25 @@ def main():
     r.add_argument("--minimo", type=int, default=30, help="fotos de treino do Pará exigidas para retreinar")
     r.add_argument("--tolerancia", type=float, default=0.005)
     r.add_argument("--semente", type=int, default=42)
+    p = sub.add_parser("publica")
+    p.add_argument("--versao", type=int, required=True)
+    p.add_argument("--commit", required=True)
+    p.add_argument("--pasta", required=True, help="pasta dos .tflite na branch modelo-contagem-vagens")
+    p.add_argument("--v1", required=True)
+    p.add_argument("--v2", required=True)
+    p.add_argument("--nota", required=True, help="frase sobre de onde o modelo aprendeu e quanto erra")
+    p.add_argument("--app-minimo", type=int, default=23)
+    p.add_argument("--anuncio", default=str(Path(__file__).resolve().parents[2] / "software" / "api_backend"
+                                            / "contador_modelo.json"))
     a = ap.parse_args()
     if a.passo == "junta":
         junta(a.zips, a.lote, a.base)
     elif a.passo == "mede":
         mede(a.base, a.assets, a.parte, a.saida)
-    else:
+    elif a.passo == "retreina":
         retreina(a)
+    else:
+        publica(a)
 
 
 if __name__ == "__main__":

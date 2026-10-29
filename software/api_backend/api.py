@@ -294,6 +294,19 @@ def get_mercado(periodo: str = "1d"):
         "conab_fonte": descricao_do_levantamento(),
     }
 
+@app.get("/api/contador")
+def get_contador():
+    """Anúncio do modelo do contador de vagens que o aplicativo deve usar.
+
+    O aplicativo (AtualizaContador.kt) consulta uma vez por dia e, se a versão
+    for mais nova que a dele, baixa os .tflite dos endereços, presos a um
+    commit, e confere tamanho e SHA-256 antes de adotar. Lido a cada requisição:
+    publicar um modelo novo é só trocar contador_modelo.json.
+    """
+    with open(Path(__file__).resolve().parent / "contador_modelo.json", encoding="utf-8") as f:
+        return json.load(f)
+
+
 @app.get("/api/avisos")
 def get_avisos(lat: float | None = None, lon: float | None = None, geocode: str | None = None):
     """Avisos meteorológicos do INMET que atingem o lugar (ver avisos_inmet.py).

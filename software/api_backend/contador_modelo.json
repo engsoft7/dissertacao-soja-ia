@@ -1,0 +1,18 @@
+{
+  "versao": 1,
+  "app_minimo": 23,
+  "arquivos": {
+    "contador_vagens_v1.tflite": {
+      "url": "https://raw.githubusercontent.com/engsoft7/dissertacao-soja-ia/1adb2a9b9db8c4590d5ccc026f3dc40199553359/celular/contador_vagens_v1.tflite",
+      "sha256": "7075c39700e3afde94400af38aa8151b23cce6d8aa32bf94c3ec695f9bf4edef",
+      "bytes": 3522968
+    },
+    "contador_vagens_v2.tflite": {
+      "url": "https://raw.githubusercontent.com/engsoft7/dissertacao-soja-ia/1adb2a9b9db8c4590d5ccc026f3dc40199553359/celular/contador_vagens_v2.tflite",
+      "sha256": "63a22e22d9c0645679f87cf1ace623c658cadafb9a2d23368a35865af5b45a69",
+      "bytes": 3530796
+    }
+  },
+  "nota": "Ele aprendeu com fotos de plantas da China, onde erra em média 6%, e ainda não foi conferido em lavouras do Pará.",
+  "descricao": "Versão 1: os modelos que vêm no aplicativo (treinados na YOLO POD, convertidos em 25/10/2026). Para publicar um modelo novo, ver pesquisa/09_contagem_por_imagem/ciclo_retreino.py (passo publica)."
+}

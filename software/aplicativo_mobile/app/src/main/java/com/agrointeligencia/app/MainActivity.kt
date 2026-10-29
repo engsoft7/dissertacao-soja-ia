@@ -56,7 +56,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
@@ -252,6 +254,9 @@ fun AgroDashboard() {
         // --- 0. Proactive Render warm-up (fire-and-forget) ---
         coroutineScope.launch {
             try { RetrofitClient.getInstance().ping() } catch (_: Exception) {}
+            // Com a API acordada, confere se há modelo novo do contador de
+            // vagens (no máximo uma vez por dia; ver AtualizaContador.kt).
+            withContext(Dispatchers.IO) { atualizaContador(context) }
         }
         
         // --- 1. Optimistic Cache Load ---

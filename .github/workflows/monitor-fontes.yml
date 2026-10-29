@@ -1,0 +1,100 @@
+# Confere, todo dia, as fontes externas de que o produto depende, e abre (ou
+# atualiza) uma issue quando alguma falha. Nenhuma tem contrato com o produto:
+# a Agrolink já mudou de formato sem aviso (25/10/2026) e o gráfico do Pará
+# ficou vazio até alguém notar. Aqui a falha aparece no dia.
+#
+#   Yahoo Finance (soja na CBOT e dólar), Agrolink (médias mensais do Pará),
+#   Notícias Agrícolas (físico do dia), Open-Meteo (previsão do tempo), INMET
+#   (avisos), SIDRA/IBGE (PAM) e a própria API do produto.
+name: Monitor das fontes
+
+on:
+  schedule:
+    - cron: "37 10 * * *"
+  workflow_dispatch:
+  # Também quando o próprio workflow muda, para conferi-lo antes do merge.
+  push:
+    paths:
+      - ".github/workflows/monitor-fontes.yml"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  confere:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet requests pandas
+      - name: Confere as fontes
+        id: confere
+        working-directory: software/api_backend
+        run: |
+          python - <<'PY' | tee "$RUNNER_TEMP/relatorio.md"
+          import json, sys, traceback, requests
+          import mercado, precos_para, avisos_inmet
+          falhas, linhas = [], []
+          def confere(nome, f):
+              try:
+                  msg = f()
+                  linhas.append(f"- ok: **{nome}** — {msg}")
+              except Exception as e:
+                  falhas.append(nome)
+                  linhas.append(f"- FALHOU: **{nome}** — {type(e).__name__}: {str(e)[:300]}")
+          def yahoo():
+              c = mercado.cotacao('5d')
+              assert c and c['velas'], 'sem velas'
+              return f"{len(c['velas'])} velas, último R$ {c['ultimo_brl_saca']}/sc"
+          def agrolink():
+              h = precos_para._baixa_agrolink()
+              assert len(h) >= 12, f'só {len(h)} meses lidos'
+              return f"{len(h)} meses, último {h[-1]['mes']}: R$ {h[-1]['para']}"
+          def noticias():
+              import precos
+              c = precos.buscar_precos()
+              assert c, 'nenhuma cotação física'
+              return f"{len(c)} praças, ex.: {precos.descricao(precos.preferida(c))}"
+          def openmeteo():
+              r = requests.get('https://api.open-meteo.com/v1/forecast', timeout=30, params={
+                  'latitude': -3.0, 'longitude': -47.35, 'current': 'temperature_2m',
+                  'hourly': 'precipitation_probability', 'daily': 'et0_fao_evapotranspiration',
+                  'past_days': 7, 'forecast_days': 7, 'timezone': 'auto'})
+              r.raise_for_status(); d = r.json()
+              assert d['current']['temperature_2m'] is not None and len(d['hourly']['time']) == 336
+              return f"{d['current']['temperature_2m']} °C em Paragominas"
+          def inmet():
+              d = avisos_inmet._baixa()
+              return f"{len(d.get('hoje') or [])} avisos hoje, {len(d.get('futuro') or [])} adiante"
+          def sidra():
+              r = requests.get('https://apisidra.ibge.gov.br/values/t/1612/n3/15/v/112/p/last%201/c81/2713', timeout=60)
+              r.raise_for_status(); d = r.json()
+              return f"PAM mais recente: {d[1]['D3N']}, Pará {d[1]['V']} kg/ha"
+          def api():
+              r = requests.get('https://agrointeligencia-api.onrender.com/api/mercado?periodo=1d', timeout=120)
+              r.raise_for_status(); d = r.json()
+              assert d.get('cotacao'), 'sem cotação'
+              return 'mercado respondeu' + (', com Pará estimado' if d.get('para') else ', SEM o Pará estimado')
+          for nome, f in [('Yahoo Finance', yahoo), ('Agrolink', agrolink), ('Notícias Agrícolas', noticias),
+                          ('Open-Meteo', openmeteo), ('INMET', inmet), ('SIDRA/IBGE', sidra), ('API do produto', api)]:
+              confere(nome, f)
+          print("\n".join(linhas))
+          open('/tmp/falhas', 'w').write(','.join(falhas))
+          PY
+          echo "falhas=$(cat /tmp/falhas)" >> "$GITHUB_OUTPUT"
+      # No push (conferência do próprio workflow) só mostra as falhas no log.
+      - name: Abre ou atualiza a issue
+        if: github.event_name != 'push' && steps.confere.outputs.falhas != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          titulo="Fonte externa com falha"
+          corpo="$(cat "$RUNNER_TEMP/relatorio.md")
+
+          Conferência de $(date -u +%d/%m/%Y) pelo workflow monitor-fontes.yml ([execução]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID))."
+          n=$(gh issue list --state open --search "in:title \"$titulo\"" --json number -q '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$corpo"; else gh issue create --title "$titulo" --body "$corpo"; fi

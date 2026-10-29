@@ -34,6 +34,7 @@ import math
 import os
 import re
 import sys
+import time
 import unicodedata
 import zipfile
 
@@ -114,15 +115,30 @@ def estacoes_inmet():
 
 
 def previsao(lat, lon):
-    r = requests.get(URL_OM, timeout=120, params={
-        'latitude': lat, 'longitude': lon, 'start_date': INICIO, 'end_date': FIM, 'timezone': 'UTC',
-        'hourly': 'temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,precipitation_probability'})
-    r.raise_for_status()
-    h = r.json()['hourly']
-    return pd.DataFrame({'hora': pd.to_datetime(h['time']), 't': h['temperature_2m'],
-                         'ur': h['relative_humidity_2m'], 'v10': h['wind_speed_10m'],
-                         'chuva': h['precipitation'],
-                         'chance': h.get('precipitation_probability') or [None] * len(h['time'])}).set_index('hora')
+    """Mês a mês e com novas tentativas: o arquivo do Open-Meteo demora a
+    responder o semestre inteiro de uma vez e cortou a primeira execução."""
+    partes = []
+    for ini in pd.date_range(INICIO, FIM, freq='MS'):
+        fim = min(ini + pd.offsets.MonthEnd(0), pd.Timestamp(FIM))
+        for tentativa in range(4):
+            try:
+                r = requests.get(URL_OM, timeout=180, params={
+                    'latitude': lat, 'longitude': lon, 'start_date': ini.strftime('%Y-%m-%d'),
+                    'end_date': fim.strftime('%Y-%m-%d'), 'timezone': 'UTC',
+                    'hourly': 'temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,'
+                              'precipitation_probability'})
+                r.raise_for_status()
+                break
+            except requests.RequestException:
+                if tentativa == 3:
+                    raise
+                time.sleep(20 * (tentativa + 1))
+        h = r.json()['hourly']
+        partes.append(pd.DataFrame({'hora': pd.to_datetime(h['time']), 't': h['temperature_2m'],
+                                    'ur': h['relative_humidity_2m'], 'v10': h['wind_speed_10m'],
+                                    'chuva': h['precipitation'],
+                                    'chance': h.get('precipitation_probability') or [None] * len(h['time'])}))
+    return pd.concat(partes).drop_duplicates('hora').set_index('hora').sort_index()
 
 
 def kappa(a, b, k=3):

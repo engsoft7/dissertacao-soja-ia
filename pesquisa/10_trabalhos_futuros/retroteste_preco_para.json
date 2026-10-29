@@ -1,0 +1,215 @@
+{
+  "nota": "Média mensal do Pará (Agrolink) prevista com a média de Chicago do mês e a base do mês anterior; o mês corrente, com média parcial, fica de fora.",
+  "fonte": "Agrolink, média mensal do Pará (praça publicada: Barcarena)",
+  "periodo": [
+    "2024-12",
+    "2026-09"
+  ],
+  "estimativa_do_produto": {
+    "MAE_R$_sc": 3.44,
+    "vies_R$_sc": 0.3,
+    "MAPE_%": 2.73,
+    "maior_erro_R$_sc": 8.54,
+    "n": 22
+  },
+  "chicago_sem_base": {
+    "MAE_R$_sc": 5.78,
+    "vies_R$_sc": 4.22,
+    "MAPE_%": 4.66,
+    "maior_erro_R$_sc": 12.39,
+    "n": 22
+  },
+  "persistencia_mes_anterior": {
+    "MAE_R$_sc": 2.92,
+    "vies_R$_sc": -0.67,
+    "MAPE_%": 2.27,
+    "maior_erro_R$_sc": 10.03,
+    "n": 22
+  },
+  "meses": [
+    {
+      "mes": "2024-12",
+      "para": 131.57,
+      "chicago": 132.14,
+      "base_mes_anterior": 2.66,
+      "estimativa": 134.8,
+      "persistencia": 129.36
+    },
+    {
+      "mes": "2025-01",
+      "para": 130.5,
+      "chicago": 136.79,
+      "base_mes_anterior": -0.57,
+      "estimativa": 136.22,
+      "persistencia": 131.57
+    },
+    {
+      "mes": "2025-02",
+      "para": 127.99,
+      "chicago": 132.23,
+      "base_mes_anterior": -6.29,
+      "estimativa": 125.94,
+      "persistencia": 130.5
+    },
+    {
+      "mes": "2025-03",
+      "para": 122.76,
+      "chicago": 127.85,
+      "base_mes_anterior": -4.24,
+      "estimativa": 123.61,
+      "persistencia": 127.99
+    },
+    {
+      "mes": "2025-04",
+      "para": 122.37,
+      "chicago": 131.03,
+      "base_mes_anterior": -5.09,
+      "estimativa": 125.94,
+      "persistencia": 122.76
+    },
+    {
+      "mes": "2025-05",
+      "para": 122.5,
+      "chicago": 131.36,
+      "base_mes_anterior": -8.66,
+      "estimativa": 122.7,
+      "persistencia": 122.37
+    },
+    {
+      "mes": "2025-06",
+      "para": 119.63,
+      "chicago": 128.52,
+      "base_mes_anterior": -8.86,
+      "estimativa": 119.66,
+      "persistencia": 122.5
+    },
+    {
+      "mes": "2025-07",
+      "para": 120.39,
+      "chicago": 123.02,
+      "base_mes_anterior": -8.89,
+      "estimativa": 114.13,
+      "persistencia": 119.63
+    },
+    {
+      "mes": "2025-08",
+      "para": 124.33,
+      "chicago": 120.82,
+      "base_mes_anterior": -2.63,
+      "estimativa": 118.19,
+      "persistencia": 120.39
+    },
+    {
+      "mes": "2025-09",
+      "para": 126.27,
+      "chicago": 120.6,
+      "base_mes_anterior": 3.51,
+      "estimativa": 124.11,
+      "persistencia": 124.33
+    },
+    {
+      "mes": "2025-10",
+      "para": 127.26,
+      "chicago": 122.87,
+      "base_mes_anterior": 5.67,
+      "estimativa": 128.54,
+      "persistencia": 126.27
+    },
+    {
+      "mes": "2025-11",
+      "para": 128.1,
+      "chicago": 132.25,
+      "base_mes_anterior": 4.39,
+      "estimativa": 136.64,
+      "persistencia": 127.26
+    },
+    {
+      "mes": "2025-12",
+      "para": 131.19,
+      "chicago": 129.34,
+      "base_mes_anterior": -4.15,
+      "estimativa": 125.19,
+      "persistencia": 128.1
+    },
+    {
+      "mes": "2026-01",
+      "para": 125.74,
+      "chicago": 123.97,
+      "base_mes_anterior": 1.85,
+      "estimativa": 125.82,
+      "persistencia": 131.19
+    },
+    {
+      "mes": "2026-02",
+      "para": 122.23,
+      "chicago": 128.97,
+      "base_mes_anterior": 1.77,
+      "estimativa": 130.74,
+      "persistencia": 125.74
+    },
+    {
+      "mes": "2026-03",
+      "para": 122.62,
+      "chicago": 135.01,
+      "base_mes_anterior": -6.74,
+      "estimativa": 128.27,
+      "persistencia": 122.23
+    },
+    {
+      "mes": "2026-04",
+      "para": 120.77,
+      "chicago": 129.85,
+      "base_mes_anterior": -12.39,
+      "estimativa": 117.46,
+      "persistencia": 122.62
+    },
+    {
+      "mes": "2026-05",
+      "para": 120.57,
+      "chicago": 131.39,
+      "base_mes_anterior": -9.08,
+      "estimativa": 122.31,
+      "persistencia": 120.77
+    },
+    {
+      "mes": "2026-06",
+      "para": 118.88,
+      "chicago": 127.39,
+      "base_mes_anterior": -10.82,
+      "estimativa": 116.57,
+      "persistencia": 120.57
+    },
+    {
+      "mes": "2026-07",
+      "para": 128.28,
+      "chicago": 135.23,
+      "base_mes_anterior": -8.51,
+      "estimativa": 126.72,
+      "persistencia": 118.88
+    },
+    {
+      "mes": "2026-08",
+      "para": 134.07,
+      "chicago": 136.31,
+      "base_mes_anterior": -6.95,
+      "estimativa": 129.36,
+      "persistencia": 128.28
+    },
+    {
+      "mes": "2026-09",
+      "para": 144.1,
+      "chicago": 148.04,
+      "base_mes_anterior": -2.24,
+      "estimativa": 145.8,
+      "persistencia": 134.07
+    },
+    {
+      "mes": "2026-10",
+      "para": 141.07,
+      "chicago": 142.21,
+      "base_mes_anterior": -3.94,
+      "estimativa": 138.27,
+      "persistencia": 144.1
+    }
+  ]
+}

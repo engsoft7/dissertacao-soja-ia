@@ -1,0 +1,52 @@
+# Roda, no Actions, uma análise de pesquisa/10_trabalhos_futuros que precisa
+# de fontes que o ambiente de desenvolvimento não alcança (Agrolink, Yahoo,
+# INMET, Open-Meteo) e grava o resultado na própria branch.
+#
+# Disparo: um push a uma branch de trabalho cujo commit diga, na mensagem,
+# "[roda: 03_retroteste_preco_para.py]" (o nome de um script da pasta). Sem
+# esse pedido, nada roda. Nunca na main.
+name: Roda análise (pesquisa)
+
+on:
+  push:
+    branches-ignore: [main]
+    paths:
+      - "pesquisa/10_trabalhos_futuros/*.py"
+      - ".github/workflows/roda-analise.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  roda:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - id: pedido
+        env:
+          MENSAGEM: ${{ github.event.head_commit.message }}
+        run: |
+          s=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[roda: *\([A-Za-z0-9_.]*\.py\)\].*/\1/p' | head -1)
+          if [ -n "$s" ] && [ ! -f "pesquisa/10_trabalhos_futuros/$s" ]; then echo "::error::$s não existe"; exit 1; fi
+          echo "script=$s" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-python@v5
+        if: steps.pedido.outputs.script != ''
+        with:
+          python-version: "3.11"
+      - name: Roda ${{ steps.pedido.outputs.script }}
+        if: steps.pedido.outputs.script != ''
+        working-directory: pesquisa/10_trabalhos_futuros
+        run: |
+          pip install --quiet pandas requests "scikit-learn>=1.3,<1.9" xgboost
+          python "${{ steps.pedido.outputs.script }}"
+      - name: Grava na branch
+        if: steps.pedido.outputs.script != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pesquisa/10_trabalhos_futuros
+          if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
+          git commit -m "Resultado de ${{ steps.pedido.outputs.script }}"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"

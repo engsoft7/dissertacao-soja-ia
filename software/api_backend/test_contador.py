@@ -4,6 +4,8 @@ import json
 import re
 from pathlib import Path
 
+import pytest
+
 AQUI = Path(__file__).resolve().parent
 ASSETS = AQUI.parent / "aplicativo_mobile" / "app" / "src" / "main" / "assets"
 ENDERECO = re.compile(r"https://raw\.githubusercontent\.com/engsoft7/dissertacao-soja-ia/[0-9a-f]{40}/[A-Za-z0-9_./-]+")
@@ -36,5 +38,6 @@ def test_versao_1_e_a_dos_assets():
 
 
 def test_endpoint_devolve_o_anuncio():
+    pytest.importorskip("fastapi")   # o job de testes do Python não instala a API inteira
     import api
     assert api.get_contador() == manifesto()

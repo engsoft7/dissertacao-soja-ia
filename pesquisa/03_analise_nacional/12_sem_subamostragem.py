@@ -18,7 +18,7 @@ A comparação com a Tabela 3 é feita nas mesmas observações de teste, com
 intervalo de 95% da diferença de RMSE por reamostragem de municípios.
 
 Uso:  python 12_sem_subamostragem.py
-Saída: results/sem_subamostragem.json
+Saída: sem_subamostragem.json
 """
 import importlib.util
 import json
@@ -95,7 +95,7 @@ def main():
         res['ic95'] = [round(float(np.percentile(difs, 2.5)), 1), round(float(np.percentile(difs, 97.5)), 1)]
         saida['modelos'][nome] = res
         print(f'>>> {nome}: {res}', flush=True)
-    json.dump(saida, open(os.path.join(AQUI, 'results', 'sem_subamostragem.json'), 'w', encoding='utf-8'),
+    json.dump(saida, open(os.path.join(AQUI, 'sem_subamostragem.json'), 'w', encoding='utf-8'),
               indent=2, ensure_ascii=False)
 
 

@@ -290,22 +290,27 @@ def retreina(args):
     melhora_para = depois["para_teste"]["erro_relativo_medio"] < antes["para_teste"]["erro_relativo_medio"]
     piora_yolo = (depois["yolopod_teste"]["erro_relativo_medio"] - antes["yolopod_teste"]["erro_relativo_medio"]
                   if "yolopod_teste" in depois else 0.0)
-    aprovado = bool(melhora_para and piora_yolo <= args.tolerancia)
+    # Sem a YOLO POD não há como saber se o modelo esqueceu o que sabia: é só ensaio.
+    aprovado = bool(melhora_para and piora_yolo <= args.tolerancia and "yolopod_teste" in depois)
     resultado = {"versao": args.versao, "fotos_para": {p: len(v) for p, v in para.items()},
                  "fotos_yolopod": {p: len(v) for p, v in yolo.items()}, "lado_mediano_das_fotos_para": float(escala),
                  "antes": antes, "depois": depois, "historico": historico,
                  "aprovado": aprovado,
-                 "criterio": (f"erro relativo médio menor no teste do Pará e, na YOLO POD, piora de no máximo "
+                 "criterio": (f"erro relativo médio menor no teste do Pará e, medida a YOLO POD (--yolopod), piora de no máximo "
                               f"{args.tolerancia:.1%}")}
     if aprovado:
         import shutil
         destino = saida / args.versao
         destino.mkdir(exist_ok=True)
         shutil.copy(saida / "contador_vagens.pt", destino / "contador_vagens.pt")
-        arquivo, dif = cel.converte(modelo, args.versao, saida)
-        resultado["tflite"] = {"arquivo": arquivo.name, "bytes": arquivo.stat().st_size,
-                               "sha256": hashlib.sha256(arquivo.read_bytes()).hexdigest(),
-                               "diferenca_maxima_para_o_pytorch": dif}
+        try:
+            arquivo, dif = cel.converte(modelo, args.versao, saida)
+            resultado["tflite"] = {"arquivo": arquivo.name, "bytes": arquivo.stat().st_size,
+                                   "sha256": hashlib.sha256(arquivo.read_bytes()).hexdigest(),
+                                   "diferenca_maxima_para_o_pytorch": dif}
+        except ImportError as e:   # litert-torch só existe no ambiente do Actions (converte-contador-celular.yml)
+            resultado["tflite"] = {"erro": f"conversão não feita: {e}. Converta com converte_para_celular.py "
+                                           f"a partir de {destino}"}
     (saida / "retreino.json").write_text(json.dumps(resultado, indent=2, ensure_ascii=False, default=str))
     print(json.dumps({k: resultado[k] for k in ("fotos_para", "aprovado", "criterio")}, indent=2, ensure_ascii=False))
 

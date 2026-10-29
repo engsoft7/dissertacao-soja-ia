@@ -23,7 +23,7 @@ GAUL, e a diferença de RMSE leva intervalo de 95% por reamostragem de
 municípios.
 
 Uso:   python 13_variaveis_extras.py solo|fases
-Saída: results/variaveis_extras_<teste>.json
+Saída: variaveis_extras_<teste>.json
 """
 import importlib.util
 import json
@@ -117,7 +117,7 @@ def main(teste):
         res['ic95'] = [round(float(np.percentile(difs, 2.5)), 1), round(float(np.percentile(difs, 97.5)), 1)]
         saida['modelos'][nome] = res
         print(f'>>> {nome}: {res}', flush=True)
-    with open(os.path.join(AQUI, 'results', f'variaveis_extras_{teste}.json'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(AQUI, f'variaveis_extras_{teste}.json'), 'w', encoding='utf-8') as f:
         json.dump(saida, f, indent=2, ensure_ascii=False)
 
 

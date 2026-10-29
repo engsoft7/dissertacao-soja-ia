@@ -96,6 +96,29 @@ com IC95 da diferença de RMSE por reamostragem de municípios. RF não muda
 SVR com subamostra, 460,7 kg/ha, segue o melhor modelo: a subamostragem não
 favoreceu o resultado publicado e não muda a conclusão da Tabela 3.
 
+**Em coleta em 29/10/2026.** Três testes têm script pronto e esperam dados do
+Earth Engine (`10_trabalhos_futuros/coleta`, workflow `coleta-gee-pesquisa.yml`):
+
+- *Sensores de 2015 em diante no Pará* (`02_sensores_recentes.py`): Sentinel-1
+  e SMAP desde 2016, Sentinel-2 (NDVI e NDRE) desde 2018, cada família com e
+  sem, nos mesmos registros da base do produto. A primeira coleta estourou o
+  tempo de computação do Earth Engine; foi refeita por sensor e em lotes de
+  municípios. O TROPOMI (fluorescência) não está no catálogo do Earth Engine.
+- *Variáveis por fase no recorte nacional* (`13_variaveis_extras.py fases`):
+  umidade do solo em duas camadas, déficit de pressão de vapor e temperatura da
+  superfície, mês a mês de setembro a março, para 1.196 municípios. A coleta
+  terminou; o arquivo entra na branch com as demais.
+- *Amazônia Legal* (`06_amazonia_legal.py`): o protocolo da Tabela 6 em
+  Tocantins, Maranhão, Rondônia e Mato Grosso, e nos cinco estados juntos.
+  Tocantins e Rondônia coletados; o Maranhão foi refeito em lotes depois de
+  estourar o tempo; Mato Grosso em coleta.
+
+**Milho.** A extensão a outras culturas esbarra na máscara: o MapBiomas
+(coleção 10) separa soja, cana, arroz, algodão e café, mas o milho fica em
+"outras lavouras temporárias", junto com o que se planta depois da soja. Sem a
+máscara, as variáveis de vegetação do milho se misturariam às da soja na
+mesma área, e o desenho da base do Pará não se repete.
+
 ## 4. Triangular a variável-alvo
 
 - **Hipótese.** Onde a PAM repete o valor, outra fonte independente varia.

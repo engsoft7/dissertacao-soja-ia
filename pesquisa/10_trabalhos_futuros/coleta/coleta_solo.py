@@ -10,8 +10,8 @@ de 0 a 30 cm (camadas de 0-5, 5-15 e 15-30 cm, ponderadas pela espessura) de:
   argila, areia e silte (%), carbono orgânico (g/kg), pH em água,
   capacidade de troca de cátions (cmol(c)/kg) e densidade do solo (g/cm³)
 
-sob a máscara de soja do MapBiomas mais recente (onde a soja está, e não no
-município inteiro, que no Pará é quase todo floresta). Município sem pixel de
+ponderada pela fração de soja do MapBiomas mais recente em cada pixel (onde
+a soja está, e não no município inteiro, que no Pará é quase todo floresta). Município sem pixel de
 soja na máscara recebe a média do município inteiro, e a coluna `sob_soja`
 diz qual foi o caso.
 
@@ -77,19 +77,36 @@ def main(recorte):
     solo = ee.Image.cat(imgs)
     sel = munis.filter(ee.Filter.inList('ADM2_NAME', list({achados[k] for k in pares})))
 
-    def reduz(img):
-        fc = img.reduceRegions(collection=sel, reducer=ee.Reducer.mean(), scale=250, tileScale=8)
+    def reduz(img, reducer):
+        fc = img.reduceRegions(collection=sel, reducer=reducer, scale=250, tileScale=8)
         return {(f['properties']['UF'], chave(f['properties']['ADM2_NAME'])): f['properties']
                 for f in fc.getInfo()['features']}
 
-    sob = tenta(reduz, solo.updateMask(soja))
-    todo = tenta(reduz, solo)
+    # Média ponderada pela fração de soja dentro de cada pixel de 250 m do
+    # SoilGrids: a máscara do MapBiomas (30 m) é agregada à grade do solo, em vez
+    # de mascarar a 250 m, onde a soja paraense, em talhões menores que o pixel,
+    # sumia (a primeira coleta não achou nenhum pixel sob a máscara).
+    frac = (soja.reproject(crs='EPSG:4326', scale=30)
+            .reduceResolution(reducer=ee.Reducer.mean(), maxPixels=1024)
+            .reproject(crs=solo.projection()).rename('peso'))
+    pond = tenta(reduz, solo.multiply(frac).addBands(frac), ee.Reducer.sum())
+    sob = {}
+    for k, p in pond.items():
+        peso = p.get('peso') or 0
+        if peso > 0:
+            sob[k] = {c: (p[c] / peso if p.get(c) is not None else None) for c, _ in PROPRIEDADES.values()}
+            sob[k]['peso'] = peso
+    amostra = list(pond.items())[:3]
+    print('amostra (soma ponderada e peso):', [(k, {c: v.get(c) for c in ('argila_pct', 'peso')}) for k, v in amostra],
+          flush=True)
+    todo = tenta(reduz, solo, ee.Reducer.mean())
     linhas = []
     for k, info in pares.items():
         p = sob.get(k, {})
         usa_mascara = p.get('argila_pct') is not None
         p = p if usa_mascara else todo.get(k, {})
         linhas.append({'id': info['id'], 'municipio': info['municipio'], 'uf': k[0], 'sob_soja': usa_mascara,
+                       'pixels_soja_250m': round(sob[k]['peso'], 1) if usa_mascara else 0,
                        **{c: (round(p[c], 3) if p.get(c) is not None else None)
                           for c, _ in PROPRIEDADES.values()}})
     os.makedirs(DADOS, exist_ok=True)

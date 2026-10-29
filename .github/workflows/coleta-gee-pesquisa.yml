@@ -36,17 +36,27 @@ jobs:
       tarefas: ${{ steps.p.outputs.tarefas }}
     steps:
       - id: p
+        env:
+          MENSAGEM: ${{ github.event.head_commit.message }}
         run: |
-          case "${{ inputs.coleta || 'tudo' }}" in
+          # No push, só coleta o que a mensagem do commit pedir, como "[coleta: solo]";
+          # sem pedido, nada (cada coleta completa leva horas e gasta cota do Earth Engine).
+          pedido="${{ inputs.coleta }}"
+          if [ -z "$pedido" ]; then
+            pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[coleta: *\([a-z_]*\)\].*/\1/p' | head -1)
+          fi
+          [ -n "$pedido" ] || { echo 'tarefas=[]' >> "$GITHUB_OUTPUT"; exit 0; }
+          case "$pedido" in
             tudo) t='["solo para","solo nacional","recentes","amazonia TO","amazonia MA","amazonia RO","amazonia MT","fases_nacional"]' ;;
             solo) t='["solo para","solo nacional"]' ;;
             amazonia) t='["amazonia TO","amazonia MA","amazonia RO","amazonia MT"]' ;;
-            *) t='["${{ inputs.coleta }}"]' ;;
+            *) t="[\"$pedido\"]" ;;
           esac
           echo "tarefas=$t" >> "$GITHUB_OUTPUT"
 
   coleta:
     needs: plano
+    if: needs.plano.outputs.tarefas != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 340
     strategy:
@@ -83,8 +93,8 @@ jobs:
           if-no-files-found: ignore
 
   grava:
-    needs: coleta
-    if: always() && github.ref_name != github.event.repository.default_branch
+    needs: [plano, coleta]
+    if: always() && github.ref_name != github.event.repository.default_branch && needs.plano.outputs.tarefas != '[]' 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -100,6 +110,6 @@ jobs:
           git add pesquisa/10_trabalhos_futuros/dados
           if git diff --cached --quiet; then echo "Nenhum dado novo."; exit 0; fi
           ls -la pesquisa/10_trabalhos_futuros/dados
-          git commit -m "Coletas no Earth Engine: ${{ inputs.coleta || 'tudo' }}"
+          git commit -m "Coletas no Earth Engine (${{ github.run_id }})"
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin HEAD:"$GITHUB_REF_NAME"

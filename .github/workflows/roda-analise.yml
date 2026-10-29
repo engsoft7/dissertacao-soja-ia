@@ -48,5 +48,9 @@ jobs:
           git add pesquisa/10_trabalhos_futuros
           if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
           git commit -m "Resultado de ${{ steps.pedido.outputs.script }}"
-          git pull --rebase origin "$GITHUB_REF_NAME"
-          git push origin HEAD:"$GITHUB_REF_NAME"
+          # Outro job pode ter gravado na branch entre o pull e o push: tenta de novo.
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
+            sleep $((i * 5))
+          done
+          exit 1

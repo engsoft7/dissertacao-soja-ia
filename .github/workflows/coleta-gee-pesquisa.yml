@@ -112,5 +112,9 @@ jobs:
           if git diff --cached --quiet; then echo "Nenhum dado novo."; exit 0; fi
           ls -la pesquisa/10_trabalhos_futuros/dados
           git commit -m "Coletas no Earth Engine (${{ github.run_id }})"
-          git pull --rebase origin "$GITHUB_REF_NAME"
-          git push origin HEAD:"$GITHUB_REF_NAME"
+          # Outro job pode ter gravado na branch entre o pull e o push: tenta de novo.
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
+            sleep $((i * 5))
+          done
+          exit 1

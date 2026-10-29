@@ -25,7 +25,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
 
-from comum_gee import DADOS, conecta_gee, mascara_soja, municipios_gaul, tenta
+from comum_gee import DADOS, conecta_gee, mascara_soja, municipios_gaul, reduz_em_lotes, tenta
 
 BANDAS = ['NDVI_mean', 'NDVI_max', 'EVI_mean', 'EVI_max', 'precip_total', 'temp_mean', 'temp_max',
           'srad_mean', 'etp_total']
@@ -60,12 +60,12 @@ def main():
             e.select('surface_solar_radiation_downwards_sum').mean().divide(1e6).rename('srad_mean'),
             e.select('potential_evaporation_sum').sum().multiply(-1000).rename('etp_total'),
         ])
-        med = bandas.reduceRegions(collection=munis, reducer=ee.Reducer.mean(), scale=250, tileScale=4)
+        med = reduz_em_lotes(ee, bandas, munis, ee.Reducer.mean(), 250)
         area = soja.multiply(ee.Image.pixelArea()).divide(1e4).rename('soy_area_ha')
-        ar = area.reduceRegions(collection=munis, reducer=ee.Reducer.sum(), scale=30, tileScale=8)
-        areas = {f['properties']['ADM2_NAME']: f['properties'].get('sum', 0) for f in ar.getInfo()['features']}
+        ar = reduz_em_lotes(ee, area, munis, ee.Reducer.sum(), 30, tamanho=6)
+        areas = {f['properties']['ADM2_NAME']: f['properties'].get('sum', 0) for f in ar}
         linhas = []
-        for f in med.getInfo()['features']:
+        for f in med:
             p = f['properties']
             if p.get('NDVI_mean') is None:      # município sem soja mapeada naquele ano
                 continue

@@ -263,4 +263,18 @@ Play App Signing, em que a chave do workflow é a de envio e pode ser trocada.
   R$ 10,03 no pior mês. A estimativa serve ao que se propõe, acompanhar o dia
   com a bolsa, e não é melhor que a persistência na média do mês.
 - **Validação da janela de pulverização** (`10_trabalhos_futuros/04_valida_tempo_inmet.py`):
-  em execução no Actions.
+  a previsão do Open-Meteo (arquivo das rodadas de curto prazo, o caso mais
+  favorável) contra 12 estações automáticas do INMET em municípios da base, de
+  novembro de 2025 a abril de 2026, 38.079 horas. Erro médio de cerca de 1 °C
+  na temperatura, de 5 a 10 pontos na umidade e de 3 a 4,5 km/h no vento, que
+  a previsão superestima. Nas estações com a série completa, a previsão acerta
+  de 73% a 92% dos dias com chuva de 1 mm ou mais, com 30% a 66% de alarmes
+  falsos. A janela concorda pouco com a calculada sobre o medido (acerto de
+  42%, kappa de 0,15): das horas previstas como boas, 26% eram boas, cerca de
+  63% de atenção e 10,6% a evitar. A maior parte da discordância fica entre
+  boa e atenção, coerente com o vento que a previsão põe nas horas calmas; os
+  10,6% de horas boas que eram a evitar são o erro que importa ao produtor.
+  A janela orienta, não garante: a tela já pede a conferência no local, e o
+  texto passa a dizer quanto ela erra. **Próximo passo:** decompor a
+  discordância por critério (vento, umidade, temperatura, chuva) e testar se
+  corrigir o viés do vento pela estação mais próxima aproxima as duas.

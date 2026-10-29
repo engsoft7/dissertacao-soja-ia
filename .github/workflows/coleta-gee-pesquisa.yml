@@ -43,13 +43,14 @@ jobs:
           # sem pedido, nada (cada coleta completa leva horas e gasta cota do Earth Engine).
           pedido="${{ inputs.coleta }}"
           if [ -z "$pedido" ]; then
-            pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[coleta: *\([a-z_]*\)\].*/\1/p' | head -1)
+            pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[coleta: *\([A-Za-z_]*\)\].*/\1/p' | head -1)
           fi
           [ -n "$pedido" ] || { echo 'tarefas=[]' >> "$GITHUB_OUTPUT"; exit 0; }
           case "$pedido" in
             tudo) t='["solo para","solo nacional","recentes","amazonia TO","amazonia MA","amazonia RO","amazonia MT","fases_nacional"]' ;;
             solo) t='["solo para","solo nacional"]' ;;
             amazonia) t='["amazonia TO","amazonia MA","amazonia RO","amazonia MT"]' ;;
+            amazonia_??) t="[\"amazonia ${pedido#amazonia_}\"]" ;;   # um estado só, ex.: amazonia_MA
             *) t="[\"$pedido\"]" ;;
           esac
           echo "tarefas=$t" >> "$GITHUB_OUTPUT"

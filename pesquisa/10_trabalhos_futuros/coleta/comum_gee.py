@@ -31,6 +31,25 @@ def chave(s):
     return re.sub(r'\s+', ' ', s).strip()
 
 
+def reduz_em_lotes(ee, img, munis, reducer, scale, tamanho=12, tileScale=16):
+    """reduceRegions em lotes de municípios, cada lote com novas tentativas.
+
+    De uma vez só, municípios grandes (Altamira, Balsas, os do norte de Mato
+    Grosso) estouravam o tempo de computação do Earth Engine e derrubavam a
+    coleta inteira do estado.
+    """
+    nomes = munis.aggregate_array('ADM2_NAME').getInfo()
+    feicoes = []
+    for i in range(0, len(nomes), tamanho):
+        lote = munis.filter(ee.Filter.inList('ADM2_NAME', nomes[i:i + tamanho]))
+
+        def reduz_lote():
+            return img.reduceRegions(collection=lote, reducer=reducer, scale=scale,
+                                     tileScale=tileScale).getInfo()['features']
+        feicoes += tenta(reduz_lote)
+    return feicoes
+
+
 def tenta(f, *a, tentativas=4, **k):
     for i in range(tentativas):
         try:

@@ -26,7 +26,7 @@ import os
 
 import pandas as pd
 
-from comum_gee import DADOS, REPO, chave, conecta_gee, mascara_soja, municipios_gaul, tenta
+from comum_gee import DADOS, REPO, chave, conecta_gee, mascara_soja, municipios_gaul, reduz_em_lotes
 
 SAFRAS = range(2016, 2026)
 
@@ -45,7 +45,7 @@ def main():
     S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
     S1 = (ee.ImageCollection('COPERNICUS/S1_GRD').filter(ee.Filter.eq('instrumentMode', 'IW'))
           .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VH')))
-    SMAP = ee.ImageCollection('NASA/SMAP/SPL4SMGP/007').select('sm_rootzone')
+    SMAP = ee.ImageCollection('NASA/SMAP/SPL4SMGP/008').select('sm_rootzone')
 
     def s2_limpa(img):
         scl = img.select('SCL')
@@ -59,23 +59,24 @@ def main():
         soja, am = mascara_soja(ee, t)
         jan, abr = ee.Date.fromYMD(t, 1, 1), ee.Date.fromYMD(t, 4, 1)
         nov, fev = ee.Date.fromYMD(t - 1, 11, 1), ee.Date.fromYMD(t, 2, 1)
-        partes = [
-            S1.filterDate(jan, abr).select(['VV', 'VH']).mean().rename(['s1_vv_db', 's1_vh_db']).updateMask(soja),
-            SMAP.filterDate(nov, abr).mean().rename('smap_raiz_nov_mar'),
-            SMAP.filterDate(fev, abr).mean().rename('smap_raiz_fev_mar'),
+        # Um sensor por vez e em lotes de municípios: tudo junto, a 100 m, estourava o
+        # tempo de computação do Earth Engine já na primeira safra. O SMAP vai na
+        # escala dele (9 km), sem a máscara, que a 9 km não teria sentido.
+        reducoes = [
+            (S1.filterDate(jan, abr).select(['VV', 'VH']).mean().rename(['s1_vv_db', 's1_vh_db'])
+             .updateMask(soja), 100),
+            (SMAP.filterDate(nov, abr).mean().rename('smap_raiz_nov_mar')
+             .addBands(SMAP.filterDate(fev, abr).mean().rename('smap_raiz_fev_mar')), 9000),
         ]
         if t >= 2018:
-            s2 = S2.filterDate(jan, abr).filterBounds(munis.geometry()).map(s2_limpa).median().updateMask(soja)
-            partes.append(s2)
-        img = ee.Image.cat(partes)
-
-        def reduz():
-            fc = img.reduceRegions(collection=munis, reducer=ee.Reducer.mean(), scale=100, tileScale=16)
-            return fc.getInfo()['features']
-
-        for f in tenta(reduz):
-            p = f['properties']
-            linhas.append({'cod_ibge7': alvo[chave(p['ADM2_NAME'])], 'municipio_gaul': p['ADM2_NAME'],
+            reducoes.append((S2.filterDate(jan, abr).filterBounds(munis.geometry()).map(s2_limpa).median()
+                             .updateMask(soja), 100))
+        por_mun = {}
+        for img, escala in reducoes:
+            for f in reduz_em_lotes(ee, img, munis, ee.Reducer.mean(), escala, tamanho=8):
+                por_mun.setdefault(f['properties']['ADM2_NAME'], {}).update(f['properties'])
+        for nome, p in por_mun.items():
+            linhas.append({'cod_ibge7': alvo[chave(nome)], 'municipio_gaul': nome,
                            'ano': t, 'mascara_mapbiomas': am,
                            **{k: p.get(k) for k in ('ndvi_s2', 'ndre', 's1_vv_db', 's1_vh_db',
                                                      'smap_raiz_nov_mar', 'smap_raiz_fev_mar')}})

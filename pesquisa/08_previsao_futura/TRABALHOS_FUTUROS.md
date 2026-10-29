@@ -27,6 +27,11 @@ com intervalo de 95% por reamostragem de safras, em janela crescente.
 - **Atlântico, feito em 22/10/2026** (`07_variaveis_por_fase.py`). TNA, TSA e
   o gradiente, baixados da NOAA pelo Actions: SVR −0,001 (IC95 −0,042 a
   +0,038) no protocolo da Tabela 6.
+- **Repetido em 29/10/2026 com a safra de 2025** (`10_oni_base_produto.py`,
+  base do produto, 451 registros): RF +0,046 (IC95 −0,045 a +0,143), XGBoost
+  +0,001 (−0,115 a +0,115), SVR −0,006 (−0,066 a +0,044) e MLP −0,004 (−0,011
+  a 0,000). Nenhum ganho significativo. O workflow `confere-safra-nova.yml`
+  repete o teste sozinho quando a base do produto ganha uma safra.
 - **Teste que falta.** Repetir os dois testes a cada safra nova.
 - **Critério.** O intervalo do ganho deixa de incluir o zero. Com 24 safras isso
   é improvável; o teste ganha poder a cada safra acrescentada.

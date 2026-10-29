@@ -1,0 +1,106 @@
+{
+  "variaveis": [
+    "NDVI_mean",
+    "NDVI_max",
+    "EVI_mean",
+    "EVI_max",
+    "precip_total",
+    "etp_total",
+    "balanco_hidrico",
+    "temp_mean",
+    "temp_max",
+    "srad_mean",
+    "log_area",
+    "oni_djf"
+  ],
+  "modelos": {
+    "Random Forest": {
+      "com_oni": {
+        "RMSE": 403.3,
+        "MAE": 285.4,
+        "R2": 0.287,
+        "rRMSE_%": 13.3
+      },
+      "tabela_6": {
+        "RMSE": 431.9,
+        "MAE": 308.6,
+        "R2": 0.153,
+        "rRMSE_%": 14.4
+      },
+      "ganho_com_oni_sobre_referencia": 0.046,
+      "IC95": [
+        -0.045,
+        0.143
+      ]
+    },
+    "XGBoost": {
+      "com_oni": {
+        "RMSE": 412.6,
+        "MAE": 292.1,
+        "R2": 0.254,
+        "rRMSE_%": 13.6
+      },
+      "tabela_6": {
+        "RMSE": 439.5,
+        "MAE": 314.5,
+        "R2": 0.123,
+        "rRMSE_%": 14.7
+      },
+      "ganho_com_oni_sobre_referencia": 0.001,
+      "IC95": [
+        -0.115,
+        0.115
+      ]
+    },
+    "SVR": {
+      "com_oni": {
+        "RMSE": 414.0,
+        "MAE": 294.0,
+        "R2": 0.249,
+        "rRMSE_%": 13.7
+      },
+      "tabela_6": {
+        "RMSE": 417.6,
+        "MAE": 294.8,
+        "R2": 0.208,
+        "rRMSE_%": 13.9
+      },
+      "ganho_com_oni_sobre_referencia": -0.006,
+      "IC95": [
+        -0.066,
+        0.044
+      ]
+    },
+    "MLP": {
+      "com_oni": {
+        "RMSE": 413.6,
+        "MAE": 297.0,
+        "R2": 0.25,
+        "rRMSE_%": 13.7
+      },
+      "tabela_6": {
+        "RMSE": 415.6,
+        "MAE": 297.4,
+        "R2": 0.216,
+        "rRMSE_%": 13.9
+      },
+      "ganho_com_oni_sobre_referencia": -0.004,
+      "IC95": [
+        -0.011,
+        -0.0
+      ]
+    }
+  },
+  "referencia_tabela_6": {
+    "RMSE": 415.6,
+    "MAE": 296.1,
+    "R2": 0.216,
+    "rRMSE_%": 13.9
+  },
+  "base": {
+    "arquivo": "pesquisa/dados/soja_para_painel.csv",
+    "registros": 451,
+    "ultima_safra": 2025
+  },
+  "nota": "05_oni_na_tabela6.py sobre a base do produto; \"tabela_6\" continua sendo o valor publicado na dissertação, sobre a base congelada, só para referência."
+}

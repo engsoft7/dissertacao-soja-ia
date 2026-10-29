@@ -255,3 +255,63 @@ def plot_para_diario(velas: list[dict], is_dark: bool = True):
     # segunda com uma reta que parecia preço parado.
     fig.update_xaxes(tickformat="%d/%m", rangebreaks=[dict(bounds=["sat", "mon"])])
     return _layout_preco(fig, is_dark, "R$ por saca")
+
+
+def cor_nivel(nivel: str, is_dark: bool = True) -> str:
+    """Cores da janela de pulverização, as mesmas do aplicativo (corDoNivel, Tempo.kt)."""
+    cores = {"boa": ("#3fb950", "#15803d"), "atenção": ("#d29922", "#b45309"),
+             "evitar": ("#f85149", "#b91c1c")}
+    escuro, claro = cores[nivel]
+    return escuro if is_dark else claro
+
+
+def plot_janela_pulverizacao(horas: list[dict], is_dark: bool = True):
+    """Faixa das próximas horas, uma barra por hora na cor do nível, com os motivos no hover."""
+    df = pd.DataFrame(horas)
+    df["rotulo"] = df["hora"].map(lambda h: h.strftime("%d/%m %Hh"))
+    df["detalhe"] = df.apply(
+        lambda r: (f"{r['temperatura']:.0f} °C" if pd.notna(r["temperatura"]) else "–")
+        + f", umidade {r['umidade']:.0f}%" * pd.notna(r["umidade"])
+        + f", vento {r['vento_2m']:.0f} km/h na lavoura" * pd.notna(r["vento_2m"])
+        + f", chuva {r['chance_chuva']:.0f}%" * pd.notna(r["chance_chuva"])
+        + ("<br>" + "<br>".join(r["motivos"]) if r["motivos"] else ""), axis=1)
+    fig = go.Figure()
+    for nivel in ("boa", "atenção", "evitar"):
+        s = df[df["nivel"] == nivel]
+        fig.add_trace(go.Bar(
+            x=s["rotulo"], y=[1] * len(s), name=nivel.capitalize(), customdata=s["detalhe"],
+            marker_color=cor_nivel(nivel, is_dark),
+            hovertemplate="<b>%{x}</b>: " + nivel + "<br>%{customdata}<extra></extra>"))
+    font_color = "#a1a1a6" if is_dark else "#6e6e73"
+    fig.update_layout(
+        barmode="overlay", bargap=0.08, height=170,
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, sans-serif", color=font_color),
+        xaxis=dict(categoryorder="array", categoryarray=list(df["rotulo"]), showgrid=False,
+                   tickangle=0, nticks=8),
+        yaxis=dict(visible=False, range=[0, 1]),
+        legend=dict(orientation="h", yanchor="top", y=-0.35, xanchor="left", x=0),
+        margin=dict(t=10, b=60, l=10, r=10))
+    return fig
+
+
+def plot_chuva_et0(diario: dict, hoje, is_dark: bool = True):
+    """Chuva e evapotranspiração de referência por dia: 7 dias passados e 7 previstos."""
+    df = pd.DataFrame({"dia": pd.to_datetime(diario["time"]),
+                       "chuva": diario.get("precipitation_sum"),
+                       "et0": diario.get("et0_fao_evapotranspiration")})
+    cinza = "#a1a1a6" if is_dark else "#6e6e73"
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=df["dia"], y=df["chuva"], name="Chuva", marker_color=cor_para(is_dark),
+                         hovertemplate="Chuva: %{y:.1f} mm<extra></extra>"))
+    fig.add_trace(go.Scatter(x=df["dia"], y=df["et0"], name="Evapotranspiração (ET0)", mode="lines+markers",
+                             line=dict(color=cinza, width=2, dash="dash"),
+                             hovertemplate="ET0: %{y:.1f} mm<extra></extra>"))
+    hoje = pd.Timestamp(hoje)
+    fig.add_vrect(x0=hoje - pd.Timedelta(hours=12), x1=df["dia"].max() + pd.Timedelta(hours=12),
+                  fillcolor=cinza, opacity=0.08, line_width=0,
+                  annotation_text="previsão", annotation_position="top left")
+    fig.update_xaxes(tickformat="%d/%m")
+    fig = _layout_preco(fig, is_dark, "mm por dia")
+    fig.update_yaxes(tickformat=",.0f")
+    return fig

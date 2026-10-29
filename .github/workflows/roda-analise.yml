@@ -4,8 +4,10 @@
 #
 # Disparo: um push a uma branch de trabalho cujo commit diga, na mensagem,
 # "[roda: 03_retroteste_preco_para.py]" (o nome de um script da pasta) ou o
-# caminho de outro script da pesquisa, "[roda: pesquisa/04_analise_para/x.py]".
-# Sem esse pedido, nada roda. Nunca na main.
+# caminho de outro script da pesquisa, "[roda: pesquisa/04_analise_para/x.py]",
+# com argumentos depois do nome, se o script pedir ("[roda: ... x.py solo]").
+# Scripts do recorte nacional recebem antes a base de von Bloh et al. (2023),
+# que não é versionada. Sem esse pedido, nada roda. Nunca na main.
 name: Roda análise (pesquisa)
 
 on:
@@ -28,7 +30,9 @@ jobs:
         env:
           MENSAGEM: ${{ github.event.head_commit.message }}
         run: |
-          s=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[roda: *\([A-Za-z0-9_./]*\.py\)\].*/\1/p' | head -1)
+          pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[roda: *\([A-Za-z0-9_./]*\.py\)\( [A-Za-z0-9_ -]*\)\{0,1\}\].*/\1|\2/p' | head -1)
+          s="${pedido%%|*}"
+          echo "args=$(printf '%s' "${pedido#*|}" | sed 's/^ *//')" >> "$GITHUB_OUTPUT"
           case "$s" in ""|pesquisa/*) ;; *) s="pesquisa/10_trabalhos_futuros/$s" ;; esac
           case "$s" in *..*) echo "::error::caminho inválido: $s"; exit 1 ;; esac
           if [ -n "$s" ] && [ ! -f "$s" ]; then echo "::error::$s não existe"; exit 1; fi
@@ -47,7 +51,10 @@ jobs:
           if grep -q "^import torch" "$s"; then
             pip install --quiet torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
           fi
-          python "$s"
+          if [ "$(basename "$PWD")" = "03_analise_nacional" ] && [ ! -f data/data_cast.csv ]; then
+            python 00_baixa_dados.py
+          fi
+          python "$s" ${{ steps.pedido.outputs.args }}
       - name: Grava na branch
         if: steps.pedido.outputs.script != ''
         run: |

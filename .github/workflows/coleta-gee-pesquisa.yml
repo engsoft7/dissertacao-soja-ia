@@ -107,6 +107,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p pesquisa/10_trabalhos_futuros/dados
           git add pesquisa/10_trabalhos_futuros/dados
           if git diff --cached --quiet; then echo "Nenhum dado novo."; exit 0; fi
           ls -la pesquisa/10_trabalhos_futuros/dados

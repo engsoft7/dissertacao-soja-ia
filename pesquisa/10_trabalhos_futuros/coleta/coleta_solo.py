@@ -88,7 +88,7 @@ def main(recorte):
     # sumia (a primeira coleta não achou nenhum pixel sob a máscara).
     frac = (soja.reproject(crs='EPSG:4326', scale=30)
             .reduceResolution(reducer=ee.Reducer.mean(), maxPixels=1024)
-            .reproject(crs=solo.projection()).rename('peso'))
+            .reproject(crs=solo.select(0).projection()).rename('peso'))
     pond = tenta(reduz, solo.multiply(frac).addBands(frac), ee.Reducer.sum())
     sob = {}
     for k, p in pond.items():

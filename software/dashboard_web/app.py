@@ -10,7 +10,7 @@ import json
 import math
 import re
 import sys
-from datetime import date
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import altair as alt  # type: ignore  # pyrefly: ignore[missing-import]
@@ -1106,7 +1106,8 @@ def on_dropdown_change():
 st.sidebar.markdown("### Navegação Principal")
 tela_atual = st.sidebar.radio(
     "Tela",
-    ["📍 Inteligência Territorial", "📈 Análise Histórica", "💰 Viabilidade Financeira"],
+    ["📍 Inteligência Territorial", "📈 Análise Histórica", "💰 Viabilidade Financeira",
+     "🌦️ Tempo na lavoura"],
     label_visibility="collapsed")
 st.sidebar.divider()
 
@@ -1854,6 +1855,130 @@ if tela_atual == "💰 Viabilidade Financeira":
 
 
 
+# ==============================================================================
+# ABA 4: TEMPO NA LAVOURA
+# ==============================================================================
+# A tela "Tempo" do aplicativo (Tempo.kt), no painel: as contas vêm de
+# api_backend/tempo.py, porta das de TempoCalculo.kt, para os dois mostrarem a
+# mesma janela de pulverização. A previsão serve às operações do dia e não
+# entra na estimativa de produtividade.
+@st.cache_data(ttl=1800, show_spinner=False)
+def buscar_tempo(lat: float, lon: float, cod: str | None):
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
+    import avisos_inmet
+    import tempo
+    return tempo.previsao(lat, lon), avisos_inmet.avisos(lat, lon, cod)
+
+
+if tela_atual == "🌦️ Tempo na lavoura":
+    import importlib
+    import ui.charts as graficos
+    if not hasattr(graficos, "plot_janela_pulverizacao"):
+        graficos = importlib.reload(graficos)
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
+    import tempo as T
+
+    st.markdown(f"### 🌦️ Tempo na lavoura — {disp(municipio)}")
+    linha = _muni[_muni.cod_ibge7 == _cod_por_nome.get(municipio)]
+    if linha.empty:
+        st.info("Este município não tem coordenadas na base; a previsão não pode ser consultada.")
+    else:
+        lat, lon = float(linha.latitude.iloc[0]), float(linha.longitude.iloc[0])
+        with st.spinner("Consultando a previsão..."):
+            dados, avisos = buscar_tempo(lat, lon, str(int(linha.cod_ibge7.iloc[0])))
+        if not dados or "current" not in dados:
+            st.warning("A previsão do tempo não respondeu agora. Tente de novo em alguns minutos.")
+        else:
+            cur, h, d = dados["current"], dados["hourly"], dados["daily"]
+            agora = datetime.fromisoformat(cur["time"])
+
+            for a in (avisos or {}).get("avisos", []):
+                br = lambda t: (datetime.fromisoformat(t[:16].replace(" ", "T")).strftime("%d/%m %H:%M")
+                                if t and len(t) >= 16 else (t or "?"))
+                inicio, fim = br(a.get("inicio")), br(a.get("fim"))
+                texto = (f"**Aviso do INMET: {a.get('evento')}** ({a.get('severidade')}), "
+                         f"de {inicio} a {fim}.")
+                if a.get("riscos"):
+                    texto += "  \n" + " ".join(a["riscos"][:2])
+                (st.error if (a.get("nivel") or 0) >= 3 else st.warning)(texto)
+
+            vento2 = T.vento_a_2m(cur["wind_speed_10m"]) if cur.get("wind_speed_10m") is not None else None
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric("Agora", f"{cur['temperature_2m']:.0f} °C".replace(".", ","),
+                      help=f"Sensação de {cur['apparent_temperature']:.0f} °C. "
+                           f"{T.descricao_tempo(cur.get('weather_code'))}.")
+            c2.metric("Umidade do ar", f"{cur['relative_humidity_2m']:.0f}%")
+            c3.metric("Vento na lavoura",
+                      f"{vento2:.0f} km/h {T.direcao_vento(cur.get('wind_direction_10m'))}" if vento2 is not None else "–",
+                      help=f"Vento de {cur['wind_speed_10m']:.0f} km/h a 10 m, com rajadas de "
+                           f"{cur.get('wind_gusts_10m') or 0:.0f} km/h, reduzido a 2 m pela FAO-56.")
+            c4.metric("Chuva na última hora", f"{cur.get('precipitation') or 0:.1f} mm".replace(".", ","))
+            st.caption(f"{T.descricao_tempo(cur.get('weather_code'))} · leitura de "
+                       f"{agora.strftime('%d/%m/%Y %H:%M')} (hora local)")
+
+            st.markdown("#### Janela de pulverização")
+            horas = T.horas_de_pulverizacao(h, agora)
+            if horas:
+                primeira, janela = horas[0], T.proxima_janela(horas)
+                cor = graficos.cor_nivel(primeira["nivel"], is_dark)
+                st.markdown(f"Agora: <b style='color:{cor}'>{primeira['nivel']}</b>"
+                            + (f" — {'; '.join(primeira['motivos'])}" if primeira["motivos"] else ""),
+                            unsafe_allow_html=True)
+                if janela:
+                    ini, fim = janela
+                    dia = "hoje" if ini.date() == agora.date() else (
+                        "amanhã" if ini.date() == agora.date() + timedelta(days=1) else ini.strftime("%d/%m"))
+                    st.markdown(f"**Próxima janela boa:** {dia}, das {ini:%H}h às {fim:%H}h.")
+                else:
+                    st.markdown(f"**Nenhuma janela boa de 2 horas ou mais nas próximas {len(horas)} horas.**")
+                st.plotly_chart(graficos.plot_janela_pulverizacao(horas, is_dark=is_dark),
+                                use_container_width=True, config={"displayModeBar": False})
+                st.caption("Critérios da Embrapa Soja (Adegas e Gazziero, 2020): até 30 °C, umidade acima de "
+                           "60%, vento de 3 a 8 km/h (até 10 km/h só com ponta antideriva) e sem chuva nas 2 "
+                           "horas seguintes. O vento na lavoura é o de 10 m reduzido a 2 m de altura (FAO-56). "
+                           "Passe o mouse numa hora para ver os números. Confira na bula o intervalo sem chuva "
+                           "do produto e as condições no local antes de aplicar.")
+
+            st.markdown("#### Próximos dias")
+            hoje = agora.date()
+            dias = []
+            for i, t in enumerate(d["time"]):
+                dia = date.fromisoformat(t)
+                if dia < hoje:
+                    continue
+                pega = lambda k: (d.get(k) or [None] * len(d["time"]))[i]
+                dias.append({
+                    "Dia": "Hoje" if dia == hoje else
+                    f"{('Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom')[dia.weekday()]} {dia:%d/%m}",
+                    "Tempo": T.descricao_tempo(pega("weather_code")),
+                    "Mín (°C)": pega("temperature_2m_min"), "Máx (°C)": pega("temperature_2m_max"),
+                    "Chuva (mm)": pega("precipitation_sum"), "Chance de chuva (%)": pega("precipitation_probability_max"),
+                    "Rajada (km/h)": pega("wind_gusts_10m_max"), "ET0 (mm)": pega("et0_fao_evapotranspiration"),
+                    "UV": (f"{pega('uv_index_max'):.0f} ({T.categoria_uv(pega('uv_index_max'))})"
+                           if pega("uv_index_max") is not None else "–"),
+                })
+            st.dataframe(pd.DataFrame(dias), hide_index=True, use_container_width=True,
+                         column_config={c: st.column_config.NumberColumn(c, format="%.0f")
+                                        for c in ("Mín (°C)", "Máx (°C)", "Chance de chuva (%)", "Rajada (km/h)")}
+                         | {c: st.column_config.NumberColumn(c, format="%.1f") for c in ("Chuva (mm)", "ET0 (mm)")})
+
+            st.markdown("#### Chuva e evapotranspiração")
+            b = T.balanco_chuva(d, hoje)
+            c1, c2, c3 = st.columns(3)
+            c1.metric(f"Chuva nos últimos {b['dias_passados']} dias", f"{b['chuva_passada']:.0f} mm")
+            c2.metric("Evapotranspiração no período", f"{b['et0_passada']:.0f} mm",
+                      help="Evapotranspiração de referência (ET0, FAO-56): a água que uma cultura de "
+                           "referência perderia. Quando passa da chuva, o solo vai secando.")
+            c3.metric(f"Chuva prevista ({b['dias_previstos']} dias)", f"{b['chuva_prevista']:.0f} mm")
+            st.plotly_chart(graficos.plot_chuva_et0(d, hoje, is_dark=is_dark), use_container_width=True,
+                            config={"displayModeBar": False})
+
+            st.caption("Previsão: Open-Meteo.com (CC BY 4.0), a partir de modelos meteorológicos, com cache "
+                       "de meia hora. Avisos: INMET (alertas.inmet.gov.br). A previsão do tempo serve às "
+                       "operações do dia a dia. Ela não entra na estimativa de produtividade, que usa o clima "
+                       "observado das safras.")
+
+
 with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
     st.markdown('''
     **Plataforma de AgroInteligência Preditiva** — Solução metodológica baseada em inteligência artificial para previsão de produtividade de soja e monitoramento do agronegócio no Estado do Pará.
@@ -1887,6 +2012,11 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
     * **Yahoo Finance (CBOT `ZS=F` e `BRL=X`):** contrato futuro de Chicago
       convertido para reais por saca de 60 kg, também exibido como comparação.
       É cotação de bolsa e fica acima do preço físico brasileiro.
+    * **Open-Meteo e INMET (tela Tempo na lavoura):** previsão do tempo do
+      Open-Meteo (CC BY 4.0), relida a cada meia hora, e avisos meteorológicos
+      do INMET. A janela de pulverização segue a Embrapa Soja (Adegas e
+      Gazziero, 2020), com as mesmas regras do aplicativo. Não entra na
+      estimativa de produtividade.
 ''' + f'''    * **Custo operacional (CONAB):** levantamento de custos de produção da soja
       no município de {PRACA_CONAB}, de {LEVANTAMENTO_CONAB_EXTENSO} — ponto de coleta da
       CONAB no cerrado do Tocantins. O Pará não integra o MATOPIBA e não tem

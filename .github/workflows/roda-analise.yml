@@ -1,0 +1,71 @@
+# Roda, no Actions, uma análise de pesquisa/10_trabalhos_futuros que precisa
+# de fontes que o ambiente de desenvolvimento não alcança (Agrolink, Yahoo,
+# INMET, Open-Meteo) e grava o resultado na própria branch.
+#
+# Disparo: um push a uma branch de trabalho cujo commit diga, na mensagem,
+# "[roda: 03_retroteste_preco_para.py]" (o nome de um script da pasta) ou o
+# caminho de outro script da pesquisa, "[roda: pesquisa/04_analise_para/x.py]",
+# com argumentos depois do nome, se o script pedir ("[roda: ... x.py solo]").
+# Scripts do recorte nacional recebem antes a base de von Bloh et al. (2023),
+# que não é versionada. Sem esse pedido, nada roda. Nunca na main.
+name: Roda análise (pesquisa)
+
+on:
+  push:
+    branches-ignore: [main]
+    paths:
+      - "pesquisa/10_trabalhos_futuros/*.py"
+      - ".github/workflows/roda-analise.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  roda:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - id: pedido
+        env:
+          MENSAGEM: ${{ github.event.head_commit.message }}
+        run: |
+          pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[roda: *\([A-Za-z0-9_./]*\.py\)\( [A-Za-z0-9_ -]*\)\{0,1\}\].*/\1|\2/p' | head -1)
+          s="${pedido%%|*}"
+          echo "args=$(printf '%s' "${pedido#*|}" | sed 's/^ *//')" >> "$GITHUB_OUTPUT"
+          case "$s" in ""|pesquisa/*) ;; *) s="pesquisa/10_trabalhos_futuros/$s" ;; esac
+          case "$s" in *..*) echo "::error::caminho inválido: $s"; exit 1 ;; esac
+          if [ -n "$s" ] && [ ! -f "$s" ]; then echo "::error::$s não existe"; exit 1; fi
+          echo "script=$s" >> "$GITHUB_OUTPUT"
+          echo "pasta=$(dirname "$s")" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-python@v5
+        if: steps.pedido.outputs.script != ''
+        with:
+          python-version: "3.11"
+      - name: Roda ${{ steps.pedido.outputs.script }}
+        if: steps.pedido.outputs.script != ''
+        working-directory: ${{ steps.pedido.outputs.pasta }}
+        run: |
+          pip install --quiet pandas requests "scikit-learn>=1.3,<1.9" xgboost
+          s=$(basename "${{ steps.pedido.outputs.script }}")
+          if grep -q "^import torch" "$s"; then
+            pip install --quiet torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
+          fi
+          if [ "$(basename "$PWD")" = "03_analise_nacional" ] && [ ! -f data/data_cast.csv ]; then
+            python 00_baixa_dados.py
+          fi
+          python "$s" ${{ steps.pedido.outputs.args }}
+      - name: Grava na branch
+        if: steps.pedido.outputs.script != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${{ steps.pedido.outputs.pasta }}"
+          if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
+          git commit -m "Resultado de $(basename "${{ steps.pedido.outputs.script }}")"
+          # Outro job pode ter gravado na branch entre o pull e o push: tenta de novo.
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
+            sleep $((i * 5))
+          done
+          exit 1

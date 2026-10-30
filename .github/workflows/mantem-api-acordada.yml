@@ -1,0 +1,29 @@
+# Mantém a API acordada no plano gratuito do Render.
+#
+# Sem acesso por 15 minutos, o Render desliga o serviço gratuito, e a próxima
+# consulta espera de 30 a 60 segundos ele subir de novo: o aplicativo abria a
+# previsão, o mercado e os avisos do INMET com essa espera. Uma consulta leve
+# (/api/ping) a cada 10 minutos evita isso. O serviço passa a ficar ligado o
+# mês inteiro (cerca de 744 horas), dentro das 750 horas mensais gratuitas do
+# Render para um serviço; um segundo serviço gratuito na mesma conta passaria
+# do limite. O agendamento do GitHub pode atrasar alguns minutos em horários
+# de pico, o que só torna mais raras as consultas.
+name: Mantém a API acordada
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Consulta /api/ping
+        run: |
+          for i in 1 2 3; do
+            if curl -fsS --max-time 90 https://agrointeligencia-api.onrender.com/api/ping; then echo; exit 0; fi
+            sleep 20
+          done
+          echo "::warning::A API não respondeu em três tentativas."

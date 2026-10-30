@@ -1,0 +1,73 @@
+# Repete, quando sai uma safra nova, os dois testes que só ganham poder com o
+# tempo (08_previsao_futura/TRABALHOS_FUTUROS.md, itens 1 e 2):
+#
+#   1. a projeção da produção do Pará registrada antes da PAM sair
+#      (09_confere_projecao.py), assim que a PAM daquela safra for publicada;
+#   2. o ONI como variável (10_oni_base_produto.py), quando a base do produto
+#      ganhar uma safra que o último teste não tinha.
+#
+# Roda no dia 20 de cada mês e por disparo manual. Quando algum dos dois tem
+# resultado novo, abre um PR com os arquivos: nada entra na main sem revisão.
+name: Confere safra nova
+
+on:
+  schedule:
+    - cron: "41 11 20 * *"
+  workflow_dispatch:
+  # Também quando o próprio workflow muda, para conferi-lo antes do merge.
+  push:
+    paths:
+      - ".github/workflows/confere-safra-nova.yml"
+      - "pesquisa/08_previsao_futura/09_confere_projecao.py"
+      - "pesquisa/08_previsao_futura/10_oni_base_produto.py"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  confere:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet pandas requests "scikit-learn>=1.3,<1.9" xgboost
+      - name: PAM do Pará atualizada (SIDRA)
+        run: python pesquisa/08_previsao_futura/coleta/coleta_pam_para.py
+      - name: Projeção registrada contra a PAM nova
+        id: projecao
+        working-directory: pesquisa/08_previsao_futura
+        run: |
+          novos=""
+          for ano in 2026 2027 2028 2029 2030; do
+            [ -f "confere_projecao_$((ano - 1)).json" ] || continue
+            [ -f "confere_projecao_$ano.json" ] && continue
+            python 09_confere_projecao.py "$ano"
+            [ -f "confere_projecao_$ano.json" ] && novos="$novos $ano"
+          done
+          echo "novos=$novos" >> "$GITHUB_OUTPUT"
+      - name: ONI com a safra nova da base do produto
+        id: oni
+        working-directory: pesquisa/08_previsao_futura
+        run: |
+          ultima=$(python -c "import pandas as pd; print(pd.read_csv('../dados/soja_para_painel.csv').ano.max())")
+          feita=$(python -c "import json,os; print(json.load(open('oni_base_produto.json'))['base']['ultima_safra'] if os.path.exists('oni_base_produto.json') else 0)")
+          if [ "$ultima" -gt "$feita" ]; then python 10_oni_base_produto.py && echo "novo=$ultima" >> "$GITHUB_OUTPUT"; fi
+      # No push (conferência do próprio workflow) só mostra o que faria.
+      - name: Abre PR com o que mudou
+        if: github.event_name != 'push' && (steps.projecao.outputs.novos != '' || steps.oni.outputs.novo != '')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ramo="confere-safra-nova/$(date -u +%Y-%m-%d)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$ramo"
+          git add pesquisa/08_previsao_futura/confere_projecao_*.json pesquisa/08_previsao_futura/oni_base_produto.json 2>/dev/null || true
+          git commit -m "Confere safra nova: projeção${{ steps.projecao.outputs.novos }}; ONI até ${{ steps.oni.outputs.novo }}"
+          git push origin "$ramo"
+          gh pr create --base main --head "$ramo" --title "Safra nova conferida: projeção e ONI" \
+            --body "Gerado pelo workflow confere-safra-nova.yml. Projeções conferidas:${{ steps.projecao.outputs.novos }}. ONI repetido na base do produto até a safra ${{ steps.oni.outputs.novo }}. Atualize TRABALHOS_FUTUROS.md com os números."

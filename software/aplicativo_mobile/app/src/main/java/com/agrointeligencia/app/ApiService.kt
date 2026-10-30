@@ -256,6 +256,10 @@ interface AgroApiService {
 
     // Parâmetros nulos ficam fora da consulta: o GPS da fazenda vai sem
     // geocódigo, e a API decide pelo polígono do aviso.
+    // Anúncio do modelo do contador de vagens (AtualizaContador.kt).
+    @GET("api/contador")
+    suspend fun getContador(): ManifestoContador
+
     @GET("api/avisos")
     suspend fun getAvisos(
         @retrofit2.http.Query("lat") lat: Double?,

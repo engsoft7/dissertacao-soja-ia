@@ -27,6 +27,11 @@ com intervalo de 95% por reamostragem de safras, em janela crescente.
 - **Atlântico, feito em 22/10/2026** (`07_variaveis_por_fase.py`). TNA, TSA e
   o gradiente, baixados da NOAA pelo Actions: SVR −0,001 (IC95 −0,042 a
   +0,038) no protocolo da Tabela 6.
+- **Repetido em 29/10/2026 com a safra de 2025** (`10_oni_base_produto.py`,
+  base do produto, 451 registros): RF +0,046 (IC95 −0,045 a +0,143), XGBoost
+  +0,001 (−0,115 a +0,115), SVR −0,006 (−0,066 a +0,044) e MLP −0,004 (−0,011
+  a 0,000). Nenhum ganho significativo. O workflow `confere-safra-nova.yml`
+  repete o teste sozinho quando a base do produto ganha uma safra.
 - **Teste que falta.** Repetir os dois testes a cada safra nova.
 - **Critério.** O intervalo do ganho deixa de incluir o zero. Com 24 safras isso
   é improvável; o teste ganha poder a cada safra acrescentada.
@@ -55,10 +60,64 @@ testadas (Holm).
 fase (veranico, calor acumulado acima de 30 °C, déficit de pressão de vapor e
 chuva na floração e no enchimento), umidade do solo em duas camadas, MODIS
 MOD11 e fenologia pelo pico de EVI. Nenhuma família superou a referência (p de
-Holm = 1,0 em todas). **Falta:** o mesmo teste no recorte nacional, que decide
-se o limite é o alvo ou a forma de medir o ambiente; e as fontes de 2015 em
-diante (SMAP, TROPOMI, Sentinel-1 e 2), que exigem um desenho só com as safras
-recentes, e o SoilGrids.
+Holm = 1,0 em todas).
+
+**Feito em 29/10/2026, LSTM no Pará** (`04_analise_para/09_lstm_series_para.py`,
+rodado no Actions): 17 composições de 16 dias de EVI, NDVI e clima por safra,
+414 registros, protocolo da Tabela 6 com busca aninhada e 5 sementes. A LSTM
+erra 422,5 kg/ha contra 416,1 da referência: ganho de −0,031 (IC95 −0,175 a
++0,093). O SVR da Tabela 6, nos mesmos registros, fica em +0,002 (IC95 −0,041 a
++0,051). A série temporal não tira o Pará do limite da referência.
+
+**Feito em 29/10/2026, SoilGrids** (`10_trabalhos_futuros/05_solo_na_tabela6.py`
+e `03_analise_nacional/13_variaveis_extras.py solo`): argila, areia, silte,
+carbono orgânico, pH, CTC e densidade de 0 a 30 cm, ponderados pela fração de
+soja de cada pixel de 250 m (`coleta/coleta_solo.py`). No Pará nenhum modelo
+supera a referência (melhor: SVR, +0,008, IC95 −0,034 a +0,053), como se
+esperava: o modelo ajusta o resíduo sobre a média do município, que já absorve
+o que é fixo nele. A Tabela 6 refeita sem o solo reproduz os valores publicados
+de RF, SVR e MLP; o XGBoost difere (433,2 contra 439,5) pela versão da
+biblioteca no Actions. No recorte nacional, onde o modelo não vê a média do
+município, os quatro modelos melhoram com o solo, e nenhum intervalo inclui o zero
+(diferença de RMSE, com − sem, IC95 por reamostragem de municípios, nos 23.820
+registros dos 1.191 municípios pareados ao GAUL): RF −4,0 kg/ha (−5,5 a −2,6),
+XGBoost −4,4 (−6,0 a −3,1), SVR −1,8 (−2,9 a −0,8) e MLP −11,1 (−15,1 a −7,0).
+O ganho é real e pequeno: no melhor modelo, o SVR, 0,4% do erro (de 449,5 para
+447,6 kg/ha). O contraste com o Pará vem do desenho, não do dado: lá o modelo
+corrige a média do município, que já carrega o solo; aqui ele não a vê.
+
+**Feito em 29/10/2026, Tabela 3 sem subamostragem**
+(`03_analise_nacional/12_sem_subamostragem.py`): os mesmos modelos e
+hiperparâmetros, cada safra de teste contra todas as outras (23.617 registros
+de treino em vez de 7.000, ou 5.000 no SVR), nas mesmas observações de teste,
+com IC95 da diferença de RMSE por reamostragem de municípios. RF não muda
+(+0,1 kg/ha, IC95 −2,3 a +2,2); XGBoost (−13,6, IC95 −16,0 a −11,5) e MLP
+(−14,3, IC95 −19,6 a −9,1) melhoram; o SVR piora (+5,1, IC95 +3,0 a +7,2). O
+SVR com subamostra, 460,7 kg/ha, segue o melhor modelo: a subamostragem não
+favoreceu o resultado publicado e não muda a conclusão da Tabela 3.
+
+**Em coleta em 29/10/2026.** Três testes têm script pronto e esperam dados do
+Earth Engine (`10_trabalhos_futuros/coleta`, workflow `coleta-gee-pesquisa.yml`):
+
+- *Sensores de 2015 em diante no Pará* (`02_sensores_recentes.py`): Sentinel-1
+  e SMAP desde 2016, Sentinel-2 (NDVI e NDRE) desde 2018, cada família com e
+  sem, nos mesmos registros da base do produto. A primeira coleta estourou o
+  tempo de computação do Earth Engine; foi refeita por sensor e em lotes de
+  municípios. O TROPOMI (fluorescência) não está no catálogo do Earth Engine.
+- *Variáveis por fase no recorte nacional* (`13_variaveis_extras.py fases`):
+  umidade do solo em duas camadas, déficit de pressão de vapor e temperatura da
+  superfície, mês a mês de setembro a março, para 1.196 municípios. A coleta
+  terminou; o arquivo entra na branch com as demais.
+- *Amazônia Legal* (`06_amazonia_legal.py`): o protocolo da Tabela 6 em
+  Tocantins, Maranhão, Rondônia e Mato Grosso, e nos cinco estados juntos.
+  Tocantins e Rondônia coletados; o Maranhão foi refeito em lotes depois de
+  estourar o tempo; Mato Grosso em coleta.
+
+**Milho.** A extensão a outras culturas esbarra na máscara: o MapBiomas
+(coleção 10) separa soja, cana, arroz, algodão e café, mas o milho fica em
+"outras lavouras temporárias", junto com o que se planta depois da soja. Sem a
+máscara, as variáveis de vegetação do milho se misturariam às da soja na
+mesma área, e o desenho da base do Pará não se repete.
 
 ## 4. Triangular a variável-alvo
 
@@ -126,6 +185,12 @@ do modelo atual.
     contagem e marcas com 85% de acerto que acham 60% das vagens; com a foto
     de cabeça para baixo, o resultado é o mesmo. Fotos com marcas só do
     contador, sem conferência do produtor, não entram no material de treino.
+- **Ferramenta pronta em 29/10/2026** (`ciclo_retreino.py`). `junta` monta a
+  base do Pará a partir dos `.zip` exportados pelo aplicativo (só fotos de
+  vagens com marcação completa, sem repetidas), separando treino, validação e
+  teste por fazenda e safra; `mede` roda os modelos do aplicativo nessas fotos
+  pelo caminho que a foto faz no celular. Ensaiado em fotos sintéticas; falta
+  a primeira remessa real.
 - **Falta.** Medir o erro em fotos do Pará marcadas no aplicativo e, depois,
   contra a colheita pesada (o critério acima).
 
@@ -164,6 +229,18 @@ versão nova do aplicativo. O plano para torná-lo quase automático:
 - **Primeiro passo.** Fazer à mão um ciclo completo (exportar, treinar, medir,
   publicar) com as primeiras 50 a 100 fotos do Pará. Automatizar só se o ciclo
   manual reduzir o erro.
+- **Feito em 29/10/2026: passos 3 e 4.** `ciclo_retreino.py retreina` parte
+  dos pesos publicados, ajusta com as fotos de treino do Pará misturadas às da
+  YOLO POD, escolhe a época pela validação do Pará e só aprova o modelo que
+  erra menos no teste do Pará sem piorar na YOLO POD além de meio ponto
+  percentual; sem a YOLO POD medida, o retreino é só ensaio. `publica` escreve
+  o anúncio que a API serve em `/api/contador` (versão, endereço de cada
+  `.tflite` preso a um commit da branch `modelo-contagem-vagens`, tamanho e
+  SHA-256). O aplicativo 2.6.0 consulta o anúncio uma vez por dia e só adota
+  o modelo novo depois de conferir endereço, tamanho, resumo e formato; o
+  embutido fica de reserva. Não se usa Release para o modelo, porque cada
+  Release publicado gera um depósito no Zenodo. O passo 1, envio pelo
+  aplicativo, continua fora: exige servidor com armazenamento e consentimento.
 - **Critério.** O erro da contagem no conjunto do portão cai, ou não sobe, a
   cada versão publicada.
 - **Fora do escopo.** O aprendizado dentro do próprio aparelho (federado). É
@@ -174,3 +251,53 @@ versão nova do aplicativo. O plano para torná-lo quase automático:
 O workflow `publica-apk.yml` já compila, assina e anexa o APK ao Release, mas
 fica inativo sem os quatro segredos da chave. Ativar só com o aplicativo no
 Play App Signing, em que a chave do workflow é a de envio e pode ser trocada.
+
+- **Feito em 29/10/2026.** Ao lado do APK universal (40,5 MB), o workflow
+  passa a anexar um só para arm64-v8a (24,7 MB, 39% menor), a arquitetura de
+  quase todo celular vendido desde 2019: tira do universal as bibliotecas
+  nativas das outras arquiteturas, realinha e assina de novo com a mesma
+  chave, conferido pelo `apksigner verify`.
+
+## 9. Produto: manutenção e conferências
+
+- **API acordada** (`mantem-api-acordada.yml`): consulta `/api/ping` a cada
+  10 minutos, para o plano gratuito do Render não adormecer (750 horas por
+  mês bastam para um serviço).
+- **Monitor das fontes** (`monitor-fontes.yml`): todo dia confere Yahoo,
+  Agrolink, Notícias Agrícolas, Open-Meteo, INMET, SIDRA e a própria API, e
+  abre uma issue quando alguma falha. Na primeira execução, as sete
+  responderam.
+- **Safra nova** (`confere-safra-nova.yml`): todo dia 20 confere a projeção
+  registrada contra a PAM nova (`09_confere_projecao.py`) e repete o teste do
+  ONI na base do produto (`10_oni_base_produto.py`); abre PR com o que mudar.
+- **Política de privacidade no GitHub Pages** (`publica-politica.yml`): gera a
+  página a partir de `loja/politica_de_privacidade.md` e recusa publicar
+  enquanto houver aviso de rascunho ou contato por preencher. Para ativar:
+  Settings → Pages → Source: GitHub Actions.
+- **Tempo no painel**: a tela Tempo na lavoura do aplicativo também no painel
+  web, com as mesmas regras (`api_backend/tempo.py`, porta de
+  `TempoCalculo.kt`, com os mesmos casos de teste).
+- **Retroteste do preço estimado do Pará**
+  (`10_trabalhos_futuros/03_retroteste_preco_para.py`). A média mensal do Pará
+  prevista com Chicago do mês e a base do mês anterior, de 12/2024 a 09/2026
+  (22 meses): erro médio de R$ 3,44 por saca (2,7%), viés de +R$ 0,30, maior
+  erro de R$ 8,54. Chicago sem a base erra R$ 5,78 (viés de +R$ 4,22). Repetir
+  o Pará do mês anterior erra R$ 2,92 em média, um pouco menos, mas chega a
+  R$ 10,03 no pior mês. A estimativa serve ao que se propõe, acompanhar o dia
+  com a bolsa, e não é melhor que a persistência na média do mês.
+- **Validação da janela de pulverização** (`10_trabalhos_futuros/04_valida_tempo_inmet.py`):
+  a previsão do Open-Meteo (arquivo das rodadas de curto prazo, o caso mais
+  favorável) contra 12 estações automáticas do INMET em municípios da base, de
+  novembro de 2025 a abril de 2026, 38.079 horas. Erro médio de cerca de 1 °C
+  na temperatura, de 5 a 10 pontos na umidade e de 3 a 4,5 km/h no vento, que
+  a previsão superestima. Nas estações com a série completa, a previsão acerta
+  de 73% a 92% dos dias com chuva de 1 mm ou mais, com 30% a 66% de alarmes
+  falsos. A janela concorda pouco com a calculada sobre o medido (acerto de
+  42%, kappa de 0,15): das horas previstas como boas, 26% eram boas, cerca de
+  63% de atenção e 10,6% a evitar. A maior parte da discordância fica entre
+  boa e atenção, coerente com o vento que a previsão põe nas horas calmas; os
+  10,6% de horas boas que eram a evitar são o erro que importa ao produtor.
+  A janela orienta, não garante: a tela já pede a conferência no local, e o
+  texto passa a dizer quanto ela erra. **Próximo passo:** decompor a
+  discordância por critério (vento, umidade, temperatura, chuva) e testar se
+  corrigir o viés do vento pela estação mais próxima aproxima as duas.

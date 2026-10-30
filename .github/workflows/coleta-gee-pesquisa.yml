@@ -1,0 +1,128 @@
+# Coletas no Earth Engine para as limitações e trabalhos futuros da dissertação
+# (pasta pesquisa/10_trabalhos_futuros). Roda num push que mude os scripts de
+# coleta, numa branch de trabalho, ou por disparo manual; o resultado é
+# versionado na própria branch e chega à main por PR. Na main não roda.
+#
+#   solo           SoilGrids sob a máscara de soja, Pará e base nacional
+#   recentes       Sentinel-1, Sentinel-2 e SMAP no Pará, safras 2016-2025
+#   amazonia       variáveis da base do Pará em TO, MA, RO e MT, 2001-2025
+#   fases_nacional umidade do solo, déficit de pressão de vapor e temperatura
+#                  da superfície, mês a mês, na base nacional, 2001-2020
+#   tudo           todas acima
+name: Coletas no Earth Engine (pesquisa)
+
+on:
+  push:
+    branches-ignore: [main]
+    paths:
+      - "pesquisa/10_trabalhos_futuros/coleta/**"
+      - ".github/workflows/coleta-gee-pesquisa.yml"
+  workflow_dispatch:
+    inputs:
+      coleta:
+        description: "O que coletar"
+        type: choice
+        options: [tudo, solo, recentes, amazonia, fases_nacional]
+        default: tudo
+
+permissions:
+  contents: write
+
+jobs:
+  plano:
+    if: github.ref_name != github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    outputs:
+      tarefas: ${{ steps.p.outputs.tarefas }}
+    steps:
+      - id: p
+        env:
+          MENSAGEM: ${{ github.event.head_commit.message }}
+        run: |
+          # No push, só coleta o que a mensagem do commit pedir, como "[coleta: solo]",
+          # ou várias de uma vez, "[coleta: amazonia_TO fases_nacional]"; sem pedido,
+          # nada (cada coleta completa leva horas e gasta cota do Earth Engine).
+          pedido="${{ inputs.coleta }}"
+          if [ -z "$pedido" ]; then
+            pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[coleta: *\([A-Za-z0-9_ ]*\)\].*/\1/p' | head -1)
+          fi
+          [ -n "$pedido" ] || { echo 'tarefas=[]' >> "$GITHUB_OUTPUT"; exit 0; }
+          lista=""
+          for item in $pedido; do
+            case "$item" in
+              tudo) t='"solo para","solo nacional","amazonia TO","amazonia MA","amazonia RO","amazonia MT","fases_nacional",'$(seq 2016 2025 | sed 's/.*/"recentes &"/' | paste -sd, -) ;;
+              solo) t='"solo para","solo nacional"' ;;
+              amazonia) t='"amazonia TO","amazonia MA","amazonia RO","amazonia MT"' ;;
+              amazonia_??) t="\"amazonia ${item#amazonia_}\"" ;;   # um estado só, ex.: amazonia_MA
+              recentes) t=$(seq 2016 2025 | sed 's/.*/"recentes &"/' | paste -sd, -) ;;   # um job por safra
+              recentes_????) t="\"recentes ${item#recentes_}\"" ;;
+              *) t="\"$item\"" ;;
+            esac
+            lista="${lista:+$lista,}$t"
+          done
+          echo "tarefas=[$lista]" >> "$GITHUB_OUTPUT"
+
+  coleta:
+    needs: plano
+    if: needs.plano.outputs.tarefas != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        tarefa: ${{ fromJSON(needs.plano.outputs.tarefas) }}
+    env:
+      GEE_SERVICE_ACCOUNT_JSON: ${{ secrets.GEE_SERVICE_ACCOUNT_JSON }}
+      GEE_PROJECT: ${{ vars.GEE_PROJECT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet pandas requests earthengine-api
+      - name: Base nacional de von Bloh et al. (2023)
+        if: contains(matrix.tarefa, 'nacional')
+        working-directory: pesquisa/03_analise_nacional
+        run: python 00_baixa_dados.py
+      - name: Coleta ${{ matrix.tarefa }}
+        working-directory: pesquisa/10_trabalhos_futuros/coleta
+        run: |
+          set -- ${{ matrix.tarefa }}
+          case "$1" in
+            solo) python coleta_solo.py "$2" ;;
+            recentes) python coleta_recentes.py "$2" ;;
+            amazonia) python coleta_amazonia_legal.py "$2" ;;
+            fases_nacional) python coleta_fases_nacional.py ;;
+          esac
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dados-${{ strategy.job-index }}
+          path: pesquisa/10_trabalhos_futuros/dados/
+          if-no-files-found: ignore
+
+  grava:
+    needs: [plano, coleta]
+    if: always() && github.ref_name != github.event.repository.default_branch && needs.plano.outputs.tarefas != '[]' 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dados-*
+          path: pesquisa/10_trabalhos_futuros/dados/
+          merge-multiple: true
+      - name: Grava na branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p pesquisa/10_trabalhos_futuros/dados
+          git add pesquisa/10_trabalhos_futuros/dados
+          if git diff --cached --quiet; then echo "Nenhum dado novo."; exit 0; fi
+          ls -la pesquisa/10_trabalhos_futuros/dados
+          git commit -m "Coletas no Earth Engine (${{ github.run_id }})"
+          # Outro job pode ter gravado na branch entre o pull e o push: tenta de novo.
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
+            sleep $((i * 5))
+          done
+          exit 1

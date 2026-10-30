@@ -1,0 +1,94 @@
+{
+  "teste": "solo",
+  "variaveis_novas": [
+    "argila_pct",
+    "areia_pct",
+    "silte_pct",
+    "carbono_org_g_kg",
+    "ph_agua",
+    "ctc_cmol_kg",
+    "densidade_g_cm3"
+  ],
+  "registros": 23820,
+  "registros_base": 24860,
+  "municipios": 1191,
+  "nota": "Protocolo de 04_avalia_ajustado.py (subamostra de 7.000, 5.000 no SVR; LOYO 2016-2020), com e sem as variáveis novas, nos mesmos registros. IC95 da diferença de RMSE (com − sem) por reamostragem de municípios: negativo é melhora.",
+  "modelos": {
+    "Random Forest": {
+      "sem": {
+        "RMSE_pool": 470.2,
+        "MAE_pool": 349.8,
+        "R2_pool": 0.388,
+        "segundos": 5
+      },
+      "com": {
+        "RMSE_pool": 466.2,
+        "MAE_pool": 346.2,
+        "R2_pool": 0.399,
+        "segundos": 5
+      },
+      "dif_rmse_com_menos_sem": -4.0,
+      "ic95": [
+        -5.5,
+        -2.6
+      ]
+    },
+    "XGBoost": {
+      "sem": {
+        "RMSE_pool": 466.7,
+        "MAE_pool": 345.1,
+        "R2_pool": 0.397,
+        "segundos": 25
+      },
+      "com": {
+        "RMSE_pool": 462.2,
+        "MAE_pool": 341.1,
+        "R2_pool": 0.409,
+        "segundos": 27
+      },
+      "dif_rmse_com_menos_sem": -4.4,
+      "ic95": [
+        -6.0,
+        -3.1
+      ]
+    },
+    "SVR": {
+      "sem": {
+        "RMSE_pool": 449.5,
+        "MAE_pool": 332.9,
+        "R2_pool": 0.441,
+        "segundos": 9
+      },
+      "com": {
+        "RMSE_pool": 447.6,
+        "MAE_pool": 331.1,
+        "R2_pool": 0.446,
+        "segundos": 8
+      },
+      "dif_rmse_com_menos_sem": -1.8,
+      "ic95": [
+        -2.9,
+        -0.8
+      ]
+    },
+    "MLP": {
+      "sem": {
+        "RMSE_pool": 504.0,
+        "MAE_pool": 386.4,
+        "R2_pool": 0.297,
+        "segundos": 9
+      },
+      "com": {
+        "RMSE_pool": 492.9,
+        "MAE_pool": 373.2,
+        "R2_pool": 0.328,
+        "segundos": 10
+      },
+      "dif_rmse_com_menos_sem": -11.1,
+      "ic95": [
+        -15.1,
+        -7.0
+      ]
+    }
+  }
+}

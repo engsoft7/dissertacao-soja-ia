@@ -96,7 +96,7 @@ async def app_lifespan(app: FastAPI):
     threading.Thread(target=_refresh_finance, daemon=True).start()
     yield
 
-app = FastAPI(title="Agro Inteligência API", description="FastAPI for Soybean Yield Prediction System", lifespan=app_lifespan)
+app = FastAPI(title="AgroInteligência API", description="FastAPI for Soybean Yield Prediction System", lifespan=app_lifespan)
 
 MUNICIPIOS_FORMATADOS = {
     'Conceicao Do Araguaia': 'Conceição do Araguaia', 'Floresta Do Araguaia': 'Floresta do Araguaia',

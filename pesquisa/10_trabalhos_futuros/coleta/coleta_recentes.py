@@ -19,10 +19,15 @@ Por município e safra, sob a máscara de soja do MapBiomas do ano:
 A fluorescência induzida pelo sol (TROPOMI) não está no catálogo do Earth
 Engine, e fica de fora.
 
-Uso:   python coleta_recentes.py
-Saída: ../dados/sensores_recentes_para.csv
+Uma safra por chamada: as dez de uma vez não couberam no limite de um job do
+Actions (a mediana do Sentinel-2 é a parte cara). No Actions, "[coleta: recentes]"
+abre um job por safra, e "[coleta: recentes_2019]" refaz uma só.
+
+Uso:   python coleta_recentes.py [ano ...]      (sem ano: 2016 a 2025)
+Saída: ../dados/sensores_recentes_<ano>.csv, um arquivo por safra
 """
 import os
+import sys
 
 import pandas as pd
 
@@ -31,7 +36,7 @@ from comum_gee import DADOS, REPO, chave, conecta_gee, mascara_soja, municipios_
 SAFRAS = range(2016, 2026)
 
 
-def main():
+def main(safras):
     ee = conecta_gee()
     base = pd.read_csv(os.path.join(REPO, 'pesquisa', 'dados', 'soja_para_mascarado_2001_2024.csv'))
     cods = base.groupby('municipio').cod_ibge7.first()
@@ -54,8 +59,8 @@ def main():
         ndre = img.normalizedDifference(['B8', 'B5']).rename('ndre')
         return ndvi.addBands(ndre).updateMask(ok)
 
-    linhas = []
-    for t in SAFRAS:
+    for t in safras:
+        linhas = []
         soja, am = mascara_soja(ee, t)
         jan, abr = ee.Date.fromYMD(t, 1, 1), ee.Date.fromYMD(t, 4, 1)
         nov, fev = ee.Date.fromYMD(t - 1, 11, 1), ee.Date.fromYMD(t, 2, 1)
@@ -80,12 +85,11 @@ def main():
                            'ano': t, 'mascara_mapbiomas': am,
                            **{k: p.get(k) for k in ('ndvi_s2', 'ndre', 's1_vv_db', 's1_vh_db',
                                                      'smap_raiz_nov_mar', 'smap_raiz_fev_mar')}})
-        print(f'  safra {t}: {len(usados)} municípios (máscara {am})', flush=True)
-    os.makedirs(DADOS, exist_ok=True)
-    saida = os.path.join(DADOS, 'sensores_recentes_para.csv')
-    pd.DataFrame(linhas).to_csv(saida, index=False)
-    print(f'{len(linhas)} registros gravados em {saida}', flush=True)
+        os.makedirs(DADOS, exist_ok=True)
+        saida = os.path.join(DADOS, f'sensores_recentes_{t}.csv')
+        pd.DataFrame(linhas).to_csv(saida, index=False)
+        print(f'  safra {t}: {len(linhas)} municípios gravados em {saida} (máscara {am})', flush=True)
 
 
 if __name__ == '__main__':
-    main()
+    main([int(a) for a in sys.argv[1:]] or list(SAFRAS))

@@ -50,10 +50,12 @@ jobs:
           lista=""
           for item in $pedido; do
             case "$item" in
-              tudo) t='"solo para","solo nacional","recentes","amazonia TO","amazonia MA","amazonia RO","amazonia MT","fases_nacional"' ;;
+              tudo) t='"solo para","solo nacional","amazonia TO","amazonia MA","amazonia RO","amazonia MT","fases_nacional",'$(seq 2016 2025 | sed 's/.*/"recentes &"/' | paste -sd, -) ;;
               solo) t='"solo para","solo nacional"' ;;
               amazonia) t='"amazonia TO","amazonia MA","amazonia RO","amazonia MT"' ;;
               amazonia_??) t="\"amazonia ${item#amazonia_}\"" ;;   # um estado só, ex.: amazonia_MA
+              recentes) t=$(seq 2016 2025 | sed 's/.*/"recentes &"/' | paste -sd, -) ;;   # um job por safra
+              recentes_????) t="\"recentes ${item#recentes_}\"" ;;
               *) t="\"$item\"" ;;
             esac
             lista="${lista:+$lista,}$t"
@@ -88,7 +90,7 @@ jobs:
           set -- ${{ matrix.tarefa }}
           case "$1" in
             solo) python coleta_solo.py "$2" ;;
-            recentes) python coleta_recentes.py ;;
+            recentes) python coleta_recentes.py "$2" ;;
             amazonia) python coleta_amazonia_legal.py "$2" ;;
             fases_nacional) python coleta_fases_nacional.py ;;
           esac

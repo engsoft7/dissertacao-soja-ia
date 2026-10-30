@@ -21,8 +21,10 @@ referência com IC95 por reamostragem de safras. Com 8 a 10 safras, o
 intervalo é largo: o teste só detecta ganho grande.
 
 Uso:   python 02_sensores_recentes.py
+Entrada: dados/sensores_recentes_<ano>.csv (um por safra)
 Saída: sensores_recentes.json
 """
+import glob
 import importlib.util
 import json
 import os
@@ -84,7 +86,10 @@ def main():
     base = pd.read_csv(os.path.join(PESQUISA, 'dados', 'soja_para_painel.csv'))
     base['balanco_hidrico'] = base.precip_total - base.etp_total
     base['log_area'] = np.log1p(base.soy_area_ha)
-    sens = pd.read_csv(os.path.join(AQUI, 'dados', 'sensores_recentes_para.csv'))
+    # Um arquivo por safra (coleta/coleta_recentes.py coleta uma safra por job).
+    arquivos = sorted(glob.glob(os.path.join(AQUI, 'dados', 'sensores_recentes_*.csv')))
+    sens = pd.concat([pd.read_csv(a) for a in arquivos], ignore_index=True)
+    print(f'{len(arquivos)} safras de sensores: {sorted(sens.ano.unique().tolist())}', flush=True)
     df0 = base.merge(sens.drop(columns=['municipio_gaul', 'mascara_mapbiomas'], errors='ignore'),
                      on=['cod_ibge7', 'ano'], how='left')
     originais = list(m.FEATURES)

@@ -1,12 +1,6 @@
 # Política de privacidade do aplicativo AgroInteligência
 
-> **Rascunho para o autor revisar.** Descreve o que o aplicativo faz com os
-> dados na versão 2.6.0, conferido no código. Antes de publicar: preencher o
-> contato, revisar o texto e hospedar a página num endereço público (a Play
-> Store pede o link no Play Console). Se o aplicativo mudar o que envia ou
-> guarda, esta página muda junto.
-
-Última atualização: 29 de outubro de 2026.
+Última atualização: 30 de outubro de 2026.
 
 O AgroInteligência é um aplicativo gratuito, sem anúncios e sem cadastro,
 desenvolvido como produto técnico de dissertação do Programa de Pós-Graduação
@@ -71,7 +65,7 @@ crianças.
 
 O aplicativo não mantém cadastro nem base de dados pessoais no servidor. Os
 dados guardados ficam no próprio celular, sob controle do usuário. Dúvidas e
-pedidos sobre esta política: **[contato do autor a preencher]**.
+pedidos sobre esta política: **maycon.engineer@gmail.com**.
 
 ## Código aberto
 

@@ -39,14 +39,33 @@ def reduz_em_lotes(ee, img, munis, reducer, scale, tamanho=12, tileScale=16):
     coleta inteira do estado.
     """
     nomes = munis.aggregate_array('ADM2_NAME').getInfo()
+
+    def reduz(lista, escala):
+        lote = munis.filter(ee.Filter.inList('ADM2_NAME', lista))
+        return img.reduceRegions(collection=lote, reducer=reducer, scale=escala,
+                                 tileScale=tileScale).getInfo()['features']
+
     feicoes = []
     for i in range(0, len(nomes), tamanho):
-        lote = munis.filter(ee.Filter.inList('ADM2_NAME', nomes[i:i + tamanho]))
-
-        def reduz_lote():
-            return img.reduceRegions(collection=lote, reducer=reducer, scale=scale,
-                                     tileScale=tileScale).getInfo()['features']
-        feicoes += tenta(reduz_lote)
+        lista = nomes[i:i + tamanho]
+        try:
+            feicoes += tenta(reduz, lista, scale)
+            continue
+        except Exception as e:  # lote pesado demais: um município por vez
+            print(f'  lote {lista[0]}..{lista[-1]} falhou ({type(e).__name__}); um município por vez', flush=True)
+        for nome in lista:
+            # Município sozinho que ainda estoura o tempo vai a uma escala mais grossa:
+            # a média sob a máscara muda pouco, e perder o município seria pior.
+            for escala in (scale, scale * 2, scale * 4):
+                try:
+                    feicoes += tenta(reduz, [nome], escala, tentativas=2)
+                    if escala != scale:
+                        print(f'  {nome}: reduzido a {escala} m', flush=True)
+                    break
+                except Exception as e:
+                    print(f'  {nome}: falhou a {escala} m ({type(e).__name__})', flush=True)
+            else:
+                print(f'  {nome}: fica sem valor nesta redução', flush=True)
     return feicoes
 
 

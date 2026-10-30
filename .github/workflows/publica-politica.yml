@@ -1,0 +1,86 @@
+# Publica a política de privacidade do aplicativo no GitHub Pages, o endereço
+# público que a Play Store pede no Play Console:
+#   https://engsoft7.github.io/dissertacao-soja-ia/politica-de-privacidade/
+#
+# O texto vive em software/aplicativo_mobile/loja/politica_de_privacidade.md e
+# é ele que se edita; a página é gerada daqui. Enquanto o arquivo trouxer o
+# aviso de rascunho ou o contato por preencher, nada é publicado: o passo de
+# conferência falha e diz o que falta.
+#
+# Para ativar (uma vez, pelo dono do repositório): Settings → Pages → Build and
+# deployment → Source: GitHub Actions.
+name: Publica política de privacidade
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "software/aplicativo_mobile/loja/politica_de_privacidade.md"
+      - ".github/workflows/publica-politica.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  gera:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confere se o texto está pronto
+        run: |
+          f=software/aplicativo_mobile/loja/politica_de_privacidade.md
+          falta=""
+          grep -q "Rascunho para o autor revisar" "$f" && falta="$falta o aviso de rascunho no topo;"
+          grep -q "a preencher" "$f" && falta="$falta o contato do autor;"
+          if [ -n "$falta" ]; then
+            echo "::error::A política ainda não está pronta para publicar. Falta tirar ou preencher:$falta"
+            exit 1
+          fi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Gera a página
+        run: |
+          pip install --quiet markdown==3.7
+          mkdir -p site/politica-de-privacidade
+          python - <<'EOF'
+          import markdown
+          texto = open("software/aplicativo_mobile/loja/politica_de_privacidade.md", encoding="utf-8").read()
+          corpo = markdown.markdown(texto, extensions=["extra"])
+          pagina = f"""<!doctype html>
+          <html lang="pt-BR"><head><meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>Política de privacidade — AgroInteligência</title>
+          <style>
+          body {{ font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; margin: 0 auto;
+                 max-width: 760px; padding: 24px 16px; color: #1c1c1e; background: #fff; }}
+          @media (prefers-color-scheme: dark) {{ body {{ color: #f2f2f7; background: #111; }} a {{ color: #58a6ff; }} }}
+          h1 {{ font-size: 1.6rem; line-height: 1.25; }} h2 {{ font-size: 1.2rem; margin-top: 2rem; }}
+          </style></head><body>
+          {corpo}
+          </body></html>"""
+          open("site/politica-de-privacidade/index.html", "w", encoding="utf-8").write(pagina)
+          open("site/index.html", "w", encoding="utf-8").write(
+              '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=politica-de-privacidade/">'
+              '<a href="politica-de-privacidade/">Política de privacidade do AgroInteligência</a>')
+          EOF
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  publica:
+    needs: gera
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}politica-de-privacidade/
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

@@ -17,6 +17,7 @@ reproduz a da base da dissertação; muda só o estado. A produtividade vem da
 PAM, em 03_analise_nacional/pam_soja_municipios.csv, e é juntada na análise.
 
 Uso:   python coleta_amazonia_legal.py TO [--anos 2001-2025]
+       (no Actions, "[coleta: amazonia_MT]" na mensagem do commit refaz um estado só)
 Saída: ../dados/amazonia_legal_<UF>.csv
 """
 import argparse

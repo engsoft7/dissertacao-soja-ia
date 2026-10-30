@@ -35,8 +35,9 @@ nem de publicidade.
 Como em qualquer acesso à Internet, os servidores que recebem essas
 requisições registram o endereço IP do aparelho. A API do produto usa a
 posição só para escolher os avisos do lugar e não a grava em banco de dados;
-os registros de acesso do servidor (Render) guardam por algum tempo o
-endereço de cada requisição, que inclui a posição aproximada. O tratamento
+os registros de acesso do servidor (Render) guardam o endereço de cada
+requisição, que inclui a posição aproximada, e são apagados automaticamente
+pelo Render em até 30 dias. O tratamento
 pelo Open-Meteo segue os termos dele (https://open-meteo.com/en/terms).
 
 A posição do GPS para a previsão do tempo só é lida quando o produtor toca em

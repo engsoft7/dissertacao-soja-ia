@@ -44,7 +44,7 @@ jobs:
           # nada (cada coleta completa leva horas e gasta cota do Earth Engine).
           pedido="${{ inputs.coleta }}"
           if [ -z "$pedido" ]; then
-            pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[coleta: *\([A-Za-z_ ]*\)\].*/\1/p' | head -1)
+            pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[coleta: *\([A-Za-z0-9_ ]*\)\].*/\1/p' | head -1)
           fi
           [ -n "$pedido" ] || { echo 'tarefas=[]' >> "$GITHUB_OUTPUT"; exit 0; }
           lista=""

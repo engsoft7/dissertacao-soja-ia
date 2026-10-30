@@ -39,21 +39,26 @@ jobs:
         env:
           MENSAGEM: ${{ github.event.head_commit.message }}
         run: |
-          # No push, só coleta o que a mensagem do commit pedir, como "[coleta: solo]";
-          # sem pedido, nada (cada coleta completa leva horas e gasta cota do Earth Engine).
+          # No push, só coleta o que a mensagem do commit pedir, como "[coleta: solo]",
+          # ou várias de uma vez, "[coleta: amazonia_TO fases_nacional]"; sem pedido,
+          # nada (cada coleta completa leva horas e gasta cota do Earth Engine).
           pedido="${{ inputs.coleta }}"
           if [ -z "$pedido" ]; then
-            pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[coleta: *\([A-Za-z_]*\)\].*/\1/p' | head -1)
+            pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[coleta: *\([A-Za-z_ ]*\)\].*/\1/p' | head -1)
           fi
           [ -n "$pedido" ] || { echo 'tarefas=[]' >> "$GITHUB_OUTPUT"; exit 0; }
-          case "$pedido" in
-            tudo) t='["solo para","solo nacional","recentes","amazonia TO","amazonia MA","amazonia RO","amazonia MT","fases_nacional"]' ;;
-            solo) t='["solo para","solo nacional"]' ;;
-            amazonia) t='["amazonia TO","amazonia MA","amazonia RO","amazonia MT"]' ;;
-            amazonia_??) t="[\"amazonia ${pedido#amazonia_}\"]" ;;   # um estado só, ex.: amazonia_MA
-            *) t="[\"$pedido\"]" ;;
-          esac
-          echo "tarefas=$t" >> "$GITHUB_OUTPUT"
+          lista=""
+          for item in $pedido; do
+            case "$item" in
+              tudo) t='"solo para","solo nacional","recentes","amazonia TO","amazonia MA","amazonia RO","amazonia MT","fases_nacional"' ;;
+              solo) t='"solo para","solo nacional"' ;;
+              amazonia) t='"amazonia TO","amazonia MA","amazonia RO","amazonia MT"' ;;
+              amazonia_??) t="\"amazonia ${item#amazonia_}\"" ;;   # um estado só, ex.: amazonia_MA
+              *) t="\"$item\"" ;;
+            esac
+            lista="${lista:+$lista,}$t"
+          done
+          echo "tarefas=[$lista]" >> "$GITHUB_OUTPUT"
 
   coleta:
     needs: plano

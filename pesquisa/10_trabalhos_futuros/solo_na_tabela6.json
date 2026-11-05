@@ -1,0 +1,146 @@
+{
+  "nota": "Tabela 6 do Pará refeita com e sem os sete atributos do SoilGrids (0-30 cm, ponderados pela fração de soja). Ganho = 1 - MSE(modelo)/MSE(referência), IC95 por reamostragem de safras.",
+  "variaveis_solo": [
+    "argila_pct",
+    "areia_pct",
+    "silte_pct",
+    "carbono_org_g_kg",
+    "ph_agua",
+    "ctc_cmol_kg",
+    "densidade_g_cm3"
+  ],
+  "registros": 415,
+  "municipios": 38,
+  "sem_solo": {
+    "Random Forest": {
+      "RMSE": 431.9,
+      "MAE": 308.6,
+      "R2": 0.153,
+      "rRMSE_%": 14.4,
+      "ganho_sobre_referencia": -0.08,
+      "IC95": [
+        -0.165,
+        -0.002
+      ],
+      "p_unilateral": 0.979
+    },
+    "XGBoost": {
+      "RMSE": 433.2,
+      "MAE": 310.6,
+      "R2": 0.148,
+      "rRMSE_%": 14.5,
+      "ganho_sobre_referencia": -0.086,
+      "IC95": [
+        -0.171,
+        -0.007
+      ],
+      "p_unilateral": 0.982
+    },
+    "SVR": {
+      "RMSE": 417.6,
+      "MAE": 294.8,
+      "R2": 0.208,
+      "rRMSE_%": 13.9,
+      "ganho_sobre_referencia": -0.01,
+      "IC95": [
+        -0.045,
+        0.033
+      ],
+      "p_unilateral": 0.696
+    },
+    "MLP": {
+      "RMSE": 415.6,
+      "MAE": 297.4,
+      "R2": 0.216,
+      "rRMSE_%": 13.9,
+      "ganho_sobre_referencia": 0.0,
+      "IC95": [
+        -0.012,
+        0.012
+      ],
+      "p_unilateral": 0.523
+    }
+  },
+  "com_solo": {
+    "Random Forest": {
+      "RMSE": 426.7,
+      "MAE": 301.8,
+      "R2": 0.174,
+      "rRMSE_%": 14.2,
+      "ganho_sobre_referencia": -0.054,
+      "IC95": [
+        -0.164,
+        0.043
+      ],
+      "p_unilateral": 0.834
+    },
+    "XGBoost": {
+      "RMSE": 431.6,
+      "MAE": 307.2,
+      "R2": 0.154,
+      "rRMSE_%": 14.4,
+      "ganho_sobre_referencia": -0.079,
+      "IC95": [
+        -0.162,
+        -0.002
+      ],
+      "p_unilateral": 0.979
+    },
+    "SVR": {
+      "RMSE": 414.0,
+      "MAE": 285.4,
+      "R2": 0.222,
+      "rRMSE_%": 13.8,
+      "ganho_sobre_referencia": 0.008,
+      "IC95": [
+        -0.034,
+        0.053
+      ],
+      "p_unilateral": 0.3625
+    },
+    "MLP": {
+      "RMSE": 416.1,
+      "MAE": 296.9,
+      "R2": 0.214,
+      "rRMSE_%": 13.9,
+      "ganho_sobre_referencia": -0.003,
+      "IC95": [
+        -0.011,
+        0.003
+      ],
+      "p_unilateral": 0.7505
+    }
+  },
+  "tabela_6_publicada": {
+    "Random Forest": {
+      "RMSE": 431.9,
+      "MAE": 308.6,
+      "R2": 0.153,
+      "rRMSE_%": 14.4
+    },
+    "XGBoost": {
+      "RMSE": 439.5,
+      "MAE": 314.5,
+      "R2": 0.123,
+      "rRMSE_%": 14.7
+    },
+    "SVR": {
+      "RMSE": 417.6,
+      "MAE": 294.8,
+      "R2": 0.208,
+      "rRMSE_%": 13.9
+    },
+    "MLP": {
+      "RMSE": 415.6,
+      "MAE": 297.4,
+      "R2": 0.216,
+      "rRMSE_%": 13.9
+    },
+    "Baseline (sem clima)": {
+      "RMSE": 415.6,
+      "MAE": 296.1,
+      "R2": 0.216,
+      "rRMSE_%": 13.9
+    }
+  }
+}

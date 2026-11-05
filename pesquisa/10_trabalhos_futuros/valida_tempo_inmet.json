@@ -1,0 +1,550 @@
+{
+  "nota": "Janela de pulverização e previsão do Open-Meteo (arquivo de previsões de curto prazo) contra as estações automáticas do INMET em municípios da base, 2025-11-01 a 2026-04-30. Classes: 0 boa, 1 atenção, 2 evitar; matriz com linhas = prevista, colunas = medida.",
+  "estacoes": {
+    "A211": {
+      "municipio": "Placas",
+      "horas": 2193,
+      "erro_medio_absoluto": {
+        "temperatura_C": 1.49,
+        "umidade_pct": 10.1,
+        "vento_10m_kmh": 3.2
+      },
+      "vies": {
+        "temperatura_C": -1.0,
+        "umidade_pct": 5.8,
+        "vento_10m_kmh": 1.7
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 9,
+        "acerto_dos_dias_com_chuva": 0.0,
+        "alarmes_falsos": 1.0
+      },
+      "janela": {
+        "acerto": 0.477,
+        "kappa": 0.164,
+        "matriz_prevista_x_medida": [
+          [
+            87,
+            221,
+            42
+          ],
+          [
+            79,
+            146,
+            34
+          ],
+          [
+            421,
+            350,
+            813
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.12,
+        "boa_prevista_que_era_boa": 0.249
+      },
+      "chance_de_chuva_no_arquivo": true
+    },
+    "A212": {
+      "municipio": "Paragominas",
+      "horas": 4325,
+      "erro_medio_absoluto": {
+        "temperatura_C": 0.97,
+        "umidade_pct": 7.1,
+        "vento_10m_kmh": 4.2
+      },
+      "vies": {
+        "temperatura_C": -0.38,
+        "umidade_pct": -5.9,
+        "vento_10m_kmh": 2.0
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 180,
+        "acerto_dos_dias_com_chuva": 0.889,
+        "alarmes_falsos": 0.312
+      },
+      "janela": {
+        "acerto": 0.48,
+        "kappa": 0.214,
+        "matriz_prevista_x_medida": [
+          [
+            280,
+            611,
+            56
+          ],
+          [
+            136,
+            364,
+            104
+          ],
+          [
+            381,
+            959,
+            1434
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.059,
+        "boa_prevista_que_era_boa": 0.296
+      },
+      "chance_de_chuva_no_arquivo": true
+    },
+    "A213": {
+      "municipio": "Tomé-Açu",
+      "horas": 3338,
+      "erro_medio_absoluto": {
+        "temperatura_C": 1.06,
+        "umidade_pct": 7.2,
+        "vento_10m_kmh": 4.5
+      },
+      "vies": {
+        "temperatura_C": -0.33,
+        "umidade_pct": -4.0,
+        "vento_10m_kmh": 4.1
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 104,
+        "acerto_dos_dias_com_chuva": 0.771,
+        "alarmes_falsos": 0.373
+      },
+      "janela": {
+        "acerto": 0.427,
+        "kappa": 0.163,
+        "matriz_prevista_x_medida": [
+          [
+            75,
+            694,
+            56
+          ],
+          [
+            95,
+            275,
+            29
+          ],
+          [
+            279,
+            759,
+            1076
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.068,
+        "boa_prevista_que_era_boa": 0.091
+      },
+      "chance_de_chuva_no_arquivo": true
+    },
+    "A216": {
+      "municipio": "São Félix do Xingu",
+      "horas": 859,
+      "erro_medio_absoluto": {
+        "temperatura_C": 1.15,
+        "umidade_pct": 7.0,
+        "vento_10m_kmh": 3.1
+      },
+      "vies": {
+        "temperatura_C": -0.08,
+        "umidade_pct": -0.8,
+        "vento_10m_kmh": -1.7
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 16,
+        "acerto_dos_dias_com_chuva": 0.5,
+        "alarmes_falsos": 0.6
+      },
+      "janela": {
+        "acerto": 0.552,
+        "kappa": 0.306,
+        "matriz_prevista_x_medida": [
+          [
+            51,
+            45,
+            18
+          ],
+          [
+            83,
+            139,
+            25
+          ],
+          [
+            111,
+            103,
+            284
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.158,
+        "boa_prevista_que_era_boa": 0.447
+      },
+      "chance_de_chuva_no_arquivo": true
+    },
+    "A234": {
+      "municipio": "Tucumã",
+      "horas": 4341,
+      "erro_medio_absoluto": {
+        "temperatura_C": 0.99,
+        "umidade_pct": 6.6,
+        "vento_10m_kmh": 3.1
+      },
+      "vies": {
+        "temperatura_C": 0.02,
+        "umidade_pct": -5.0,
+        "vento_10m_kmh": 2.3
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 181,
+        "acerto_dos_dias_com_chuva": 0.865,
+        "alarmes_falsos": 0.417
+      },
+      "janela": {
+        "acerto": 0.381,
+        "kappa": 0.121,
+        "matriz_prevista_x_medida": [
+          [
+            200,
+            940,
+            61
+          ],
+          [
+            173,
+            784,
+            102
+          ],
+          [
+            449,
+            963,
+            669
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.051,
+        "boa_prevista_que_era_boa": 0.167
+      },
+      "chance_de_chuva_no_arquivo": true
+    },
+    "A239": {
+      "municipio": "Monte Alegre",
+      "horas": 1856,
+      "erro_medio_absoluto": {
+        "temperatura_C": 0.9,
+        "umidade_pct": 5.3,
+        "vento_10m_kmh": 3.0
+      },
+      "vies": {
+        "temperatura_C": -0.23,
+        "umidade_pct": 1.2,
+        "vento_10m_kmh": 1.6
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 0,
+        "acerto_dos_dias_com_chuva": 0.0,
+        "alarmes_falsos": 0.0
+      },
+      "janela": {
+        "acerto": 0.597,
+        "kappa": 0.202,
+        "matriz_prevista_x_medida": [
+          [
+            85,
+            24,
+            15
+          ],
+          [
+            104,
+            47,
+            31
+          ],
+          [
+            333,
+            241,
+            976
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.121,
+        "boa_prevista_que_era_boa": 0.685
+      },
+      "chance_de_chuva_no_arquivo": true
+    },
+    "A241": {
+      "municipio": "Conceição do Araguaia",
+      "horas": 3620,
+      "erro_medio_absoluto": {
+        "temperatura_C": 1.17,
+        "umidade_pct": 5.4,
+        "vento_10m_kmh": 2.6
+      },
+      "vies": {
+        "temperatura_C": 0.02,
+        "umidade_pct": 1.3,
+        "vento_10m_kmh": 0.9
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 125,
+        "acerto_dos_dias_com_chuva": 0.791,
+        "alarmes_falsos": 0.663
+      },
+      "janela": {
+        "acerto": 0.433,
+        "kappa": 0.131,
+        "matriz_prevista_x_medida": [
+          [
+            171,
+            300,
+            173
+          ],
+          [
+            237,
+            607,
+            304
+          ],
+          [
+            507,
+            531,
+            790
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.269,
+        "boa_prevista_que_era_boa": 0.266
+      },
+      "chance_de_chuva_no_arquivo": true
+    },
+    "A250": {
+      "municipio": "Santarém",
+      "horas": 1617,
+      "erro_medio_absoluto": {
+        "temperatura_C": 0.78,
+        "umidade_pct": 5.5,
+        "vento_10m_kmh": 4.6
+      },
+      "vies": {
+        "temperatura_C": 0.19,
+        "umidade_pct": -0.6,
+        "vento_10m_kmh": 4.4
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 0,
+        "acerto_dos_dias_com_chuva": 0.0,
+        "alarmes_falsos": 0.0
+      },
+      "janela": {
+        "acerto": 0.27,
+        "kappa": 0.019,
+        "matriz_prevista_x_medida": [
+          [
+            103,
+            171,
+            33
+          ],
+          [
+            82,
+            102,
+            9
+          ],
+          [
+            725,
+            160,
+            232
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.107,
+        "boa_prevista_que_era_boa": 0.336
+      },
+      "chance_de_chuva_no_arquivo": true
+    },
+    "A252": {
+      "municipio": "Dom Eliseu",
+      "horas": 4239,
+      "erro_medio_absoluto": {
+        "temperatura_C": 0.96,
+        "umidade_pct": 8.7,
+        "vento_10m_kmh": 2.9
+      },
+      "vies": {
+        "temperatura_C": -0.19,
+        "umidade_pct": 1.5,
+        "vento_10m_kmh": 1.4
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 61,
+        "acerto_dos_dias_com_chuva": 0.733,
+        "alarmes_falsos": 0.633
+      },
+      "janela": {
+        "acerto": 0.326,
+        "kappa": 0.085,
+        "matriz_prevista_x_medida": [
+          [
+            311,
+            400,
+            62
+          ],
+          [
+            303,
+            435,
+            56
+          ],
+          [
+            1109,
+            925,
+            638
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.08,
+        "boa_prevista_que_era_boa": 0.402
+      },
+      "chance_de_chuva_no_arquivo": true
+    },
+    "A253": {
+      "municipio": "Altamira",
+      "horas": 4156,
+      "erro_medio_absoluto": {
+        "temperatura_C": 0.93,
+        "umidade_pct": 6.8,
+        "vento_10m_kmh": 4.2
+      },
+      "vies": {
+        "temperatura_C": -0.36,
+        "umidade_pct": -5.6,
+        "vento_10m_kmh": 3.9
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 165,
+        "acerto_dos_dias_com_chuva": 0.918,
+        "alarmes_falsos": 0.4
+      },
+      "janela": {
+        "acerto": 0.323,
+        "kappa": 0.067,
+        "matriz_prevista_x_medida": [
+          [
+            164,
+            803,
+            74
+          ],
+          [
+            175,
+            381,
+            53
+          ],
+          [
+            698,
+            1011,
+            797
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.071,
+        "boa_prevista_que_era_boa": 0.158
+      },
+      "chance_de_chuva_no_arquivo": true
+    },
+    "A254": {
+      "municipio": "Redenção",
+      "horas": 4122,
+      "erro_medio_absoluto": {
+        "temperatura_C": 1.31,
+        "umidade_pct": 5.7,
+        "vento_10m_kmh": 2.6
+      },
+      "vies": {
+        "temperatura_C": -0.8,
+        "umidade_pct": -1.2,
+        "vento_10m_kmh": 0.4
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 116,
+        "acerto_dos_dias_com_chuva": 0.864,
+        "alarmes_falsos": 0.457
+      },
+      "janela": {
+        "acerto": 0.457,
+        "kappa": 0.176,
+        "matriz_prevista_x_medida": [
+          [
+            180,
+            315,
+            152
+          ],
+          [
+            305,
+            854,
+            254
+          ],
+          [
+            620,
+            591,
+            851
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.235,
+        "boa_prevista_que_era_boa": 0.278
+      },
+      "chance_de_chuva_no_arquivo": true
+    },
+    "A256": {
+      "municipio": "Santa Maria das Barreiras",
+      "horas": 3413,
+      "erro_medio_absoluto": {
+        "temperatura_C": 1.2,
+        "umidade_pct": 5.4,
+        "vento_10m_kmh": 3.3
+      },
+      "vies": {
+        "temperatura_C": -0.38,
+        "umidade_pct": 0.1,
+        "vento_10m_kmh": 0.3
+      },
+      "chuva_por_dia_1mm": {
+        "dias": 142,
+        "acerto_dos_dias_com_chuva": 0.833,
+        "alarmes_falsos": 0.301
+      },
+      "janela": {
+        "acerto": 0.456,
+        "kappa": 0.196,
+        "matriz_prevista_x_medida": [
+          [
+            358,
+            455,
+            89
+          ],
+          [
+            374,
+            421,
+            100
+          ],
+          [
+            449,
+            391,
+            776
+          ]
+        ],
+        "boa_prevista_que_era_evitar": 0.099,
+        "boa_prevista_que_era_boa": 0.397
+      },
+      "chance_de_chuva_no_arquivo": true
+    }
+  },
+  "geral": {
+    "horas": 38079,
+    "acerto": 0.419,
+    "kappa": 0.147,
+    "matriz_prevista_x_medida": [
+      [
+        2065,
+        4979,
+        831
+      ],
+      [
+        2146,
+        4555,
+        1101
+      ],
+      [
+        6082,
+        6984,
+        9336
+      ]
+    ],
+    "boa_prevista_que_era_evitar": 0.106,
+    "boa_prevista_que_era_boa": 0.262,
+    "proporcao_medida": {
+      "boa": 0.27,
+      "atencao": 0.434,
+      "evitar": 0.296
+    }
+  }
+}

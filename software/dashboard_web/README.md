@@ -35,6 +35,11 @@ Abre em `http://localhost:8501`.
   arrasta nem dá zoom; a seleção do município é feita pelo menu.
 - Usa a **grafia oficial acentuada** dos nomes de município (IBGE) — a base
   bruta vem do GAUL, sem acentos.
+- Na tela **Tempo na lavoura**, mostra o tempo agora, os avisos do INMET, a
+  **janela de pulverização** das próximas 24 horas (critérios da Embrapa Soja,
+  as mesmas regras do aplicativo, em `software/api_backend/tempo.py`), a
+  previsão de 7 dias e a chuva contra a evapotranspiração dos últimos 7 dias.
+  A previsão vem do Open-Meteo e não entra na estimativa de produtividade.
 - Traz um **panorama ordenável dos 38 municípios** (produtividade recente, área,
   repetição na PAM) e um bloco **"Sobre este painel"** com metodologia, autoria,
   DOI e instrução de citação.

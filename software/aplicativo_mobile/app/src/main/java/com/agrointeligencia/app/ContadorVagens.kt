@@ -126,8 +126,9 @@ private fun roda(context: Context, foto: Bitmap, m: ModeloVagens): Pair<Double, 
     entrada.asFloatBuffer().put(normaliza(pixels, nw, nh, m))
     val saida = ByteBuffer.allocateDirect((m.largura / m.passo) * (m.altura / m.passo) * 4).order(ByteOrder.nativeOrder())
     // Lido inteiro para a memória, e não mapeado do pacote: assim funciona
-    // mesmo se o empacotamento comprimir o arquivo.
-    val bytes = context.assets.open(m.arquivo).use { it.readBytes() }
+    // mesmo se o empacotamento comprimir o arquivo. Vem do modelo baixado, se
+    // houver um conferido (AtualizaContador.kt), ou do embutido.
+    val bytes = bytesDoModelo(context, m.arquivo)
     val modelo = ByteBuffer.allocateDirect(bytes.size).order(ByteOrder.nativeOrder()).put(bytes)
     modelo.rewind()
     Interpreter(modelo, Interpreter.Options().setNumThreads(4)).use { it.run(entrada, saida) }

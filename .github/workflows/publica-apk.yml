@@ -106,6 +106,38 @@ jobs:
         working-directory: software/aplicativo_mobile
         run: ./gradlew --no-daemon bundleRelease assembleRelease
 
+      # Um segundo APK, só para arm64-v8a, a arquitetura de quase todo celular
+      # Android vendido desde 2019: o universal leva as bibliotecas nativas do
+      # LiteRT (contador de vagens) para quatro arquiteturas, e o produtor que
+      # baixa pelo celular, no campo, paga por todas. Sai do universal já
+      # assinado: tiram-se as pastas das outras arquiteturas, realinha-se e
+      # assina-se de novo com a mesma chave, sem mexer no build.gradle.kts. O
+      # universal continua no Release, para aparelhos antigos de 32 bits.
+      - name: APK menor, só para arm64
+        if: steps.chave.outputs.presente == 'sim'
+        working-directory: software/aplicativo_mobile
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          for apk in $(find app/build/outputs/apk -name '*-release*.apk' ! -name '*-arm64*'); do
+            saida="${apk%.apk}-arm64.apk"
+            tmp=$(mktemp -d)
+            cp "$apk" "$tmp/cru.apk"
+            # zip devolve 12 quando um padrão não acha nada: não é erro aqui.
+            zip -q -d "$tmp/cru.apk" 'lib/armeabi-v7a/*' 'lib/x86/*' 'lib/x86_64/*' \
+              'META-INF/*.SF' 'META-INF/*.RSA' 'META-INF/*.EC' 'META-INF/*.MF' || [ $? -eq 12 ]
+            unzip -l "$tmp/cru.apk" | grep -q 'lib/arm64-v8a/' || { echo "::error::sem lib/arm64-v8a em $apk"; exit 1; }
+            "$BT/zipalign" -p -f 4 "$tmp/cru.apk" "$tmp/alinhado.apk"
+            "$BT/apksigner" sign --ks agro_playstore.jks --ks-pass env:KEYSTORE_PASSWORD \
+              --ks-key-alias "$KEY_ALIAS" --key-pass env:KEY_PASSWORD --out "$saida" "$tmp/alinhado.apk"
+            "$BT/apksigner" verify "$saida"
+            ls -la "$apk" "$saida"
+            rm -rf "$tmp"
+          done
+
       # O REGISTRO_INPI.md declara o SHA-256 do APK distribuído. Imprimi-lo aqui
       # deixa o valor no log do Release, conferível sem baixar nada.
       - name: Resumo criptográfico dos pacotes

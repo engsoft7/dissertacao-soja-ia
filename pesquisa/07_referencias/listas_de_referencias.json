@@ -1,6 +1,6 @@
 {
- "gerado_em": "2026-10-25",
- "fonte": "versões do Google Drive de 23/10/2026; lista principal da dissertação atualizada em 25/10/2026 (entram XIANG et al., 2023; BOARD; KAHLON, 2011; FEHR; CAVINESS, 1977; LEMPITSKY; ZISSERMAN, 2010; endereços da CONAB atualizados para gov.br/conab; em 25/10/2026 também ADEGAS; GAZZIERO, 2020, ALLEN et al., 1998, INMET, 2026, e OPEN-METEO, 2026, da tela Tempo do aplicativo, e BOARD antes de BRASIL)",
+ "gerado_em": "2026-10-29",
+ "fonte": "versões do Google Drive de 23/10/2026; lista principal da dissertação atualizada em 25/10/2026 (entram XIANG et al., 2023; BOARD; KAHLON, 2011; FEHR; CAVINESS, 1977; LEMPITSKY; ZISSERMAN, 2010; endereços da CONAB atualizados para gov.br/conab; em 25/10/2026 também ADEGAS; GAZZIERO, 2020, ALLEN et al., 1998, INMET, 2026, e OPEN-METEO, 2026, da tela Tempo do aplicativo, e BOARD antes de BRASIL; em 29/10/2026, POGGIO et al., 2021, do SoilGrids, citado na conclusão; no artigo ERAD, sai Williams e Seeger, 2001, com a citação retirada da conclusão a pedido do orientador)",
  "listas": {
   "dissertacao_referencias": [
    "ADEGAS, F. S.; GAZZIERO, D. L. P. Tecnologia de aplicação de agrotóxicos. In: SEIXAS, C. D. S. et al. (ed.). Tecnologias de produção de soja. Londrina: Embrapa Soja, 2020. p. 281-292. (Sistemas de Produção, 17).",
@@ -39,6 +39,7 @@
    "NATIONAL AERONAUTICS AND SPACE ADMINISTRATION (NASA). POWER: Prediction of Worldwide Energy Resources. [S. l.]: NASA, 2024. Disponível em: https://power.larc.nasa.gov. Acesso em: 19 ago. 2026.",
    "OPEN-METEO. Weather Forecast API. Bürglen: Open-Meteo, 2026. Disponível em: https://open-meteo.com/en/docs. Acesso em: 25 out. 2026.",
    "PAGE, M. J. et al. The PRISMA 2020 statement: an updated guideline for reporting systematic reviews. BMJ, v. 372, art. n71, 2021.",
+   "POGGIO, L. et al. SoilGrids 2.0: producing soil information for the globe with quantified spatial uncertainty. SOIL, v. 7, n. 1, p. 217-240, 2021. DOI: 10.5194/soil-7-217-2021.",
    "RICHETTI, J. et al. Using phenology-based enhanced vegetation index and machine learning for soybean yield estimation in Paraná State, Brazil. Journal of Applied Remote Sensing, v. 12, n. 2, art. 026029, 2018.",
    "RUSSELL, S. J.; NORVIG, P. Artificial intelligence: a modern approach. 4. ed. Hoboken: Pearson, 2021.",
    "SCHWALBERT, R. A. et al. Satellite-based soybean yield forecast: integrating machine learning and weather data for improving crop yield prediction in southern Brazil. Agricultural and Forest Meteorology, v. 284, art. 107886, 2020.",
@@ -116,8 +117,7 @@
    "Chang, C.-C. e Lin, C.-J. (2011). LIBSVM: a library for support vector machines. ACM Transactions on Intelligent Systems and Technology, 2(3):27:1–27:27.",
    "Chen, T. e Guestrin, C. (2016). XGBoost: a scalable tree boosting system. In Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining, p. 785–794. ACM.",
    "Pedregosa, F. et al. (2011). Scikit-learn: machine learning in Python. Journal of Machine Learning Research, 12:2825–2830.",
-   "von Bloh, M. et al. (2023). Machine learning for soybean yield forecasting in Brazil. Agricultural and Forest Meteorology, 341:109670.",
-   "Williams, C. K. I. e Seeger, M. (2001). Using the Nyström method to speed up kernel machines. In Advances in Neural Information Processing Systems 13, p. 682–688. MIT Press."
+   "von Bloh, M. et al. (2023). Machine learning for soybean yield forecasting in Brazil. Agricultural and Forest Meteorology, 341:109670."
   ],
   "artigo_eramia": [
    "Bergstra, J. e Bengio, Y. (2012). Random search for hyper-parameter optimization. Journal of Machine Learning Research, 13:281–305.",

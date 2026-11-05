@@ -1,0 +1,81 @@
+{
+  "nota": "Gerado por 12_sem_subamostragem.py: protocolo de 04_avalia_ajustado.py com o treino inteiro (todas as safras fora a de teste), comparado à Tabela 3 (subamostra de 7.000; 5.000 no SVR) nas mesmas observações de teste.",
+  "modelos": {
+    "Random Forest": {
+      "subamostra": {
+        "RMSE_pool": 476.0,
+        "MAE_pool": 353.5,
+        "R2_pool": 0.387,
+        "segundos": 5
+      },
+      "completo": {
+        "RMSE_pool": 476.1,
+        "MAE_pool": 353.5,
+        "R2_pool": 0.386,
+        "segundos": 16
+      },
+      "dif_rmse_completo_menos_subamostra": 0.1,
+      "ic95": [
+        -2.3,
+        2.2
+      ]
+    },
+    "XGBoost": {
+      "subamostra": {
+        "RMSE_pool": 480.6,
+        "MAE_pool": 352.8,
+        "R2_pool": 0.374,
+        "segundos": 25
+      },
+      "completo": {
+        "RMSE_pool": 467.1,
+        "MAE_pool": 346.2,
+        "R2_pool": 0.409,
+        "segundos": 37
+      },
+      "dif_rmse_completo_menos_subamostra": -13.6,
+      "ic95": [
+        -16.0,
+        -11.5
+      ]
+    },
+    "SVR": {
+      "subamostra": {
+        "RMSE_pool": 460.7,
+        "MAE_pool": 339.6,
+        "R2_pool": 0.425,
+        "segundos": 12
+      },
+      "completo": {
+        "RMSE_pool": 465.7,
+        "MAE_pool": 343.0,
+        "R2_pool": 0.413,
+        "segundos": 400
+      },
+      "dif_rmse_completo_menos_subamostra": 5.1,
+      "ic95": [
+        3.0,
+        7.2
+      ]
+    },
+    "MLP": {
+      "subamostra": {
+        "RMSE_pool": 549.6,
+        "MAE_pool": 409.6,
+        "R2_pool": 0.182,
+        "segundos": 403
+      },
+      "completo": {
+        "RMSE_pool": 535.3,
+        "MAE_pool": 404.8,
+        "R2_pool": 0.224,
+        "segundos": 2129
+      },
+      "dif_rmse_completo_menos_subamostra": -14.3,
+      "ic95": [
+        -19.6,
+        -9.1
+      ]
+    }
+  }
+}

@@ -56,7 +56,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
@@ -252,6 +254,9 @@ fun AgroDashboard() {
         // --- 0. Proactive Render warm-up (fire-and-forget) ---
         coroutineScope.launch {
             try { RetrofitClient.getInstance().ping() } catch (_: Exception) {}
+            // Com a API acordada, confere se há modelo novo do contador de
+            // vagens (no máximo uma vez por dia; ver AtualizaContador.kt).
+            withContext(Dispatchers.IO) { atualizaContador(context) }
         }
         
         // --- 1. Optimistic Cache Load ---
@@ -1249,9 +1254,10 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
             }
             Spacer(modifier = Modifier.height(16.dp))
             
-            Text(text = "Satélite: MODIS (Resolução 250m)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(text = "Clima: CHIRPS (Chuva) & ERA5-Land (Temp.)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(text = "Base Territorial: MapBiomas e IBGE (PAM)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // Aviso de que o app não é do governo e cada fonte com o link oficial, como o
+            // Google Play exige de apps que mostram dados de órgãos públicos (FontesOficiais.kt).
+            FontesDosDados()
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
             // Preço e custo são constantes de um levantamento datado, não cotação
             // diária. Sem a praça e a data o número envelhece sem avisar — por isso
             // o rótulo vem da API, junto com a frase que diz onde o preço está na

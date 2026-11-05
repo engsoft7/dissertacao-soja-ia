@@ -483,16 +483,21 @@ private fun FotoParaContar(
                 TextButton(onClick = { marcas.clear(); aoContar(0) }, enabled = marcas.isNotEmpty()) { Text("Limpar") }
             }
             automatica?.let { a ->
+                // Um modelo baixado traz a própria frase sobre de onde aprendeu e quanto erra.
+                val baixado = remember { modeloBaixado(context)?.takeIf { it.versao > VERSAO_EMBUTIDA } }
+                val origem = baixado?.nota
+                    ?: ("Ele aprendeu com fotos de plantas da China, onde erra em média 6%, e ainda não foi " +
+                        "conferido em lavouras do Pará.")
                 Nota(
                     if (!conferida)
-                        "O contador estimou ${a.vagens} vagens e marcou ${a.marcas.size} onde as viu. Ele aprendeu " +
-                        "com fotos de plantas da China, onde erra em média 6%, e ainda não foi conferido em " +
-                        "lavouras do Pará. Confira: toque nas vagens sem marca e nas marcas erradas. " +
+                        "O contador estimou ${a.vagens} vagens e marcou ${a.marcas.size} onde as viu. $origem " +
+                        "Confira: toque nas vagens sem marca e nas marcas erradas. " +
                         "A partir do primeiro toque, vale a contagem das marcas."
                     else
                         "Contagem conferida por você, a partir das marcas do contador (que estimou ${a.vagens})."
                 )
-                Nota("Contador treinado com a base YOLO POD (Xiang et al., 2023, Plant Methods), licença CC BY 4.0.")
+                Nota("Contador versão ${baixado?.versao ?: VERSAO_EMBUTIDA}, treinado com a base YOLO POD " +
+                     "(Xiang et al., 2023, Plant Methods), licença CC BY 4.0.")
             }
         }
     }

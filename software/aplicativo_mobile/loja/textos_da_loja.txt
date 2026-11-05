@@ -1,0 +1,60 @@
+NOME DO APP
+AgroInteligência
+
+BREVE DESCRIÇÃO
+Produtividade, preço e tempo da soja para os municípios do Pará
+
+DESCRIÇÃO COMPLETA
+O AgroInteligência reúne, num só aplicativo, o que o produtor de soja do Pará precisa acompanhar ao longo da safra: a produtividade esperada do município, o preço da saca, o tempo na lavoura e a viabilidade financeira.
+
+AVISO: o AgroInteligência NÃO é um aplicativo do governo e não representa nenhum órgão público. Não tem vínculo com o IBGE, o INMET, a CONAB, a Embrapa ou a NOAA: apenas usa dados abertos publicados por essas instituições, com os links oficiais listados em "Fontes oficiais", no fim desta descrição. É um produto técnico de pesquisa do Programa de Pós-Graduação em Computação Aplicada da Universidade Federal do Pará (UFPA).
+
+PRODUTIVIDADE DO SEU MUNICÍPIO
+• Estimativa da produtividade da próxima safra para 38 municípios paraenses, sempre com a margem de erro.
+• Histórico de produtividade do IBGE desde 2001, com as safras de El Niño e La Niña destacadas.
+
+TEMPO NA LAVOURA
+• Condições de agora e previsão para os próximos 7 dias, na sede do município ou na sua localização.
+• Janela de pulverização hora a hora, pelos critérios da Embrapa Soja: temperatura, umidade, vento e chuva.
+• Avisos meteorológicos do INMET para o lugar.
+• Chuva dos últimos dias comparada com a evapotranspiração.
+
+ESTIMATIVA NO CAMPO
+• Fotografe um metro de linha e algumas plantas, conte plantas e vagens tocando na foto e veja a estimativa em sacas por hectare e em reais para o talhão.
+• Área do talhão medida pelo GPS do celular.
+• Contador automático de vagens, em teste, que roda no próprio celular, sem internet. Você confere e corrige as marcas.
+
+PREÇO DA SOJA
+• Cotação de Chicago convertida em reais por saca, com gráfico de velas de 1 dia a 6 meses.
+• Preço estimado para o Pará, com a diferença (base) entre o mercado paraense e a bolsa.
+• Preço físico do dia na praça mais próxima.
+
+VIABILIDADE DA SAFRA
+• Receita, custo e margem por hectare, a partir dos seus números de produtividade, preço e custeio.
+• Custo de referência da CONAB como ponto de partida, com aviso quando o levantamento estiver desatualizado.
+
+FEITO PARA O CAMPO
+• Funciona sem internet com os últimos dados carregados.
+• Sem cadastro e sem anúncios.
+• Fotos e marcações ficam só no seu celular; saem dele apenas se você exportar.
+
+FONTES OFICIAIS (órgãos públicos)
+• Produtividade municipal: IBGE, Produção Agrícola Municipal – https://sidra.ibge.gov.br/pesquisa/pam/tabelas
+• Avisos meteorológicos: INMET – https://alertas2.inmet.gov.br
+• Custo de produção e preço de referência: CONAB – https://portaldeinformacoes.conab.gov.br/custos-de-producao.html
+• Critérios da janela de pulverização: Embrapa Soja, Tecnologias de produção de soja – https://ainfo.cnptia.embrapa.br/digital/bitstream/item/223209/1/SP-17-2020-online-1.pdf
+• El Niño e La Niña (índice ONI): NOAA – https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php
+• Vegetação por satélite: NASA, MODIS – https://lpdaac.usgs.gov/products/mod13q1v061/
+
+OUTRAS FONTES
+• Máscara de soja: MapBiomas – https://brasil.mapbiomas.org
+• Chuva: CHIRPS – https://www.chc.ucsb.edu/data/chirps
+• Clima: ERA5-Land, Copernicus – https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land
+• Previsão do tempo: Open-Meteo – https://open-meteo.com
+• Preço do Pará: Agrolink – https://www.agrolink.com.br/cotacoes/historico/pa/soja-em-grao-sc-60kg
+• Preço físico do dia: Notícias Agrícolas – https://www.noticiasagricolas.com.br/cotacoes/soja/
+
+As estimativas são de apoio à decisão e não substituem a avaliação de um profissional nem a verificação das condições no local. Confira sempre a bula antes de qualquer aplicação.
+
+Código aberto: https://github.com/engsoft7/dissertacao-soja-ia
+Política de privacidade: https://engsoft7.github.io/dissertacao-soja-ia/politica-de-privacidade/

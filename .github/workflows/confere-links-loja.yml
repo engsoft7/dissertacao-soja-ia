@@ -1,0 +1,26 @@
+# Confere os textos da página do app no Google Play (limites de tamanho, aviso de
+# que o app não é do governo e se cada link abre) sempre que eles mudam. O Play
+# recusa a ficha quando faltam links funcionais para as fontes oficiais.
+name: Confere textos da loja
+
+on:
+  push:
+    paths:
+      - "software/aplicativo_mobile/loja/textos_da_loja.txt"
+      - "software/aplicativo_mobile/loja/confere_textos_da_loja.py"
+      - ".github/workflows/confere-links-loja.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  confere:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python software/aplicativo_mobile/loja/confere_textos_da_loja.py

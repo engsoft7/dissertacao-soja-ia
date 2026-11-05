@@ -10,6 +10,11 @@ on:
       - "software/aplicativo_mobile/loja/confere_textos_da_loja.py"
       - ".github/workflows/confere-links-loja.yml"
   workflow_dispatch:
+    inputs:
+      links:
+        description: "Só testar estes endereços (separados por espaço)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -23,4 +28,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python software/aplicativo_mobile/loja/confere_textos_da_loja.py
+      - env:
+          LINKS: ${{ inputs.links }}
+          MENSAGEM: ${{ github.event.head_commit.message }}
+        run: |
+          # "[links: url url]" na mensagem do commit testa só esses endereços (candidatos)
+          [ -n "$LINKS" ] || LINKS=$(printf '%s' "$MENSAGEM" | tr '\n' ' ' | sed -n 's/.*\[links: *\([^]]*\)\].*/\1/p')
+          if [ -n "$LINKS" ]; then
+            python software/aplicativo_mobile/loja/confere_textos_da_loja.py --links $LINKS
+          else
+            python software/aplicativo_mobile/loja/confere_textos_da_loja.py
+          fi

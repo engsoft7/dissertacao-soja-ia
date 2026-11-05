@@ -14,6 +14,7 @@ não é do governo. Este script verifica:
 
 Roda no Actions (confere-links-loja.yml), que tem acesso livre à internet.
 Uso:  python confere_textos_da_loja.py [arquivo]
+      python confere_textos_da_loja.py --links URL [URL ...]   # só testa endereços candidatos
 """
 import os
 import re
@@ -78,5 +79,14 @@ def main(caminho):
     print('\nTudo certo: limites respeitados, aviso presente e todos os links abrem.')
 
 
+def testa_links(urls):
+    for url in urls:
+        codigo, final = abre(url)
+        ok = isinstance(codigo, int) and codigo < 400
+        print(f'{"OK " if ok else "ERRO"} {codigo}  {url}' + (f'  -> {final}' if ok and final != url else ''), flush=True)
+
+
 if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == '--links':
+        testa_links(sys.argv[2:]); sys.exit(0)
     main(sys.argv[1] if len(sys.argv) > 1 else os.path.join(AQUI, 'textos_da_loja.txt'))

@@ -96,7 +96,20 @@ com IC95 da diferença de RMSE por reamostragem de municípios. RF não muda
 SVR com subamostra, 460,7 kg/ha, segue o melhor modelo: a subamostragem não
 favoreceu o resultado publicado e não muda a conclusão da Tabela 3.
 
-**Em coleta em 29/10/2026.** Três testes têm script pronto e esperam dados do
+**Feito em 05/11/2026, variáveis por fase no recorte nacional**
+(`03_analise_nacional/13_variaveis_extras.py fases`, rodado no Actions):
+umidade do solo em duas camadas, déficit de pressão de vapor e temperatura da
+superfície, mês a mês de setembro a março (28 variáveis), em 23.920 registros
+de 1.196 municípios, no protocolo da Tabela 3. Diferença de RMSE (com − sem),
+IC95 por reamostragem de municípios: RF −9,8 kg/ha (−12,0 a −7,9), XGBoost
+−10,3 (−12,3 a −8,4) e SVR −8,6 (−10,2 a −7,0); o MLP piora, +40,8 (+35,9 a
++45,8), sinal de que a rede, com subamostra de 7.000, não absorve 28 variáveis a
+mais. O SVR com as fases chega a 449,7 kg/ha, 1,9% abaixo do mesmo modelo sem
+elas, ganho maior que o do solo (0,4%), mas medido em outro conjunto de registros. No Pará as mesmas
+famílias não superaram a referência (`07_variaveis_por_fase.py`): o limite lá
+está no alvo, que repete valores, e não na forma de medir o ambiente.
+
+**Em coleta em 29/10/2026.** Dois testes têm script pronto e esperam dados do
 Earth Engine (`10_trabalhos_futuros/coleta`, workflow `coleta-gee-pesquisa.yml`):
 
 - *Sensores de 2015 em diante no Pará* (`02_sensores_recentes.py`): Sentinel-1
@@ -104,10 +117,6 @@ Earth Engine (`10_trabalhos_futuros/coleta`, workflow `coleta-gee-pesquisa.yml`)
   sem, nos mesmos registros da base do produto. A primeira coleta estourou o
   tempo de computação do Earth Engine; foi refeita por sensor e em lotes de
   municípios. O TROPOMI (fluorescência) não está no catálogo do Earth Engine.
-- *Variáveis por fase no recorte nacional* (`13_variaveis_extras.py fases`):
-  umidade do solo em duas camadas, déficit de pressão de vapor e temperatura da
-  superfície, mês a mês de setembro a março, para 1.196 municípios. A coleta
-  terminou; o arquivo entra na branch com as demais.
 - *Amazônia Legal* (`06_amazonia_legal.py`): o protocolo da Tabela 6 em
   Tocantins, Maranhão, Rondônia e Mato Grosso, e nos cinco estados juntos.
   Tocantins e Rondônia coletados; o Maranhão foi refeito em lotes depois de

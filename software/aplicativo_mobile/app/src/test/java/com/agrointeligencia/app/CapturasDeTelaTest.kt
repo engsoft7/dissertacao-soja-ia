@@ -195,8 +195,10 @@ class CapturasDeTelaTest {
     }
 
     @Test fun cartoes_historico_claro() = captura("cartoes_historico", false) {
-        PrevisaoCard(projecao, financas)
-        ultimoReal?.let { PrevisaoCard(it, financas) }
+        // O mesmo preço padrão do app: a praça em dia mais perto de Paragominas.
+        val preco = pracaParaUsar("Paragominas", mercado.pracas_para.orEmpty())?.valor
+        PrevisaoCard(projecao, financas, preco)
+        ultimoReal?.let { PrevisaoCard(it, financas, preco) }
     }
 
     @Test fun sobre_claro() = captura("sobre", false) { MetodologiaCard(financas, previsao.validacao) }

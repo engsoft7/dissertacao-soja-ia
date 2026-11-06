@@ -821,6 +821,83 @@ NOME_EXIBICAO = {
         m) for m in df.municipio.unique()}
 
 
+# ── o que o painel e o aplicativo mostram igual ──────────────────────────────
+# As mesmas regras do aplicativo (Safra.kt e Pracas.kt), para os dois produtos
+# darem a mesma safra, o mesmo preço padrão e o mesmo histórico do IBGE.
+def ano_da_safra_em_curso(hoje: date | None = None) -> int:
+    """Ano de colheita da safra em curso. O IBGE identifica a safra pelo ano
+    da colheita; no Pará a soja é colhida até julho, e de agosto em diante a
+    colheita seguinte já é a do ano que vem."""
+    hoje = hoje or date.today()
+    return hoje.year + 1 if hoje.month >= 8 else hoje.year
+
+
+@st.cache_data(ttl=7200, show_spinner=False)
+def _pracas_do_para() -> list:
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
+        import precos_para
+        return precos_para.pracas_do_para()
+    except Exception as e:  # rede ou formato da fonte
+        print(f"[painel] cotações das praças indisponíveis: {type(e).__name__}: {e}",
+              flush=True)
+        return []
+
+
+def _sem_acento(texto: str) -> str:
+    import unicodedata
+    return "".join(c for c in unicodedata.normalize("NFD", texto.lower())
+                   if unicodedata.category(c) != "Mn")
+
+
+_COORD_PRACAS_EXTRA = {"barcarena": (-1.5058, -48.6258), "belem": (-1.4558, -48.5039),
+                       "parauapebas": (-6.0678, -49.9037)}
+
+
+def praca_para_usar(municipio: str, hoje: date | None = None) -> dict | None:
+    """A cotação que o aplicativo oferece como preço padrão: entre as praças
+    do Pará atualizadas na última semana, a mais perto da sede do município."""
+    import math
+    hoje = hoje or date.today()
+    em_dia = []
+    for p in _pracas_do_para():
+        try:
+            idade = (hoje - date.fromisoformat(p["data"])).days
+        except (KeyError, TypeError, ValueError):
+            continue
+        if 0 <= idade <= 7:
+            em_dia.append(p)
+    if not em_dia:
+        return None
+    linha = _muni[_muni.cod_ibge7 == _cod_por_nome.get(municipio)]
+    if linha.empty:
+        return max(em_dia, key=lambda p: p["data"])
+    la0, lo0 = math.radians(float(linha.latitude.iloc[0])), math.radians(float(linha.longitude.iloc[0]))
+    coords = {_sem_acento(n): (la, lo) for n, la, lo in
+              zip(_muni.municipio, _muni.latitude, _muni.longitude)}
+    coords.update(_COORD_PRACAS_EXTRA)
+
+    def distancia(p):
+        c = coords.get(_sem_acento(p["praca"]))
+        if c is None:
+            return float("inf")
+        la1, lo1 = math.radians(c[0]), math.radians(c[1])
+        a = (math.sin((la1 - la0) / 2) ** 2
+             + math.cos(la0) * math.cos(la1) * math.sin((lo1 - lo0) / 2) ** 2)
+        return 2 * 6371 * math.asin(math.sqrt(a))
+    return min(em_dia, key=distancia)
+
+
+@st.cache_data(show_spinner=False)
+def carregar_pam_oficial() -> dict:
+    """Produtividade de todas as safras publicadas pelo IBGE nos municípios da
+    base, inclusive as que a máscara do MapBiomas não captou (ver
+    api_backend/historico_oficial.py)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
+    import historico_oficial
+    return historico_oficial.carrega_pam()
+
+
 def disp(municipio: str) -> str:
     return NOME_EXIBICAO.get(municipio, municipio)
 
@@ -1139,11 +1216,15 @@ if comparar:
         opcoes_comp,
         format_func=disp)
 
+# Abre na safra em curso, a mesma que o aplicativo mostra no Resumo; antes
+# abria na seguinte à última publicada (2026 com o aplicativo em 2027).
+_safra_padrao = min(max(ano_da_safra_em_curso(), int(df.ano.max()) + 1),
+                    int(df.ano.max()) + 3)
 ano_alvo = st.sidebar.number_input(
     "Safra Alvo (Projeção IA)",
     min_value=int(df.ano.max()) + 1,
     max_value=int(df.ano.max()) + 3,
-    value=int(df.ano.max()) + 1)
+    value=_safra_padrao)
 
 unidade = st.sidebar.radio(
     "Unidade de medida",
@@ -1153,7 +1234,7 @@ unidade = st.sidebar.radio(
 fator = 1 if unidade == "kg/ha" else 1 / SACA_KG
 
 st.sidebar.markdown("### Perfil do Produtor")
-baseline_ibge = estimador.estimar(municipio, int(df.ano.max()) + 1)["baseline_kg_ha"]
+baseline_ibge = estimador.estimar(municipio, int(ano_alvo))["baseline_kg_ha"]
 fator_tecnologico = st.sidebar.number_input(
     "Expectativa Produtiva da Fazenda", 
     min_value=10.0, max_value=120.0, 
@@ -1370,6 +1451,22 @@ if tela_atual == "📈 Análise Histórica":
         serie = df[df.municipio == municipio].sort_values(
             "ano")  # type: ignore
 
+    # Safras que o IBGE publicou e a base do modelo não tem (sem soja na
+    # máscara do MapBiomas naquele ano): o aplicativo as mostra desde 06/11/2026,
+    # e o painel também, para os dois contarem a mesma história do município.
+    _pam = carregar_pam_oficial()
+    _extras = []
+    for _m in serie.municipio.unique():
+        _cod = _cod_por_nome.get(_m)
+        _anos = set(serie.loc[serie.municipio == _m, "ano"].astype(int))
+        for _ano, _v in (sorted(_pam.get(int(_cod), {}).items()) if _cod is not None else []):
+            if _ano not in _anos and _ano <= int(df.ano.max()):
+                _extras.append({"municipio": _m, "ano": _ano, M.ALVO: _v})
+    serie_obs = serie[["municipio", "ano", M.ALVO]]
+    if _extras:
+        serie_obs = pd.concat([serie_obs, pd.DataFrame(_extras)], ignore_index=True)
+    serie_obs = serie_obs.sort_values(["municipio", "ano"])
+
     st.subheader("Evolução histórica da produtividade")
 
     serie_plot = serie.assign(
@@ -1394,9 +1491,9 @@ if tela_atual == "📈 Análise Histórica":
         # saiu da máscara do MapBiomas em 2017 (a API fazia o mesmo).
         ano_pivo = int(df.ano.max())
         for m in municipios:
-            hist = df[df.municipio == m]
-            if hist.empty:
+            if df[df.municipio == m].empty:
                 continue
+            hist = serie_obs[serie_obs.municipio == m]
             # A safra-pivô entra com o valor observado, e não com o previsto:
             # é o que faz o tracejado sair de cima da linha cheia. Sem ela na
             # base, o tracejado começa solto.
@@ -1424,14 +1521,17 @@ if tela_atual == "📈 Análise Histórica":
     SEM_BARRA = {"displayModeBar": False}
 
     st.plotly_chart(
-        plot_produtividade(serie_plot, is_dark=is_dark, unidade=unidade,
-                           projecao=projecao),
+        plot_produtividade(serie_obs.assign(produtividade=serie_obs[M.ALVO] * fator,
+                                            Nome=[disp(m) for m in serie_obs["municipio"]]),
+                           is_dark=is_dark, unidade=unidade, projecao=projecao),
         width="stretch", config=SEM_BARRA)
     st.caption(
         "O trecho tracejado é projeção, não safra publicada: são as três "
         "seguintes à última do IBGE, e o hover traz a margem de cada uma. "
         "Sem clima observado para elas, o modelo usa a média climática do "
-        "município — o que sobra, ali, é a tendência.")
+        "município — o que sobra, ali, é a tendência. A linha cheia traz todas "
+        "as safras que o IBGE publicou, inclusive as que a máscara do MapBiomas "
+        "não captou e que, por isso, ficam fora do modelo.")
     st.caption("Gráfico interativo: arraste para selecionar um período, dois toques para resetar o zoom.")
 
     st.subheader("Expansão da área plantada")
@@ -1463,7 +1563,7 @@ if tela_atual == "💰 Viabilidade Financeira":
         "produtividade que a sua propriedade colhe em um ano normal.")
 
     with st.spinner("Processando margem de lucro com IA Georreferenciada..."):
-        r_eco = ajustar_r(estimador.estimar(municipio, int(df.ano.max()) + 1))
+        r_eco = ajustar_r(estimador.estimar(municipio, int(ano_alvo)))
 
     col_eco1, col_eco2 = st.columns(2)
     try:
@@ -1492,7 +1592,10 @@ if tela_atual == "💰 Viabilidade Financeira":
     # O padrão é preço de PORTEIRA, da mesma praça de onde vem o custo, para a
     # margem não sair inflada. Paranaguá (porto) e CBOT (bolsa) ficam como
     # comparação: os dois estão acima do que se recebe no Pará.
-    default_preco = float(preco_referencia)
+    # Como no aplicativo: a cotação do dia na praça do Pará mais perto do
+    # município (Agrolink) e, sem nenhuma em dia, o preço recebido da CONAB.
+    praca_hoje = praca_para_usar(municipio)
+    default_preco = float(praca_hoje["valor"]) if praca_hoje else float(preco_referencia)
     comparacoes = []
     if PRECO_SACA_ONLINE is not None:
         praca = (f"{COTACAO_FISICA['praca']} ({COTACAO_FISICA['uf']}), "
@@ -1509,6 +1612,14 @@ if tela_atual == "💰 Viabilidade Financeira":
                    f"{PRACA_CONAB}, levantamento de {LEVANTAMENTO_CONAB_EXTENSO} "
                    f"— preço de porteira, e da mesma praça de onde vem o custo "
                    f"abaixo. {esc_md(LEVANTAMENTO_CONAB['textos']['nota_preco'])}")
+    if praca_hoje:
+        _dia = date.fromisoformat(praca_hoje["data"]).strftime("%d/%m")
+        fonte_preco = (f"**Cotação:** {praca_hoje['praca']}, {_dia} (Agrolink): cotação do "
+                       f"dia na praça do Pará mais perto do município, a mesma que o "
+                       f"aplicativo usa; na fazenda o preço pode ser menor, pelo frete. "
+                       f"Sem cotação em dia, o padrão é o preço recebido da CONAB em "
+                       f"{PRACA_CONAB} ({brl_md(PRECO_RECEBIDO_CONAB_PADRAO_SACA, 2)}), "
+                       f"levantamento de {LEVANTAMENTO_CONAB_EXTENSO}.")
     if comparacoes:
         fonte_preco += (" Para comparação: " + "; ".join(comparacoes) +
                         ". São preços de porto e de bolsa, acima do que se "

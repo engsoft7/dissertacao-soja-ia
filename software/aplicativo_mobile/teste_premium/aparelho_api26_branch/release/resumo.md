@@ -13,7 +13,7 @@
 | fonte 200%: Resumo abre | ok |  |
 | tela pequena: Resumo abre | ok |  |
 | tela tablet: Resumo abre | ok |  |
-| tela deitada: Resumo abre | **falha** |  |
+| tela deitada: Resumo abre | ok |  |
 | o emulador ficou sem internet | ok |  |
 | sem internet: Resumo abre com os dados guardados | ok |  |
 | sem internet: o app avisa | ok |  |
@@ -32,26 +32,26 @@
  "altura_px": 2400,
  "densidade_dpi": 420,
  "apk_mb": 27.6,
- "partida_fria_primeira_ms": 821,
- "partida_fria_sem_municipio_ms": 851.5,
- "dados_do_municipio_s": 3.7,
- "memoria_resumo_kb": 35363,
+ "partida_fria_primeira_ms": 953,
+ "partida_fria_sem_municipio_ms": 981.0,
+ "dados_do_municipio_s": 3.8,
+ "memoria_resumo_kb": 36509,
  "rolagem_resumo": {
-  "quadros": 466.0,
-  "lentos_pct": 96.35,
-  "p50_ms": 48.0,
-  "p90_ms": 65.0,
-  "p99_ms": 85.0
+  "quadros": 346.0,
+  "lentos_pct": 98.27,
+  "p50_ms": 65.0,
+  "p90_ms": 81.0,
+  "p99_ms": 93.0
  },
  "rolagem_historico": {
-  "quadros": 430.0,
-  "lentos_pct": 97.44,
-  "p50_ms": 48.0,
-  "p90_ms": 65.0,
-  "p99_ms": 77.0
+  "quadros": 303.0,
+  "lentos_pct": 98.68,
+  "p50_ms": 61.0,
+  "p90_ms": 81.0,
+  "p99_ms": 93.0
  },
- "memoria_depois_das_abas_kb": 79863,
- "partida_fria_com_municipio_ms": 897,
+ "memoria_depois_das_abas_kb": 80774,
+ "partida_fria_com_municipio_ms": 1138,
  "monkey": {
   "eventos": 3000,
   "falhas": 0,
@@ -62,7 +62,7 @@
 
 ## Acessibilidade pela árvore do uiautomator
 
-- **r04_resumo_1**: alvos < 48 dp: View (379×29 dp); sem rótulo: nenhum
+- **r04_resumo_1**: alvos < 48 dp: View (379×41 dp); sem rótulo: nenhum
 - **r05_mapa**: alvos < 48 dp: nenhum; sem rótulo: WebView em (45,465)
 - **r08_sobre**: alvos < 48 dp: View (339×33 dp), View (339×44 dp), View (339×46 dp); sem rótulo: nenhum
 - **r09_estimativa_no_campo**: alvos < 48 dp: View (347×32 dp); sem rótulo: nenhum

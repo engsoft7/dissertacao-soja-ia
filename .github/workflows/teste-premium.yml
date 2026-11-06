@@ -32,6 +32,12 @@ on:
 permissions:
   contents: write
 
+# Uma rodada por vez: duas juntas gravavam o mesmo relatório na branch, e a
+# segunda parava num conflito de rebase (run 42296581193).
+concurrency:
+  group: teste-premium
+  cancel-in-progress: false
+
 jobs:
   api:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[premium]')
@@ -190,7 +196,10 @@ jobs:
           if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
           git commit -m "Teste Premium do aplicativo (${{ github.run_id }})"
           for i in 1 2 3 4 5; do
-            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
+            # Num conflito com outro commit da branch, fica o relatório desta
+            # rodada, que é o mais novo ("theirs" no rebase é o commit reaplicado).
+            git pull --rebase -X theirs origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
+            git rebase --abort 2>/dev/null || true
             sleep $((i * 5))
           done
           exit 1

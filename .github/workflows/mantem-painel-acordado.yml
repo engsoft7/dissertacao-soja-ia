@@ -1,0 +1,46 @@
+# Mantém o painel acordado no Streamlit Community Cloud.
+#
+# O Streamlit põe para dormir o app que fica horas sem visita, e quem abre o
+# painel depois disso (a banca, um produtor) vê a tela de "app dormindo" e
+# espera ele subir de novo. A cada 4 horas um navegador sem tela abre o painel,
+# toca em "Yes, get this app back up!" se precisar e espera o título desenhar
+# (acorda_painel.py). Uma consulta HTTP simples não serviria: só conta como
+# visita uma sessão com o JavaScript do Streamlit rodando.
+#
+# Faz para o painel o que mantem-api-acordada.yml faz para a API do Render.
+# O gatilho por caminho existe para a primeira execução, porque o disparo
+# manual só alcança workflows que já estão no branch padrão.
+name: Mantém o painel acordado
+
+on:
+  schedule:
+    - cron: "23 */4 * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - "software/automacao_github/acorda_painel.py"
+      - ".github/workflows/mantem-painel-acordado.yml"
+
+concurrency:
+  group: mantem-painel-acordado
+  cancel-in-progress: false
+
+jobs:
+  visita:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instala o navegador
+        run: |
+          pip install --quiet playwright
+          python -m playwright install --with-deps chromium
+      - name: Abre o painel
+        run: |
+          python software/automacao_github/acorda_painel.py || {
+            echo "::warning::O painel não desenhou em 6 minutos; confira https://soja-para.streamlit.app"
+            exit 1
+          }

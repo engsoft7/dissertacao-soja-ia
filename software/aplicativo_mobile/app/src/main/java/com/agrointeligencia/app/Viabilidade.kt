@@ -515,7 +515,11 @@ fun ResumoFinanceiroCard(
                     Text(text = "${reaisInteiros(receita)}/ha", fontSize = 18.sp, color = (if(isDark) Color(0xFF58a6ff) else Color(0xFF2563eb)), fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "Custo operacional", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    // O campo traz o custo da CONAB na produtividade dela (48 sc/ha); aqui vai o
+                    // custo para a produtividade da conta, com frete e CESSR das sacas.
+                    Text(text = if (temCusto) "Seu custo operacional"
+                                else "Custo para ${String.format(PT_BR, "%.0f", scHa)} sc/ha",
+                         fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "${reaisInteiros(custoUsado)}/ha", fontSize = 18.sp,
                          color = if (isDark) Color(0xFFf85149) else Color(0xFFdc2626), fontWeight = FontWeight.Bold)
                 }

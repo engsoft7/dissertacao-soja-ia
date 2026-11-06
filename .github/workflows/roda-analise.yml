@@ -6,6 +6,8 @@
 # "[roda: 03_retroteste_preco_para.py]" (o nome de um script da pasta) ou o
 # caminho de outro script da pesquisa, "[roda: pesquisa/04_analise_para/x.py]",
 # com argumentos depois do nome, se o script pedir ("[roda: ... x.py solo]").
+# Vários pedidos na mesma mensagem rodam em jobs paralelos, um por pedido
+# ("[roda: 06_amazonia_legal.py TO] [roda: 06_amazonia_legal.py MA]").
 # Scripts do recorte nacional recebem antes a base de von Bloh et al. (2023),
 # que não é versionada. Sem esse pedido, nada roda. Nunca na main.
 name: Roda análise (pesquisa)
@@ -22,48 +24,75 @@ permissions:
   contents: write
 
 jobs:
-  roda:
+  plano:
     runs-on: ubuntu-latest
-    timeout-minutes: 340
+    outputs:
+      pedidos: ${{ steps.p.outputs.pedidos }}
     steps:
       - uses: actions/checkout@v4
-      - id: pedido
+      - id: p
         env:
           MENSAGEM: ${{ github.event.head_commit.message }}
         run: |
-          pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[roda: *\([A-Za-z0-9_./]*\.py\)\( [A-Za-z0-9_ -]*\)\{0,1\}\].*/\1|\2/p' | head -1)
-          s="${pedido%%|*}"
-          echo "args=$(printf '%s' "${pedido#*|}" | sed 's/^ *//')" >> "$GITHUB_OUTPUT"
-          case "$s" in ""|pesquisa/*) ;; *) s="pesquisa/10_trabalhos_futuros/$s" ;; esac
-          case "$s" in *..*) echo "::error::caminho inválido: $s"; exit 1 ;; esac
-          if [ -n "$s" ] && [ ! -f "$s" ]; then echo "::error::$s não existe"; exit 1; fi
-          echo "script=$s" >> "$GITHUB_OUTPUT"
-          echo "pasta=$(dirname "$s")" >> "$GITHUB_OUTPUT"
+          python3 - <<'PY'
+          import json, os, re
+          pedidos = []
+          for s, args in re.findall(r'\[roda: *([A-Za-z0-9_./]*\.py)((?: [A-Za-z0-9_ -]*)?)\]', os.environ['MENSAGEM']):
+              if not s.startswith('pesquisa/'):
+                  s = 'pesquisa/10_trabalhos_futuros/' + s
+              if '..' in s:
+                  raise SystemExit(f'::error::caminho inválido: {s}')
+              if not os.path.isfile(s):
+                  raise SystemExit(f'::error::{s} não existe')
+              args = ' '.join(args.split())
+              pedidos.append({'script': s, 'pasta': os.path.dirname(s), 'args': args,
+                              'nome': (os.path.basename(s) + ' ' + args).strip()})
+          print(json.dumps(pedidos, ensure_ascii=False))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'pedidos={json.dumps(pedidos)}\n')
+          PY
+
+  roda:
+    needs: plano
+    if: needs.plano.outputs.pedidos != '[]'
+    name: roda (${{ matrix.pedido.nome }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        pedido: ${{ fromJSON(needs.plano.outputs.pedidos) }}
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        if: steps.pedido.outputs.script != ''
         with:
           python-version: "3.11"
-      - name: Roda ${{ steps.pedido.outputs.script }}
-        if: steps.pedido.outputs.script != ''
-        working-directory: ${{ steps.pedido.outputs.pasta }}
+      - name: Roda ${{ matrix.pedido.nome }}
+        working-directory: ${{ matrix.pedido.pasta }}
+        env:
+          SCRIPT: ${{ matrix.pedido.script }}
+          ARGS: ${{ matrix.pedido.args }}
         run: |
           pip install --quiet pandas requests "scikit-learn>=1.3,<1.9" xgboost
-          s=$(basename "${{ steps.pedido.outputs.script }}")
+          s=$(basename "$SCRIPT")
           if grep -q "^import torch" "$s"; then
             pip install --quiet torch==2.14.1 --index-url https://download.pytorch.org/whl/cpu
           fi
           if [ "$(basename "$PWD")" = "03_analise_nacional" ] && [ ! -f data/data_cast.csv ]; then
             python 00_baixa_dados.py
           fi
-          python "$s" ${{ steps.pedido.outputs.args }}
+          # $ARGS sem aspas: cada palavra é um argumento (o plano só aceita letras, dígitos, _ e -).
+          python "$s" $ARGS
       - name: Grava na branch
-        if: steps.pedido.outputs.script != ''
+        env:
+          PASTA: ${{ matrix.pedido.pasta }}
+          NOME: ${{ matrix.pedido.nome }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "${{ steps.pedido.outputs.pasta }}"
+          git add "$PASTA"
           if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
-          git commit -m "Resultado de $(basename "${{ steps.pedido.outputs.script }}")"
+          git commit -m "Resultado de $NOME"
           # Outro job pode ter gravado na branch entre o pull e o push: tenta de novo.
           for i in 1 2 3 4 5; do
             git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0

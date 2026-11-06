@@ -24,7 +24,9 @@ Actions (a mediana do Sentinel-2 é a parte cara). No Actions, "[coleta: recente
 abre um job por safra, e "[coleta: recentes_2019]" refaz uma só.
 O nível gratuito do Earth Engine tem cota mensal de computação (150 EECU-hora); as
 dez safras de uma vez a esgotaram em outubro e o projeto passou ao modo restrito.
-Peça poucas safras por vez, como "[coleta: recentes_2019 recentes_2020]".
+Peça poucas safras por vez, como "[coleta: recentes_2019 recentes_2020]". Em
+novembro, um lote de três safras e um estado da Amazônia Legal levou cerca de
+duas horas e meia e coube na cota.
 
 Uso:   python coleta_recentes.py [ano ...]      (sem ano: 2016 a 2025)
 Saída: ../dados/sensores_recentes_<ano>.csv, um arquivo por safra

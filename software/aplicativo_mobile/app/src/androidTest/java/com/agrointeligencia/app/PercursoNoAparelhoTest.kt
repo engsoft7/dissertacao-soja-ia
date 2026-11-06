@@ -138,10 +138,12 @@ class PercursoNoAparelhoTest {
             tela("01_boas_vindas")
 
             regra.onNodeWithText("Escolher na lista").performClick()
-            espera("Pau D'Arco")
-            anota("lista\tchegou da API")
+            // A lista só desenha os nomes que cabem na janela: busca antes.
+            regra.waitUntil(150_000) { regra.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty() }
             tela("02_lista")
             regra.onNode(hasSetTextAction()).performTextInput("Pau")
+            espera("Pau D'Arco")
+            anota("lista\tchegou da API")
             regra.onAllNodesWithText("Pau D'Arco").onLast().performClick()
 
             espera("(safra $safra)")
@@ -184,7 +186,8 @@ class PercursoNoAparelhoTest {
             cenario.close()
             shell("svc wifi disable")
             shell("svc data disable")
-            Thread.sleep(3_000)
+            if (android.os.Build.VERSION.SDK_INT >= 30) shell("cmd connectivity airplane-mode enable")
+            Thread.sleep(5_000)
             cenario = ActivityScenario.launch(MainActivity::class.java)
             espera("(safra $safra)", 60_000)
             confere("sem internet, o Resumo abre com os dados guardados", true)
@@ -205,6 +208,7 @@ class PercursoNoAparelhoTest {
             runCatching { tela("99_falha") }
             throw e
         } finally {
+            if (android.os.Build.VERSION.SDK_INT >= 30) shell("cmd connectivity airplane-mode disable")
             shell("svc wifi enable")
             shell("svc data enable")
             grava()

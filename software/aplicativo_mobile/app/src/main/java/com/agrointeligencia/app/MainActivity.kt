@@ -139,6 +139,15 @@ class MainActivity : ComponentActivity() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/** O celular tem agora alguma rede com Internet? Sem resposta do sistema, supõe que sim. */
+fun temRede(context: Context): Boolean {
+    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
+        ?: return true
+    val rede = cm.activeNetwork ?: return false
+    val capacidades = cm.getNetworkCapabilities(rede) ?: return false
+    return capacidades.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
+}
+
 @Composable
 fun AgroDashboard() {
     val coroutineScope = rememberCoroutineScope()
@@ -308,6 +317,10 @@ fun AgroDashboard() {
         previsaoEm = if (guardada != null) sharedPrefs.getLong("previsao_${mun}_em", 0L) else 0L
         // O "carregando" só aparece quando não há nada guardado do município.
         carregandoPrevisao = guardada == null
+        // Sem rede nenhuma, o aviso aparece na hora: antes esperava a chamada
+        // à API falhar, o que podia levar o minuto do tempo limite (que existe
+        // para o servidor do Render acordar).
+        if (!temRede(context)) isOfflineMode = true
         try {
             val resposta = RetrofitClient.getInstance().getPrevisao(mun).valida()
                 ?: throw IllegalStateException("resposta sem histórico")

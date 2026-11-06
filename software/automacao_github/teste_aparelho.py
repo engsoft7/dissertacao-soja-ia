@@ -210,10 +210,34 @@ def fluidez() -> dict:
             "p99_ms": num(r"99th percentile:\s*(\d+)ms")}
 
 
-def rede(ligada: bool) -> None:
+def tem_internet() -> bool:
+    saida = sh("ping -c 1 -W 3 8.8.8.8 2>&1", timeout=30)
+    return "1 received" in saida or "1 packets received" in saida
+
+
+def rede(ligada: bool) -> bool:
+    """Liga ou desliga a rede do emulador e diz se ficou como pedido.
+
+    O svc sozinho não derruba a rede de todo emulador antigo; o modo avião
+    derruba (cmd connectivity a partir do Android 11, broadcast com root antes).
+    """
     v = "enable" if ligada else "disable"
     sh(f"svc wifi {v}; svc data {v}")
-    time.sleep(4)
+    if res["medidas"].get("api_level", 0) >= 30:
+        sh(f"cmd connectivity airplane-mode {'disable' if ligada else 'enable'}")
+    else:
+        adb("root", timeout=60)
+        time.sleep(3)
+        adb("wait-for-device", timeout=60)
+        sh(f"settings put global airplane_mode_on {0 if ligada else 1}; "
+           f"am broadcast -a android.intent.action.AIRPLANE_MODE --ez state {'false' if ligada else 'true'}")
+        if ligada:
+            sh("svc wifi enable; svc data enable")
+    for _ in range(10):
+        time.sleep(2)
+        if tem_internet() == ligada:
+            return True
+    return False
 
 
 def main() -> int:
@@ -343,7 +367,9 @@ def main() -> int:
     time.sleep(2)
 
     # 7. Sem internet.
-    rede(False)
+    if not verifica("o emulador ficou sem internet", rede(False)):
+        rede(True)
+        raise RuntimeError("não deu para tirar a internet do emulador; os testes sem internet não valem")
     abre_frio()
     verifica("sem internet: Resumo abre com os dados guardados", espera("(safra ", 40) is not None)
     verifica("sem internet: o app avisa", espera("Sem conexão", 10) is not None)
@@ -356,7 +382,7 @@ def main() -> int:
     aba("Resumo")
     verifica("sem internet: a Estimativa no campo abre", toca("Estimativa no campo", 15)
              and espera("Conte plantas", 10) is not None)
-    rede(True)
+    verifica("a internet do emulador voltou", rede(True))
 
     # 8. Monkey.
     adb("logcat", "-c")

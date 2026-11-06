@@ -34,7 +34,7 @@ ponto de equilíbrio combina com o sinal do lucro.
 |---|---|---|
 | Alta | Pau D'Arco mostra "Produtividade esperada na safra **2020**" e "Safra **2017**, IBGE"; o IBGE publicou até 2025 (3.700 kg/ha em 2025). Os cartões de 2018 a 2020 dizem "IBGE ainda não divulgou", e 2020 foi divulgado | API (`/api/previsao`) |
 | Média | São João do Araguaia mostra a safra 2026 no lugar de 2027 e "Safra 2023, IBGE" | API |
-| Média | Safras publicadas pelo IBGE faltam no histórico do app: pelo menos 40 em 8 municípios (o relatório desta rodada lista só as 40 primeiras), como Altamira de 2001 a 2010, Marabá em 9 safras e Pau D'Arco de 2020 a 2025. Outros 6 municípios têm lacunas no meio da série (Monte Alegre de 2006 a 2023, Goianésia do Pará de 2018 a 2023) | base do produto |
+| Média | Safras publicadas pelo IBGE faltam no histórico do app: pelo menos 40 em 8 municípios (o relatório desta rodada lista só as 40 primeiras), como Altamira de 2001 a 2010, Marabá em 9 safras e Pau D'Arco de 2020 a 2025. Mais 3 municípios têm lacunas longas no meio da série, a confrontar com o IBGE na próxima rodada: Monte Alegre (2006 a 2023), Goianésia do Pará (2018 a 2023) e Água Azul do Norte (2009 a 2016) | base do produto |
 
 **Causa.** A base do produto só guarda as safras em que a máscara de soja do
 MapBiomas acha soja no município, porque o modelo precisa das variáveis de

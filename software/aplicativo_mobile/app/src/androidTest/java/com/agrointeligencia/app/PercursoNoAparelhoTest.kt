@@ -20,6 +20,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
@@ -114,11 +115,17 @@ class PercursoNoAparelhoTest {
         }
     }
 
+    /** Desce a lista da tela em [vezes] passos, com captura em cada um, e volta ao topo. */
     private fun rola(nome: String, vezes: Int) {
+        val lista = regra.onAllNodes(hasScrollToIndexAction()).onFirst()
         repeat(vezes) { i ->
-            regra.onAllNodes(hasScrollToIndexAction()).onFirst().performTouchInput { swipeUp() }
+            lista.performTouchInput { swipeUp() }
             tela("${nome}_${i + 1}")
         }
+        // O que sai da tela numa LazyColumn deixa de existir: sem voltar, o
+        // cartão do tempo, no alto, não seria achado.
+        lista.performScrollToIndex(0)
+        regra.waitForIdle()
     }
 
     private fun grava() {

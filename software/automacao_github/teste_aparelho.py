@@ -233,7 +233,8 @@ def rede(ligada: bool) -> bool:
            f"am broadcast -a android.intent.action.AIRPLANE_MODE --ez state {'false' if ligada else 'true'}")
         if ligada:
             sh("svc wifi enable; svc data enable")
-    for _ in range(10):
+    # Desligar é rápido; a rede do emulador leva mais para voltar.
+    for _ in range(10 if not ligada else 30):
         time.sleep(2)
         if tem_internet() == ligada:
             return True

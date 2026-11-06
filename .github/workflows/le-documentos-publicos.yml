@@ -57,6 +57,9 @@ jobs:
                   (destino / f"{nome}.pdf").write_bytes(dados)
                   texto = "\n\n".join((pg.extract_text() or "") for pg in PdfReader(str(destino / f"{nome}.pdf")).pages)
               else:
+                  # O HTML cru vai junto: mostra o que o texto não mostra, como
+                  # um preço publicado em imagem.
+                  (destino / f"{nome}.html").write_bytes(dados)
                   pagina = dados.decode("utf-8", "replace")
                   ancoras = re.findall(r'(?is)<a[^>]+href="([^"#]+)"[^>]*>(.*?)</a>', pagina)
                   limpa = lambda t: re.sub(r"<[^>]+>|[ \t\r\n]+", " ", t).strip()[:120]

@@ -26,13 +26,13 @@ ESTIMATIVA NO CAMPO
 • Contador automático de vagens, em teste, que roda no próprio celular, sem internet. Você confere e corrige as marcas.
 
 PREÇO DA SOJA
+• Cotação do dia nas praças do Pará, com a data de cada uma.
 • Cotação de Chicago convertida em reais por saca, com gráfico de velas de 1 dia a 6 meses.
-• Preço estimado para o Pará, com a diferença (base) entre o mercado paraense e a bolsa.
-• Preço físico do dia na praça mais próxima.
+• Média do Pará estimada a cada momento, com a diferença (base) entre o mercado paraense e a bolsa.
 
 VIABILIDADE DA SAFRA
-• Receita, custo e margem por hectare, a partir dos seus números de produtividade, preço e custeio.
-• Custo de referência da CONAB como ponto de partida, com aviso quando o levantamento estiver desatualizado.
+• Receita, custo, margem e ponto de equilíbrio por hectare, com os seus números de produtividade, preço e custeio.
+• Parte da cotação do dia na praça mais perto do seu município e do custo da CONAB aberto por item, com aviso quando o levantamento estiver desatualizado.
 
 FEITO PARA O CAMPO
 • Funciona sem internet com os últimos dados carregados.

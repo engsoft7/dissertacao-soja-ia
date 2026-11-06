@@ -120,6 +120,15 @@ internal data class Resultado(
  * Quando o produtor informa o próprio custo não há o que repartir: o número é
  * dele, e a função devolve só ele.
  */
+/**
+ * Sacas por hectare com uma casa, como o campo da Viabilidade mostra e usa na
+ * conta. O Histórico projeta com o mesmo número: com 3.297 kg/ha, a Viabilidade
+ * contava 55,0 sc e o cartão do ano, 54,95, e o mesmo ano saía R$ 7/ha
+ * diferente nas duas telas.
+ */
+internal fun sacasDoCampo(sacas: Double): Double =
+    String.format(java.util.Locale.US, "%.1f", sacas).toDouble()
+
 internal fun resultadoPorHectare(
     sacasPorHectare: Double,
     preco: Double,

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.agrointeligencia.app.AuditoriaTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-06T18:00:23.793Z" hostname="runnervmwuk1x" time="0.202">
+<testsuite name="com.agrointeligencia.app.AuditoriaTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-06T18:26:07.687Z" hostname="runnervmwuk1x" time="0.122">
   <properties/>
-  <testcase name="telasConferemNosMunicipios" classname="com.agrointeligencia.app.AuditoriaTest" time="0.199"/>
+  <testcase name="telasConferemNosMunicipios" classname="com.agrointeligencia.app.AuditoriaTest" time="0.12"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

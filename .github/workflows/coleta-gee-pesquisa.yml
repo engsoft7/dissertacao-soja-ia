@@ -92,6 +92,9 @@ jobs:
         run: python 00_baixa_dados.py
       - name: Coleta ${{ matrix.tarefa }}
         working-directory: pesquisa/10_trabalhos_futuros/coleta
+        # Abaixo do limite do job: se a coleta não fechar, o passo falha em vez de
+        # o job ser cancelado, e o envio abaixo ainda guarda o que ficou pronto.
+        timeout-minutes: 320
         run: |
           set -- ${{ matrix.tarefa }}
           case "$1" in
@@ -101,6 +104,7 @@ jobs:
             fases_nacional) python coleta_fases_nacional.py ;;
           esac
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: dados-${{ strategy.job-index }}
           path: pesquisa/10_trabalhos_futuros/dados/

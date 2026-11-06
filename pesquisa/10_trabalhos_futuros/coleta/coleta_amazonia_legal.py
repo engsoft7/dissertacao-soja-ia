@@ -16,12 +16,21 @@ municípios de Tocantins, Maranhão, Rondônia e Mato Grosso, safra a safra:
 reproduz a da base da dissertação; muda só o estado. A produtividade vem da
 PAM, em 03_analise_nacional/pam_soja_municipios.csv, e é juntada na análise.
 
-Uso:   python coleta_amazonia_legal.py TO [--anos 2001-2025]
+Uso:   python coleta_amazonia_legal.py TO [--anos 2001-2025] [--paralelo 4]
        (no Actions, "[coleta: amazonia_MT]" na mensagem do commit refaz um estado só;
-       "[coleta: amazonia_MT_2001_2007]", só uma faixa de anos, em arquivo próprio)
-Saída: ../dados/amazonia_legal_<UF>.csv
+       "[coleta: amazonia_MT_2008_2013]", só uma faixa de anos)
+Saída: ../dados/amazonia_legal_<UF>.csv; com --anos, um arquivo por safra,
+       ../dados/amazonia_legal_<UF>_<ano>.csv, gravado assim que a safra fecha.
+
+Com faixa de anos, a coleta retoma de onde parou: pula as safras que já têm
+arquivo (o de um ano ou o de uma faixa, como amazonia_legal_MT_2001_2007.csv).
+Em 06/11/2026 o projeto passou a cota mensal do Earth Engine e entrou em modo
+restrito, com menos chamadas simultâneas; um job de Mato Grosso coletou
+safras de 2008 a 2016 e perdeu todas ao estourar o tempo, porque o arquivo só
+era gravado no fim.
 """
 import argparse
+import glob
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -37,8 +46,18 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('uf')
     ap.add_argument('--anos', default='2001-2025')
+    ap.add_argument('--paralelo', type=int, default=4, help='safras ao mesmo tempo')
     a = ap.parse_args()
     a0, a1 = map(int, a.anos.split('-'))
+    por_safra = a.anos != '2001-2025'
+    anos = list(range(a0, a1 + 1))
+    if por_safra:
+        feitos = safras_gravadas(a.uf)
+        if feitos & set(anos):
+            print(f'{a.uf}: safras já gravadas, puladas: {sorted(feitos & set(anos))}', flush=True)
+        anos = [t for t in anos if t not in feitos]
+        if not anos:
+            return
     ee = conecta_gee()
     munis, _ = municipios_gaul(ee, [a.uf])
     munis = munis.select(['ADM2_NAME', 'UF'])
@@ -75,20 +94,46 @@ def main():
                            'soy_area_ha': areas.get(p['ADM2_NAME'], 0), **{b: p.get(b) for b in BANDAS}})
         return t, linhas
 
-    todas = []
-    with ThreadPoolExecutor(4) as ex:
-        futuros = [ex.submit(tenta, ano, t) for t in range(a0, a1 + 1)]
-        for f in as_completed(futuros):
-            t, linhas = f.result()
-            todas += linhas
-            print(f'  {a.uf} {t}: {len(linhas)} municípios com soja mapeada', flush=True)
     os.makedirs(DADOS, exist_ok=True)
-    # Faixa de anos (estado que não cabe num job do Actions, como MT) vai num
-    # arquivo próprio; 06_amazonia_legal.py junta as partes.
-    sufixo = '' if a.anos == '2001-2025' else f'_{a0}_{a1}'
-    saida = os.path.join(DADOS, f'amazonia_legal_{a.uf}{sufixo}.csv')
-    pd.DataFrame(todas).sort_values(['municipio_gaul', 'ano']).to_csv(saida, index=False)
-    print(f'{len(todas)} registros gravados em {saida}', flush=True)
+    todas, falhas = [], []
+    with ThreadPoolExecutor(a.paralelo) as ex:
+        futuros = {ex.submit(tenta, ano, t): t for t in anos}
+        for f in as_completed(futuros):
+            try:
+                t, linhas = f.result()
+            except Exception as e:  # uma safra que não fecha não derruba as outras
+                falhas.append(futuros[f])
+                print(f'  {a.uf} {futuros[f]}: falhou ({type(e).__name__}: {str(e)[:150]})', flush=True)
+                continue
+            print(f'  {a.uf} {t}: {len(linhas)} municípios com soja mapeada', flush=True)
+            if por_safra:
+                # Grava já: se o job estourar o tempo, as safras prontas ficam.
+                grava(linhas, os.path.join(DADOS, f'amazonia_legal_{a.uf}_{t}.csv'))
+            todas += linhas
+    if not por_safra:
+        grava(todas, os.path.join(DADOS, f'amazonia_legal_{a.uf}.csv'))
+    if falhas:
+        raise SystemExit(f'{a.uf}: safras sem dado: {sorted(falhas)}')
+
+
+COLUNAS = ['uf', 'municipio_gaul', 'ano', 'mascara_mapbiomas', 'soy_area_ha'] + BANDAS
+
+
+def grava(linhas, saida):
+    df = pd.DataFrame(linhas, columns=COLUNAS)
+    df.sort_values(['municipio_gaul', 'ano']).to_csv(saida, index=False)
+    print(f'{len(df)} registros gravados em {saida}', flush=True)
+
+
+def safras_gravadas(uf):
+    """Safras do estado que já têm arquivo, de uma safra ou de uma faixa."""
+    feitas = set()
+    for f in glob.glob(os.path.join(DADOS, f'amazonia_legal_{uf}_*.csv')):
+        feitas |= set(pd.read_csv(f, usecols=['ano']).ano.astype(int))
+        nome = os.path.basename(f)[len(f'amazonia_legal_{uf}_'):-4]
+        if nome.isdigit():          # arquivo de uma safra: vale mesmo sem município com soja
+            feitas.add(int(nome))
+    return feitas
 
 
 if __name__ == '__main__':

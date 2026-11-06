@@ -1,0 +1,996 @@
+ 
+SERVIÇO PÚBLICO FEDERAL 
+UNIVERSIDADE FEDERAL DO PARÁ 
+CONSELHO SUPERIOR DE ENSINO, PESQUISA E EXTENSÃO 
+ 
+ 
+ 
+RESOLUÇÃO N. 4.882, DE 25 DE JANEIRO DE 2017 
+ 
+ 
+Aprova o Regimento do Programa de Pós -
+Graduação em Computação Aplicada (PPCA ), 
+em nível de Mestrado Profissional. 
+ 
+ 
+ O REITOR DA UNIVERSIDADE FEDERAL DO PARÁ , no uso das atribuições que 
+lhe conferem o Estatuto e o Regimento Geral, em cumprimento à decisão da Colenda Câmara de 
+Pesquisa e Pós-Graduação e do Egrégio Conselho Superior de Ensino, Pesquisa e Ext ensão, em 
+sessão realizada em 25.01.2017, e em conformidade com os autos do Processo n. 020079/2016 
+– UFPA, procedentes do Núcleo de Desenvolvimento Amazônico em Engenharia (NDAE ), 
+promulga a seguinte 
+ 
+ 
+ 
+R E S O L U Ç Ã O: 
+ 
+ 
+ Art. 1º  Fica aprovado o Regime nto do Programa de Pós -Graduação em 
+Computação Aplicada  (PPCA), em nível de Mestrado Profissional, de interesse do 
+Núcleo de Desenvolvimento Amazônico em Engenharia (NDAE)  da Universidade 
+Federal do Pará  (UFPA), de acordo com o Anexo (páginas 2 – 30), que é parte 
+integrante e inseparável da presente Resolução. 
+ Art. 2º Esta Resolução entra em vigor na data de sua publicação. 
+Reitoria da Universidade Federal do Pará, em 25 de janeiro de 2017. 
+ 
+ 
+ 
+ 
+EMMANUEL ZAGURY TOURINHO 
+R e i t o r 
+Presidente do Conselho Superior de Ensino, Pesquisa e Extensão 
+ 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+2 
+REGIMENTO DO PROGRAMA DE PÓS-GRADUAÇÃO EM COMPUTAÇÃO 
+APLICADA (PPCA), EM NÍVEL DE MESTRADO PROFISSIONAL 
+ 
+CAPÍTULO I 
+DOS OBJETIVOS INSTITUCIONAIS 
+Art. 1º O Programa de Pós-Graduação em Computação Aplicada (PPCA) é parte 
+integrante do Núcleo de Desenvolvimento Amazônico em Engenharia (NDAE) da 
+Universidade Federal do Pará (UFPA), e tem por objetivo ampliar e aprofundar a 
+formação adquirida nos Cursos de Graduação, conduzindo à obtenção do Grau 
+Acadêmico de Mestre em Computação Aplicada. 
+Art. 2º O PPCA visa à formação de recurso humano, habilitando -o a atuar de 
+forma integ rada nos campos tradicionais da seguinte Área  de Concentração: 
+Computação Aplicada. 
+Art. 3º O PPCA visa à formação de um pesquisador com capacidade para a 
+produção do conhecimento tecnológico e científico, estudando as diversas áreas da 
+Ciência da Computação, de forma a contribuir para o desenvolvimento e a aplicação de 
+Sistemas Computacionais, a fim de gerar soluções para demandas da sociedade. 
+Art. 4º O Programa visa à formação de um profissional com competência para 
+atuar em instituições de ensino e/ou pesquisa, órgãos governamentais e não 
+governamentais, empresas públicas e privadas, com habilidade para lidar nos diversos 
+ramos relacionados à Ciência da Computação. 
+ 
+CAPÍTULO II 
+DA NATUREZA E ORGANIZAÇÃO DOS CURSOS 
+Art. 5º O PPCA compreende um nível de formação: Mestrado Profissional, 
+sendo constituído por: 
+I – um Mestrado Profissional da Área de Concentração em Computação 
+Aplicada, organizado em uma Linha de Pesquisa: Desenvolvimento de Sistemas. 
+Art. 6º O Curso de Mestrado poderá compartilhar disciplinas e atividades com a 
+Graduação e a Pós-Graduação, a critério do Colegiado do Programa. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+3 
+Art. 7º O PPCA oferecerá, também, estágios de pós-doutoramento, cujas normas 
+são definidas no Capítulo XIX desse Regimento. 
+ 
+CAPÍTULO III 
+DA COORDENAÇÃO ACADÊMICA E DA ADMINISTRAÇÃO DO 
+PROGRAMA 
+Art. 8º A Coordenação Acadêmica e Administrativa do PPCA compete ao 
+Colegiado e à Coordenação do Programa, respectivamente, caben do o controle e o 
+registro das atividades acadêmicas à Secretaria. 
+Art. 9º O Coordenador e Vice -Coordenador serão eleitos para um mandato de 
+dois anos, na forma do Regimento Geral da UFPA, podendo ser reconduzidos apenas 
+uma vez. 
+Parágrafo único. O Coorden ador do Programa não poderá acumular outros 
+cargos de direção. 
+Art. 10. O Colegiado do PPCA é a instância responsável pela orientação e pela 
+supervisão didática e administrativa do Programa, sendo constituído pelos seguintes 
+membros: 
+I – o Coordenador e o Vice-Coordenador do Programa;  
+II – todos os docentes do Programa; 
+III – a representação discente, sendo um representante de cada Linha de Pesquisa 
+do Mestrado; 
+IV – um representante dos técnico-administrativos do Programa. 
+Parágrafo único. A representação  discente será indicada pelo corpo discente 
+para um mandato de um ano, podendo ser reconduzida apenas uma vez, salvo quando 
+materialmente impossível a substituição. 
+Art. 11. O Colegiado do Pro grama se reunirá ordinariamente  pelo menos 02 
+(duas) vezes p or s emestre, e extraordinariamente  quantas vezes forem necessárias, 
+mediante convocação feita pelo seu Coordenador, com antecedência mínima de 48 
+(quarenta e oito) horas, ou em decorrência de pedido formal de 2/3 (dois terços) de seus 
+membros. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+4 
+Parágrafo único.  As votações far -se-ão p or maioria simples, observado o 
+quórum correspondente. 
+ 
+CAPÍTULO IV 
+DAS ATRIBUIÇÕES DOS ÓRGÃOS DO COLEGIADO 
+Art. 12. Compete ao Colegiado do Programa: 
+I – indicar o Coordenador e o Vice-Coordenador do Programa; 
+II – orientar os trabalhos de coordenação didática e de supervisão administrativa 
+do Programa; 
+III – decidir sobre a criação, modificação ou extinção de disciplinas ou 
+atividades que compõem os currículos dos Cursos do Programa; 
+IV – encaminhar, ao Conselho Superior de Ensino,  Pesquisa e Extensão 
+(CONSEPE), os ajustes ocorridos nos currículos do Programa; 
+V – decidir sobre o aproveitamento de estudos e a equivalência de créditos em 
+disciplinas e Atividades Curriculares; 
+VI – promover a integração dos planos de ensino das discip linas e Atividades 
+Curriculares; 
+VII – propor as medidas necessárias à integração da Pós -Graduação com o 
+Ensino de Graduação; 
+VIII – aprovar a relação de Professores Orientadores e Coorientadores e suas 
+modificações; 
+IX – aprovar a composição de Bancas Exa minadoras de defesa de Dissertação e 
+Exame de Qualificação; 
+X – apreciar e propor convênios e termos de cooperação com entidades públicas 
+ou privadas, de interesse do Programa; 
+XI – elaborar normas internas para o funcionamento do Programa e delas dar 
+conhecimento a todos os discentes e docentes; 
+XII – homologar os projetos de Dissertação dos alunos do Curso de Mestrado; 
+ 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+5 
+XIII – definir critérios e finalidades para aplicação de recursos concedidos ao 
+Programa; 
+XIV – estabelecer critérios para admissão de no vos candidatos ao(s) Curso(s) e 
+indicar a comissão de docentes para os processos seletivos; 
+XV – estabelecer e aplicar critérios de credenciamento e descredenciamento para 
+os integrantes do corpo docente; 
+XVI – acompanhar o desempenho acadêmico dos discentes e, quando for o caso, 
+determinar seu desligamento do Curso; 
+XVII – decidir sobre pedidos de declinação de orientação e substituição do 
+Orientador; 
+XVIII – traçar metas de desempenho acadêmico de docentes e discentes;  
+XIX – aprovar as comissões propostas pela Coordenação do Programa; 
+XX – homologar as Dissertações concluídas e conceder os graus acadêmicos 
+correspondentes; 
+XXI – propor ao Reitor, em parecer fundamentado, pelo voto de 2/3 (dois terços) 
+dos seus membros, a destituição do Coordenador e/ou do Vice-Coordenador; 
+XXII – propor e aprovar modificações no Regimento do Programa; 
+XXIII – outras atribuições conferidas pelo CONSEPE e pelo Regimento Geral 
+da UFPA. 
+ 
+Seção I 
+Da Competência do Coordenador e do Vice-Coordenador 
+Art. 13. Compete ao Coordenado r do Programa, na forma do Regimento Geral 
+da UFPA: 
+I – exercer a direção administrativa do Programa; 
+II – coordenar a execução das atividades do Programa, adotando as medidas 
+necessárias ao seu pleno desenvolvimento; 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+6 
+III – preparar e apresentar relatórios  periódicos seguindo as exigências das 
+instâncias superiores, sobretudo aquelas das agências de fomento à formação e 
+aperfeiçoamento de pessoal de nível superior e à pesquisa; 
+IV – convocar e presidir as reuniões do Colegiado do Programa; 
+V – elaborar e re meter, à Pró -Reitoria de Pesquisa e Pós -Graduação 
+(PROPESP), relatório anual das atividades do Programa, de acordo com as instruções 
+desse órgão; 
+VI – administrar as finanças do Programa e apresentar as respectivas prestações 
+de contas ao Colegiado; 
+VII – representar o Programa junto aos órgãos deliberativos e executivos da 
+UFPA, na forma do seu Regimento Geral; 
+VIII – orientar, coordenar e fiscalizar a execução dos planos de desenvolvimento 
+aprovados, tomando as medidas adequadas ou propondo-as aos órgãos competentes; 
+IX – compatibilizar, junto às Faculdades competentes, a disposição da carga 
+horária dos professores do Programa; 
+X – elaborar o Manual de Pós -Graduação, contendo calendário escolar, normas 
+de inscrição e seleção, currículo, corpo docente, emen tas das disciplinas e Linhas de 
+Pesquisa; 
+XI – tomar as medidas necessárias à divulgação do Programa; 
+XII – aplicar os critérios de admissão de candidatos aos Cursos de Pós -
+Graduação, em conformidade com o disposto neste Regimento; 
+XIII – adotar, propor e encaminhar, aos órgãos competentes, todas as 
+providências relacionadas ao exercício das funções do Programa; 
+XIV – adotar, em caso de urgência, providências indispensáveis no âmbito do 
+Colegiado do Programa, ad referendum deste, ao qual as submeterá no pra zo de até 15 
+(quinze) dias; 
+XV – cumprir e fazer cumprir as disposições do Estatuto e Regimento Geral da 
+UFPA, do Regimento Geral dos Cursos de Pós -Graduação da UFPA e desse Regimento 
+Interno. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+7 
+XVI – cumprir e fazer cumprir as deliberações do Colegiado do P rograma, dos 
+órgãos de administração de nível intermediário e da Administração Superior, que lhe 
+digam respeito; 
+XVII – zelar pelos interesses do Programa junto aos órgãos superiores e 
+setoriais; 
+XVIII – convocar e presidir a eleição dos membros do Colegia do e do 
+Coordenador e do Vice-Coordenador do Programa, pelo menos 30 (trinta) dias antes do 
+término dos mandatos, encaminhando os resultados aos conselhos setoriais da(s) 
+Unidade(s) Acadêmica(s) de vínculo e à Pró -Reitoria de Pesquisa e Pós -Graduação 
+(PROPESP), no prazo máximo de 30 (trinta) dias após a realização das eleições; 
+XIX – organizar o calendário das atividades relacionadas ao Programa e tratar, 
+com as Unidades e Subunidades Acadêmicas, a liberação de carga horária para oferta de 
+disciplinas, atividades e funções necessárias ao pleno funcionamento do Programa; 
+XX – propor a criação de comissões de assessoramento para analisar questões 
+relacionadas ao Programa; 
+XXI – representar o Programa em fóruns nacionais de coordenadores relativos à 
+sua área de conhecimento; 
+XXII – representar o Programa em todas as instâncias; 
+XXIII – exercer outras funções especificadas pelo Colegiado do Programa. 
+Art. 14. Compete ao Vice -Coordenador do Programa substituir o Coordenador 
+em suas faltas e impedimentos. 
+ 
+Seção II 
+Da Secretaria do Programa 
+Art. 15. Integram a Secretaria do Programa, além do secretário, servidores e 
+estagiários designados para desempenho das tarefas administrativas, com as seguintes 
+atribuições: 
+I – realizar inscrições de candidatos à seleção e matrículas de discentes; 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+8 
+II – manter atualizados e devidamente resguardados os arquivos sobre o 
+funcionamento do Programa, especialmente os que registrem o Histórico Escolar dos 
+alunos do Curso; 
+III – acompanhar a matrícula e integralização dos créditos dos discentes; 
+IV – manter fichário atualizado de seus docentes, em que conste projetos de 
+pesquisa realizados e em andamento, relatórios de pesquisa, portarias sobre carga 
+horária, afastamento do país, realização de Pós -Doutorado ou quaisquer outros 
+documentos relativos à situação institucional do docente; 
+V – secretariar as reuniões do Colegiado do Programa; 
+VI – exercer tarefas próprias de rotina administrativa que lhe sejam atribuídas 
+pelo Coordenador; 
+VII – ao final de cada ano letivo, elaborar os relatórios  de atividades do 
+Programa, encaminhando-os à Coordenação. 
+ 
+CAPÍTULO V 
+DA COMPOSIÇÃO, CARACTERIZAÇÃO E CREDENCIAMENTO DO 
+CORPO DOCENTE 
+Art. 16. O corpo docente do PPCA é integrado por profissionais qualificados, 
+portadores de título de Doutor e Mestre, for malmente credenciados pelo Colegiado do 
+Programa, com produção científica regular, sendo os docentes classificados segundo as 
+normas vigentes da Coordenação de Aperfeiçoamento de Pessoal de Nível Superior  
+(CAPES/MEC). 
+Art. 17. O corpo docente do PPCA é com posto por professores da UFPA e de 
+outras instituições de ensino e pesquisa, de acordo com as seguintes designações: 
+I – Docentes Permanentes, que constituem o núcleo principal de docentes do 
+Programa; 
+II – Docentes Visitantes; 
+III – Docentes Colaboradores. 
+Parágrafo único. Os pré -requisitos para enquadramento em cada uma dessas 
+categorias são aqueles definidos na Portaria CAPES. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+9 
+Art. 18. São professores credenciados do PPCA aqueles docentes que compõem 
+o projeto inicial do Programa e aqueles que vierem a s er credenciados a partir do início 
+do funcionamento do Programa. 
+§ 1º O credenciamento do docente tem validade de até 3 (três) anos, podendo ser 
+renovado, a critério do Colegiado do Programa, por períodos de igual duração. 
+§ 2º O docente do PPCA só poderá ser credenciado como Professor Permanente 
+em, no máximo, mais dois Programas de Pós-Graduação da UFPA. 
+Art. 19. O docente que deseja ingressar no PPCA deverá solicitar 
+credenciamento ao Colegiado apresentando a seguinte documentação: 
+I – Carta de Intenção,  indicando que projetos de pesquisa desenvolve, que 
+disciplinas se propõe a ministrar e a que Área de Concentração e Linha de Pesquisa se 
+candidata; 
+II – Curriculum Vitae da Plataforma Lattes do Conselho Nacional de 
+Desenvolvimento Científico e Tecnológico (CNPq); 
+III – comprovações de publicações e demais produtos nos últimos 03 (três) anos. 
+Art. 20. Poderão ser credenciados como Docentes Permanentes do PPCA 
+aqueles requerentes que possuírem: 
+I – projeto de pesquisa em andamento e participarem de grupo de pesquisa 
+registrado no CNPq e/ou na PROPESP; 
+II – no mínimo três produções técnicas e/ou científicas nos últimos três anos, 
+considerando os critérios estabelecidos pela Área de Avaliação a que está vinculado o 
+Programa, na CAPES; 
+III – dedicação às ativida des de ensino, orientação, comparecimento nas 
+reuniões do Colegiado e participação em Comissões Examinadoras. 
+Parágrafo único. Dentre essas produções uma, no mínimo, deve ser artigo 
+científico publicado em periódico científico nacional ou internacional de reconhecida 
+qualidade acadêmica. 
+Art. 21. Poderão ser credenciados como Docentes Colaboradores do PPCA 
+aqueles requerentes que: 
+I – possuírem projeto de pesquisa em andamento e participarem de grupo de 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+10 
+pesquisa registrado no CNPq e/ou na PROPESP; 
+II – no m ínimo três produções técnicas e/ou científicas nos últimos três anos, 
+considerando os critérios estabelecidos pela Área de Avaliação a que está vinculado o 
+Programa, na CAPES; 
+III – dedicação às atividades de ensino, orientação, comparecimento nas 
+reuniões do Colegiado e participação em Comissões Examinadoras. 
+ 
+CAPÍTULO VI 
+DA SELEÇÃO E DA MATRÍCULA 
+Seção I 
+Da Documentação Exigida do Candidato 
+Art. 22. Os candidatos à seleção deverão apresentar à Secretaria do Programa os 
+seguintes documentos, no ato da inscrição: 
+I – Diploma do Curso de Graduação (fotocópia); 
+II – Histórico Escolar do Curso de Graduação (fotocópia); 
+III – Certificados de Cursos de Pós -Graduação Lato Sensu (especialização, 
+aperfeiçoamento) já concluídos; 
+IV – Curriculum Vitae no formato Lattes/CNPq, com os dados essenciais sobre a 
+carreira em termos de produção acadêmica, estudos extracurriculares e atividades 
+profissionais; 
+V – carta na qual exponha as razões da candidatura, com indicação da 
+disponibilidade real de tempo para se dedicar ao Curso e dos recursos disponíveis para a 
+manutenção; 
+VI – duas cartas de apresentação de profissionais que atestem as qualidades 
+acadêmicas e/ou profissionais do candidato; 
+VII – pré-projeto de pesquisa, expondo o trabalho que pretende desenvolver ao 
+longo do Curso. 
+ 
+ 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+11 
+Seção II 
+Da Seleção 
+Art. 23. Haverá, anualmente, processo seletivo para admissão de alunos novos 
+ao Programa, sendo o número de vagas reservadas para o Mestrado, assim como para as 
+políticas afirmativas, definidos anualmente em edital específico. 
+Parágrafo único. Outros processos seletivos, de caráter extraordinário, poderão 
+ser realizados desde que devidamente justificados, aprovado pelo Colegiado do 
+programa e homologado pela Congregação do Núcleo. 
+Art. 24. O candidato à seleção se inscreverá in dicando a Linha de Pesquisa de 
+seu interesse. 
+Art. 25. A seleção consistirá de duas etapas: uma eliminatória e uma 
+classificatória. 
+Art. 26. A etapa eliminatória da seleção ao Mestrado consistirá em três etapas, 
+sendo: 
+I – uma prova dissertativa de conhecimentos sobre a(s) Linha(s) de Pesquisa; 
+II – uma prova objetiva em língua inglesa, baseada na compreensão de textos;  
+III – defesa do pré-projeto de pesquisa. 
+Parágrafo único. Outra etapa eliminatória, de caráter extraordinário, poderá ser 
+realizada desde que devidamente justificada, aprovada pelo Colegiado do Programa e 
+homologada pela Congregação do Núcleo. 
+Art. 27. A nota mínima necessária para aprovação em cada uma das provas 
+referidas no art. 26 será seis (6,0). 
+Art. 28. Apenas os candidatos aprovados nas provas da etapa eliminatória 
+estarão aptos a concorrer na etapa de classificação, que será baseada nos seguintes itens: 
+I – notas obtidas nas etapas eliminatórias; 
+II – análise do Curriculum Vitae (modelo Lattes) e das cartas de apresentação. 
+Art. 29. O processo seletivo do Programa é regulado por Edital próprio do 
+PPCA, onde se especificam os critérios de admissão, atividades, calendário e vagas 
+disponíveis, ao qual se dará ampla divulgação. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+12 
+Art. 30. O título obtido por candidato em instituição estrang eira deverá ser 
+reconhecido por órgão habilitado em território brasileiro, salvo acordos internacionais, 
+na forma da legislação vigente. 
+Art. 31. O pedido de inscrição ao processo seletivo do Mestrado de aluno 
+concluinte de Curso de Graduação deverá ser ac atado condicionalmente, devendo o 
+candidato apresentar documentação comprobatória de conclusão do Curso de 
+Graduação, por ocasião da matrícula. 
+Parágrafo único. A não apresentação do documento referido no caput deste 
+artigo implicará a rejeição da matrícula. 
+Art. 32. Para a execução do processo seletivo, o Colegiado do Programa 
+constituirá Comissão do Processo Seletivo composta por 03 (três) membros efetivos e 
+01 (um) suplente, dentre os integrantes do corpo docente do Programa. 
+Parágrafo único. As vagas of ertadas serão preenchidas pelos candidatos 
+aprovados, de acordo com a classificação final, até o limite previamente definido pelo 
+Colegiado e indicado no Edital, na Área de Concentração ou Linha de Pesquisa. 
+Art. 33. A seleção dos candidatos estrangeiros o bedecerá as mesmas etapas 
+desta Seção, sendo que, em exceção da prova de língua estrangeira, as demais etapas 
+serão todas em língua portuguesa.  
+ 
+Seção III 
+Da Matrícula 
+Art. 34. O candidato aprovado no processo seletivo deverá formalizar  a sua 
+matrícula na Secretaria do Programa, de acordo com o calendário acadêmico definido 
+pelo Colegiado do Programa e com as normas gerais aprovadas pelo CONSEPE. 
+§ 1º Os discentes deverão renovar a sua matrícula regularmente, seguindo a 
+periodicidade definida pelo Colegiad o do Programa e explicitada no seu Regimento 
+Interno. 
+§ 2º O discente que não efetivar a sua matrícula nos prazos fixados no respectivo 
+calendário letivo será automaticamente desligado do Programa. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+13 
+Seção IV 
+Do Trancamento e Suspensão de Matrícula 
+Art. 35. Até 30 (trinta) dias após o efetivo início do período letivo, respeitado o 
+calendário acadêmico, o discente, com a anuência de seu Orientador, poderá requerer ao 
+Colegiado do Programa o trancamento parcial da matrícula, devendo a Secretaria 
+registrar o trancamento no Sistema Acadêmico de Pós -Graduação (SPG) e comunicá -lo 
+ao Centro de Registros e Indicadores Acadêmicos (CIAC) da UFPA. 
+§ 1º No caso de disciplinas ministradas de forma intensiva, em períodos 
+compactados, o trancamento deverá ser feito até o seg undo dia do início do seu 
+desenvolvimento. 
+§ 2º O trancamento de matrícula em uma disciplina ou atividade curricular será 
+permitido uma única vez durante o desenvolvimento do Curso. 
+Art. 36. O trancamento integral do Curso poderá ser concedido somente a pa rtir 
+do segundo semestre letivo do seu início, por um período de 06 (seis) meses, sem 
+possibilidade de renovação, através do encaminhamento de requerimento formal ao 
+Colegiado, com as devidas justificativas e com a anuência do Orientador. 
+Parágrafo único. Concluído o período de trancamento sem que seja requerida 
+formalmente a matrícula de reingresso ou solicitada sua continuidade, o discente será 
+desligado automaticamente do Programa, devendo o ato ser comunicado e registrado em 
+Ata de reunião do Colegiado e no Histórico Escolar do discente e comunicado 
+formalmente ao discente e ao Orientador. 
+ 
+CAPÍTULO VII 
+DAS BOLSAS DE ESTUDO 
+Art. 37. As bolsas de estudo porventura existentes serão disponibilizadas de 
+acordo com as normas definidas pelas agências de foment o e pela PROPESP, e a sua 
+distribuição será feita pela Comissão de Bolsas do Programa. 
+Parágrafo único. A comissão será formada por dois docentes e um discente do 
+Programa que não possa receber bolsa da CAPES ou CNPq. O critério de atribuição de 
+bolsa será a classificação do candidato no processo de seleção, a ausência de vínculo 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+14 
+empregatício, considerando as disposições e especificidades das resoluções das agências 
+de fomento. 
+ 
+CAPÍTULO VIII 
+DO CORPO DISCENTE 
+Seção I 
+Do Aluno Especial 
+Art. 38. A critério do Colegiado do Programa poderão ser admitidos alunos não 
+vinculados ao Programa para cursar disciplinas, na condição de Aluno Especial. 
+§ 1º A condição de Aluno Especial se caracteriza por duas situações: 
+I – alunos de Mestrado formalmente matriculados em ou tros Programas de 
+Pós-Graduação da UFPA e de outras IES conveniadas com a UFPA; 
+II – profissionais portadores de Diploma de Curso Superior reconhecido pelo 
+Ministério da Educação (MEC), não vinculados a Programas de Pós-Graduação. 
+§ 2º A condição de Aluno Esp ecial não vinculado a outro Programa permitirá, 
+única e exclusivamente ao interessado, frequentar a sala de aula na(s) atividade(s) 
+matriculada(s) e realizar as correspondentes avaliações. As avaliações ficam retidas na 
+Secretaria do Programa para o regist ro da conclusão da Atividade Curricular, que só 
+será aproveitado se, e quando, o discente ingressar no respectivo Curso, no nível 
+pretendido, através de processo seletivo, não implicando esta condição qualquer 
+compromisso do Programa ou da Instituição com a aceitação de aluno formal. 
+§ 3º O aproveitamento de créditos das atividades acadêmicas cursadas como 
+Aluno Especial será feito apenas em relação àquelas com rendimento igual ou superior a 
+70% (setenta por cento) do seu total. 
+§ 4º A matrícula de Aluno Es pecial proveniente de outro Programa de Pós - 
+Graduação será feita através do Sistema Integrado de Gestão de Atividades Acadêmicas 
+(SIGAA), sem necessidade de autorização especial. 
+§ 5º A aceitação de Aluno Especial estará condicionada à existência de vaga na 
+Atividade Curricular pretendida, além dos critérios definidos no Regimento Interno do 
+Programa. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+15 
+Seção II 
+Da Transferência de Alunos 
+Art. 39. A transferência de alunos de um Curso de Mestrado da UFPA ou a 
+aceitação dos discentes de outros Programas de ou tras Instituições integrantes do 
+Sistema Nacional de Pós -Graduação poderá ser admitida a critério do Colegiado do 
+Programa, desde que haja disponibilidade de vaga e condições para o pleno atendimento 
+acadêmico ao candidato. 
+Parágrafo único. Uma vez deferid a a transferência, o Colegiado deverá avaliar 
+a necessidade de adaptações curriculares. 
+ 
+Seção III 
+Da Frequência às Atividades Acadêmicas 
+Art. 40. A frequência mínima exigida nas Atividades Curriculares desenvolvidas 
+no PPCA é de 75 % (setenta e cinco por cento). 
+ 
+Seção IV 
+Do Tempo de Permanência no Curso 
+Art. 41. A duração máxima do Curso será de 24 (vinte e quatro) meses para o 
+Mestrado, contados da data da primeira matrícula. 
+§ 1º Caso seja necessário prazo complementar, a prorrogação máxima permitida 
+será de 06 (seis) meses para o Mestrado, devendo o aluno encaminhar justificativa 
+formal ao Colegiado, com o aval do seu Orientador, com a antecedência mínima de 30 
+(trinta) dias do fim do período. 
+§ 2º A prorrogação mencionada no parágrafo anterior não pode rá ser aplicada 
+nos casos de alunos que tiveram a sua matrícula trancada nos termos do art . 36 deste 
+Regimento, devendo, nessa hipótese, ser descontado o período de trancamento. 
+ 
+ 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+16 
+Seção V 
+Do Desligamento do Discente 
+Art. 42. O desligamento de aluno será de cidido pelo Colegiado do Programa, na 
+ocorrência de quaisquer dos seguintes motivos: 
+I – não apresentar rendimento acadêmico satisfatório nas atividades acadêmicas, 
+dentre elas as Disciplinas Obrigatórias, Optativas ou orientação de Dissertação. É 
+considerado rendimento acadêmico insatisfatório a reprovação em duas ou mais 
+disciplinas durante o Curso; 
+II – não ter efetivado matrícula sem justificativas formais e procedentes, nos 
+termos do art. 34 deste Regimento; 
+III – ter sido reprovado por insuficiência d e frequência em qualquer atividade 
+acadêmica ao longo do desenvolvimento do Curso; 
+IV – demonstrar insuficiência de rendimento e produção no desenvolvimento do 
+seu plano de trabalho, segundo avaliação de seu Orientador; 
+V – não ter se submetido a Exame de Qualificação no prazo estipulado pelo 
+Colegiado do Programa; 
+VI – ter sido reprovado em Exame de Qualificação ou na defesa da Dissertação; 
+VII – ter praticado fraude nos trabalhos de verificação de aprendizagem ou no 
+desenvolvimento da Dissertação; 
+VIII – ter ultrapassado o prazo máximo estipulado para a integralização no 
+Curso, descontado o período de trancamento, conforme disposto neste Regimento; 
+IX – ter violado princípios éticos que regem o funcionamento do Curso e as 
+relações de convivência dentro do ambiente universitário, incluindo -se a omissão de 
+informações, furto, burla de qualquer natureza, fraude ou outro motivo que desabone a 
+conduta acadêmica e científica; 
+X – ter causado perdas e danos ao patrimônio da Instituição;  
+XI – outros definidos pelo Colegiado do Programa. 
+§ 1º O desligamento deverá ser registrado em Ata de reunião do Colegiado e 
+comunicado formalmente ao discente e ao seu Orientador através de correspondência 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+17 
+datada e assinada pelo Coordenador do Programa, registrado no Histórico Esc olar do 
+aluno e no SIGAA, de tudo informando-se à PROPESP. 
+§ 2º O discente e o seu Orientador deverão registrar ciência da decisão de 
+desligamento em documento datado, valendo para este fim a ciência no documento 
+encaminhado ou o Aviso de Recebimento (AR) de carta enviada pelo correio, com a 
+devida especificação. 
+ 
+Seção VI 
+Do Reingresso 
+Art. 43. Considera-se Reingresso a readmissão do aluno ao PPCA, no mesmo 
+nível e na mesma Área de Concentração/Linha de Pesquisa originários e anteriores ao 
+desligamento do Curso. 
+Art. 44. A readmissão de discente desligado do PPCA poderá ser feita uma 
+única vez, devendo o aluno apresentar requerimento ao Colegiado juntando 
+documentação que permita ao Colegiado apreciar a possibilidade de reintegração do 
+aluno, tendo sido sol ucionadas as pendências ou falhas que resultaram em seu 
+desligamento. 
+§ 1º O Reingresso deverá ser efetuado até o prazo máximo de 18 (dezoito) 
+meses, contado da data do desligamento do aluno. 
+§ 2º Haverá um limite máximo para conclusão do Curso, sendo 12 ( doze) meses 
+para o Mestrado, contados da nova data de matrícula do aluno readmitido. 
+ 
+CAPÍTULO IX 
+DOS CRÉDITOS POR PUBLICAÇÃO DE ARTIGO E OUTRAS ATIVIDADES 
+COMPLEMENTARES 
+Art. 45. O Colegiado do Programa poderá conceder créditos por publicação de 
+trabalho completo em revistas científicas de reconhecida qualidade, relacionados à 
+temática ou área de conhecimento na qual a Dissertação esteja sendo desenvolvida, 
+desde que: 
+I – o discente seja o primeiro autor da obra; 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+18 
+II – o artigo científico tenha sido submeti do para publicação após o ingresso do 
+discente no Programa. 
+Parágrafo único. A solicitação de créditos por artigo publicado deverá ser feita 
+pelo aluno e endossada pelo Orientador, com parecer substanciado. 
+Art. 46. O Colegiado do Programa poderá conceder créditos por atividades 
+complementares, devendo cada discente enviar, à Coordenação do PPCA, sua 
+solicitação de crédito por atividades complementares preferencialmente uma única vez, 
+antes da qualificação, solicitando o número de créditos esperado em funçã o das 
+atividades realizadas. As solicitações serão avaliadas e apresentadas em reunião do 
+Colegiado, para homologação. São consideradas atividades complementares: 
+I – atividades de docência de graduação em conjunto com o Orientador; 
+II – realização de atividades de monitoria em disciplinas do Programa; 
+III – apoio no desenvolvimento de projeto de iniciação científica sob supervisão 
+do Orientador; 
+IV – acompanhamento e apoio técnico, na área do Mestrado, em empresas 
+incubadas no Parque Tecnológico e/ou na Incubadora de Empresas do NDAE;  
+V – apresentação oral de trabalho em evento (exposições, seminários, encontros, 
+congressos etc.) local, regional, nacional e internacional; 
+VI – apresentação de pôster em evento (exposições, seminários, encontros, 
+congressos etc.) local, regional, nacional e internacional; 
+VII – palestras e seminários ministrados pelo discente;  
+VIII – workshops e minicursos ministrados pelo discente; 
+IX – organização de evento (exposições, seminários, encontros, congressos etc.) 
+local, regional, nacional e internacional; 
+X – curadoria de exposição; 
+XI – participação como ouvinte em evento (seminários, encontros, congressos , 
+etc.); 
+XII – participação em cursos de extensão, workshops e minicursos relacionados 
+aos objetivos do Programa; 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+19 
+XIII – coordenação ou participação de trabalhos de campo não relacionados à 
+Tese ou Dissertação; 
+XIV – trabalhos de laboratório não relacionados à Dissertação; 
+XV – representação estudantil no Colegiado do Curso e na Congregação; 
+XVI – outras atividades propostas p elos discentes, com o parecer do seu 
+Orientador. 
+ 
+CAPÍTULO X 
+DA ORIENTAÇÃO 
+Art. 47. O aluno de Curso de Mestrado terá o acompanhamento e a supervisão 
+de um Orientador, Docente Permanente do  quadro, observando-se a disponibilidade dos 
+professores habilitados nas respectivas áreas e Linhas de Pesquisa, devendo a indicação 
+ser aprovada pelo Colegiado. 
+Art. 48. O Orientador deverá ser portador do grau de Doutor ou equivalente e 
+deverá ser habilitado pelo Colegiado do Programa para exercer atividade de orientação. 
+§ 1º Todos os professores doutores credenciados estão habilitados a exercer 
+atividade de orientação. 
+§ 2º O Colegiado do Programa deverá avaliar a pertinência do docente em 
+orientar alunos de Mestrado, levando em conta a titulação, a experiência em pesq uisa e 
+orientação e a especialidade do docente. 
+Art. 49. O Colegiado poderá homologar a indicação de Coorientador, nos 
+seguintes casos: 
+I – quando o Orientador principal estiver ausente da cidade ou país por período 
+superior a 06 (seis) meses; 
+II – quando o caráter multidisciplinar da Dissertação tornar necessária a 
+orientação por docente de uma segunda área de especialidade; 
+III – em outros casos, a critério do Colegiado do Programa. 
+Art. 50. Compete ao Orientador: 
+I – acompanhar o desempenho acadêmico do discente, orientando-o na escolha e 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+20 
+desenvolvimento das atividades e na elaboração do projeto de Dissertação; 
+II – acompanhar a elaboração da Dissertação em todas as suas etapas; 
+III – promover a integração do aluno em projeto e grupo de pesquisa do 
+Programa; 
+IV – auxiliar o discente com problemas e dificuldades que, por qualquer motivo, 
+estejam interferindo no seu desempenho e orientá-lo na busca de soluções; 
+V – manter o Colegiado informado sobre as atividades desenvolvidas pelo 
+orientando, bem como solic itar providências que se fizerem necessárias ao atendimento 
+do discente na sua vida acadêmica; 
+VI – referendar, semestralmente, a matrícula do orientando, com a assinatura do 
+Certificado de Matrícula, conferindo nota ao desempenho do aluno, de acordo com o  
+plano de estudos do mesmo; 
+VII – cientificar imediatamente a Coordenação do Programa sobre problemas 
+porventura existentes no andamento da vida acadêmica do orientando; 
+VIII – recomendar, ao Colegiado do Programa, o desligamento do orientando, 
+em caso de insuficiência de rendimento e produção no desenvolvimento do seu plano de 
+trabalho. 
+Art. 51. O Colegiado do Programa poderá autorizar a substituição do 
+Orientador/Coorientador a pedido do orientando ou do próprio Orientador/Coorientador, 
+e com a aceitação do provável novo Orientador, através de requerimento formal dirigido 
+à Coordenação do Programa, com as devidas justificativas e manifestação formal por 
+todas as partes envolvidas. 
+§ 1º A mudança de orientação para Área de Concentração diferente daquela de 
+origem demandará, do discente, adequação ao percurso curricular da nova área. 
+§ 2º O Orientador deverá informar se a troca de orientação acarretará em 
+potencial prejuízo aos prazos acadêmicos do aluno. 
+§ 3º A troca de orientação só será permitida dentro do  prazo de máximo de 2/3 
+(dois terços) do Curso, que é de 16 (dezesseis) meses a contar da primeira matrícula do 
+discente de Mestrado. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+21 
+§ 4º No caso de solicitação de mudança de orientação por parte do discente e/ou 
+solicitação de desligamento do Orientador,  sem que seja indicado novo Orientador, o 
+Colegiado analisará o pedido, podendo identificar e indicar novo Orientador ao aluno, 
+ou solicitar, às partes, reconsideração do caso. 
+§ 5º Em hipótese alguma poderá o aluno permanecer sem Orientador por mais de 
+90 (noventa) dias. 
+ 
+CAPÍTULO XI 
+DO CURRÍCULO, ATIVIDADES E CRÉDITOS 
+Art. 52. O PPCA possui uma Área de Concentração em Computação Aplicada, 
+organizada em uma Linha de Pesquisa: Desenvolvimento de Sistemas. 
+Art. 53.   O número mínimo de créditos necessários pa ra a integralização 
+curricular é de 28 (vinte e oito) créditos para o Mestrado. 
+§ 1º Cada Disciplina corresponde a 30 (trinta) ou 45 (quarenta e cinco) 
+horas/aula, que equivalem a 02 (dois) ou 03 (três) créditos respectivamente. 
+§ 2º O mínimo de disciplinas a serem cursadas pelo aluno do Mestrado são: 
+I – 05 (cinco) Disciplinas Obrigatórias, sendo 12 (doze) créditos; 
+II – 02 (duas) Disciplinas Optativas, sendo 04 (quatro) créditos;  
+III – 03 Disciplinas de Nivelamento, sendo 06 (seis) créditos; 
+IV – atividade prática equivalente a 02 (dois) créditos; 
+V – 02 (dois) créditos para Exame de Qualificação; 
+VI – 02 (dois) créditos em Dissertação. 
+§ 3º A critério do Colegiado do Programa, as disciplinas de nivelamento poderão 
+ser creditadas através de processo de in tegralização de créditos com as devidas 
+comprovações, nas seguintes situações: 
+I – quando previamente cursadas na Graduação;  
+II – quando possuir experiência comprovada. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+22 
+Art. 54. A critério do Colegiado do Programa, poderão ser aproveitados créditos 
+obtidos em Disciplinas de Cursos de Mestrado ou Doutorado da UFPA ou de outra 
+Instituição integrante do Sistema Nacional de Pós -Graduação ou de Instituições 
+estrangeiras reconhecidas no Brasil. 
+§ 1º As Disciplinas e atividades acadêmicas serão consideradas equiv alentes, a 
+critério do Colegiado, quando houver similaridade de tópicos ou temáticas e 
+compatibilidade de carga horária. 
+§ 2º Os créditos obtidos em Curso de Mestrado poderão ser aproveitados para o 
+Doutorado, obedecidas as equivalências, sem limite numéri co, mantendo -se idêntico 
+enquadramento dentro da estrutura curricular, a critério do Colegiado, e desde que 
+tenham tido rendimento acadêmico igual ou superior a 70 % (setenta por cento). 
+§ 3º O requerimento de aproveitamento de créditos deverá ser acompanh ado de 
+documentação comprobatória, incluindo o Histórico Escolar, o Programa e a Ementa 
+da(s) Disciplina(s). 
+Art. 55. O aproveitamento de créditos de disciplinas cursadas em nível de 
+Especialização poderá ser aceito pelo Colegiado, desde que: 
+I – trate-se de Curso de Especialização em área afim com uma ou mais Áreas de 
+Concentração do PPCA; 
+II – seja comprovada a similaridade de tópicos ou temáticas e a compatibilidade 
+de carga horária; 
+III – o rendimento acadêmico na Disciplina cursada tenha sido igual ou superior 
+a 70% (setenta por cento). 
+Art. 56. As Disciplinas de Curso de Pós -Graduação de Mestrado terão um 
+código alfanumérico composto por letras e algarismos, as quais serão cadastradas no 
+Sistema de Pós-Graduação (SPG) da UFPA/SIGAA. 
+ 
+CAPÍTULO XII 
+DA COMPOSIÇÃO DA BANCA EXAMINADORA E DE JULGAMENTO 
+Art. 57. A Dissertação, seja no Exame de Qualificação, seja na defesa, será 
+julgada por uma Banca Examinadora designada pelo Colegiado do Programa, composta 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+23 
+por especialistas de reconhecida competência, com Tít ulo de Doutor ou equivalente, na 
+área de conhecimento do Programa. 
+§ 1º No caso da qualificação de Mestrado, a Banca Examinadora deverá ser 
+composta por 03 (três) ou mais membros titulares, incluindo o Orientador, sendo 01 
+(um) dos membros, sempre que poss ível, mas não obrigatoriamente, não pertencente ao 
+corpo docente do Programa, e contar com um membro suplente interno ao Programa. 
+§ 2º No caso da defesa de Dissertação de Mestrado, a Banca Examinadora 
+deverá ser composta por 03 (três) ou mais membros titu lares, incluindo o Orientador, 
+sendo pelo menos 01 (um) professor ou pesquisador não pertencente ao corpo docente 
+do Programa, preferencialmente de outra Instituição, e contar com um membro suplente 
+externo e um interno ao Programa. 
+ 
+CAPÍTULO XIII 
+DO SISTEMA DE CRÉDITOS, APROVAÇÃO E INTEGRALIZACÃO 
+CURRICULAR 
+Art. 58. O sistema de créditos e o modo de verificação da aprendizagem serão os 
+previstos no Regimento Geral da UFPA, respeitando -se a flexibilidade para adaptação 
+às exigências e à natureza dos Cursos de Pós -Graduação, definidas pelo competente  
+Colegiado. 
+Art. 59. A integralização curricular dos Cursos de Pós -Graduação tomará por 
+base o sistema de crédito/hora, em consonância com o disposto nos artigos 60 e 61 deste 
+Regimento. 
+Art. 60. Para fins de aval iação do discente nas Atividades Curriculares de Pós - 
+Graduação ficam instituídos os seguintes conceitos, com os correspondentes símbolos e 
+escala numérica, que deverão ser registrados no Histórico Escolar do Sistema de Pós - 
+Graduação (SPG)/CIAC – UFPA, ao final de cada período letivo: 
+EXC (Excelente) = 9,0 a 10,0 
+BOM (Bom) = 7,0 a 8,9 
+REG (Regular) = 5,0 a 6,9 
+INS (Insuficiente) = 0,0 a 4,9 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+24 
+SA (Sem Aproveitamento) 
+SF (Sem Frequência) 
+§1º Ficará sem avaliação, com o correspondente registro SA (Sem 
+Aproveitamento), o discente que não comparecer às atividades avaliatórias 
+programadas. 
+§ 2º Registrar-se-á SF (Sem Frequência) no Histórico Escolar quando o discente 
+não obtiver a frequência mínima exigida. 
+§ 3º O aluno poderá requerer revisão de avaliação no prazo  de até 48 (quarenta e 
+oito) horas após a divulgação dos resultados. 
+Art. 61. Considerar-se-á aprovado o discente que, na disciplina ou atividade 
+correspondente, obtiver o conceito REG, BOM ou EXC e tiver pelo menos 75% (setenta 
+e cinco por cento) de frequência às atividades programadas. 
+ 
+CAPÍTULO XIV 
+DA FORMA DE APRESENTAÇÃO E NORMATIZAÇÃO DA DISSERTAÇÃO 
+Art. 62. As Dissertações deverão ser apresentadas de acordo com as normas 
+técnicas definidas pelo PPCA. 
+Parágrafo único. A Dissertação deverá ser apresentada no modo tradicional, ou 
+por agregação de artigos científicos, ou por relatório de produção técnica. 
+Art. 63. A elaboração da Dissertação no modo tradicional deverá seguir as 
+Normas adotadas pelo PPCA, devendo ser redigida obrigatoriamente em língua 
+portuguesa e conter resumos em língua portuguesa e em língua inglesa. 
+Art. 64. A elaboração da Dissertação por agregação de artigos científicos deverá 
+ser constituída por um documento que incorpore artigos completos, publicados ou 
+submetidos a revistas especializadas com corpo editorial e um texto integrador. 
+§ 1º Para o cumprimento do previsto no caput desse artigo, serão considerados 
+somente os artigos científicos elaborados após o ingresso do discente no Curso de 
+Mestrado ou Doutorado e que sejam diretamente relacionados com o tema desenvolvido 
+na Dissertação, devendo ser ele o primeiro autor de, no mínimo, 01 (um) trabalho. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+25 
+§ 2º A Dissertação que for redigida em forma de agregação de artigos deverá 
+indicar para qual revista especializada, nacional ou intern acional, de reconhecida 
+qualificação, os artigos foram submetidos. 
+Art. 65. A elaboração de relatório de produção tecnológica deverá ser 
+constituída por um documento que incorpore registro de patentes e de software, criação 
+de ferramentas de software de bases de dados ou resultados similares. 
+§ 1º Para o cumprimento do previsto no caput desse artigo, serão considerados 
+somente produtos elaborados após o ingresso do estudante no Curso de Mestrado ou 
+Doutorado e que sejam diretamente relacionados com o tema d esenvolvido na 
+Dissertação, devendo ser ele o autor principal de, no mínimo, 01 (um) produto. 
+§ 2º A critério do Colegiado, a análise da produção tecnológica será feita caso a 
+caso, sem utilizar um roteiro específico de classificação. 
+Art. 66. Para a edito ração final da Dissertação o aluno deverá fornecer, pelo 
+menos, 01 (um) exemplar para a Coordenação do Programa, impresso e em mídia 
+eletrônica; 01 (um) em mídia eletrônica para a Biblioteca Central da UFPA e para o 
+cadastro nacional; 01 (um) para a Biblioteca Setorial da Unidade à qual está vinculado o 
+Programa (impresso e digital); e 01 (um) exemplar para cada membro da Banca 
+Examinadora. 
+ 
+CAPÍTULO XV 
+DO EXAME DE QUALIFICAÇÃO 
+Art. 67. O Exame de Qualificação é obrigatório para o Mestrado, 
+correspondendo à apresentação do roteiro da Dissertação, com pelo menos 1/3 (um 
+terço) do texto da Dissertação e relatório de atividades, no caso do Mestrado. 
+Parágrafo único. O objetivo desse procedimento é avaliar o domínio, por parte 
+do candidato, da literatura pertine nte ao tema de sua Dissertação ou Tese, sua 
+capacidade de síntese, clareza de exposição, bem como suas possibilidades de titulação 
+nos prazos previstos neste Regimento. 
+Art. 68. A Banca Examinadora da qualificação fornecerá um parecer por escrito, 
+a ser en caminhado à Coordenação do Programa, para efeito de registro acadêmico, 
+considerando o candidato apto ou não a prosseguir com seu projeto. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+26 
+CAPÍTULO XVI 
+DA APROVAÇÃO OU REPROVAÇÃO DA QUALIFICAÇÃO E DEFESA DA 
+DISSERTAÇÃO 
+Art. 69. A qualificação do Mestrado s erá considerada aprovada com a 
+manifestação favorável e unânime da Banca Examinadora, através de parecer de seus 
+membros. 
+Parágrafo único. Em caso de reprovação por um ou mais examinadores, poderá 
+ser concedida, por recomendação da Banca, uma segunda oport unidade ao candidato 
+que, no período máximo de 03 (três) meses, no caso do Mestrado, a contar da data de 
+defesa, deverá submeter ao Colegiado novo pedido de Exame para Qualificação. 
+Art. 70. A Dissertação de Mestrado será considerada aprovada com a 
+manifestação favorável e unânime da Banca Examinadora, através de parecer de seus 
+membros. 
+§ 1º Em caso de reprovação por um ou mais examinadores, poderá ser 
+concedida, por recomendação da Banca, uma segunda oportunidade ao candidato que, 
+no período máximo de 06 (seis) meses, a contar da data de defesa, deverá submeter ao 
+Colegiado a nova versão da Dissertação para julgamento. 
+§ 2º Em caso da não entrega da nova versão da Dissertação à Secretaria do 
+Programa, no prazo estabelecido ou, em caso de reprovação nesta s egunda chance, o 
+aluno será automaticamente desligado do Curso. 
+Art. 71. Caso a Banca de defesa do Mestrado considerar que devam ser feitas 
+modificações formais e pontuais no texto final da Dissertação, estas deverão ser feitas 
+na forma de errata e acrescidas à versão eletrônica. 
+ 
+CAPÍTULO XVII 
+DO DESTAQUE À DISSERTAÇÃO 
+Art. 72. A Banca Examinadora poderá conferir destaque à Dissertação por ela 
+reconhecida como excepcional, com a menção “COM DISTINÇÃO”. 
+ 
+ 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+27 
+CAPÍTULO XVIII 
+DA TITULAÇÃO E DIPLOMA 
+Art. 73. Para a obtenção do Grau de Mestre em Computação Aplicada, o 
+discente deverá ter cumprido, no prazo estabelecido pelo Programa, as seguintes 
+exigências: 
+I – ter integralizado os créditos curriculares; 
+II – ter obtido aprovação em Exame de Qualificação, na forma definida pelo 
+Regimento Interno do Programa; 
+III – ter sua Dissertação aprovada por uma Banca Examinadora; 
+IV – ter sua Dissertação homologada em reunião do Colegiado do Programa; 
+V – estar em dia com suas obrigações na Unidade Acadêmica, tais como, 
+empréstimo de material bibliográfico, equipamento ou outros materiais, e demais 
+obrigações definidas pelo Colegiado. 
+Parágrafo único.  A critério do Colegiado, para a obtenção do Diploma, o 
+discente deverá comprovar a submissão, com aval do Orientador, ou publicação de pelo 
+menos um artigo completo em periódico nacional ou internacional indexado ( Qualis), 
+cujo tema deverá estar relacionado com o plano da Dissertação. 
+Art. 74. Depois de aprovada a Dissertação e cumpridas as exigências 
+regimentais, o Colegiado do Pr ograma homologará a Dissertação e concederá o Grau 
+correspondente. 
+Art. 75. Após a Homologação e Concessão do Grau, a Coordenação do 
+Programa encaminhará o respectivo processo à PROPESP, solicitando a emissão do 
+Diploma correspondente, acompanhado de docum entação definida em Instrução 
+Normativa da referida Pró-Reitoria. 
+ 
+CAPÍTULO XIX 
+DO ESTÁGIO PÓS-DOUTORAL 
+Art. 76. Entende-se por Pós -Doutorado as atividades de pesquisa realizadas 
+sob a forma de estágio, por portador do Título de Doutor, junto ao PPCA. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+28 
+Parágrafo único. O Estágio Pós-Doutoral poderá incluir atividades de ensino 
+em Curso de Pós-Graduação. 
+Art. 77. A duração do Pós -Doutorado será de, no mínimo, 03 (três) e de, no 
+máximo, 12 (doze) meses, podendo ocorrer até duas prorrogações, de até 12 (doze) 
+meses cada, a critério do Colegiado do Programa. 
+Art. 78. O Programa não se obriga a fornecer recursos materiais e financeiros 
+destinados à realização das atividades de pesquisa previstas no Plano de Trabalho do 
+Pós-Doutorado, limitando -se a disponibilizar ao Pós -Doutorando a infraestrutura já 
+existente no Programa de Pós-Graduação. 
+Art. 79. Somente o docente credenciado na categoria de Permanente junto ao 
+Programa poderá aceitar candidato ao Pós-Doutorado, cabendo-lhe a responsabilidade 
+pelo seu acompanhamento durante o período do estágio. 
+Parágrafo único. Para fins do disposto neste artigo, o Docente Permanente 
+será denominado docente supervisor. 
+Art. 80. Somente poderá orientar estágio de Pós -Doutorado o professor 
+credenciado que possuir bolsa de produtivi dade do CNPq ou que, caso não possua, 
+tenha produtividade científica compatível com bolsa de produtividade nível 2, de 
+acordo com os critérios do CNPq. 
+Art. 81. Poderão realizar Estágio Pós -Doutoral no Programa os portadores do 
+título de Doutor não integra ntes do quadro docente da Universidade, que tenham 
+condições de assumir, em tempo integral e com dedicação exclusiva, as suas 
+atividades junto ao Programa. 
+Art. 82. O candidato ao Estágio Pós -Doutoral no PPCA deverá formalizar o 
+seu pedido ao Coordenador do Programa de Pós-Graduação na área de seu interesse, a 
+qual pretende realizar suas atividades, instruindo-o com a seguinte documentação: 
+I – carta de aceitação pelo docente supervisor vinculado ao Programa de Pós - 
+Graduação; 
+II – cópia do diploma de Doutor; 
+III – Curriculum Vitae gerado na Plataforma Lattes e, no caso de estrangeiros, 
+currículo impresso, acompanhado de cópias de publicações; 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+29 
+IV – Plano de Trabalho contendo projeto de pesquisa (no máximo 20 páginas) e 
+planejamento de atividades de ensino, se for o caso; 
+V – Declaração de que dispõe de tempo integral e dedicação exclusiva às 
+atividades a serem desenvolvidas durante o Pós-Doutorado; 
+VI – documento oficial de liberação das atividades, em caso de possuir vínculo 
+empregatício; 
+VII – comprovante d e subvenção financeira para custear despesas pessoais 
+(bolsa, ou outros meios) e para cobrir despesas pertinentes à realização do projeto de 
+pesquisa. 
+Art. 83. O Coordenador do Programa de Pós -Graduação deverá submeter o 
+processo do candidato ao Pós-Doutorado à aprovação pelo Colegiado do Programa. 
+Art. 84. No caso de aceitação do candidato, o docente supervisor deverá 
+proceder ao registro do projeto junto à PROPESP. 
+Art. 85. No caso de solicitação de prorrogação do Estágio Pós -Doutoral, o 
+interessado dever á apresentar relatório de atividades, acompanhado por  um parecer 
+circunstanciado do docente supervisor, manifestando -se pela permanência do pós -
+doutorando ou pelo encerramento do seu estágio. 
+Parágrafo único. Nos casos de aprovação da prorrogação do Estági o Pós - 
+Doutoral, o docente supervisor deverá promover as alterações necessárias em relação 
+ao registro do respectivo projeto de pesquisa junto à PROPESP. 
+Art. 86. Ao final do período de permanência na Universidade, o pós -
+doutorando deverá apresentar, ao Co ordenador do Programa, o relatório 
+circunstanciado de atividades, devidamente avalizado pelo docente supervisor, 
+anexando a sua produção intelectual. 
+Parágrafo único. O relatório deverá ser anexado ao processo original e 
+submetido à apreciação do Colegiado  do Programa de Pós -Graduação, até 30 (trinta) 
+dias do término das atividades de pesquisa na Instituição. 
+Art. 87. No caso de aprovação do relatório, o Coordenador do Programa 
+comunicará a sua ocorrência ao pós-doutorando, para a expedição de certificado. 
+
+Resolução n. 4.882 – CONSEPE, de 25.01.2017 – Anexo 
+  
+30 
+Parágrafo único . Nos casos de pós -doutorandos que tenham obtido a 
+titulação há menos de 05 (cinco) anos, a certificação dar -se-á com a denominação de 
+“Estágio Recém-Doutor”. 
+Art. 88. Aplicam-se, aos projetos de pesquisa desenvolvidos durante o Estágio 
+Pós-Doutoral, no que couber, as disposições da Resolução de Pesquisa e Pós -
+Graduação vigente, que regulamenta as atividades de pesquisa na UFPA. 
+Art. 89. A participação em Programa de Pós -Graduação na condição de pós - 
+doutorando não gerará vínculo empregatício com a Universidade. 
+ 
+CAPÍTULO XX 
+DAS DISPOSIÇÕES GERAIS E TRANSITÓRIAS 
+Art. 90. Esse Regimento Interno encontra -se em consonância com o Regimento 
+dos Programas de Pós-Graduação da UFPA aprovado pelo CONSEPE. 
+Art. 91. Os casos omissos nesse Regimento serão  decididos pelo Colegiado do 
+Programa, pela Congregação do NDAE e pelo Conselho Superior de Ensino, Pesquisa e 
+Extensão (CONSEPE). 
+Art. 92. Esse Regimento entra em vigor na data de aprovação pelas instâncias 
+superiores da UFPA e da CAPES. 
+ 

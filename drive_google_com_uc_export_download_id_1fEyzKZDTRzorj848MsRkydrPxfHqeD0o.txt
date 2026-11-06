@@ -1,0 +1,101 @@
+ 
+ 
+UNIVERSIDADE FEDERAL DO PARÁ 
+NÚCLEO DE DESENVOLVIMENTO AMAZÔNICO EM ENGENHARIA 
+ 
+ 
+ 
+ 
+PORTARIA Nº 0035/2023 
+ 
+O Diretor Adjunto do Núcleo De Desenvolvimento Amazônico em Engenharia, no uso 
+das atribuições que lhe conferem o Estatuto e o Regimento Geral da UFPA. 
+ 
+CONSIDERANDO: 
+• OFÍCIO nº 0011/2023/INTERNO/PPCA/NDAE/UFPA  
+• Aprovação na 6ª Reunião Extraordinária do Colegiado do PPCA, realizada no 
+dia 02/10/2023. 
+ 
+RESOLVE: 
+Art. 1º  DESIGNAR os servidores abaixo relacionados para comporem a Comissão de 
+estudo e elaboração de normativa interna para Credenciamento, Descredenciamento e 
+Recredenciamento de docentes ao Programa  de Pós -Graduação em Computação 
+Aplicada (PPCA). 
+Marcos Túlio Amaris Gonzalez – Presidente  
+Raphael Barros Teixeira 
+Viviane Almeida dos Santos 
+Bruno Merlin 
+Heleno Fülber 
+Otávio Noura Teixeira 
+ 
+DÊ-SE CIÊNCIA E CUMPRA-SE. 
+Núcleo de Desenvolvimento Amazônico em Engenharia – UFPA 
+ 
+Tucuruí-PA, 27 de novembro de 2023. 
+ 
+ 
+ 
+ 
+Prof. Dr. Junior Hiroyuki Ishihara 
+Diretor Adjunto 
+Núcleo de Desenvolvimento Amazônico em Engenharia  
+NDAE - UFPA 
+ 
+Assinado com Assinatura Eletrônica Avançada (Art. 4, II da lei 14.063/2020 | Regulamento 910/2014/EC)
+Hash SHA256 do original:
+3d0910ee845255f1524004de3f6cfd8e0e4e1a59a3837ad71e0f7f94a32e1f2f
+Link de validação:
+https://valida.ae/b32dc185e7010811c650246bfc23897da94abc5fe94fd6c15?sv
+Validador
+Junior I
+Junior Hiroyuki Ishihara
+Data: 27/11/2023 15:56
+#f7b5e4a88d5211eea3c542010a2b60c6
+SIGNATÁRIO
+
+Autenticação eletrônica pg.
+2
+Data e horários em
+GMT -03:00 Brasília
+Código identificador do documento:
+b32dc185e7010811c650246bfc23897da94abc5fe94fd6c15
+Página de auditoria
+Hash SHA256 do original:
+3d0910ee845255f1524004de3f6cfd8e0e4e1a59a3837ad71e0f7f94a32e1f2f
+Link de validação:
+https://valida.ae/b32dc185e7010811c650246bfc23897da94abc5fe94fd6c15
+Última atualização em
+27 nov 2023 16:26
+Assinaturas realizadas:
+2/2
+Assinatura Eletrônica Avançada (Art. 4, II da lei 14.063/2020)
+Escaneie o QRCode ao lado ou acesse o link de validação para obter o
+arquivo assinado e os dados de assinatura no Autentique
+Assinaturas presentes no documento
+Junior I
+Junior Hiroyuki Ishihara
+Data: 27/11/2023 15:56
+#f7b5e4a88d5211eea3c542010a2b60c6
+SIGNATÁRIO
+ 
+NDAE A
+NDAE Secretaria Acadêmica
+Data: 27/11/2023 16:26
+#f7b7ded28d5211eea3c542010a2b60c6
+SIGNATÁRIO
+Histórico
+27/11/2023
+15:29
+Ailana Guta Vieira Martins (ailana@ufpa.br) criou este documento
+27/11/2023
+15:56
+Junior Hiroyuki Ishihara (jhi@ufpa.br, CPF 868.009.572-91) visualizou este documento pelo IP 138.122.32.111
+27/11/2023
+15:56
+Junior Hiroyuki Ishihara (jhi@ufpa.br, CPF 868.009.572-91) assinou este documento pelo IP 138.122.32.111
+27/11/2023
+16:25
+NDAE Secretaria Acadêmica (academicandae@ufpa.br, CPF 850.921.182-53) visualizou este documento pelo IP 200.239.65.214
+27/11/2023
+16:26
+NDAE Secretaria Acadêmica (academicandae@ufpa.br, CPF 850.921.182-53) assinou este documento pelo IP 200.239.65.214

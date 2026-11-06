@@ -1,10 +1,10 @@
 # Auditoria do aplicativo 2.7.3: 16 KB e números
 
 Primeira rodada em 06/11/2026 (auditoria-app.yml, run 42263602506), sobre a
-API em produção e o AAB/APK da v2.4.18. A segunda rodada, no fim deste
-relatório, confere a correção; as tabelas completas desta pasta, `fontes.md`
-(API × fontes) e `telas.csv` (o que cada tela mostra, município a município),
-são dela.
+API em produção e o AAB/APK da v2.4.18. A segunda e a terceira rodadas, no fim
+deste relatório, conferem a correção na branch e em produção; as tabelas
+completas desta pasta, `fontes.md` (API × fontes) e `telas.csv` (o que cada
+tela mostra, município a município), são da terceira.
 
 ## Páginas de 16 KB (Android 15 e a Play Store): conforme
 
@@ -63,8 +63,8 @@ As lacunas que continuam no histórico são safras que o IBGE também não publi
 ## Segunda rodada, com a correção (API da branch)
 
 Run 42266503173, mesmo dia, com a API desta branch rodando no job. Os arquivos
-`fontes.md`, `fontes.json`, `telas.csv` e `telas_falhas.txt` desta pasta são
-desta rodada.
+`fontes.md`, `fontes.json`, `telas.csv` e `telas_falhas.txt` desta pasta
+foram desta rodada até a terceira.
 
 | Grupo | Resultado |
 |---|---|
@@ -74,7 +74,13 @@ desta rodada.
 | São João do Araguaia | safra 2027; última do IBGE 2023 (o IBGE não publicou 2024 nem 2025) |
 | Praças, Chicago, CONAB, INMET | iguais às fontes, como na primeira rodada |
 
-A API em produção só recebe a correção com o merge na main. Para conferir de
-novo: aba Actions > "Auditoria do aplicativo" > Run workflow (com "API da
+## Terceira rodada, em produção
+
+Run 42270355684, depois do merge do PR #180 e do deploy no Render: as 521
+safras do app iguais ao SIDRA, nenhuma divergência entre telas nos 38
+municípios, Pau D'Arco na safra 2027 e com a safra 2025 do IBGE. Os arquivos
+desta pasta são agora desta rodada.
+
+Para conferir de novo: aba Actions > "Auditoria do aplicativo" > Run workflow (com "API da
 branch" marcado antes do merge), ou `[auditoria]` / `[auditoria-branch]` no
 commit.

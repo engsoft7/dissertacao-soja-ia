@@ -21,9 +21,14 @@ de safras.
 Pergunta: com mais registros, o clima e a vegetação medidos por satélite
 passam a explicar a produtividade municipal além da média do município?
 
-Uso:   python 06_amazonia_legal.py [TO MA RO MT]
-Saída: amazonia_legal.json
+Cada estado roda num job à parte, e os estados juntos noutro, depois de
+coletados os quatro:
+
+Uso:   python 06_amazonia_legal.py TO [MA RO MT]       um arquivo por estado
+       python 06_amazonia_legal.py juntos [TO MA RO MT] o Pará e os estados dados
+Saída: amazonia_legal_<UF>.json e amazonia_legal_juntos.json
 """
+import glob
 import importlib.util
 import json
 import os
@@ -58,7 +63,13 @@ def busca():
 
 def base_do_estado(uf, m):
     """Registros do estado no formato da base do Pará."""
-    g = pd.read_csv(os.path.join(AQUI, 'dados', f'amazonia_legal_{uf}.csv'))
+    # O estado inteiro num arquivo ou em faixas de anos (amazonia_legal_MT_2001_2007.csv...).
+    partes = sorted(glob.glob(os.path.join(AQUI, 'dados', f'amazonia_legal_{uf}.csv')) +
+                    glob.glob(os.path.join(AQUI, 'dados', f'amazonia_legal_{uf}_*.csv')))
+    if not partes:
+        raise FileNotFoundError(f'nenhum arquivo de {uf} em dados/')
+    g = (pd.concat([pd.read_csv(f) for f in partes], ignore_index=True)
+         .drop_duplicates(['municipio_gaul', 'ano'], keep='last'))
     pam = pd.read_csv(os.path.join(PESQUISA, '03_analise_nacional', 'pam_soja_municipios.csv'))
     pam = pam[(pam.uf == uf) & (pam.area_plantada_ha > 0) & (pam.rendimento_kg_ha > 0)].copy()
     pam['k'] = pam.nome.str.replace(r'\s+-\s+[A-Z]{2}$', '', regex=True).map(chave)
@@ -105,23 +116,32 @@ def avalia(m, df, rotulo):
     return saida
 
 
-def main(ufs):
+NOTA = ('Protocolo da Tabela 6 (04_analise_para/03_busca_hiperparametros.py). Ganho = '
+        '1 - MSE(modelo)/MSE(referência), IC95 por reamostragem de safras.')
+ESTADOS = ['TO', 'MA', 'RO', 'MT']
+
+
+def grava(nome, dados):
+    with open(os.path.join(AQUI, nome), 'w', encoding='utf-8') as f:
+        json.dump({'nota': NOTA, **dados}, f, indent=2, ensure_ascii=False, default=float)
+
+
+def main(args):
+    juntos = 'juntos' in args
+    ufs = [a for a in args if a != 'juntos'] or ESTADOS
     m = busca()
-    saida = {'nota': ('Protocolo da Tabela 6 (04_analise_para/03_busca_hiperparametros.py) por estado e com os '
-                      'cinco estados juntos. Ganho = 1 - MSE(modelo)/MSE(referência), IC95 por reamostragem de '
-                      'safras.'), 'estados': {}}
-    bases = {'PA': m.carrega()}
+    if juntos:
+        bases = {'PA': m.carrega(), **{uf: base_do_estado(uf, m)[0] for uf in ufs}}
+        junto = pd.concat([b.assign(municipio=b.municipio + ('' if uf != 'PA' else ' - PA'))
+                           for uf, b in bases.items()], ignore_index=True)
+        rotulo = ' + '.join(bases)
+        grava('amazonia_legal_juntos.json', {'estados': list(bases), **avalia(m, junto, rotulo)})
+        return
     for uf in ufs:
         df, (n_gaul, n_par) = base_do_estado(uf, m)
-        bases[uf] = df
-        saida['estados'][uf] = {'municipios_gaul': n_gaul, 'municipios_com_pam': n_par}
-        saida['estados'][uf].update(avalia(m, df, uf))
-    junto = pd.concat([b.assign(municipio=b.municipio + ('' if uf != 'PA' else ' - PA'))
-                       for uf, b in bases.items()], ignore_index=True)
-    saida['cinco_estados'] = avalia(m, junto, 'cinco estados')
-    with open(os.path.join(AQUI, 'amazonia_legal.json'), 'w', encoding='utf-8') as f:
-        json.dump(saida, f, indent=2, ensure_ascii=False, default=float)
+        grava(f'amazonia_legal_{uf}.json', {'estado': uf, 'municipios_gaul': n_gaul,
+                                            'municipios_com_pam': n_par, **avalia(m, df, uf)})
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:] or ['TO', 'MA', 'RO', 'MT'])
+    main(sys.argv[1:])

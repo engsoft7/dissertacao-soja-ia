@@ -126,7 +126,15 @@ class CapturasDeTelaTest {
     private val previsao: PrevisaoResponse = real("previsao") ?: previsaoExemplo
     private val financas: FinancaResponse? = real("financas")
     private val mercadoReal: MercadoResponse? = real("mercado")
-    private val mercado: MercadoResponse = mercadoReal ?: mercadoExemplo
+    // Praças do Pará: as da API quando ela já as manda; senão um exemplo com a
+    // data de ontem (e uma praça parada), para a captura mostrar o bloco.
+    private val pracasExemplo = java.time.LocalDate.now().minusDays(1).toString().let { ontem ->
+        listOf(PracaPara("Redenção", "PA", 148.5, ontem), PracaPara("Barcarena", "PA", 148.5, ontem),
+               PracaPara("Paragominas", "PA", 133.12, java.time.LocalDate.now().minusDays(32).toString()))
+    }
+    private val mercado: MercadoResponse = (mercadoReal ?: mercadoExemplo).let {
+        if (it.pracas_para.isNullOrEmpty()) it.copy(pracas_para = pracasExemplo) else it
+    }
     private val periodoMercado = if (mercadoReal != null) "1mo" else "1d"
 
     // Tempo: a resposta do Open-Meteo gravada pelo script, ou a de Paragominas
@@ -183,12 +191,14 @@ class CapturasDeTelaTest {
     @Test fun resumo_escuro() = captura("resumo", true) { ResumoAgronomicoCard(projecao, ultimoReal) }
 
     @Test fun viabilidade_claro() = captura("viabilidade", false) {
-        financas?.let { ResumoFinanceiroCard(projecao, it, mercado.para) }
+        financas?.let { ResumoFinanceiroCard(projecao, it, mercado.para, mercado.pracas_para.orEmpty(), "Paragominas") }
     }
 
     @Test fun cartoes_historico_claro() = captura("cartoes_historico", false) {
-        PrevisaoCard(projecao, financas)
-        ultimoReal?.let { PrevisaoCard(it, financas) }
+        // O mesmo preço padrão do app: a praça em dia mais perto de Paragominas.
+        val preco = pracaParaUsar("Paragominas", mercado.pracas_para.orEmpty())?.valor
+        PrevisaoCard(projecao, financas, preco)
+        ultimoReal?.let { PrevisaoCard(it, financas, preco) }
     }
 
     @Test fun sobre_claro() = captura("sobre", false) { MetodologiaCard(financas, previsao.validacao) }

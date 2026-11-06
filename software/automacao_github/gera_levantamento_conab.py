@@ -51,6 +51,8 @@ SERIE_CSV = CONAB / "serie_pedro_afonso_to.csv"
 MUNICIPIOS_CSV = CONAB / "custo_producao_por_municipio.csv"
 PRODUTIVIDADE_CSV = CONAB / "custo_variavel_e_produtividade_por_municipio.csv"
 SAIDA = CONAB / "levantamento_atual.json"
+# Custo aberto por item, da série histórica em planilha (extrai_itens_conab.py).
+ITENS_CSV = CONAB / "custo_itens_pedro_afonso_to.csv"
 
 # Praça de referência. O Pará não integra o MATOPIBA e não tem levantamento de
 # custo de soja; adota-se o ponto de coleta da CONAB no cerrado do Tocantins.
@@ -129,6 +131,55 @@ def custo_variavel_publicado() -> float:
             return float(linha["Custo Variavel Unid Comercializacao(R$)"])
     raise LevantamentoInconsistente(
         f"{PRACA_CSV} não está em {PRODUTIVIDADE_CSV.name}")
+
+
+def componentes_do_custo(levantamento: str, prod_kg: float, preco: float,
+                         custo_operacional_ha: float) -> dict | None:
+    """O que do custo operacional acompanha a área e o que acompanha a produção.
+
+    Até aqui o produto dizia que a CONAB publica só os totais, sem abrir por
+    item, e mostrava o resultado por dois rateios extremos do custo variável.
+    A planilha da série histórica abre por item: na praça de referência quase
+    tudo é por hectare (sementes, adubo, defensivo, máquinas, juros, fixos), e
+    só o transporte externo (por saca) e a CESSR (fração da receita) andam com
+    a produção. Com isso o resultado tem um valor só.
+
+    Devolve None quando o CSV dos itens não tem o levantamento em uso: aí o
+    produto volta aos dois rateios, que continuam corretos como limites.
+    """
+    if not ITENS_CSV.exists():
+        return None
+    with ITENS_CSV.open(encoding="utf-8") as fh:  # este CSV usa vírgula
+        linhas = [l for l in csv.DictReader(fh) if l["levantamento"] == levantamento]
+    if not linhas:
+        return None
+
+    def item(padrao: str) -> dict | None:
+        return next((l for l in linhas if padrao in l["item"]), None)
+
+    transporte, cessr = item("Transporte Externo"), item("CESSR")
+    operacional = next((l for l in linhas if l["item"].startswith("CUSTO OPERACIONAL")), None)
+    if transporte is None or cessr is None or operacional is None or preco <= 0:
+        return None
+    # Regra 2, para a terceira fonte: a planilha tem que descrever o mesmo
+    # levantamento dos CSVs do portal (a diferença tolerada é a de arredondar
+    # o custo por saca antes de multiplicar pela produtividade).
+    if abs(float(operacional["custo_ha"]) - custo_operacional_ha) > 0.005 * custo_operacional_ha \
+            or abs(float(linhas[0]["produtividade_kg_ha"]) - prod_kg) > 0.5:
+        raise LevantamentoInconsistente(
+            f"{ITENS_CSV.name} não descreve o levantamento {levantamento} dos outros CSVs: "
+            f"custo operacional R$ {float(operacional['custo_ha']):.2f}/ha contra "
+            f"R$ {custo_operacional_ha:.2f}/ha, produtividade {linhas[0]['produtividade_kg_ha']} kg/ha "
+            f"contra {prod_kg} kg/ha")
+    transporte_sc = float(transporte["custo_saca"])
+    cessr_sc = float(cessr["custo_saca"])
+    prod_sc = prod_kg / SACA_KG
+    return {
+        "area_ha": round(custo_operacional_ha - (transporte_sc + cessr_sc) * prod_sc, 2),
+        "transporte_saca": round(transporte_sc, 2),
+        "taxa_receita": round(cessr_sc / preco, 4),
+        "fonte": ITENS_CSV.name,
+    }
 
 
 def montar() -> dict:
@@ -217,6 +268,10 @@ def montar() -> dict:
         # lista não estiver vazia, o custo em uso é o do último com cotação.
         "levantamentos_sem_preco": posteriores,
     }
+    componentes = componentes_do_custo(atual["levantamento"], prod_kg, atual["preco_recebido_saca"],
+                                       dados["custo_operacional_ha"])
+    if componentes is not None:
+        dados["custo_por_componente"] = componentes
     dados["textos"] = _textos(dados)
     return dados
 
@@ -243,7 +298,7 @@ RESERVAS = (
       "custo_operacional_saca", "custo_variavel_saca", "custo_fixo_saca",
       "produtividade_referencia_kg_ha",
       "produtividade_referencia_sc_ha", "custo_operacional_ha",
-      "custo_total_ha", "renda_fatores_ha", "serie", "textos")),
+      "custo_total_ha", "renda_fatores_ha", "custo_por_componente", "serie", "textos")),
 )
 
 
@@ -287,7 +342,7 @@ def sincronizar_reservas(levantamento: dict, conferir: bool = False) -> list[str
     base = {k: v for k, v in levantamento.items() if k not in FORA}
     defasados = []
     for caminho, nome, chaves in RESERVAS:
-        dados = base if chaves is None else {k: base[k] for k in chaves}
+        dados = base if chaves is None else {k: base[k] for k in chaves if k in base}
         texto = caminho.read_text(encoding="utf-8")
         ini = texto.index(INICIO)
         ini = texto.index("\n", ini) + 1

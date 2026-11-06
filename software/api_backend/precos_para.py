@@ -32,14 +32,18 @@ import re
 import threading
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from html import unescape
 
 import requests
 
 import mercado
 
 URL_AGROLINK = "https://www.agrolink.com.br/cotacoes/historico/pa/soja-em-grao-sc-60kg"
-FONTE = "Agrolink, média mensal do Pará (praça publicada: Barcarena)"
+# A média mensal é a das praças que a Agrolink publica no estado (Barcarena,
+# Redenção e Paragominas em nov/2026), e não só a de Barcarena: uma praça sem
+# cotação nova entra na média com o último valor, e a puxa.
+FONTE = "Agrolink, média mensal das praças do Pará"
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 # A média mensal muda uma vez por dia, no máximo; meio dia de cache basta e
 # poupa a fonte.
@@ -190,6 +194,97 @@ def serie_mensal() -> list[dict]:
     return serie
 
 
+# ── cotação diária de cada praça ──────────────────────────────────────────
+# Desde a página nova (out/2026), a Agrolink publica em texto a cotação diária
+# de cada praça, e a página regional de qualquer cidade do Pará lista as praças
+# do estado. Antes o valor diário vinha em imagem, e só a média mensal era lida.
+# Em nov/2026 a Agrolink publica soja em três praças do Pará: Barcarena,
+# Redenção e Paragominas. As páginas de cidades sem praça própria (Parauapebas,
+# Dom Eliseu, Santana do Araguaia, Ulianópolis) listam as três; as das praças,
+# só a sua; a de Marabá não tem soja. Lê-se a de Parauapebas e, se ela falhar,
+# as das praças, uma a uma.
+URL_PRACAS = "https://www.agrolink.com.br/regional/pa/parauapebas/cotacoes"
+URLS_RESERVA = [f"https://www.agrolink.com.br/regional/pa/{c}/cotacoes"
+                for c in ("barcarena", "redencao", "paragominas")]
+FONTE_PRACAS = "Agrolink, cotação diária por praça"
+VALIDADE_PRACAS_S = 2 * 3600
+_LINHA_SOJA = re.compile(
+    r"Soja em Grão Sc 60Kg\s+([A-Za-zÀ-ÿ' .-]{2,40}?)\s*\(PA\)\s+([\d.]+,\d{2})\s+"
+    r"(?:[▲▼=]\s*)?(?:[\d.,]+\s*%\s+)?(\d{2})/(\d{2})/(\d{2})")
+
+
+def _texto(html: str) -> str:
+    """O texto da página, sem marcação, como aparece na tela."""
+    corpo = re.sub(r"(?is)<(script|style).*?</\1>", " ", html)
+    return re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", corpo)))
+
+
+# A página traz os mesmos números em JSON, dentro do script que a desenha:
+# {"cidade":"Redenção","uf":"PA","preco":148.5,...,"produto":"Soja em Grão
+# Sc 60Kg",...,"atualizacaoMs":1793900220000}. É a leitura principal, com a
+# data exata; o texto da tabela fica de reserva.
+_OBJ_SOJA = re.compile(
+    r'\{"cidade":"([^"]{2,40})","uf":"PA","preco":([\d.]+),[^{}]*?'
+    r'"produto":"Soja em Gr[^"]*Sc 60Kg"[^{}]*?"atualizacaoMs":(\d+)')
+BELEM = timezone(timedelta(hours=-3))
+
+
+def _guarda(ultimas: dict, praca: str, v: float, data: str) -> None:
+    if PRECO_MIN <= v <= PRECO_MAX and (praca not in ultimas or data > ultimas[praca]["data"]):
+        ultimas[praca] = {"praca": praca, "uf": "PA", "valor": round(v, 2), "data": data}
+
+
+def le_pracas(html: str) -> list[dict]:
+    """A cotação mais recente de cada praça do Pará, da mais nova para a mais velha.
+
+    Cada uma traz a data da última atualização: uma praça que a fonte parou de
+    atualizar continua listada todo dia com o valor velho, e a data é o que
+    mostra isso.
+    """
+    ultimas = {}
+    for praca, preco, ms in _OBJ_SOJA.findall(html.replace('\\"', '"')):
+        dia = datetime.fromtimestamp(int(ms) / 1000, tz=BELEM).strftime("%Y-%m-%d")
+        _guarda(ultimas, praca, float(preco), dia)
+    if not ultimas:
+        for praca, valor, dia, mes, ano in _LINHA_SOJA.findall(_texto(html)):
+            _guarda(ultimas, praca.strip(), _numero(valor), f"20{ano}-{mes}-{dia}")
+    return sorted(ultimas.values(), key=lambda c: (c["data"], c["praca"]), reverse=True)
+
+
+def _baixa_pracas(url: str) -> list[dict]:
+    try:
+        r = requests.get(url, headers=UA, timeout=15)
+        r.raise_for_status()
+        return le_pracas(r.text)
+    except Exception as e:  # rede, formato, limite de requisições
+        print(f"[precos_para] {url}: {type(e).__name__}: {e}", flush=True)
+        return []
+
+
+def pracas_do_para() -> list[dict]:
+    """Cotações diárias das praças do Pará, com cache de duas horas.
+
+    Quando a fonte falha, a última leitura boa; sem nenhuma, lista vazia, e a
+    interface fica com a estimativa.
+    """
+    with _trava:
+        guardado = _cache.get("pracas")
+        if guardado and time.time() - guardado[0] < VALIDADE_PRACAS_S:
+            return guardado[1]
+    pracas = _baixa_pracas(URL_PRACAS)
+    if not pracas:
+        juntas = {}
+        for url in URLS_RESERVA:
+            for c in _baixa_pracas(url):
+                juntas[c["praca"]] = c
+        pracas = sorted(juntas.values(), key=lambda c: (c["data"], c["praca"]), reverse=True)
+    if not pracas:
+        return guardado[1] if guardado else []
+    with _trava:
+        _cache["pracas"] = (time.time(), pracas)
+    return pracas
+
+
 if __name__ == "__main__":  # diagnóstico manual e no GitHub Actions
     s = serie_mensal()
     if not s:
@@ -216,3 +311,6 @@ if __name__ == "__main__":  # diagnóstico manual e no GitHub Actions
         print(f"  {linha['mes']}  Pará {linha['para']:7.2f}  Chicago {linha['chicago']:7.2f}  base {linha['base']:+7.2f}")
     agora = estima(mercado.cotacao("1d"), s)
     print("\nPará estimado agora:", agora and agora["estimado_brl_saca"])
+    print(f"\nCotação diária por praça ({FONTE_PRACAS}):")
+    for c in pracas_do_para():
+        print(f"  {c['data']}  {c['praca']:<14} R$ {c['valor']:7.2f}")

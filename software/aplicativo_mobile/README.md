@@ -11,6 +11,24 @@ Aplicativo Android focado em Inteligência Artificial para estimar o rendimento 
 - **Tempo na lavoura:** No alto do Resumo, a temperatura de agora e se a hora é boa para pulverizar; o toque abre a tela completa, para a sede do município ou para a posição do GPS (arredondada a cerca de 1 km). Mostra o tempo agora (temperatura, sensação, umidade, vento e rajadas, índice UV pela escala da OMS, nascer e pôr do sol), os avisos meteorológicos do INMET que atingem o lugar, a janela de pulverização hora a hora nas próximas 24 h com a próxima janela boa, a previsão de 7 dias e a chuva dos últimos 7 dias contra a evapotranspiração de referência. A janela segue os critérios da Embrapa Soja (Adegas e Gazziero, 2020, *Tecnologias de produção de soja*, cap. 12): até 30 °C, umidade acima de 60%, vento de 3 a 8 km/h (até 10 km/h só com ponta antideriva) e sem chuva nas 2 horas seguintes, com o vento de 10 m reduzido a 2 m pelo perfil da FAO-56. A previsão vem direto do Open-Meteo (CC BY 4.0), sem depender da API acordar; os avisos passam pela API (`/api/avisos`), que reduz a lista do INMET do país inteiro aos do lugar. Sem rede, a tela mostra a última previsão baixada, com a hora. A previsão do tempo não entra na estimativa de produtividade, que usa o clima observado das safras. As contas estão em `TempoCalculo.kt`.
 - **Integração Real-Time:** Conexão direta com modelo preditivo em FastAPI hospedado no Render, com dados atualizados pelas fontes MapBiomas, CHIRPS e ERA5-Land.
 
+## Organização do código
+
+Em `app/src/main/java/com/agrointeligencia/app/`, um arquivo por tela ou assunto:
+
+| Arquivo | O que tem |
+|---|---|
+| `MainActivity.kt` | a atividade, o tema e o painel (`AgroDashboard`): abas, carga dos dados, cache, puxar para atualizar |
+| `Resumo.kt` | atalho da Estimativa no campo, produtividade esperada da safra e simulador climático |
+| `Viabilidade.kt` | receita, custo e margem com os números do produtor; resultado pelos dois rateios do custo |
+| `Historico.kt` | gráfico da série do IBGE com a projeção e cartão por safra |
+| `Mercado.kt` | cotação do dia nas praças do Pará, Chicago em reais, média do Pará estimada e base mensal |
+| `Sobre.kt` | aviso de não afiliação, fontes, preço e custo, métricas da validação |
+| `Tempo.kt`, `TempoCalculo.kt` | tela Tempo na lavoura e as contas da janela de pulverização |
+| `EstimativaCampo.kt`, `CampoCalculo.kt`, `ContadorVagens.kt`, `AmostrasTreino.kt`, `AtualizaContador.kt` | Estimativa no campo e contador de vagens |
+| `Municipio.kt`, `Localizacao.kt` | escolha do município (lista e GPS) e leitura da posição |
+| `Safra.kt`, `Pracas.kt` | qual safra mostrar e qual praça do Pará oferecer como preço |
+| `Comum.kt`, `FontesOficiais.kt`, `ApiService.kt` | formatos e peças comuns, fontes com link, cliente da API |
+
 ## Requisitos
 - Android 8.0 (API 26) ou superior.
 - Conexão de Internet (a Estimativa no campo funciona sem ela).

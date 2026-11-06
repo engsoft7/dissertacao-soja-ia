@@ -6,6 +6,7 @@ rotina do produto (software/automacao_github/coleta_gee_safra.py), importados
 de lá para que as coletas novas meçam do mesmo jeito que a base da dissertação.
 """
 import os
+import random
 import sys
 import time
 import unicodedata
@@ -15,7 +16,24 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(AQUI, '..', '..', '..'))
 DADOS = os.path.join(AQUI, '..', 'dados')
 sys.path.insert(0, os.path.join(REPO, 'software', 'automacao_github'))
-from coleta_gee_safra import COLL_ID, CLASSE_SOJA, conecta_gee  # noqa: E402,F401
+from coleta_gee_safra import COLL_ID, CLASSE_SOJA  # noqa: E402,F401
+from coleta_gee_safra import conecta_gee as _conecta_gee_produto  # noqa: E402
+
+# Prazo de cada chamada ao Earth Engine. Sem ele, uma chamada pode ficar
+# pendurada indefinidamente: em 06/11/2026 a nova tentativa da safra 2023
+# esperou mais de 5 h por uma resposta, até o GitHub cancelar o job. Com o
+# prazo, a chamada falha, e reduz_em_lotes cai para um município por vez ou
+# para uma escala mais grossa, como já fazia com os outros erros.
+PRAZO_MS = 15 * 60 * 1000
+
+
+def conecta_gee():
+    ee = _conecta_gee_produto()
+    try:
+        ee.data.setDeadline(PRAZO_MS)
+    except AttributeError:  # versão da biblioteca sem prazo configurável
+        print('aviso: earthengine-api sem setDeadline; chamadas sem prazo', flush=True)
+    return ee
 
 # Nome do estado no GAUL 2015 (ADM1_NAME, sem acento ou com, conforme o GAUL) -> sigla
 UFS = {'para': 'PA', 'tocantins': 'TO', 'maranhao': 'MA', 'rondonia': 'RO', 'mato grosso': 'MT',
@@ -52,6 +70,8 @@ def reduz_em_lotes(ee, img, munis, reducer, scale, tamanho=12, tileScale=16):
             feicoes += tenta(reduz, lista, scale)
             continue
         except Exception as e:  # lote pesado demais: um município por vez
+            if limite_de_chamadas(e):
+                raise                   # cota, não peso: dividir o lote não ajuda
             print(f'  lote {lista[0]}..{lista[-1]} falhou ({type(e).__name__}); um município por vez', flush=True)
         for nome in lista:
             # Município sozinho que ainda estoura o tempo vai a uma escala mais grossa:
@@ -63,22 +83,51 @@ def reduz_em_lotes(ee, img, munis, reducer, scale, tamanho=12, tileScale=16):
                         print(f'  {nome}: reduzido a {escala} m', flush=True)
                     break
                 except Exception as e:
+                    if limite_de_chamadas(e):
+                        raise           # idem: escala mais grossa só para o que é pesado
                     print(f'  {nome}: falhou a {escala} m ({type(e).__name__})', flush=True)
             else:
                 print(f'  {nome}: fica sem valor nesta redução', flush=True)
     return feicoes
 
 
+def limite_de_chamadas(e):
+    """Erro de cota do Earth Engine (HTTP 429, chamadas simultâneas demais).
+
+    Em 06/11/2026 o projeto passou a cota mensal não comercial e entrou em modo
+    restrito, que aceita poucas chamadas ao mesmo tempo. O 429 pede espera; antes,
+    contava como estouro de tempo, e reduz_em_lotes passava municípios a 500 m e
+    1.000 m ou os deixava sem valor, sem que fossem pesados demais.
+    """
+    s = str(e)
+    return 'Too Many Requests' in s or 'concurrency limit' in s
+
+
+# Esperas por cota numa mesma chamada antes de desistir: com o teto de 5 min
+# entre uma e outra, cerca de 3 h.
+ESPERAS_POR_COTA = 40
+
+
 def tenta(f, *a, tentativas=4, **k):
-    for i in range(tentativas):
+    falhas = esperas = 0
+    nome = getattr(f, '__name__', 'chamada')
+    while True:
         try:
             return f(*a, **k)
         except Exception as e:  # o Earth Engine devolve erros transitórios variados
-            if i == tentativas - 1:
+            if limite_de_chamadas(e) and esperas < ESPERAS_POR_COTA:
+                esperas += 1        # espera não conta como tentativa
+                pausa = min(30 * 2 ** min(esperas - 1, 4), 300) + random.uniform(0, 15)
+                if esperas == 1 or esperas % 5 == 0:
+                    print(f'  {nome}: limite de chamadas do Earth Engine; espera {esperas} ({pausa:.0f} s)',
+                          flush=True)
+                time.sleep(pausa)
+                continue
+            falhas += 1
+            if falhas >= tentativas:
                 raise
-            print(f'  {getattr(f, "__name__", "chamada")}: {type(e).__name__}: {str(e)[:150]}; nova tentativa',
-                  flush=True)
-            time.sleep(20 * (i + 1))
+            print(f'  {nome}: {type(e).__name__}: {str(e)[:150]}; nova tentativa', flush=True)
+            time.sleep(20 * falhas)
 
 
 def municipios_gaul(ee, siglas):

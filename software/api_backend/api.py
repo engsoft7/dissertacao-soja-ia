@@ -129,6 +129,14 @@ app.add_middleware(
 )
 
 
+def _componentes_do_custo() -> dict:
+    """Componentes do custo do levantamento em uso; nulos se o levantamento não os tiver."""
+    c = LEVANTAMENTO.get("custo_por_componente") or {}
+    return {"custo_area_ha": c.get("area_ha"),
+            "custo_transporte_saca": c.get("transporte_saca"),
+            "taxa_cessr": c.get("taxa_receita")}
+
+
 @app.get("/api/financas/{municipio}")
 def get_financas(municipio: str):
     fin = _get_cached_finance()
@@ -152,17 +160,15 @@ def get_financas(municipio: str):
         "preco_fisico": fin.get("fisico"),
         "precos_fisicos": fin.get("cotacoes") or [],
         "custo_ha": custo_ha,
-        # Componentes do custo, para a interface poder mostrar quanto o
-        # resultado depende do rateio. A CONAB publica só os totais por
-        # saca, sem abertura por item: não dá para saber que parcela do
-        # custo variável acompanha a área e que parcela acompanha a
-        # produção. Acima da produtividade de referência os dois rateios
-        # possíveis chegam a inverter o SINAL da margem, e um produto que
-        # pinta de verde um resultado que pode ser negativo perde a
-        # confiança de quem decidiu com ele.
+        # Componentes do custo. Com o custo aberto por item (planilha da série
+        # histórica da CONAB), custo_area_ha, custo_transporte_saca e taxa_cessr
+        # dão o resultado de um valor só; os campos por saca abaixo ficam para o
+        # APK antigo e para o caso de o levantamento não ter os itens, em que o
+        # resultado volta aos dois rateios extremos do custo variável.
         "custo_variavel_saca": LEVANTAMENTO["custo_variavel_saca"],
         "custo_fixo_ha": LEVANTAMENTO["custo_fixo_saca"] * LEVANTAMENTO["produtividade_referencia_sc_ha"],
         "produtividade_referencia_sc": LEVANTAMENTO["produtividade_referencia_sc_ha"],
+        **_componentes_do_custo(),
         "vtn_ha": custos["vtn_ha"],
         # Rótulo e nota vêm do servidor de propósito: quando a CONAB publica
         # levantamento novo, o aplicativo passa a exibir a praça, a data e a
@@ -232,17 +238,15 @@ def get_kpis_economia():
          "preco_fisico": fin.get("fisico"),
          "precos_fisicos": fin.get("cotacoes") or [],
          "custo_ha": custo_ha,
-         # Componentes do custo, para a interface poder mostrar quanto o
-         # resultado depende do rateio. A CONAB publica só os totais por
-         # saca, sem abertura por item: não dá para saber que parcela do
-         # custo variável acompanha a área e que parcela acompanha a
-         # produção. Acima da produtividade de referência os dois rateios
-         # possíveis chegam a inverter o SINAL da margem, e um produto que
-         # pinta de verde um resultado que pode ser negativo perde a
-         # confiança de quem decidiu com ele.
+         # Componentes do custo. Com o custo aberto por item (planilha da série
+         # histórica da CONAB), custo_area_ha, custo_transporte_saca e taxa_cessr
+         # dão o resultado de um valor só; os campos por saca abaixo ficam para o
+         # APK antigo e para o caso de o levantamento não ter os itens, em que o
+         # resultado volta aos dois rateios extremos do custo variável.
          "custo_variavel_saca": LEVANTAMENTO["custo_variavel_saca"],
          "custo_fixo_ha": LEVANTAMENTO["custo_fixo_saca"] * LEVANTAMENTO["produtividade_referencia_sc_ha"],
          "produtividade_referencia_sc": LEVANTAMENTO["produtividade_referencia_sc_ha"],
+         **_componentes_do_custo(),
          "fonte_preco": descricao_do_levantamento(),
          "nota_preco": nota_sobre_o_preco(),
          "levantamento": LEVANTAMENTO["levantamento"],
@@ -272,6 +276,7 @@ def get_mercado(periodo: str = "1d"):
     referências situam o número: o físico do dia na praça mais próxima do Pará
     e o preço de porteira do levantamento da CONAB, que é o padrão da simulação.
 
+    "pracas_para" traz a cotação diária de cada praça do Pará na Agrolink.
     "para" traz a estimativa do preço no Pará (ver precos_para.py): cada vela
     ganha "pa", a cotação de Chicago daquele instante somada à base do Pará no
     mês, e o bloco traz a série mensal de onde a base sai.
@@ -289,6 +294,10 @@ def get_mercado(periodo: str = "1d"):
     return {
         "cotacao": cotacao,
         "para": para,
+        # Cotação diária de cada praça do Pará (Agrolink), com a data da última
+        # atualização: o número real do dia, ao lado da estimativa.
+        "pracas_para": precos_para.pracas_do_para(),
+        "pracas_fonte": precos_para.FONTE_PRACAS,
         "fisico": fin.get("fisico"),
         "conab_saca": PRECO_RECEBIDO_CONAB_SACA,
         "conab_fonte": descricao_do_levantamento(),

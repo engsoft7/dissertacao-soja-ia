@@ -63,11 +63,25 @@ def test_1d_no_fim_de_semana_mostra_o_ultimo_pregao():
     o 1D é o pregão de sexta, e não um dia vazio."""
     h = 3600
     quinta = [0, 900, 1800]                                # pregão de quinta
-    sexta = [x + 10 * h for x in (0, 900, 1800, 2700)]     # depois da pausa diária (5h40)
-    soja = resposta(quinta + sexta, [1000.0] * 3 + [1000.0, 1010.0, 1020.0, 1030.0])
+    sexta = [10 * h + 900 * i for i in range(10)]          # depois da pausa diária (5h40)
+    soja = resposta(quinta + sexta, [1000.0] * 3 + [1000.0] * 9 + [1030.0])
     r = mercado.resumo(soja, resposta([0], [5.0]), "1d")
     assert [v["t"] for v in r["velas"]] == sexta
     assert r["variacao_periodo_pct"] == pytest.approx(3.0, abs=0.01)
+
+
+def test_1d_com_pregao_recem_aberto_junta_o_anterior():
+    """Às 22h de Belém o pregão noturno tem uma vela: o 1D mostra o pregão do
+    dia junto com ela, e não uma vela só ocupando o gráfico inteiro."""
+    h = 3600
+    dia = [900 * i for i in range(20)]
+    noite = [dia[-1] + 6 * h]
+    velas = [{"t": t} for t in dia + noite]
+    assert [v["t"] for v in mercado.ultimo_pregao(velas)] == dia + noite
+    # Com o pregão já andando, volta a ser só ele.
+    noite_cheia = [noite[0] + 900 * i for i in range(12)]
+    velas = [{"t": t} for t in dia + noite_cheia]
+    assert [v["t"] for v in mercado.ultimo_pregao(velas)] == noite_cheia
 
 
 def test_minutos_sem_negocio_nao_partem_o_pregao():

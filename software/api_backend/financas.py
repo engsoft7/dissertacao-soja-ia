@@ -93,6 +93,12 @@ LEVANTAMENTO_RESERVA = {
         ]
     },
     "levantamentos_sem_preco": [],
+    "custo_por_componente": {
+        "area_ha": 5042.88,
+        "transporte_saca": 3.3,
+        "taxa_receita": 0.015,
+        "fonte": "custo_itens_pedro_afonso_to.csv"
+    },
     "textos": {
         "descricao": "CONAB, Pedro Afonso (TO), março de 2026",
         "nota_preco": "R$ 105,09/sc é o menor dos 13 levantamentos da praça (mar/2023 a mar/2026, mediana R$ 116,91). Cenário conservador, não previsão de preço.",

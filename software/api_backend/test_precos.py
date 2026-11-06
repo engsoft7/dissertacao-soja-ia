@@ -147,3 +147,17 @@ def test_descricao_diz_praca_uf_e_tipo():
     preço de porteira."""
     achado = precos.preferida(precos.extrair_precos(PAGINA))
     assert precos.descricao(achado) == "Barcarena (PA), porto"
+
+
+def test_componentes_do_custo_somam_o_custo_operacional():
+    """Na produtividade e no preço de referência, área + transporte + CESSR dão
+    de volta o custo operacional por hectare da CONAB: os componentes só
+    redistribuem o custo, não o mudam."""
+    lev = financas.LEVANTAMENTO
+    c = lev.get("custo_por_componente")
+    assert c, "o levantamento em uso tem o custo aberto por item"
+    prod = lev["produtividade_referencia_sc_ha"]
+    soma = c["area_ha"] + (c["transporte_saca"] + c["taxa_receita"] * lev["preco_recebido_saca"]) * prod
+    assert abs(soma - lev["custo_operacional_ha"]) < 1.0
+    # Quase tudo é por hectare: o que anda com a produção é transporte e CESSR.
+    assert c["area_ha"] > 0.9 * lev["custo_operacional_ha"]

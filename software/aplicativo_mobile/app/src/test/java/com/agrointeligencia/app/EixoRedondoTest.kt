@@ -48,4 +48,14 @@ class EixoRedondoTest {
         assertTrue(marcas.size >= 2)
         assertTrue(marcas.first() <= 140.0 && marcas.last() >= 140.0)
     }
+
+    @Test
+    fun faixa_minima_de_um_por_cento_do_preco() {
+        // Pregão calmo: R$ 0,30 de faixa num preço de R$ 144 vira R$ 1,44.
+        val (a, b) = faixaDoEixo(143.90, 144.20)
+        assertEquals(1.44, b - a, 0.01)
+        assertEquals(144.05, (a + b) / 2, 1e-9)
+        // Faixa larga fica como está.
+        assertEquals(130.0 to 150.0, faixaDoEixo(130.0, 150.0))
+    }
 }

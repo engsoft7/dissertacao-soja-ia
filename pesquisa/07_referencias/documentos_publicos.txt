@@ -103,3 +103,26 @@ https://query.wikidata.org/sparql?format=json&query=SELECT%20%3Fibge%20%3Fnome%2
 https://www.fao.org/4/x0490e/x0490e00.htm
 https://www.fao.org/4/x0490e/x0490e07.htm
 https://openlibrary.org/search.json?q=crop+evapotranspiration+guidelines+for+computing+crop+water+requirements&fields=title,author_name,publish_year,publisher,isbn,number_of_pages_median
+#
+# Oitava leva: cotação diária da soja nas praças do Pará (Barcarena e
+# Parauapebas), para o preço do Pará no aplicativo deixar de ser só estimativa.
+https://www.agrolink.com.br/regional/pa/barcarena/cotacoes
+https://www.agrolink.com.br/regional/pa/parauapebas/cotacoes
+https://www.agrolink.com.br/cotacoes/graos/soja/soja-em-grao-sc-60kg
+https://www.noticiasagricolas.com.br/cotacoes/soja/soja-mercado-fisico-sindicatos-e-cooperativas
+https://www.canalrural.com.br/cotacoes/soja/
+navegador https://www.agrolink.com.br/regional/pa/barcarena/cotacoes
+navegador https://www.agrolink.com.br/regional/pa/parauapebas/cotacoes
+navegador https://www.agrolink.com.br/cotacoes/graos/soja/soja-em-grao-sc-60kg
+https://www.agrolink.com.br/regional/pa/redencao/cotacoes
+https://www.agrolink.com.br/regional/pa/paragominas/cotacoes
+https://www.agrolink.com.br/regional/pa/dom-eliseu/cotacoes
+https://www.agrolink.com.br/regional/pa/santana-do-araguaia/cotacoes
+https://www.agrolink.com.br/regional/pa/ulianopolis/cotacoes
+https://www.agrolink.com.br/regional/pa/maraba/cotacoes
+navegador https://www.agrolink.com.br/regional/pa/redencao/cotacoes
+navegador https://www.agrolink.com.br/regional/pa/paragominas/cotacoes
+#
+# Nona leva: a série histórica de custos de soja da CONAB, para conferir se
+# algum município do Pará já teve levantamento de custo.
+https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-soja-1997-a-2026.xls

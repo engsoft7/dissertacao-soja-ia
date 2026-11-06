@@ -130,4 +130,45 @@ class ResultadoPorHectareTest {
             comPrecoProprio.valor > comPrecoConab.valor
         )
     }
+
+    // ── custo aberto por item (planilha da série histórica da CONAB) ─────────
+    // MAR-2026, Pedro Afonso (TO): R$ 5.042,88/ha por área, transporte de
+    // R$ 3,30/sc e CESSR de 1,5% da receita, que somam os R$ 5.277,12/ha na
+    // produtividade (48 sc/ha) e no preço (R$ 105,09) de referência.
+    private fun kpisComItens() = kpis().copy(custo_area_ha = 5042.88, custo_transporte_saca = 3.30, taxa_cessr = 0.015)
+
+    @Test
+    fun comItensNaReferenciaDaOResultadoDaConab() {
+        val r = resultadoPorHectare(48.0, 105.09, null, kpisComItens())
+        assertEquals(48.0 * 105.09 - 5277.12, r.valor, 1.0)
+        assertNull(r.outroRateio)
+        assertFalse(r.sinalIncerto)
+    }
+
+    @Test
+    fun comItensUmValorSoAcimaDaReferencia() {
+        // A 52 sc/ha os dois rateios discordavam do sinal; com os itens há um valor só.
+        val r = resultadoPorHectare(52.0, 105.09, null, kpisComItens())
+        val esperado = 52.0 * 105.09 - (5042.88 + (3.30 + 0.015 * 105.09) * 52.0)
+        assertEquals(esperado, r.valor, delta)
+        assertNull(r.outroRateio)
+        assertFalse(r.sinalIncerto)
+        assertTrue(r.valor > 0)
+    }
+
+    @Test
+    fun custoDoProdutorVenceOsItens() {
+        val r = resultadoPorHectare(52.0, 105.09, 4000.0, kpisComItens())
+        assertEquals(52.0 * 105.09 - 4000.0, r.valor, delta)
+    }
+
+    @Test
+    fun pontoDeEquilibrioComItens() {
+        // área / (preço × (1 − CESSR) − transporte) = 5042,88 / (105,09 × 0,985 − 3,30)
+        val eq = pontoDeEquilibrio(105.09, null, kpisComItens())!!
+        assertEquals(5042.88 / (105.09 * 0.985 - 3.30), eq, 1e-6)
+        assertEquals(5277.12 / 105.09, pontoDeEquilibrio(105.09, null, kpis())!!, 1e-6)
+        assertEquals(4000.0 / 105.09, pontoDeEquilibrio(105.09, 4000.0, kpisComItens())!!, 1e-6)
+        assertNull(pontoDeEquilibrio(0.0, null, kpisComItens()))
+    }
 }

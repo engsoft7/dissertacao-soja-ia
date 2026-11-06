@@ -42,9 +42,12 @@ jobs:
           # No push, só coleta o que a mensagem do commit pedir, como "[coleta: solo]",
           # ou várias de uma vez, "[coleta: amazonia_TO fases_nacional]"; sem pedido,
           # nada (cada coleta completa leva horas e gasta cota do Earth Engine).
+          # Valem todos os pedidos da mensagem, cada item uma vez: antes só o
+          # primeiro valia, e um exemplo no corpo do commit escondia o pedido real.
           pedido="${{ inputs.coleta }}"
           if [ -z "$pedido" ]; then
-            pedido=$(printf '%s' "$MENSAGEM" | sed -n 's/.*\[coleta: *\([A-Za-z0-9_ ]*\)\].*/\1/p' | head -1)
+            pedido=$(printf '%s' "$MENSAGEM" | { grep -o '\[coleta: *[A-Za-z0-9_ ]*\]' || true; } |
+                     sed 's/^\[coleta: *//; s/\]$//' | tr ' ' '\n' | awk 'NF && !v[$0]++' | paste -sd' ' -)
           fi
           [ -n "$pedido" ] || { echo 'tarefas=[]' >> "$GITHUB_OUTPUT"; exit 0; }
           lista=""
@@ -54,6 +57,9 @@ jobs:
               solo) t='"solo para","solo nacional"' ;;
               amazonia) t='"amazonia TO","amazonia MA","amazonia RO","amazonia MT"' ;;
               amazonia_??) t="\"amazonia ${item#amazonia_}\"" ;;   # um estado só, ex.: amazonia_MA
+              # Um estado em faixa de anos, para os que não cabem num job (MT):
+              # amazonia_MT_2001_2007 vira "amazonia MT 2001-2007".
+              amazonia_??_????_????) t="\"amazonia ${item:9:2} ${item:12:4}-${item:17:4}\"" ;;
               recentes) t=$(seq 2016 2025 | sed 's/.*/"recentes &"/' | paste -sd, -) ;;   # um job por safra
               recentes_????) t="\"recentes ${item#recentes_}\"" ;;
               *) t="\"$item\"" ;;
@@ -86,15 +92,19 @@ jobs:
         run: python 00_baixa_dados.py
       - name: Coleta ${{ matrix.tarefa }}
         working-directory: pesquisa/10_trabalhos_futuros/coleta
+        # Abaixo do limite do job: se a coleta não fechar, o passo falha em vez de
+        # o job ser cancelado, e o envio abaixo ainda guarda o que ficou pronto.
+        timeout-minutes: 320
         run: |
           set -- ${{ matrix.tarefa }}
           case "$1" in
             solo) python coleta_solo.py "$2" ;;
             recentes) python coleta_recentes.py "$2" ;;
-            amazonia) python coleta_amazonia_legal.py "$2" ;;
+            amazonia) python coleta_amazonia_legal.py "$2" ${3:+--anos "$3"} ;;
             fases_nacional) python coleta_fases_nacional.py ;;
           esac
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: dados-${{ strategy.job-index }}
           path: pesquisa/10_trabalhos_futuros/dados/

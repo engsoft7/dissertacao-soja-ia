@@ -1,0 +1,257 @@
+{
+  "nota": "Protocolo da Tabela 6 nas safras recentes da base do produto, com e sem cada família de sensores, nos mesmos registros. Ganho = 1 - MSE(modelo)/MSE(referência), IC95 por reamostragem de safras.",
+  "familias": {
+    "radar_e_umidade": {
+      "variaveis": [
+        "s1_vv_db",
+        "s1_vh_db",
+        "smap_raiz_nov_mar",
+        "smap_raiz_fev_mar"
+      ],
+      "registros": 275,
+      "municipios": 38,
+      "sem": {
+        "Random Forest": {
+          "RMSE": 434.6,
+          "MAE": 323.2,
+          "R2": 0.305,
+          "rRMSE_%": 14.0,
+          "ganho_sobre_referencia": -0.018,
+          "IC95": [
+            -0.181,
+            0.106
+          ],
+          "p_unilateral": 0.588
+        },
+        "XGBoost": {
+          "RMSE": 442.6,
+          "MAE": 332.1,
+          "R2": 0.28,
+          "rRMSE_%": 14.3,
+          "ganho_sobre_referencia": -0.056,
+          "IC95": [
+            -0.25,
+            0.093
+          ],
+          "p_unilateral": 0.73
+        },
+        "SVR": {
+          "RMSE": 439.3,
+          "MAE": 327.8,
+          "R2": 0.29,
+          "rRMSE_%": 14.2,
+          "ganho_sobre_referencia": -0.04,
+          "IC95": [
+            -0.093,
+            0.005
+          ],
+          "p_unilateral": 0.9575
+        },
+        "MLP": {
+          "RMSE": 430.8,
+          "MAE": 320.8,
+          "R2": 0.318,
+          "rRMSE_%": 13.9,
+          "ganho_sobre_referencia": -0.0,
+          "IC95": [
+            -0.001,
+            0.001
+          ],
+          "p_unilateral": 0.5355
+        }
+      },
+      "referencia": {
+        "RMSE": 430.8,
+        "MAE": 320.9,
+        "R2": 0.318,
+        "rRMSE_%": 13.9
+      },
+      "safras_avaliadas": [
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "com": {
+        "Random Forest": {
+          "RMSE": 433.9,
+          "MAE": 324.1,
+          "R2": 0.308,
+          "rRMSE_%": 14.0,
+          "ganho_sobre_referencia": -0.014,
+          "IC95": [
+            -0.161,
+            0.097
+          ],
+          "p_unilateral": 0.5615
+        },
+        "XGBoost": {
+          "RMSE": 424.4,
+          "MAE": 313.2,
+          "R2": 0.338,
+          "rRMSE_%": 13.7,
+          "ganho_sobre_referencia": 0.03,
+          "IC95": [
+            -0.171,
+            0.17
+          ],
+          "p_unilateral": 0.3435
+        },
+        "SVR": {
+          "RMSE": 435.9,
+          "MAE": 324.6,
+          "R2": 0.301,
+          "rRMSE_%": 14.1,
+          "ganho_sobre_referencia": -0.024,
+          "IC95": [
+            -0.077,
+            0.016
+          ],
+          "p_unilateral": 0.8655
+        },
+        "MLP": {
+          "RMSE": 429.9,
+          "MAE": 322.0,
+          "R2": 0.321,
+          "rRMSE_%": 13.9,
+          "ganho_sobre_referencia": 0.004,
+          "IC95": [
+            -0.001,
+            0.014
+          ],
+          "p_unilateral": 0.153
+        }
+      }
+    },
+    "optico_sentinel2": {
+      "variaveis": [
+        "ndvi_s2",
+        "ndre"
+      ],
+      "registros": 212,
+      "municipios": 37,
+      "sem": {
+        "Random Forest": {
+          "RMSE": 420.3,
+          "MAE": 291.5,
+          "R2": 0.204,
+          "rRMSE_%": 13.2,
+          "ganho_sobre_referencia": -0.058,
+          "IC95": [
+            -0.152,
+            0.037
+          ],
+          "p_unilateral": 0.8795
+        },
+        "XGBoost": {
+          "RMSE": 420.6,
+          "MAE": 289.5,
+          "R2": 0.203,
+          "rRMSE_%": 13.2,
+          "ganho_sobre_referencia": -0.059,
+          "IC95": [
+            -0.149,
+            0.037
+          ],
+          "p_unilateral": 0.895
+        },
+        "SVR": {
+          "RMSE": 411.4,
+          "MAE": 288.4,
+          "R2": 0.237,
+          "rRMSE_%": 12.9,
+          "ganho_sobre_referencia": -0.013,
+          "IC95": [
+            -0.042,
+            0.012
+          ],
+          "p_unilateral": 0.833
+        },
+        "MLP": {
+          "RMSE": 408.6,
+          "MAE": 291.8,
+          "R2": 0.248,
+          "rRMSE_%": 12.8,
+          "ganho_sobre_referencia": 0.0,
+          "IC95": [
+            -0.001,
+            0.001
+          ],
+          "p_unilateral": 0.234
+        }
+      },
+      "referencia": {
+        "RMSE": 408.6,
+        "MAE": 291.7,
+        "R2": 0.248,
+        "rRMSE_%": 12.8
+      },
+      "safras_avaliadas": [
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "com": {
+        "Random Forest": {
+          "RMSE": 433.0,
+          "MAE": 295.7,
+          "R2": 0.155,
+          "rRMSE_%": 13.6,
+          "ganho_sobre_referencia": -0.123,
+          "IC95": [
+            -0.207,
+            -0.016
+          ],
+          "p_unilateral": 0.9885
+        },
+        "XGBoost": {
+          "RMSE": 426.9,
+          "MAE": 290.6,
+          "R2": 0.179,
+          "rRMSE_%": 13.4,
+          "ganho_sobre_referencia": -0.091,
+          "IC95": [
+            -0.171,
+            0.013
+          ],
+          "p_unilateral": 0.9635
+        },
+        "SVR": {
+          "RMSE": 411.8,
+          "MAE": 291.0,
+          "R2": 0.236,
+          "rRMSE_%": 12.9,
+          "ganho_sobre_referencia": -0.015,
+          "IC95": [
+            -0.046,
+            0.01
+          ],
+          "p_unilateral": 0.8655
+        },
+        "MLP": {
+          "RMSE": 408.6,
+          "MAE": 291.7,
+          "R2": 0.248,
+          "rRMSE_%": 12.8,
+          "ganho_sobre_referencia": 0.0,
+          "IC95": [
+            -0.0,
+            0.001
+          ],
+          "p_unilateral": 0.3175
+        }
+      }
+    }
+  }
+}

@@ -283,14 +283,14 @@ def test_requisitos_declaram_o_que_financas_importa():
     assert not faltando, f"ausentes em dashboard_web/requirements.txt: {faltando}"
 
 def test_sinal_do_resultado_avisa_quando_depende_do_rateio():
-    """A CONAB publica o custo por saca sem abrir por item, e acima da
-    produtividade de referência os dois rateios possíveis discordam sobre lucro
-    ou prejuízo. Pintar um deles de verde é dar por decidido o que o dado não
-    decide — e quem decide com isso é o produtor, no talhão."""
+    """Sem o custo aberto por item, os dois rateios possíveis do custo variável
+    discordam sobre lucro ou prejuízo acima da produtividade de referência, e o
+    painel mostra os dois em vez de pintar um de verde."""
     import json as _json
 
     lev = _json.loads((RAIZ / "pesquisa" / "dados" / "conab" /
                        "levantamento_atual.json").read_text(encoding="utf-8"))
+    lev.pop("custo_por_componente", None)   # levantamento sem os itens
     painel = _funcoes_do_painel(
         nomes=("resultado_por_hectare",),
         constantes=(),
@@ -299,9 +299,7 @@ def test_sinal_do_resultado_avisa_quando_depende_do_rateio():
     preco = lev["preco_recebido_saca"]
     prod_ref = lev["produtividade_referencia_sc_ha"]
 
-    # Na produtividade de referência os dois rateios coincidem, por construção:
-    # é exatamente ali que o custo por saca vezes as sacas dá o custo por
-    # hectare publicado.
+    # Na produtividade de referência os dois rateios coincidem, por construção.
     valor, outro, incerto = calcular(prod_ref, preco)
     assert outro is not None
     assert abs(valor - outro) < 0.01
@@ -316,6 +314,32 @@ def test_sinal_do_resultado_avisa_quando_depende_do_rateio():
     valor, outro, incerto = calcular(52.0, preco, 4000.0)
     assert outro is None and not incerto
     assert abs(valor - (52.0 * preco - 4000.0)) < 0.01
+
+
+def test_com_o_custo_aberto_por_item_o_resultado_tem_um_valor_so():
+    """O levantamento em uso traz o custo por item: área, transporte e CESSR.
+    Na referência ele devolve o resultado da CONAB; acima dela, um valor só."""
+    import json as _json
+
+    lev = _json.loads((RAIZ / "pesquisa" / "dados" / "conab" /
+                       "levantamento_atual.json").read_text(encoding="utf-8"))
+    comp = lev["custo_por_componente"]
+    painel = _funcoes_do_painel(
+        nomes=("resultado_por_hectare",),
+        constantes=(),
+        extras={"LEVANTAMENTO_CONAB": lev})
+    calcular = painel["resultado_por_hectare"]
+    preco = lev["preco_recebido_saca"]
+    prod_ref = lev["produtividade_referencia_sc_ha"]
+
+    valor, outro, incerto = calcular(prod_ref, preco)
+    assert outro is None and not incerto
+    assert abs(valor - (prod_ref * preco - lev["custo_operacional_ha"])) < 1.0
+
+    valor, outro, incerto = calcular(52.0, preco)
+    esperado = 52.0 * preco - (comp["area_ha"] + (comp["transporte_saca"] + comp["taxa_receita"] * preco) * 52.0)
+    assert outro is None and not incerto
+    assert abs(valor - esperado) < 0.01
 
 
 def _atribuicao(modulo: ast.Module, nome: str):

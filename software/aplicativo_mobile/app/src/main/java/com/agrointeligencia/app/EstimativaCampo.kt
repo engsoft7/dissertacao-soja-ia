@@ -304,9 +304,13 @@ private fun NovoPonto(
             automatica = automatica,
             conferida = conferida,
             aoContarSozinho = { r -> automatica = r; conferida = false; vagens = r.vagens.toString() },
+            // O contador marca só umas 6 em cada 10 vagens, embora estime o total.
+            // Antes, o primeiro toque trocava a estimativa pela contagem das
+            // marcas, e corrigir uma marca errada derrubava o número em 40%.
+            // Agora o número só passa às marcas quando o produtor pede.
+            aoUsarMarcas = { conferida = true; vagens = marcasVagens.size.toString() },
         ) {
-            vagens = it.toString()
-            if (automatica != null) conferida = true
+            if (automatica == null || conferida) vagens = it.toString()
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
             CampoNumero(arrancadas, { arrancadas = it }, "Plantas arrancadas", Modifier.weight(1f), inteiro = true)
@@ -386,6 +390,7 @@ private fun FotoParaContar(
     automatica: ContagemAutomatica? = null,
     conferida: Boolean = false,
     aoContarSozinho: ((ContagemAutomatica) -> Unit)? = null,
+    aoUsarMarcas: (() -> Unit)? = null,
     aoContar: (Int) -> Unit,
 ) {
     val context = LocalContext.current
@@ -488,14 +493,18 @@ private fun FotoParaContar(
                 val origem = baixado?.nota
                     ?: ("Ele aprendeu com fotos de plantas da China, onde erra em média 6%, e ainda não foi " +
                         "conferido em lavouras do Pará.")
-                Nota(
-                    if (!conferida)
-                        "O contador estimou ${a.vagens} vagens e marcou ${a.marcas.size} onde as viu. $origem " +
-                        "Confira: toque nas vagens sem marca e nas marcas erradas. " +
-                        "A partir do primeiro toque, vale a contagem das marcas."
-                    else
-                        "Contagem conferida por você, a partir das marcas do contador (que estimou ${a.vagens})."
-                )
+                if (!conferida) {
+                    Nota("O contador estimou ${a.vagens} vagens; as marcas mostram onde viu algumas delas " +
+                         "(ele marca cerca de 6 em cada 10). $origem O número fica o do contador. Para contar " +
+                         "você mesmo, marque as vagens sem marca, tire as erradas e toque em Usar as marcas.")
+                    aoUsarMarcas?.let { usar ->
+                        OutlinedButton(onClick = usar, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                            Text("Usar as marcas (${marcas.size} vagens)")
+                        }
+                    }
+                } else {
+                    Nota("Contagem conferida por você, pelas marcas (o contador estimou ${a.vagens}).")
+                }
                 Nota("Contador versão ${baixado?.versao ?: VERSAO_EMBUTIDA}, treinado com a base YOLO POD " +
                      "(Xiang et al., 2023, Plant Methods), licença CC BY 4.0.")
             }

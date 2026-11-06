@@ -102,10 +102,26 @@ def acha(texto: str, nos: list[dict] | None = None, parcial: bool = True, mais_b
     return max(cand, key=lambda n: n["y1"]) if mais_baixo else cand[0]
 
 
+def fecha_dialogo_do_sistema(nos: list[dict]) -> bool:
+    """Toca em "Wait" num aviso de app do sistema travado (o Pixel Launcher do
+    emulador trava às vezes e cobre a tela, e o teste inteiro falhava)."""
+    if any("isn't responding" in n["texto"] or "não está respondendo" in n["texto"] for n in nos):
+        botao = next((n for n in nos if n["texto"] in ("Wait", "Aguardar")), None)
+        if botao:
+            res.setdefault("dialogos_do_sistema_fechados", 0)
+            res["dialogos_do_sistema_fechados"] += 1
+            toca_no(botao)
+            return True
+    return False
+
+
 def espera(texto: str, s: int = 60, **kw) -> dict | None:
     fim = time.time() + s
     while time.time() < fim:
-        n = acha(texto, **kw)
+        nos = arvore()
+        if fecha_dialogo_do_sistema(nos):
+            continue
+        n = acha(texto, nos=nos, **kw)
         if n:
             return n
         time.sleep(1.5)

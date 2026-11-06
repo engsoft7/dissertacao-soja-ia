@@ -847,7 +847,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                 // não sustenta nenhum dos dois, e a cor é o que o produtor lê
                 // antes do número.
                 val color = when {
-                    r.sinalIncerto -> if (isDark) Color(0xFFd29922) else Color(0xFFbf8700)
+                    r.sinalIncerto -> corAtencao(isDark)
                     r.valor > 0 -> if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
                     else -> if (isDark) Color(0xFFf85149) else Color(0xFFdc2626)
                 }
@@ -1010,7 +1010,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     text = it,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = if (isDark) Color(0xFFd29922) else Color(0xFFbf8700),
+                    color = corAtencao(isDark),
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
             }
@@ -1157,7 +1157,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
             val lucro = r.valor
             val roi = if (custo > 0) (lucro / custo) * 100 else 0.0
             val profitColor = when {
-                r.sinalIncerto -> if (isDark) Color(0xFFd29922) else Color(0xFFbf8700)
+                r.sinalIncerto -> corAtencao(isDark)
                 lucro >= 0 -> if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
                 else -> if (isDark) Color(0xFFf85149) else Color(0xFFdc2626)
             }
@@ -1193,7 +1193,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     text = String.format(PT_BR, "Atenção: com estes dados o resultado pode ir de R$ %,d a R$ %,d por hectare, conforme quanto do custo variável acompanha a área e quanto acompanha a produção. A CONAB publica só o total por saca, sem abrir por item. Informe o seu custeio para a conta parar de depender disso.", 
                         minOf(lucro, outroRateio).toInt(), maxOf(lucro, outroRateio).toInt()),
                     fontSize = 12.sp,
-                    color = if (isDark) Color(0xFFd29922) else Color(0xFFbf8700),
+                    color = corAtencao(isDark),
                     modifier = Modifier.padding(top = 12.dp)
                 )
             }
@@ -1382,7 +1382,7 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
                 Text(
                     text = it,
                     fontSize = 12.sp,
-                    color = if (isDark) Color(0xFFd29922) else Color(0xFFbf8700)
+                    color = corAtencao(isDark)
                 )
             }
             

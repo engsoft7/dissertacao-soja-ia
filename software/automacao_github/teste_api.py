@@ -119,7 +119,8 @@ def main() -> None:
     estranhos = [
         ("município inexistente", "GET", "/api/previsao/Nenhures", {}, {404}),
         ("nome com 5.000 letras", "GET", "/api/previsao/" + "a" * 5000, {}, {404, 414}),
-        ("aspas e ponto e vírgula", "GET", "/api/previsao/" + quote("x'; DROP TABLE x;--"), {}, {404}),
+        # O firewall do Render barra cara de injeção de SQL antes da API (403).
+        ("aspas e ponto e vírgula", "GET", "/api/previsao/" + quote("x'; DROP TABLE x;--"), {}, {403, 404}),
         ("caminho com ../", "GET", "/api/previsao/" + quote("../../etc/passwd", safe=""), {}, {404}),
         ("emoji", "GET", "/api/previsao/" + quote("🌱"), {}, {404}),
         ("finanças de município inexistente", "GET", "/api/financas/Nenhures", {}, {404, 200}),

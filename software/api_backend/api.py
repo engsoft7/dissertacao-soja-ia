@@ -13,8 +13,10 @@ from functools import lru_cache
 from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel
 import pandas as pd
+import copy
 import json
 import requests
 import sys
@@ -93,7 +95,11 @@ async def app_lifespan(app: FastAPI):
     AppState.metricas = AppState.estimador.validar(df)  # Popula métricas de mae e rmse
     AppState.last_year = int(df["ano"].max())
     AppState.pam = historico_oficial.carrega_pam()
+    AppState.historicos = {}
     print("Modelo carregado e treinado com sucesso.", flush=True)
+    # Prepara o histórico dos municípios em segundo plano, para a primeira
+    # abertura de cada um não esperar as estimativas.
+    threading.Thread(target=_aquece_historicos, daemon=True).start()
     # Pre-populate finance cache in background
     threading.Thread(target=_refresh_finance, daemon=True).start()
     yield
@@ -121,11 +127,16 @@ MUNICIPIOS_FORMATADOS = {
 
 REVERSE_FORMATADOS = {v: k for k, v in MUNICIPIOS_FORMATADOS.items()}
 
-# Enable CORS for generic clients
+# Respostas comprimidas: o histórico de um município passa de 10 KB, e o
+# produtor baixa pelo celular, no campo.
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Enable CORS for generic clients. Sem credenciais: a API não usa cookie nem
+# login, e "*" com credenciais fazia o Starlette ecoar a origem de qualquer site.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -199,6 +210,7 @@ class AppState:
     metricas = None
     last_year = None
     pam = {}
+    historicos: dict = {}
 
 # Startup phase handled via lifespan manager in app definition
 
@@ -331,6 +343,78 @@ def get_avisos(lat: float | None = None, lon: float | None = None, geocode: str 
         raise HTTPException(status_code=400, detail="informe lat e lon, ou geocode")
     return avisos_inmet.avisos(lat, lon, geocode)
 
+def _historico_do_municipio(raw_municipio: str, df_mun) -> list[dict]:
+    """Histórico, safras do IBGE fora da base e projeções de um município.
+
+    Só muda quando o processo recarrega a base, o arquivo do IBGE e o modelo,
+    então fica guardado por município: cada chamada fazia dezenas de
+    estimativas, e 30 celulares abrindo o app juntos esperavam até 30 s.
+    """
+    guardado = AppState.historicos.get(raw_municipio)
+    if guardado is not None:
+        return copy.deepcopy(guardado)
+    mae = float(AppState.estimador.mae)
+    resultado = []
+    # Histórico passado
+    for _, row in df_mun.iterrows():
+        ano = int(row["ano"])
+        real = float(row["rendimento_kg_ha"])
+        r = AppState.estimador.estimar(raw_municipio, ano)
+        pred = float(r["estimativa_kg_ha"])
+        resultado.append({
+            "ano": ano,
+            "rendimento_predito": pred,
+            "rendimento_real": real,
+            "margem_erro": mae
+        })
+
+    # Safras que o IBGE publicou e a base não tem (sem soja na máscara do
+    # MapBiomas naquele ano; ver historico_oficial.py): entram com o valor
+    # oficial e a estimativa do modelo, marcadas, para o histórico e a
+    # "última safra do IBGE" não pararem anos atrás.
+    pam = AppState.pam or {}
+    ultimo_publicado = historico_oficial.ultima_safra_publicada(AppState.last_year, pam)
+    oficiais = pam.get(int(df_mun["cod_ibge7"].iloc[0]), {})
+    anos_base = set(df_mun["ano"].astype(int))
+    for ano, real in historico_oficial.safras_fora_da_base(oficiais, anos_base, ultimo_publicado):
+        r = AppState.estimador.estimar(raw_municipio, ano)
+        resultado.append({
+            "ano": ano,
+            "rendimento_predito": float(r["estimativa_kg_ha"]),
+            "rendimento_real": real,
+            "margem_erro": mae,
+            "fora_do_modelo": True,
+        })
+    resultado.sort(key=lambda h: h["ano"])
+
+    # Futuro projetado: as três safras depois da última publicada, a mesma
+    # para todos os municípios. Antes partia da última safra do município na
+    # base, e quem saiu da máscara em 2017 recebia a projeção de 2018 a 2020.
+    ano_max = int(ultimo_publicado)
+    for delta in range(1, 4):
+        ano_futuro = ano_max + delta
+        rf = AppState.estimador.estimar(raw_municipio, ano_futuro)
+        resultado.append({
+             "ano": ano_futuro,
+             "rendimento_predito": float(rf["estimativa_kg_ha"]),
+             # Sentinela de safra ainda não divulgada pela PAM. Os clientes
+             # devem exibir traço, e não zero: um zero aqui anuncia uma
+             # colheita nula que não houve.
+             "rendimento_real": 0.0,
+             "margem_erro": float(rf["margem_kg_ha"])
+        })
+    AppState.historicos[raw_municipio] = resultado
+    return copy.deepcopy(resultado)
+
+
+def _aquece_historicos() -> None:
+    for raw in AppState.df["municipio"].unique():
+        try:
+            _historico_do_municipio(raw, AppState.df[AppState.df["municipio"] == raw])
+        except Exception as e:  # um município ruim não impede os outros
+            print(f"histórico de {raw} não preparado: {e}", flush=True)
+
+
 @app.get("/api/previsao/{municipio}")
 def get_previsao(municipio: str):
     if AppState.df is None:
@@ -342,56 +426,7 @@ def get_previsao(municipio: str):
         raise HTTPException(status_code=404, detail="Município não encontrado")
     
     try:
-        mae = float(AppState.estimador.mae)
-        resultado = []
-        # Histórico passado
-        for _, row in df_mun.iterrows():
-            ano = int(row["ano"])
-            real = float(row["rendimento_kg_ha"])
-            r = AppState.estimador.estimar(raw_municipio, ano)
-            pred = float(r["estimativa_kg_ha"])
-            resultado.append({
-                "ano": ano,
-                "rendimento_predito": pred,
-                "rendimento_real": real,
-                "margem_erro": mae
-            })
-        
-        # Safras que o IBGE publicou e a base não tem (sem soja na máscara do
-        # MapBiomas naquele ano; ver historico_oficial.py): entram com o valor
-        # oficial e a estimativa do modelo, marcadas, para o histórico e a
-        # "última safra do IBGE" não pararem anos atrás.
-        pam = AppState.pam or {}
-        ultimo_publicado = historico_oficial.ultima_safra_publicada(AppState.last_year, pam)
-        oficiais = pam.get(int(df_mun["cod_ibge7"].iloc[0]), {})
-        anos_base = set(df_mun["ano"].astype(int))
-        for ano, real in historico_oficial.safras_fora_da_base(oficiais, anos_base, ultimo_publicado):
-            r = AppState.estimador.estimar(raw_municipio, ano)
-            resultado.append({
-                "ano": ano,
-                "rendimento_predito": float(r["estimativa_kg_ha"]),
-                "rendimento_real": real,
-                "margem_erro": mae,
-                "fora_do_modelo": True,
-            })
-        resultado.sort(key=lambda h: h["ano"])
-
-        # Futuro projetado: as três safras depois da última publicada, a mesma
-        # para todos os municípios. Antes partia da última safra do município na
-        # base, e quem saiu da máscara em 2017 recebia a projeção de 2018 a 2020.
-        ano_max = int(ultimo_publicado)
-        for delta in range(1, 4):
-            ano_futuro = ano_max + delta
-            rf = AppState.estimador.estimar(raw_municipio, ano_futuro)
-            resultado.append({
-                 "ano": ano_futuro,
-                 "rendimento_predito": float(rf["estimativa_kg_ha"]),
-                 # Sentinela de safra ainda não divulgada pela PAM. Os clientes
-                 # devem exibir traço, e não zero: um zero aqui anuncia uma
-                 # colheita nula que não houve.
-                 "rendimento_real": 0.0,
-                 "margem_erro": float(rf["margem_kg_ha"])
-            })
+        resultado = _historico_do_municipio(raw_municipio, df_mun)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
         

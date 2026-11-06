@@ -141,6 +141,7 @@ registros da análise (no Pará, os 40,1% da dissertação):
 | Mato Grosso | 2.290 (116) | 12,1% | 305,4 | Random Forest | +0,119 (+0,045 a +0,178) | 0,004 |
 | Tocantins | 1.639 (108) | 21,0% | 342,1 | XGBoost | +0,113 (−0,013 a +0,216) | 0,14 |
 | Rondônia | 485 (41) | 35,3% | 323,5 | SVR | +0,077 (+0,016 a +0,134) | 0,036 |
+| Os cinco juntos | 5.872 (383) | 17,9% | 353,3 | XGBoost | +0,100 (+0,030 a +0,163) | < 0,001 |
 
 Em Mato Grosso os quatro modelos superam a referência (ganhos de +0,093 a
 +0,119, p de Holm de 0,004 a 0,013); no Maranhão, o Random Forest e o SVR, com
@@ -158,8 +159,12 @@ registros do Pará, não passa na correção. Tamanho da base e variação do al
 andam juntos nesses estados, e separar os dois pede outro desenho (por
 exemplo, subamostrar Mato Grosso ao tamanho do Pará).
 
-**Em análise em 06/11/2026.** Os cinco estados numa só base, com o Pará
-(`06_amazonia_legal.py juntos`).
+Com os cinco estados numa só base (`06_amazonia_legal.py juntos`: o Pará da
+dissertação e os quatro estados, 5.872 registros de 383 municípios), os quatro
+modelos superam a referência por margem parecida: Random Forest +0,099, XGBoost
+e SVR +0,100 e MLP +0,097, com p de Holm de 0,003 ou menos. O protocolo da
+Tabela 6, que no Pará não sai da média do município, encontra sinal quando a
+base cresce e o alvo repete menos.
 
 **Milho.** A extensão a outras culturas esbarra na máscara: o MapBiomas
 (coleção 10) separa soja, cana, arroz, algodão e café, mas o milho fica em

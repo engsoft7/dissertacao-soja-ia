@@ -1,6 +1,6 @@
 # Política de privacidade do aplicativo AgroInteligência
 
-Última atualização: 5 de novembro de 2026.
+Última atualização: 6 de novembro de 2026 (versão 2.7.4 do aplicativo).
 
 O AgroInteligência é um aplicativo gratuito, sem anúncios e sem cadastro,
 desenvolvido como produto técnico de dissertação do Programa de Pós-Graduação
@@ -23,11 +23,18 @@ nem de publicidade.
 - **Posição do GPS para medir a área do talhão.** Usada só com a tela aberta,
   para calcular a área; não é enviada.
 - **Município escolhido**, para o aplicativo abrir nele da próxima vez.
+- **Posição para a previsão do tempo**, se o produtor escolher "Minha
+  localização": guardada já arredondada a cerca de 1 km, para a previsão abrir
+  no mesmo lugar da próxima vez. Sai quando ele volta à sede do município ou
+  desinstala o aplicativo.
 - **Posição do GPS para achar o município mais próximo.** Lida só quando o
   produtor toca em "Usar minha localização" na escolha do município. A sede
   mais próxima é calculada no próprio celular; a posição não é guardada nem
   enviada, e só o nome do município escolhido segue para a API, como na
   escolha pela lista.
+
+O aplicativo desliga o backup automático do Android: nada disso é copiado
+para o Google Drive nem passa para um celular novo na transferência de dados.
 
 ## O que sai do celular, para quê e para onde
 

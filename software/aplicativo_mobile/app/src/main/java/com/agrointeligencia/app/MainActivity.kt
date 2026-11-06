@@ -574,8 +574,26 @@ fun AgroDashboard() {
                                         settings.javaScriptEnabled = true
                                         settings.domStorageEnabled = true
                                         settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+                                        // A página é da API; nada de arquivos do celular.
+                                        settings.allowFileAccess = false
+                                        settings.allowContentAccess = false
                                         setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null)
-                                        webViewClient = WebViewClient()
+                                        // Um link de fora (o crédito do OpenStreetMap, por
+                                        // exemplo) abre no navegador: dentro do quadro do
+                                        // mapa, o produtor ficava preso numa página sem volta.
+                                        webViewClient = object : WebViewClient() {
+                                            override fun shouldOverrideUrlLoading(
+                                                view: WebView, request: android.webkit.WebResourceRequest
+                                            ): Boolean {
+                                                if (request.url.host == "agrointeligencia-api.onrender.com") return false
+                                                runCatching {
+                                                    view.context.startActivity(
+                                                        android.content.Intent(android.content.Intent.ACTION_VIEW, request.url)
+                                                    )
+                                                }
+                                                return true
+                                            }
+                                        }
                                         loadUrl(mapUrl)
                                         lastLoadedUrl = mapUrl
                                     }

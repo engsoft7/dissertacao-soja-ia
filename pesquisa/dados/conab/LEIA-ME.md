@@ -20,6 +20,14 @@ Fonte: <https://portaldeinformacoes.conab.gov.br/custos-de-producao.html>
 O Pará não integra o MATOPIBA e não tem levantamento de custo de soja. Adota-se
 **Pedro Afonso (TO)**, ponto de coleta da CONAB no cerrado do Tocantins.
 
+Conferido em 06/11/2026 na série histórica completa
+(`serie-historica-custos-soja-1997-a-2026.xls`, publicada pela CONAB em
+20/07/2026, lida pelo workflow `le-documentos-publicos.yml`): 515 planilhas de
+35 praças em 13 unidades da federação (BA, DF, GO, MA, MG, MS, MT, PI, PR, RR,
+RS, SP e TO), nenhuma no Pará em nenhum ano. As mais próximas das lavouras do
+Pará são Pedro Afonso (TO), de 2015 a 2026, e Balsas (MA), de 2006 a 2026; na
+Amazônia, só Boa Vista (RR), de 2016 a 2022.
+
 A CONAB publica o custo **por saca comercializada**. A conversão para hectare
 usa a produtividade de referência do próprio levantamento, 2.880 kg/ha, ou
 48 sc/ha:

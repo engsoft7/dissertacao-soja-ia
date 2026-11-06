@@ -114,3 +114,11 @@ https://www.canalrural.com.br/cotacoes/soja/
 navegador https://www.agrolink.com.br/regional/pa/barcarena/cotacoes
 navegador https://www.agrolink.com.br/regional/pa/parauapebas/cotacoes
 navegador https://www.agrolink.com.br/cotacoes/graos/soja/soja-em-grao-sc-60kg
+https://www.agrolink.com.br/regional/pa/redencao/cotacoes
+https://www.agrolink.com.br/regional/pa/paragominas/cotacoes
+https://www.agrolink.com.br/regional/pa/dom-eliseu/cotacoes
+https://www.agrolink.com.br/regional/pa/santana-do-araguaia/cotacoes
+https://www.agrolink.com.br/regional/pa/ulianopolis/cotacoes
+https://www.agrolink.com.br/regional/pa/maraba/cotacoes
+navegador https://www.agrolink.com.br/regional/pa/redencao/cotacoes
+navegador https://www.agrolink.com.br/regional/pa/paragominas/cotacoes

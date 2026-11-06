@@ -509,8 +509,7 @@ fun TempoConteudo(
         Text("Previsão: Open-Meteo.com (CC BY 4.0), a partir de modelos meteorológicos" +
              (quando?.let { "; obtida em $it" } ?: "") + ". Avisos: INMET.",
              fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
-        Text("A previsão do tempo serve às operações do dia a dia. Ela não entra na estimativa de " +
-             "produtividade, que usa o clima observado das safras.",
+        Text("A previsão do tempo não entra na estimativa de produtividade.",
              fontSize = 12.sp, color = secundaria, lineHeight = 16.sp, fontStyle = FontStyle.Italic)
     }
 }
@@ -571,8 +570,9 @@ private fun CartaoAgora(a: TempoAtual, hoje: DiaTempo?) {
                 Medida("Sol", if (d.nascer != null && d.por != null) "${d.nascer} – ${d.por}" else "–", Modifier.weight(1f))
             }
         }
-        Text("Vento a 10 m de altura, como os modelos publicam. UV pela escala da OMS: de 8 para cima " +
-             "(muito alto), proteja quem trabalha ao sol.",
+        // Só o que muda a leitura: a altura do vento e, quando é o caso, o UV.
+        Text("Vento a 10 m de altura." +
+             (if ((hoje?.uv ?: 0.0) >= 8.0) " UV muito alto: proteja quem trabalha ao sol." else ""),
              fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp,
              modifier = Modifier.padding(top = 8.dp))
     }
@@ -703,10 +703,9 @@ private fun CartaoPulverizacao(horas: List<HoraPulverizacao>, agora: LocalDateTi
                 }
             }
         }
-        Text("Critérios da Embrapa Soja (Adegas e Gazziero, 2020): até 30 °C, umidade acima de 60%, vento " +
-             "de 3 a 8 km/h (até 10 km/h só com ponta antideriva) e sem chuva nas 2 horas seguintes. O vento " +
-             "na lavoura é o de 10 m reduzido a 2 m de altura (FAO-56). Toque numa hora para ver os números. " +
-             "Confira na bula o intervalo sem chuva do produto e as condições no local antes de aplicar.",
+        // A fonte completa (Adegas e Gazziero, 2020; FAO-56) está no Sobre.
+        Text("Embrapa Soja: até 30 °C, umidade acima de 60%, vento de 3 a 8 km/h e sem chuva nas 2 h " +
+             "seguintes. Toque numa hora para ver os números. Confira a bula antes de aplicar.",
              fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 8.dp))
     }
 }
@@ -791,9 +790,7 @@ private fun CartaoChuva(lista: List<DiaTempo>, hoje: LocalDate) {
                 }
             }
         }
-        Text("Barras claras: chuva estimada pelos modelos nos dias passados (não é medida de pluviômetro); " +
-             "escuras: prevista. A evapotranspiração de referência (FAO-56) é a de um gramado bem regado; a da " +
-             "soja muda com a fase da cultura.",
+        Text("Barras claras: chuva estimada nos dias passados (não medida); escuras: prevista.",
              fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 6.dp))
     }
 }

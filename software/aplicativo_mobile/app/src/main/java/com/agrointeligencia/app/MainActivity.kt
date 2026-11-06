@@ -879,8 +879,8 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                 )
                 if (r.sinalIncerto && outro != null) {
                     Text(
-                        text = "Pode ir de ${reaisInteiros(minOf(r.valor, outro))} a ${reaisInteiros(maxOf(r.valor, outro))} " +
-                               "conforme o rateio do custo, que a CONAB não publica aberto por item.",
+                        text = "Pode ir de ${reaisInteiros(minOf(r.valor, outro))} a ${reaisInteiros(maxOf(r.valor, outro))}, " +
+                               "conforme o rateio do custo.",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 2.dp)
@@ -1031,9 +1031,17 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse, par
                 temPreco && !temCusto -> kpis.aviso_custo
                 // Com o número de hoje ao lado, o produtor vê o tamanho da
                 // defasagem em vez de só ler que ela existe.
-                else -> kpis.aviso_preco?.let { aviso ->
-                    "Preço possivelmente desatualizado. $aviso" +
-                        (paraHoje?.estimado_brl_saca?.let { " Hoje o Pará está em R$\u00A0${reais(it)}/sc (estimado, preço de porto)." } ?: "")
+                // Curto: a idade do padrão e, ao lado, o preço de hoje. O texto
+                // longo do servidor fica só quando ele não manda a idade.
+                else -> {
+                    val meses = kpis.defasagem_meses
+                    val hoje = paraHoje?.estimado_brl_saca?.let { " Hoje o Pará está em R$\u00A0${reais(it)}/sc (porto)." } ?: ""
+                    when {
+                        meses == null -> kpis.aviso_preco?.let { "Preço possivelmente desatualizado. $it" }
+                        meses >= 12 -> "Preço padrão da CONAB de mais de um ano atrás.$hoje"
+                        meses >= 5 -> "Preço padrão da CONAB de $meses meses atrás.$hoje"
+                        else -> null
+                    }
                 }
             }
             alerta?.let {
@@ -1171,37 +1179,25 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse, par
                 if (temPreco && precoEm > 0L) "o preço em ${quando.format(java.util.Date(precoEm))}" else null,
                 if (temCusto && custoEm > 0L) "o custo em ${quando.format(java.util.Date(custoEm))}" else null
             )
+            // Duas frases: o que é do produtor (e quando informou) e o que
+            // ainda é padrão. A nota sobre a série de preços da CONAB fica no
+            // Sobre; o físico de outro estado, no Mercado.
+            val conab = kpis.fonte_preco?.removePrefix("CONAB, ")
+            val daConab = listOfNotNull(if (temPreco) null else "preço", if (temCusto) null else "custo")
+            val padrao = listOfNotNull(
+                if (temProd) null else "produtividade do modelo",
+                if (daConab.isNotEmpty() && conab != null) juntaComE(daConab) + " da CONAB ($conab)" else null
+            )
             val legenda = listOfNotNull(
-                if (seus.isEmpty())
-                    "Preencha com os seus números: o app guarda e passa a abrir com eles."
-                else if (datas.isNotEmpty())
-                    "Você informou ${juntaComE(datas)}."
-                else
-                    "Seus números: " + seus.joinToString(", ") + ".",
-                // O preço do produtor não segue o mercado sozinho, de propósito:
-                // vale o que ele recebe. Mas precisa saber disso.
-                if (temPreco) "O app guarda o seu preço e não o troca quando o mercado muda: " +
-                    "para atualizar, digite o novo" + (if (paraHoje?.estimado_brl_saca != null) " ou use o do Pará hoje." else ".")
-                else null,
-                if (temProd) null
-                    else "A produtividade é a estimativa do modelo — se você já colheu, informe a sua.",
-                if (temPreco) null else kpis.fonte_preco?.let { "Preço padrão: $it." },
-                if (temPreco) null else kpis.nota_preco,
-                if (temCusto) null else kpis.fonte_preco?.let { "Custo padrão: $it." },
-                // Referência que se move todo dia, contra um padrão que se move
-                // a cada dois meses. A praça vem do servidor: o corredor do
-                // Pará quando a fonte publica, um porto do Sul só quando não
-                // publica. Escrever "Paranaguá" fixo aqui era afirmar uma praça
-                // que pode não ser a exibida. Concatenar antes de .format()
-                // deixaria dúvida sobre a qual literal o format se aplica.
-                kpis.preco_fisico?.let {
-                    // A fonte não publica praça no Pará: a mais próxima pode
-                    // ser Sorriso (MT). Dita sem o estado, parecia o preço local.
-                    if (it.uf == "PA")
-                        "Físico hoje em ${it.praca} (PA), ${it.tipo}: R$ ${reais(it.valor)}/sc — não é preço de porteira, entre a praça e a fazenda ainda há frete e base."
-                    else
-                        "Físico hoje em ${it.praca} (${it.uf}), ${it.tipo}: R$ ${reais(it.valor)}/sc. É de outro estado: mostra o rumo do mercado, não o seu preço."
-                }
+                when {
+                    datas.isNotEmpty() -> "Você informou ${juntaComE(datas)}." +
+                        (if (temPreco) " Seu preço não muda sozinho com o mercado." else "")
+                    seus.isNotEmpty() -> "Seus números: " + seus.joinToString(", ") + "."
+                    else -> null
+                },
+                if (padrao.isEmpty()) null
+                else "Padrão: ${juntaComE(padrao)}." + (if (seus.isEmpty()) " Toque num campo para usar os seus números." else ""),
+                kpis.preco_fisico?.takeIf { it.uf == "PA" }?.let { "Físico hoje em ${it.praca}: R$\u00A0${reais(it.valor)}/sc." }
             ).joinToString(" ")
             if (legenda.isNotBlank()) {
                 Text(text = legenda, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -1265,10 +1261,9 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse, par
             
             if (r.sinalIncerto && outroRateio != null) {
                 Text(
-                    text = "Atenção: com estes dados o resultado pode ir de ${reaisInteiros(minOf(lucro, outroRateio))} a " +
-                           "${reaisInteiros(maxOf(lucro, outroRateio))} por hectare, conforme quanto do custo variável " +
-                           "acompanha a área e quanto acompanha a produção. A CONAB publica só o total por saca, sem " +
-                           "abrir por item. Informe o seu custeio para a conta parar de depender disso.",
+                    text = "O resultado pode ir de ${reaisInteiros(minOf(lucro, outroRateio))} a " +
+                           "${reaisInteiros(maxOf(lucro, outroRateio))}/ha, conforme o rateio do custo da CONAB. " +
+                           "Informe o seu custo para fechar a conta.",
                     fontSize = 12.sp,
                     color = corAtencao(isDark),
                     modifier = Modifier.padding(top = 12.dp)
@@ -1395,14 +1390,13 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
             resposta?.sensibilidade?.let { sens ->
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "O que este número vale: a associação entre chuva e " +
-                           "produtividade nesta base não é distinguível de zero " +
-                           "(r = ${String.format("%.3f", sens.r).replace('.', ',')}; " +
-                           "p = ${String.format("%.3f", sens.p).replace('.', ',')}; " +
-                           "n = ${sens.n})." +
+                    // Os números do teste (r, p, n) estão na dissertação; aqui, a
+                    // conclusão dele, dita conforme o resultado e não fixa.
+                    text = (if (sens.p >= 0.05) "Nesta base, a chuva não mostrou efeito claro na produtividade."
+                            else "Nesta base, a chuva tem efeito pequeno na produtividade.") +
                            (resposta?.margem_kg_ha?.let {
-                               " A variação acima cabe dentro da margem de erro do " +
-                               "modelo, de ± ${it.toInt()} kg/ha."
+                               if (kotlin.math.abs(delta) <= it) " A variação acima cabe na margem de erro do modelo (± ${milhar(it)} kg/ha)."
+                               else " A variação acima passa da margem de erro do modelo (± ${milhar(it)} kg/ha)."
                            } ?: ""),
                     fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp
                 )
@@ -1616,7 +1610,7 @@ fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: Str
                     GraficoVelas(cot.velas, isDark, cot.periodo)
                     val quando = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", PT_BR)
                         .format(java.util.Date(cot.atualizado_em * 1000))
-                    Text("Cotação de $quando, com atraso de cerca de ${cot.atraso_min} min. Não é tempo real.",
+                    Text("Cotação de $quando, com cerca de ${cot.atraso_min} min de atraso.",
                          fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
                     if (cot.ultimo_usd_bushel != null && cot.cambio != null) {
                         Text("US$ ${reais(cot.ultimo_usd_bushel)}/bushel · dólar a R$ ${String.format(PT_BR, "%.4f", cot.cambio)}",
@@ -1643,8 +1637,7 @@ fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: Str
                      fontSize = 13.sp, color = secundaria)
             }
             Spacer(Modifier.height(8.dp))
-            Text("Preço de bolsa não é preço de porteira: entre Chicago e a fazenda há câmbio, " +
-                 "frete, prêmio de porto e base. Informação de mercado, não recomendação de compra ou venda.",
+            Text("Informação de mercado, não recomendação de compra ou venda.",
                  fontSize = 12.sp, color = secundaria, lineHeight = 16.sp,
                  fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
         }
@@ -1679,9 +1672,8 @@ fun PrecoEstimadoPara(para: EstimativaPara, estimado: Double, isDark: Boolean) {
         Text("Pará, estimado agora", fontSize = 12.sp, color = cor, fontWeight = FontWeight.SemiBold)
         Text("R$ ${reais(estimado)}/sc", fontSize = 22.sp, fontWeight = FontWeight.Bold,
              color = MaterialTheme.colorScheme.onSurface)
-        Text("Chicago deste momento $sinal R$ ${reais(kotlin.math.abs(para.base_brl_saca))} de base do Pará " +
-             "(${mesCurto(para.mes_base, anoCompleto = true)}). Estimativa do preço de porto no Pará, não cotação " +
-             "de praça: na fazenda o preço costuma ser menor, pelo frete.",
+        Text("Chicago agora $sinal R$ ${reais(kotlin.math.abs(para.base_brl_saca))} de base do Pará " +
+             "(${mesCurto(para.mes_base, anoCompleto = true)}). Preço de porto estimado; na fazenda costuma ser menor.",
              fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
     }
 }
@@ -1801,8 +1793,7 @@ fun GraficoMensalPara(meses: List<MesPara>, fonte: String, isDark: Boolean) {
                      size = Size(largura, kotlin.math.abs(y(m.base) - zero).coerceAtLeast(1.dp.toPx())))
         }
     }
-    Text("Base = média do Pará − média de Chicago no mês. Fonte do Pará: $fonte; " +
-         "o mês corrente entra com a média parcial. Chicago: CBOT convertida pelo dólar de cada dia.",
+    Text("Base = Pará − Chicago, médias do mês (o mês atual é parcial). Pará: $fonte.",
          fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 4.dp))
 }
 

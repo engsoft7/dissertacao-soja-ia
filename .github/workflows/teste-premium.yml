@@ -1,0 +1,162 @@
+# Teste Premium do aplicativo, sob pedido.
+#
+# - api: robustez e desempenho da API em produção (teste_api.py).
+# - aparelho: o app em emuladores Android, com a API em produção. Em cada um,
+#   o percurso do produtor com as verificações de acessibilidade do
+#   Accessibility Test Framework (PercursoNoAparelhoTest, build de depuração) e
+#   o app de release comandado por adb (teste_aparelho.py): partida a frio,
+#   memória, fluidez, fonte 200%, modo escuro, tela pequena e tablet, tela
+#   deitada, sem internet e monkey. O release é o desta branch e, para
+#   comparar, o publicado (o AAB do último Release, convertido em APK universal
+#   com o bundletool e assinado com a chave de depuração).
+# - junta: grava os relatórios em software/aplicativo_mobile/teste_premium/ na
+#   própria branch (na main não grava). As capturas ficam nos artefatos.
+#
+# Disparo: aba Actions > "Teste Premium do aplicativo" > Run workflow, ou um push
+# a uma branch de trabalho com "[premium]" na mensagem do commit.
+name: Teste Premium do aplicativo
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [main]
+    paths:
+      - "software/automacao_github/teste_api.py"
+      - "software/automacao_github/teste_aparelho.py"
+      - "software/automacao_github/teste_premium_emulador.sh"
+      - "software/aplicativo_mobile/app/src/androidTest/java/com/agrointeligencia/app/PercursoNoAparelhoTest.kt"
+      - ".github/workflows/teste-premium.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  api:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[premium]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: API em produção
+        run: |
+          pip install --quiet requests
+          python software/automacao_github/teste_api.py saida/api
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: premium-api
+          path: saida/
+
+  aparelho:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[premium]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api: 26
+            apk: branch
+          - api: 34
+            apk: branch
+          - api: 34
+            apk: publicado
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compila depuração, teste no aparelho e release
+        working-directory: software/aplicativo_mobile
+        run: ./gradlew --no-daemon assembleDebug assembleDebugAndroidTest assembleRelease
+
+      - name: Prepara o APK de release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          KS=$(find ~ -name debug.keystore | head -1)
+          echo "chave de depuração: $KS"
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          if [ "${{ matrix.apk }}" = "publicado" ]; then
+            TAG=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName -q .tagName)
+            echo "Release publicado: $TAG"
+            gh release download "$TAG" --repo "$GITHUB_REPOSITORY" -p app-release.aab -D /tmp/pub
+            curl -sSL -o /tmp/bundletool.jar \
+              https://github.com/google/bundletool/releases/download/1.17.2/bundletool-all-1.17.2.jar
+            java -jar /tmp/bundletool.jar build-apks --bundle /tmp/pub/app-release.aab \
+              --output /tmp/pub/u.apks --mode universal \
+              --ks "$KS" --ks-pass pass:android --ks-key-alias androiddebugkey --key-pass pass:android
+            unzip -o -q /tmp/pub/u.apks -d /tmp/pub
+            cp /tmp/pub/universal.apk /tmp/teste.apk
+          else
+            U=$(find software/aplicativo_mobile/app/build/outputs/apk/release -name '*.apk' | head -1)
+            "$BT/zipalign" -f -p 4 "$U" /tmp/alinhado.apk
+            "$BT/apksigner" sign --ks "$KS" --ks-pass pass:android --ks-key-alias androiddebugkey \
+              --key-pass pass:android --out /tmp/teste.apk /tmp/alinhado.apk
+          fi
+          ls -la /tmp/teste.apk
+
+      # O emulador x86_64 precisa da aceleração por hardware (KVM).
+      - name: Libera o KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Testes no emulador
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api }}
+          arch: x86_64
+          target: google_apis
+          ram-size: 4096M
+          disable-animations: true
+          emulator-boot-timeout: 900
+          script: bash software/automacao_github/teste_premium_emulador.sh saida/aparelho_api${{ matrix.api }}_${{ matrix.apk }} /tmp/teste.apk ${{ matrix.apk == 'branch' && '1' || '0' }}
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: premium-aparelho-api${{ matrix.api }}-${{ matrix.apk }}
+          path: saida/
+
+  junta:
+    needs: [api, aparelho]
+    if: always() && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[premium]'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: premium-*
+          merge-multiple: true
+          path: saida
+      - name: Grava os relatórios na branch
+        if: github.ref_name != github.event.repository.default_branch
+        run: |
+          d=software/aplicativo_mobile/teste_premium
+          mkdir -p "$d"
+          rsync -a --exclude '*.png' saida/ "$d/"
+          find "$d" -type f | sort
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$d"
+          if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
+          git commit -m "Teste Premium do aplicativo (${{ github.run_id }})"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
+            sleep $((i * 5))
+          done
+          exit 1

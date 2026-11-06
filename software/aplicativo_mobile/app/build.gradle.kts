@@ -36,8 +36,8 @@ android {
         applicationId = "com.agrointeligencia.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 27
-        versionName = "2.7.3"
+        versionCode = 28
+        versionName = "2.7.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -47,7 +47,12 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8: sem ele o APK levava 12 MB de código, quase todo do pacote de
+            // ícones estendidos, que o app usa em poucas dezenas. As regras do
+            // app ficam em proguard-rules.pro.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             if (file("../agro_playstore.jks").exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
@@ -121,6 +126,7 @@ dependencies {
     debugImplementation(platform(libs.androidx.compose.bom))
 
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.ui.test.junit4.accessibility)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

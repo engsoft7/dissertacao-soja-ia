@@ -63,7 +63,8 @@ def busca():
 
 def base_do_estado(uf, m):
     """Registros do estado no formato da base do Pará."""
-    # O estado inteiro num arquivo ou em faixas de anos (amazonia_legal_MT_2001_2007.csv...).
+    # O estado inteiro num arquivo, ou em partes: faixas de anos (amazonia_legal_MT_2001_2007.csv)
+    # e safras (amazonia_legal_MT_2008.csv...), como Mato Grosso foi coletado no modo restrito.
     partes = sorted(glob.glob(os.path.join(AQUI, 'dados', f'amazonia_legal_{uf}.csv')) +
                     glob.glob(os.path.join(AQUI, 'dados', f'amazonia_legal_{uf}_*.csv')))
     if not partes:

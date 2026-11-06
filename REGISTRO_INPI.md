@@ -218,6 +218,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.13` (25/10/2026) — contador automático de vagens no aplicativo (2.4.0) e preço estimado do Pará de volta | 123 | 23.950 | `35877615a2cd9b2e713013754bf46e32f02bedbf7979538f4f1da07824811140` |
 | Tag `v2.4.14` (25/10/2026) — tempo na lavoura no aplicativo (2.5.0): janela de pulverização, avisos do INMET e previsão de 7 dias; sedes corrigidas e só HTTPS | 129 | 25.618 | `b4201dec3536366fdd4c50275b32c5f00b0ac30f85eb01dd3fdefa4ac679e009` |
 | Tag `v2.4.15` (06/11/2026) — aplicativo 2.7.0: escolha do município pela lista ou pelo GPS, acessibilidade e fontes oficiais na tela Sobre | 156 | 29.217 | `32213e979e9cfd5a4cb0514054a0ab221e3cd121b3c670db1f1c696ce2f03323` |
+| Tag `v2.4.16` (06/11/2026) — aplicativo 2.7.1: safra em curso no Resumo, preço do Pará de hoje na Viabilidade e textos sem ambiguidade | 158 | 29.427 | `e02c8f2d77e792057ced0aedf36928d24bb5479dd80e4c07dbeabaefc42f9b69` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -657,6 +658,24 @@ arquivos e 29.217 linhas. O DOI de versão desta etiqueta é
 10.5281/zenodo.23992059, atribuído pelo Zenodo no depósito disparado pela
 publicação do Release em 06/11/2026.
 
+A `v2.4.16` foi registrada pelo workflow `registra-doi.yml` na publicação do
+Release, em 06/11/2026, com o título “v2.4.16 — Aplicativo 2.7.1: safra em curso
+no Resumo, preço do Pará de hoje na Viabilidade e textos sem ambiguidade”. Em
+relação à `v2.4.15`, entram 2 arquivos-fonte
+(`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Safra.kt`
+e
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/SafraTest.kt`);
+mudam 3 (`software/aplicativo_mobile/app/build.gradle.kts`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/MainActivity.kt`
+e
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/CapturasDeTelaTest.kt`).
+
+O resumo criptográfico da `v2.4.16` foi calculado pelo mesmo workflow sobre uma
+cópia limpa da etiqueta (commit `2e3ede6`), com o critério do comando acima: 158
+arquivos e 29.427 linhas. O DOI de versão desta etiqueta é
+10.5281/zenodo.23992350, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 06/11/2026.
+
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
 calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
@@ -903,6 +922,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.12`:** 10.5281/zenodo.23641635
 - **DOI da `v2.4.13`:** 10.5281/zenodo.23644764
 - **DOI da `v2.4.14`:** 10.5281/zenodo.23652157
-- **DOI da versão mais recente (`v2.4.15`):** 10.5281/zenodo.23992059
+- **DOI da `v2.4.15`:** 10.5281/zenodo.23992059
+- **DOI da versão mais recente (`v2.4.16`):** 10.5281/zenodo.23992350
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

@@ -54,6 +54,9 @@ jobs:
               solo) t='"solo para","solo nacional"' ;;
               amazonia) t='"amazonia TO","amazonia MA","amazonia RO","amazonia MT"' ;;
               amazonia_??) t="\"amazonia ${item#amazonia_}\"" ;;   # um estado só, ex.: amazonia_MA
+              # Um estado em faixa de anos, para os que não cabem num job (MT):
+              # amazonia_MT_2001_2007 vira "amazonia MT 2001-2007".
+              amazonia_??_????_????) t="\"amazonia ${item:9:2} ${item:12:4}-${item:17:4}\"" ;;
               recentes) t=$(seq 2016 2025 | sed 's/.*/"recentes &"/' | paste -sd, -) ;;   # um job por safra
               recentes_????) t="\"recentes ${item#recentes_}\"" ;;
               *) t="\"$item\"" ;;
@@ -91,7 +94,7 @@ jobs:
           case "$1" in
             solo) python coleta_solo.py "$2" ;;
             recentes) python coleta_recentes.py "$2" ;;
-            amazonia) python coleta_amazonia_legal.py "$2" ;;
+            amazonia) python coleta_amazonia_legal.py "$2" ${3:+--anos "$3"} ;;
             fases_nacional) python coleta_fases_nacional.py ;;
           esac
       - uses: actions/upload-artifact@v4

@@ -24,6 +24,7 @@ passam a explicar a produtividade municipal além da média do município?
 Uso:   python 06_amazonia_legal.py [TO MA RO MT]
 Saída: amazonia_legal.json
 """
+import glob
 import importlib.util
 import json
 import os
@@ -58,7 +59,13 @@ def busca():
 
 def base_do_estado(uf, m):
     """Registros do estado no formato da base do Pará."""
-    g = pd.read_csv(os.path.join(AQUI, 'dados', f'amazonia_legal_{uf}.csv'))
+    # O estado inteiro num arquivo ou em faixas de anos (amazonia_legal_MT_2001_2007.csv...).
+    partes = sorted(glob.glob(os.path.join(AQUI, 'dados', f'amazonia_legal_{uf}.csv')) +
+                    glob.glob(os.path.join(AQUI, 'dados', f'amazonia_legal_{uf}_*.csv')))
+    if not partes:
+        raise FileNotFoundError(f'nenhum arquivo de {uf} em dados/')
+    g = (pd.concat([pd.read_csv(f) for f in partes], ignore_index=True)
+         .drop_duplicates(['municipio_gaul', 'ano'], keep='last'))
     pam = pd.read_csv(os.path.join(PESQUISA, '03_analise_nacional', 'pam_soja_municipios.csv'))
     pam = pam[(pam.uf == uf) & (pam.area_plantada_ha > 0) & (pam.rendimento_kg_ha > 0)].copy()
     pam['k'] = pam.nome.str.replace(r'\s+-\s+[A-Z]{2}$', '', regex=True).map(chave)

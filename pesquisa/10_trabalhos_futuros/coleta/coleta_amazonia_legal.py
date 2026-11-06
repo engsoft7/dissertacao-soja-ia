@@ -17,7 +17,8 @@ reproduz a da base da dissertação; muda só o estado. A produtividade vem da
 PAM, em 03_analise_nacional/pam_soja_municipios.csv, e é juntada na análise.
 
 Uso:   python coleta_amazonia_legal.py TO [--anos 2001-2025]
-       (no Actions, "[coleta: amazonia_MT]" na mensagem do commit refaz um estado só)
+       (no Actions, "[coleta: amazonia_MT]" na mensagem do commit refaz um estado só;
+       "[coleta: amazonia_MT_2001_2007]", só uma faixa de anos, em arquivo próprio)
 Saída: ../dados/amazonia_legal_<UF>.csv
 """
 import argparse
@@ -82,7 +83,10 @@ def main():
             todas += linhas
             print(f'  {a.uf} {t}: {len(linhas)} municípios com soja mapeada', flush=True)
     os.makedirs(DADOS, exist_ok=True)
-    saida = os.path.join(DADOS, f'amazonia_legal_{a.uf}.csv')
+    # Faixa de anos (estado que não cabe num job do Actions, como MT) vai num
+    # arquivo próprio; 06_amazonia_legal.py junta as partes.
+    sufixo = '' if a.anos == '2001-2025' else f'_{a0}_{a1}'
+    saida = os.path.join(DADOS, f'amazonia_legal_{a.uf}{sufixo}.csv')
     pd.DataFrame(todas).sort_values(['municipio_gaul', 'ano']).to_csv(saida, index=False)
     print(f'{len(todas)} registros gravados em {saida}', flush=True)
 

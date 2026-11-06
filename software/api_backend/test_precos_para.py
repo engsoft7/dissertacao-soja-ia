@@ -164,3 +164,16 @@ def test_le_a_tabela_quando_o_json_nao_vem():
 
 def test_pagina_sem_cotacao_de_soja_nao_inventa_praca():
     assert pp.le_pracas("<html><body>Cotações</body></html>") == []
+
+
+def test_sem_a_pagina_do_estado_junta_as_paginas_das_pracas(monkeypatch):
+    pp._cache.pop("pracas", None)
+    paginas = {
+        pp.URL_PRACAS: [],
+        pp.URLS_RESERVA[0]: [{"praca": "Barcarena", "uf": "PA", "valor": 148.5, "data": "2026-11-05"}],
+        pp.URLS_RESERVA[1]: [{"praca": "Redenção", "uf": "PA", "valor": 148.5, "data": "2026-11-05"}],
+        pp.URLS_RESERVA[2]: [],
+    }
+    monkeypatch.setattr(pp, "_baixa_pracas", lambda url: paginas[url])
+    assert [c["praca"] for c in pp.pracas_do_para()] == ["Redenção", "Barcarena"]
+    pp._cache.pop("pracas", None)

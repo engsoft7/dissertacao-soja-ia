@@ -62,6 +62,11 @@ import kotlinx.coroutines.withContext
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.foundation.lazy.rememberLazyListState
+import kotlinx.coroutines.flow.first
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
@@ -231,6 +236,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * A resposta só serve com o histórico. O Gson não passa pelo construtor: sem o
+ * campo no JSON (cache de outra versão, resposta cortada), um tipo não nulo
+ * chega nulo, e o app caía na primeira tela que o lia.
+ */
+@Suppress("SENSELESS_COMPARISON")
+internal fun PrevisaoResponse.valida(): PrevisaoResponse? =
+    if (historico == null || municipio == null) null else this
+
 /** Amarelo de atenção com contraste de texto acima de 4,5:1 nos dois temas. */
 fun corAtencao(isDark: Boolean) = if (isDark) Color(0xFFd29922) else Color(0xFF9a6700)
 
@@ -325,12 +339,26 @@ fun AgroDashboard() {
     var mostrarLista by rememberSaveable { mutableStateOf(false) }
     // Aumenta a cada "atualizar" e refaz a busca da previsão do município.
     var recarga by remember { mutableStateOf(0) }
-    // Preço estimado do Pará agora, para a Viabilidade oferecer em um toque.
-    // Sem cache: um preço de mercado guardado envelhece, e aí é melhor não oferecer.
+    // Mercado de hoje (praças do Pará e estimativa), um só para o app inteiro:
+    // a Viabilidade, o Histórico e a Estimativa no campo usam o mesmo preço que
+    // a tela Mercado mostra, e a tela Mercado o atualiza a cada minuto.
     var mercadoHoje by remember { mutableStateOf<MercadoResponse?>(null) }
+    // Puxar a tela para baixo: true até a previsão e a lista voltarem.
+    var atualizando by remember { mutableStateOf(false) }
+    var sincronizandoPrevisao by remember { mutableStateOf(false) }
     LaunchedEffect(recarga) {
+        // Sem rede, as praças guardadas ainda servem (cada uma tem a data, e as
+        // de mais de uma semana são ignoradas); a estimativa guardada, não, porque
+        // "estimado agora" deixaria de ser verdade.
+        if (mercadoHoje == null) {
+            mercadoHoje = sharedPrefs.getString("mercado_1d", null)
+                ?.let { runCatching { gson.fromJson(it, MercadoResponse::class.java) }.getOrNull() }
+                ?.copy(para = null)
+        }
         try {
-            mercadoHoje = RetrofitClient.getInstance().getMercado("1d")
+            val m = RetrofitClient.getInstance().getMercado("1d")
+            mercadoHoje = m
+            sharedPrefs.edit().putString("mercado_1d", gson.toJson(m)).apply()
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (_: Exception) {
@@ -387,10 +415,14 @@ fun AgroDashboard() {
         // Primeiro o que está guardado, para a tela abrir na hora.
         val cachedMunStr = sharedPrefs.getString("municipios", null)
         val cachedKpiStr = sharedPrefs.getString("kpis", null)
-        if (cachedMunStr != null && cachedKpiStr != null) {
-            municipios = gson.fromJson(cachedMunStr, MunicipioResponse::class.java).municipios
+        // Lido com runCatching: um cache gravado por outra versão, ou cortado,
+        // derrubava o app na abertura; agora só é ignorado.
+        val munGuardados = cachedMunStr?.let { runCatching { gson.fromJson(it, MunicipioResponse::class.java)?.municipios }.getOrNull() }
+        val kpisGuardados = cachedKpiStr?.let { runCatching { gson.fromJson(it, FinancaResponse::class.java) }.getOrNull() }
+        if (!munGuardados.isNullOrEmpty() && kpisGuardados != null) {
+            municipios = munGuardados
             selectedMunicipio = municipioGuardadoValido(municipios, selectedMunicipio)
-            kpis = gson.fromJson(cachedKpiStr, FinancaResponse::class.java)
+            kpis = kpisGuardados
         } else {
             carregandoLista = true
         }
@@ -412,7 +444,7 @@ fun AgroDashboard() {
                 errorMsg = null
             } catch (e: Exception) {
                 e.printStackTrace()
-                if (cachedMunStr == null) {
+                if (municipios.isEmpty()) {
                     errorMsg = "Erro na API: ${e.message}"
                 }
             } finally {
@@ -425,9 +457,9 @@ fun AgroDashboard() {
         loadData()
     }
 
-    // A Estimativa no campo e o Tempo não têm item na barra de baixo; o voltar
-    // do celular leva de volta ao Resumo, de onde eles são abertos.
-    BackHandler(enabled = currentTab == 5 || currentTab == 6) { currentTab = 0 }
+    // O voltar do celular leva ao Resumo, e só do Resumo sai do app: antes, no
+    // Mercado ou no Histórico, o voltar fechava o app de uma vez.
+    BackHandler(enabled = currentTab != 0) { currentTab = 0 }
 
     // A previsão do município corre dentro do efeito, e não num escopo de fora:
     // trocar de município cancela a busca anterior. Antes as duas corriam
@@ -437,16 +469,20 @@ fun AgroDashboard() {
         val mun = selectedMunicipio
         if (mun == null) {
             previsao = null
+            sincronizandoPrevisao = false
             return@LaunchedEffect
         }
+        sincronizandoPrevisao = true
         val guardada = sharedPrefs.getString("previsao_$mun", null)
             ?.let { runCatching { gson.fromJson(it, PrevisaoResponse::class.java) }.getOrNull() }
+            ?.valida()
         previsao = guardada
         previsaoEm = if (guardada != null) sharedPrefs.getLong("previsao_${mun}_em", 0L) else 0L
         // O "carregando" só aparece quando não há nada guardado do município.
         carregandoPrevisao = guardada == null
         try {
-            val resposta = RetrofitClient.getInstance().getPrevisao(mun)
+            val resposta = RetrofitClient.getInstance().getPrevisao(mun).valida()
+                ?: throw IllegalStateException("resposta sem histórico")
             previsao = resposta
             previsaoEm = System.currentTimeMillis()
             sharedPrefs.edit()
@@ -455,6 +491,7 @@ fun AgroDashboard() {
                 .apply()
             isOfflineMode = false
             carregandoPrevisao = false
+            sincronizandoPrevisao = false
         } catch (e: kotlinx.coroutines.CancellationException) {
             // Trocou de município: o efeito novo cuida do indicador.
             throw e
@@ -462,8 +499,38 @@ fun AgroDashboard() {
             e.printStackTrace()
             isOfflineMode = true
             carregandoPrevisao = false
+            sincronizandoPrevisao = false
         }
     }
+
+    // Atualiza tudo o que a tela mostra: lista, previsão, mercado e tempo. O
+    // indicador some quando a lista e a previsão voltam (ou em 60 s).
+    fun atualizarTudo() {
+        if (atualizando) return
+        atualizando = true
+        loadData()
+        recarga++
+        lugarTempo?.let { l -> coroutineScope.launch { tempo.carrega(l, forcar = true) } }
+        coroutineScope.launch {
+            kotlinx.coroutines.delay(300)
+            kotlinx.coroutines.withTimeoutOrNull(60_000) {
+                snapshotFlow { carregandoLista || sincronizandoPrevisao }.first { !it }
+            }
+            atualizando = false
+        }
+    }
+
+    // Um preço padrão para o app inteiro: a cotação do dia na praça do Pará mais
+    // perto do município (Agrolink) e, sem ela, o levantamento da CONAB. Antes a
+    // Viabilidade, o Histórico e a Estimativa no campo podiam usar preços
+    // diferentes para a mesma lavoura.
+    val pracaHoje = pracaParaUsar(selectedMunicipio, mercadoHoje?.pracas_para.orEmpty())
+    val precoPadraoAtual: Double? = pracaHoje?.valor ?: kpis?.soja_preco_saca
+
+    // Cada aba abre do começo: antes, quem rolava o Histórico e ia ao Mercado
+    // caía no meio da tela.
+    val lista = rememberLazyListState()
+    LaunchedEffect(currentTab) { lista.scrollToItem(0) }
 
     if (mostrarLista) {
         EscolhaMunicipioDialog(
@@ -525,8 +592,14 @@ fun AgroDashboard() {
         }
     ) { paddingValues ->
         val isDark = isSystemInDarkTheme()
+        PullToRefreshBox(
+            isRefreshing = atualizando,
+            onRefresh = { atualizarTudo() },
+            modifier = Modifier.fillMaxSize().padding(paddingValues)
+        ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            state = lista,
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             userScrollEnabled = currentTab != 1
@@ -545,13 +618,14 @@ fun AgroDashboard() {
                             modifier = Modifier.weight(1f).semantics { heading() }
                         )
                         if (currentTab in 0..2 && selectedMunicipio != null) {
-                            IconButton(onClick = { loadData(); recarga++ }, enabled = !isLoading) {
+                            IconButton(onClick = { atualizarTudo() }, enabled = !isLoading && !atualizando) {
                                 Icon(Icons.Filled.Refresh, contentDescription = "Atualizar os dados")
                             }
                         }
                     }
 
-                    if (isOfflineMode) {
+                    // O aviso fala dos dados do município: só nas abas que os mostram.
+                    if (isOfflineMode && currentTab in 0..2) {
                         val cor = corAtencao(isDark)
                         val quando = previsaoEm.takeIf { it > 0 }?.let {
                             java.text.SimpleDateFormat("dd/MM 'às' HH:mm", PT_BR).format(java.util.Date(it))
@@ -602,16 +676,20 @@ fun AgroDashboard() {
                 currentTab == 4 -> item {
                     // A cotação não depende da previsão do município: a aba abre
                     // mesmo quando a previsão ainda não carregou ou falhou.
-                    MercadoCard()
+                    MercadoCard(recarga) { mercadoHoje = it }
                 }
                 currentTab == 5 -> item {
                     // Como o Mercado, não depende da previsão: a contagem no campo
                     // funciona sem rede. A previsão, se houver, entra para comparação.
                     val projecao = prev?.historico?.let { projecaoDaSafra(it) }
+                    val precoDoProdutor = sharedPrefs.valorDoProdutor(PREF_PRECO)
                     EstimativaCampoTela(
-                        precoPadrao = sharedPrefs.valorDoProdutor(PREF_PRECO) ?: kpis?.soja_preco_saca,
-                        fontePreco = if (sharedPrefs.valorDoProdutor(PREF_PRECO) != null) "Seu preço, informado na Viabilidade."
-                                     else kpis?.fonte_preco?.let { "Preço de referência: $it." },
+                        precoPadrao = precoDoProdutor ?: precoPadraoAtual,
+                        fontePreco = when {
+                            precoDoProdutor != null -> "Seu preço, informado na Viabilidade."
+                            pracaHoje != null -> "Cotação de ${pracaHoje.praca} em ${dataCurta(pracaHoje.data)} (Agrolink)."
+                            else -> kpis?.fonte_preco?.let { "Preço de referência: $it." }
+                        },
                         referenciaKgHa = projecao?.rendimento_predito,
                         rotuloReferencia = projecao?.let { "${prev?.municipio ?: selectedMunicipio} em ${it.ano}" },
                         aoVoltar = { currentTab = 0 }
@@ -753,12 +831,13 @@ fun AgroDashboard() {
                             HistoricoProdutividadeChart(historico = historicoOrdenado, previsao = prev)
                         }
                         items(historicoOrdenado) { hist ->
-                            PrevisaoCard(hist, kpis)
+                            PrevisaoCard(hist, kpis, precoPadraoAtual)
                         }
                     }
                 }
             }
         }
+        } // PullToRefreshBox
     }
 }
 
@@ -786,7 +865,7 @@ fun AtalhoEstimativaCampo(aoAbrir: () -> Unit) {
 }
 
 @Composable
-fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
+fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?, precoPadrao: Double? = null) {
     val isDark = isSystemInDarkTheme()
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
@@ -857,7 +936,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
             if (kpis != null && (observado || historico.rendimento_predito > 0)) {
                 val kgHa = if (observado) historico.rendimento_real else historico.rendimento_predito
                 val r = resultadoPorHectare(
-                    kgHa / 60, precoDoProdutor ?: kpis.soja_preco_saca, custoDoProdutor, kpis)
+                    kgHa / 60, precoDoProdutor ?: precoPadrao ?: kpis.soja_preco_saca, custoDoProdutor, kpis)
                 val outro = r.outroRateio
                 // Sinal incerto não leva verde nem vermelho: o dado publicado
                 // não sustenta nenhum dos dois, e a cor é o que o produtor lê
@@ -962,6 +1041,9 @@ fun ResumoFinanceiroCard(
     val praca = remember(pracas, municipio) { pracaParaUsar(municipio, pracas) }
     val precoHoje: Double? = praca?.valor ?: paraHoje?.estimado_brl_saca
     val rotuloHoje: String = praca?.let { "${it.praca}, ${dataCurta(it.data)}" } ?: "Pará, estimado agora"
+    // O padrão do preço é a cotação do dia na praça (a mesma do Histórico e da
+    // Estimativa no campo); o levantamento da CONAB, só quando não há praça em dia.
+    val precoPadrao: Double = praca?.valor ?: kpis.soja_preco_saca
     val isDark = isSystemInDarkTheme()
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
@@ -999,8 +1081,10 @@ fun ResumoFinanceiroCard(
     // custo são dinheiro e param em centavos; produtividade, em décimos de
     // saca. Sem isto o campo exibia a representação binária inteira — foi
     // assim que 135,15 apareceu ao produtor como 135.14999389648438.
-    var customPreco by remember {
-        mutableStateOf(String.format(PT_BR, "%.2f", precoSalvo ?: kpis.soja_preco_saca))
+    // Com a chave, o campo passa ao preço da praça quando ele chega da rede
+    // (o do produtor, se houver, continua valendo).
+    var customPreco by remember(precoPadrao) {
+        mutableStateOf(String.format(PT_BR, "%.2f", prefs.valorDoProdutor(PREF_PRECO) ?: precoPadrao))
     }
     var customCusto by remember {
         mutableStateOf(String.format(PT_BR, "%.2f", custoSalvo ?: kpis.custo_ha))
@@ -1018,7 +1102,7 @@ fun ResumoFinanceiroCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            val preco = customPreco.replace(',', '.').toDoubleOrNull() ?: kpis.soja_preco_saca
+            val preco = customPreco.replace(',', '.').toDoubleOrNull() ?: precoPadrao
             val custo = customCusto.replace(',', '.').toDoubleOrNull() ?: kpis.custo_ha
             val scHa = customProd.replace(',', '.').toDoubleOrNull() ?: prodModelo
             val diasDoPrecoProprio =
@@ -1040,11 +1124,14 @@ fun ResumoFinanceiroCard(
                 // Com preço próprio, o custo é que continua vindo do
                 // levantamento — a menos que o produtor já tenha informado o
                 // dele também, e aí não há o que avisar.
-                temPreco && !temCusto -> kpis.aviso_custo
-                // Com o número de hoje ao lado, o produtor vê o tamanho da
-                // defasagem em vez de só ler que ela existe.
-                // Curto: a idade do padrão e, ao lado, o preço de hoje. O texto
-                // longo do servidor fica só quando ele não manda a idade.
+                // Preço em dia (do produtor ou da praça): o que envelhece é o
+                // custo do levantamento, a menos que o produtor informe o dele.
+                (temPreco || praca != null) && !temCusto -> kpis.defasagem_meses?.let { m ->
+                    if (m >= 5) "Custo padrão da CONAB de $m meses atrás: informe o seu para a conta ficar certa." else null
+                } ?: kpis.aviso_custo
+                temPreco || praca != null -> null
+                // Preço padrão da CONAB: a idade dele e, ao lado, o preço de hoje.
+                // O texto longo do servidor fica só quando ele não manda a idade.
                 else -> {
                     val meses = kpis.defasagem_meses
                     val hoje = precoHoje?.let { " $rotuloHoje: R$\u00A0${reais(it)}/sc." } ?: ""
@@ -1146,7 +1233,7 @@ fun ResumoFinanceiroCard(
             // CONAB, que pode ter meses, e o produtor não tinha como trazer o
             // mercado para a conta sem ir à tela Mercado e copiar o número.
             precoHoje?.let { pa ->
-                val usandoEste = temPreco && kotlin.math.abs(preco - pa) < 0.005
+                val usandoEste = kotlin.math.abs(preco - pa) < 0.005
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
@@ -1196,9 +1283,10 @@ fun ResumoFinanceiroCard(
             // ainda é padrão. A nota sobre a série de preços da CONAB fica no
             // Sobre; o físico de outro estado, no Mercado.
             val conab = kpis.fonte_preco?.removePrefix("CONAB, ")
-            val daConab = listOfNotNull(if (temPreco) null else "preço", if (temCusto) null else "custo")
+            val daConab = listOfNotNull(if (temPreco || praca != null) null else "preço", if (temCusto) null else "custo")
             val padrao = listOfNotNull(
                 if (temProd) null else "produtividade do modelo",
+                if (!temPreco && praca != null) "preço de ${praca.praca} em ${dataCurta(praca.data)} (Agrolink)" else null,
                 if (daConab.isNotEmpty() && conab != null) juntaComE(daConab) + " da CONAB ($conab)" else null
             )
             val legenda = listOfNotNull(
@@ -1223,7 +1311,7 @@ fun ResumoFinanceiroCard(
                         prefs.esquecerDoProdutor(PREF_PRECO, PREF_CUSTO, PREF_PROD)
                         temPreco = false; temCusto = false; temProd = false
                         precoEm = 0L; custoEm = 0L; prodEm = 0L
-                        customPreco = String.format(PT_BR, "%.2f", kpis.soja_preco_saca)
+                        customPreco = String.format(PT_BR, "%.2f", precoPadrao)
                         customCusto = String.format(PT_BR, "%.2f", kpis.custo_ha)
                         customProd = String.format(PT_BR, "%.1f", prodModelo)
                     },
@@ -1544,28 +1632,56 @@ private val PERIODOS_MERCADO = listOf("1d" to "1D", "5d" to "5D", "1mo" to "1M",
 // "1D" lido em voz alta não diz nada; o leitor de tela lê o período por extenso.
 private val PERIODOS_POR_EXTENSO = mapOf("1d" to "1 dia", "5d" to "5 dias", "1mo" to "1 mês", "6mo" to "6 meses")
 
-/** Busca a cotação e entrega à tela; a tela em si é MercadoConteudo. */
+/**
+ * Busca a cotação e entrega à tela; a tela em si é MercadoConteudo.
+ *
+ * Abre na hora com a última cotação guardada de cada período (a data dela fica
+ * na tela) e troca pela nova quando chega. Cada período tem a sua: trocar de
+ * 1D para 6M mostrava, até a resposta chegar, as velas do 1D com o 6M marcado.
+ * Atualiza a cada minuto só com o app aberto na frente.
+ */
 @Composable
-fun MercadoCard() {
-    var periodo by remember { mutableStateOf("1d") }
-    var mercado by remember { mutableStateOf<MercadoResponse?>(null) }
+fun MercadoCard(recarga: Int = 0, aoReceber: (MercadoResponse) -> Unit = {}) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
+    val gson = remember { Gson() }
+    var periodo by rememberSaveable { mutableStateOf("1d") }
+    val porPeriodo = remember { mutableStateMapOf<String, MercadoResponse>() }
     var carregando by remember { mutableStateOf(true) }
+    var falhou by remember { mutableStateOf(false) }
+    val receber by rememberUpdatedState(aoReceber)
+    val ciclo = (context as? ComponentActivity)?.lifecycle
 
-    // Atualiza a cada minuto enquanto a tela está aberta. A API guarda a
-    // cotação por dois minutos, então isto não pressiona a fonte.
-    LaunchedEffect(periodo) {
-        carregando = true
-        while (true) {
-            try {
-                mercado = RetrofitClient.getInstance().getMercado(periodo)
-            } catch (_: Exception) {
-                // mantém a última leitura; a hora dela continua visível
-            }
-            carregando = false
-            kotlinx.coroutines.delay(60_000)
+    LaunchedEffect(periodo, recarga) {
+        if (porPeriodo[periodo] == null) {
+            prefs.getString("mercado_$periodo", null)
+                ?.let { runCatching { gson.fromJson(it, MercadoResponse::class.java) }.getOrNull() }
+                ?.let { porPeriodo[periodo] = it }
         }
+        carregando = true
+        suspend fun atualizaSempre() {
+            while (true) {
+                try {
+                    val m = RetrofitClient.getInstance().getMercado(periodo)
+                    porPeriodo[periodo] = m
+                    falhou = false
+                    receber(m)
+                    prefs.edit().putString("mercado_$periodo", gson.toJson(m)).apply()
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    // mantém a última leitura; a hora dela continua visível
+                    falhou = true
+                }
+                carregando = false
+                // A API guarda a cotação por dois minutos: isto não pressiona a fonte.
+                kotlinx.coroutines.delay(60_000)
+            }
+        }
+        if (ciclo != null) ciclo.repeatOnLifecycle(Lifecycle.State.STARTED) { atualizaSempre() }
+        else atualizaSempre()
     }
-    MercadoConteudo(mercado, carregando, periodo) { periodo = it }
+    MercadoConteudo(porPeriodo[periodo], carregando, periodo, falhou) { periodo = it }
 }
 
 /**
@@ -1573,7 +1689,13 @@ fun MercadoCard() {
  * para poder ser desenhada nas capturas de tela automáticas.
  */
 @Composable
-fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: String, aoMudarPeriodo: (String) -> Unit) {
+fun MercadoConteudo(
+    mercado: MercadoResponse?,
+    carregando: Boolean,
+    periodo: String,
+    falhou: Boolean = false,
+    aoMudarPeriodo: (String) -> Unit
+) {
     val isDark = isSystemInDarkTheme()
     val secundaria = MaterialTheme.colorScheme.onSurfaceVariant
     Card(
@@ -1585,6 +1707,13 @@ fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: Str
         Column(modifier = Modifier.padding(16.dp)) {
             // O preço do Pará primeiro: é o que o produtor daqui recebe; Chicago
             // vem depois, como o mercado que move esse preço.
+            // Sem conexão, a tela mostra a última leitura; a data dela está em
+            // cada número, e esta linha diz por que não mudou.
+            if (falhou && mercado != null) {
+                Text("Sem conexão: mostrando a última cotação baixada.", fontSize = 12.sp,
+                     color = corAtencao(isDark), fontWeight = FontWeight.SemiBold,
+                     modifier = Modifier.padding(bottom = 8.dp).semantics { liveRegion = LiveRegionMode.Polite })
+            }
             mercado?.pracas_para?.takeIf { it.isNotEmpty() }?.let { pracas ->
                 CotacoesPracasPara(pracas)
                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)

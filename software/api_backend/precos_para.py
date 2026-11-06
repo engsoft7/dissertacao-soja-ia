@@ -198,7 +198,14 @@ def serie_mensal() -> list[dict]:
 # Desde a página nova (out/2026), a Agrolink publica em texto a cotação diária
 # de cada praça, e a página regional de qualquer cidade do Pará lista as praças
 # do estado. Antes o valor diário vinha em imagem, e só a média mensal era lida.
+# Em nov/2026 a Agrolink publica soja em três praças do Pará: Barcarena,
+# Redenção e Paragominas. As páginas de cidades sem praça própria (Parauapebas,
+# Dom Eliseu, Santana do Araguaia, Ulianópolis) listam as três; as das praças,
+# só a sua; a de Marabá não tem soja. Lê-se a de Parauapebas e, se ela falhar,
+# as das praças, uma a uma.
 URL_PRACAS = "https://www.agrolink.com.br/regional/pa/parauapebas/cotacoes"
+URLS_RESERVA = [f"https://www.agrolink.com.br/regional/pa/{c}/cotacoes"
+                for c in ("barcarena", "redencao", "paragominas")]
 FONTE_PRACAS = "Agrolink, cotação diária por praça"
 VALIDADE_PRACAS_S = 2 * 3600
 _LINHA_SOJA = re.compile(
@@ -244,6 +251,16 @@ def le_pracas(html: str) -> list[dict]:
     return sorted(ultimas.values(), key=lambda c: (c["data"], c["praca"]), reverse=True)
 
 
+def _baixa_pracas(url: str) -> list[dict]:
+    try:
+        r = requests.get(url, headers=UA, timeout=15)
+        r.raise_for_status()
+        return le_pracas(r.text)
+    except Exception as e:  # rede, formato, limite de requisições
+        print(f"[precos_para] {url}: {type(e).__name__}: {e}", flush=True)
+        return []
+
+
 def pracas_do_para() -> list[dict]:
     """Cotações diárias das praças do Pará, com cache de duas horas.
 
@@ -254,13 +271,13 @@ def pracas_do_para() -> list[dict]:
         guardado = _cache.get("pracas")
         if guardado and time.time() - guardado[0] < VALIDADE_PRACAS_S:
             return guardado[1]
-    try:
-        r = requests.get(URL_PRACAS, headers=UA, timeout=15)
-        r.raise_for_status()
-        pracas = le_pracas(r.text)
-    except Exception as e:  # rede, formato, limite de requisições
-        print(f"[precos_para] praças do Pará indisponíveis: {type(e).__name__}: {e}", flush=True)
-        pracas = []
+    pracas = _baixa_pracas(URL_PRACAS)
+    if not pracas:
+        juntas = {}
+        for url in URLS_RESERVA:
+            for c in _baixa_pracas(url):
+                juntas[c["praca"]] = c
+        pracas = sorted(juntas.values(), key=lambda c: (c["data"], c["praca"]), reverse=True)
     if not pracas:
         return guardado[1] if guardado else []
     with _trava:

@@ -14,7 +14,7 @@ tabelas completas estão nas pastas ao lado, e as capturas de tela na branch
 | Páginas de 16 KB (Android 15) | conforme | conforme |
 | Privacidade e segurança | backup copiava fotos e valores para o Google Drive; permissão sem uso; links do mapa presos no app | corrigidos; política de privacidade atualizada |
 | API: robustez | nenhuma entrada estranha virou erro 500; nada refletido em HTML; HTTP vai para HTTPS | idem, e CORS sem credenciais |
-| API: desempenho | 30 aberturas simultâneas: p95 de 29,6 s | histórico guardado por município (12 ms por resposta) |
+| API: desempenho | 30 aberturas simultâneas: p95 de 29,6 s | p95 de 0,97 s, já em produção |
 | App: tamanho e memória | R8 desligado: 12 MB de código sem enxugar | R8 ligado: APK 28% menor, 35 a 40% menos memória |
 | App: percurso, sem internet, monkey | tudo passa; com sinal fraco, o aviso de sem conexão levava até 1 min | tudo passa; aviso na hora |
 | App: fonte do sistema em 200% | rótulos das abas quebrados, textos encavalados no Resumo e no Mercado | corrigidos |
@@ -71,9 +71,10 @@ Todas vêm comprimidas pelo Cloudflare do Render.
   mapa não devolve o HTML que vem na URL.
 - **Simultâneas**: 30 aberturas de /api/previsao ao mesmo tempo, sem erro, mas
   com p50 de 25,4 s e p95 de 29,6 s. Cada chamada refazia dezenas de
-  estimativas e o servidor atende uma por vez. Na 2.7.4 o histórico fica
-  guardado por município e é preparado na partida do servidor; as respostas
-  são as mesmas nos 38 municípios, e a chamada repetida leva 12 ms.
+  estimativas e o servidor atende uma por vez. O histórico passou a ficar
+  guardado por município, preparado na partida do servidor, com as mesmas
+  respostas nos 38 municípios. Em produção, depois do merge do PR #181: as 30
+  aberturas simultâneas sem erro e com p95 de 970 ms.
 - Pontos menores, que ficam como estão: /api/financas de município inexistente
   responde 200 (o custo é o mesmo levantamento para todos), e /api/avisos com
   latitude 999 responde 200 sem avisos.

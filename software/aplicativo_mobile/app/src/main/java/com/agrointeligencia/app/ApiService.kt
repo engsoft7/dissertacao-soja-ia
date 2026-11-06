@@ -137,7 +137,9 @@ data class KpiEconomiaResponse(
 data class SimulacaoRequest(
     val municipio: String,
     val precip_factor: Double,
-    val temp_offset: Double
+    val temp_offset: Double,
+    // A safra do cenário: a mesma do Resumo (a API aceita as três projetadas).
+    val ano: Int? = null
 )
 
 data class Sensibilidade(

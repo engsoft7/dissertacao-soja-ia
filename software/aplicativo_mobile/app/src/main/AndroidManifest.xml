@@ -3,7 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!-- Estimativa no campo: área do talhão marcando os cantos com o GPS,
          só com a tela aberta. Tempo na lavoura: a posição, se o produtor
          pedir, para a previsão no lugar dele (sai arredondada a ~1 km). A
@@ -16,9 +15,12 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
     <!-- Só HTTPS: a API, o Open-Meteo e as bibliotecas que o mapa carrega
-         são todos https, e o tráfego sem criptografia fica proibido. -->
+         são todos https, e o tráfego sem criptografia fica proibido.
+         Sem backup: a política de privacidade diz que fotos, marcações e
+         valores ficam só no celular, e o backup automático do Android os
+         copiava para o Google Drive do usuário e para o celular novo. -->
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"

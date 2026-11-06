@@ -45,7 +45,7 @@ jobs:
           target: google_apis
           disable-animations: true
           working-directory: software/aplicativo_mobile
-          script: ./gradlew --no-daemon connectedDebugAndroidTest
+          script: ./gradlew --no-daemon connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.agrointeligencia.app.ContadorVagensAparelhoTest
 
       - name: Guarda o relatório
         if: always()

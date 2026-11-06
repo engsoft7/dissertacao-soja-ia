@@ -39,14 +39,6 @@ fun projecaoDaSafra(historico: List<PrevisaoHistorico>, hoje: LocalDate = LocalD
     return projecoes(historico).minWithOrNull(compareBy({ abs(it.ano - alvo) }, { -it.ano }))
 }
 
-/**
- * A projeção do ano seguinte ao último divulgado. É o ano que o simulador
- * climático da API usa como base (ano_alvo em /api/simulacao); o cartão do
- * simulador parte dela para o número inicial bater com o que a API devolve.
- */
-fun projecaoDoSimulador(historico: List<PrevisaoHistorico>): PrevisaoHistorico? =
-    projecoes(historico).minByOrNull { it.ano }
-
 /** O que dizer de uma safra sem dado do IBGE: ainda por colher, ou colhida e não divulgada. */
 fun situacaoSemDado(ano: Int, hoje: LocalDate = LocalDate.now()): String =
     if (ano >= anoDaSafraEmCurso(hoje)) "a colher" else "IBGE ainda não divulgou"

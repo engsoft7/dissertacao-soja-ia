@@ -1,0 +1,16 @@
+--------- beginning of main
+--------- beginning of system
+--------- beginning of crash
+11-06 20:40:43.408  4590  4607 I PERCURSO: 2s	abriu	boas-vindas
+11-06 20:40:44.990  4590  4607 I PERCURSO: 3s	lista	chegou da API
+11-06 20:40:45.891  4590  4607 I PERCURSO: 4s	resumo	safra 2027 carregada
+11-06 20:40:45.913  4590  4607 I PERCURSO: 4s	ok	Resumo mostra a última safra do IBGE, 2025
+11-06 20:41:50.051  4590  4607 I PERCURSO: 68s	FALHA	ComposeTimeoutException: Condition still not satisfied after 60000 ms
+11-06 20:41:50.241  4590  4607 I PERCURSO: a11y	01_boas_vindas	sem achados
+11-06 20:41:50.241  4590  4607 I PERCURSO: a11y	02_lista	sem achados
+11-06 20:41:50.241  4590  4607 I PERCURSO: a11y	03_resumo	sem achados
+11-06 20:41:50.241  4590  4607 I PERCURSO: a11y	04_resumo_1	sem achados
+11-06 20:41:50.241  4590  4607 I PERCURSO: a11y	04_resumo_2	sem achados
+11-06 20:41:50.241  4590  4607 I PERCURSO: a11y	04_resumo_3	sem achados
+11-06 20:41:50.241  4590  4607 I PERCURSO: a11y	04_resumo_4	sem achados
+11-06 20:41:50.241  4590  4607 I PERCURSO: a11y	99_falha	sem achados

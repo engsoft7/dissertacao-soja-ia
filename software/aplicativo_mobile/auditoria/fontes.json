@@ -1,6 +1,6 @@
 {
- "em": "06/11/2026 14:59",
- "api": "http://127.0.0.1:8000",
+ "em": "06/11/2026 15:25",
+ "api": "https://agrointeligencia-api.onrender.com",
  "conferencias": [
   {
    "grupo": "Municípios",
@@ -54,25 +54,25 @@
    "grupo": "Chicago (CBOT)",
    "item": "R$/saca",
    "situacao": "ok",
-   "app": "R$ 143.96",
-   "fonte": "R$ 143.94",
-   "nota": "diferença +0.01% (as duas leituras têm minutos de distância)"
+   "app": "R$ 143.69",
+   "fonte": "R$ 143.77",
+   "nota": "diferença -0.05% (as duas leituras têm minutos de distância)"
   },
   {
    "grupo": "Chicago (CBOT)",
    "item": "conversão da própria API",
    "situacao": "ok",
-   "app": "R$ 143.96",
-   "fonte": "R$ 143.96",
+   "app": "R$ 143.69",
+   "fonte": "R$ 143.69",
    "nota": "US$/bushel × 2,2046 bushels/saca × câmbio"
   },
   {
    "grupo": "Média do Pará estimada",
    "item": "Chicago + base",
    "situacao": "ok",
-   "app": "R$ 144.02",
-   "fonte": "R$ 144.02",
-   "nota": "base de 2026-11: R$ +0.06"
+   "app": "R$ 143.83",
+   "fonte": "R$ 143.83",
+   "nota": "base de 2026-11: R$ +0.14"
   },
   {
    "grupo": "Custo e preço (CONAB)",

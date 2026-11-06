@@ -135,18 +135,21 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
                 val sign = if (diff >= 0) "+" else ""
                 
                 Spacer(modifier = Modifier.height(16.dp))
+                // Cada coluna com metade da largura: com a fonte do sistema em
+                // 200%, "Safra 2025, IBGE" e "Em relação a 2025" se encostavam.
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Column {
+                    Column(Modifier.weight(1f)) {
                         Text(text = "Safra ${ultimoReal.ano}, $typeStr", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(text = "${milhar(pastYield)} kg/ha", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     }
-                    Column(horizontalAlignment = Alignment.End) {
+                    Column(Modifier.weight(1f), horizontalAlignment = Alignment.End) {
                         // Entre a safra esperada e a última divulgada pode haver
                         // mais de um ano: "variação anual" dizia outra coisa.
-                        Text(text = "Em relação a ${ultimoReal.ano}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = "Em relação a ${ultimoReal.ano}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                             textAlign = androidx.compose.ui.text.style.TextAlign.End)
                         Text(text = "$sign${diffPct.roundToInt()}%", fontSize = 16.sp, color = color, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -175,7 +178,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
         coroutineScope.launch {
             isSimulating = true
             try {
-                val req = SimulacaoRequest(municipio, precipFactor / 100.0, tempOffset.toDouble())
+                val req = SimulacaoRequest(municipio, precipFactor / 100.0, tempOffset.toDouble(), ano)
                 val resp = RetrofitClient.getInstance().simularCenario(req)
                 simulado = resp.estimativa_kg_ha
                 delta = resp.delta_kg_ha
@@ -200,8 +203,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                // O simulador da API parte da safra seguinte à última divulgada,
-                // que pode não ser a do Resumo: o ano fica escrito.
+                // A mesma safra do Resumo, que vai também para a API.
                 Text(text = "Projeção com o cenário" + (ano?.let { ", safra $it" } ?: ""),
                      fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (isSimulating) {

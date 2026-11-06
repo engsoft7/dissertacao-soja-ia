@@ -1033,7 +1033,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse, par
                 // defasagem em vez de só ler que ela existe.
                 else -> kpis.aviso_preco?.let { aviso ->
                     "Preço possivelmente desatualizado. $aviso" +
-                        (paraHoje?.estimado_brl_saca?.let { " Hoje o Pará está em R$ ${reais(it)}/sc (estimado, preço de porto)." } ?: "")
+                        (paraHoje?.estimado_brl_saca?.let { " Hoje o Pará está em R$\u00A0${reais(it)}/sc (estimado, preço de porto)." } ?: "")
                 }
             }
             alerta?.let {
@@ -1265,8 +1265,10 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse, par
             
             if (r.sinalIncerto && outroRateio != null) {
                 Text(
-                    text = String.format(PT_BR, "Atenção: com estes dados o resultado pode ir de R$ %,d a R$ %,d por hectare, conforme quanto do custo variável acompanha a área e quanto acompanha a produção. A CONAB publica só o total por saca, sem abrir por item. Informe o seu custeio para a conta parar de depender disso.", 
-                        minOf(lucro, outroRateio).toInt(), maxOf(lucro, outroRateio).toInt()),
+                    text = "Atenção: com estes dados o resultado pode ir de ${reaisInteiros(minOf(lucro, outroRateio))} a " +
+                           "${reaisInteiros(maxOf(lucro, outroRateio))} por hectare, conforme quanto do custo variável " +
+                           "acompanha a área e quanto acompanha a produção. A CONAB publica só o total por saca, sem " +
+                           "abrir por item. Informe o seu custeio para a conta parar de depender disso.",
                     fontSize = 12.sp,
                     color = corAtencao(isDark),
                     modifier = Modifier.padding(top = 12.dp)
@@ -1522,9 +1524,13 @@ fun milhar(v: Double): String = String.format(PT_BR, "%,d", v.roundToInt())
 
 fun reais(v: Double): String = String.format(PT_BR, "%,.2f", v)
 
-/** Reais sem centavos, com o sinal antes do símbolo: "−R$ 86", e não "R$ -86". */
+/**
+ * Reais sem centavos, com o sinal antes do símbolo: "−R$ 86", e não "R$ -86".
+ * O espaço depois de "R$" não quebra: numa frase longa, o símbolo ficava no fim
+ * de uma linha e o número no começo da outra.
+ */
 fun reaisInteiros(v: Double): String =
-    (if (v.roundToInt() < 0) "−" else "") + "R$ " + milhar(kotlin.math.abs(v))
+    (if (v.roundToInt() < 0) "−" else "") + "R$\u00A0" + milhar(kotlin.math.abs(v))
 
 // Períodos da tela Mercado: chave da API e rótulo do botão.
 private val PERIODOS_MERCADO = listOf("1d" to "1D", "5d" to "5D", "1mo" to "1M", "6mo" to "6M")

@@ -47,9 +47,9 @@ class SafraTest {
 
     @Test
     fun reaisComSinalAntesDoSimbolo() {
-        assertEquals("−R$ 86", reaisInteiros(-86.4))
-        assertEquals("R$ 5.811", reaisInteiros(5811.2))
-        assertEquals("R$ 0", reaisInteiros(-0.3))
+        assertEquals("−R$\u00A086", reaisInteiros(-86.4))
+        assertEquals("R$\u00A05.811", reaisInteiros(5811.2))
+        assertEquals("R$\u00A00", reaisInteiros(-0.3))
     }
 
     @Test

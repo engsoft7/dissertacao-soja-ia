@@ -112,6 +112,22 @@ def espera(texto: str, s: int = 60, **kw) -> dict | None:
     return None
 
 
+def espera_rolando(texto: str, rolagens: int = 8, **kw) -> dict | None:
+    """Procura o texto descendo a tela; volta ao topo no fim.
+
+    A árvore do uiautomator só traz o que está na tela, e numa tela pequena ou
+    com fonte grande o que se procura pode estar mais abaixo.
+    """
+    achado = None
+    for i in range(rolagens + 1):
+        achado = acha(texto, **kw)
+        if achado or i == rolagens:
+            break
+        rola(1)
+    rola(rolagens, para_cima=True)
+    return achado
+
+
 def toca_no(n: dict) -> None:
     sh(f"input tap {(n['x1'] + n['x2']) // 2} {(n['y1'] + n['y2']) // 2}")
     time.sleep(1.2)
@@ -237,7 +253,7 @@ def main() -> int:
     resumo = espera("(safra ", 150)
     m["dados_do_municipio_s"] = round(time.time() - t0, 1)
     verifica("Resumo carrega a safra em curso", resumo is not None, resumo["texto"] if resumo else "")
-    verifica("Resumo mostra a última safra do IBGE, 2025", espera("Safra 2025, IBGE", 10) is not None)
+    verifica("Resumo mostra a última safra do IBGE, 2025", espera_rolando("Safra 2025, IBGE") is not None)
     tela("r03_resumo")
     m["memoria_resumo_kb"] = memoria_kb()
 
@@ -280,7 +296,8 @@ def main() -> int:
     # 3. Fonte em 200%.
     sh("settings put system font_scale 2.0")
     abre_frio()
-    verifica("fonte 200%: Resumo abre", espera("(safra ", 60) is not None)
+    espera("AgroInteligência", 60)
+    verifica("fonte 200%: Resumo abre", espera_rolando("(safra ", 10) is not None)
     tela("r11_fonte_200")
     rola(2)
     tela("r12_fonte_200_rolado")
@@ -305,7 +322,8 @@ def main() -> int:
         sh(f"wm size {tamanho}; wm density {dens}")
         time.sleep(2)
         abre_frio()
-        verifica(f"tela {nome}: Resumo abre", espera("(safra ", 60) is not None)
+        espera("AgroInteligência", 60)
+        verifica(f"tela {nome}: Resumo abre", espera_rolando("(safra ", 6) is not None)
         w0, h0, d0 = m["largura_px"], m["altura_px"], m["densidade_dpi"]
         m["largura_px"], m["altura_px"] = map(int, tamanho.split("x"))
         m["densidade_dpi"] = dens
@@ -318,7 +336,8 @@ def main() -> int:
     sh("settings put system accelerometer_rotation 0; settings put system user_rotation 1")
     time.sleep(2)
     abre_frio()
-    verifica("tela deitada: Resumo abre", espera("(safra ", 60) is not None)
+    espera("AgroInteligência", 60)
+    verifica("tela deitada: Resumo abre", espera_rolando("(safra ", 10) is not None)
     captura("r17_deitada")
     sh("settings put system user_rotation 0")
     time.sleep(2)

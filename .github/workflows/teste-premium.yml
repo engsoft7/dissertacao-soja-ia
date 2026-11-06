@@ -10,7 +10,9 @@
 #   comparar, o publicado (o AAB do último Release, convertido em APK universal
 #   com o bundletool e assinado com a chave de depuração).
 # - junta: grava os relatórios em software/aplicativo_mobile/teste_premium/ na
-#   própria branch (na main não grava). As capturas ficam nos artefatos.
+#   própria branch (na main não grava) e as capturas na branch
+#   teste-premium-capturas, sobrescrita a cada execução, como a
+#   capturas-de-tela do capturas.yml.
 #
 # Disparo: aba Actions > "Teste Premium do aplicativo" > Run workflow, ou um push
 # a uma branch de trabalho com "[premium]" na mensagem do commit.
@@ -121,6 +123,10 @@ jobs:
           api-level: ${{ matrix.api }}
           arch: x86_64
           target: google_apis
+          # Sem perfil, o emulador sai com 320 x 640 dp, menor que quase todo
+          # celular à venda; o Pixel 6 tem 411 x 914 dp. Tela pequena e tablet
+          # são testadas à parte, com wm size.
+          profile: pixel_6
           ram-size: 4096M
           disable-animations: true
           emulator-boot-timeout: 900
@@ -143,6 +149,34 @@ jobs:
           pattern: premium-*
           merge-multiple: true
           path: saida
+      - name: Publica as capturas na branch teste-premium-capturas
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          destino="$RUNNER_TEMP/capturas"
+          mkdir -p "$destino"
+          rsync -a --include '*/' --include '*.png' --exclude '*' --prune-empty-dirs saida/ "$destino/"
+          cd "$destino"
+          n=$(find . -name '*.png' | wc -l)
+          echo "$n capturas"
+          [ "$n" -gt 0 ] || exit 0
+          {
+            echo "# Capturas do Teste Premium"
+            echo
+            echo "teste-premium.yml em \`${GITHUB_REF_NAME}\` (\`${GITHUB_SHA::7}\`), $(date -u +%d/%m/%Y)."
+            echo
+            for d in $(find . -name '*.png' -printf '%h\n' | sort -u); do
+              echo "## ${d#./}"; echo
+              for f in $(ls "$d"/*.png | sort); do echo "![$(basename "$f" .png)](${f#./})"; done
+              echo
+            done
+          } > README.md
+          git init -q -b teste-premium-capturas
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add . && git commit -q -m "Capturas do Teste Premium (${{ github.run_id }})"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" teste-premium-capturas
+
       - name: Grava os relatórios na branch
         if: github.ref_name != github.event.repository.default_branch
         run: |

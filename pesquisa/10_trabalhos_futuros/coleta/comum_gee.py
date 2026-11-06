@@ -15,7 +15,24 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(AQUI, '..', '..', '..'))
 DADOS = os.path.join(AQUI, '..', 'dados')
 sys.path.insert(0, os.path.join(REPO, 'software', 'automacao_github'))
-from coleta_gee_safra import COLL_ID, CLASSE_SOJA, conecta_gee  # noqa: E402,F401
+from coleta_gee_safra import COLL_ID, CLASSE_SOJA  # noqa: E402,F401
+from coleta_gee_safra import conecta_gee as _conecta_gee_produto  # noqa: E402
+
+# Prazo de cada chamada ao Earth Engine. Sem ele, uma chamada pode ficar
+# pendurada indefinidamente: em 06/11/2026 a nova tentativa da safra 2023
+# esperou mais de 5 h por uma resposta, até o GitHub cancelar o job. Com o
+# prazo, a chamada falha, e reduz_em_lotes cai para um município por vez ou
+# para uma escala mais grossa, como já fazia com os outros erros.
+PRAZO_MS = 15 * 60 * 1000
+
+
+def conecta_gee():
+    ee = _conecta_gee_produto()
+    try:
+        ee.data.setDeadline(PRAZO_MS)
+    except AttributeError:  # versão da biblioteca sem prazo configurável
+        print('aviso: earthengine-api sem setDeadline; chamadas sem prazo', flush=True)
+    return ee
 
 # Nome do estado no GAUL 2015 (ADM1_NAME, sem acento ou com, conforme o GAUL) -> sigla
 UFS = {'para': 'PA', 'tocantins': 'TO', 'maranhao': 'MA', 'rondonia': 'RO', 'mato grosso': 'MT',

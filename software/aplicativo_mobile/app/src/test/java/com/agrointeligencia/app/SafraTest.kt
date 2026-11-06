@@ -31,8 +31,7 @@ class SafraTest {
     }
 
     @Test
-    fun simuladorPartiDoAnoSeguinteAoUltimoDivulgado() {
-        assertEquals(2026, projecaoDoSimulador(historico)?.ano)
+    fun ultimoDivulgadoESemProjecaoSemDadoFuturo() {
         assertEquals(2025, ultimoObservado(historico)?.ano)
         assertNull(projecaoDaSafra(historico.filter { it.rendimento_real > 0 }))
     }

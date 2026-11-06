@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import java.net.URLEncoder
 import android.annotation.SuppressLint
 import android.webkit.WebView
@@ -253,18 +254,29 @@ fun CotacoesPracasPara(pracas: List<PracaPara>, hoje: java.time.LocalDate = java
     Text("Agrolink, por praça. Na fazenda o preço pode ser menor, pelo frete.",
          fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
     Spacer(Modifier.height(6.dp))
+    // Com a fonte do sistema grande, a data desce para baixo do preço: na mesma
+    // linha, o nome da praça ficava com uma letra de largura.
+    val fonteGrande = LocalDensity.current.fontScale > 1.3f
     pracas.forEach { p ->
         val emDia = cotacaoEmDia(p, hoje)
+        val data = if (emDia) dataCurta(p.data) else "parada desde ${dataCurta(p.data)}"
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp).semantics(mergeDescendants = true) {}
         ) {
             Text(p.praca, fontSize = 15.sp, modifier = Modifier.weight(1f),
                  color = if (emDia) MaterialTheme.colorScheme.onSurface else secundaria)
-            Text("R$ ${reais(p.valor)}", fontSize = 16.sp, fontWeight = FontWeight.Bold,
-                 color = if (emDia) MaterialTheme.colorScheme.onSurface else secundaria)
-            Text(if (emDia) "  ${dataCurta(p.data)}" else "  parada desde ${dataCurta(p.data)}",
-                 fontSize = 12.sp, color = secundaria)
+            if (fonteGrande) {
+                Column(horizontalAlignment = Alignment.End) {
+                    Text("R$ ${reais(p.valor)}", fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                         color = if (emDia) MaterialTheme.colorScheme.onSurface else secundaria)
+                    Text(data, fontSize = 12.sp, color = secundaria)
+                }
+            } else {
+                Text("R$ ${reais(p.valor)}", fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                     color = if (emDia) MaterialTheme.colorScheme.onSurface else secundaria)
+                Text("  $data", fontSize = 12.sp, color = secundaria)
+            }
         }
     }
 }

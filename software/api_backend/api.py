@@ -603,6 +603,9 @@ class SimulacaoRequest(BaseModel):
     municipio: str
     precip_factor: float
     temp_offset: float
+    # A safra do cenário. O app manda a safra em curso, a mesma do Resumo; sem
+    # ela (versões antigas), vale a seguinte à última publicada.
+    ano: int | None = None
 
 @lru_cache(maxsize=1)
 def _sensibilidade_clima():
@@ -617,7 +620,9 @@ def simular_cenario(req: SimulacaoRequest):
     if AppState.df is None:
         raise HTTPException(status_code=503, detail="Modelo não carregado")
     
-    ano_alvo = int(AppState.last_year) + 1
+    # As safras que a API projeta: as três seguintes à última publicada.
+    ultimo = historico_oficial.ultima_safra_publicada(AppState.last_year, AppState.pam or {})
+    ano_alvo = req.ano if req.ano is not None and ultimo < req.ano <= ultimo + 3 else ultimo + 1
     raw_municipio = REVERSE_FORMATADOS.get(req.municipio, req.municipio)
     
     hist = AppState.df[AppState.df.municipio == raw_municipio]
@@ -663,6 +668,7 @@ def simular_cenario(req: SimulacaoRequest):
     
     return {
         "municipio": req.municipio,
+        "ano": ano_alvo,
         "baseline_kg_ha": est_base,
         "estimativa_kg_ha": est_sim,
         "fora_da_faixa": fora_da_faixa,

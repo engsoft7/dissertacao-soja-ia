@@ -54,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
@@ -139,6 +140,18 @@ class MainActivity : ComponentActivity() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Rótulo da barra de abas, numa linha só e com a fonte crescendo no máximo
+ * 1,15 vez. Com a fonte do sistema em 200%, "Histórico" quebrava em "Histór" e
+ * "ico"; o ícone de cada aba continua ao lado do rótulo.
+ */
+@Composable
+fun RotuloAba(texto: String) {
+    val escala = LocalDensity.current.fontScale
+    Text(texto, fontSize = (12f * minOf(escala, 1.15f) / escala).sp, maxLines = 1, softWrap = false,
+         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+}
+
 /** O celular tem agora alguma rede com Internet? Sem resposta do sistema, supõe que sim. */
 fun temRede(context: Context): Boolean {
     val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
@@ -402,32 +415,32 @@ fun AgroDashboard() {
                     selected = currentTab == 0,
                     onClick = { irPara(0) },
                     icon = { Icon(Icons.Filled.Home, contentDescription = null) },
-                    label = { Text("Resumo") }
+                    label = { RotuloAba("Resumo") }
                 )
                 NavigationBarItem(
                     selected = currentTab == 1,
                     onClick = { irPara(1) },
                     icon = { Icon(Icons.Filled.LocationOn, contentDescription = null) },
-                    label = { Text("Mapa") }
+                    label = { RotuloAba("Mapa") }
                 )
                 @Suppress("DEPRECATION")
                 NavigationBarItem(
                     selected = currentTab == 2,
                     onClick = { irPara(2) },
                     icon = { Icon(Icons.Filled.List, contentDescription = null) },
-                    label = { Text("Histórico") }
+                    label = { RotuloAba("Histórico") }
                 )
                 NavigationBarItem(
                     selected = currentTab == 4,
                     onClick = { irPara(4) },
                     icon = { Icon(Icons.Filled.CandlestickChart, contentDescription = null) },
-                    label = { Text("Mercado") }
+                    label = { RotuloAba("Mercado") }
                 )
                 NavigationBarItem(
                     selected = currentTab == 3,
                     onClick = { irPara(3) },
                     icon = { Icon(Icons.Filled.Info, contentDescription = null) },
-                    label = { Text("Sobre") }
+                    label = { RotuloAba("Sobre") }
                 )
             }
         }
@@ -646,7 +659,6 @@ fun AgroDashboard() {
                     // A safra em curso, e não a projeção mais distante (Safra.kt).
                     val projecao = projecaoDaSafra(prev.historico)
                     val ultimoReal = ultimoObservado(prev.historico)
-                    val baseSimulador = projecaoDoSimulador(prev.historico) ?: projecao
 
                     if (currentTab == 0) { // Resumo
                         item {
@@ -670,9 +682,12 @@ fun AgroDashboard() {
                             item {
                                 TituloSecao(Icons.Filled.SettingsSuggest, "Simulador de cenário climático",
                                             Modifier.padding(top = 8.dp))
+                                // A safra em curso, a mesma do Resumo: antes o simulador
+                                // partia da seguinte à última divulgada (2026 com o Resumo
+                                // em 2027) e mostrava outro número para "a safra".
                                 CenarioClimaticoCard(municipio = selectedMunicipio ?: prev.municipio,
-                                                     baselineRendimento = (baseSimulador ?: projecao).rendimento_predito,
-                                                     ano = (baseSimulador ?: projecao).ano)
+                                                     baselineRendimento = projecao.rendimento_predito,
+                                                     ano = projecao.ano)
                             }
                         }
                     } else if (currentTab == 2) { // Histórico

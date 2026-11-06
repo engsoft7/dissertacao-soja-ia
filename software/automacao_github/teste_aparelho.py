@@ -358,14 +358,20 @@ def main() -> int:
         time.sleep(2)
 
     # 6. Tela deitada.
-    sh("settings put system accelerometer_rotation 0; settings put system user_rotation 1")
-    time.sleep(2)
+    # O Android 12+ deixa de obedecer só ao user_rotation: cmd window também.
+    sh("settings put system accelerometer_rotation 0; settings put system user_rotation 1; "
+       "cmd window user-rotation lock 1 2>/dev/null")
+    time.sleep(3)
     abre_frio()
+    w0, h0 = m["largura_px"], m["altura_px"]
+    m["largura_px"], m["altura_px"] = max(w0, h0), min(w0, h0)  # a rolagem usa as medidas da tela
     espera("AgroInteligência", 60)
     verifica("tela deitada: Resumo abre", espera_rolando("(safra ", 10) is not None)
     captura("r17_deitada")
-    sh("settings put system user_rotation 0")
-    time.sleep(2)
+    m["largura_px"], m["altura_px"] = w0, h0
+    sh("settings put system user_rotation 0; cmd window user-rotation lock 0 2>/dev/null; "
+       "cmd window user-rotation free 2>/dev/null")
+    time.sleep(3)
 
     # 7. Sem internet.
     if not verifica("o emulador ficou sem internet", rede(False)):

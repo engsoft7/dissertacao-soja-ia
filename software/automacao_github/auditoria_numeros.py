@@ -136,7 +136,8 @@ def confere_pam(respostas, sede):
             if gg == g and ano >= 2001 and ano not in anos_app and v > 0:
                 divergentes.append(f"{m} {ano}: IBGE {v:.0f}, ausente no app")
     registra("Produtividade (IBGE)", f"{conferidos} safras município a município",
-             "ok" if not divergentes else "divergente", nota=f"{len(divergentes)}: " + "; ".join(divergentes))
+             "ok" if not divergentes else "divergente",
+             nota=f"{len(divergentes)}: " + "; ".join(divergentes) if divergentes else "")
 
 
 # ── Agrolink ─────────────────────────────────────────────────────────────────

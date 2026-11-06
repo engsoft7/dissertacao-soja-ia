@@ -1,8 +1,10 @@
 # Auditoria do aplicativo 2.7.3: 16 KB e números
 
-Rodada em 06/11/2026 (auditoria-app.yml, run 42263602506), sobre a API em
-produção e o AAB/APK da v2.4.18. Tabelas completas em `fontes.md` (API × fontes)
-e `telas.csv` (o que cada tela mostra, município a município).
+Primeira rodada em 06/11/2026 (auditoria-app.yml, run 42263602506), sobre a
+API em produção e o AAB/APK da v2.4.18. A segunda rodada, no fim deste
+relatório, confere a correção; as tabelas completas desta pasta, `fontes.md`
+(API × fontes) e `telas.csv` (o que cada tela mostra, município a município),
+são dela.
 
 ## Páginas de 16 KB (Android 15 e a Play Store): conforme
 
@@ -58,5 +60,21 @@ não à última safra da base.
 As lacunas que continuam no histórico são safras que o IBGE também não publicou
 (Goianésia do Pará de 2018 a 2023, por exemplo).
 
-Para conferir antes do merge: aba Actions > "Auditoria do aplicativo" > Run
-workflow com "API da branch" marcado, ou `[auditoria-branch]` no commit.
+## Segunda rodada, com a correção (API da branch)
+
+Run 42266503173, mesmo dia, com a API desta branch rodando no job. Os arquivos
+`fontes.md`, `fontes.json`, `telas.csv` e `telas_falhas.txt` desta pasta são
+desta rodada.
+
+| Grupo | Resultado |
+|---|---|
+| Produtividade (IBGE) | as 521 safras do app iguais ao SIDRA; nenhuma safra publicada ausente |
+| Telas × telas | nenhuma divergência nos 38 municípios; todos na safra 2027 |
+| Pau D'Arco | safra 2027, 3.227 kg/ha; última do IBGE 2025, 3.700 kg/ha |
+| São João do Araguaia | safra 2027; última do IBGE 2023 (o IBGE não publicou 2024 nem 2025) |
+| Praças, Chicago, CONAB, INMET | iguais às fontes, como na primeira rodada |
+
+A API em produção só recebe a correção com o merge na main. Para conferir de
+novo: aba Actions > "Auditoria do aplicativo" > Run workflow (com "API da
+branch" marcado antes do merge), ou `[auditoria]` / `[auditoria-branch]` no
+commit.

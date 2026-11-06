@@ -6,7 +6,7 @@ API conferida: http://127.0.0.1:8000
 |---|---|---|---|---|---|
 | Municípios | lista da API × sedes do app | ok | 38 | 38 |  |
 | API | respostas dos 38 municípios | ok |  |  |  |
-| Produtividade (IBGE) | 521 safras município a município | ok |  |  | 0:  |
+| Produtividade (IBGE) | 521 safras município a município | ok |  |  |  |
 | Praças do Pará (Agrolink) | Barcarena | ok | R$ 149.50 em 2026-11-06 | R$ 149.50 em 2026-11-06 |  |
 | Praças do Pará (Agrolink) | Paragominas | ok | R$ 133.12 em 2026-10-05 | R$ 133.12 em 2026-10-05 |  |
 | Praças do Pará (Agrolink) | Redenção | ok | R$ 149.50 em 2026-11-06 | R$ 149.50 em 2026-11-06 |  |

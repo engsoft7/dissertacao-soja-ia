@@ -17,7 +17,7 @@
   },
   {
    "item": "Resumo mostra a última safra do IBGE, 2025",
-   "ok": false,
+   "ok": true,
    "detalhe": ""
   },
   {
@@ -42,7 +42,7 @@
   },
   {
    "item": "fonte 200%: Resumo abre",
-   "ok": false,
+   "ok": true,
    "detalhe": ""
   },
   {
@@ -57,7 +57,12 @@
   },
   {
    "item": "tela deitada: Resumo abre",
-   "ok": false,
+   "ok": true,
+   "detalhe": ""
+  },
+  {
+   "item": "o emulador ficou sem internet",
+   "ok": true,
    "detalhe": ""
   },
   {
@@ -81,6 +86,11 @@
    "detalhe": ""
   },
   {
+   "item": "a internet do emulador voltou",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
    "item": "monkey: sem falhas nem ANR",
    "ok": true,
    "detalhe": "3000 eventos, 0 falhas, 0 ANR"
@@ -100,8 +110,12 @@
    "sem_rotulo": []
   },
   "r04_resumo_1": {
-   "alvos_pequenos": [],
-   "sem_rotulo": []
+   "alvos_pequenos": [
+    "View (379×3 dp)"
+   ],
+   "sem_rotulo": [
+    "View em (42,128)"
+   ]
   },
   "r04_resumo_2": {
    "alvos_pequenos": [],
@@ -118,7 +132,7 @@
   "r05_mapa": {
    "alvos_pequenos": [],
    "sem_rotulo": [
-    "WebView em (17,177)"
+    "WebView em (45,530)"
    ]
   },
   "r06_historico": {
@@ -131,13 +145,15 @@
   },
   "r08_sobre": {
    "alvos_pequenos": [
-    "View (248×42 dp)",
-    "View (248×46 dp)"
+    "View (339×44 dp)",
+    "View (339×46 dp)"
    ],
    "sem_rotulo": []
   },
   "r09_estimativa_no_campo": {
-   "alvos_pequenos": [],
+   "alvos_pequenos": [
+    "View (347×31 dp)"
+   ],
    "sem_rotulo": []
   },
   "r10_tempo": {
@@ -169,9 +185,7 @@
    "sem_rotulo": []
   },
   "r16_tela_tablet": {
-   "alvos_pequenos": [
-    "5277,12 (360×11 dp)"
-   ],
+   "alvos_pequenos": [],
    "sem_rotulo": []
   },
   "r18_sem_internet": {
@@ -186,30 +200,30 @@
  "medidas": {
   "api_level": 34,
   "aparelho": "sdk_gphone64_x86_64",
-  "largura_px": 320,
-  "altura_px": 640,
-  "densidade_dpi": 160,
+  "largura_px": 1080,
+  "altura_px": 2400,
+  "densidade_dpi": 420,
   "apk_mb": 38.6,
-  "partida_fria_primeira_ms": 2576,
-  "partida_fria_sem_municipio_ms": 1278.0,
-  "dados_do_municipio_s": 6.5,
-  "memoria_resumo_kb": 57522,
+  "partida_fria_primeira_ms": 1219,
+  "partida_fria_sem_municipio_ms": 837.5,
+  "dados_do_municipio_s": 5.2,
+  "memoria_resumo_kb": 61876,
   "rolagem_resumo": {
-   "quadros": 422.0,
-   "lentos_pct": 10.66,
-   "p50_ms": 16.0,
-   "p90_ms": 25.0,
+   "quadros": 221.0,
+   "lentos_pct": 75.57,
+   "p50_ms": 57.0,
+   "p90_ms": 85.0,
    "p99_ms": 117.0
   },
   "rolagem_historico": {
-   "quadros": 590.0,
-   "lentos_pct": 5.93,
-   "p50_ms": 16.0,
-   "p90_ms": 16.0,
-   "p99_ms": 26.0
+   "quadros": 166.0,
+   "lentos_pct": 75.3,
+   "p50_ms": 57.0,
+   "p90_ms": 89.0,
+   "p99_ms": 117.0
   },
-  "memoria_depois_das_abas_kb": 100952,
-  "partida_fria_com_municipio_ms": 686,
+  "memoria_depois_das_abas_kb": 108605,
+  "partida_fria_com_municipio_ms": 729,
   "monkey": {
    "eventos": 3000,
    "falhas": 0,

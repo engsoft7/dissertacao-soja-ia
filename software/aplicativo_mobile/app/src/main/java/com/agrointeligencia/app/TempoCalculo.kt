@@ -186,7 +186,8 @@ fun balancoChuva(lista: List<DiaTempo>, hoje: LocalDate): BalancoChuva {
 /** Descrição do código de tempo da OMM, como a documentação do Open-Meteo o define. */
 fun descricaoTempo(codigo: Int?): String = when (codigo) {
     0 -> "Céu limpo"
-    1 -> "Predomínio de sol"
+    // "Predomínio de sol" aparecia de noite, ao lado do ícone da lua.
+    1 -> "Poucas nuvens"
     2 -> "Parcialmente nublado"
     3 -> "Nublado"
     45, 48 -> "Nevoeiro"

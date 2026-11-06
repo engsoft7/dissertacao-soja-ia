@@ -171,4 +171,16 @@ class ResultadoPorHectareTest {
         assertEquals(4000.0 / 105.09, pontoDeEquilibrio(105.09, 4000.0, kpisComItens())!!, 1e-6)
         assertNull(pontoDeEquilibrio(0.0, null, kpisComItens()))
     }
+
+    @Test
+    fun historicoUsaAsSacasDoCampoDaViabilidade() {
+        // 3.297 kg/ha: a Viabilidade mostra 55,0 sc e conta com 55,0; o cartão
+        // do ano contava com 54,95 e dava R$ 7/ha a menos para a mesma safra.
+        assertEquals(55.0, sacasDoCampo(3297 / 60.0), 0.0)
+        assertEquals(54.9, sacasDoCampo(54.94), 0.0)
+        assertEquals(50.0, sacasDoCampo(3000 / 60.0), 0.0)
+        val campo = resultadoPorHectare(55.0, 148.5, null, kpisComItens())
+        val cartao = resultadoPorHectare(sacasDoCampo(3297 / 60.0), 148.5, null, kpisComItens())
+        assertEquals(campo.valor, cartao.valor, 0.0)
+    }
 }

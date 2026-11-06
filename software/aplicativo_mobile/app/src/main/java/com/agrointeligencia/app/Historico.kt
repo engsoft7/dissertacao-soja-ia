@@ -146,7 +146,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?, precoPadr
             if (kpis != null && (observado || historico.rendimento_predito > 0)) {
                 val kgHa = if (observado) historico.rendimento_real else historico.rendimento_predito
                 val r = resultadoPorHectare(
-                    kgHa / 60, precoDoProdutor ?: precoPadrao ?: kpis.soja_preco_saca, custoDoProdutor, kpis)
+                    sacasDoCampo(kgHa / 60), precoDoProdutor ?: precoPadrao ?: kpis.soja_preco_saca, custoDoProdutor, kpis)
                 val outro = r.outroRateio
                 // Sinal incerto não leva verde nem vermelho: o dado publicado
                 // não sustenta nenhum dos dois, e a cor é o que o produtor lê

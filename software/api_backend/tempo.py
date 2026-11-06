@@ -125,7 +125,7 @@ def balanco_chuva(d: dict, hoje: date) -> dict:
             "dias_passados": len(passados), "chuva_prevista": soma(chuva, adiante), "dias_previstos": len(adiante)}
 
 
-DESCRICAO = {0: "Céu limpo", 1: "Predomínio de sol", 2: "Parcialmente nublado", 3: "Nublado", 45: "Nevoeiro",
+DESCRICAO = {0: "Céu limpo", 1: "Poucas nuvens", 2: "Parcialmente nublado", 3: "Nublado", 45: "Nevoeiro",
              48: "Nevoeiro", 51: "Garoa fraca", 53: "Garoa", 55: "Garoa forte", 56: "Garoa congelante",
              57: "Garoa congelante", 61: "Chuva fraca", 63: "Chuva moderada", 65: "Chuva forte",
              66: "Chuva congelante", 67: "Chuva congelante", 71: "Neve", 73: "Neve", 75: "Neve", 77: "Neve",

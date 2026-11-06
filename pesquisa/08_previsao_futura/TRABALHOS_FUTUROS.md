@@ -124,36 +124,47 @@ grande, e os sensores novos não o trazem. O MLP quase repete a referência nos
 quatro braços (ganho de 0,000 a +0,004): prevê resíduo perto de zero. O
 TROPOMI (fluorescência) não está no catálogo do Earth Engine e ficou fora.
 
-**Feito em 06/11/2026, Amazônia Legal em três estados**
+**Feito em 06/11/2026, Amazônia Legal em quatro estados**
 (`10_trabalhos_futuros/06_amazonia_legal.py`, rodado no Actions): as onze
 variáveis da base do Pará, coletadas da mesma forma em cada estado, com a
 produtividade da PAM, no protocolo da Tabela 6 sem mudança, safras 2001 a 2024.
 Ganho sobre a referência, IC95 por reamostragem de safras e p de Holm entre os
-quatro modelos do estado:
+quatro modelos do estado. A repetição é a fração dos pares de safras
+sucessivas de um mesmo município em que a produtividade da PAM se repete, nos
+registros da análise (no Pará, os 40,1% da dissertação):
 
-| Estado | Registros (municípios) | Referência (kg/ha) | Melhor modelo | Ganho (IC95) | p de Holm |
-|---|---|---|---|---|---|
-| Maranhão | 1.043 (80) | 439,8 | Random Forest | +0,158 (+0,028 a +0,236) | 0,024 |
-| | | | SVR | +0,151 (+0,075 a +0,200) | < 0,001 |
-| Rondônia | 485 (41) | 323,5 | SVR | +0,077 (+0,016 a +0,134) | 0,036 |
-| Tocantins | 1.639 (108) | 342,1 | XGBoost | +0,113 (−0,013 a +0,216) | 0,14 |
+| Estado | Registros (municípios) | Repetição | Referência (kg/ha) | Melhor modelo | Ganho (IC95) | p de Holm |
+|---|---|---|---|---|---|---|
+| Pará | 415 (38) | 40,1% | 416 | SVR (Tabela 6) | ≈ 0 | — |
+| Maranhão | 1.043 (80) | 9,5% | 439,8 | Random Forest | +0,158 (+0,028 a +0,236) | 0,024 |
+| | | | | SVR | +0,151 (+0,075 a +0,200) | < 0,001 |
+| Mato Grosso | 2.290 (116) | 12,1% | 305,4 | Random Forest | +0,119 (+0,045 a +0,178) | 0,004 |
+| Tocantins | 1.639 (108) | 21,0% | 342,1 | XGBoost | +0,113 (−0,013 a +0,216) | 0,14 |
+| Rondônia | 485 (41) | 35,3% | 323,5 | SVR | +0,077 (+0,016 a +0,134) | 0,036 |
+| Os cinco juntos | 5.872 (383) | 17,9% | 353,3 | XGBoost | +0,100 (+0,030 a +0,163) | < 0,001 |
 
-No Maranhão, o Random Forest e o SVR superam a referência com folga, e o
-XGBoost e o MLP (+0,113 e +0,172) ficam perto disso (p de Holm 0,064). Em
-Rondônia, só o SVR. Em Tocantins, os quatro modelos ganham de 0,09 a 0,11,
-mas nenhum passa na correção (o SVR fica em 0,098). É a primeira vez, no
-protocolo da Tabela 6, que o clima e a vegetação medidos por satélite explicam
-a produtividade municipal além da média do município. No Pará, com 415
-registros, o melhor ganho fica perto de zero. O Maranhão tem duas vezes e meia
-esse número de registros e um ganho grande. Já Tocantins tem quatro
-vezes mais registros e um ganho menor. Logo, o número de registros sozinho
-não explica a diferença. Falta separar o que vem do tamanho da base e o que
-vem de quanto a produtividade de cada estado varia de ano para ano além da
-tendência.
+Em Mato Grosso os quatro modelos superam a referência (ganhos de +0,093 a
++0,119, p de Holm de 0,004 a 0,013); no Maranhão, o Random Forest e o SVR, com
+o XGBoost e o MLP (+0,113 e +0,172) perto disso (p de Holm 0,064); em
+Rondônia, só o SVR. Em Tocantins, os quatro modelos ganham de 0,09 a 0,11, mas
+nenhum passa na correção (o SVR fica em 0,098). É a primeira vez, no protocolo
+da Tabela 6, que o clima e a vegetação medidos por satélite explicam a
+produtividade municipal além da média do município.
 
-**Em coleta em 06/11/2026.** Mato Grosso, em quatro faixas de anos (a de 2001
-a 2007 já coletada), e depois os cinco estados juntos
-(`06_amazonia_legal.py MT` e `06_amazonia_legal.py juntos`).
+Os dois estados com menos repetição, Maranhão e Mato Grosso, são os de ganho
+mais claro, e o Pará, com mais repetição, o de nenhum ganho; é o que a
+dissertação atribui ao alvo. A repetição não explica tudo: Rondônia, com
+35,3%, ainda tem ganho no SVR, e Tocantins, com 21,0% e quatro vezes os
+registros do Pará, não passa na correção. Tamanho da base e variação do alvo
+andam juntos nesses estados, e separar os dois pede outro desenho (por
+exemplo, subamostrar Mato Grosso ao tamanho do Pará).
+
+Com os cinco estados numa só base (`06_amazonia_legal.py juntos`: o Pará da
+dissertação e os quatro estados, 5.872 registros de 383 municípios), os quatro
+modelos superam a referência por margem parecida: Random Forest +0,099, XGBoost
+e SVR +0,100 e MLP +0,097, com p de Holm de 0,003 ou menos. O protocolo da
+Tabela 6, que no Pará não sai da média do município, encontra sinal quando a
+base cresce e o alvo repete menos.
 
 **Milho.** A extensão a outras culturas esbarra na máscara: o MapBiomas
 (coleção 10) separa soja, cana, arroz, algodão e café, mas o milho fica em

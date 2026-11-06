@@ -1389,18 +1389,23 @@ if tela_atual == "📈 Análise Histórica":
     # número, na outra tela.
     def _projecao(municipios):
         linhas = []
+        # A mesma safra-pivô para todos: a última da base. Partir da última
+        # safra de cada município projetava 2018 a 2020 para Pau D'Arco, que
+        # saiu da máscara do MapBiomas em 2017 (a API fazia o mesmo).
+        ano_pivo = int(df.ano.max())
         for m in municipios:
             hist = df[df.municipio == m]
             if hist.empty:
                 continue
-            ano_pivo = int(hist.ano.max())
             # A safra-pivô entra com o valor observado, e não com o previsto:
-            # é o que faz o tracejado sair de cima da linha cheia.
-            linhas.append({
-                "ano": ano_pivo, "Nome": disp(m), "previsto": False,
-                "produtividade": float(hist[hist.ano == ano_pivo][M.ALVO].iloc[0]) * fator,
-                "margem": 0.0,
-            })
+            # é o que faz o tracejado sair de cima da linha cheia. Sem ela na
+            # base, o tracejado começa solto.
+            if (hist.ano == ano_pivo).any():
+                linhas.append({
+                    "ano": ano_pivo, "Nome": disp(m), "previsto": False,
+                    "produtividade": float(hist[hist.ano == ano_pivo][M.ALVO].iloc[0]) * fator,
+                    "margem": 0.0,
+                })
             for adiante in range(1, 4):
                 r = estimador.estimar(m, ano_pivo + adiante)
                 linhas.append({

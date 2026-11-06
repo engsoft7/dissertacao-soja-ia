@@ -1,0 +1,94 @@
+{
+  "nota": "Protocolo da Tabela 6 (04_analise_para/03_busca_hiperparametros.py). Ganho = 1 - MSE(modelo)/MSE(referência), IC95 por reamostragem de safras.",
+  "estado": "MT",
+  "municipios_gaul": 123,
+  "municipios_com_pam": 116,
+  "registros": 2290,
+  "municipios": 116,
+  "safras_avaliadas": [
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "referencia": {
+    "RMSE": 305.4,
+    "MAE": 226.9,
+    "R2": 0.34,
+    "rRMSE_%": 9.8
+  },
+  "modelos": {
+    "Random Forest": {
+      "RMSE": 286.6,
+      "MAE": 215.4,
+      "R2": 0.418,
+      "rRMSE_%": 9.2,
+      "segundos": 559,
+      "ganho_sobre_referencia": 0.119,
+      "IC95": [
+        0.045,
+        0.178
+      ],
+      "p_unilateral": 0.001
+    },
+    "XGBoost": {
+      "RMSE": 288.5,
+      "MAE": 216.5,
+      "R2": 0.411,
+      "rRMSE_%": 9.3,
+      "segundos": 268,
+      "ganho_sobre_referencia": 0.108,
+      "IC95": [
+        0.026,
+        0.171
+      ],
+      "p_unilateral": 0.005
+    },
+    "SVR": {
+      "RMSE": 290.8,
+      "MAE": 215.2,
+      "R2": 0.401,
+      "rRMSE_%": 9.3,
+      "segundos": 226,
+      "ganho_sobre_referencia": 0.093,
+      "IC95": [
+        0.026,
+        0.152
+      ],
+      "p_unilateral": 0.004
+    },
+    "MLP": {
+      "RMSE": 290.1,
+      "MAE": 218.1,
+      "R2": 0.404,
+      "rRMSE_%": 9.3,
+      "segundos": 997,
+      "ganho_sobre_referencia": 0.098,
+      "IC95": [
+        0.011,
+        0.171
+      ],
+      "p_unilateral": 0.0135
+    }
+  }
+}

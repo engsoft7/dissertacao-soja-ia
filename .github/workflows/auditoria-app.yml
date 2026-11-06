@@ -1,0 +1,120 @@
+# Auditoria dos números do aplicativo, sob pedido.
+#
+# 1. auditoria_numeros.py lê a API em produção para os 38 municípios e confere
+#    cada número com a própria fonte: IBGE (SIDRA), Agrolink, Yahoo Finance,
+#    o levantamento da CONAB versionado e o INMET.
+# 2. AuditoriaTest passa as mesmas respostas pelo código das telas do app e
+#    confere que Resumo, Viabilidade, Histórico e Estimativa no campo dizem a
+#    mesma coisa, com números plausíveis.
+# O resultado vai para software/aplicativo_mobile/auditoria/ na própria branch.
+#
+# Disparo: aba Actions > "Auditoria do aplicativo" > Run workflow, ou um push a
+# uma branch de trabalho com "[auditoria]" na mensagem do commit. Na main não
+# grava nada.
+#
+# Por padrão confere a API em produção, que só muda com o merge na main. Para
+# conferir uma correção da API antes do merge, marque "API da branch" no disparo
+# manual ou use "[auditoria-branch]" no commit: o job sobe a API da própria
+# branch e audita essa.
+name: Auditoria do aplicativo
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_da_branch:
+        description: "Auditar a API desta branch, e não a de produção"
+        type: boolean
+        default: false
+  push:
+    branches-ignore: [main]
+    paths:
+      - "software/automacao_github/auditoria_numeros.py"
+      - "software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/AuditoriaTest.kt"
+      - ".github/workflows/auditoria-app.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  auditoria:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[auditoria')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      API_DA_BRANCH: ${{ (github.event_name == 'workflow_dispatch' && inputs.api_da_branch) || contains(github.event.head_commit.message, '[auditoria-branch]') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Sobe a API da branch
+        if: env.API_DA_BRANCH == 'true'
+        run: |
+          pip install --quiet -r software/api_backend/requirements.txt
+          cd software/api_backend
+          nohup uvicorn api:app --host 127.0.0.1 --port 8000 > /tmp/api.log 2>&1 &
+          # O lifespan treina o modelo antes de aceitar conexões.
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:8000/api/ping && exit 0
+            sleep 5
+          done
+          cat /tmp/api.log
+          exit 1
+
+      - name: API × fontes
+        env:
+          AUDITORIA_API: ${{ env.API_DA_BRANCH == 'true' && 'http://127.0.0.1:8000' || '' }}
+        run: |
+          pip install --quiet requests
+          python software/automacao_github/auditoria_numeros.py software/aplicativo_mobile/app/build/auditoria
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Telas do app com as mesmas respostas
+        working-directory: software/aplicativo_mobile
+        # O teste reprova quando acha divergência entre telas; o relatório é
+        # gravado do mesmo jeito, e o passo seguinte o guarda.
+        continue-on-error: true
+        run: ./gradlew --no-daemon testDebugUnitTest --tests '*AuditoriaTest*'
+
+      - name: Junta o relatório
+        if: always()
+        run: |
+          d=software/aplicativo_mobile/auditoria
+          mkdir -p "$d"
+          b=software/aplicativo_mobile/app/build/auditoria
+          cp "$b/fontes.md" "$b/fontes.json" "$d/" 2>/dev/null || true
+          cp "$b/telas.csv" "$b/telas_falhas.txt" "$d/" 2>/dev/null || true
+          r=software/aplicativo_mobile/app/build/test-results/testDebugUnitTest/TEST-com.agrointeligencia.app.AuditoriaTest.xml
+          [ -f "$r" ] && cp "$r" "$d/AuditoriaTest.xml" || true
+          ls -la "$d"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: auditoria
+          path: |
+            software/aplicativo_mobile/auditoria/
+            software/aplicativo_mobile/app/build/auditoria/api/
+
+      - name: Grava na branch
+        if: always() && github.ref_name != github.event.repository.default_branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add software/aplicativo_mobile/auditoria
+          if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
+          if [ "$API_DA_BRANCH" = "true" ]; then onde="API da branch"; else onde="API em produção"; fi
+          git commit -m "Auditoria do aplicativo (${{ github.run_id }}, $onde)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
+            sleep $((i * 5))
+          done
+          exit 1

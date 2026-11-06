@@ -109,14 +109,24 @@ elas, ganho maior que o do solo (0,4%), mas medido em outro conjunto de registro
 famílias não superaram a referência (`07_variaveis_por_fase.py`): o limite lá
 está no alvo, que repete valores, e não na forma de medir o ambiente.
 
-**Em coleta em 29/10/2026.** Dois testes têm script pronto e esperam dados do
-Earth Engine (`10_trabalhos_futuros/coleta`, workflow `coleta-gee-pesquisa.yml`):
+**Feito em 06/11/2026, sensores lançados depois de 2014 no Pará**
+(`10_trabalhos_futuros/02_sensores_recentes.py`, rodado no Actions): cada
+família com e sem, nos mesmos registros da base do produto, no protocolo da
+Tabela 6. Radar e umidade (Sentinel-1 VV e VH de janeiro a março, SMAP na zona
+radicular), 275 registros de 38 municípios, safras 2016 a 2025: com a família,
+o melhor modelo é o XGBoost, com ganho de +0,030 sobre a referência (IC95
+−0,171 a +0,170), contra −0,056 sem ela. Sentinel-2 (NDVI e NDRE na mediana de
+janeiro a março), 212 registros de 37 municípios, 2018 a 2025: a família piora
+o Random Forest (ganho de −0,058 sem e −0,123 com, IC95 −0,207 a −0,016) e não
+muda o SVR (−0,013 e −0,015). Nenhum braço com a família supera a referência
+(p de Holm = 1,0 nos oito). Com oito a dez safras, o teste só acusaria ganho
+grande, e os sensores novos não o trazem. O MLP quase repete a referência nos
+quatro braços (ganho de 0,000 a +0,004): prevê resíduo perto de zero. O
+TROPOMI (fluorescência) não está no catálogo do Earth Engine e ficou fora.
 
-- *Sensores de 2015 em diante no Pará* (`02_sensores_recentes.py`): Sentinel-1
-  e SMAP desde 2016, Sentinel-2 (NDVI e NDRE) desde 2018, cada família com e
-  sem, nos mesmos registros da base do produto. A primeira coleta estourou o
-  tempo de computação do Earth Engine; foi refeita por sensor e em lotes de
-  municípios. O TROPOMI (fluorescência) não está no catálogo do Earth Engine.
+**Em coleta em 06/11/2026.** Um teste ainda espera dados do Earth Engine
+(`10_trabalhos_futuros/coleta`, workflow `coleta-gee-pesquisa.yml`):
+
 - *Amazônia Legal* (`06_amazonia_legal.py`): o protocolo da Tabela 6 em
   Tocantins, Maranhão, Rondônia e Mato Grosso, e nos cinco estados juntos.
   Tocantins e Rondônia coletados; o Maranhão foi refeito em lotes depois de

@@ -68,6 +68,12 @@ LEVANTAMENTO_CONAB_RESERVA = {
     "custo_operacional_ha": 5277.12,
     "custo_total_ha": 5714.88,
     "renda_fatores_ha": 437.76,
+    "custo_por_componente": {
+        "area_ha": 5042.88,
+        "transporte_saca": 3.3,
+        "taxa_receita": 0.015,
+        "fonte": "custo_itens_pedro_afonso_to.csv"
+    },
     "serie": {
         "levantamentos": 13,
         "periodo": "março de 2023 a março de 2026",
@@ -970,27 +976,31 @@ def dec(v: float, casas: int = 1) -> str:
 
 def resultado_por_hectare(sacas_ha: float, preco: float,
                           custo_do_usuario: float | None = None) -> tuple[float, float | None, bool]:
-    """Resultado por hectare pelos dois rateios possíveis do custo.
+    """Resultado por hectare e, sem o custo aberto por item, pelos dois rateios.
 
     Devolve (valor exibido, valor pelo outro rateio, sinal é incerto).
 
-    A CONAB publica o custo por saca comercializada, sem abrir por item. Tratar
-    o custo variável como fixo por hectare — o que o painel faz, por ser o
-    único caminho com os dados publicados — faz as sacas acima da produtividade
-    de referência entrarem na receita sem onerar colheita, secagem e frete.
-    Tratá-lo como proporcional à produção é o outro extremo.
+    Com o custo aberto por item (planilha da série histórica da CONAB, em
+    custo_por_componente), o resultado tem um valor só: quase todo o custo é
+    por hectare, e só o transporte externo (por saca) e a CESSR (fração da
+    receita) acompanham a produção.
 
-    Entre os dois, o SINAL do resultado se inverte sempre que a produtividade
-    supera a de referência e a margem é estreita: a 52 sc/ha e R$ 105,09, o
-    resultado vai de +R$ 188 a -R$ 153 por hectare com os mesmos dados. Exibir
-    só um dos dois, em verde, é dar por decidido o que o dado não decide.
+    Sem os itens, o custo variável por saca pode ser tratado como fixo por
+    hectare ou como proporcional à produção, e entre os dois extremos o SINAL
+    do resultado se inverte quando a produtividade supera a de referência e a
+    margem é estreita (a 52 sc/ha e R$ 105,09, de +R$ 188 a -R$ 153 por
+    hectare). Aí o painel mostra os dois em vez de dar um por decidido.
 
-    Com custo informado pelo usuário não há rateio a discutir: é o número dele.
+    Com custo informado pelo usuário não há o que repartir: é o número dele.
     """
     receita = sacas_ha * preco
     if custo_do_usuario is not None:
         return receita - custo_do_usuario, None, False
     lev = LEVANTAMENTO_CONAB
+    comp = lev.get("custo_por_componente")
+    if comp:
+        custo = comp["area_ha"] + (comp["transporte_saca"] + comp["taxa_receita"] * preco) * sacas_ha
+        return receita - custo, None, False
     por_hectare = receita - lev["custo_operacional_ha"]
     variavel = lev.get("custo_variavel_saca")
     fixo_sc = lev.get("custo_fixo_saca")
@@ -1579,9 +1589,8 @@ if tela_atual == "💰 Viabilidade Financeira":
     faixa_receita = f"{brl(receita_min)} a {brl(receita_max)}"
     faixa_margem = f"{brl(margem_min)} a {brl(margem_max)}"
     # Duas fontes de incerteza, e basta uma para o resultado ser inconclusivo:
-    # o erro típico do modelo, que move a produtividade, e o rateio do custo
-    # variável, que a CONAB não publica aberto por item. A segunda costuma ser
-    # maior que a primeira acima da produtividade de referência.
+    # o erro típico do modelo, que move a produtividade, e, só quando o
+    # levantamento não traz o custo aberto por item, o rateio do custo variável.
     margem_incerta = (margem_min < 0 < margem_max) or sinal_incerto
 
     # SÍNTESE LLM (ANÁLISE GENERATIVA)
@@ -1658,10 +1667,10 @@ if tela_atual == "💰 Viabilidade Financeira":
         baixo, alto = sorted((margem_ha, margem_outro_rateio))
         st.warning(
             f"**O sinal deste resultado não está determinado pelos dados.** "
-            f"A CONAB publica o custo por saca comercializada, sem abrir por "
-            f"item, e não se sabe que parcela do custo variável acompanha a "
-            f"área — semente, adubo, pulverização — e que parcela acompanha a "
-            f"produção — colheita, secagem, frete. Tratando toda ela como fixa "
+            f"O levantamento em uso não traz o custo aberto por item, e não se "
+            f"sabe que parcela do custo variável acompanha a área — semente, "
+            f"adubo, pulverização — e que parcela acompanha a produção — "
+            f"frete e CESSR. Tratando toda ela como fixa "
             f"por hectare, o resultado é {brl_md(margem_ha)}/ha; tratando toda "
             f"ela como proporcional à produção, {brl_md(margem_outro_rateio)}/ha. "
             f"O valor está entre {brl_md(baixo)} e {brl_md(alto)} por hectare, e "

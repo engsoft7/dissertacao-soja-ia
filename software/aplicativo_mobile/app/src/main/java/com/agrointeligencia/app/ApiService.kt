@@ -89,15 +89,17 @@ data class FinancaResponse(
     // Antes o campo nem existia aqui, e o painel mostrava a comparação
     // enquanto o aplicativo não mostrava nada.
     val soja_preco_cbot_saca: Double? = null,
-    // Componentes do custo. A CONAB publica só os totais por saca, sem abrir
-    // por item: não se sabe que parcela do custo variável acompanha a área
-    // (semente, adubo, pulverização) e que parcela acompanha a produção
-    // (colheita, secagem, frete). Acima da produtividade de referência os dois
-    // rateios possíveis chegam a inverter o sinal do resultado, e daí a tela
-    // precisa dizer isso em vez de pintar de verde.
+    // Componentes do custo por saca, para o caso de o levantamento não trazer
+    // o custo aberto por item: aí o resultado vai pelos dois rateios extremos.
     val custo_variavel_saca: Double? = null,
     val custo_fixo_ha: Double? = null,
     val produtividade_referencia_sc: Double? = null,
+    // Custo aberto por item (planilha da série histórica da CONAB): a parte por
+    // hectare, o transporte por saca e a CESSR como fração da receita. Nulos com
+    // a API antiga ou levantamento sem itens: o app volta aos dois rateios.
+    val custo_area_ha: Double? = null,
+    val custo_transporte_saca: Double? = null,
+    val taxa_cessr: Double? = null,
     // Cotação diária da praça mais próxima do usuário. O corredor do Pará vem
     // antes dos portos do Sul na busca; nulo quando a fonte não responde, e
     // nunca um valor de reserva.
@@ -119,6 +121,12 @@ data class KpiEconomiaResponse(
     val custo_variavel_saca: Double? = null,
     val custo_fixo_ha: Double? = null,
     val produtividade_referencia_sc: Double? = null,
+    // Custo aberto por item (planilha da série histórica da CONAB): a parte por
+    // hectare, o transporte por saca e a CESSR como fração da receita. Nulos com
+    // a API antiga ou levantamento sem itens: o app volta aos dois rateios.
+    val custo_area_ha: Double? = null,
+    val custo_transporte_saca: Double? = null,
+    val taxa_cessr: Double? = null,
     // Cotação diária da praça mais próxima do usuário. O corredor do Pará vem
     // antes dos portos do Sul na busca; nulo quando a fonte não responde, e
     // nunca um valor de reserva.

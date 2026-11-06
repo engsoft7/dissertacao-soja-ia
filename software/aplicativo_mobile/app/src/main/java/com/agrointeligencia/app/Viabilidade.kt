@@ -104,21 +104,21 @@ internal data class Resultado(
 )
 
 /**
- * Resultado por hectare pelos dois rateios possíveis do custo.
+ * Resultado por hectare.
  *
- * A CONAB publica o custo por saca comercializada, sem abrir por item. Tratar
- * o custo variável como fixo por hectare — o que a interface faz, por ser o
- * único caminho com os dados publicados — faz as sacas acima da produtividade
- * de referência entrarem na receita sem onerar colheita, secagem e frete.
- * Tratá-lo como proporcional à produção é o outro extremo.
+ * Com o custo aberto por item da CONAB (planilha da série histórica), há um
+ * valor só: quase todo o custo é por hectare (semente, adubo, defensivo,
+ * máquinas, juros, fixos), e só o transporte externo, por saca, e a CESSR,
+ * fração da receita, acompanham a produção. Antes o app dizia que a CONAB não
+ * abria o custo por item e mostrava dois rateios extremos.
  *
- * Entre os dois, o SINAL do resultado se inverte sempre que a produtividade
- * supera a de referência e a margem é estreita: em 2022, +R$ 188 ou -R$ 153
- * por hectare, com os mesmos dados. Um produto que pinta isso de verde manda
- * o produtor decidir com uma certeza que o dado não sustenta.
+ * Sem os itens (API antiga, levantamento sem planilha), volta aos dois
+ * rateios: o custo variável tratado como fixo por hectare ou como proporcional
+ * à produção. Entre os dois o SINAL se inverte quando a produtividade supera a
+ * de referência e a margem é estreita, e a tela mostra a faixa.
  *
- * Quando o produtor informa o próprio custo não há rateio a discutir: o número
- * é dele, e a função devolve só ele.
+ * Quando o produtor informa o próprio custo não há o que repartir: o número é
+ * dele, e a função devolve só ele.
  */
 internal fun resultadoPorHectare(
     sacasPorHectare: Double,
@@ -130,6 +130,13 @@ internal fun resultadoPorHectare(
     if (custoDoProdutor != null) {
         return Resultado(receita - custoDoProdutor, null, false)
     }
+    val area = kpis.custo_area_ha
+    val transporte = kpis.custo_transporte_saca
+    val taxa = kpis.taxa_cessr
+    if (area != null && transporte != null && taxa != null) {
+        val custo = area + (transporte + taxa * preco) * sacasPorHectare
+        return Resultado(receita - custo, null, false)
+    }
     val porHectare = receita - kpis.custo_ha
     val variavel = kpis.custo_variavel_saca
     val fixo = kpis.custo_fixo_ha
@@ -138,6 +145,24 @@ internal fun resultadoPorHectare(
     }
     val porSaca = receita - (variavel * sacasPorHectare + fixo)
     return Resultado(porHectare, porSaca, (porHectare > 0) != (porSaca > 0))
+}
+
+/**
+ * Sacas por hectare que cobrem o custo. Com o custo aberto por item, o frete e a
+ * CESSR crescem com cada saca, e a conta resolve área / (preço líquido por saca);
+ * sem os itens, ou com o custo do produtor, custo / preço. Nulo sem preço.
+ */
+internal fun pontoDeEquilibrio(preco: Double, custoDoProdutor: Double?, kpis: FinancaResponse): Double? {
+    if (preco <= 0) return null
+    if (custoDoProdutor != null) return custoDoProdutor / preco
+    val area = kpis.custo_area_ha
+    val transporte = kpis.custo_transporte_saca
+    val taxa = kpis.taxa_cessr
+    if (area != null && transporte != null && taxa != null) {
+        val liquido = preco * (1 - taxa) - transporte
+        return if (liquido > 0) area / liquido else null
+    }
+    return kpis.custo_ha / preco
 }
 
 // O valor que o produtor digita é dinheiro, e dinheiro não cabe em float de
@@ -472,7 +497,11 @@ fun ResumoFinanceiroCard(
             val r = resultadoPorHectare(scHa, preco, if (temCusto) custo else null, kpis)
             val outroRateio = r.outroRateio
             val lucro = r.valor
-            val roi = if (custo > 0) (lucro / custo) * 100 else 0.0
+            // O custo que entrou na conta: com o custo aberto por item, o da CONAB
+            // cresce com o frete e a CESSR das sacas a mais, e a linha de custo, o
+            // retorno e o equilíbrio têm de usar o mesmo número do lucro.
+            val custoUsado = receita - lucro
+            val roi = if (custoUsado > 0) (lucro / custoUsado) * 100 else 0.0
             val profitColor = when {
                 r.sinalIncerto -> corAtencao(isDark)
                 lucro >= 0 -> if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
@@ -487,7 +516,7 @@ fun ResumoFinanceiroCard(
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(text = "Custo operacional", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = "${reaisInteiros(custo)}/ha", fontSize = 18.sp,
+                    Text(text = "${reaisInteiros(custoUsado)}/ha", fontSize = 18.sp,
                          color = if (isDark) Color(0xFFf85149) else Color(0xFFdc2626), fontWeight = FontWeight.Bold)
                 }
             }
@@ -519,8 +548,8 @@ fun ResumoFinanceiroCard(
             Spacer(modifier = Modifier.height(16.dp))
             // O ponto de equilíbrio arredonda para cima: com 54,2 sacas de
             // equilíbrio, 54 ainda dá prejuízo.
-            if (preco > 0) {
-                Text(text = "Ponto de equilíbrio: ${kotlin.math.ceil(custo / preco).toInt()} sc/ha para cobrir o custo",
+            pontoDeEquilibrio(preco, if (temCusto) custo else null, kpis)?.let { eq ->
+                Text(text = "Ponto de equilíbrio: ${kotlin.math.ceil(eq).toInt()} sc/ha para cobrir o custo",
                      fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }

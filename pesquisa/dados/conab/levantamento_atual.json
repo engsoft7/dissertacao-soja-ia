@@ -4,9 +4,8 @@
   "levantamento": "MAR-2026",
   "levantamento_extenso": "março de 2026",
   "fonte": "https://portaldeinformacoes.conab.gov.br/custos-de-producao.html",
-  "gerado_em": "2026-09-04",
+  "gerado_em": "2026-11-06",
   "gerado_por": "software/automacao_github/gera_levantamento_conab.py",
-  "conferido_em": "2026-09-14",
   "preco_recebido_saca": 105.09,
   "custo_variavel_saca": 85.03,
   "custo_fixo_saca": 24.91,
@@ -39,9 +38,16 @@
     ]
   },
   "levantamentos_sem_preco": [],
+  "custo_por_componente": {
+    "area_ha": 5042.88,
+    "transporte_saca": 3.3,
+    "taxa_receita": 0.015,
+    "fonte": "custo_itens_pedro_afonso_to.csv"
+  },
   "textos": {
     "descricao": "CONAB, Pedro Afonso (TO), março de 2026",
     "nota_preco": "R$ 105,09/sc é o menor dos 13 levantamentos da praça (mar/2023 a mar/2026, mediana R$ 116,91). Cenário conservador, não previsão de preço.",
     "nota_custo": "Custo operacional de R$ 109,94/sc, convertido para R$ 5.277,12/ha pela produtividade de referência do próprio levantamento (2.880 kg/ha, 48 sc/ha)."
-  }
+  },
+  "conferido_em": "2026-09-14"
 }

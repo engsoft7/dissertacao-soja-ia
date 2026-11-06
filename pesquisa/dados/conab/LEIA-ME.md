@@ -13,6 +13,7 @@ Fonte: <https://portaldeinformacoes.conab.gov.br/custos-de-producao.html>
 | `custo_variavel_e_produtividade_por_municipio.csv` | Custo variável por saca e produtividade de referência |
 | `custo_producao_por_uf.csv` | Os mesmos componentes agregados por unidade da federação |
 | `serie_pedro_afonso_to.csv` | Série histórica de Pedro Afonso (TO), de março de 2023 a março de 2026 |
+| `custo_itens_pedro_afonso_to.csv` | Custo aberto por item (sementes, fertilizantes, defensivos, máquinas, transporte, CESSR, juros, depreciações), por hectare e por saca, de 2015 a 2026; extraído da série histórica em planilha por `software/automacao_github/extrai_itens_conab.py` |
 | `levantamento_atual.json` | **Gerado.** Consolidação legível por máquina do levantamento em vigor — é o que o produto lê em tempo de execução |
 
 ## Como o número do painel é obtido
@@ -42,6 +43,25 @@ custo total                    R$ 119,06/sc  ×  48  =  R$ 5.714,88/ha
 
 O painel usa o **custo operacional**, que é o que a CONAB define como variável
 mais fixo e o que o campo "Custo Operacional" representa.
+
+### O que acompanha a área e o que acompanha a produção
+
+A planilha da série histórica abre o custo por item. Em março de 2026, em Pedro
+Afonso, quase tudo é por hectare (custeio de R$ 3.455,83, juros e despesas
+administrativas, depreciações e outros fixos); só dois itens andam com a
+produção: o **transporte externo**, R$ 3,30/sc, e a **CESSR**, 1,5% da receita.
+`gera_levantamento_conab.py` grava isso em `custo_por_componente`:
+
+```
+custo por área     R$ 5.277,12 − (3,30 + 1,58) × 48 sc  =  R$ 5.042,88/ha
+custo da lavoura   = 5.042,88 + (3,30 + 0,015 × preço) × sacas por hectare
+```
+
+Na produtividade e no preço de referência a conta devolve os R$ 5.277,12/ha da
+CONAB. Com ela, o produto mostra um resultado só, em vez dos dois rateios
+extremos que usava quando se supunha que a CONAB publicasse apenas os totais.
+Se um levantamento novo não tiver os itens na planilha, o campo some e o
+produto volta aos dois rateios.
 
 Essa conta não é feita à mão nem escrita no código: `levantamento_atual.json` é
 gerado dos CSVs acima por `software/automacao_github/gera_levantamento_conab.py`,

@@ -220,6 +220,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.15` (06/11/2026) — aplicativo 2.7.0: escolha do município pela lista ou pelo GPS, acessibilidade e fontes oficiais na tela Sobre | 156 | 29.217 | `32213e979e9cfd5a4cb0514054a0ab221e3cd121b3c670db1f1c696ce2f03323` |
 | Tag `v2.4.16` (06/11/2026) — aplicativo 2.7.1: safra em curso no Resumo, preço do Pará de hoje na Viabilidade e textos sem ambiguidade | 158 | 29.427 | `e02c8f2d77e792057ced0aedf36928d24bb5479dd80e4c07dbeabaefc42f9b69` |
 | Tag `v2.4.17` (06/11/2026) — app 2.7.2: cotação do dia nas praças do Pará, um preço só e custo da CONAB por item | 168 | 30.837 | `c843002ab629f62338427b26c4ea80ae2d29d03c4f60af34e3385758c5c5c613` |
+| Tag `v2.4.18` (06/11/2026) — app 2.7.3: Histórico e Viabilidade com o mesmo valor e texto do tempo de noite | 168 | 30.859 | `c367e28dd70ff551f4efbfbd14acafac10c28a1cbddca7004b8548a41cde6fff` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -716,6 +717,23 @@ arquivos e 30.837 linhas. O DOI de versão desta etiqueta é
 10.5281/zenodo.24013526, atribuído pelo Zenodo no depósito disparado pela
 publicação do Release em 06/11/2026.
 
+A `v2.4.18` foi registrada pelo workflow `registra-doi.yml` na publicação do
+Release, em 06/11/2026, com o título “v2.4.18 — App 2.7.3: Histórico e
+Viabilidade com o mesmo valor e texto do tempo de noite”. Em relação à
+`v2.4.17`, mudam 6 arquivos-fonte (`software/api_backend/tempo.py`,
+`software/aplicativo_mobile/app/build.gradle.kts`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Historico.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/TempoCalculo.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Viabilidade.kt`
+e
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/ResultadoPorHectareTest.kt`).
+
+O resumo criptográfico da `v2.4.18` foi calculado pelo mesmo workflow sobre uma
+cópia limpa da etiqueta (commit `d26beb6`), com o critério do comando acima: 168
+arquivos e 30.859 linhas. O DOI de versão desta etiqueta é
+10.5281/zenodo.24013809, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 06/11/2026.
+
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
 calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
@@ -964,6 +982,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.14`:** 10.5281/zenodo.23652157
 - **DOI da `v2.4.15`:** 10.5281/zenodo.23992059
 - **DOI da `v2.4.16`:** 10.5281/zenodo.23992350
-- **DOI da versão mais recente (`v2.4.17`):** 10.5281/zenodo.24013526
+- **DOI da `v2.4.17`:** 10.5281/zenodo.24013526
+- **DOI da versão mais recente (`v2.4.18`):** 10.5281/zenodo.24013809
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

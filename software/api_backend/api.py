@@ -272,6 +272,7 @@ def get_mercado(periodo: str = "1d"):
     referências situam o número: o físico do dia na praça mais próxima do Pará
     e o preço de porteira do levantamento da CONAB, que é o padrão da simulação.
 
+    "pracas_para" traz a cotação diária de cada praça do Pará na Agrolink.
     "para" traz a estimativa do preço no Pará (ver precos_para.py): cada vela
     ganha "pa", a cotação de Chicago daquele instante somada à base do Pará no
     mês, e o bloco traz a série mensal de onde a base sai.
@@ -289,6 +290,10 @@ def get_mercado(periodo: str = "1d"):
     return {
         "cotacao": cotacao,
         "para": para,
+        # Cotação diária de cada praça do Pará (Agrolink), com a data da última
+        # atualização: o número real do dia, ao lado da estimativa.
+        "pracas_para": precos_para.pracas_do_para(),
+        "pracas_fonte": precos_para.FONTE_PRACAS,
         "fisico": fin.get("fisico"),
         "conab_saca": PRECO_RECEBIDO_CONAB_SACA,
         "conab_fonte": descricao_do_levantamento(),

@@ -199,6 +199,12 @@ data class CotacaoBolsa(
     val velas: List<Vela>
 )
 
+/**
+ * Cotação diária de uma praça do Pará na Agrolink. "data" é a da última
+ * atualização (AAAA-MM-DD): uma praça parada continua listada com o valor velho.
+ */
+data class PracaPara(val praca: String, val uf: String? = "PA", val valor: Double, val data: String)
+
 data class MercadoResponse(
     // Nulo quando a fonte não respondeu: a tela diz que a cotação está
     // indisponível em vez de exibir um número inventado.
@@ -208,7 +214,10 @@ data class MercadoResponse(
     val conab_fonte: String? = null,
     // Nulo quando a API é mais antiga ou a fonte da base não respondeu: a tela
     // omite a estimativa do Pará em vez de inventar uma base.
-    val para: EstimativaPara? = null
+    val para: EstimativaPara? = null,
+    // Nulo ou vazio com a API antiga ou a fonte fora do ar: a tela fica com a estimativa.
+    val pracas_para: List<PracaPara>? = null,
+    val pracas_fonte: String? = null
 )
 
 /**

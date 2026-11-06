@@ -327,10 +327,10 @@ fun AgroDashboard() {
     var recarga by remember { mutableStateOf(0) }
     // Preço estimado do Pará agora, para a Viabilidade oferecer em um toque.
     // Sem cache: um preço de mercado guardado envelhece, e aí é melhor não oferecer.
-    var paraHoje by remember { mutableStateOf<EstimativaPara?>(null) }
+    var mercadoHoje by remember { mutableStateOf<MercadoResponse?>(null) }
     LaunchedEffect(recarga) {
         try {
-            paraHoje = RetrofitClient.getInstance().getMercado("1d").para
+            mercadoHoje = RetrofitClient.getInstance().getMercado("1d")
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (_: Exception) {
@@ -731,7 +731,8 @@ fun AgroDashboard() {
                                 item {
                                     TituloSecao(Icons.Filled.MonetizationOn, "Viabilidade Financeira",
                                                 Modifier.padding(top = 8.dp))
-                                    ResumoFinanceiroCard(projecao, k, paraHoje)
+                                    ResumoFinanceiroCard(projecao, k, mercadoHoje?.para,
+                                                         mercadoHoje?.pracas_para.orEmpty(), selectedMunicipio)
                                 }
                             }
                         }
@@ -949,7 +950,18 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
 }
 
 @Composable
-fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse, paraHoje: EstimativaPara? = null) {
+fun ResumoFinanceiroCard(
+    projecao: PrevisaoHistorico,
+    kpis: FinancaResponse,
+    paraHoje: EstimativaPara? = null,
+    pracas: List<PracaPara> = emptyList(),
+    municipio: String? = null
+) {
+    // A cotação do dia na praça do Pará mais perto do município; sem ela, a
+    // média do Pará estimada com Chicago e a base do mês.
+    val praca = remember(pracas, municipio) { pracaParaUsar(municipio, pracas) }
+    val precoHoje: Double? = praca?.valor ?: paraHoje?.estimado_brl_saca
+    val rotuloHoje: String = praca?.let { "${it.praca}, ${dataCurta(it.data)}" } ?: "Pará, estimado agora"
     val isDark = isSystemInDarkTheme()
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
@@ -1035,7 +1047,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse, par
                 // longo do servidor fica só quando ele não manda a idade.
                 else -> {
                     val meses = kpis.defasagem_meses
-                    val hoje = paraHoje?.estimado_brl_saca?.let { " Hoje o Pará está em R$\u00A0${reais(it)}/sc (porto)." } ?: ""
+                    val hoje = precoHoje?.let { " $rotuloHoje: R$\u00A0${reais(it)}/sc." } ?: ""
                     when {
                         meses == null -> kpis.aviso_preco?.let { "Preço possivelmente desatualizado. $it" }
                         meses >= 12 -> "Preço padrão da CONAB de mais de um ano atrás.$hoje"
@@ -1133,16 +1145,17 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse, par
             // O preço do Pará de hoje, a um toque. O padrão é o levantamento da
             // CONAB, que pode ter meses, e o produtor não tinha como trazer o
             // mercado para a conta sem ir à tela Mercado e copiar o número.
-            paraHoje?.estimado_brl_saca?.let { pa ->
+            precoHoje?.let { pa ->
                 val usandoEste = temPreco && kotlin.math.abs(preco - pa) < 0.005
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
                 ) {
                     Column(Modifier.weight(1f)) {
-                        Text("Pará hoje, estimado: R$ ${reais(pa)}/sc", fontSize = 13.sp,
+                        Text("$rotuloHoje: R$ ${reais(pa)}/sc", fontSize = 13.sp,
                              fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                        Text("Preço de porto; na fazenda costuma ser menor, pelo frete.",
+                        Text(if (praca != null) "Cotação do dia na praça (Agrolink); na fazenda pode ser menor, pelo frete."
+                             else "Chicago agora + base do Pará no mês; na fazenda pode ser menor.",
                              fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
                     }
                     if (usandoEste) {
@@ -1570,6 +1583,12 @@ fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: Str
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // O preço do Pará primeiro: é o que o produtor daqui recebe; Chicago
+            // vem depois, como o mercado que move esse preço.
+            mercado?.pracas_para?.takeIf { it.isNotEmpty() }?.let { pracas ->
+                CotacoesPracasPara(pracas)
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
+            }
             Text("Soja em Chicago, em R$/saca", fontWeight = FontWeight.Bold, fontSize = 16.sp,
                  color = MaterialTheme.colorScheme.onSurface)
             Text("Bolsa de Chicago (CBOT), contrato mais próximo, convertido pelo dólar de cada momento",
@@ -1644,6 +1663,35 @@ fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: Str
     }
 }
 
+/**
+ * Cotação do dia em cada praça do Pará (Agrolink). Uma praça que a fonte parou
+ * de atualizar continua listada, em cinza e com a data, para não passar por
+ * preço de hoje.
+ */
+@Composable
+fun CotacoesPracasPara(pracas: List<PracaPara>, hoje: java.time.LocalDate = java.time.LocalDate.now()) {
+    val secundaria = MaterialTheme.colorScheme.onSurfaceVariant
+    Text("Soja no Pará, cotação do dia", fontWeight = FontWeight.Bold, fontSize = 16.sp,
+         color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.semantics { heading() })
+    Text("Agrolink, por praça. Na fazenda o preço pode ser menor, pelo frete.",
+         fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
+    Spacer(Modifier.height(6.dp))
+    pracas.forEach { p ->
+        val emDia = cotacaoEmDia(p, hoje)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp).semantics(mergeDescendants = true) {}
+        ) {
+            Text(p.praca, fontSize = 15.sp, modifier = Modifier.weight(1f),
+                 color = if (emDia) MaterialTheme.colorScheme.onSurface else secundaria)
+            Text("R$ ${reais(p.valor)}", fontSize = 16.sp, fontWeight = FontWeight.Bold,
+                 color = if (emDia) MaterialTheme.colorScheme.onSurface else secundaria)
+            Text(if (emDia) "  ${dataCurta(p.data)}" else "  parada desde ${dataCurta(p.data)}",
+                 fontSize = 12.sp, color = secundaria)
+        }
+    }
+}
+
 /** Cor da estimativa do Pará nos dois gráficos da tela Mercado. */
 fun corPara(isDark: Boolean) = if (isDark) Color(0xFF58A6FF) else Color(0xFF1D4ED8)
 
@@ -1669,11 +1717,11 @@ fun PrecoEstimadoPara(para: EstimativaPara, estimado: Double, isDark: Boolean) {
             .background(cor.copy(alpha = 0.08f), RoundedCornerShape(10.dp))
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
-        Text("Pará, estimado agora", fontSize = 12.sp, color = cor, fontWeight = FontWeight.SemiBold)
+        Text("Média do Pará, estimada agora", fontSize = 12.sp, color = cor, fontWeight = FontWeight.SemiBold)
         Text("R$ ${reais(estimado)}/sc", fontSize = 22.sp, fontWeight = FontWeight.Bold,
              color = MaterialTheme.colorScheme.onSurface)
-        Text("Chicago agora $sinal R$ ${reais(kotlin.math.abs(para.base_brl_saca))} de base do Pará " +
-             "(${mesCurto(para.mes_base, anoCompleto = true)}). Preço de porto estimado; na fazenda costuma ser menor.",
+        Text("Chicago agora $sinal R$ ${reais(kotlin.math.abs(para.base_brl_saca))} de base média do Pará " +
+             "(${mesCurto(para.mes_base, anoCompleto = true)}). Acompanha Chicago ao longo do dia.",
              fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
     }
 }

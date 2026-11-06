@@ -129,3 +129,38 @@ def test_nao_altera_a_cotacao_guardada_em_cache():
 
 def test_sem_serie_nao_ha_estimativa():
     assert pp.estima({"velas": [{"t": ts(2026, 10, 22), "c": 139.0}]}, []) is None
+
+
+# ── cotação diária por praça ──────────────────────────────────────────────
+# Trecho do JSON que a página regional da Agrolink traz no script (nov/2026),
+# com as aspas escapadas como na página: duas praças em dia e uma parada.
+PAGINA_PRACAS = (
+    '<script>self.__next_f.push([1,"[{\\"cidade\\":\\"Barcarena\\",\\"uf\\":\\"PA\\",\\"preco\\":148.5,'
+    '\\"variacaoPct\\":-0.66,\\"freq\\":\\"diario\\",\\"produto\\":\\"Soja em Grão Sc 60Kg\\",'
+    '\\"codProduto\\":9,\\"atualizacaoMs\\":1793900220000},'
+    '{\\"cidade\\":\\"Paragominas\\",\\"uf\\":\\"PA\\",\\"preco\\":133.12,\\"freq\\":\\"diario\\",'
+    '\\"produto\\":\\"Soja em Grão Sc 60Kg\\",\\"codProduto\\":9,\\"atualizacaoMs\\":1791207120000},'
+    '{\\"cidade\\":\\"Redenção\\",\\"uf\\":\\"PA\\",\\"preco\\":51.3,\\"freq\\":\\"diario\\",'
+    '\\"produto\\":\\"Milho Seco Sc 60Kg\\",\\"codProduto\\":7,\\"atualizacaoMs\\":1793900220000}]"])</script>'
+)
+
+
+def test_le_a_cotacao_diaria_de_cada_praca_no_json_da_pagina():
+    pracas = pp.le_pracas(PAGINA_PRACAS)
+    assert pracas == [
+        {"praca": "Barcarena", "uf": "PA", "valor": 148.5, "data": "2026-11-05"},
+        {"praca": "Paragominas", "uf": "PA", "valor": 133.12, "data": "2026-10-05"},
+    ]
+
+
+def test_le_a_tabela_quando_o_json_nao_vem():
+    # O texto da tabela, como a página mostra: a mesma praça em vários dias.
+    tabela = ("<div>05/11/2026 Soja em Grão Sc 60Kg Redenção (PA) <span>148,50</span> ▼<!-- --> 0,7<!-- -->% "
+              "05/11/26 Diário Histórico 04/11/2026 Soja em Grão Sc 60Kg Redenção (PA) 149,50 ▲ 0,7 % "
+              "04/11/26 Diário Histórico Milho Seco Sc 60Kg Redenção (PA) 51,30 ▼ 0,9 % 05/11/26</div>")
+    assert pp.le_pracas(tabela) == [
+        {"praca": "Redenção", "uf": "PA", "valor": 148.5, "data": "2026-11-05"}]
+
+
+def test_pagina_sem_cotacao_de_soja_nao_inventa_praca():
+    assert pp.le_pracas("<html><body>Cotações</body></html>") == []

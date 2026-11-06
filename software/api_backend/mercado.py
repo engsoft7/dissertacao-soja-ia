@@ -71,12 +71,24 @@ def velas_em_reais(soja, cambio):
     return velas
 
 
-def ultimo_pregao(velas):
-    """As velas depois da última pausa de 5 h ou mais: o pregão em curso ou o último."""
-    inicio = 0
-    for i in range(1, len(velas)):
-        if velas[i]["t"] - velas[i - 1]["t"] >= PAUSA_ENTRE_PREGOES_S:
-            inicio = i
+# O pregão noturno abre às 19h de Chicago (22h em Belém) e, na primeira meia
+# hora, tem uma ou duas velas de 15 min. Sozinhas, cada uma ocupava a largura
+# do gráfico do 1D, numa escala de centavos. Com menos velas que isto, o 1D
+# junta o pregão anterior. Um pregão completo tem umas 70.
+MINIMO_VELAS_1D = 8
+
+
+def ultimo_pregao(velas, minimo=MINIMO_VELAS_1D):
+    """As velas depois da última pausa de 5 h ou mais: o pregão em curso ou o último.
+
+    Se o pregão em curso acabou de abrir (menos de ``minimo`` velas), vem junto
+    com o anterior.
+    """
+    inicios = [0] + [i for i in range(1, len(velas))
+                     if velas[i]["t"] - velas[i - 1]["t"] >= PAUSA_ENTRE_PREGOES_S]
+    inicio = inicios[-1]
+    if len(velas) - inicio < minimo and len(inicios) > 1:
+        inicio = inicios[-2]
     return velas[inicio:]
 
 

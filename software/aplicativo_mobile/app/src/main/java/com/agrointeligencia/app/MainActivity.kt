@@ -1841,6 +1841,18 @@ fun eixoRedondo(min: Double, max: Double, divisoes: Int = 4): List<Double> {
     return generateSequence(inicio) { it + passo }.takeWhile { it <= fim + passo / 2 }.toList()
 }
 
+/**
+ * Faixa do eixo de preço com pelo menos 1% do preço. Num pregão calmo, ou com
+ * poucas velas, a faixa dos dados é de centavos, e o eixo ajustado a ela fazia
+ * um movimento de R$ 0,10 parecer uma queda enorme.
+ */
+fun faixaDoEixo(min: Double, max: Double, fracaoMinima: Double = 0.01): Pair<Double, Double> {
+    val minimo = (min + max) / 2 * fracaoMinima
+    if (max - min >= minimo) return min to max
+    val meio = (min + max) / 2
+    return (meio - minimo / 2) to (meio + minimo / 2)
+}
+
 /** Rótulo de uma marca: sem casas quando o passo é inteiro ("136"), com duas quando não. */
 fun rotuloEixo(v: Double, marcas: List<Double>): String {
     val passo = if (marcas.size > 1) marcas[1] - marcas[0] else 1.0
@@ -1860,7 +1872,8 @@ fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
     val cPara = corPara(isDark)
     val minDado = minOf(velas.minOf { it.l }, velas.mapNotNull { it.pa }.minOrNull() ?: Double.MAX_VALUE)
     val maxDado = maxOf(velas.maxOf { it.h }, velas.mapNotNull { it.pa }.maxOrNull() ?: -Double.MAX_VALUE)
-    val marcas = eixoRedondo(minDado, maxDado)
+    val (minEixo, maxEixo) = faixaDoEixo(minDado, maxDado)
+    val marcas = eixoRedondo(minEixo, maxEixo)
     val minP = marcas.first()
     val maxP = marcas.last()
     val faixa = if (maxP > minP) maxP - minP else 1.0
@@ -1907,7 +1920,9 @@ fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
         val w = size.width - padX
         val h = size.height - padY
         val passo = w / velas.size
-        val corpo = (passo * 0.6f).coerceAtLeast(1f)
+        // Com poucas velas (o pregão noturno acabou de abrir), cada uma ocupava
+        // a largura do gráfico; o corpo agora tem largura máxima.
+        val corpo = (passo * 0.6f).coerceIn(1f, 10.dp.toPx())
         fun y(p: Double) = (h - ((p - minP) / faixa * h)).toFloat()
         val paint = Paint().apply { color = corTexto.toArgb(); textSize = 11.sp.toPx(); isAntiAlias = true }
         val yUltima = y(ultima.c)

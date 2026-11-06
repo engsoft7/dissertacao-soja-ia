@@ -1,0 +1,197 @@
+{
+ "em": "06/11/2026 14:40",
+ "conferencias": [
+  {
+   "grupo": "Municípios",
+   "item": "lista da API × sedes do app",
+   "situacao": "ok",
+   "app": 38,
+   "fonte": 38,
+   "nota": ""
+  },
+  {
+   "grupo": "API",
+   "item": "respostas dos 38 municípios",
+   "situacao": "ok",
+   "app": null,
+   "fonte": null,
+   "nota": ""
+  },
+  {
+   "grupo": "Produtividade (IBGE)",
+   "item": "451 safras município a município",
+   "situacao": "divergente",
+   "app": null,
+   "fonte": null,
+   "nota": "Altamira 2001: IBGE 2000, ausente no app; Altamira 2002: IBGE 2000, ausente no app; Altamira 2003: IBGE 2000, ausente no app; Altamira 2004: IBGE 2000, ausente no app; Altamira 2005: IBGE 2000, ausente no app; Altamira 2006: IBGE 2000, ausente no app; Altamira 2007: IBGE 2000, ausente no app; Altamira 2008: IBGE 2700, ausente no app; Altamira 2009: IBGE 2700, ausente no app; Altamira 2010: IBGE 2700, ausente no app; Altamira 2013: IBGE 2700, ausente no app; Brejo Grande do Araguaia 2019: IBGE 3180, ausente no app; Conceição do Araguaia 2011: IBGE 3300, ausente no app; Floresta do Araguaia 2008: IBGE 3000, ausente no app; Floresta do Araguaia 2009: IBGE 3000, ausente no app; Marabá 2004: IBGE 1400, ausente no app; Marabá 2006: IBGE 2000, ausente no app; Marabá 2013: IBGE 2700, ausente no app; Marabá 2014: IBGE 2700, ausente no app; Marabá 2016: IBGE 3100, ausente no app; Marabá 2017: IBGE 3100, ausente no app; Marabá 2018: IBGE 3100, ausente no app; Marabá 2019: IBGE 3100, ausente no app; Marabá 2020: IBGE 1895, ausente no app; Novo Progresso 2004: IBGE 1800, ausente no app; Novo Progresso 2008: IBGE 3000, ausente no app; Novo Progresso 2009: IBGE 3000, ausente no app; Novo Progresso 2012: IBGE 3000, ausente no app; Pau D'Arco 2007: IBGE 3000, ausente no app; Pau D'Arco 2008: IBGE 2700, ausente no app; Pau D'Arco 2009: IBGE 3000, ausente no app; Pau D'Arco 2010: IBGE 3000, ausente no app; Pau D'Arco 2016: IBGE 3180, ausente no app; Pau D'Arco 2020: IBGE 3000, ausente no app; Pau D'Arco 2021: IBGE 1893, ausente no app; Pau D'Arco 2022: IBGE 1893, ausente no app; Pau D'Arco 2023: IBGE 3200, ausente no app; Pau D'Arco 2024: IBGE 3000, ausente no app; Pau D'Arco 2025: IBGE 3700, ausente no app; Placas 2006: IBGE 3000, ausente no app"
+  },
+  {
+   "grupo": "Praças do Pará (Agrolink)",
+   "item": "Barcarena",
+   "situacao": "ok",
+   "app": "R$ 149.50 em 2026-11-06",
+   "fonte": "R$ 149.50 em 2026-11-06",
+   "nota": ""
+  },
+  {
+   "grupo": "Praças do Pará (Agrolink)",
+   "item": "Paragominas",
+   "situacao": "ok",
+   "app": "R$ 133.12 em 2026-10-05",
+   "fonte": "R$ 133.12 em 2026-10-05",
+   "nota": ""
+  },
+  {
+   "grupo": "Praças do Pará (Agrolink)",
+   "item": "Redenção",
+   "situacao": "ok",
+   "app": "R$ 149.50 em 2026-11-06",
+   "fonte": "R$ 149.50 em 2026-11-06",
+   "nota": ""
+  },
+  {
+   "grupo": "Chicago (CBOT)",
+   "item": "R$/saca",
+   "situacao": "ok",
+   "app": "R$ 143.90",
+   "fonte": "R$ 143.93",
+   "nota": "diferença -0.02% (as duas leituras têm minutos de distância)"
+  },
+  {
+   "grupo": "Chicago (CBOT)",
+   "item": "conversão da própria API",
+   "situacao": "ok",
+   "app": "R$ 143.90",
+   "fonte": "R$ 143.90",
+   "nota": "US$/bushel × 2,2046 bushels/saca × câmbio"
+  },
+  {
+   "grupo": "Média do Pará estimada",
+   "item": "Chicago + base",
+   "situacao": "ok",
+   "app": "R$ 144.00",
+   "fonte": "R$ 144.00",
+   "nota": "base de 2026-11: R$ +0.10"
+  },
+  {
+   "grupo": "Custo e preço (CONAB)",
+   "item": "custo_ha",
+   "situacao": "ok",
+   "app": 5277.12,
+   "fonte": 5277.12,
+   "nota": "levantamento MAR-2026 de Pedro Afonso (TO)"
+  },
+  {
+   "grupo": "Custo e preço (CONAB)",
+   "item": "soja_preco_saca",
+   "situacao": "ok",
+   "app": 105.09,
+   "fonte": 105.09,
+   "nota": "levantamento MAR-2026 de Pedro Afonso (TO)"
+  },
+  {
+   "grupo": "Custo e preço (CONAB)",
+   "item": "custo_area_ha",
+   "situacao": "ok",
+   "app": 5042.88,
+   "fonte": 5042.88,
+   "nota": "levantamento MAR-2026 de Pedro Afonso (TO)"
+  },
+  {
+   "grupo": "Custo e preço (CONAB)",
+   "item": "custo_transporte_saca",
+   "situacao": "ok",
+   "app": 3.3,
+   "fonte": 3.3,
+   "nota": "levantamento MAR-2026 de Pedro Afonso (TO)"
+  },
+  {
+   "grupo": "Custo e preço (CONAB)",
+   "item": "taxa_cessr",
+   "situacao": "ok",
+   "app": 0.015,
+   "fonte": 0.015,
+   "nota": "levantamento MAR-2026 de Pedro Afonso (TO)"
+  },
+  {
+   "grupo": "Custo e preço (CONAB)",
+   "item": "levantamento × série do portal",
+   "situacao": "ok",
+   "app": "R$ 105.09/sc; R$ 5277.12/ha",
+   "fonte": "R$ 105.09/sc; (24.91 + 85.03) × 48 sc",
+   "nota": ""
+  },
+  {
+   "grupo": "Custo e preço (CONAB)",
+   "item": "componentes somam o custo da CONAB (48 sc/ha)",
+   "situacao": "ok",
+   "app": "R$ 5276.94",
+   "fonte": "R$ 5277.12",
+   "nota": ""
+  },
+  {
+   "grupo": "Custo e preço (CONAB)",
+   "item": "mesmo levantamento nos 38 municípios",
+   "situacao": "ok",
+   "app": null,
+   "fonte": null,
+   "nota": "1 combinação(ões) de custo e preço"
+  },
+  {
+   "grupo": "Custo e preço (CONAB)",
+   "item": "idade do levantamento",
+   "situacao": "ok",
+   "app": 8,
+   "fonte": "MAR-2026",
+   "nota": "meses desde o levantamento; o app avisa o produtor"
+  },
+  {
+   "grupo": "Avisos (INMET)",
+   "item": "Paragominas",
+   "situacao": "ok",
+   "app": 0,
+   "fonte": 0,
+   "nota": ""
+  },
+  {
+   "grupo": "Avisos (INMET)",
+   "item": "Redenção",
+   "situacao": "ok",
+   "app": 1,
+   "fonte": 1,
+   "nota": ""
+  },
+  {
+   "grupo": "Avisos (INMET)",
+   "item": "Santarém",
+   "situacao": "ok",
+   "app": 0,
+   "fonte": 0,
+   "nota": ""
+  },
+  {
+   "grupo": "Avisos (INMET)",
+   "item": "Dom Eliseu",
+   "situacao": "ok",
+   "app": 0,
+   "fonte": 0,
+   "nota": ""
+  },
+  {
+   "grupo": "Avisos (INMET)",
+   "item": "Novo Progresso",
+   "situacao": "ok",
+   "app": 1,
+   "fonte": 1,
+   "nota": ""
+  },
+  {
+   "grupo": "Avisos (INMET)",
+   "item": "Altamira",
+   "situacao": "ok",
+   "app": 1,
+   "fonte": 1,
+   "nota": ""
+  }
+ ]
+}

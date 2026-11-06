@@ -15,9 +15,10 @@ tabelas completas estão nas pastas ao lado, e as capturas de tela na branch
 | Privacidade e segurança | backup copiava fotos e valores para o Google Drive; permissão sem uso; links do mapa presos no app | corrigidos; política de privacidade atualizada |
 | API: robustez | nenhuma entrada estranha virou erro 500; nada refletido em HTML; HTTP vai para HTTPS | idem, e CORS sem credenciais |
 | API: desempenho | 30 aberturas simultâneas: p95 de 29,6 s | histórico guardado por município (12 ms por resposta) |
-| App: tamanho e partida | R8 desligado: 12 MB de código sem enxugar | R8 ligado: APK 28% menor, partida 3,5 vezes mais rápida |
-| App: percurso, sem internet, monkey | ver abaixo | ver abaixo |
-| Acessibilidade | ver abaixo | ver abaixo |
+| App: tamanho e memória | R8 desligado: 12 MB de código sem enxugar | R8 ligado: APK 28% menor, 35 a 40% menos memória |
+| App: percurso, sem internet, monkey | tudo passa; com sinal fraco, o aviso de sem conexão levava até 1 min | tudo passa; aviso na hora |
+| App: fonte do sistema em 200% | rótulos das abas quebrados, textos encavalados no Resumo e no Mercado | corrigidos |
+| App: coerência | simulador na safra 2026 com o Resumo em 2027 | mesma safra |
 
 ## 1. Números
 
@@ -79,11 +80,65 @@ Todas vêm comprimidas pelo Cloudflare do Render.
 
 ## 5. App em emuladores
 
-PENDENTE
+`teste-premium.yml`, três emuladores com a tela de um Pixel 6 (411 × 914 dp) e
+a API em produção: Android 8 (API 26, o mínimo do app) e Android 14 (API 34)
+com a 2.7.4, e Android 14 com a 2.7.3 publicada (o AAB do Release, convertido
+em APK universal). Capturas na branch `teste-premium-capturas`.
+
+**Percurso** (`teste_aparelho.py`, app de release por adb): escolher Pau
+D'Arco na busca, Resumo na safra 2027 com a safra 2025 do IBGE, as cinco abas,
+Estimativa no campo e Tempo. Passa nas três versões, e também com fonte em
+200%, modo escuro, tela pequena (360 × 640 dp) e tablet (800 × 1.280 dp).
+
+**Sem internet** (modo avião conferido com ping): o app abre com os dados
+guardados, avisa "Sem conexão: mostrando os dados guardados em…", o Mapa
+explica que precisa de conexão, e a Estimativa no campo funciona, nas três
+versões. Um caso que o emulador não reproduz: rede que existe e não navega
+(sinal fraco, Wi-Fi com login). Nele a 2.7.3 só avisa quando a chamada à API
+cai no tempo limite de 60 s, que existe para o servidor do Render acordar; a
+2.7.4 pergunta ao Android se a rede foi validada e avisa na hora, sem deixar de
+tentar.
+
+**Monkey**: 3.000 toques, arrastos e teclas aleatórios em cada emulador, sem
+nenhuma falha nem ANR.
+
+**Desempenho**, Android 14, a mesma tela e a mesma API:
+
+| Medida | 2.7.3 | 2.7.4 |
+|---|---|---|
+| APK universal | 38,6 MB | 27,6 MB |
+| Memória (PSS) no Resumo | 61,9 MB | 36,8 MB |
+| Memória depois das cinco abas | 108,6 MB | 87,0 MB |
+| Dados de Pau D'Arco na tela, depois da escolha | 5,2 s | 5,7 s |
+
+A memória e o tamanho repetiram nas duas rodadas (na primeira, 57,5 contra
+39,9 MB no Resumo). A partida a frio e a fluidez da rolagem não: os emuladores
+do Actions desenham sem GPU, e as duas rodadas deram resultados opostos para a
+partida (0,7 contra 1,3 s numa, 1,6 contra 0,8 s na outra). Esses números
+valem no Android vitals do Play Console, depois da publicação.
 
 ## 6. Acessibilidade
 
-PENDENTE
+Duas fontes: as verificações do Accessibility Test Framework do Google em cada
+tela do `PercursoNoAparelhoTest` (as mesmas do Scanner de Acessibilidade:
+contraste, tamanho de alvo, rótulos, texto cortado) e a árvore de
+acessibilidade de cada captura do `teste_aparelho.py` (alvos menores que
+48 dp e botões sem rótulo).
+
+ATF_PENDENTE
+
+Pelas capturas com a fonte do sistema em 200%, três defeitos, todos já na
+2.7.3 e corrigidos na 2.7.4:
+
+| Tela | Defeito | Correção |
+|---|---|---|
+| Barra de abas | "Resu/mo", "Histór/ico", "Merca/do": o rótulo quebrava no meio da palavra | uma linha, fonte crescendo até 1,15 vez; o ícone segue ao lado |
+| Resumo | "Safra 2025, IBGE" encostava em "Em relação a 2025" ("IBGEEm") | cada coluna com metade da largura |
+| Mercado | o nome da praça ficava com uma letra de largura ("B-a-r-c-a-r-e-n-a") | com fonte grande, a data desce para baixo do preço |
+
+E um de coerência: o simulador climático do Resumo dizia "Projeção com o
+cenário, safra 2026" e outro número, logo abaixo de "Resumo Agronômico (safra
+2027)". O app manda a safra em curso, e a API simula nela.
 
 ## 7. O que este relatório não cobre
 

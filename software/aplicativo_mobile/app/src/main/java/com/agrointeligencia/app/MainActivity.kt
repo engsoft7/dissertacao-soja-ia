@@ -152,13 +152,19 @@ fun RotuloAba(texto: String) {
          overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
 }
 
-/** O celular tem agora alguma rede com Internet? Sem resposta do sistema, supõe que sim. */
+/**
+ * O celular tem agora uma rede que chega à Internet? Sem rede nenhuma a chamada
+ * à API falha logo; o caso lento é a rede que existe e não navega (sinal fraco
+ * no campo, Wi-Fi com login), em que a chamada só cai no tempo limite. O Android
+ * marca essa rede como não validada. Sem resposta do sistema, supõe que sim.
+ */
 fun temRede(context: Context): Boolean {
     val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
         ?: return true
     val rede = cm.activeNetwork ?: return false
     val capacidades = cm.getNetworkCapabilities(rede) ?: return false
-    return capacidades.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    return capacidades.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+        capacidades.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 }
 
 @Composable
@@ -330,9 +336,10 @@ fun AgroDashboard() {
         previsaoEm = if (guardada != null) sharedPrefs.getLong("previsao_${mun}_em", 0L) else 0L
         // O "carregando" só aparece quando não há nada guardado do município.
         carregandoPrevisao = guardada == null
-        // Sem rede nenhuma, o aviso aparece na hora: antes esperava a chamada
-        // à API falhar, o que podia levar o minuto do tempo limite (que existe
-        // para o servidor do Render acordar).
+        // Sem rede que navegue, o aviso aparece na hora: antes esperava a
+        // chamada à API falhar, o que com sinal fraco levava o minuto do tempo
+        // limite (que existe para o servidor do Render acordar). A chamada
+        // segue, e o aviso some se ela der certo.
         if (!temRede(context)) isOfflineMode = true
         try {
             val resposta = RetrofitClient.getInstance().getPrevisao(mun).valida()

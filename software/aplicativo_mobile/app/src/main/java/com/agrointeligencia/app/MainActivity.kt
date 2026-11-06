@@ -61,8 +61,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 
 // OS TRÊS NÚMEROS QUE DECIDEM A MARGEM SÃO DO PRODUTOR.
 //
@@ -222,80 +231,173 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/** Amarelo de atenção com contraste de texto acima de 4,5:1 nos dois temas. */
+fun corAtencao(isDark: Boolean) = if (isDark) Color(0xFFd29922) else Color(0xFF9a6700)
+
+/**
+ * Título de seção, marcado como título para o leitor de tela: com o TalkBack,
+ * o produtor pula de uma seção a outra em vez de ouvir a tela inteira.
+ */
+@Composable
+fun TituloSecao(icone: ImageVector, texto: String, modifier: Modifier = Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.padding(bottom = 4.dp).semantics(mergeDescendants = true) { heading() }
+    ) {
+        Icon(icone, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
+        Spacer(Modifier.width(8.dp))
+        Text(texto, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+    }
+}
+
+/** Sem dados para mostrar: o que aconteceu, o que ainda funciona e o botão de tentar de novo. */
+@Composable
+fun AvisoSemDados(titulo: String, texto: String, aoTentar: () -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth().padding(24.dp)
+                .semantics { liveRegion = LiveRegionMode.Polite }
+        ) {
+            Icon(Icons.Filled.WifiOff, contentDescription = null, tint = MaterialTheme.colorScheme.error,
+                 modifier = Modifier.size(48.dp))
+            Spacer(Modifier.height(12.dp))
+            Text(titulo, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 18.sp,
+                 textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
+            Text(texto, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp, lineHeight = 20.sp,
+                 textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp, bottom = 20.dp))
+            Button(onClick = aoTentar, modifier = Modifier.heightIn(min = 48.dp)) {
+                Icon(Icons.Filled.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Tentar de novo", fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+/** Carregando, com o motivo da demora: o servidor gratuito dorme e leva até um minuto para acordar. */
+@Composable
+fun CarregandoDados(municipio: String?) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp)
+            .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }
+    ) {
+        CircularProgressIndicator()
+        Spacer(Modifier.height(12.dp))
+        Text("Carregando os dados" + (municipio?.let { " de $it" } ?: "") + "…", fontSize = 15.sp,
+             fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
+        Text("Na primeira consulta do dia o servidor pode levar até um minuto para responder.",
+             fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center,
+             lineHeight = 16.sp, modifier = Modifier.padding(top = 4.dp))
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgroDashboard() {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    val sharedPrefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
+    val gson = remember { Gson() }
+    val avisos = remember { SnackbarHostState() }
     var municipios by remember { mutableStateOf<List<String>>(emptyList()) }
-    var selectedMunicipio by remember { mutableStateOf<String?>(null) }
+    // O último município escolhido. Nulo na primeira abertura: o app pergunta
+    // qual é, em vez de abrir no primeiro da lista (Municipio.kt).
+    var selectedMunicipio by remember { mutableStateOf(sharedPrefs.getString(PREF_MUNICIPIO, null)) }
     var previsao by remember { mutableStateOf<PrevisaoResponse?>(null) }
+    var previsaoEm by remember { mutableStateOf(0L) }
     var kpis by remember { mutableStateOf<FinancaResponse?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
-    var expanded by remember { mutableStateOf(false) }
+    // Duas cargas independentes, cada uma com o seu indicador: com um só, a
+    // que terminava primeiro escondia o "carregando" da outra.
+    var carregandoLista by remember { mutableStateOf(false) }
+    var carregandoPrevisao by remember { mutableStateOf(false) }
+    val isLoading = carregandoLista || carregandoPrevisao
     var errorMsg by remember { mutableStateOf<String?>(null) }
     // Salvável: a câmera da Estimativa no campo pode levar o Android a
     // encerrar o app, e na volta ele precisa reabrir na mesma tela.
     var currentTab by rememberSaveable { mutableStateOf(0) }
     var isOfflineMode by remember { mutableStateOf(false) }
-    
-    val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
-    val sharedPrefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
-    val gson = remember { Gson() }
+    var mostrarLista by rememberSaveable { mutableStateOf(false) }
+    // Aumenta a cada "atualizar" e refaz a busca da previsão do município.
+    var recarga by remember { mutableStateOf(0) }
+
     // Previsão do tempo (Tempo.kt): vem do Open-Meteo, e não da API, e por
     // isso carrega mesmo com a API dormindo. Serve o cartão do Resumo e a tela.
     val tempo = remember { EstadoTempo(sharedPrefs) }
     val lugarTempo = tempo.lugarPara(selectedMunicipio)
     LaunchedEffect(lugarTempo) { lugarTempo?.let { tempo.carrega(it) } }
-    
+
+    // Mensagens curtas na barra de baixo; o TalkBack as lê em voz alta.
+    fun avisar(msg: String) {
+        coroutineScope.launch {
+            avisos.currentSnackbarData?.dismiss()
+            avisos.showSnackbar(msg)
+        }
+    }
+
+    fun escolherMunicipio(mun: String) {
+        selectedMunicipio = mun
+        sharedPrefs.edit().putString(PREF_MUNICIPIO, mun).apply()
+    }
+
+    // GPS para o município: a sede mais próxima entre os da lista, calculada
+    // no celular. A posição não é guardada nem enviada.
+    val leitorMunicipio = rememberLeitorDePosicao(
+        semPermissao = "Sem a permissão de localização, escolha o município na lista.",
+        aoFalhar = { avisar(it) }
+    ) { lat, lon ->
+        val candidatos = municipios.ifEmpty { SEDES_MUNICIPAIS.keys.toList() }
+        val proximo = municipioMaisProximo(lat, lon, candidatos)
+        if (proximo == null) {
+            avisar("Não foi possível achar um município da lista perto de você. Escolha na lista.")
+        } else {
+            escolherMunicipio(proximo.nome)
+            mostrarLista = false
+            avisar(fraseDoMaisProximo(proximo, candidatos.size))
+        }
+    }
+
     fun loadData() {
         errorMsg = null
-        
-        // --- 0. Proactive Render warm-up (fire-and-forget) ---
+
+        // Acorda a API do Render sem esperar a resposta.
         coroutineScope.launch {
             try { RetrofitClient.getInstance().ping() } catch (_: Exception) {}
             // Com a API acordada, confere se há modelo novo do contador de
             // vagens (no máximo uma vez por dia; ver AtualizaContador.kt).
             withContext(Dispatchers.IO) { atualizaContador(context) }
         }
-        
-        // --- 1. Optimistic Cache Load ---
+
+        // Primeiro o que está guardado, para a tela abrir na hora.
         val cachedMunStr = sharedPrefs.getString("municipios", null)
         val cachedKpiStr = sharedPrefs.getString("kpis", null)
-        
         if (cachedMunStr != null && cachedKpiStr != null) {
-            val mResponse = gson.fromJson(cachedMunStr, MunicipioResponse::class.java)
-            municipios = mResponse.municipios
-            if (municipios.isNotEmpty() && selectedMunicipio == null) {
-                selectedMunicipio = municipios[0]
-            }
+            municipios = gson.fromJson(cachedMunStr, MunicipioResponse::class.java).municipios
+            selectedMunicipio = municipioGuardadoValido(municipios, selectedMunicipio)
             kpis = gson.fromJson(cachedKpiStr, FinancaResponse::class.java)
-            // Do not assume offline yet to avoid flickering
         } else {
-            isLoading = true // Only show spinner if absolutely no data is available
+            carregandoLista = true
         }
-        
-        // --- 2. Background Sync ---
+
+        // Depois a versão do servidor, sem bloquear a tela.
         coroutineScope.launch {
             try {
                 val response = RetrofitClient.getInstance().getMunicipios()
+                // Preço e custo são os da CONAB para o estado: de um município
+                // para outro só muda o VTN, que o aplicativo não mostra.
                 val kpisResponse = RetrofitClient.getInstance().getFinancas("Paragominas")
-                
-                // Update State Silently
                 municipios = response.municipios
-                if (selectedMunicipio == null && municipios.isNotEmpty()) {
-                    selectedMunicipio = municipios[0]
-                }
+                selectedMunicipio = municipioGuardadoValido(municipios, selectedMunicipio)
                 kpis = kpisResponse
-                
-                // Save Cache
-                sharedPrefs.edit().apply {
-                    putString("municipios", gson.toJson(response))
-                    putString("kpis", gson.toJson(kpis))
-                    apply()
-                }
-                
-                isOfflineMode = false
+                sharedPrefs.edit()
+                    .putString("municipios", gson.toJson(response))
+                    .putString("kpis", gson.toJson(kpisResponse))
+                    .apply()
                 errorMsg = null
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -303,7 +405,7 @@ fun AgroDashboard() {
                     errorMsg = "Erro na API: ${e.message}"
                 }
             } finally {
-                isLoading = false
+                carregandoLista = false
             }
         }
     }
@@ -315,76 +417,103 @@ fun AgroDashboard() {
     // A Estimativa no campo e o Tempo não têm item na barra de baixo; o voltar
     // do celular leva de volta ao Resumo, de onde eles são abertos.
     BackHandler(enabled = currentTab == 5 || currentTab == 6) { currentTab = 0 }
-    
-    LaunchedEffect(selectedMunicipio) {
-        selectedMunicipio?.let { mun ->
-            // --- 1. Optimistic Cache Load ---
-            val cachedPrevStr = sharedPrefs.getString("previsao_$mun", null)
-            if (cachedPrevStr != null) {
-                previsao = gson.fromJson(cachedPrevStr, PrevisaoResponse::class.java)
-                // Se já carregou do cache, não bloqueamos o app com spinner principal
-            } else {
-                isLoading = true // Apenas mostra o spinner se for o primeiro acesso da cidade
-            }
-            
-            // --- 2. Background Sync ---
-            coroutineScope.launch {
-                try {
-                    val prevResponse = RetrofitClient.getInstance().getPrevisao(mun)
-                    previsao = prevResponse // Atualiza estado silenciosamente
-                    sharedPrefs.edit().putString("previsao_$mun", gson.toJson(prevResponse)).apply()
-                    isOfflineMode = false
-                } catch (e: Exception) {
-                    isOfflineMode = true
-                    e.printStackTrace()
-                    if (cachedPrevStr == null) {
-                        previsao = null
-                        // Optional: show a toast or error state specifically for prevision
-                    }
-                } finally {
-                    isLoading = false
-                }
-            }
+
+    // A previsão do município corre dentro do efeito, e não num escopo de fora:
+    // trocar de município cancela a busca anterior. Antes as duas corriam
+    // juntas, e a resposta do município velho, se chegasse por último, ficava
+    // na tela com o nome do novo.
+    LaunchedEffect(selectedMunicipio, recarga) {
+        val mun = selectedMunicipio
+        if (mun == null) {
+            previsao = null
+            return@LaunchedEffect
+        }
+        val guardada = sharedPrefs.getString("previsao_$mun", null)
+            ?.let { runCatching { gson.fromJson(it, PrevisaoResponse::class.java) }.getOrNull() }
+        previsao = guardada
+        previsaoEm = if (guardada != null) sharedPrefs.getLong("previsao_${mun}_em", 0L) else 0L
+        // O "carregando" só aparece quando não há nada guardado do município.
+        carregandoPrevisao = guardada == null
+        try {
+            val resposta = RetrofitClient.getInstance().getPrevisao(mun)
+            previsao = resposta
+            previsaoEm = System.currentTimeMillis()
+            sharedPrefs.edit()
+                .putString("previsao_$mun", gson.toJson(resposta))
+                .putLong("previsao_${mun}_em", previsaoEm)
+                .apply()
+            isOfflineMode = false
+            carregandoPrevisao = false
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            // Trocou de município: o efeito novo cuida do indicador.
+            throw e
+        } catch (e: Exception) {
+            e.printStackTrace()
+            isOfflineMode = true
+            carregandoPrevisao = false
         }
     }
 
+    if (mostrarLista) {
+        EscolhaMunicipioDialog(
+            municipios = municipios,
+            atual = selectedMunicipio,
+            procurandoPosicao = leitorMunicipio.procurando,
+            aoUsarPosicao = { leitorMunicipio.ler() },
+            aoEscolher = { mun ->
+                escolherMunicipio(mun)
+                mostrarLista = false
+            },
+            aoFechar = { mostrarLista = false }
+        )
+    }
+
+    fun irPara(aba: Int) {
+        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        currentTab = aba
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(avisos) },
         bottomBar = {
+            // O rótulo já diz o nome da aba: o ícone fica sem descrição, senão
+            // o leitor de tela lia "Resumo, Resumo".
             NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 NavigationBarItem(
                     selected = currentTab == 0,
-                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 0 },
-                    icon = { Icon(Icons.Filled.Home, contentDescription = "Resumo") },
+                    onClick = { irPara(0) },
+                    icon = { Icon(Icons.Filled.Home, contentDescription = null) },
                     label = { Text("Resumo") }
                 )
                 NavigationBarItem(
                     selected = currentTab == 1,
-                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 1 },
-                    icon = { Icon(Icons.Filled.LocationOn, contentDescription = "Mapa") },
+                    onClick = { irPara(1) },
+                    icon = { Icon(Icons.Filled.LocationOn, contentDescription = null) },
                     label = { Text("Mapa") }
                 )
                 @Suppress("DEPRECATION")
                 NavigationBarItem(
                     selected = currentTab == 2,
-                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 2 },
-                    icon = { Icon(Icons.Filled.List, contentDescription = "Histórico") },
+                    onClick = { irPara(2) },
+                    icon = { Icon(Icons.Filled.List, contentDescription = null) },
                     label = { Text("Histórico") }
                 )
                 NavigationBarItem(
                     selected = currentTab == 4,
-                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 4 },
-                    icon = { Icon(Icons.Filled.CandlestickChart, contentDescription = "Mercado") },
+                    onClick = { irPara(4) },
+                    icon = { Icon(Icons.Filled.CandlestickChart, contentDescription = null) },
                     label = { Text("Mercado") }
                 )
                 NavigationBarItem(
                     selected = currentTab == 3,
-                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); currentTab = 3 },
-                    icon = { Icon(Icons.Filled.Info, contentDescription = "Sobre") },
+                    onClick = { irPara(3) },
+                    icon = { Icon(Icons.Filled.Info, contentDescription = null) },
                     label = { Text("Sobre") }
                 )
             }
         }
     ) { paddingValues ->
+        val isDark = isSystemInDarkTheme()
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
             contentPadding = PaddingValues(16.dp),
@@ -392,275 +521,223 @@ fun AgroDashboard() {
             userScrollEnabled = currentTab != 1
         ) {
             item {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
-                    Icon(Icons.Filled.Agriculture, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "AgroInteligência",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                
-                if (isOfflineMode) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
-                        Icon(Icons.Filled.WifiOff, contentDescription = null, tint = Color(0xFFFF9800), modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text(text = "Exibindo dados da última vez em que esteve online", fontSize = 12.sp, color = Color(0xFFFF9800), fontWeight = FontWeight.Bold)
-                    }
-                }
-                
-                // O município só muda Resumo, Mapa e Histórico; em Mercado e
-                // Sobre o seletor ocupava a tela sem efeito.
-                if (currentTab in 0..2) {
-                    Text(text = "Município selecionado:", color = MaterialTheme.colorScheme.onBackground)
-                    
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = !expanded },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = selectedMunicipio ?: "Carregando...",
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                            modifier = Modifier.menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth()
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        Icon(Icons.Filled.Agriculture, contentDescription = null, tint = MaterialTheme.colorScheme.primary,
+                             modifier = Modifier.size(28.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "AgroInteligência",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.weight(1f).semantics { heading() }
                         )
-                        
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            municipios.forEach { mun ->
-                                DropdownMenuItem(
-                                    text = { Text(mun) },
-                                    onClick = {
-                                        selectedMunicipio = mun
-                                        expanded = false
-                                    }
-                                )
+                        if (currentTab in 0..2 && selectedMunicipio != null) {
+                            IconButton(onClick = { loadData(); recarga++ }, enabled = !isLoading) {
+                                Icon(Icons.Filled.Refresh, contentDescription = "Atualizar os dados")
                             }
                         }
                     }
-                }
 
-                // Fora do bloco da previsão de produtividade: o tempo aparece
-                // mesmo enquanto a API acorda ou quando ela falha.
-                if (currentTab == 0) {
-                    TempoResumoCard(tempo) { currentTab = 6 }
+                    if (isOfflineMode) {
+                        val cor = corAtencao(isDark)
+                        val quando = previsaoEm.takeIf { it > 0 }?.let {
+                            java.text.SimpleDateFormat("dd/MM 'às' HH:mm", PT_BR).format(java.util.Date(it))
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }
+                        ) {
+                            Icon(Icons.Filled.WifiOff, contentDescription = null, tint = cor, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = if (quando != null) "Sem conexão: mostrando os dados guardados em $quando."
+                                       else "Sem conexão: mostrando os últimos dados guardados.",
+                                fontSize = 12.sp, color = cor, fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    // O município só muda Resumo, Mapa e Histórico; em Mercado e
+                    // Sobre o seletor ocupava a tela sem efeito.
+                    if (currentTab in 0..2) {
+                        if (selectedMunicipio == null) {
+                            BoasVindasMunicipio(
+                                procurandoPosicao = leitorMunicipio.procurando,
+                                aoUsarPosicao = { leitorMunicipio.ler() },
+                                aoAbrirLista = { mostrarLista = true }
+                            )
+                        } else {
+                            SeletorMunicipio(
+                                municipio = selectedMunicipio,
+                                procurandoPosicao = leitorMunicipio.procurando,
+                                aoAbrirLista = { mostrarLista = true },
+                                aoUsarPosicao = { leitorMunicipio.ler() }
+                            )
+                        }
+                    }
+
+                    // Fora do bloco da previsão de produtividade: o tempo aparece
+                    // mesmo enquanto a API acorda ou quando ela falha.
+                    if (currentTab == 0 && lugarTempo != null) {
+                        TempoResumoCard(tempo) { currentTab = 6 }
+                    }
                 }
             }
 
-            if (currentTab == 4) {
-                // A cotação não depende da previsão do município: a aba abre
-                // mesmo quando a previsão ainda não carregou ou falhou.
-                item {
+            val prev = previsao
+            when {
+                currentTab == 4 -> item {
+                    // A cotação não depende da previsão do município: a aba abre
+                    // mesmo quando a previsão ainda não carregou ou falhou.
                     MercadoCard()
                 }
-            } else if (currentTab == 5) {
-                // Como o Mercado, não depende da previsão: a contagem no campo
-                // funciona sem rede. A previsão, se houver, entra para comparação.
-                item {
-                    val projecao = previsao?.historico?.maxByOrNull { it.ano }
+                currentTab == 5 -> item {
+                    // Como o Mercado, não depende da previsão: a contagem no campo
+                    // funciona sem rede. A previsão, se houver, entra para comparação.
+                    val projecao = prev?.historico?.maxByOrNull { it.ano }
                     EstimativaCampoTela(
                         precoPadrao = sharedPrefs.valorDoProdutor(PREF_PRECO) ?: kpis?.soja_preco_saca,
                         fontePreco = if (sharedPrefs.valorDoProdutor(PREF_PRECO) != null) "Seu preço, informado na Viabilidade."
                                      else kpis?.fonte_preco?.let { "Preço de referência: $it." },
                         referenciaKgHa = projecao?.rendimento_predito,
-                        rotuloReferencia = projecao?.let { "${previsao?.municipio ?: selectedMunicipio} em ${it.ano}" },
+                        rotuloReferencia = projecao?.let { "${prev?.municipio ?: selectedMunicipio} em ${it.ano}" },
                         aoVoltar = { currentTab = 0 }
                     )
                 }
-            } else if (currentTab == 6) {
-                item {
+                currentTab == 6 -> item {
                     TempoTela(tempo, selectedMunicipio) { currentTab = 0 }
                 }
-            } else if (isLoading) {
-                item {
-                    CircularProgressIndicator(modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally))
+                // O Sobre traz o aviso de não afiliação e as fontes oficiais que
+                // o Google Play exige: abre sempre, com ou sem previsão carregada.
+                currentTab == 3 -> item {
+                    MetodologiaCard(kpis, prev?.validacao)
                 }
-            } else if (errorMsg != null) {
-                item {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        modifier = Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 24.dp)
-                    ) {
+                currentTab == 1 -> item {
+                    if (isOfflineMode) {
                         Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxWidth().padding(24.dp)
+                            modifier = Modifier.fillMaxWidth().height(400.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Icon(Icons.Filled.WifiOff, contentDescription = null, tint = Color(0xFFf85149), modifier = Modifier.size(56.dp))
-                            Spacer(Modifier.height(16.dp))
-                            Text(
-                                text = "Conexão Indisponível",
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp
+                            Icon(Icons.Filled.WifiOff, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                 modifier = Modifier.size(64.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
+                            // Nunca houve imagem de satélite aqui: o mapa é vetorial,
+                            // com o contorno do Pará da malha do IBGE, rios do Natural
+                            // Earth e círculos coloridos pela produtividade observada.
+                            Text("Mapa indisponível sem conexão", fontWeight = FontWeight.Bold,
+                                 color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("O mapa é desenhado pelo servidor. Conecte-se para carregá-lo.",
+                                 color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp, textAlign = TextAlign.Center)
+                        }
+                    } else {
+                        Card(
+                            modifier = Modifier.fillParentMaxHeight(0.82f).fillMaxWidth().padding(1.dp)
+                                .semantics {
+                                    contentDescription = "Mapa da produtividade da soja nos municípios do Pará" +
+                                        (selectedMunicipio?.let { ", com $it em destaque" } ?: "")
+                                },
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            val currentTheme = if (isDark) "dark" else "light"
+                            val mapUrl = "https://agrointeligencia-api.onrender.com/api/mapa/render?theme=${currentTheme}" +
+                                (selectedMunicipio?.let { "&municipio=${URLEncoder.encode(it, "UTF-8")}" } ?: "")
+                            // Lembra a última URL para não recarregar a cada recomposição.
+                            var lastLoadedUrl by remember { mutableStateOf("") }
+                            AndroidView(
+                                factory = { ctx ->
+                                    WebView(ctx).apply {
+                                        layoutParams = android.view.ViewGroup.LayoutParams(
+                                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                                            android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                                        )
+                                        settings.javaScriptEnabled = true
+                                        settings.domStorageEnabled = true
+                                        settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+                                        setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null)
+                                        webViewClient = WebViewClient()
+                                        loadUrl(mapUrl)
+                                        lastLoadedUrl = mapUrl
+                                    }
+                                },
+                                update = { webView ->
+                                    if (mapUrl != lastLoadedUrl) {
+                                        webView.loadUrl(mapUrl)
+                                        lastLoadedUrl = mapUrl
+                                    }
+                                },
+                                modifier = Modifier.fillMaxSize()
                             )
-                            Text(
-                                text = "Não foi possível sincronizar os dados meteorológicos e do mercado futuro. Verifique sua conexão.",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 13.sp,
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                                modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
-                            )
-                            Button(
-                                onClick = { loadData() },
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                            ) {
-                                Text("Tentar Novamente", fontWeight = FontWeight.Bold)
-                            }
                         }
                     }
                 }
-            } else {
-                previsao?.let { prev ->
+                isLoading -> item {
+                    CarregandoDados(selectedMunicipio)
+                }
+                errorMsg != null -> item {
+                    AvisoSemDados(
+                        titulo = "Sem conexão com o servidor",
+                        texto = "Não foi possível baixar a lista de municípios e as estimativas. O servidor pode " +
+                                "levar até um minuto para acordar: confira a internet e tente de novo. " +
+                                "A Estimativa no campo funciona sem internet."
+                    ) { loadData(); recarga++ }
+                }
+                // Primeira abertura: o cartão de boas-vindas, lá em cima, pergunta o município.
+                selectedMunicipio == null -> {}
+                prev == null -> item {
+                    AvisoSemDados(
+                        titulo = "Sem dados de $selectedMunicipio neste celular",
+                        texto = "A estimativa deste município ainda não foi baixada. Confira a internet e tente de novo."
+                    ) { recarga++ }
+                }
+                else -> {
                     val historicoOrdenado = prev.historico.sortedByDescending { it.ano }
                     val projecao = historicoOrdenado.firstOrNull()
                     val ultimoReal = historicoOrdenado.drop(1).firstOrNull { it.rendimento_real > 0 } ?: historicoOrdenado.drop(1).firstOrNull()
 
-                    when (currentTab) {
-                        0 -> { // Resumo
-                            item {
-                                AtalhoEstimativaCampo { currentTab = 5 }
-                            }
-                            item {
-                                if (projecao != null) {
-                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 4.dp)) {
-                                        Icon(Icons.Filled.BarChart, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
-                                        Spacer(Modifier.width(8.dp))
-                                        Text(
-                                            text = "Resumo Agronômico (${projecao.ano})",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.onBackground
-                                        )
-                                    }
-                                    ResumoAgronomicoCard(projecao, ultimoReal)
-                                }
-                            }
-                            item {
-                                if (projecao != null) {
-                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)) {
-                                        Icon(Icons.Filled.SettingsSuggest, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
-                                        Spacer(Modifier.width(8.dp))
-                                        Text(
-                                            text = "Simulador de cenário climático",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.onBackground
-                                        )
-                                    }
-                                    CenarioClimaticoCard(municipio = selectedMunicipio ?: "", baselineRendimento = projecao.rendimento_predito)
-                                }
-                            }
-                            item {
-                                if (projecao != null && kpis != null) {
-                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)) {
-                                        Icon(Icons.Filled.MonetizationOn, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
-                                        Spacer(Modifier.width(8.dp))
-                                        Text(
-                                            text = "Viabilidade Financeira",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.onBackground
-                                        )
-                                    }
-                                    ResumoFinanceiroCard(projecao, kpis!!)
-                                }
-                            }
+                    if (currentTab == 0) { // Resumo
+                        item {
+                            AtalhoEstimativaCampo { currentTab = 5 }
                         }
-                        2 -> { // Histórico
+                        if (projecao != null) {
                             item {
-                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
-                                    Icon(Icons.Filled.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground)
-                                    Spacer(Modifier.width(8.dp))
-                                    Text(
-                                        text = "Histórico Completo",
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onBackground
-                                    )
-                                }
-                                Text(
-                                    text = "A estimativa das safras passadas parte do histórico " +
-                                           "do município e da tendência, com o clima médio da série. " +
-                                           "Ela não é uma previsão refeita ano a ano.",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    lineHeight = 16.sp,
-                                    modifier = Modifier.padding(top = 6.dp, bottom = 4.dp)
-                                )
+                                TituloSecao(Icons.Filled.BarChart, "Resumo Agronômico (${projecao.ano})")
+                                ResumoAgronomicoCard(projecao, ultimoReal)
                             }
-                            
+                            item {
+                                TituloSecao(Icons.Filled.SettingsSuggest, "Simulador de cenário climático",
+                                            Modifier.padding(top = 8.dp))
+                                CenarioClimaticoCard(municipio = selectedMunicipio ?: prev.municipio, baselineRendimento = projecao.rendimento_predito)
+                            }
+                            kpis?.let { k ->
                                 item {
-                                    HistoricoProdutividadeChart(historico = historicoOrdenado, previsao = previsao)
-                                }
-                                items(historicoOrdenado) { hist ->
-                                    PrevisaoCard(hist, kpis)
-                                }
-                        }
-                        3 -> { // Sobre
-                            item {
-                                MetodologiaCard(kpis, previsao?.validacao)
-                            }
-                        }
-                        1 -> { // Mapa WebView
-                            item {
-                                if (isOfflineMode) {
-                                    Column(
-                                        modifier = Modifier.fillMaxWidth().height(400.dp),
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Icon(Icons.Filled.WifiOff, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(64.dp))
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        // Nunca houve imagem de satélite aqui: o mapa é vetorial,
-                                        // com o contorno do Pará da malha do IBGE, rios do Natural
-                                        // Earth e círculos coloridos pela produtividade observada.
-                                        Text("Mapa indisponível offline", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        Text("O mapa é desenhado pela API. Conecte-se para carregá-lo.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
-                                    }
-                                } else {
-                                    Card(
-                                        modifier = Modifier.fillParentMaxHeight(0.82f).fillMaxWidth().padding(1.dp),
-                                        shape = RoundedCornerShape(12.dp)
-                                    ) {
-                                        val currentTheme = if (isSystemInDarkTheme()) "dark" else "light"
-                                        val mapUrl = "https://agrointeligencia-api.onrender.com/api/mapa/render?theme=${currentTheme}" + if (selectedMunicipio != null) "&municipio=${URLEncoder.encode(selectedMunicipio, "UTF-8")}" else ""
-                                        // Remember last loaded URL to avoid redundant reloads on recomposition
-                                        var lastLoadedUrl by remember { mutableStateOf("") }
-                                        AndroidView(
-                                            factory = { ctx ->
-                                                WebView(ctx).apply {
-                                                    layoutParams = android.view.ViewGroup.LayoutParams(
-                                                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                                                        android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                                                    )
-                                                    settings.javaScriptEnabled = true
-                                                    settings.domStorageEnabled = true
-                                                    settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
-                                                    setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null)
-                                                    webViewClient = WebViewClient()
-                                                    loadUrl(mapUrl)
-                                                    lastLoadedUrl = mapUrl
-                                                }
-                                            },
-                                            update = { webView ->
-                                                if (mapUrl != lastLoadedUrl) {
-                                                    webView.loadUrl(mapUrl)
-                                                    lastLoadedUrl = mapUrl
-                                                }
-                                            },
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
+                                    TituloSecao(Icons.Filled.MonetizationOn, "Viabilidade Financeira",
+                                                Modifier.padding(top = 8.dp))
+                                    ResumoFinanceiroCard(projecao, k)
                                 }
                             }
+                        }
+                    } else if (currentTab == 2) { // Histórico
+                        item {
+                            TituloSecao(Icons.Filled.DateRange, "Histórico Completo", Modifier.padding(top = 8.dp))
+                            Text(
+                                text = "A estimativa das safras passadas parte do histórico " +
+                                       "do município e da tendência, com o clima médio da série. " +
+                                       "Ela não é uma previsão refeita ano a ano.",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                lineHeight = 16.sp,
+                                modifier = Modifier.padding(top = 6.dp, bottom = 4.dp)
+                            )
+                        }
+                        item {
+                            HistoricoProdutividadeChart(historico = historicoOrdenado, previsao = prev)
+                        }
+                        items(historicoOrdenado) { hist ->
+                            PrevisaoCard(hist, kpis)
                         }
                     }
                 }
@@ -770,7 +847,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                 // não sustenta nenhum dos dois, e a cor é o que o produtor lê
                 // antes do número.
                 val color = when {
-                    r.sinalIncerto -> if (isDark) Color(0xFFd29922) else Color(0xFFbf8700)
+                    r.sinalIncerto -> corAtencao(isDark)
                     r.valor > 0 -> if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
                     else -> if (isDark) Color(0xFFf85149) else Color(0xFFdc2626)
                 }
@@ -862,6 +939,9 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
     val precoSalvo = remember { prefs.valorDoProdutor(PREF_PRECO) }
     val custoSalvo = remember { prefs.valorDoProdutor(PREF_CUSTO) }
     val prodSalva = remember { prefs.valorDoProdutor(PREF_PROD) }
+    // Teclado numérico nos três campos: no teclado de letras, o produtor
+    // tinha de trocar de teclado para digitar cada número.
+    val tecladoNumero = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next)
     val prodModelo = projecao.rendimento_predito / 60.0
 
     // Os três carimbos de "informado em" são estado, e os três se declaram
@@ -887,8 +967,10 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
     var customCusto by remember {
         mutableStateOf("%.2f".format(custoSalvo ?: kpis.custo_ha))
     }
-    var customProd by remember {
-        mutableStateOf("%.1f".format(prodSalva ?: prodModelo))
+    // Com a chave, o campo acompanha o município: sem ela, ao trocar de
+    // município, seguia a estimativa do anterior até o produtor redigitar.
+    var customProd by remember(prodModelo) {
+        mutableStateOf("%.1f".format(prefs.valorDoProdutor(PREF_PROD) ?: prodModelo))
     }
 
     Card(
@@ -928,7 +1010,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     text = it,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = if (isDark) Color(0xFFd29922) else Color(0xFFbf8700),
+                    color = corAtencao(isDark),
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
             }
@@ -950,6 +1032,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     label = { Text(if (temProd) "Sua produtividade (sc/ha)" else "Produtividade (sc/ha)", fontSize = 12.sp) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
+                    keyboardOptions = tecladoNumero,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9),
                         unfocusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9)
@@ -971,6 +1054,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     label = { Text(if (temPreco) "Seu preço (R$/sc)" else "Preço da saca (R$)", fontSize = 12.sp) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
+                    keyboardOptions = tecladoNumero,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9),
                         unfocusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9)
@@ -997,6 +1081,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     label = { Text(if (temCusto) "Seu custo/ha (R$)" else "Custo/ha (R$)", fontSize = 12.sp) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9),
                         unfocusedContainerColor = if (isDark) Color(0xFF161b22) else Color(0xFFF1F5F9)
@@ -1072,20 +1157,21 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
             val lucro = r.valor
             val roi = if (custo > 0) (lucro / custo) * 100 else 0.0
             val profitColor = when {
-                r.sinalIncerto -> if (isDark) Color(0xFFd29922) else Color(0xFFbf8700)
+                r.sinalIncerto -> corAtencao(isDark)
                 lucro >= 0 -> if (isDark) Color(0xFF3fb950) else Color(0xFF16a34a)
                 else -> if (isDark) Color(0xFFf85149) else Color(0xFFdc2626)
             }
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text(text = if (temProd) "Receita Bruta" else "Receita Bruta Est.",
+                    Text(text = if (temProd) "Receita bruta" else "Receita bruta estimada",
                          fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = "R$ ${receita.toInt()}/ha", fontSize = 18.sp, color = (if(isDark) Color(0xFF58a6ff) else Color(0xFF2563eb)), fontWeight = FontWeight.Bold)
+                    Text(text = "R$ ${milhar(receita)}/ha", fontSize = 18.sp, color = (if(isDark) Color(0xFF58a6ff) else Color(0xFF2563eb)), fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "Custo Operacional", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = "R$ ${custo.toInt()}/ha", fontSize = 18.sp, color = Color(0xFFf85149), fontWeight = FontWeight.Bold)
+                    Text(text = "Custo operacional", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = "R$ ${milhar(custo)}/ha", fontSize = 18.sp,
+                         color = if (isDark) Color(0xFFf85149) else Color(0xFFdc2626), fontWeight = FontWeight.Bold)
                 }
             }
             
@@ -1093,11 +1179,11 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text(text = "Lucro Líquido Proj.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = "R$ ${lucro.toInt()}/ha", fontSize = 22.sp, color = profitColor, fontWeight = FontWeight.ExtraBold)
+                    Text(text = "Lucro líquido projetado", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = "R$ ${milhar(lucro)}/ha", fontSize = 22.sp, color = profitColor, fontWeight = FontWeight.ExtraBold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "ROI (Retorno)", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = "Retorno sobre o custo", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "${roi.toInt()}%", fontSize = 22.sp, color = profitColor, fontWeight = FontWeight.ExtraBold)
                 }
             }
@@ -1107,15 +1193,17 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                     text = String.format(PT_BR, "Atenção: com estes dados o resultado pode ir de R$ %,d a R$ %,d por hectare, conforme quanto do custo variável acompanha a área e quanto acompanha a produção. A CONAB publica só o total por saca, sem abrir por item. Informe o seu custeio para a conta parar de depender disso.", 
                         minOf(lucro, outroRateio).toInt(), maxOf(lucro, outroRateio).toInt()),
                     fontSize = 12.sp,
-                    color = if (isDark) Color(0xFFd29922) else Color(0xFFbf8700),
+                    color = corAtencao(isDark),
                     modifier = Modifier.padding(top = 12.dp)
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Simulação Inteligente", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(text = "Ponto Empate: ${(custo / preco).toInt()} sc/ha", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // O ponto de equilíbrio arredonda para cima: com 54,2 sacas de
+            // equilíbrio, 54 ainda dá prejuízo.
+            if (preco > 0) {
+                Text(text = "Ponto de equilíbrio: ${kotlin.math.ceil(custo / preco).toInt()} sc/ha para cobrir o custo",
+                     fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -1124,12 +1212,15 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
 @Composable
 fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
     val isDark = isSystemInDarkTheme()
-    var precipFactor by remember { mutableStateOf(100f) }
-    var tempOffset by remember { mutableStateOf(0f) }
-    var delta by remember { mutableStateOf(0.0) }
-    var simulado by remember { mutableStateOf(baselineRendimento) }
+    // Tudo volta ao padrão quando o município muda: sem a chave, o cartão
+    // seguia com a estimativa e o cenário do município anterior.
+    var precipFactor by remember(municipio, baselineRendimento) { mutableStateOf(100f) }
+    var tempOffset by remember(municipio, baselineRendimento) { mutableStateOf(0f) }
+    var delta by remember(municipio, baselineRendimento) { mutableStateOf(0.0) }
+    var simulado by remember(municipio, baselineRendimento) { mutableStateOf(baselineRendimento) }
     var isSimulating by remember { mutableStateOf(false) }
-    var resposta by remember { mutableStateOf<SimulacaoResponse?>(null) }
+    var resposta by remember(municipio, baselineRendimento) { mutableStateOf<SimulacaoResponse?>(null) }
+    var falhou by remember(municipio, baselineRendimento) { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     val haptic = LocalHapticFeedback.current
@@ -1143,8 +1234,12 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                 simulado = resp.estimativa_kg_ha
                 delta = resp.delta_kg_ha
                 resposta = resp
+                falhou = false
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 e.printStackTrace()
+                falhou = true
             } finally {
                 isSimulating = false
             }
@@ -1159,7 +1254,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Projeção Ajustada", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = "Projeção com o cenário", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (isSimulating) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                 }
@@ -1181,8 +1276,14 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
 
             Spacer(modifier = Modifier.height(16.dp))
             
-            Text(text = "Precipitação (${precipFactor.toInt()}%)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // O leitor de tela anunciava a posição do controle ("50 por cento"
+            // no meio da faixa), e não o valor: a descrição diz o cenário.
+            val chuva = "${precipFactor.roundToInt()}% da chuva média"
+            val temperatura = if (kotlin.math.abs(tempOffset) < 0.05f) "temperatura média"
+                              else String.format(PT_BR, "%+.1f °C na temperatura média", tempOffset)
+            Text(text = "Chuva: $chuva", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Slider(
+                modifier = Modifier.semantics { contentDescription = "Chuva da safra"; stateDescription = chuva },
                 value = precipFactor,
                 onValueChange = { precipFactor = it },
                 onValueChangeFinished = { simular() },
@@ -1190,8 +1291,9 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                 steps = 19
             )
             
-            Text(text = "Desvio Térmico (${if (tempOffset > 0) "+" else ""}${String.format("%.1f", tempOffset)}°C)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = "Temperatura: $temperatura", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Slider(
+                modifier = Modifier.semantics { contentDescription = "Temperatura da safra"; stateDescription = temperatura },
                 value = tempOffset,
                 onValueChange = { tempOffset = it },
                 onValueChangeFinished = { simular() },
@@ -1199,6 +1301,13 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
                 steps = 9
             )
 
+            if (falhou) {
+                Text(
+                    text = "Não foi possível simular agora. Confira a internet e mova o controle de novo.",
+                    fontSize = 12.sp, color = corAtencao(isDark), fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(top = 8.dp).semantics { liveRegion = LiveRegionMode.Polite }
+                )
+            }
             // O simulador precisa declarar o que pode prometer. A associação
             // entre chuva e produtividade nesta base não é distinguível de
             // zero, e a variação que ele produz cabe dentro da margem de erro
@@ -1242,7 +1351,8 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.semantics(mergeDescendants = true) { heading() }) {
                 Icon(Icons.Filled.Verified, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.width(8.dp))
                 Text(
@@ -1272,7 +1382,7 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
                 Text(
                     text = it,
                     fontSize = 12.sp,
-                    color = if (isDark) Color(0xFFd29922) else Color(0xFFbf8700)
+                    color = corAtencao(isDark)
                 )
             }
             
@@ -1336,6 +1446,8 @@ fun reais(v: Double): String = String.format(PT_BR, "%,.2f", v)
 
 // Períodos da tela Mercado: chave da API e rótulo do botão.
 private val PERIODOS_MERCADO = listOf("1d" to "1D", "5d" to "5D", "1mo" to "1M", "6mo" to "6M")
+// "1D" lido em voz alta não diz nada; o leitor de tela lê o período por extenso.
+private val PERIODOS_POR_EXTENSO = mapOf("1d" to "1 dia", "5d" to "5 dias", "1mo" to "1 mês", "6mo" to "6 meses")
 
 /** Busca a cotação e entrega à tela; a tela em si é MercadoConteudo. */
 @Composable
@@ -1384,7 +1496,8 @@ fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: Str
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PERIODOS_MERCADO.forEach { (chave, rotulo) ->
                     FilterChip(selected = periodo == chave, onClick = { aoMudarPeriodo(chave) },
-                               label = { Text(rotulo) })
+                               label = { Text(rotulo) },
+                               modifier = Modifier.semantics { contentDescription = PERIODOS_POR_EXTENSO[chave] ?: rotulo })
                 }
             }
             Spacer(Modifier.height(10.dp))

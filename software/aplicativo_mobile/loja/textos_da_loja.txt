@@ -12,6 +12,7 @@ AVISO: o AgroInteligência NÃO é um aplicativo do governo e não representa ne
 PRODUTIVIDADE DO SEU MUNICÍPIO
 • Estimativa da produtividade da próxima safra para 38 municípios paraenses, sempre com a margem de erro.
 • Histórico de produtividade do IBGE desde 2001, com as safras de El Niño e La Niña destacadas.
+• O app lembra o seu município e pode achar o mais próximo pela localização do celular.
 
 TEMPO NA LAVOURA
 • Condições de agora e previsão para os próximos 7 dias, na sede do município ou na sua localização.

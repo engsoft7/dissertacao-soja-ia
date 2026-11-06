@@ -1,6 +1,6 @@
 # Política de privacidade do aplicativo AgroInteligência
 
-Última atualização: 30 de outubro de 2026.
+Última atualização: 5 de novembro de 2026.
 
 O AgroInteligência é um aplicativo gratuito, sem anúncios e sem cadastro,
 desenvolvido como produto técnico de dissertação do Programa de Pós-Graduação
@@ -22,6 +22,12 @@ nem de publicidade.
   toque em exportar e escolha para onde enviar o arquivo .zip.
 - **Posição do GPS para medir a área do talhão.** Usada só com a tela aberta,
   para calcular a área; não é enviada.
+- **Município escolhido**, para o aplicativo abrir nele da próxima vez.
+- **Posição do GPS para achar o município mais próximo.** Lida só quando o
+  produtor toca em "Usar minha localização" na escolha do município. A sede
+  mais próxima é calculada no próprio celular; a posição não é guardada nem
+  enviada, e só o nome do município escolhido segue para a API, como na
+  escolha pela lista.
 
 ## O que sai do celular, para quê e para onde
 
@@ -47,8 +53,9 @@ celular; a previsão volta então à sede do município.
 
 ## Permissões
 
-- **Localização:** medir a área do talhão e, se o produtor pedir, a previsão
-  do tempo no lugar dele. Só com o aplicativo aberto.
+- **Localização:** medir a área do talhão, achar o município mais próximo e,
+  se o produtor pedir, a previsão do tempo no lugar dele. Só com o aplicativo
+  aberto, e só depois de o produtor tocar no botão correspondente.
 - **Internet:** buscar estimativas, cotações, previsão do tempo, avisos e
   versões novas do modelo de contagem de vagens. O modelo baixado só é usado
   depois de conferido (tamanho e resumo SHA-256 anunciados); as fotos

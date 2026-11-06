@@ -2,6 +2,8 @@ package com.agrointeligencia.app
 
 import android.widget.ImageView
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -206,6 +208,24 @@ class CapturasDeTelaTest {
     }
 
     @Test fun aviso_inmet_claro() = captura("aviso_inmet", false) { CartaoAvisos(avisoExemplo) }
+
+    // Escolha do município (2.7.0): o cartão da primeira abertura, o seletor
+    // com o botão do GPS e a lista com busca, filtrada por "pa".
+    @Composable
+    private fun telaMunicipio() {
+        val lista = SEDES_MUNICIPAIS.keys.sortedWith(java.text.Collator.getInstance(java.util.Locale("pt", "BR")))
+        BoasVindasMunicipio(procurandoPosicao = false, aoUsarPosicao = {}, aoAbrirLista = {})
+        Spacer(Modifier.height(16.dp))
+        SeletorMunicipio("Paragominas", procurandoPosicao = false, aoAbrirLista = {}, aoUsarPosicao = {})
+        Spacer(Modifier.height(16.dp))
+        ListaDeMunicipios(lista, atual = "Paragominas", busca = "pa", aoBuscar = {}, aoEscolher = {})
+    }
+
+    @Config(qualifiers = "w411dp-h1100dp-xxhdpi")
+    @Test fun municipio_claro() = captura("municipio", false) { telaMunicipio() }
+
+    @Config(qualifiers = "w411dp-h1100dp-night-xxhdpi")
+    @Test fun municipio_escuro() = captura("municipio", true) { telaMunicipio() }
 
     // O ícone do launcher, montado pelo próprio Android a partir do
     // adaptive-icon: confere que as três camadas compilam e se encaixam.

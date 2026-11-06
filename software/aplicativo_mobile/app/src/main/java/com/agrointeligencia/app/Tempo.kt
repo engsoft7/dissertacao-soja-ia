@@ -1,17 +1,7 @@
 package com.agrointeligencia.app
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.graphics.Paint
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
-import android.os.Looper
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -33,14 +23,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -434,67 +422,16 @@ fun TempoTela(estado: EstadoTempo, municipio: String?, aoVoltar: () -> Unit) {
 }
 
 /** Sede do município ou posição do GPS, e o botão de atualizar. */
-@SuppressLint("MissingPermission") // a permissão é conferida antes de pedir posições
 @Composable
 private fun EscolhaDoLugar(estado: EstadoTempo, municipio: String?, aoAtualizar: () -> Unit) {
-    val context = LocalContext.current
-    var procurando by remember { mutableStateOf(false) }
     var mensagem by remember { mutableStateOf<String?>(null) }
-    val gerente = remember { context.getSystemService(Context.LOCATION_SERVICE) as LocationManager }
-    val ouvinte = remember {
-        object : LocationListener {
-            override fun onLocationChanged(location: Location) {
-                gerente.removeUpdates(this)
-                procurando = false
-                mensagem = null
-                estado.usarPosicao(location.latitude, location.longitude)
-            }
-            // Todos os métodos, como em EstimativaCampo: até o Android 10 a
-            // interface não tinha implementação padrão para os demais.
-            override fun onProviderDisabled(provider: String) {}
-            override fun onProviderEnabled(provider: String) {}
-            @Deprecated("Exigido até o Android 10")
-            override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) {}
-        }
-    }
-    DisposableEffect(Unit) { onDispose { gerente.removeUpdates(ouvinte) } }
-
-    fun localizar() {
-        // A última posição conhecida basta se tiver menos de uma hora: a
-        // previsão tem resolução de quilômetros.
-        val recente = listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER, LocationManager.PASSIVE_PROVIDER)
-            .mapNotNull { runCatching { gerente.getLastKnownLocation(it) }.getOrNull() }
-            .maxByOrNull { it.time }
-            ?.takeIf { System.currentTimeMillis() - it.time < 60 * 60 * 1000L }
-        if (recente != null) {
-            estado.usarPosicao(recente.latitude, recente.longitude)
-            return
-        }
-        val provedor = listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER)
-            .firstOrNull { runCatching { gerente.isProviderEnabled(it) }.getOrDefault(false) }
-        if (provedor == null) {
-            mensagem = "A localização do celular está desligada. Ligue-a e toque de novo."
-            return
-        }
-        procurando = true
-        mensagem = "Procurando sua posição…"
-        try {
-            gerente.requestLocationUpdates(provedor, 0L, 0f, ouvinte, Looper.getMainLooper())
-        } catch (_: Exception) {
-            procurando = false
-            mensagem = "Não foi possível ler a posição do celular."
-        }
-    }
-
-    fun temPermissao() = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-        PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(context,
-        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-    val pedir = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-        if (temPermissao()) {
-            localizar()
-        } else {
-            mensagem = "Sem a permissão de localização, a previsão fica na sede do município."
-        }
+    // A leitura da posição é a mesma da escolha do município (Localizacao.kt).
+    val leitor = rememberLeitorDePosicao(
+        semPermissao = "Sem a permissão de localização, a previsão fica na sede do município.",
+        aoFalhar = { mensagem = it }
+    ) { lat, lon ->
+        mensagem = null
+        estado.usarPosicao(lat, lon)
     }
 
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -502,15 +439,15 @@ private fun EscolhaDoLugar(estado: EstadoTempo, municipio: String?, aoAtualizar:
                    label = { Text(municipio ?: "Município", maxLines = 1) },
                    leadingIcon = { Icon(Icons.Filled.LocationCity, contentDescription = null, modifier = Modifier.size(18.dp)) },
                    modifier = Modifier.weight(1f, fill = false))
-        FilterChip(selected = estado.usarGps, onClick = {
-                       if (temPermissao()) localizar()
-                       else pedir.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
-                   },
+        FilterChip(selected = estado.usarGps, onClick = { mensagem = null; leitor.ler() },
                    label = { Text("Minha localização", maxLines = 1) },
                    leadingIcon = { Icon(Icons.Filled.MyLocation, contentDescription = null, modifier = Modifier.size(18.dp)) })
         IconButton(onClick = aoAtualizar) { Icon(Icons.Filled.Refresh, contentDescription = "Atualizar a previsão") }
     }
-    if (procurando) LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
+    if (leitor.procurando) {
+        LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
+        Text("Procurando sua posição…", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
     mensagem?.let { Text(it, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
 }
 
@@ -636,7 +573,7 @@ private fun CartaoAgora(a: TempoAtual, hoje: DiaTempo?) {
         }
         Text("Vento a 10 m de altura, como os modelos publicam. UV pela escala da OMS: de 8 para cima " +
              "(muito alto), proteja quem trabalha ao sol.",
-             fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 14.sp,
+             fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp,
              modifier = Modifier.padding(top = 8.dp))
     }
 }
@@ -770,7 +707,7 @@ private fun CartaoPulverizacao(horas: List<HoraPulverizacao>, agora: LocalDateTi
              "de 3 a 8 km/h (até 10 km/h só com ponta antideriva) e sem chuva nas 2 horas seguintes. O vento " +
              "na lavoura é o de 10 m reduzido a 2 m de altura (FAO-56). Toque numa hora para ver os números. " +
              "Confira na bula o intervalo sem chuva do produto e as condições no local antes de aplicar.",
-             fontSize = 11.sp, color = corTexto, lineHeight = 14.sp, modifier = Modifier.padding(top = 8.dp))
+             fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 8.dp))
     }
 }
 
@@ -857,6 +794,6 @@ private fun CartaoChuva(lista: List<DiaTempo>, hoje: LocalDate) {
         Text("Barras claras: chuva estimada pelos modelos nos dias passados (não é medida de pluviômetro); " +
              "escuras: prevista. A evapotranspiração de referência (FAO-56) é a de um gramado bem regado; a da " +
              "soja muda com a fase da cultura.",
-             fontSize = 11.sp, color = corTexto, lineHeight = 14.sp, modifier = Modifier.padding(top = 6.dp))
+             fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 6.dp))
     }
 }

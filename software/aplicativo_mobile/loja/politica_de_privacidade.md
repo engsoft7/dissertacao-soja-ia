@@ -43,6 +43,7 @@ para o Google Drive nem passa para um celular novo na transferência de dados.
 | Nome do município escolhido | estimativa de produtividade, histórico, mapa, finanças | API do produto (servidor no Render) |
 | Posição aproximada, arredondada a cerca de 1 km: a sede do município ou, se o produtor escolher "Minha localização", a posição do GPS | previsão do tempo e janela de pulverização | Open-Meteo (open-meteo.com) |
 | A mesma posição aproximada e, quando é a sede, o código IBGE do município | avisos meteorológicos do INMET para o lugar | API do produto, que consulta o INMET |
+| Nada além da própria consulta, ao abrir a aba Mapa | as bibliotecas que desenham o mapa (Leaflet, jQuery, Bootstrap) | servidores públicos de bibliotecas: cdn.jsdelivr.net, cdnjs.cloudflare.com, code.jquery.com e netdna.bootstrapcdn.com |
 | Nada além da própria consulta, uma vez por dia | saber se há versão nova do modelo de contagem de vagens e, se houver, baixá-la | API do produto e GitHub (raw.githubusercontent.com) |
 
 Como em qualquer acesso à Internet, os servidores que recebem essas

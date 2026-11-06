@@ -13,7 +13,6 @@ from functools import lru_cache
 from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import copy
@@ -126,10 +125,6 @@ MUNICIPIOS_FORMATADOS = {
 }
 
 REVERSE_FORMATADOS = {v: k for k, v in MUNICIPIOS_FORMATADOS.items()}
-
-# Respostas comprimidas: o histórico de um município passa de 10 KB, e o
-# produtor baixa pelo celular, no campo.
-app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Enable CORS for generic clients. Sem credenciais: a API não usa cookie nem
 # login, e "*" com credenciais fazia o Starlette ecoar a origem de qualquer site.

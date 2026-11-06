@@ -1,0 +1,7 @@
+--------- beginning of main
+--------- beginning of system
+--------- beginning of crash
+11-06 18:30:33.326  4581  4599 I PERCURSO: 2s	abriu	boas-vindas
+11-06 18:33:03.551  4581  4599 I PERCURSO: 152s	FALHA	ComposeTimeoutException: Condition still not satisfied after 150000 ms
+11-06 18:33:03.642  4581  4599 I PERCURSO: a11y	01_boas_vindas	sem achados
+11-06 18:33:03.642  4581  4599 I PERCURSO: a11y	99_falha	sem achados

@@ -1,0 +1,388 @@
+8:41:46.125  system_uptime:750787]
+    // Sending event #1600
+:Sending Trackball (ACTION_MOVE): 0:(1.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,0.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+    // Rejecting start of Intent { act=android.content.pm.action.REQUEST_PERMISSIONS pkg=com.google.android.packageinstaller cmp=com.google.android.packageinstaller/com.android.packageinstaller.permission.ui.GrantPermissionsActivity } in package com.google.android.packageinstaller
+:Sending Trackball (ACTION_MOVE): 0:(4.0,2.0)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,2.0)
+:Sending Touch (ACTION_DOWN): 0:(47.0,235.0)
+:Sending Touch (ACTION_UP): 0:(46.074493,263.3863)
+:Sending Touch (ACTION_DOWN): 0:(184.0,284.0)
+:Sending Touch (ACTION_UP): 0:(190.41608,285.2867)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,2.0)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,2.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,4.0)
+    //[calendar_time:2026-11-06 18:41:47.528  system_uptime:752189]
+    // Sending event #1700
+:Sending Touch (ACTION_DOWN): 0:(286.0,310.0)
+    // Injection Failed
+    // Injection Failed
+:Sending Touch (ACTION_UP): 0:(319.76328,359.62704)
+    // Injection Failed
+:Sending Trackball (ACTION_MOVE): 0:(1.0,3.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,1.0)
+:Sending Touch (ACTION_DOWN): 0:(170.0,364.0)
+:Sending Touch (ACTION_UP): 0:(186.90036,365.00494)
+:Sending Touch (ACTION_DOWN): 0:(256.0,492.0)
+:Sending Touch (ACTION_UP): 0:(239.99915,491.98672)
+:Sending Touch (ACTION_DOWN): 0:(222.0,348.0)
+:Sending Touch (ACTION_UP): 0:(212.95662,376.0294)
+:Sending Flip keyboardOpen=false
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Trackball (ACTION_MOVE): 0:(0.0,2.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,3.0)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,1.0)
+    //[calendar_time:2026-11-06 18:41:49.315  system_uptime:753976]
+    // Sending event #1800
+:Sending Touch (ACTION_DOWN): 0:(208.0,228.0)
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+:Sending Touch (ACTION_UP): 0:(270.50317,252.83221)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(143.0,249.0)
+:Sending Touch (ACTION_UP): 0:(148.51224,257.95862)
+:Sending Touch (ACTION_DOWN): 0:(46.0,325.0)
+:Sending Touch (ACTION_UP): 0:(56.496017,301.39484)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,-1.0)
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,-5.0)
+:Sending Flip keyboardOpen=true
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Trackball (ACTION_MOVE): 0:(4.0,-5.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(19.0,586.0)
+:Sending Touch (ACTION_UP): 0:(12.882526,602.35535)
+:Sending Touch (ACTION_DOWN): 0:(203.0,166.0)
+:Sending Touch (ACTION_UP): 0:(199.45189,161.31915)
+:Sending Touch (ACTION_DOWN): 0:(214.0,446.0)
+:Sending Touch (ACTION_UP): 0:(231.02911,457.83405)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,1.0)
+:Sending Touch (ACTION_DOWN): 0:(190.0,376.0)
+:Sending Touch (ACTION_UP): 0:(181.40723,374.27957)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,-3.0)
+    //[calendar_time:2026-11-06 18:41:51.832  system_uptime:756493]
+    // Sending event #1900
+:Sending Trackball (ACTION_MOVE): 0:(1.0,4.0)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(12.0,42.0)
+:Sending Touch (ACTION_UP): 0:(21.015514,42.66795)
+:Sending Touch (ACTION_DOWN): 0:(176.0,154.0)
+:Sending Touch (ACTION_UP): 0:(167.86897,172.56897)
+:Sending Touch (ACTION_DOWN): 0:(289.0,89.0)
+:Sending Touch (ACTION_UP): 0:(275.19736,86.48861)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-3.0)
+:Sending Touch (ACTION_DOWN): 0:(136.0,545.0)
+:Sending Touch (ACTION_UP): 0:(144.11438,553.4846)
+:Sending Touch (ACTION_DOWN): 0:(98.0,413.0)
+:Sending Touch (ACTION_UP): 0:(102.90096,423.795)
+    // Rejecting start of Intent { cmp=com.google.android.inputmethod.latin/com.google.android.apps.inputmethod.libs.framework.core.PermissionsActivity } in package com.google.android.inputmethod.latin
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(31.0,446.0)
+:Sending Touch (ACTION_UP): 0:(0.0,354.14096)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-3.0)
+    //[calendar_time:2026-11-06 18:41:54.127  system_uptime:758789]
+    // Sending event #2000
+:Sending Trackball (ACTION_MOVE): 0:(3.0,3.0)
+:Sending Touch (ACTION_DOWN): 0:(11.0,462.0)
+:Sending Touch (ACTION_UP): 0:(10.373011,469.1316)
+:Sending Touch (ACTION_DOWN): 0:(177.0,188.0)
+:Sending Touch (ACTION_UP): 0:(221.40932,216.16768)
+:Sending Touch (ACTION_DOWN): 0:(5.0,338.0)
+:Sending Touch (ACTION_UP): 0:(21.949612,305.325)
+:Sending Touch (ACTION_DOWN): 0:(93.0,529.0)
+:Sending Touch (ACTION_UP): 0:(101.45019,535.50336)
+:Sending Touch (ACTION_DOWN): 0:(80.0,170.0)
+:Sending Touch (ACTION_UP): 0:(82.33991,157.9207)
+    // Rejecting start of Intent { act=android.content.pm.action.REQUEST_PERMISSIONS pkg=com.google.android.packageinstaller cmp=com.google.android.packageinstaller/com.android.packageinstaller.permission.ui.GrantPermissionsActivity } in package com.google.android.packageinstaller
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,4.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,-5.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(36.0,521.0)
+:Sending Touch (ACTION_UP): 0:(31.713066,518.485)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(98.0,485.0)
+:Sending Touch (ACTION_UP): 0:(104.885605,485.5379)
+:Sending Touch (ACTION_DOWN): 0:(227.0,393.0)
+:Sending Touch (ACTION_UP): 0:(296.14456,440.0815)
+:Sending Touch (ACTION_DOWN): 0:(239.0,516.0)
+:Sending Touch (ACTION_UP): 0:(252.15224,504.79092)
+:Sending Touch (ACTION_DOWN): 0:(263.0,609.0)
+:Sending Touch (ACTION_UP): 0:(268.49313,529.74866)
+    //[calendar_time:2026-11-06 18:41:56.629  system_uptime:761291]
+    // Sending event #2100
+    //[calendar_time:2026-11-06 18:41:56.750  system_uptime:761411]
+    // Sending event #2100
+:Sending Touch (ACTION_DOWN): 0:(112.0,222.0)
+:Sending Touch (ACTION_UP): 0:(86.82472,201.09142)
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,4.0)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,-1.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(219.0,267.0)
+:Sending Touch (ACTION_UP): 0:(214.22511,269.50415)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(212.0,444.0)
+:Sending Touch (ACTION_UP): 0:(258.2187,399.557)
+:Sending Touch (ACTION_DOWN): 0:(92.0,70.0)
+    //[calendar_time:2026-11-06 18:41:58.030  system_uptime:762692]
+    // Sending event #2200
+:Sending Touch (ACTION_UP): 0:(68.700966,121.1586)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(181.0,326.0)
+:Sending Touch (ACTION_UP): 0:(188.40224,331.29532)
+:Sending Touch (ACTION_DOWN): 0:(26.0,362.0)
+:Sending Touch (ACTION_UP): 0:(69.16788,363.80014)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,-3.0)
+:Sending Touch (ACTION_DOWN): 0:(303.0,559.0)
+:Sending Touch (ACTION_UP): 0:(300.00668,562.2709)
+:Sending Touch (ACTION_DOWN): 0:(211.0,184.0)
+:Sending Touch (ACTION_UP): 0:(212.5569,194.26051)
+:Sending Touch (ACTION_DOWN): 0:(98.0,207.0)
+:Sending Touch (ACTION_UP): 0:(88.90605,197.72293)
+:Sending Touch (ACTION_DOWN): 0:(7.0,212.0)
+:Sending Touch (ACTION_UP): 0:(3.9844954,205.42232)
+:Sending Touch (ACTION_DOWN): 0:(182.0,164.0)
+:Sending Touch (ACTION_UP): 0:(181.41943,152.48434)
+    // Rejecting start of Intent { act=android.content.pm.action.REQUEST_PERMISSIONS pkg=com.google.android.packageinstaller cmp=com.google.android.packageinstaller/com.android.packageinstaller.permission.ui.GrantPermissionsActivity } in package com.google.android.packageinstaller
+:Sending Touch (ACTION_DOWN): 0:(177.0,474.0)
+:Sending Touch (ACTION_UP): 0:(184.59857,473.57138)
+:Sending Touch (ACTION_DOWN): 0:(147.0,179.0)
+:Sending Touch (ACTION_UP): 0:(148.82819,178.2835)
+    // Rejecting start of Intent { act=android.content.pm.action.REQUEST_PERMISSIONS pkg=com.google.android.packageinstaller cmp=com.google.android.packageinstaller/com.android.packageinstaller.permission.ui.GrantPermissionsActivity } in package com.google.android.packageinstaller
+:Sending Touch (ACTION_DOWN): 0:(114.0,384.0)
+:Sending Touch (ACTION_UP): 0:(211.4461,387.295)
+:Sending Touch (ACTION_DOWN): 0:(81.0,14.0)
+:Sending Touch (ACTION_UP): 0:(84.00616,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,0.0)
+    //[calendar_time:2026-11-06 18:42:01.152  system_uptime:765814]
+    // Sending event #2300
+:Sending Touch (ACTION_DOWN): 0:(23.0,571.0)
+:Sending Touch (ACTION_UP): 0:(5.4632545,575.08594)
+:Sending Touch (ACTION_DOWN): 0:(316.0,477.0)
+:Sending Touch (ACTION_UP): 0:(314.76166,477.7863)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(128.0,2.0)
+    // Rejecting start of Intent { act=android.content.pm.action.REQUEST_PERMISSIONS pkg=com.google.android.packageinstaller cmp=com.google.android.packageinstaller/com.android.packageinstaller.permission.ui.GrantPermissionsActivity } in package com.google.android.packageinstaller
+:Sending Touch (ACTION_UP): 0:(106.68328,0.0)
+:Sending Touch (ACTION_DOWN): 0:(249.0,251.0)
+:Sending Touch (ACTION_UP): 0:(246.84196,260.11884)
+:Sending Touch (ACTION_DOWN): 0:(129.0,598.0)
+:Sending Touch (ACTION_UP): 0:(122.21933,606.7077)
+:Sending Touch (ACTION_DOWN): 0:(221.0,334.0)
+:Sending Touch (ACTION_UP): 0:(211.93622,325.14117)
+:Sending Touch (ACTION_DOWN): 0:(109.0,568.0)
+:Sending Touch (ACTION_UP): 0:(110.24745,571.5962)
+:Sending Touch (ACTION_DOWN): 0:(58.0,75.0)
+:Sending Touch (ACTION_UP): 0:(28.296373,99.808205)
+:Sending Touch (ACTION_DOWN): 0:(130.0,280.0)
+:Sending Touch (ACTION_UP): 0:(124.30178,279.3223)
+:Sending Touch (ACTION_DOWN): 0:(106.0,271.0)
+:Sending Touch (ACTION_UP): 0:(110.35195,278.04544)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(27.0,423.0)
+:Sending Touch (ACTION_UP): 0:(27.42353,441.50143)
+:Sending Trackball (ACTION_MOVE): 0:(1.0,-5.0)
+    //[calendar_time:2026-11-06 18:42:04.980  system_uptime:769641]
+    // Sending event #2400
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,3.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(83.0,473.0)
+:Sending Touch (ACTION_UP): 0:(83.7,470.03656)
+:Sending Touch (ACTION_DOWN): 0:(223.0,73.0)
+:Sending Touch (ACTION_UP): 0:(235.76991,70.760124)
+:Sending Touch (ACTION_DOWN): 0:(209.0,134.0)
+:Sending Touch (ACTION_UP): 0:(219.14685,129.26479)
+    // Rejecting start of Intent { act=android.content.pm.action.REQUEST_PERMISSIONS pkg=com.google.android.packageinstaller cmp=com.google.android.packageinstaller/com.android.packageinstaller.permission.ui.GrantPermissionsActivity } in package com.google.android.packageinstaller
+:Sending Trackball (ACTION_MOVE): 0:(-3.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(50.0,227.0)
+:Sending Touch (ACTION_UP): 0:(28.504898,218.28154)
+:Sending Flip keyboardOpen=false
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(92.0,78.0)
+:Sending Touch (ACTION_UP): 0:(153.88608,199.28615)
+:Sending Touch (ACTION_DOWN): 0:(277.0,82.0)
+:Sending Touch (ACTION_UP): 0:(282.12747,98.142784)
+:Sending Touch (ACTION_DOWN): 0:(240.0,46.0)
+:Sending Touch (ACTION_UP): 0:(235.12875,46.89721)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,2.0)
+:Sending Touch (ACTION_DOWN): 0:(63.0,253.0)
+:Sending Touch (ACTION_UP): 0:(62.588413,249.61087)
+:Sending Trackball (ACTION_MOVE): 0:(-2.0,-2.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(290.0,438.0)
+:Sending Touch (ACTION_UP): 0:(298.1309,452.7221)
+    //[calendar_time:2026-11-06 18:42:07.819  system_uptime:772480]
+    // Sending event #2500
+    //[calendar_time:2026-11-06 18:42:07.939  system_uptime:772601]
+    // Sending event #2500
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,-5.0)
+:Sending Touch (ACTION_DOWN): 0:(79.0,261.0)
+:Sending Touch (ACTION_UP): 0:(58.282448,284.49414)
+:Sending Touch (ACTION_DOWN): 0:(218.0,474.0)
+:Sending Touch (ACTION_UP): 0:(241.37126,495.41495)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,1.0)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(316.0,76.0)
+:Sending Touch (ACTION_UP): 0:(320.0,93.254456)
+:Sending Touch (ACTION_DOWN): 0:(64.0,512.0)
+:Sending Touch (ACTION_UP): 0:(100.948135,468.75406)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,-5.0)
+:Sending Flip keyboardOpen=true
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(194.0,236.0)
+:Sending Touch (ACTION_UP): 0:(185.70758,239.70801)
+:Sending Touch (ACTION_DOWN): 0:(30.0,201.0)
+:Sending Touch (ACTION_UP): 0:(44.398468,209.18857)
+:Sending Touch (ACTION_DOWN): 0:(300.0,438.0)
+    //[calendar_time:2026-11-06 18:42:10.480  system_uptime:775141]
+    // Sending event #2600
+:Sending Touch (ACTION_UP): 0:(293.58374,432.3808)
+:Sending Touch (ACTION_DOWN): 0:(276.0,356.0)
+:Sending Touch (ACTION_UP): 0:(273.66312,358.33438)
+:Sending Touch (ACTION_DOWN): 0:(131.0,556.0)
+:Sending Touch (ACTION_UP): 0:(137.23317,566.2516)
+:Sending Touch (ACTION_DOWN): 0:(17.0,542.0)
+:Sending Touch (ACTION_UP): 0:(16.844177,539.85175)
+:Sending Touch (ACTION_DOWN): 0:(182.0,400.0)
+:Sending Touch (ACTION_UP): 0:(179.56569,401.7373)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(73.0,392.0)
+:Sending Touch (ACTION_UP): 0:(71.81311,400.91727)
+:Sending Touch (ACTION_DOWN): 0:(203.0,258.0)
+:Sending Touch (ACTION_UP): 0:(169.10022,232.86171)
+:Sending Touch (ACTION_DOWN): 0:(263.0,534.0)
+:Sending Touch (ACTION_UP): 0:(262.12863,542.94135)
+:Sending Touch (ACTION_DOWN): 0:(95.0,98.0)
+:Sending Touch (ACTION_UP): 0:(96.10049,109.24345)
+:Sending Touch (ACTION_DOWN): 0:(79.0,429.0)
+:Sending Touch (ACTION_UP): 0:(30.479399,505.54398)
+:Sending Touch (ACTION_DOWN): 0:(266.0,559.0)
+:Sending Touch (ACTION_UP): 0:(265.75894,544.56714)
+:Sending Touch (ACTION_DOWN): 0:(23.0,471.0)
+:Sending Touch (ACTION_UP): 0:(15.790358,463.7997)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,2.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,1.0)
+:Sending Touch (ACTION_DOWN): 0:(73.0,515.0)
+:Sending Touch (ACTION_UP): 0:(50.313663,520.1438)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,4.0)
+:Sending Touch (ACTION_DOWN): 0:(78.0,79.0)
+    //[calendar_time:2026-11-06 18:42:13.320  system_uptime:777982]
+    // Sending event #2700
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+:Sending Touch (ACTION_UP): 0:(16.046177,148.55585)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(300.0,489.0)
+:Sending Touch (ACTION_UP): 0:(302.3585,492.60437)
+:Sending Touch (ACTION_DOWN): 0:(207.0,482.0)
+:Sending Touch (ACTION_UP): 0:(180.26562,427.68622)
+:Sending Touch (ACTION_DOWN): 0:(156.0,439.0)
+:Sending Touch (ACTION_UP): 0:(154.2184,439.18042)
+:Sending Touch (ACTION_DOWN): 0:(274.0,151.0)
+:Sending Touch (ACTION_UP): 0:(237.6537,187.6543)
+:Sending Touch (ACTION_DOWN): 0:(236.0,297.0)
+:Sending Touch (ACTION_UP): 0:(254.1164,303.4266)
+:Sending Touch (ACTION_DOWN): 0:(191.0,294.0)
+:Sending Touch (ACTION_UP): 0:(182.82729,288.67505)
+:Sending Trackball (ACTION_MOVE): 0:(3.0,-2.0)
+:Sending Touch (ACTION_DOWN): 0:(214.0,620.0)
+:Sending Touch (ACTION_UP): 0:(214.1512,609.0774)
+:Sending Trackball (ACTION_MOVE): 0:(-4.0,-2.0)
+:Sending Touch (ACTION_DOWN): 0:(293.0,377.0)
+:Sending Touch (ACTION_UP): 0:(292.63422,363.6035)
+:Sending Touch (ACTION_DOWN): 0:(287.0,506.0)
+:Sending Touch (ACTION_UP): 0:(286.02722,515.685)
+:Sending Touch (ACTION_DOWN): 0:(164.0,183.0)
+:Sending Touch (ACTION_UP): 0:(141.84433,200.62552)
+:Sending Flip keyboardOpen=false
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Trackball (ACTION_MOVE): 0:(3.0,0.0)
+:Sending Touch (ACTION_DOWN): 0:(305.0,592.0)
+:Sending Touch (ACTION_UP): 0:(305.87747,580.1793)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,1.0)
+    //[calendar_time:2026-11-06 18:42:15.933  system_uptime:780595]
+    // Sending event #2800
+:Sending Touch (ACTION_DOWN): 0:(270.0,576.0)
+:Sending Touch (ACTION_UP): 0:(279.94638,540.1896)
+    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://portal.inmet.gov.br/... cmp=android/com.android.internal.app.ResolverActivity } in package android
+:Sending Touch (ACTION_DOWN): 0:(48.0,85.0)
+:Sending Touch (ACTION_UP): 0:(57.999332,58.647846)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(156.0,500.0)
+:Sending Touch (ACTION_UP): 0:(150.65128,496.3966)
+    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://www.gov.br/... cmp=android/com.android.internal.app.ResolverActivity } in package android
+:Sending Trackball (ACTION_MOVE): 0:(3.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,-4.0)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,-1.0)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(129.0,399.0)
+:Sending Touch (ACTION_UP): 0:(134.50816,398.69946)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(93.0,295.0)
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+    // Injection Failed
+:Sending Touch (ACTION_UP): 0:(191.3273,254.01248)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(42.0,310.0)
+:Sending Touch (ACTION_UP): 0:(42.3041,320.16434)
+    //[calendar_time:2026-11-06 18:42:18.814  system_uptime:783475]
+    // Sending event #2900
+:Sending Touch (ACTION_DOWN): 0:(84.0,488.0)
+:Sending Touch (ACTION_UP): 0:(104.4061,492.40823)
+    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://ainfo.cnptia.embrapa.br/... cmp=com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity } in package com.google.android.apps.docs
+:Sending Touch (ACTION_DOWN): 0:(312.0,586.0)
+:Sending Touch (ACTION_UP): 0:(308.80807,575.5414)
+:Sending Touch (ACTION_DOWN): 0:(85.0,499.0)
+:Sending Touch (ACTION_UP): 0:(25.529545,526.12976)
+    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://sidra.ibge.gov.br/... cmp=android/com.android.internal.app.ResolverActivity } in package android
+:Sending Trackball (ACTION_MOVE): 0:(3.0,-4.0)
+:Sending Touch (ACTION_DOWN): 0:(235.0,596.0)
+:Sending Touch (ACTION_UP): 0:(240.38077,599.8362)
+:Sending Touch (ACTION_DOWN): 0:(154.0,58.0)
+:Sending Touch (ACTION_UP): 0:(164.71545,57.66561)
+:Sending Trackball (ACTION_MOVE): 0:(0.0,3.0)
+:Sending Trackball (ACTION_UP): 0:(0.0,0.0)
+    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://ainfo.cnptia.embrapa.br/... cmp=com.google.android.apps.docs/com.google.android.apps.viewer.PdfViewerActivity } in package com.google.android.apps.docs
+:Sending Touch (ACTION_DOWN): 0:(275.0,384.0)
+:Sending Touch (ACTION_UP): 0:(141.9322,237.27074)
+:Sending Flip keyboardOpen=true
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,0.0)
+Events injected: 3000
+:Sending rotation degree=0, persist=false
+:Dropped: keys=0 pointers=65 trackballs=0 flips=14 rotations=0
+## Network stats: elapsed time=74875ms (0ms mobile, 0ms wifi, 74875ms not connected)
+// Monkey finished
+
+--- logcat crash ---

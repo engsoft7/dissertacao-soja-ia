@@ -1,0 +1,5 @@
+--------- beginning of main
+11-06 18:30:50.989  3469  3831 I PERCURSO: 3s	abriu	boas-vindas
+11-06 18:33:22.207  3469  3831 I PERCURSO: 154s	FALHA	ComposeTimeoutException: Condition still not satisfied after 150000 ms
+11-06 18:33:22.821  3469  3831 I PERCURSO: a11y	01_boas_vindas	sem achados
+11-06 18:33:22.828  3469  3831 I PERCURSO: a11y	99_falha	sem achados

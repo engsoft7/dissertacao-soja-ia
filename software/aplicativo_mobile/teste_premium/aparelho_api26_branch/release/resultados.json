@@ -1,0 +1,215 @@
+{
+ "verificacoes": [
+  {
+   "item": "abre na tela de boas-vindas",
+   "ok": true,
+   "detalhe": ""
+  },
+  {
+   "item": "acha Pau D'Arco na busca",
+   "ok": true,
+   "detalhe": ""
+  },
+  {
+   "item": "Resumo carrega a safra em curso",
+   "ok": true,
+   "detalhe": "Resumo Agronômico (safra 2027)"
+  },
+  {
+   "item": "Resumo mostra a última safra do IBGE, 2025",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "abre a aba Mapa",
+   "ok": true,
+   "detalhe": ""
+  },
+  {
+   "item": "abre a aba Histórico",
+   "ok": true,
+   "detalhe": ""
+  },
+  {
+   "item": "abre a aba Mercado",
+   "ok": true,
+   "detalhe": ""
+  },
+  {
+   "item": "abre a aba Sobre",
+   "ok": true,
+   "detalhe": ""
+  },
+  {
+   "item": "fonte 200%: Resumo abre",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "tela pequena: Resumo abre",
+   "ok": true,
+   "detalhe": ""
+  },
+  {
+   "item": "tela tablet: Resumo abre",
+   "ok": true,
+   "detalhe": ""
+  },
+  {
+   "item": "tela deitada: Resumo abre",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "sem internet: Resumo abre com os dados guardados",
+   "ok": true,
+   "detalhe": ""
+  },
+  {
+   "item": "sem internet: o app avisa",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "sem internet: o Mapa explica",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "sem internet: a Estimativa no campo abre",
+   "ok": true,
+   "detalhe": ""
+  },
+  {
+   "item": "monkey: sem falhas nem ANR",
+   "ok": true,
+   "detalhe": "3000 eventos, 0 falhas, 0 ANR"
+  }
+ ],
+ "acessibilidade": {
+  "r01_boas_vindas": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r02_lista": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r03_resumo": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r04_resumo_1": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r04_resumo_2": {
+   "alvos_pequenos": [
+    "5277,12 (120×4 dp)"
+   ],
+   "sem_rotulo": []
+  },
+  "r04_resumo_3": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r04_resumo_4": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r05_mapa": {
+   "alvos_pequenos": [],
+   "sem_rotulo": [
+    "WebView em (17,177)"
+   ]
+  },
+  "r06_historico": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r07_mercado": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r08_sobre": {
+   "alvos_pequenos": [
+    "View (248×24 dp)",
+    "View (248×46 dp)"
+   ],
+   "sem_rotulo": []
+  },
+  "r09_estimativa_no_campo": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r10_tempo": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r11_fonte_200": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r12_fonte_200_rolado": {
+   "alvos_pequenos": [
+    "View (288×7 dp)"
+   ],
+   "sem_rotulo": [
+    "View em (16,24)"
+   ]
+  },
+  "r13_fonte_200_mercado": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r16_tela_pequena": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r16_tela_tablet": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r18_sem_internet": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  },
+  "r19_sem_internet_mercado": {
+   "alvos_pequenos": [],
+   "sem_rotulo": []
+  }
+ },
+ "medidas": {
+  "api_level": 26,
+  "aparelho": "Android SDK built for x86_64",
+  "largura_px": 320,
+  "altura_px": 640,
+  "densidade_dpi": 160,
+  "apk_mb": 27.6,
+  "partida_fria_primeira_ms": 658,
+  "partida_fria_sem_municipio_ms": 699.0,
+  "dados_do_municipio_s": 3.7,
+  "memoria_resumo_kb": 29474,
+  "rolagem_resumo": {
+   "quadros": 867.0,
+   "lentos_pct": 6.34,
+   "p50_ms": 5.0,
+   "p90_ms": 8.0,
+   "p99_ms": 20.0
+  },
+  "rolagem_historico": {
+   "quadros": 776.0,
+   "lentos_pct": 0.0,
+   "p50_ms": 5.0,
+   "p90_ms": 6.0,
+   "p99_ms": 8.0
+  },
+  "memoria_depois_das_abas_kb": 79088,
+  "partida_fria_com_municipio_ms": 750,
+  "monkey": {
+   "eventos": 3000,
+   "falhas": 0,
+   "anrs": 0
+  }
+ }
+}

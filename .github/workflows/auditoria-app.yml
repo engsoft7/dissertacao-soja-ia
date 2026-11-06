@@ -11,10 +11,20 @@
 # Disparo: aba Actions > "Auditoria do aplicativo" > Run workflow, ou um push a
 # uma branch de trabalho com "[auditoria]" na mensagem do commit. Na main não
 # grava nada.
+#
+# Por padrão confere a API em produção, que só muda com o merge na main. Para
+# conferir uma correção da API antes do merge, marque "API da branch" no disparo
+# manual ou use "[auditoria-branch]" no commit: o job sobe a API da própria
+# branch e audita essa.
 name: Auditoria do aplicativo
 
 on:
   workflow_dispatch:
+    inputs:
+      api_da_branch:
+        description: "Auditar a API desta branch, e não a de produção"
+        type: boolean
+        default: false
   push:
     branches-ignore: [main]
     paths:
@@ -27,9 +37,11 @@ permissions:
 
 jobs:
   auditoria:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[auditoria]')
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[auditoria')
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      API_DA_BRANCH: ${{ (github.event_name == 'workflow_dispatch' && inputs.api_da_branch) || contains(github.event.head_commit.message, '[auditoria-branch]') }}
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +49,23 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Sobe a API da branch
+        if: env.API_DA_BRANCH == 'true'
+        run: |
+          pip install --quiet -r software/api_backend/requirements.txt
+          cd software/api_backend
+          nohup uvicorn api:app --host 127.0.0.1 --port 8000 > /tmp/api.log 2>&1 &
+          # O lifespan treina o modelo antes de aceitar conexões.
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:8000/api/ping && exit 0
+            sleep 5
+          done
+          cat /tmp/api.log
+          exit 1
+
       - name: API × fontes
+        env:
+          AUDITORIA_API: ${{ env.API_DA_BRANCH == 'true' && 'http://127.0.0.1:8000' || '' }}
         run: |
           pip install --quiet requests
           python software/automacao_github/auditoria_numeros.py software/aplicativo_mobile/app/build/auditoria
@@ -83,7 +111,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add software/aplicativo_mobile/auditoria
           if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
-          git commit -m "Auditoria do aplicativo (${{ github.run_id }})"
+          if [ "$API_DA_BRANCH" = "true" ]; then onde="API da branch"; else onde="API em produção"; fi
+          git commit -m "Auditoria do aplicativo (${{ github.run_id }}, $onde)"
           for i in 1 2 3 4 5; do
             git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
             sleep $((i * 5))

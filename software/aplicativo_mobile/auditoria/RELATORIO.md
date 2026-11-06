@@ -42,10 +42,21 @@ satélite. O IBGE publica a produtividade mesmo quando o satélite não acha. A
 API projeta as três safras seguintes à **última safra do município na base**, e
 não à última safra da base.
 
-**Correção proposta** (a decidir, pela pausa de mudanças antes da defesa):
+**Correção** (nesta branch; a API em produção muda com o merge na main):
 
-1. API: projetar a partir da última safra da base inteira (2025), para todos os
-   municípios. Corrige os dois primeiros defeitos.
-2. API: completar o histórico oficial com as safras do IBGE que não estão na
-   base, lidas de um arquivo da PAM do Pará gravado por `atualiza_pam.py`,
-   marcadas como fora do modelo. As métricas do modelo não mudam.
+1. A API projeta as três safras seguintes à última safra publicada (hoje 2025),
+   a mesma para todos os municípios. O painel faz o mesmo. Corrige os dois
+   primeiros defeitos: os 38 municípios passam a ter projeção de 2026 a 2028, e
+   o Resumo mostra a safra 2027.
+2. A API completa o histórico com as safras do IBGE que a base não tem, lidas
+   de `pesquisa/dados/pam_soja_para.csv` (521 safras de 38 municípios; as 451 da
+   base têm o mesmo valor), marcadas `fora_do_modelo`. Pau D'Arco passa a mostrar
+   a safra 2025 do IBGE, 3.700 kg/ha. A base do modelo e as métricas não mudam.
+3. `atualiza_pam.py` regrava esse arquivo a cada execução mensal, e a
+   atualização mensal (`atualiza-dados.yml`, dia 15) voltou a ser agendada.
+
+As lacunas que continuam no histórico são safras que o IBGE também não publicou
+(Goianésia do Pará de 2018 a 2023, por exemplo).
+
+Para conferir antes do merge: aba Actions > "Auditoria do aplicativo" > Run
+workflow com "API da branch" marcado, ou `[auditoria-branch]` no commit.

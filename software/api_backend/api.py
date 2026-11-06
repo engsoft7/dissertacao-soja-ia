@@ -4,6 +4,7 @@ from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
                       aviso_de_defasagem, meses_desde_o_levantamento,
                       buscar_cotacoes, aviso_sobre_o_custo)
 from validacao import metricas_validacao
+import historico_oficial
 import mercado
 import precos_para
 import avisos_inmet
@@ -91,6 +92,7 @@ async def app_lifespan(app: FastAPI):
     AppState.estimador = M.Estimador().treinar(df)
     AppState.metricas = AppState.estimador.validar(df)  # Popula métricas de mae e rmse
     AppState.last_year = int(df["ano"].max())
+    AppState.pam = historico_oficial.carrega_pam()
     print("Modelo carregado e treinado com sucesso.", flush=True)
     # Pre-populate finance cache in background
     threading.Thread(target=_refresh_finance, daemon=True).start()
@@ -196,6 +198,7 @@ class AppState:
     estimador = None
     metricas = None
     last_year = None
+    pam = {}
 
 # Startup phase handled via lifespan manager in app definition
 
@@ -354,8 +357,29 @@ def get_previsao(municipio: str):
                 "margem_erro": mae
             })
         
-        # Futuro projetado (Próximos 3 anos)
-        ano_max = int(df_mun["ano"].max())
+        # Safras que o IBGE publicou e a base não tem (sem soja na máscara do
+        # MapBiomas naquele ano; ver historico_oficial.py): entram com o valor
+        # oficial e a estimativa do modelo, marcadas, para o histórico e a
+        # "última safra do IBGE" não pararem anos atrás.
+        pam = AppState.pam or {}
+        ultimo_publicado = historico_oficial.ultima_safra_publicada(AppState.last_year, pam)
+        oficiais = pam.get(int(df_mun["cod_ibge7"].iloc[0]), {})
+        anos_base = set(df_mun["ano"].astype(int))
+        for ano, real in historico_oficial.safras_fora_da_base(oficiais, anos_base, ultimo_publicado):
+            r = AppState.estimador.estimar(raw_municipio, ano)
+            resultado.append({
+                "ano": ano,
+                "rendimento_predito": float(r["estimativa_kg_ha"]),
+                "rendimento_real": real,
+                "margem_erro": mae,
+                "fora_do_modelo": True,
+            })
+        resultado.sort(key=lambda h: h["ano"])
+
+        # Futuro projetado: as três safras depois da última publicada, a mesma
+        # para todos os municípios. Antes partia da última safra do município na
+        # base, e quem saiu da máscara em 2017 recebia a projeção de 2018 a 2020.
+        ano_max = int(ultimo_publicado)
         for delta in range(1, 4):
             ano_futuro = ano_max + delta
             rf = AppState.estimador.estimar(raw_municipio, ano_futuro)

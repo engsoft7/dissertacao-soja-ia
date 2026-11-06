@@ -25,6 +25,7 @@ Uso: python software/automacao_github/auditoria_numeros.py [saída]
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 import time
@@ -34,7 +35,9 @@ from pathlib import Path
 import requests
 
 RAIZ = Path(__file__).resolve().parents[2]
-API = "https://agrointeligencia-api.onrender.com"
+# AUDITORIA_API aponta para outra instância, como a API da própria branch
+# rodando no job (auditoria-app.yml), para conferir uma correção antes do merge.
+API = (os.environ.get("AUDITORIA_API") or "https://agrointeligencia-api.onrender.com").rstrip("/")
 SAIDA = Path(sys.argv[1]) if len(sys.argv) > 1 else RAIZ / "software/aplicativo_mobile/app/build/auditoria"
 CABECALHO = {"User-Agent": "Mozilla/5.0 (auditoria AgroInteligencia)"}
 BELEM = timezone(timedelta(hours=-3))
@@ -140,11 +143,11 @@ def confere_pam(respostas, sede):
 def pracas_agrolink():
     achadas = {}
     for cidade in ("barcarena", "redencao", "paragominas", "parauapebas"):
-        html = pega(f"https://www.agrolink.com.br/regional/pa/{cidade}/cotacoes", json_=False)
-        if not html:
+        pagina = pega(f"https://www.agrolink.com.br/regional/pa/{cidade}/cotacoes", json_=False)
+        if not pagina:
             continue
-        html = html.replace('\\"', '"')
-        for obj in re.findall(r"\{[^{}]*\}", html):
+        pagina = pagina.replace('\\"', '"')
+        for obj in re.findall(r"\{[^{}]*\}", pagina):
             if '"uf":"PA"' not in obj or not re.search(r'"produto":"Soja em Gr[^"]*60Kg"', obj):
                 continue
             c = re.search(r'"cidade":"([^"]+)"', obj); p = re.search(r'"preco":([\d.]+)', obj)
@@ -290,9 +293,10 @@ def main():
     confere_avisos(sede)
 
     agora = datetime.now(BELEM).strftime("%d/%m/%Y %H:%M")
-    (SAIDA / "fontes.json").write_text(json.dumps({"em": agora, "conferencias": conferencias},
+    (SAIDA / "fontes.json").write_text(json.dumps({"em": agora, "api": API, "conferencias": conferencias},
                                                   ensure_ascii=False, indent=1), encoding="utf-8")
     linhas = [f"# Auditoria dos números: API × fontes ({agora}, horário de Belém)", "",
+              f"API conferida: {API}", "",
               "| Grupo | Item | Situação | App | Fonte | Nota |", "|---|---|---|---|---|---|"]
     for c in conferencias:
         linhas.append("| " + " | ".join(str(c[k] if c[k] is not None else "") .replace("|", "/")

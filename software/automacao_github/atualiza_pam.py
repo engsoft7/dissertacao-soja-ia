@@ -14,12 +14,17 @@ Executado mensalmente pelo GitHub Actions (.github/workflows/atualiza-dados.yml)
    máscara MapBiomas) precisam ser coletadas no Google Earth Engine com as
    rotinas de 01_coleta_dados/ antes de a safra entrar na base.
 
-Apenas pesquisa/dados/soja_para_painel.csv (a base do painel) é atualizado.
-A base da dissertação, soja_para_mascarado_2001_2024.csv, e a base sem máscara
-permanecem congeladas: as tabelas do texto se reproduzem a partir delas.
+4. PRODUTIVIDADE OFICIAL: regrava pesquisa/dados/pam_soja_para.csv com todas
+   as safras que o IBGE publicou nos municípios da base, inclusive as que a base
+   não tem (sem soja na máscara do MapBiomas naquele ano). A API usa o arquivo
+   para completar o histórico e projetar a partir da última safra publicada.
+
+Só esses dois arquivos de pesquisa/dados/ mudam. A base da dissertação,
+soja_para_mascarado_2001_2024.csv, e a base sem máscara permanecem congeladas: as tabelas do texto se reproduzem a partir delas.
 
 Saídas para o workflow (arquivo apontado por GITHUB_OUTPUT):
     csv_alterado=true|false   revisoes=N   novo_ano=AAAA (vazio se não houver)
+    pam_alterado=true|false   (csv_alterado também vira true quando ele muda)
 Um resumo em Markdown é gravado no caminho apontado por RESUMO_MD (opcional).
 """
 from __future__ import annotations
@@ -35,6 +40,7 @@ import requests
 RAIZ = Path(__file__).resolve().parents[2]
 CSV_PAINEL = RAIZ / "pesquisa" / "dados" / "soja_para_painel.csv"
 DATA_ATUALIZACAO = RAIZ / "pesquisa" / "dados" / "ultima_atualizacao.txt"
+CSV_PAM = RAIZ / "pesquisa" / "dados" / "pam_soja_para.csv"
 
 
 def marca_atualizacao() -> None:
@@ -117,6 +123,32 @@ def aplica_revisoes(caminho: Path, base: pd.DataFrame, sidra: pd.DataFrame) -> p
     return pd.DataFrame(revisoes.values())
 
 
+def grava_pam(caminho: Path, base: pd.DataFrame, sidra: pd.DataFrame) -> bool:
+    """Regrava a produtividade oficial dos municípios da base; True se mudou.
+
+    Guarda só as safras com rendimento publicado (> 0), em kg/ha inteiros como
+    a base. O valor do SIDRA substitui o gravado (revisão do IBGE), e uma safra
+    já gravada que não veio na resposta fica: o IBGE não retira safra publicada,
+    e uma resposta parcial da API não pode apagar o histórico do app. O arquivo
+    só é reescrito quando o conteúdo muda, para o PR mensal não sair vazio.
+    """
+    codigos = set(base["cod_ibge7"].astype(int))
+    t = sidra[sidra["cod_ibge7"].isin(codigos) & (sidra["rendimento_kg_ha"] > 0)]
+    oficial = {(int(c), int(a)): int(round(v))
+               for c, a, v in t[["cod_ibge7", "ano", "rendimento_kg_ha"]].itertuples(index=False)}
+    if caminho.exists():
+        gravado = pd.read_csv(caminho)
+        for c, a, v in gravado[["cod_ibge7", "ano", "rendimento_kg_ha"]].itertuples(index=False):
+            oficial.setdefault((int(c), int(a)), int(v))
+    texto = "cod_ibge7,ano,rendimento_kg_ha\n" + "".join(
+        f"{c},{a},{v}\n" for (c, a), v in sorted(oficial.items())
+    )
+    if caminho.exists() and caminho.read_text(encoding="utf-8") == texto:
+        return False
+    caminho.write_text(texto, encoding="utf-8")
+    return True
+
+
 def detecta_ano_novo(base: pd.DataFrame, sidra: pd.DataFrame) -> int | None:
     """Ano mais recente do SIDRA que ainda não existe na base do painel."""
     ano_max_base = int(base["ano"].max())
@@ -142,9 +174,13 @@ def main() -> int:
 
     revisoes = aplica_revisoes(CSV_PAINEL, base, sidra)
     ano_novo = detecta_ano_novo(base, sidra)
+    pam_alterado = grava_pam(CSV_PAM, base, sidra)
+    if pam_alterado:
+        print(f"{CSV_PAM.name} regravado com a produtividade oficial do IBGE")
 
-    if len(revisoes):
+    if len(revisoes) or pam_alterado:
         marca_atualizacao()
+    if len(revisoes):
         print(f"{len(revisoes)} revisões aplicadas em {CSV_PAINEL.name}:")
         print(revisoes.to_string(index=False))
     else:
@@ -177,6 +213,13 @@ def main() -> int:
                 f"| {r.municipio} | {r.ano} | {r.antes} | {r.depois} |"
                 for r in revisoes.itertuples()
             ]
+        if pam_alterado:
+            linhas += [
+                "",
+                "A produtividade oficial dos municípios da base "
+                "(`pesquisa/dados/pam_soja_para.csv`) mudou no SIDRA; o app e a "
+                "API passam a mostrar as safras novas ou revistas.",
+            ]
         if ano_novo:
             linhas += [
                 "",
@@ -188,7 +231,8 @@ def main() -> int:
         Path(resumo_md).write_text("\n".join(linhas) + "\n", encoding="utf-8")
 
     grava_saidas(
-        csv_alterado="true" if len(revisoes) else "false",
+        csv_alterado="true" if len(revisoes) or pam_alterado else "false",
+        pam_alterado="true" if pam_alterado else "false",
         revisoes=str(len(revisoes)),
         novo_ano=str(ano_novo) if ano_novo else "",
     )

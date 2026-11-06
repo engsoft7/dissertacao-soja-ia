@@ -8,6 +8,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -22,8 +23,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -115,11 +114,15 @@ class PercursoNoAparelhoTest {
         }
     }
 
-    /** Desce a lista da tela em [vezes] passos, com captura em cada um, e volta ao topo. */
+    /**
+     * Desce a lista principal da tela item a item, com captura e verificações
+     * em cada um, e volta ao topo. Pelo índice, e não por arrasto: o arrasto
+     * podia cair num gráfico e não rolar nada.
+     */
     private fun rola(nome: String, vezes: Int) {
-        val lista = regra.onAllNodes(hasScrollToIndexAction()).onFirst()
+        val lista = regra.onNode(hasScrollToIndexAction() and hasAnyDescendant(hasText("AgroInteligência")))
         repeat(vezes) { i ->
-            lista.performTouchInput { swipeUp() }
+            lista.performScrollToIndex(i + 1)
             tela("${nome}_${i + 1}")
         }
         // O que sai da tela numa LazyColumn deixa de existir: sem voltar, o
@@ -161,7 +164,7 @@ class PercursoNoAparelhoTest {
 
             espera("Tempo em", 60_000)
             regra.onAllNodesWithText("Tempo em", substring = true).onFirst().performClick()
-            espera("Pulverizar", 90_000)
+            espera("Agora", 90_000)
             anota("tempo\tprevisão carregada")
             tela("05_tempo")
 

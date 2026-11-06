@@ -704,8 +704,13 @@ private fun CartaoPulverizacao(horas: List<HoraPulverizacao>, agora: LocalDateTi
             }
         }
         // A fonte completa (Adegas e Gazziero, 2020; FAO-56) está no Sobre.
+        // Quanto a janela erra, medido contra 12 estações do INMET de nov/2025 a
+        // abr/2026 (pesquisa/10_trabalhos_futuros/04_valida_tempo_inmet.py):
+        // das horas previstas boas, 26% eram boas, 63% de atenção e 10,6% a evitar.
         Text("Embrapa Soja: até 30 °C, umidade acima de 60%, vento de 3 a 8 km/h e sem chuva nas 2 h " +
-             "seguintes. Toque numa hora para ver os números. Confira a bula antes de aplicar.",
+             "seguintes. Toque numa hora para ver os números. Conferida com 12 estações do INMET, só 1 " +
+             "em cada 4 horas previstas boas foi boa de fato (em geral o vento era mais fraco que o " +
+             "previsto) e 1 em 10 era para evitar: confira vento e umidade no local e a bula antes de aplicar.",
              fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 8.dp))
     }
 }

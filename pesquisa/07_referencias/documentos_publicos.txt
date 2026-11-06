@@ -122,3 +122,9 @@ https://www.agrolink.com.br/regional/pa/ulianopolis/cotacoes
 https://www.agrolink.com.br/regional/pa/maraba/cotacoes
 navegador https://www.agrolink.com.br/regional/pa/redencao/cotacoes
 navegador https://www.agrolink.com.br/regional/pa/paragominas/cotacoes
+#
+# Nona leva: a série histórica de custos de soja da CONAB, para conferir se
+# algum município do Pará já teve levantamento de custo.
+https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-soja-1997-a-2026.xls
+https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-soja-1997-a-2026.xls/@@download/file
+https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-soja-1997-a-2026.xls/view

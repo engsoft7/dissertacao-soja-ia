@@ -155,11 +155,11 @@ class CapturasDeTelaTest {
         )
     )
 
-    // A mesma escolha do AgroDashboard: a projeção é o ano mais adiante, e a
-    // comparação é com a última safra que tem produtividade divulgada.
+    // A mesma escolha do AgroDashboard (Safra.kt): a projeção é a da safra em
+    // curso, e a comparação é com a última safra que tem produtividade divulgada.
     private val historico = previsao.historico.sortedByDescending { it.ano }
-    private val projecao = historico.first()
-    private val ultimoReal = historico.drop(1).firstOrNull { it.rendimento_real > 0 }
+    private val projecao = projecaoDaSafra(previsao.historico) ?: historico.first()
+    private val ultimoReal = ultimoObservado(previsao.historico)
 
     // ── capturas ──────────────────────────────────────────────────────────────
 
@@ -183,7 +183,7 @@ class CapturasDeTelaTest {
     @Test fun resumo_escuro() = captura("resumo", true) { ResumoAgronomicoCard(projecao, ultimoReal) }
 
     @Test fun viabilidade_claro() = captura("viabilidade", false) {
-        financas?.let { ResumoFinanceiroCard(projecao, it) }
+        financas?.let { ResumoFinanceiroCard(projecao, it, mercado.para) }
     }
 
     @Test fun cartoes_historico_claro() = captura("cartoes_historico", false) {

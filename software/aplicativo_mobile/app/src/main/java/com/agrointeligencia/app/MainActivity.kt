@@ -325,6 +325,17 @@ fun AgroDashboard() {
     var mostrarLista by rememberSaveable { mutableStateOf(false) }
     // Aumenta a cada "atualizar" e refaz a busca da previsão do município.
     var recarga by remember { mutableStateOf(0) }
+    // Preço estimado do Pará agora, para a Viabilidade oferecer em um toque.
+    // Sem cache: um preço de mercado guardado envelhece, e aí é melhor não oferecer.
+    var paraHoje by remember { mutableStateOf<EstimativaPara?>(null) }
+    LaunchedEffect(recarga) {
+        try {
+            paraHoje = RetrofitClient.getInstance().getMercado("1d").para
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (_: Exception) {
+        }
+    }
 
     // Previsão do tempo (Tempo.kt): vem do Open-Meteo, e não da API, e por
     // isso carrega mesmo com a API dormindo. Serve o cartão do Resumo e a tela.
@@ -596,7 +607,7 @@ fun AgroDashboard() {
                 currentTab == 5 -> item {
                     // Como o Mercado, não depende da previsão: a contagem no campo
                     // funciona sem rede. A previsão, se houver, entra para comparação.
-                    val projecao = prev?.historico?.maxByOrNull { it.ano }
+                    val projecao = prev?.historico?.let { projecaoDaSafra(it) }
                     EstimativaCampoTela(
                         precoPadrao = sharedPrefs.valorDoProdutor(PREF_PRECO) ?: kpis?.soja_preco_saca,
                         fontePreco = if (sharedPrefs.valorDoProdutor(PREF_PRECO) != null) "Seu preço, informado na Viabilidade."
@@ -695,8 +706,10 @@ fun AgroDashboard() {
                 }
                 else -> {
                     val historicoOrdenado = prev.historico.sortedByDescending { it.ano }
-                    val projecao = historicoOrdenado.firstOrNull()
-                    val ultimoReal = historicoOrdenado.drop(1).firstOrNull { it.rendimento_real > 0 } ?: historicoOrdenado.drop(1).firstOrNull()
+                    // A safra em curso, e não a projeção mais distante (Safra.kt).
+                    val projecao = projecaoDaSafra(prev.historico)
+                    val ultimoReal = ultimoObservado(prev.historico)
+                    val baseSimulador = projecaoDoSimulador(prev.historico) ?: projecao
 
                     if (currentTab == 0) { // Resumo
                         item {
@@ -704,19 +717,21 @@ fun AgroDashboard() {
                         }
                         if (projecao != null) {
                             item {
-                                TituloSecao(Icons.Filled.BarChart, "Resumo Agronômico (${projecao.ano})")
+                                TituloSecao(Icons.Filled.BarChart, "Resumo Agronômico (safra ${projecao.ano})")
                                 ResumoAgronomicoCard(projecao, ultimoReal)
                             }
                             item {
                                 TituloSecao(Icons.Filled.SettingsSuggest, "Simulador de cenário climático",
                                             Modifier.padding(top = 8.dp))
-                                CenarioClimaticoCard(municipio = selectedMunicipio ?: prev.municipio, baselineRendimento = projecao.rendimento_predito)
+                                CenarioClimaticoCard(municipio = selectedMunicipio ?: prev.municipio,
+                                                     baselineRendimento = (baseSimulador ?: projecao).rendimento_predito,
+                                                     ano = (baseSimulador ?: projecao).ano)
                             }
                             kpis?.let { k ->
                                 item {
                                     TituloSecao(Icons.Filled.MonetizationOn, "Viabilidade Financeira",
                                                 Modifier.padding(top = 8.dp))
-                                    ResumoFinanceiroCard(projecao, k)
+                                    ResumoFinanceiroCard(projecao, k, paraHoje)
                                 }
                             }
                         }
@@ -811,7 +826,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                 // pela PAM; imprimir esse zero anunciaria colheita nula.
                 Text(
                     text = if (observado) milhar(historico.rendimento_real) + " kg/ha"
-                           else "não divulgada",
+                           else situacaoSemDado(historico.ano),
                     fontWeight = FontWeight.Bold,
                     fontSize = if (observado) 16.sp else 12.sp,
                     maxLines = 1,
@@ -852,8 +867,11 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                     else -> if (isDark) Color(0xFFf85149) else Color(0xFFdc2626)
                 }
                 Text(
-                    text = (if (observado) "Resultado a preços de hoje: "
-                            else "Resultado projetado: ") + String.format(PT_BR, "R$ %,d/ha", r.valor.toInt()),
+                    // "A preços de hoje" dizia mais do que é: o preço e o custo
+                    // são os da Viabilidade, do produtor ou do levantamento da
+                    // CONAB, que pode ter meses.
+                    text = (if (observado) "Com o preço e o custo da Viabilidade: "
+                            else "Projetado, com o preço e o custo da Viabilidade: ") + reaisInteiros(r.valor) + "/ha",
                     fontSize = 13.sp,
                     color = color,
                     fontWeight = FontWeight.SemiBold,
@@ -861,8 +879,8 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?) {
                 )
                 if (r.sinalIncerto && outro != null) {
                     Text(
-                        text = String.format(PT_BR, "Pode ir de R$ %,d a R$ %,d conforme o rateio do custo, que a CONAB não publica aberto por item.", 
-                            minOf(r.valor, outro).toInt(), maxOf(r.valor, outro).toInt()),
+                        text = "Pode ir de ${reaisInteiros(minOf(r.valor, outro))} a ${reaisInteiros(maxOf(r.valor, outro))} " +
+                               "conforme o rateio do custo, que a CONAB não publica aberto por item.",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 2.dp)
@@ -884,7 +902,7 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             val projYield = projecao.rendimento_predito
-            Text(text = "Rendimento Esperado", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = "Produtividade esperada na safra ${projecao.ano}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = "${milhar(projYield)} kg/ha", 
@@ -892,12 +910,18 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Text(text = " (~ ${(projYield / 60).toInt()} sc/ha)", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
+                Text(text = " (~ ${(projYield / 60).roundToInt()} sc/ha)", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
+            }
+            // O erro típico vai junto do número: é uma estimativa, e a loja
+            // promete a margem de erro sempre ao lado dela.
+            if (projecao.margem_erro > 0) {
+                Text(text = "Estimativa do modelo, com erro típico de ± ${milhar(projecao.margem_erro)} kg/ha.",
+                     fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             
             if (ultimoReal != null) {
                 val pastYield = if (ultimoReal.rendimento_real > 0) ultimoReal.rendimento_real else ultimoReal.rendimento_predito
-                val typeStr = if (ultimoReal.rendimento_real > 0) "Real" else "Est."
+                val typeStr = if (ultimoReal.rendimento_real > 0) "IBGE" else "estimada"
                 val diff = projYield - pastYield
                 val diffPct = if (pastYield > 0) (diff / pastYield) * 100 else 0.0
                 val color = if (diff >= 0) (if(isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else (if(isDark) Color(0xFFf85149) else Color(0xFFdc2626))
@@ -909,12 +933,14 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        Text(text = "Safra ${ultimoReal.ano} ($typeStr)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = "Safra ${ultimoReal.ano}, $typeStr", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(text = "${milhar(pastYield)} kg/ha", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(text = "Variação anual", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(text = "$sign${diffPct.toInt()}%", fontSize = 16.sp, color = color, fontWeight = FontWeight.Bold)
+                        // Entre a safra esperada e a última divulgada pode haver
+                        // mais de um ano: "variação anual" dizia outra coisa.
+                        Text(text = "Em relação a ${ultimoReal.ano}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = "$sign${diffPct.roundToInt()}%", fontSize = 16.sp, color = color, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -923,7 +949,7 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
 }
 
 @Composable
-fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
+fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse, paraHoje: EstimativaPara? = null) {
     val isDark = isSystemInDarkTheme()
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
@@ -962,15 +988,15 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
     // saca. Sem isto o campo exibia a representação binária inteira — foi
     // assim que 135,15 apareceu ao produtor como 135.14999389648438.
     var customPreco by remember {
-        mutableStateOf("%.2f".format(precoSalvo ?: kpis.soja_preco_saca))
+        mutableStateOf(String.format(PT_BR, "%.2f", precoSalvo ?: kpis.soja_preco_saca))
     }
     var customCusto by remember {
-        mutableStateOf("%.2f".format(custoSalvo ?: kpis.custo_ha))
+        mutableStateOf(String.format(PT_BR, "%.2f", custoSalvo ?: kpis.custo_ha))
     }
     // Com a chave, o campo acompanha o município: sem ela, ao trocar de
     // município, seguia a estimativa do anterior até o produtor redigitar.
     var customProd by remember(prodModelo) {
-        mutableStateOf("%.1f".format(prefs.valorDoProdutor(PREF_PROD) ?: prodModelo))
+        mutableStateOf(String.format(PT_BR, "%.1f", prefs.valorDoProdutor(PREF_PROD) ?: prodModelo))
     }
 
     Card(
@@ -1003,7 +1029,12 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                 // levantamento — a menos que o produtor já tenha informado o
                 // dele também, e aí não há o que avisar.
                 temPreco && !temCusto -> kpis.aviso_custo
-                else -> kpis.aviso_preco?.let { "Preço possivelmente desatualizado. $it" }
+                // Com o número de hoje ao lado, o produtor vê o tamanho da
+                // defasagem em vez de só ler que ela existe.
+                else -> kpis.aviso_preco?.let { aviso ->
+                    "Preço possivelmente desatualizado. $aviso" +
+                        (paraHoje?.estimado_brl_saca?.let { " Hoje o Pará está em R$\u00A0${reais(it)}/sc (estimado, preço de porto)." } ?: "")
+                }
             }
             alerta?.let {
                 Text(
@@ -1091,6 +1122,37 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                 Spacer(modifier = Modifier.weight(1f))
             }
 
+            // O preço do Pará de hoje, a um toque. O padrão é o levantamento da
+            // CONAB, que pode ter meses, e o produtor não tinha como trazer o
+            // mercado para a conta sem ir à tela Mercado e copiar o número.
+            paraHoje?.estimado_brl_saca?.let { pa ->
+                val usandoEste = temPreco && kotlin.math.abs(preco - pa) < 0.005
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Pará hoje, estimado: R$ ${reais(pa)}/sc", fontSize = 13.sp,
+                             fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                        Text("Preço de porto; na fazenda costuma ser menor, pelo frete.",
+                             fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
+                    }
+                    if (usandoEste) {
+                        Text("Em uso", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary,
+                             fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 8.dp))
+                    } else {
+                        TextButton(onClick = {
+                            customPreco = String.format(PT_BR, "%.2f", pa)
+                            temPreco = true
+                            precoEm = System.currentTimeMillis()
+                            prefs.guardarDoProdutor(PREF_PRECO, pa, precoEm)
+                        }) {
+                            Text("Usar este preço")
+                        }
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
             // A legenda diz, em linguagem de campo, o que é do produtor e o que
             // ainda é padrão. Quem usa isto no talhão precisa saber de onde vem
@@ -1100,12 +1162,27 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                 if (temPreco) "preço" else null,
                 if (temCusto) "custo" else null
             )
-            val quando = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+            val quando = java.text.SimpleDateFormat("dd/MM/yyyy", PT_BR)
+            // "Informados em" com uma data só deixava dúvida: era a data do
+            // preço digitado ou a da cotação? Agora cada número diz quando foi
+            // informado pelo produtor.
+            val datas = listOfNotNull(
+                if (temProd && prodEm > 0L) "a produtividade em ${quando.format(java.util.Date(prodEm))}" else null,
+                if (temPreco && precoEm > 0L) "o preço em ${quando.format(java.util.Date(precoEm))}" else null,
+                if (temCusto && custoEm > 0L) "o custo em ${quando.format(java.util.Date(custoEm))}" else null
+            )
             val legenda = listOfNotNull(
                 if (seus.isEmpty())
                     "Preencha com os seus números: o app guarda e passa a abrir com eles."
+                else if (datas.isNotEmpty())
+                    "Você informou ${juntaComE(datas)}."
                 else
                     "Seus números: " + seus.joinToString(", ") + ".",
+                // O preço do produtor não segue o mercado sozinho, de propósito:
+                // vale o que ele recebe. Mas precisa saber disso.
+                if (temPreco) "O app guarda o seu preço e não o troca quando o mercado muda: " +
+                    "para atualizar, digite o novo" + (if (paraHoje?.estimado_brl_saca != null) " ou use o do Pará hoje." else ".")
+                else null,
                 if (temProd) null
                     else "A produtividade é a estimativa do modelo — se você já colheu, informe a sua.",
                 if (temPreco) null else kpis.fonte_preco?.let { "Preço padrão: $it." },
@@ -1118,20 +1195,18 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                 // que pode não ser a exibida. Concatenar antes de .format()
                 // deixaria dúvida sobre a qual literal o format se aplica.
                 kpis.preco_fisico?.let {
-                    "Físico hoje em %s (%s), %s: R$ %.2f/sc — não é preço de porteira, entre a praça e a fazenda ainda há frete e base."
-                        .format(it.praca, it.uf, it.tipo, it.valor)
+                    // A fonte não publica praça no Pará: a mais próxima pode
+                    // ser Sorriso (MT). Dita sem o estado, parecia o preço local.
+                    if (it.uf == "PA")
+                        "Físico hoje em ${it.praca} (PA), ${it.tipo}: R$ ${reais(it.valor)}/sc — não é preço de porteira, entre a praça e a fazenda ainda há frete e base."
+                    else
+                        "Físico hoje em ${it.praca} (${it.uf}), ${it.tipo}: R$ ${reais(it.valor)}/sc. É de outro estado: mostra o rumo do mercado, não o seu preço."
                 }
             ).joinToString(" ")
             if (legenda.isNotBlank()) {
                 Text(text = legenda, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (seus.isNotEmpty()) {
-                Text(
-                    text = "Informados em " + quando.format(java.util.Date(
-                        maxOf(precoEm, custoEm, prodEm))) + ".",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
                 // Caminho de volta, para ninguém ficar preso a um número
                 // digitado errado sem saber de onde vinha o padrão.
                 TextButton(
@@ -1139,9 +1214,9 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                         prefs.esquecerDoProdutor(PREF_PRECO, PREF_CUSTO, PREF_PROD)
                         temPreco = false; temCusto = false; temProd = false
                         precoEm = 0L; custoEm = 0L; prodEm = 0L
-                        customPreco = "%.2f".format(kpis.soja_preco_saca)
-                        customCusto = "%.2f".format(kpis.custo_ha)
-                        customProd = "%.1f".format(prodModelo)
+                        customPreco = String.format(PT_BR, "%.2f", kpis.soja_preco_saca)
+                        customCusto = String.format(PT_BR, "%.2f", kpis.custo_ha)
+                        customProd = String.format(PT_BR, "%.1f", prodModelo)
                     },
                     contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
                 ) {
@@ -1166,11 +1241,11 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
                 Column {
                     Text(text = if (temProd) "Receita bruta" else "Receita bruta estimada",
                          fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = "R$ ${milhar(receita)}/ha", fontSize = 18.sp, color = (if(isDark) Color(0xFF58a6ff) else Color(0xFF2563eb)), fontWeight = FontWeight.Bold)
+                    Text(text = "${reaisInteiros(receita)}/ha", fontSize = 18.sp, color = (if(isDark) Color(0xFF58a6ff) else Color(0xFF2563eb)), fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(text = "Custo operacional", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = "R$ ${milhar(custo)}/ha", fontSize = 18.sp,
+                    Text(text = "${reaisInteiros(custo)}/ha", fontSize = 18.sp,
                          color = if (isDark) Color(0xFFf85149) else Color(0xFFdc2626), fontWeight = FontWeight.Bold)
                 }
             }
@@ -1180,7 +1255,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
                     Text(text = "Lucro líquido projetado", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text(text = "R$ ${milhar(lucro)}/ha", fontSize = 22.sp, color = profitColor, fontWeight = FontWeight.ExtraBold)
+                    Text(text = "${reaisInteiros(lucro)}/ha", fontSize = 22.sp, color = profitColor, fontWeight = FontWeight.ExtraBold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(text = "Retorno sobre o custo", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -1190,8 +1265,10 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
             
             if (r.sinalIncerto && outroRateio != null) {
                 Text(
-                    text = String.format(PT_BR, "Atenção: com estes dados o resultado pode ir de R$ %,d a R$ %,d por hectare, conforme quanto do custo variável acompanha a área e quanto acompanha a produção. A CONAB publica só o total por saca, sem abrir por item. Informe o seu custeio para a conta parar de depender disso.", 
-                        minOf(lucro, outroRateio).toInt(), maxOf(lucro, outroRateio).toInt()),
+                    text = "Atenção: com estes dados o resultado pode ir de ${reaisInteiros(minOf(lucro, outroRateio))} a " +
+                           "${reaisInteiros(maxOf(lucro, outroRateio))} por hectare, conforme quanto do custo variável " +
+                           "acompanha a área e quanto acompanha a produção. A CONAB publica só o total por saca, sem " +
+                           "abrir por item. Informe o seu custeio para a conta parar de depender disso.",
                     fontSize = 12.sp,
                     color = corAtencao(isDark),
                     modifier = Modifier.padding(top = 12.dp)
@@ -1210,7 +1287,7 @@ fun ResumoFinanceiroCard(projecao: PrevisaoHistorico, kpis: FinancaResponse) {
 }
 
 @Composable
-fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
+fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int? = null) {
     val isDark = isSystemInDarkTheme()
     // Tudo volta ao padrão quando o município muda: sem a chave, o cartão
     // seguia com a estimativa e o cenário do município anterior.
@@ -1254,7 +1331,10 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Projeção com o cenário", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                // O simulador da API parte da safra seguinte à última divulgada,
+                // que pode não ser a do Resumo: o ano fica escrito.
+                Text(text = "Projeção com o cenário" + (ano?.let { ", safra $it" } ?: ""),
+                     fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (isSimulating) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                 }
@@ -1444,6 +1524,14 @@ fun milhar(v: Double): String = String.format(PT_BR, "%,d", v.roundToInt())
 
 fun reais(v: Double): String = String.format(PT_BR, "%,.2f", v)
 
+/**
+ * Reais sem centavos, com o sinal antes do símbolo: "−R$ 86", e não "R$ -86".
+ * O espaço depois de "R$" não quebra: numa frase longa, o símbolo ficava no fim
+ * de uma linha e o número no começo da outra.
+ */
+fun reaisInteiros(v: Double): String =
+    (if (v.roundToInt() < 0) "−" else "") + "R$\u00A0" + milhar(kotlin.math.abs(v))
+
 // Períodos da tela Mercado: chave da API e rótulo do botão.
 private val PERIODOS_MERCADO = listOf("1d" to "1D", "5d" to "5D", "1mo" to "1M", "6mo" to "6M")
 // "1D" lido em voz alta não diz nada; o leitor de tela lê o período por extenso.
@@ -1546,7 +1634,8 @@ fun MercadoConteudo(mercado: MercadoResponse?, carregando: Boolean, periodo: Str
             Text("Referências de preço físico", fontWeight = FontWeight.Bold, fontSize = 14.sp,
                  color = MaterialTheme.colorScheme.onSurface)
             mercado?.fisico?.let {
-                Text("${it.praca} (${it.uf}), ${it.tipo}: R$ ${reais(it.valor)}/sc, cotação do dia",
+                Text("${it.praca} (${it.uf}), ${it.tipo}: R$ ${reais(it.valor)}/sc, cotação do dia" +
+                     (if (it.uf != "PA") ", em outro estado" else ""),
                      fontSize = 13.sp, color = secundaria)
             }
             mercado?.conab_saca?.let {
@@ -1591,7 +1680,8 @@ fun PrecoEstimadoPara(para: EstimativaPara, estimado: Double, isDark: Boolean) {
         Text("R$ ${reais(estimado)}/sc", fontSize = 22.sp, fontWeight = FontWeight.Bold,
              color = MaterialTheme.colorScheme.onSurface)
         Text("Chicago deste momento $sinal R$ ${reais(kotlin.math.abs(para.base_brl_saca))} de base do Pará " +
-             "(${mesCurto(para.mes_base, anoCompleto = true)}). Estimativa, não cotação de praça.",
+             "(${mesCurto(para.mes_base, anoCompleto = true)}). Estimativa do preço de porto no Pará, não cotação " +
+             "de praça: na fazenda o preço costuma ser menor, pelo frete.",
              fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
     }
 }

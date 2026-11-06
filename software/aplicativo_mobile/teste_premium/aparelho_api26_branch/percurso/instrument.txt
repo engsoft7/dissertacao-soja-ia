@@ -1,21 +1,21 @@
 
 com.agrointeligencia.app.PercursoNoAparelhoTest:
 Error in percorreAsTelasComDadosReais(com.agrointeligencia.app.PercursoNoAparelhoTest):
-androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 60000 ms
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 90000 ms
 	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:887)
 	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:482)
-	at com.agrointeligencia.app.PercursoNoAparelhoTest.espera(PercursoNoAparelhoTest.kt:80)
-	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:155)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.espera(PercursoNoAparelhoTest.kt:81)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:164)
 
 
-Time: 69.898
+Time: 101.194
 There was 1 failure:
 1) percorreAsTelasComDadosReais(com.agrointeligencia.app.PercursoNoAparelhoTest)
-androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 60000 ms
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 90000 ms
 	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:887)
 	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:482)
-	at com.agrointeligencia.app.PercursoNoAparelhoTest.espera(PercursoNoAparelhoTest.kt:80)
-	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:155)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.espera(PercursoNoAparelhoTest.kt:81)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:164)
 
 FAILURES!!!
 Tests run: 1,  Failures: 1

@@ -217,6 +217,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.12` (25/10/2026) — estimativa no campo por foto e GPS no aplicativo (2.3.0), contador de vagens e LSTM no recorte nacional | 119 | 23.198 | `4d1c23effae508d8d5dce1f3b58a2d2f611cea7406acad4a4651410c3bf7f314` |
 | Tag `v2.4.13` (25/10/2026) — contador automático de vagens no aplicativo (2.4.0) e preço estimado do Pará de volta | 123 | 23.950 | `35877615a2cd9b2e713013754bf46e32f02bedbf7979538f4f1da07824811140` |
 | Tag `v2.4.14` (25/10/2026) — tempo na lavoura no aplicativo (2.5.0): janela de pulverização, avisos do INMET e previsão de 7 dias; sedes corrigidas e só HTTPS | 129 | 25.618 | `b4201dec3536366fdd4c50275b32c5f00b0ac30f85eb01dd3fdefa4ac679e009` |
+| Tag `v2.4.15` (06/11/2026) — aplicativo 2.7.0: escolha do município pela lista ou pelo GPS, acessibilidade e fontes oficiais na tela Sobre | 156 | 29.217 | `32213e979e9cfd5a4cb0514054a0ab221e3cd121b3c670db1f1c696ce2f03323` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -610,6 +611,52 @@ arquivos e 25.618 linhas. O DOI de versão desta etiqueta é
 10.5281/zenodo.23652157, atribuído pelo Zenodo no depósito disparado pela
 publicação do Release em 25/10/2026.
 
+A `v2.4.15` foi registrada pelo workflow `registra-doi.yml` na publicação do
+Release, em 06/11/2026, com o título “v2.4.15 — Aplicativo 2.7.0: escolha do
+município pela lista ou pelo GPS, acessibilidade e fontes oficiais na tela
+Sobre”. Em relação à `v2.4.14`, entram 27 arquivos-fonte
+(`pesquisa/03_analise_nacional/12_sem_subamostragem.py`,
+`pesquisa/03_analise_nacional/13_variaveis_extras.py`,
+`pesquisa/04_analise_para/09_lstm_series_para.py`,
+`pesquisa/08_previsao_futura/09_confere_projecao.py`,
+`pesquisa/08_previsao_futura/10_oni_base_produto.py`,
+`pesquisa/09_contagem_por_imagem/ciclo_retreino.py`,
+`pesquisa/10_trabalhos_futuros/02_sensores_recentes.py`,
+`pesquisa/10_trabalhos_futuros/03_retroteste_preco_para.py`,
+`pesquisa/10_trabalhos_futuros/04_valida_tempo_inmet.py`,
+`pesquisa/10_trabalhos_futuros/05_solo_na_tabela6.py`,
+`pesquisa/10_trabalhos_futuros/06_amazonia_legal.py`,
+`pesquisa/10_trabalhos_futuros/coleta/coleta_amazonia_legal.py`,
+`pesquisa/10_trabalhos_futuros/coleta/coleta_fases_nacional.py`,
+`pesquisa/10_trabalhos_futuros/coleta/coleta_recentes.py`,
+`pesquisa/10_trabalhos_futuros/coleta/coleta_solo.py`,
+`pesquisa/10_trabalhos_futuros/coleta/comum_gee.py`,
+`software/api_backend/tempo.py`, `software/api_backend/test_contador.py`,
+`software/api_backend/test_tempo.py`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/AtualizaContador.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/FontesOficiais.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Localizacao.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Municipio.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/AtualizaContadorTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/FontesOficiaisTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/MunicipioTest.kt`
+e `software/aplicativo_mobile/loja/confere_textos_da_loja.py`); mudam 11
+(`pesquisa/07_referencias/confere_listas.py`, `software/api_backend/api.py`,
+`software/aplicativo_mobile/app/build.gradle.kts`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/ApiService.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/ContadorVagens.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/EstimativaCampo.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/MainActivity.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Tempo.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/CapturasDeTelaTest.kt`,
+`software/dashboard_web/app.py` e `software/dashboard_web/ui/charts.py`).
+
+O resumo criptográfico da `v2.4.15` foi calculado pelo mesmo workflow sobre uma
+cópia limpa da etiqueta (commit `033d973`), com o critério do comando acima: 156
+arquivos e 29.217 linhas. O DOI de versão desta etiqueta é
+10.5281/zenodo.23992059, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 06/11/2026.
+
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
 calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
@@ -855,6 +902,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.11`:** 10.5281/zenodo.23592602
 - **DOI da `v2.4.12`:** 10.5281/zenodo.23641635
 - **DOI da `v2.4.13`:** 10.5281/zenodo.23644764
-- **DOI da versão mais recente (`v2.4.14`):** 10.5281/zenodo.23652157
+- **DOI da `v2.4.14`:** 10.5281/zenodo.23652157
+- **DOI da versão mais recente (`v2.4.15`):** 10.5281/zenodo.23992059
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

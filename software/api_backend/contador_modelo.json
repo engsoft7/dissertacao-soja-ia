@@ -14,5 +14,6 @@
     }
   },
   "nota": "Ele aprendeu com fotos de plantas da China, onde erra em média 6%, e ainda não foi conferido em lavouras do Pará.",
-  "descricao": "Versão 1: os modelos que vêm no aplicativo (treinados na YOLO POD, convertidos em 25/10/2026). Para publicar um modelo novo, ver pesquisa/09_contagem_por_imagem/ciclo_retreino.py (passo publica)."
+  "modo_automatico": false,
+  "descricao": "Versão 1: os modelos que vêm no aplicativo (treinados na YOLO POD, convertidos em 25/10/2026). Para publicar um modelo novo, ver pesquisa/09_contagem_por_imagem/ciclo_retreino.py (passo publica). \"modo_automatico\" fica false até ciclo_retreino.py publica receber a medição do erro nas fotos de teste do Pará (--modo-automatico --medicao), com o erro dentro do limite."
 }

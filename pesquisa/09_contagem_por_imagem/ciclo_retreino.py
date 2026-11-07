@@ -28,22 +28,34 @@ de conversão, de que só importa as rotinas:
             na validação do Pará; mede no teste do Pará e no da YOLO POD, antes
             e depois. O modelo novo só vale se melhorar no Pará sem piorar na
             YOLO POD além da margem dada (--tolerancia).
+  colheita  com os talhões que vieram nos .zip (talhoes.json, com o peso colhido
+            que o produtor informou no app), compara com a colheita a
+            estimativa por componentes de rendimento feita com as contagens
+            do produtor e a mesma conta com o número do contador automático
+            onde ele foi usado. Diz quanto cada uma erra na lavoura, que é o
+            que decide se o modo automático pode ser ligado.
   publica   com a v1 e a v2 aprovadas e já gravadas na branch
             modelo-contagem-vagens, escreve o anúncio que a API serve em
             /api/contador (software/api_backend/contador_modelo.json): versão,
             endereço preso ao commit, tamanho e SHA-256 de cada arquivo, e a
             frase que o aplicativo mostra. O aplicativo (AtualizaContador.kt)
             baixa e confere sozinho, sem versão nova. Não use Release: cada
-            Release publicado gera um depósito novo no Zenodo.
+            Release publicado gera um depósito novo no Zenodo. Com
+            --modo-automatico, o anúncio libera o número do contador sem
+            conferência (ModoAutomatico.kt), e só com --medicao: o mede_teste.json
+            dos mesmos modelos nas fotos de teste do Pará, com ao menos
+            --fotos-minimas fotos e erro relativo médio de no máximo --erro-maximo.
 
 Uso:
     python ciclo_retreino.py junta fotos_marcadas_2027-03-02.zip --lote "Fazenda Boa Vista" --base base_para
     python ciclo_retreino.py mede --base base_para --assets <app/src/main/assets>
     python ciclo_retreino.py retreina --base base_para --modelos <branch> --versao v1 \
         [--yolopod dados_yolopod] --saida retreino_v1
+    python ciclo_retreino.py colheita --base base_para
     python ciclo_retreino.py publica --versao 2 --commit <sha da branch> --pasta celular_v2 \
         --v1 retreino_v1/contador_vagens_v1.tflite --v2 retreino_v2/contador_vagens_v2.tflite \
-        --nota "Aprendeu também com N fotos de lavouras do Pará, onde erra em média X%."
+        --nota "Aprendeu também com N fotos de lavouras do Pará, onde erra em média X%." \
+        [--modo-automatico --medicao medido/mede_teste.json]
 
 Fotos de pessoas, documentos ou qualquer coisa que não seja vagem de soja não
 devem entrar: confira as miniaturas que `junta` grava em base_para/revisar/
@@ -101,16 +113,36 @@ def motivo_de_recusa(a: dict) -> str | None:
     return None
 
 
+TALHOES = "talhoes.json"   # o arquivo dos talhões no .zip (AmostrasTreino.kt)
+
+
+def junta_talhoes(dados: bytes, lote: str, talhoes: dict) -> int:
+    """Os talhões de um .zip, pela chave (lote, talhão): o registro mais novo vence."""
+    n = 0
+    for t in json.loads(dados).get("talhoes") or []:
+        if not t or not t.get("talhao"):
+            continue
+        chave = f"{lote}|{t['talhao']}"
+        if chave not in talhoes or (t.get("atualizado_em") or "") >= (talhoes[chave].get("atualizado_em") or ""):
+            talhoes[chave] = {**t, "lote": lote}
+            n += 1
+    return n
+
+
 def junta(zips: list[Path], lote: str, base: Path):
     (base / "imagens").mkdir(parents=True, exist_ok=True)
     (base / "revisar").mkdir(exist_ok=True)
     indice_arq = base / "anotacoes.json"
     indice = json.loads(indice_arq.read_text()) if indice_arq.exists() else {}
-    recusas, novas = {}, 0
+    talhoes_arq = base / TALHOES
+    talhoes = json.loads(talhoes_arq.read_text()) if talhoes_arq.exists() else {}
+    recusas, novas, n_talhoes = {}, 0, 0
     for z in zips:
         with zipfile.ZipFile(z) as arq:
             nomes = set(arq.namelist())
-            for nome in sorted(n for n in nomes if n.endswith(".json")):
+            if TALHOES in nomes:
+                n_talhoes += junta_talhoes(arq.read(TALHOES), lote, talhoes)
+            for nome in sorted(n for n in nomes if n.endswith(".json") and n != TALHOES):
                 a = json.loads(arq.read(nome))
                 motivo = motivo_de_recusa(a)
                 if motivo is None and a.get("imagem") not in nomes:
@@ -133,10 +165,13 @@ def junta(zips: list[Path], lote: str, base: Path):
                 miniatura(base / "imagens" / f"{resumo[:16]}.jpg", a["pontos"], base / "revisar" / f"{resumo[:16]}.jpg")
                 novas += 1
     indice_arq.write_text(json.dumps(indice, indent=1, ensure_ascii=False))
+    talhoes_arq.write_text(json.dumps(talhoes, indent=1, ensure_ascii=False))
     resumo_partes = {p: {"fotos": sum(1 for v in indice.values() if v["parte"] == p),
                          "lavouras": len({(v["lote"], v["safra"]) for v in indice.values() if v["parte"] == p})}
                      for p in PARTES}
-    print(json.dumps({"novas": novas, "recusadas": recusas, "na_base": len(indice), "partes": resumo_partes},
+    print(json.dumps({"novas": novas, "recusadas": recusas, "na_base": len(indice), "partes": resumo_partes,
+                      "talhoes_recebidos": n_talhoes, "talhoes_na_base": len(talhoes),
+                      "talhoes_com_colheita": sum(1 for t in talhoes.values() if t.get("colheita_kg_ha"))},
                      indent=2, ensure_ascii=False))
 
 
@@ -177,8 +212,9 @@ def mede(base: Path, assets: Path, parte: str = "teste", saida: Path | None = No
     itens = carrega_base(base, parte)
     if not itens:
         raise SystemExit(f"nenhuma foto de {parte} na base; rode junta antes")
-    interpretes = {}
+    interpretes, resumos = {}, {}
     for versao in ("v1", "v2"):
+        resumos[versao] = hashlib.sha256((assets / f"contador_vagens_{versao}.tflite").read_bytes()).hexdigest()
         it = Interpreter(model_path=str(assets / f"contador_vagens_{versao}.tflite"), num_threads=4)
         it.allocate_tensors()
         interpretes[versao] = (it, it.get_input_details()[0]["index"], it.get_output_details()[0]["index"])
@@ -201,7 +237,7 @@ def mede(base: Path, assets: Path, parte: str = "teste", saida: Path | None = No
         linhas.append({"arquivo": item["arquivo"].name, "verdade": len(verd), "contagem_v1": res["v1"][0],
                        "marcas_v2": len(res["v2"][1])})
     resultado = {
-        "parte": parte, "modelos": str(assets),
+        "parte": parte, "modelos": str(assets), "sha256": resumos,
         "contagem_v1": resume_erros([l["verdade"] for l in linhas], [l["contagem_v1"] for l in linhas]),
         "marcas_v2": {"precisao": round(acertos / max(n_pred, 1), 3), "revocacao": round(acertos / max(n_verd, 1), 3),
                       "raio_fracao_do_lado": RAIO_MARCAS},
@@ -212,6 +248,68 @@ def mede(base: Path, assets: Path, parte: str = "teste", saida: Path | None = No
         saida.mkdir(parents=True, exist_ok=True)
         (saida / f"mede_{parte}.json").write_text(json.dumps({**resultado, "por_foto": linhas}, indent=1,
                                                              ensure_ascii=False))
+    return resultado
+
+
+# ── colheita ─────────────────────────────────────────────────────────────────
+
+def kg_ha_do_talhao(t: dict, contador: bool = False) -> float | None:
+    """A conta de CampoCalculo.kt: média, entre os pontos válidos, de
+    plantas/m² × vagens/planta × grãos/vagem × peso de mil grãos ÷ 100. Com
+    contador=True, as vagens de cada ponto em que o contador foi usado são as
+    dele; os demais ficam com as do produtor."""
+    esp, graos, pmg = t.get("espacamento_m") or 0, t.get("graos_por_vagem") or 0, t.get("peso_mil_graos_g") or 0
+    if esp <= 0 or graos <= 0 or pmg <= 0:
+        return None
+    por_ponto = []
+    for p in t.get("pontos") or []:
+        vagens = p.get("vagensDoContador") if contador and p.get("vagensDoContador") is not None else p.get("vagens")
+        plantas, metros, arr = p.get("plantas") or 0, p.get("metrosDeLinha") or 0, p.get("arrancadas") or 0
+        if plantas > 0 and metros > 0 and arr > 0 and (vagens or 0) > 0:
+            por_ponto.append(plantas / (metros * esp) * (vagens / arr) * graos * pmg / 100)
+    return float(np.mean(por_ponto)) if por_ponto else None
+
+
+def compara_colheita(talhoes: list[dict]) -> dict:
+    """Erro, contra a colheita, da estimativa com as contagens do produtor e,
+    nos talhões em que ele foi usado, com o número do contador."""
+    linhas = []
+    for t in talhoes:
+        colhido = t.get("colheita_kg_ha")
+        produtor = kg_ha_do_talhao(t)
+        if not colhido or colhido <= 0 or produtor is None:
+            continue
+        usou = any(p.get("vagensDoContador") is not None for p in t.get("pontos") or [])
+        linhas.append({"lote": t.get("lote"), "talhao": t.get("talhao"), "colheita_kg_ha": round(colhido, 1),
+                       "estimativa_produtor": round(produtor, 1),
+                       "estimativa_contador": round(kg_ha_do_talhao(t, contador=True), 1) if usou else None,
+                       "pontos": len(t.get("pontos") or [])})
+
+    def resume(chave):
+        par = [(l[chave], l["colheita_kg_ha"]) for l in linhas if l[chave] is not None]
+        if not par:
+            return None
+        e = np.array([(est - col) / col for est, col in par])
+        return {"talhoes": len(par), "erro_relativo_medio": round(float(np.abs(e).mean()), 4),
+                "vies_relativo": round(float(e.mean()), 4)}
+
+    return {"talhoes_com_colheita": len(linhas), "produtor": resume("estimativa_produtor"),
+            "contador": resume("estimativa_contador"),
+            "nota": ("Estimativa no pé contra o romaneio: um viés positivo de alguns por cento é a perda na colheita, "
+                     "que a estimativa não desconta. O contador só vale no modo automático se errar contra a colheita "
+                     "quase o mesmo que a contagem do produtor, nos mesmos talhões."),
+            "por_talhao": linhas}
+
+
+def colheita(base: Path, saida: Path | None = None):
+    arq = base / TALHOES
+    if not arq.exists():
+        raise SystemExit(f"{arq} não existe; rode junta com os .zip exportados pelo app")
+    resultado = compara_colheita(list(json.loads(arq.read_text()).values()))
+    print(json.dumps({k: v for k, v in resultado.items() if k != "por_talhao"}, indent=2, ensure_ascii=False))
+    if saida:
+        saida.mkdir(parents=True, exist_ok=True)
+        (saida / "colheita.json").write_text(json.dumps(resultado, indent=1, ensure_ascii=False))
     return resultado
 
 
@@ -315,6 +413,26 @@ def retreina(args):
     print(json.dumps({k: resultado[k] for k in ("fotos_para", "aprovado", "criterio")}, indent=2, ensure_ascii=False))
 
 
+def libera_modo_automatico(args, arquivos: dict) -> bool:
+    """O modo automático só com a medição dos mesmos modelos no teste do Pará, dentro do limite."""
+    if not args.medicao:
+        raise SystemExit("--modo-automatico precisa de --medicao (o mede_teste.json dos modelos anunciados)")
+    m = json.loads(Path(args.medicao).read_text(encoding="utf-8"))
+    if m.get("parte") != "teste":
+        raise SystemExit("a medição precisa ser das fotos de teste do Pará (mede --parte teste)")
+    for versao in ("v1", "v2"):
+        anunciado = arquivos[f"contador_vagens_{versao}.tflite"]["sha256"]
+        medido = (m.get("sha256") or {}).get(versao)
+        if medido != anunciado:
+            raise SystemExit(f"a medição não é do {versao} anunciado (resumo {medido} contra {anunciado})")
+    c = m["contagem_v1"]
+    if c["fotos"] < args.fotos_minimas:
+        raise SystemExit(f"só {c['fotos']} fotos de teste do Pará; o mínimo é {args.fotos_minimas}")
+    if c["erro_relativo_medio"] > args.erro_maximo:
+        raise SystemExit(f"erro de {c['erro_relativo_medio']:.1%} no teste do Pará, acima de {args.erro_maximo:.1%}")
+    return True
+
+
 def publica(args):
     """Anúncio do modelo novo para a API, com os endereços presos ao commit."""
     import re
@@ -332,7 +450,9 @@ def publica(args):
             "url": f"https://raw.githubusercontent.com/engsoft7/dissertacao-soja-ia/{args.commit}/"
                    f"{args.pasta.strip('/')}/{nome}",
             "sha256": hashlib.sha256(dados).hexdigest(), "bytes": len(dados)}
+    modo = libera_modo_automatico(args, arquivos) if args.modo_automatico else False
     anuncio = {"versao": args.versao, "app_minimo": args.app_minimo, "arquivos": arquivos, "nota": args.nota,
+               "modo_automatico": modo,
                "descricao": f"Versão {args.versao}, publicada por ciclo_retreino.py publica."}
     destino.write_text(json.dumps(anuncio, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps(anuncio, indent=2, ensure_ascii=False))
@@ -351,6 +471,9 @@ def main():
     m.add_argument("--assets", type=Path, required=True, help="pasta com contador_vagens_v1/v2.tflite")
     m.add_argument("--parte", choices=list(PARTES), default="teste")
     m.add_argument("--saida", type=Path)
+    c = sub.add_parser("colheita")
+    c.add_argument("--base", type=Path, default=Path("base_para"))
+    c.add_argument("--saida", type=Path)
     r = sub.add_parser("retreina")
     r.add_argument("--base", default="base_para")
     r.add_argument("--modelos", required=True, help="pasta com v1/ e v2/ da branch modelo-contagem-vagens")
@@ -373,6 +496,11 @@ def main():
     p.add_argument("--v2", required=True)
     p.add_argument("--nota", required=True, help="frase sobre de onde o modelo aprendeu e quanto erra")
     p.add_argument("--app-minimo", type=int, default=23)
+    p.add_argument("--modo-automatico", action="store_true",
+                   help="libera o número do contador sem conferência no app (exige --medicao)")
+    p.add_argument("--medicao", help="mede_teste.json dos modelos anunciados, nas fotos de teste do Pará")
+    p.add_argument("--erro-maximo", type=float, default=0.10)
+    p.add_argument("--fotos-minimas", type=int, default=30)
     p.add_argument("--anuncio", default=str(Path(__file__).resolve().parents[2] / "software" / "api_backend"
                                             / "contador_modelo.json"))
     a = ap.parse_args()
@@ -380,6 +508,8 @@ def main():
         junta(a.zips, a.lote, a.base)
     elif a.passo == "mede":
         mede(a.base, a.assets, a.parte, a.saida)
+    elif a.passo == "colheita":
+        colheita(a.base, a.saida)
     elif a.passo == "retreina":
         retreina(a)
     else:

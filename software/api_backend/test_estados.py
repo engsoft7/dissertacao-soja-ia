@@ -75,3 +75,11 @@ def test_previsao_financas_simulacao_e_mapa(cliente):
     assert "leaflet" in html.lower() and "Sorriso" in html
     m = cliente.get("/api/mercado", params={"uf": "MA"}).json()
     assert m["uf"] == "MA" and m["para"] is None and m["conab_fonte"].startswith("CONAB, Balsas")
+
+
+def test_textos_da_praca_em_reais():
+    t = estados.levantamento_da_praca("SORRISO-MT", "Sorriso (MT)", "MAR-2026", "março de 2026")["textos"]
+    assert "R$ 83,66/sc, convertido para R$ 5.019,60/ha" in t["nota_custo"]
+    assert "(3.600 kg/ha, 60 sc/ha)" in t["nota_custo"]
+    assert t["nota_preco"].startswith("R$ 103,90/sc")
+    assert estados.ESTADOS["MT"].no == "em Mato Grosso" and estados.ESTADOS["MA"].do == "do Maranhão"

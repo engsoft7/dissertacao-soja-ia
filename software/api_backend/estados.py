@@ -41,6 +41,15 @@ class Estado:
     # que usa o levantamento de Pedro Afonso (financas.LEVANTAMENTO).
     pracas_conab: tuple[tuple[str, str, float, float], ...] = ()
 
+    @property
+    def no(self) -> str:
+        """"no Pará", "em Mato Grosso", "no Maranhão": para as frases das telas."""
+        return {"PA": "no Pará", "MA": "no Maranhão"}.get(self.uf, f"em {self.nome}")
+
+    @property
+    def do(self) -> str:
+        return {"PA": "do Pará", "MA": "do Maranhão"}.get(self.uf, f"de {self.nome}")
+
 
 # Sedes das praças: kelvins/municipios-brasileiros, como municipios_<UF>.csv.
 ESTADOS: dict[str, Estado] = {
@@ -130,6 +139,6 @@ def levantamento_da_praca(praca_csv: str, rotulo: str, levantamento: str, extens
                            "da CONAB. Cenário de referência, não previsão de preço."),
             "nota_custo": (f"Custo operacional de R$ {reais(operacional)}/sc, convertido para "
                            f"R$ {reais(operacional * sc)}/ha pela produtividade de referência da praça "
-                           f"({kg:,.0f} kg/ha, {sc:.0f} sc/ha).".replace(",", ".")),
+                           f"({reais(kg)[:-3]} kg/ha, {sc:.0f} sc/ha)."),
         },
     }

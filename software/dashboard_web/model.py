@@ -30,6 +30,10 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler
 
+# Sobe quando o painel passa a depender de algo novo deste módulo: o app.py
+# recarrega o módulo se a versão em memória for mais velha (Streamlit Cloud).
+VERSAO_DO_MODULO = 2
+
 FEATURES = [
     "NDVI_mean", "NDVI_max", "EVI_mean", "EVI_max",
     "precip_total", "etp_total", "balanco_hidrico",

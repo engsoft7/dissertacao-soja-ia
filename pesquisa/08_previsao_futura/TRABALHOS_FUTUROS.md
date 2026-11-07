@@ -166,6 +166,20 @@ e SVR +0,100 e MLP +0,097, com p de Holm de 0,003 ou menos. O protocolo da
 Tabela 6, que no Pará não sai da média do município, encontra sinal quando a
 base cresce e o alvo repete menos.
 
+**Feito em 07/11/2026, quais preditores pesam em cada estado**
+(`10_trabalhos_futuros/08_preditores_estados.py`, nos mesmos registros de
+`06_amazonia_legal.py`). Para cada safra deixada de fora, o erro da referência
+contra o desvio de cada preditor em relação à média do município, com IC95 por
+reamostragem de safras. Em Mato Grosso, só o pico dos índices de vegetação
+passa (EVI máximo, r = 0,20; NDVI máximo, 0,13); a temperatura média chega a
+−0,23, mas o IC95 (−0,42 a +0,16) inclui o zero, porque o calor de um ano é
+parecido no estado inteiro e as safras efetivas são poucas. No Maranhão,
+passam sete: temperatura máxima (−0,33), chuva (+0,33), temperatura média
+(−0,32), balanço hídrico (+0,31), EVI máximo (+0,31), NDVI máximo (+0,28) e
+radiação solar (−0,28). No Pará, só o NDVI máximo, fraco (−0,09) e com o sinal
+ao contrário do esperado. Entrou como uma frase, com alteração controlada, na
+conclusão da dissertação, depois da Amazônia Legal.
+
 **Feito em 07/11/2026, data de semeadura por satélite**
 (`10_trabalhos_futuros/07_data_semeadura.py`, rodado no Actions). Não há
 registro público da data de semeadura nem da cultivar por município. A data,

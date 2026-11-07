@@ -5,7 +5,14 @@ Painel de Inteligência e Previsão de Safra de Soja — Pará
 Execução:
     streamlit run app.py
 """
+import importlib
 import model as M
+# O Streamlit Cloud, ao receber um push, roda o app.py novo e mantém na
+# memória o model.py de antes: o painel caiu com KeyError em 07/11/2026,
+# quando o app.py novo pediu um campo que o model.py velho não devolvia.
+# Sem a marca da versão atual, o módulo é recarregado.
+if getattr(M, "VERSAO_DO_MODULO", 0) < 3:
+    M = importlib.reload(M)
 import json
 import math
 import re
@@ -1426,7 +1433,9 @@ if tela_atual == "📍 Inteligência Territorial":
             # anomalias observada no estado. Antes os controles iam de toda a
             # faixa de chuva do estado e pediam à rede um ano com a chuva mudada
             # e o resto no normal, que quase não existe nos dados.
-            assoc = estimador.associacao
+            # Um Estimador guardado em cache por uma versão anterior do módulo não
+            # tem a associação: calcula-se aqui, em vez de derrubar a página.
+            assoc = getattr(estimador, "associacao", None) or M.associacao_climatica(df)
             fc, ft = assoc["chuva"]["faixa"], assoc["temperatura"]["faixa"]
             sinal = lambda v, c: f"{v:+.{c}f}".replace(".", ",")
             st.caption(
@@ -1440,7 +1449,7 @@ if tela_atual == "📍 Inteligência Territorial":
                                float(round(ft[0], 1)), float(round(ft[1], 1)), 0.0, step=0.1)
 
             st.divider()
-            efeito = estimador.cenario(1 + chuva_pct / 100, temp_c)
+            efeito = M.efeito_do_cenario(assoc, 1 + chuva_pct / 100, temp_c)
             dif = efeito["delta_kg_ha"]
             st.metric("Projeção ajustada",
                       f"{qtd(r['estimativa_kg_ha'] + dif)} {unidade}",

@@ -5,7 +5,14 @@ Painel de Inteligência e Previsão de Safra de Soja — Pará
 Execução:
     streamlit run app.py
 """
+import importlib
 import model as M
+# O Streamlit Cloud, ao receber um push, roda o app.py novo e mantém na
+# memória o model.py de antes: o painel caiu com KeyError em 07/11/2026,
+# quando o app.py novo pediu um campo que o model.py velho não devolvia.
+# Sem a marca da versão atual, o módulo é recarregado.
+if getattr(M, "VERSAO_DO_MODULO", 0) < 2:
+    M = importlib.reload(M)
 import json
 import math
 import re
@@ -1392,21 +1399,29 @@ if tela_atual == "📍 Inteligência Territorial":
             st.metric("Projeção ajustada",
                       f"{qtd(cenario['estimativa_kg_ha'])} {unidade}",
                       delta=f"{qtd(dif, '+')} {unidade}")
-            sens = M.sensibilidade_climatica(df)
             virg = lambda v, c: f"{v:.{c}f}".replace(".", ",")
-            # A frase segue o teste, e não fica escrita: com a safra 2025 na base,
-            # o p antigo caiu para 0,020 e contradizia o "não é distinguível de zero".
-            claro = sens["ic95"][0] > 0 or sens["ic95"][1] < 0
-            st.caption(
-                "**O que este número vale.** A associação entre chuva e "
-                f"produtividade nesta base {'é fraca' if claro else 'não é distinguível de zero'} "
-                f"(r = {virg(sens['r'], 3)}; IC95 por reamostragem de safras de "
-                f"{virg(sens['ic95'][0], 3)} a {virg(sens['ic95'][1], 3)}; "
-                f"n = {sens['n']}), e a diferença entre o terço mais seco e o "
-                f"mais chuvoso é de {br(round(sens['amplitude_kg_ha']))} kg/ha — "
-                f"contra margem de erro do modelo de "
-                f"{br(round(estimador.rmse or 0))} kg/ha. A variação acima está "
-                "dentro do ruído, e é assim que deve ser lida.")
+            # A legenda é um acréscimo: se o cálculo falhar, a página continua.
+            try:
+                sens = M.sensibilidade_climatica(df)
+                # A frase segue o teste, e não fica escrita: com a safra 2025 na base,
+                # o p antigo caiu para 0,020 e contradizia o "não é distinguível de zero".
+                claro = sens["ic95"][0] > 0 or sens["ic95"][1] < 0
+                st.caption(
+                    "**O que este número vale.** A associação entre chuva e "
+                    f"produtividade nesta base {'é fraca' if claro else 'não é distinguível de zero'} "
+                    f"(r = {virg(sens['r'], 3)}; IC95 por reamostragem de safras de "
+                    f"{virg(sens['ic95'][0], 3)} a {virg(sens['ic95'][1], 3)}; "
+                    f"n = {sens['n']}), e a diferença entre o terço mais seco e o "
+                    f"mais chuvoso é de {br(round(sens['amplitude_kg_ha']))} kg/ha — "
+                    f"contra margem de erro do modelo de "
+                    f"{br(round(estimador.rmse or 0))} kg/ha. A variação acima está "
+                    "dentro do ruído, e é assim que deve ser lida.")
+            except Exception as e:  # noqa: BLE001 — abrir a página vale mais
+                print(f"[painel] associação da chuva indisponível: {type(e).__name__}: {e}", flush=True)
+                st.caption(
+                    "**O que este número vale.** A margem de erro do modelo é de "
+                    f"{br(round(estimador.rmse or 0))} kg/ha; uma variação menor que ela "
+                    "está dentro do ruído.")
 
     with dir_:
         mapa, nome_para_interno, faixa_rend = construir_mapa(

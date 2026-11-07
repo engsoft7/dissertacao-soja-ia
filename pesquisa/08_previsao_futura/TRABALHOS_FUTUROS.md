@@ -166,6 +166,25 @@ e SVR +0,100 e MLP +0,097, com p de Holm de 0,003 ou menos. O protocolo da
 Tabela 6, que no Pará não sai da média do município, encontra sinal quando a
 base cresce e o alvo repete menos.
 
+**Feito em 07/11/2026, data de semeadura por satélite**
+(`10_trabalhos_futuros/07_data_semeadura.py`, rodado no Actions). Não há
+registro público da data de semeadura nem da cultivar por município. A data,
+porém, aparece na curva de vegetação: estimou-se o início do verdor de cada
+município-safra na série de NDVI de 16 dias do MODIS sobre a máscara de soja
+(o primeiro dia acima de 20% da subida até o pico, como no TIMESAT), e a
+semeadura como o verdor menos 20 dias. O calendário que sai é o da região: no
+sul do Pará (9 municípios, 169 safras), semeadura mediana em 28/10 (quartis
+19/10 e 13/11), e no nordeste (13 municípios, 217 safras), em 20/12 (28/11 e
+09/01), com 47 e 92 dias do verdor ao pico. Na Tabela 6, com e sem o início do
+verdor e os dias até o pico, nos mesmos 407 registros (37 municípios),
+nenhum modelo supera a referência: com a fenologia, o MLP fica em −0,011
+(IC95 −0,031 a +0,006), o SVR em −0,016, o XGBoost em −0,061 e o Random
+Forest em −0,105, contra −0,025, −0,011, −0,064 e −0,065 sem ela (p de Holm
+= 1,0 em todos). Do quanto o início do verdor varia, 63% é de uma safra para
+outra no mesmo município, mas essa variação, que mistura a semeadura com o
+ruído da série de 16 dias sob nuvens, não acompanha a produtividade da PAM.
+A cultivar continua sem fonte.
+
 **Milho.** A extensão a outras culturas esbarra na máscara: o MapBiomas
 (coleção 10) separa soja, cana, arroz, algodão e café, mas o milho fica em
 "outras lavouras temporárias", junto com o que se planta depois da soja. Sem a
@@ -244,6 +263,20 @@ do modelo atual.
   teste por fazenda e safra; `mede` roda os modelos do aplicativo nessas fotos
   pelo caminho que a foto faz no celular. Ensaiado em fotos sintéticas; falta
   a primeira remessa real.
+- **Feito em 07/11/2026, colheita e modo automático** (aplicativo 2.8.0, na
+  branch, sem publicar). Depois de colher, o produtor informa as sacas do
+  romaneio do talhão, e a tela compara com a estimativa. O talhão, com os
+  pontos (e o número do contador em cada um, quando usado) e a colheita, vai
+  no mesmo `.zip` das fotos. `ciclo_retreino.py colheita` mede, contra o que
+  foi pesado, a estimativa com as contagens do produtor e a mesma conta com o
+  número do contador. O modo automático, em que o número do contador entra sem
+  conferência, fica desligado. Ele liga só com um modelo baixado cujo anúncio
+  diga `modo_automatico: true`, e `publica` só escreve isso com a medição dos
+  mesmos modelos nas fotos de teste do Pará: ao menos 30 fotos e erro médio de
+  até 10%. Ligado, ainda pede a conferência do produtor com foto escura ou
+  borrada, com vagens por planta fora de 5 a 150, no primeiro ponto do talhão
+  e depois em um a cada cinco. Os limites também vêm no anúncio, para serem
+  ajustados com as fotos do Pará.
 - **Falta.** Medir o erro em fotos do Pará marcadas no aplicativo e, depois,
   contra a colheita pesada (o critério acima).
 

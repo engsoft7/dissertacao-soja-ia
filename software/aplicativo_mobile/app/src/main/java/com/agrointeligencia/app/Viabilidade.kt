@@ -213,11 +213,12 @@ fun ResumoFinanceiroCard(
     kpis: FinancaResponse,
     paraHoje: EstimativaPara? = null,
     pracas: List<PracaPara> = emptyList(),
-    municipio: String? = null
+    municipio: String? = null,
+    sedes: Map<String, LugarTempo> = SEDES_MUNICIPAIS
 ) {
-    // A cotação do dia na praça do Pará mais perto do município; sem ela, a
-    // média do Pará estimada com Chicago e a base do mês.
-    val praca = remember(pracas, municipio) { pracaParaUsar(municipio, pracas) }
+    // A cotação do dia na praça do estado mais perto do município; sem ela, no
+    // Pará, a média do Pará estimada com Chicago e a base do mês.
+    val praca = remember(pracas, municipio, sedes) { pracaParaUsar(municipio, pracas, sedes = sedes) }
     val precoHoje: Double? = praca?.valor ?: paraHoje?.estimado_brl_saca
     val rotuloHoje: String = praca?.let { "${it.praca}, ${dataCurta(it.data)}" } ?: "Pará, estimado agora"
     // O padrão do preço é a cotação do dia na praça (a mesma do Histórico e da

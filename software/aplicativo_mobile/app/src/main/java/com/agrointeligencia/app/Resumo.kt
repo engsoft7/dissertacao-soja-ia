@@ -159,7 +159,7 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
 }
 
 @Composable
-fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int? = null) {
+fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int? = null, uf: String? = null) {
     val isDark = isSystemInDarkTheme()
     // Tudo volta ao padrão quando o município muda: sem a chave, o cartão
     // seguia com a estimativa e o cenário do município anterior.
@@ -178,7 +178,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
         coroutineScope.launch {
             isSimulating = true
             try {
-                val req = SimulacaoRequest(municipio, precipFactor / 100.0, tempOffset.toDouble(), ano)
+                val req = SimulacaoRequest(municipio, precipFactor / 100.0, tempOffset.toDouble(), ano, uf)
                 val resp = RetrofitClient.getInstance().simularCenario(req)
                 simulado = resp.estimativa_kg_ha
                 delta = resp.delta_kg_ha

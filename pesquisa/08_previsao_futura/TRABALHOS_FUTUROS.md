@@ -401,17 +401,18 @@ depois da mudança), e o aplicativo do Pará pede e guarda o mesmo de sempre.
   Actions por `monta-estados.yml` e mantido pela atualização mensal). A
   coleta da seção 3, no formato da base do Pará, com a PAM pelo SIDRA, as
   sedes do mesmo conjunto aberto do Pará e o contorno pela malha do IBGE.
-  Ficam em `pesquisa/dados/estados/`. RESULTADO_BASE
+  Ficam em `pesquisa/dados/estados/`. Mato Grosso: 2.452 registros de 118 municípios, safras 2001 a 2025, com a série oficial de 140 municípios; Maranhão: 1.121 registros de 83 municípios, com a série de 94. Dois nomes do GAUL foram corrigidos à mão (Poxoréo, hoje Poxoréu, e Santo Antônio do Leverger); os municípios da coleta que ficaram sem par não aparecem na PAM da soja. O contorno do estado vem da malha do IBGE, que não atendeu na primeira rodada; sem ele, o mapa sai só com os pontos.
 - **Modelo.** O mesmo do Pará (referência mais a correção do MLP), treinado
-  na base de cada estado. Na validação temporal do produto, RESULTADO_MODELO
+  na base de cada estado. Na validação temporal do produto (deixando uma safra de fora por vez), Mato Grosso erra 303,5 kg/ha (9,6%), com R² de 0,429 contra 0,388 da referência, e o Maranhão erra 411,1 kg/ha (14,3%), com R² de 0,327 contra 0,260. No Pará, o mesmo modelo empata com a referência (R² de 0,253 nos dois): nos dois estados novos, a correção pelo clima e pela vegetação acrescenta o que a seção 3 mediu.
 - **Preço e custo.** Os da CONAB no próprio estado, no levantamento em uso
   (março de 2026): em Mato Grosso, Sorriso (R$ 83,66/sc, R$ 5.019,60/ha) ou
   Primavera do Leste (R$ 103,63/sc), a mais perto da sede do município; no
   Maranhão, Balsas (R$ 105,56/sc, R$ 5.489,12/ha). Diferente de Pedro Afonso,
   essas praças não têm o custo aberto por item na extração, e o resultado vai
   pelos dois rateios. O preço do dia é o das praças da Agrolink no estado,
-  quando houver (RESULTADO_PRACAS); a estimativa pela base mensal fica só no
-  Pará.
+  quando houver: em 07/11/2026, Sorriso (R$ 134,85), Lucas do Rio Verde, Sinop,
+  Primavera do Leste e Rondonópolis (R$ 141,40) em Mato Grosso, e Balsas (R$ 143,00)
+  no Maranhão. A estimativa pela base mensal fica só no Pará.
 - **API** (`software/api_backend/estados.py`). As rotas aceitam `?uf=MT` ou
   `?uf=MA`; `/api/estados` lista os estados e `/api/municipios?com_sedes=true`
   traz as sedes. Mato Grosso e Maranhão treinam depois do Pará, em segundo

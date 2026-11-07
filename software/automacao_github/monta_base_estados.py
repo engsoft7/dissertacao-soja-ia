@@ -66,7 +66,7 @@ VARIAVEIS = COLUNAS[3:12]
 URL_SIDRA = ("https://apisidra.ibge.gov.br/values"
              "/t/5457/n6/in%20n3%20{uf}/v/112/p/all/c782/40124?formato=json")
 URL_MALHA = ("https://servicodados.ibge.gov.br/api/v3/malhas/estados/{uf}"
-             "?formato=application/vnd.geo%2Bjson&qualidade=minima")
+             "?formato=application/vnd.geo+json&qualidade=minima")
 URL_SEDES = "https://raw.githubusercontent.com/kelvins/municipios-brasileiros/main/csv/municipios.csv"
 
 
@@ -80,7 +80,9 @@ def baixa(url: str, tentativas: int = 3, espera_s: int = 20) -> requests.Respons
         return None
     for i in range(1, tentativas + 1):
         try:
-            r = requests.get(url, timeout=120)
+            # 20 s para conectar: o servidor de malhas do IBGE às vezes não
+            # atende, e esperar dois minutos a cada tentativa não ajuda.
+            r = requests.get(url, timeout=(20, 120))
             r.raise_for_status()
             return r
         except requests.RequestException as e:
@@ -160,13 +162,21 @@ def sedes(codigos, nomes: dict[int, str]) -> pd.DataFrame:
 
 
 def contorno(uf: str, destino: Path) -> bool:
-    r = baixa(URL_MALHA.format(uf=ESTADOS[uf]))
+    # Como gera_geo_para.py: a API de malhas oscila, e vale tentar mais vezes.
+    r = baixa(URL_MALHA.format(uf=ESTADOS[uf]), tentativas=6, espera_s=30)
     if r is None:
         return False
     geo = r.json()
     if geo.get("type") != "FeatureCollection" or not geo.get("features"):
         print(f"  malha de {uf} em formato inesperado: {str(geo)[:200]}")
         return False
+    # Como o do Pará: sem propriedades e com 3 casas decimais (~100 m), que bastam ao fundo do mapa.
+    def arredonda(x):
+        return [arredonda(v) for v in x] if isinstance(x, list) else round(x, 3) if isinstance(x, float) else x
+    for f in geo["features"]:
+        f.pop("properties", None)
+        if "coordinates" in f.get("geometry", {}):
+            f["geometry"]["coordinates"] = arredonda(f["geometry"]["coordinates"])
     destino.write_text(json.dumps(geo, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     return True
 

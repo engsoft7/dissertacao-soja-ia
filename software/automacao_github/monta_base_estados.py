@@ -28,7 +28,9 @@ Fontes:
 
 Os nomes da coleta vêm do GAUL, sem acento e às vezes de antes de um
 desmembramento; o pareamento com o IBGE é pelo nome normalizado dentro do
-estado, como em 06_amazonia_legal.py, e o que não pareia é listado.
+estado, como em 06_amazonia_legal.py, e o que não pareia é listado. Com dois
+nomes corrigidos à mão (ALIASES), Mato Grosso fica com 118 municípios, dois a
+mais que na análise da pesquisa.
 
 Uso:   python software/automacao_github/monta_base_estados.py [MT MA]
        SEM_IBGE=1 python ...   sem tentar o SIDRA e a malha (onde o IBGE não é alcançável)

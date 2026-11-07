@@ -248,13 +248,15 @@ jobs:
         if: steps.pam.outcome == 'success'
         run: |
           python software/automacao_github/monta_base_estados.py
-          if git diff --quiet -- pesquisa/dados/estados ':!pesquisa/dados/estados/LEIA-ME.json'; then
+          # git status, e não git diff: o contorno do estado é arquivo novo
+          # quando a malha do IBGE enfim responde, e o diff não vê arquivo novo.
+          if [ -z "$(git status --porcelain -- pesquisa/dados/estados ':!pesquisa/dados/estados/LEIA-ME.json')" ]; then
             echo "csv_alterado=false" >> "$GITHUB_OUTPUT"
             git checkout -- pesquisa/dados/estados 2>/dev/null || true
           else
             echo "csv_alterado=true" >> "$GITHUB_OUTPUT"
             echo "" >> /tmp/resumo_pam.md
-            echo "- Mato Grosso e Maranhão: série oficial ou base do modelo mudou no SIDRA." >> /tmp/resumo_pam.md
+            echo "- Mato Grosso e Maranhão: série oficial, base do modelo ou contorno mudou." >> /tmp/resumo_pam.md
           fi
 
       # O README listava atualiza_enso.py como automático, mas nenhum workflow o

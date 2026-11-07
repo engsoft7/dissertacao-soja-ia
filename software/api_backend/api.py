@@ -4,6 +4,8 @@ from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
                       aviso_de_defasagem, meses_desde_o_levantamento,
                       buscar_cotacoes, aviso_sobre_o_custo)
 from validacao import metricas_validacao
+import validacao
+import estados
 import historico_oficial
 import mercado
 import precos_para
@@ -86,19 +88,54 @@ def _get_cached_finance():
     return data
 
 
+class EstadoCarregado:
+    """Base, modelo treinado, métricas e série oficial de um estado."""
+
+    def __init__(self, e: "estados.Estado") -> None:
+        self.estado = e
+        self.df = M.carregar(str(e.base))
+        self.estimador = M.Estimador().treinar(self.df)
+        self.metricas = self.estimador.validar(self.df)  # Popula métricas de mae e rmse
+        self.last_year = int(self.df["ano"].max())
+        self.pam = historico_oficial.carrega_pam(e.pam)
+        self.historicos: dict = {}
+        self.sedes = estados.sedes(e)
+
+    def nome_na_base(self, municipio: str) -> str:
+        """O nome como está na base: no Pará, sem acento (do GAUL); nos outros, o oficial."""
+        return REVERSE_FORMATADOS.get(municipio, municipio) if self.estado.uf == "PA" else municipio
+
+    def nome_exibido(self, municipio: str) -> str:
+        return MUNICIPIOS_FORMATADOS.get(municipio, municipio) if self.estado.uf == "PA" else municipio
+
+
+def _carrega_outros_estados() -> None:
+    """Mato Grosso e Maranhão depois do Pará, sem atrasar a subida da API."""
+    for e in estados.disponiveis():
+        if e.uf in AppState.estados:
+            continue
+        try:
+            AppState.estados[e.uf] = EstadoCarregado(e)
+            print(f"{e.nome}: modelo treinado ({len(AppState.estados[e.uf].df)} registros).", flush=True)
+            _aquece_historicos(e.uf)
+        except Exception as erro:  # um estado com problema não derruba os outros
+            print(f"{e.nome} não carregado: {type(erro).__name__}: {erro}", flush=True)
+
+
 @asynccontextmanager
 async def app_lifespan(app: FastAPI):
-    df = M.carregar(str(DADOS_PATH))
-    AppState.df = df
-    AppState.estimador = M.Estimador().treinar(df)
-    AppState.metricas = AppState.estimador.validar(df)  # Popula métricas de mae e rmse
-    AppState.last_year = int(df["ano"].max())
-    AppState.pam = historico_oficial.carrega_pam()
-    AppState.historicos = {}
+    pa = EstadoCarregado(estados.ESTADOS["PA"])
+    AppState.estados = {"PA": pa}
+    AppState.df = pa.df
+    AppState.estimador = pa.estimador
+    AppState.metricas = pa.metricas
+    AppState.last_year = pa.last_year
+    AppState.pam = pa.pam
+    AppState.historicos = pa.historicos
     print("Modelo carregado e treinado com sucesso.", flush=True)
     # Prepara o histórico dos municípios em segundo plano, para a primeira
-    # abertura de cada um não esperar as estimativas.
-    threading.Thread(target=_aquece_historicos, daemon=True).start()
+    # abertura de cada um não esperar as estimativas; depois, os outros estados.
+    threading.Thread(target=lambda: (_aquece_historicos("PA"), _carrega_outros_estados()), daemon=True).start()
     # Pre-populate finance cache in background
     threading.Thread(target=_refresh_finance, daemon=True).start()
     yield
@@ -145,9 +182,47 @@ def _componentes_do_custo() -> dict:
             "taxa_cessr": c.get("taxa_receita")}
 
 
+def _financas_de_outro_estado(municipio: str, ce: "EstadoCarregado", fin: dict) -> dict:
+    """O mesmo formato do Pará, com preço e custo da praça da CONAB no estado."""
+    cod = next((c for c, (nome, _, _) in ce.sedes.items() if nome == municipio), None)
+    sede = ce.sedes[cod][1:] if cod is not None else None
+    praca_csv, rotulo = estados.praca_conab(ce.estado, sede)
+    lev = estados.levantamento_da_praca(praca_csv, rotulo, LEVANTAMENTO["levantamento"],
+                                        LEVANTAMENTO["levantamento_extenso"])
+    return {
+        "municipio": municipio,
+        "uf": ce.estado.uf,
+        "soja_preco_saca": lev["preco_recebido_saca"],
+        "soja_preco_cbot_saca": fin["cbot_saca"],
+        "soja_preco_paranagua_saca": fin.get("paranagua_saca"),
+        "preco_fisico": fin.get("fisico"),
+        "precos_fisicos": fin.get("cotacoes") or [],
+        "custo_ha": lev["custo_operacional_ha"],
+        "custo_variavel_saca": lev["custo_variavel_saca"],
+        "custo_fixo_ha": lev["custo_fixo_saca"] * lev["produtividade_referencia_sc_ha"],
+        "produtividade_referencia_sc": lev["produtividade_referencia_sc_ha"],
+        # Sem o custo aberto por item nessas praças: o aplicativo usa os dois rateios.
+        "custo_area_ha": None, "custo_transporte_saca": None, "taxa_cessr": None,
+        # A tabela de VTN da Receita Federal no produto é só a do Pará.
+        "vtn_ha": None,
+        "fonte_preco": lev["textos"]["descricao"],
+        "nota_preco": lev["textos"]["nota_preco"],
+        "levantamento": lev["levantamento"],
+        "defasagem_meses": meses_desde_o_levantamento(),
+        "aviso_preco": aviso_de_defasagem(),
+        "aviso_custo": aviso_sobre_o_custo(),
+        "ano_referencia": int(ce.last_year),
+    }
+
+
 @app.get("/api/financas/{municipio}")
-def get_financas(municipio: str):
+def get_financas(municipio: str, uf: str | None = None):
     fin = _get_cached_finance()
+    ce = _estado_carregado(uf)
+    if ce.estado.uf != "PA":
+        if municipio not in set(ce.df["municipio"]):
+            raise HTTPException(status_code=404, detail="Município não encontrado")
+        return _financas_de_outro_estado(municipio, ce, fin)
 
     raw_municipio = REVERSE_FORMATADOS.get(municipio, municipio)
     custos = get_custos_locais(raw_municipio)
@@ -200,12 +275,27 @@ DADOS_PATH = ROOT_PATH / "pesquisa" / "dados" / "soja_para_painel.csv"
 
 # In-memory cached model
 class AppState:
+    # O Pará, como antes; os outros estados ficam em "estados", junto com ele.
     df = None
     estimador = None
     metricas = None
     last_year = None
     pam = {}
     historicos: dict = {}
+    estados: dict = {}
+
+
+def _estado_carregado(uf: str | None) -> "EstadoCarregado":
+    """O estado pedido, já com o modelo treinado; 404 se não é atendido, 503 enquanto carrega."""
+    e = estados.estado(uf)
+    if e is None:
+        raise HTTPException(status_code=404, detail="Estado não atendido")
+    ce = AppState.estados.get(e.uf)
+    if ce is None:
+        if e.base.exists():
+            raise HTTPException(status_code=503, detail=f"{e.nome}: modelo em preparação, tente em instantes")
+        raise HTTPException(status_code=404, detail="Estado não atendido")
+    return ce
 
 # Startup phase handled via lifespan manager in app definition
 
@@ -217,13 +307,36 @@ def ping():
 class PrevisaoRequest(BaseModel):
     municipio: str
 
+@app.get("/api/estados")
+def list_estados():
+    """Os estados que o produto cobre, com quantos municípios e se o modelo já está pronto."""
+    saida = []
+    for e in estados.disponiveis():
+        ce = AppState.estados.get(e.uf)
+        saida.append({"uf": e.uf, "nome": e.nome, "carregado": ce is not None,
+                      "municipios": int(ce.df["municipio"].nunique()) if ce is not None else None})
+    return {"estados": saida, "padrao": estados.PADRAO}
+
+
 @app.get("/api/municipios")
-def list_municipios():
+def list_municipios(uf: str | None = None, com_sedes: bool = False):
     if AppState.df is None:
         raise HTTPException(status_code=503, detail="Modelo não carregado")
-    muns = AppState.df["municipio"].unique().tolist()
-    muns_formatados = sorted([MUNICIPIOS_FORMATADOS.get(m, m) for m in muns])
-    return {"municipios": muns_formatados}
+    ce = _estado_carregado(uf)
+    muns = ce.df["municipio"].unique().tolist()
+    muns_formatados = sorted([ce.nome_exibido(m) for m in muns])
+    resposta = {"municipios": muns_formatados}
+    if uf is not None or com_sedes:
+        resposta["uf"] = ce.estado.uf
+    if com_sedes:
+        # A sede de cada município, para o aplicativo achar o mais perto e
+        # buscar a previsão do tempo; o código IBGE vai para os avisos do INMET.
+        codigos = ce.df.drop_duplicates("municipio").set_index("municipio")["cod_ibge7"].to_dict()
+        resposta["sedes"] = [
+            {"nome": ce.nome_exibido(m), "cod_ibge7": int(codigos[m]),
+             "latitude": ce.sedes[int(codigos[m])][1], "longitude": ce.sedes[int(codigos[m])][2]}
+            for m in sorted(muns, key=ce.nome_exibido) if int(codigos[m]) in ce.sedes]
+    return resposta
 
 @app.get("/api/kpis_economia")
 def get_kpis_economia():
@@ -279,7 +392,7 @@ def _get_eventos_enso():
     return [], []
 
 @app.get("/api/mercado")
-def get_mercado(periodo: str = "1d"):
+def get_mercado(periodo: str = "1d", uf: str | None = None):
     """Soja na CBOT em R$/saca ao longo do período, com as referências físicas.
 
     A cotação de bolsa vem com atraso de 10 a 15 minutos (ver mercado.py). As
@@ -296,6 +409,20 @@ def get_mercado(periodo: str = "1d"):
                             detail=f"período deve ser um de {sorted(mercado.PERIODOS)}")
     fin = _get_cached_finance()
     cotacao = mercado.cotacao(periodo)
+    ce = _estado_carregado(uf)
+    if ce.estado.uf != "PA":
+        # Fora do Pará, Chicago e as praças da Agrolink no estado; a estimativa
+        # pela base mensal (precos_para.py) é só do Pará.
+        praca_csv, rotulo = estados.praca_conab(ce.estado, None)
+        lev = estados.levantamento_da_praca(praca_csv, rotulo, LEVANTAMENTO["levantamento"],
+                                            LEVANTAMENTO["levantamento_extenso"])
+        return {
+            "cotacao": cotacao, "para": None, "uf": ce.estado.uf,
+            "pracas_para": [], "pracas": precos_para.pracas_do_estado(ce.estado.uf),
+            "pracas_fonte": precos_para.FONTE_PRACAS,
+            "fisico": fin.get("fisico"),
+            "conab_saca": lev["preco_recebido_saca"], "conab_fonte": lev["textos"]["descricao"],
+        }
     para = precos_para.estima(cotacao, precos_para.serie_mensal())
     if para is not None:
         pa = para.pop("velas_pa")
@@ -338,23 +465,24 @@ def get_avisos(lat: float | None = None, lon: float | None = None, geocode: str 
         raise HTTPException(status_code=400, detail="informe lat e lon, ou geocode")
     return avisos_inmet.avisos(lat, lon, geocode)
 
-def _historico_do_municipio(raw_municipio: str, df_mun) -> list[dict]:
+def _historico_do_municipio(raw_municipio: str, df_mun, ce: "EstadoCarregado | None" = None) -> list[dict]:
     """Histórico, safras do IBGE fora da base e projeções de um município.
 
     Só muda quando o processo recarrega a base, o arquivo do IBGE e o modelo,
     então fica guardado por município: cada chamada fazia dezenas de
     estimativas, e 30 celulares abrindo o app juntos esperavam até 30 s.
     """
-    guardado = AppState.historicos.get(raw_municipio)
+    ce = ce or AppState.estados["PA"]
+    guardado = ce.historicos.get(raw_municipio)
     if guardado is not None:
         return copy.deepcopy(guardado)
-    mae = float(AppState.estimador.mae)
+    mae = float(ce.estimador.mae)
     resultado = []
     # Histórico passado
     for _, row in df_mun.iterrows():
         ano = int(row["ano"])
         real = float(row["rendimento_kg_ha"])
-        r = AppState.estimador.estimar(raw_municipio, ano)
+        r = ce.estimador.estimar(raw_municipio, ano)
         pred = float(r["estimativa_kg_ha"])
         resultado.append({
             "ano": ano,
@@ -367,12 +495,12 @@ def _historico_do_municipio(raw_municipio: str, df_mun) -> list[dict]:
     # MapBiomas naquele ano; ver historico_oficial.py): entram com o valor
     # oficial e a estimativa do modelo, marcadas, para o histórico e a
     # "última safra do IBGE" não pararem anos atrás.
-    pam = AppState.pam or {}
-    ultimo_publicado = historico_oficial.ultima_safra_publicada(AppState.last_year, pam)
+    pam = ce.pam or {}
+    ultimo_publicado = historico_oficial.ultima_safra_publicada(ce.last_year, pam)
     oficiais = pam.get(int(df_mun["cod_ibge7"].iloc[0]), {})
     anos_base = set(df_mun["ano"].astype(int))
     for ano, real in historico_oficial.safras_fora_da_base(oficiais, anos_base, ultimo_publicado):
-        r = AppState.estimador.estimar(raw_municipio, ano)
+        r = ce.estimador.estimar(raw_municipio, ano)
         resultado.append({
             "ano": ano,
             "rendimento_predito": float(r["estimativa_kg_ha"]),
@@ -388,7 +516,7 @@ def _historico_do_municipio(raw_municipio: str, df_mun) -> list[dict]:
     ano_max = int(ultimo_publicado)
     for delta in range(1, 4):
         ano_futuro = ano_max + delta
-        rf = AppState.estimador.estimar(raw_municipio, ano_futuro)
+        rf = ce.estimador.estimar(raw_municipio, ano_futuro)
         resultado.append({
              "ano": ano_futuro,
              "rendimento_predito": float(rf["estimativa_kg_ha"]),
@@ -398,44 +526,55 @@ def _historico_do_municipio(raw_municipio: str, df_mun) -> list[dict]:
              "rendimento_real": 0.0,
              "margem_erro": float(rf["margem_kg_ha"])
         })
-    AppState.historicos[raw_municipio] = resultado
+    ce.historicos[raw_municipio] = resultado
     return copy.deepcopy(resultado)
 
 
-def _aquece_historicos() -> None:
-    for raw in AppState.df["municipio"].unique():
+def _aquece_historicos(uf: str = "PA") -> None:
+    ce = AppState.estados[uf]
+    for raw in ce.df["municipio"].unique():
         try:
-            _historico_do_municipio(raw, AppState.df[AppState.df["municipio"] == raw])
+            _historico_do_municipio(raw, ce.df[ce.df["municipio"] == raw], ce)
         except Exception as e:  # um município ruim não impede os outros
-            print(f"histórico de {raw} não preparado: {e}", flush=True)
+            print(f"histórico de {raw} ({uf}) não preparado: {e}", flush=True)
+
+
+def _metricas_do_estado(ce: "EstadoCarregado") -> dict | None:
+    # O arquivo de métricas gravado é o do Pará; os outros estados usam as calculadas na subida.
+    arquivo = validacao.ARQUIVO if ce.estado.uf == "PA" else validacao.ARQUIVO.with_name(
+        f"metricas_validacao_{ce.estado.uf}.json")
+    return metricas_validacao(len(ce.df), ce.df["municipio"].nunique(), ce.metricas, arquivo)
 
 
 @app.get("/api/previsao/{municipio}")
-def get_previsao(municipio: str):
+def get_previsao(municipio: str, uf: str | None = None):
     if AppState.df is None:
         raise HTTPException(status_code=503, detail="Modelo não carregado")
+    ce = _estado_carregado(uf)
     
-    raw_municipio = REVERSE_FORMATADOS.get(municipio, municipio)
-    df_mun = AppState.df[AppState.df["municipio"] == raw_municipio].copy()
+    raw_municipio = ce.nome_na_base(municipio)
+    df_mun = ce.df[ce.df["municipio"] == raw_municipio].copy()
     if df_mun.empty:
         raise HTTPException(status_code=404, detail="Município não encontrado")
     
     try:
-        resultado = _historico_do_municipio(raw_municipio, df_mun)
+        resultado = _historico_do_municipio(raw_municipio, df_mun, ce)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
         
     el_ninos, la_ninas = _get_eventos_enso()
-    return {
+    resposta = {
         "municipio": municipio, 
         "historico": resultado,
         "elNinos": el_ninos,
         "laNinas": la_ninas,
         # Métricas da validação, para o aplicativo não precisar tê-las escritas
         # no código: acompanham a base a cada safra nova, como no painel web.
-        "validacao": metricas_validacao(len(AppState.df), AppState.df["municipio"].nunique(),
-                                        AppState.metricas),
+        "validacao": _metricas_do_estado(ce),
     }
+    if uf is not None:
+        resposta["uf"] = ce.estado.uf
+    return resposta
 
 @app.get("/api/mapa/geo")
 def get_mapa_geo():
@@ -446,25 +585,26 @@ def get_mapa_geo():
     except Exception as e:
          raise HTTPException(status_code=500, detail=f"Erro ao carregar mapa: {str(e)}")
 
-@lru_cache(maxsize=128)
-def _generate_map_html_cached(municipio: str, theme: str) -> str:
+@lru_cache(maxsize=256)
+def _generate_map_html_cached(municipio: str, theme: str, uf: str = "PA") -> str:
     import folium
     import branca.colormap as cm
     import math
 
-    geo_path = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "para_geo.json"
-    rios_path = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "rios_para.json"
-    mun_path = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "municipios_para.csv"
+    ce = AppState.estados[uf]
+    e = ce.estado
+    geo_path, rios_path, mun_path = e.geo, e.rios, e.municipios
     
     try:
-        geo = json.loads(geo_path.read_text(encoding="utf-8"))
-        rios = json.loads(rios_path.read_text(encoding="utf-8")) if rios_path.exists() else None
+        # Sem o contorno (estado montado sem acesso à malha do IBGE), o mapa sai só com os pontos.
+        geo = json.loads(geo_path.read_text(encoding="utf-8")) if geo_path.exists() else None
+        rios = json.loads(rios_path.read_text(encoding="utf-8")) if rios_path and rios_path.exists() else None
         pts_coords = pd.read_csv(mun_path)
-    except Exception as e:
-        return HTMLResponse(f"Erro ao carregar dados geográficos: {str(e)}", status_code=500)
+    except Exception as erro:
+        return HTMLResponse(f"Erro ao carregar dados geográficos: {str(erro)}", status_code=500)
     
-    last_year = int(AppState.df["ano"].max())
-    recente = AppState.df[AppState.df["ano"] >= last_year - 4]
+    last_year = int(ce.df["ano"].max())
+    recente = ce.df[ce.df["ano"] >= last_year - 4]
     
     agg = recente.groupby("cod_ibge7").agg(
         area=("soy_area_ha", "mean"),
@@ -483,6 +623,9 @@ def _generate_map_html_cached(municipio: str, theme: str) -> str:
     # terceiros") e derrubava a tela inteira sem internet, num aplicativo que se
     # anuncia de operação predominantemente offline.
     fundo_mapa = "#12151a" if theme == "dark" else "#eef1f4"
+    # Os limites do Pará, como sempre foram; nos outros estados, os pontos com folga.
+    limites = ((-10.5, 3.5, -60.0, -45.0) if uf == "PA" else
+               (latmin - 3, latmax + 3, lonmin - 4, lonmax + 4))
     m = folium.Map(
         location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
         tiles=None,
@@ -490,24 +633,25 @@ def _generate_map_html_cached(municipio: str, theme: str) -> str:
         min_zoom=5,
         max_zoom=12,
         max_bounds=True,
-        min_lat=-10.5,
-        max_lat=3.5,
-        min_lon=-60.0,
-        max_lon=-45.0,
+        min_lat=limites[0],
+        max_lat=limites[1],
+        min_lon=limites[2],
+        max_lon=limites[3],
         control_scale=True,
         prefer_canvas=True
     )
                    
-    folium.GeoJson(
-        geo,
-        name="Pará",
-        interactive=False,
-        smooth_factor=1.0,
-        style_function=lambda f: {
-            "fillColor": "#1b2d1b",
-            "color": "#304a30",
-            "weight": 1.2,
-            "fillOpacity": 0.2}).add_to(m)
+    if geo is not None:
+        folium.GeoJson(
+            geo,
+            name=e.nome,
+            interactive=False,
+            smooth_factor=1.0,
+            style_function=lambda f: {
+                "fillColor": "#1b2d1b",
+                "color": "#304a30",
+                "weight": 1.2,
+                "fillOpacity": 0.2}).add_to(m)
 
     if rios is not None and rios.get("features"):
         folium.GeoJson(
@@ -526,8 +670,8 @@ def _generate_map_html_cached(municipio: str, theme: str) -> str:
     
     amax = float(pts["area"].max())
     
-    _cod_por_nome = AppState.df.drop_duplicates("municipio").set_index("municipio")["cod_ibge7"].to_dict()
-    raw_municipio = REVERSE_FORMATADOS.get(municipio, municipio) if municipio else None
+    _cod_por_nome = ce.df.drop_duplicates("municipio").set_index("municipio")["cod_ibge7"].to_dict()
+    raw_municipio = ce.nome_na_base(municipio) if municipio else None
     cod_sel = _cod_por_nome.get(raw_municipio)
 
     lat_sel, lon_sel = None, None
@@ -591,9 +735,10 @@ def _generate_map_html_cached(municipio: str, theme: str) -> str:
     return html_content
 
 @app.get("/api/mapa/render", response_class=HTMLResponse)
-def render_mapa(municipio: str = None, theme: str = "dark"):
+def render_mapa(municipio: str = None, theme: str = "dark", uf: str | None = None):
+    ce = _estado_carregado(uf)
     try:
-        html = _generate_map_html_cached(municipio, theme)
+        html = _generate_map_html_cached(municipio, theme, ce.estado.uf)
         return HTMLResponse(content=html)
     except Exception as e:
         return HTMLResponse(f"Erro ao gerar mapa: {str(e)}", status_code=500)
@@ -606,13 +751,16 @@ class SimulacaoRequest(BaseModel):
     # A safra do cenário. O app manda a safra em curso, a mesma do Resumo; sem
     # ela (versões antigas), vale a seguinte à última publicada.
     ano: int | None = None
+    # Sem estado, o Pará, como nas versões antigas.
+    uf: str | None = None
 
-@lru_cache(maxsize=1)
-def _sensibilidade_clima():
-    """Associação chuva-rendimento na base, calculada uma vez por processo."""
-    if AppState.df is None:
+@lru_cache(maxsize=8)
+def _sensibilidade_clima(uf: str = "PA"):
+    """Associação chuva-rendimento na base, calculada uma vez por processo e estado."""
+    ce = AppState.estados.get(uf)
+    if ce is None:
         return None
-    return M.sensibilidade_climatica(AppState.df)
+    return M.sensibilidade_climatica(ce.df)
 
 
 @app.post("/api/simulacao")
@@ -620,12 +768,13 @@ def simular_cenario(req: SimulacaoRequest):
     if AppState.df is None:
         raise HTTPException(status_code=503, detail="Modelo não carregado")
     
+    ce = _estado_carregado(req.uf)
     # As safras que a API projeta: as três seguintes à última publicada.
-    ultimo = historico_oficial.ultima_safra_publicada(AppState.last_year, AppState.pam or {})
+    ultimo = historico_oficial.ultima_safra_publicada(ce.last_year, ce.pam or {})
     ano_alvo = req.ano if req.ano is not None and ultimo < req.ano <= ultimo + 3 else ultimo + 1
-    raw_municipio = REVERSE_FORMATADOS.get(req.municipio, req.municipio)
+    raw_municipio = ce.nome_na_base(req.municipio)
     
-    hist = AppState.df[AppState.df.municipio == raw_municipio]
+    hist = ce.df[ce.df.municipio == raw_municipio]
     if hist.empty:
         raise HTTPException(status_code=404, detail="Município não encontrado")
         
@@ -635,15 +784,15 @@ def simular_cenario(req: SimulacaoRequest):
     from model import _baseline
     import numpy as np
     base_val = float(_baseline(
-        AppState.estimador.df,
+        ce.estimador.df,
         pd.Series([raw_municipio]),
         pd.Series([ano_alvo])
     )[0])
     
     # Baseline prediction (unmodified climate)
     x_base = np.array([clima[f] for f in M.FEATURES], dtype=float)
-    corr_base = float(AppState.estimador.modelo.predict(
-        AppState.estimador.scaler.transform(x_base.reshape(1, -1))
+    corr_base = float(ce.estimador.modelo.predict(
+        ce.estimador.scaler.transform(x_base.reshape(1, -1))
     )[0])
     est_base = base_val + corr_base
     
@@ -658,11 +807,11 @@ def simular_cenario(req: SimulacaoRequest):
     # treino, chuva zero devolvia colheita acima da média e +3 °C dava o mesmo
     # número que +6 °C. O cenário é limitado, e a interface avisa quando isso
     # acontece — o modelo só tem o que dizer onde ele viu dado.
-    clima_novo, fora_da_faixa = AppState.estimador.limitar_clima(clima_novo)
+    clima_novo, fora_da_faixa = ce.estimador.limitar_clima(clima_novo)
 
     x_sim = np.array([clima_novo[f] for f in M.FEATURES], dtype=float)
-    corr_sim = float(AppState.estimador.modelo.predict(
-        AppState.estimador.scaler.transform(x_sim.reshape(1, -1))
+    corr_sim = float(ce.estimador.modelo.predict(
+        ce.estimador.scaler.transform(x_sim.reshape(1, -1))
     )[0])
     est_sim = base_val + corr_sim
     
@@ -676,6 +825,6 @@ def simular_cenario(req: SimulacaoRequest):
         # Para a interface poder dizer o que o cenário significa: a margem do
         # modelo e a força da associação medida na base. Sem isso o usuário lê
         # uma variação de dezenas de quilos como se fosse resposta agronômica.
-        "margem_kg_ha": AppState.estimador.rmse,
-        "sensibilidade": _sensibilidade_clima(),
+        "margem_kg_ha": ce.estimador.rmse,
+        "sensibilidade": _sensibilidade_clima(ce.estado.uf),
     }

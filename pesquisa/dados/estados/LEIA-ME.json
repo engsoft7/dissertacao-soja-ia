@@ -1,0 +1,75 @@
+{
+  "gerado_por": "software/automacao_github/monta_base_estados.py",
+  "estados": {
+    "MT": {
+      "fonte_pam": "pesquisa/03_analise_nacional/pam_soja_municipios.csv (SIDRA fora do ar)",
+      "registros": 2338,
+      "municipios": 118,
+      "safras": [
+        2001,
+        2024
+      ],
+      "ultima_safra_pam": 2024,
+      "municipios_na_pam": 136,
+      "coleta_sem_par_no_ibge": [
+        "Acorizal",
+        "Barao De Melgaco",
+        "Jauru",
+        "Reserva Do Cabacal",
+        "Varzea Grande"
+      ],
+      "contorno": false
+    },
+    "MA": {
+      "fonte_pam": "pesquisa/03_analise_nacional/pam_soja_municipios.csv (SIDRA fora do ar)",
+      "registros": 1043,
+      "municipios": 80,
+      "safras": [
+        2001,
+        2024
+      ],
+      "ultima_safra_pam": 2024,
+      "municipios_na_pam": 86,
+      "coleta_sem_par_no_ibge": [
+        "Agua Doce Do Maranhao",
+        "Araioses",
+        "Barao De Grajau",
+        "Barreirinhas",
+        "Bela Vista Do Maranhao",
+        "Belagua",
+        "Buritirana",
+        "Cantanhede",
+        "Capinzal Do Norte",
+        "Centro Novo Do Maranhao",
+        "Coelho Neto",
+        "Coroata",
+        "Dom Pedro",
+        "Goncalves Dias",
+        "Graca Aranha",
+        "Humberto De Campos",
+        "Igarape Grande",
+        "Imperatriz",
+        "Itaipava Do Grajau",
+        "Itapecuru Mirim",
+        "Lagoa Grande Do Maranhao",
+        "Maranhaozinho",
+        "Matoes Do Norte",
+        "Montes Altos",
+        "Morros",
+        "Nina Rodrigues",
+        "Pedreiras",
+        "Pio Xii",
+        "Presidente Dutra",
+        "Presidente Vargas",
+        "Primeira Cruz",
+        "Ribamar Fiquene",
+        "Santana Do Maranhao",
+        "Sao Mateus Do Maranhao",
+        "Timbiras",
+        "Tutoia",
+        "Vargem Grande"
+      ],
+      "contorno": false
+    }
+  }
+}

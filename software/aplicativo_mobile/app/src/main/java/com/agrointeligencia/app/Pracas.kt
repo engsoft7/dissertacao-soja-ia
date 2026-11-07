@@ -34,12 +34,20 @@ fun cotacaoEmDia(p: PracaPara, hoje: LocalDate = LocalDate.now()): Boolean =
  * da sede do município; sem município conhecido, a mais recente. Nula quando
  * nenhuma está em dia.
  */
-fun pracaParaUsar(municipio: String?, pracas: List<PracaPara>, hoje: LocalDate = LocalDate.now()): PracaPara? {
+fun pracaParaUsar(
+    municipio: String?,
+    pracas: List<PracaPara>,
+    hoje: LocalDate = LocalDate.now(),
+    // As sedes do estado escolhido (Estados.kt); as praças de outro estado se
+    // acham pelas sedes dele, quando a praça é um dos municípios da base.
+    sedes: Map<String, LugarTempo> = SEDES_MUNICIPAIS,
+): PracaPara? {
     val emDia = pracas.filter { cotacaoEmDia(it, hoje) }
     if (emDia.isEmpty()) return null
-    val sede = municipio?.let { SEDES_MUNICIPAIS[it] } ?: return emDia.maxByOrNull { it.data }
+    val sede = municipio?.let { sedes[it] } ?: return emDia.maxByOrNull { it.data }
     return emDia.minByOrNull { p ->
-        COORDENADAS_PRACAS[p.praca]?.let { (lat, lon) -> distanciaKm(sede.lat, sede.lon, lat, lon) } ?: Double.MAX_VALUE
+        (sedes[p.praca]?.let { it.lat to it.lon } ?: COORDENADAS_PRACAS[p.praca])
+            ?.let { (lat, lon) -> distanciaKm(sede.lat, sede.lon, lat, lon) } ?: Double.MAX_VALUE
     }
 }
 

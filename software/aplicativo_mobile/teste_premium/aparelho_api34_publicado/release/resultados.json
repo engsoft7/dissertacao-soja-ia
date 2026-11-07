@@ -2,7 +2,7 @@
  "verificacoes": [
   {
    "item": "abre na tela de boas-vindas",
-   "ok": false,
+   "ok": true,
    "detalhe": ""
   },
   {
@@ -134,8 +134,12 @@
    "sem_rotulo": []
   },
   "r07_mercado": {
-   "alvos_pequenos": [],
-   "sem_rotulo": []
+   "alvos_pequenos": [
+    "View (272×46 dp)"
+   ],
+   "sem_rotulo": [
+    "View em (183,1909)"
+   ]
   },
   "r08_sobre": {
    "alvos_pequenos": [],
@@ -184,11 +188,11 @@
   "largura_px": 1080,
   "altura_px": 2400,
   "densidade_dpi": 420,
-  "apk_mb": 38.6,
-  "partida_fria_primeira_ms": 1415,
-  "partida_fria_sem_municipio_ms": 1071.0,
-  "dados_do_municipio_s": 183.2,
-  "memoria_resumo_kb": 50775,
+  "apk_mb": 27.6,
+  "partida_fria_primeira_ms": 1211,
+  "partida_fria_sem_municipio_ms": 738.0,
+  "dados_do_municipio_s": 183.1,
+  "memoria_resumo_kb": 32403,
   "rolagem_resumo": {
    "quadros": 0.0,
    "lentos_pct": 0.0,
@@ -197,18 +201,19 @@
    "p99_ms": 4950.0
   },
   "rolagem_historico": {
-   "quadros": 0.0,
-   "lentos_pct": 0.0,
-   "p50_ms": 4950.0,
-   "p90_ms": 4950.0,
-   "p99_ms": 4950.0
+   "quadros": 10.0,
+   "lentos_pct": 90.0,
+   "p50_ms": 61.0,
+   "p90_ms": 113.0,
+   "p99_ms": 113.0
   },
-  "memoria_depois_das_abas_kb": 51150,
-  "partida_fria_com_municipio_ms": 1015,
+  "memoria_depois_das_abas_kb": 34313,
+  "partida_fria_com_municipio_ms": 689,
   "monkey": {
    "eventos": 3000,
    "falhas": 0,
    "anrs": 0
   }
- }
+ },
+ "dialogos_do_sistema_fechados": 113
 }

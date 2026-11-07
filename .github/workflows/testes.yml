@@ -25,7 +25,7 @@ jobs:
         run: pip install --quiet pytest pandas requests
 
       - name: Roda os testes
-        run: python -m pytest software -q
+        run: python -m pytest software pesquisa/09_contagem_por_imagem/test_ciclo_retreino.py -q
 
   # Compila o aplicativo Android e roda os testes de unidade dele.
   #

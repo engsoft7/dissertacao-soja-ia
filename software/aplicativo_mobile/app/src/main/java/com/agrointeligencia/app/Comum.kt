@@ -105,7 +105,7 @@ fun TituloSecao(icone: ImageVector, texto: String, modifier: Modifier = Modifier
 
 /** Sem dados para mostrar: o que aconteceu, o que ainda funciona e o botão de tentar de novo. */
 @Composable
-fun AvisoSemDados(titulo: String, texto: String, aoTentar: () -> Unit) {
+fun AvisoSemDados(titulo: String, texto: String, rotulo: String = "Tentar de novo", aoTentar: () -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
@@ -125,7 +125,7 @@ fun AvisoSemDados(titulo: String, texto: String, aoTentar: () -> Unit) {
             Button(onClick = aoTentar, modifier = Modifier.heightIn(min = 48.dp)) {
                 Icon(Icons.Filled.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Tentar de novo", fontWeight = FontWeight.Bold)
+                Text(rotulo, fontWeight = FontWeight.Bold)
             }
         }
     }

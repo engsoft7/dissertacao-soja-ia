@@ -166,6 +166,39 @@ e SVR +0,100 e MLP +0,097, com p de Holm de 0,003 ou menos. O protocolo da
 Tabela 6, que no Pará não sai da média do município, encontra sinal quando a
 base cresce e o alvo repete menos.
 
+**Feito em 07/11/2026, quais preditores pesam em cada estado**
+(`10_trabalhos_futuros/08_preditores_estados.py`, nos mesmos registros de
+`06_amazonia_legal.py`). Para cada safra deixada de fora, o erro da referência
+contra o desvio de cada preditor em relação à média do município, com IC95 por
+reamostragem de safras. Em Mato Grosso, só o pico dos índices de vegetação
+passa (EVI máximo, r = 0,20; NDVI máximo, 0,13); a temperatura média chega a
+−0,23, mas o IC95 (−0,42 a +0,16) inclui o zero, porque o calor de um ano é
+parecido no estado inteiro e as safras efetivas são poucas. No Maranhão,
+passam sete: temperatura máxima (−0,33), chuva (+0,33), temperatura média
+(−0,32), balanço hídrico (+0,31), EVI máximo (+0,31), NDVI máximo (+0,28) e
+radiação solar (−0,28). No Pará, só o NDVI máximo, fraco (−0,09) e com o sinal
+ao contrário do esperado. Entrou como uma frase, com alteração controlada, na
+conclusão da dissertação, depois da Amazônia Legal.
+
+**Feito em 07/11/2026, data de semeadura por satélite**
+(`10_trabalhos_futuros/07_data_semeadura.py`, rodado no Actions). Não há
+registro público da data de semeadura nem da cultivar por município. A data,
+porém, aparece na curva de vegetação: estimou-se o início do verdor de cada
+município-safra na série de NDVI de 16 dias do MODIS sobre a máscara de soja
+(o primeiro dia acima de 20% da subida até o pico, como no TIMESAT), e a
+semeadura como o verdor menos 20 dias. O calendário que sai é o da região: no
+sul do Pará (9 municípios, 169 safras), semeadura mediana em 28/10 (quartis
+19/10 e 13/11), e no nordeste (13 municípios, 217 safras), em 20/12 (28/11 e
+09/01), com 47 e 92 dias do verdor ao pico. Na Tabela 6, com e sem o início do
+verdor e os dias até o pico, nos mesmos 407 registros (37 municípios),
+nenhum modelo supera a referência: com a fenologia, o MLP fica em −0,011
+(IC95 −0,031 a +0,006), o SVR em −0,016, o XGBoost em −0,061 e o Random
+Forest em −0,105, contra −0,025, −0,011, −0,064 e −0,065 sem ela (p de Holm
+= 1,0 em todos). Do quanto o início do verdor varia, 63% é de uma safra para
+outra no mesmo município, mas essa variação, que mistura a semeadura com o
+ruído da série de 16 dias sob nuvens, não acompanha a produtividade da PAM.
+A cultivar continua sem fonte.
+
 **Milho.** A extensão a outras culturas esbarra na máscara: o MapBiomas
 (coleção 10) separa soja, cana, arroz, algodão e café, mas o milho fica em
 "outras lavouras temporárias", junto com o que se planta depois da soja. Sem a
@@ -244,6 +277,20 @@ do modelo atual.
   teste por fazenda e safra; `mede` roda os modelos do aplicativo nessas fotos
   pelo caminho que a foto faz no celular. Ensaiado em fotos sintéticas; falta
   a primeira remessa real.
+- **Feito em 07/11/2026, colheita e modo automático** (aplicativo 2.8.0, na
+  branch, sem publicar). Depois de colher, o produtor informa as sacas do
+  romaneio do talhão, e a tela compara com a estimativa. O talhão, com os
+  pontos (e o número do contador em cada um, quando usado) e a colheita, vai
+  no mesmo `.zip` das fotos. `ciclo_retreino.py colheita` mede, contra o que
+  foi pesado, a estimativa com as contagens do produtor e a mesma conta com o
+  número do contador. O modo automático, em que o número do contador entra sem
+  conferência, fica desligado. Ele liga só com um modelo baixado cujo anúncio
+  diga `modo_automatico: true`, e `publica` só escreve isso com a medição dos
+  mesmos modelos nas fotos de teste do Pará: ao menos 30 fotos e erro médio de
+  até 10%. Ligado, ainda pede a conferência do produtor com foto escura ou
+  borrada, com vagens por planta fora de 5 a 150, no primeiro ponto do talhão
+  e depois em um a cada cinco. Os limites também vêm no anúncio, para serem
+  ajustados com as fotos do Pará.
 - **Falta.** Medir o erro em fotos do Pará marcadas no aplicativo e, depois,
   contra a colheita pesada (o critério acima).
 
@@ -354,3 +401,58 @@ Play App Signing, em que a chave do workflow é a de envio e pode ser trocada.
   texto passa a dizer quanto ela erra. **Próximo passo:** decompor a
   discordância por critério (vento, umidade, temperatura, chuva) e testar se
   corrigir o viés do vento pela estação mais próxima aproxima as duas.
+
+## 10. Produto em Mato Grosso e no Maranhão
+
+A seção 3 mostrou que, em Mato Grosso e no Maranhão, o clima e a vegetação
+medidos por satélite explicam a produtividade além da média do município. O
+produto passa a atender os dois estados, na branch, sem publicar antes da
+defesa. O Pará continua como está: as rotas da API sem `uf` dão as mesmas
+respostas de antes (conferidas uma a uma nas 80 rotas do Pará, antes e
+depois da mudança), e o aplicativo do Pará pede e guarda o mesmo de sempre.
+
+- **Base** (`software/automacao_github/monta_base_estados.py`, rodado no
+  Actions por `monta-estados.yml` e mantido pela atualização mensal). A
+  coleta da seção 3, no formato da base do Pará, com a PAM pelo SIDRA, as
+  sedes do mesmo conjunto aberto do Pará e o contorno pela malha do IBGE.
+  Ficam em `pesquisa/dados/estados/`. Mato Grosso: 2.452 registros de 118 municípios, safras 2001 a 2025, com a série oficial de 140 municípios; Maranhão: 1.121 registros de 83 municípios, com a série de 94. Dois nomes do GAUL foram corrigidos à mão (Poxoréo, hoje Poxoréu, e Santo Antônio do Leverger); os municípios da coleta que ficaram sem par não aparecem na PAM da soja. O contorno do estado vem da malha do IBGE, que não atendeu na primeira rodada; sem ele, o mapa sai só com os pontos.
+- **Modelo.** O mesmo do Pará (referência mais a correção do MLP), treinado
+  na base de cada estado. Na validação temporal do produto (deixando uma safra de fora por vez), Mato Grosso erra 303,5 kg/ha (9,6%), com R² de 0,429 contra 0,388 da referência, e o Maranhão erra 411,1 kg/ha (14,3%), com R² de 0,327 contra 0,260. No Pará, o mesmo modelo empata com a referência (R² de 0,253 nos dois): nos dois estados novos, a correção pelo clima e pela vegetação acrescenta o que a seção 3 mediu.
+- **Preço e custo.** Os da CONAB no próprio estado, no levantamento em uso
+  (março de 2026): em Mato Grosso, Sorriso (R$ 83,66/sc, R$ 5.019,60/ha) ou
+  Primavera do Leste (R$ 103,63/sc), a mais perto da sede do município; no
+  Maranhão, Balsas (R$ 105,56/sc, R$ 5.489,12/ha). Diferente de Pedro Afonso,
+  essas praças não têm o custo aberto por item na extração, e o resultado vai
+  pelos dois rateios. O preço do dia é o das praças da Agrolink no estado,
+  quando houver: em 07/11/2026, Sorriso (R$ 134,85), Lucas do Rio Verde, Sinop,
+  Primavera do Leste e Rondonópolis (R$ 141,40) em Mato Grosso, e Balsas (R$ 143,00)
+  no Maranhão. A estimativa pela base mensal fica só no Pará.
+- **API** (`software/api_backend/estados.py`). As rotas aceitam `?uf=MT` ou
+  `?uf=MA`; `/api/estados` lista os estados e `/api/municipios?com_sedes=true`
+  traz as sedes. Mato Grosso e Maranhão treinam depois do Pará, em segundo
+  plano, e respondem 503 nos primeiros segundos.
+- **Painel.** Seletor de estado na barra lateral. As quatro telas abertas no
+  `streamlit.testing` em municípios dos três estados, sem exceção.
+- **Simulador de cenário climático, corrigido.** Ele pedia à rede um ano com a
+  chuva mudada e todo o resto no normal. Nos dados, um ano mais seco também é
+  mais quente, mais ensolarado e menos verde (no Maranhão, a anomalia de chuva
+  tem correlação de −0,67 com a de radiação), e a rede respondia a essa
+  combinação, que quase não existe, ao contrário da base: 20% menos chuva dava
+  +0,9 sc/ha em Balsas. Os controles também iam a ±50% de chuva e +3 °C, muito
+  além do que um município varia (de 5% a 95% das safras, cerca de ±20% a 30%
+  de chuva e de −0,7 a +1,2 °C). O cenário passa a sair do efeito medido: o
+  quanto a produtividade fugiu da referência por 1% de chuva e por 1 °C acima
+  do normal do município, as duas juntas, só com o coeficiente de IC95 sem o
+  zero (reamostragem de safras), preso à faixa observada no estado. No Pará e
+  em Mato Grosso, nenhum dos dois passa (em Mato Grosso, a temperatura dá
+  −163 kg/ha por °C, com IC95 de −250 a +114), e o cenário não move a projeção;
+  no Maranhão, a chuva passa (+4,5 kg/ha por 1%, IC95 de +0,5 a +8,0), e 20%
+  menos chuva tira 1,5 sc/ha. O simulador do Pará continua sem mover a
+  projeção, como antes; muda a faixa dos controles e o aviso fora dela.
+- **Aplicativo 2.8.0.** Pará, Mato Grosso ou Maranhão na janela de escolha do
+  município. Com a API anterior, que ignora `?uf=` e responderia pelo Pará, o
+  aplicativo diz que o estado ainda não está no servidor.
+- **Falta.** Publicar (API, painel e aplicativo) depois da defesa; coletar as
+  variáveis de satélite das safras novas dos dois estados, que a coleta
+  mensal faz só para o Pará; e conferir com quem planta lá se o custo da praça
+  mais perto representa o município.

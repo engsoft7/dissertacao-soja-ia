@@ -90,20 +90,21 @@ private val PERIODOS_POR_EXTENSO = mapOf("1d" to "1 dia", "5d" to "5 dias", "1mo
  * Atualiza a cada minuto só com o app aberto na frente.
  */
 @Composable
-fun MercadoCard(recarga: Int = 0, aoReceber: (MercadoResponse) -> Unit = {}) {
+fun MercadoCard(recarga: Int = 0, uf: String = "PA", aoReceber: (MercadoResponse) -> Unit = {}) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE) }
     val gson = remember { Gson() }
     var periodo by rememberSaveable { mutableStateOf("1d") }
-    val porPeriodo = remember { mutableStateMapOf<String, MercadoResponse>() }
+    // Uma por estado: trocar de estado não pode mostrar as praças do outro.
+    val porPeriodo = remember(uf) { mutableStateMapOf<String, MercadoResponse>() }
     var carregando by remember { mutableStateOf(true) }
     var falhou by remember { mutableStateOf(false) }
     val receber by rememberUpdatedState(aoReceber)
     val ciclo = (context as? ComponentActivity)?.lifecycle
 
-    LaunchedEffect(periodo, recarga) {
+    LaunchedEffect(periodo, recarga, uf) {
         if (porPeriodo[periodo] == null) {
-            prefs.getString("mercado_$periodo", null)
+            prefs.getString(chaveDoEstado("mercado_$periodo", uf), null)
                 ?.let { runCatching { gson.fromJson(it, MercadoResponse::class.java) }.getOrNull() }
                 ?.let { porPeriodo[periodo] = it }
         }
@@ -111,11 +112,13 @@ fun MercadoCard(recarga: Int = 0, aoReceber: (MercadoResponse) -> Unit = {}) {
         suspend fun atualizaSempre() {
             while (true) {
                 try {
-                    val m = RetrofitClient.getInstance().getMercado(periodo)
+                    val m = RetrofitClient.getInstance().getMercado(periodo, ufParaApi(uf))
+                    // A API antiga responde pelo Pará: fora dele, só vale a resposta do estado.
+                    if (!respostaDoEstado(uf, m.uf)) throw IllegalStateException("estado não atendido")
                     porPeriodo[periodo] = m
                     falhou = false
                     receber(m)
-                    prefs.edit().putString("mercado_$periodo", gson.toJson(m)).apply()
+                    prefs.edit().putString(chaveDoEstado("mercado_$periodo", uf), gson.toJson(m)).apply()
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
                 } catch (_: Exception) {
@@ -163,8 +166,8 @@ fun MercadoConteudo(
                      color = corAtencao(isDark), fontWeight = FontWeight.SemiBold,
                      modifier = Modifier.padding(bottom = 8.dp).semantics { liveRegion = LiveRegionMode.Polite })
             }
-            mercado?.pracas_para?.takeIf { it.isNotEmpty() }?.let { pracas ->
-                CotacoesPracasPara(pracas)
+            mercado?.pracasDoEstado()?.takeIf { it.isNotEmpty() }?.let { pracas ->
+                CotacoesPracasPara(pracas, estado = estadoDoApp(mercado?.uf))
                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
             }
             Text("Soja em Chicago, em R$/saca", fontWeight = FontWeight.Bold, fontSize = 16.sp,
@@ -226,7 +229,7 @@ fun MercadoConteudo(
                  color = MaterialTheme.colorScheme.onSurface)
             mercado?.fisico?.let {
                 Text("${it.praca} (${it.uf}), ${it.tipo}: R$ ${reais(it.valor)}/sc, cotação do dia" +
-                     (if (it.uf != "PA") ", em outro estado" else ""),
+                     (if (it.uf != (mercado?.uf ?: "PA")) ", em outro estado" else ""),
                      fontSize = 13.sp, color = secundaria)
             }
             mercado?.conab_saca?.let {
@@ -247,9 +250,13 @@ fun MercadoConteudo(
  * preço de hoje.
  */
 @Composable
-fun CotacoesPracasPara(pracas: List<PracaPara>, hoje: java.time.LocalDate = java.time.LocalDate.now()) {
+fun CotacoesPracasPara(
+    pracas: List<PracaPara>,
+    hoje: java.time.LocalDate = java.time.LocalDate.now(),
+    estado: EstadoDoApp = ESTADOS_DO_APP[0],
+) {
     val secundaria = MaterialTheme.colorScheme.onSurfaceVariant
-    Text("Soja no Pará, cotação do dia", fontWeight = FontWeight.Bold, fontSize = 16.sp,
+    Text("Soja ${estado.no}, cotação do dia", fontWeight = FontWeight.Bold, fontSize = 16.sp,
          color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.semantics { heading() })
     Text("Agrolink, por praça. Na fazenda o preço pode ser menor, pelo frete.",
          fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)

@@ -208,9 +208,23 @@ URLS_RESERVA = [f"https://www.agrolink.com.br/regional/pa/{c}/cotacoes"
                 for c in ("barcarena", "redencao", "paragominas")]
 FONTE_PRACAS = "Agrolink, cotação diária por praça"
 VALIDADE_PRACAS_S = 2 * 3600
-_LINHA_SOJA = re.compile(
-    r"Soja em Grão Sc 60Kg\s+([A-Za-zÀ-ÿ' .-]{2,40}?)\s*\(PA\)\s+([\d.]+,\d{2})\s+"
-    r"(?:[▲▼=]\s*)?(?:[\d.,]+\s*%\s+)?(\d{2})/(\d{2})/(\d{2})")
+# Mato Grosso e Maranhão (estados.py): páginas de cidades de soja, lidas todas,
+# porque cada uma pode listar praças diferentes. Ainda não conferidas uma a
+# uma: o que não tiver soja simplesmente não acrescenta nada.
+URLS_PRACAS_ESTADO = {
+    "MT": [f"https://www.agrolink.com.br/regional/mt/{c}/cotacoes"
+           for c in ("sorriso", "rondonopolis", "primavera-do-leste", "lucas-do-rio-verde", "sinop")],
+    "MA": [f"https://www.agrolink.com.br/regional/ma/{c}/cotacoes" for c in ("balsas", "imperatriz")],
+}
+
+
+def _linha_soja(uf: str) -> re.Pattern:
+    return re.compile(
+        r"Soja em Grão Sc 60Kg\s+([A-Za-zÀ-ÿ' .-]{2,40}?)\s*\(" + uf + r"\)\s+([\d.]+,\d{2})\s+"
+        r"(?:[▲▼=]\s*)?(?:[\d.,]+\s*%\s+)?(\d{2})/(\d{2})/(\d{2})")
+
+
+_LINHA_SOJA = _linha_soja("PA")
 
 
 def _texto(html: str) -> str:
@@ -223,18 +237,22 @@ def _texto(html: str) -> str:
 # {"cidade":"Redenção","uf":"PA","preco":148.5,...,"produto":"Soja em Grão
 # Sc 60Kg",...,"atualizacaoMs":1793900220000}. É a leitura principal, com a
 # data exata; o texto da tabela fica de reserva.
-_OBJ_SOJA = re.compile(
-    r'\{"cidade":"([^"]{2,40})","uf":"PA","preco":([\d.]+),[^{}]*?'
-    r'"produto":"Soja em Gr[^"]*Sc 60Kg"[^{}]*?"atualizacaoMs":(\d+)')
+def _obj_soja(uf: str) -> re.Pattern:
+    return re.compile(
+        r'\{"cidade":"([^"]{2,40})","uf":"' + uf + r'","preco":([\d.]+),[^{}]*?'
+        r'"produto":"Soja em Gr[^"]*Sc 60Kg"[^{}]*?"atualizacaoMs":(\d+)')
+
+
+_OBJ_SOJA = _obj_soja("PA")
 BELEM = timezone(timedelta(hours=-3))
 
 
-def _guarda(ultimas: dict, praca: str, v: float, data: str) -> None:
+def _guarda(ultimas: dict, praca: str, v: float, data: str, uf: str = "PA") -> None:
     if PRECO_MIN <= v <= PRECO_MAX and (praca not in ultimas or data > ultimas[praca]["data"]):
-        ultimas[praca] = {"praca": praca, "uf": "PA", "valor": round(v, 2), "data": data}
+        ultimas[praca] = {"praca": praca, "uf": uf, "valor": round(v, 2), "data": data}
 
 
-def le_pracas(html: str) -> list[dict]:
+def le_pracas(html: str, uf: str = "PA") -> list[dict]:
     """A cotação mais recente de cada praça do Pará, da mais nova para a mais velha.
 
     Cada uma traz a data da última atualização: uma praça que a fonte parou de
@@ -242,20 +260,21 @@ def le_pracas(html: str) -> list[dict]:
     mostra isso.
     """
     ultimas = {}
-    for praca, preco, ms in _OBJ_SOJA.findall(html.replace('\\"', '"')):
+    obj, linha = (_OBJ_SOJA, _LINHA_SOJA) if uf == "PA" else (_obj_soja(uf), _linha_soja(uf))
+    for praca, preco, ms in obj.findall(html.replace('\\"', '"')):
         dia = datetime.fromtimestamp(int(ms) / 1000, tz=BELEM).strftime("%Y-%m-%d")
-        _guarda(ultimas, praca, float(preco), dia)
+        _guarda(ultimas, praca, float(preco), dia, uf)
     if not ultimas:
-        for praca, valor, dia, mes, ano in _LINHA_SOJA.findall(_texto(html)):
-            _guarda(ultimas, praca.strip(), _numero(valor), f"20{ano}-{mes}-{dia}")
+        for praca, valor, dia, mes, ano in linha.findall(_texto(html)):
+            _guarda(ultimas, praca.strip(), _numero(valor), f"20{ano}-{mes}-{dia}", uf)
     return sorted(ultimas.values(), key=lambda c: (c["data"], c["praca"]), reverse=True)
 
 
-def _baixa_pracas(url: str) -> list[dict]:
+def _baixa_pracas(url: str, uf: str = "PA") -> list[dict]:
     try:
         r = requests.get(url, headers=UA, timeout=15)
         r.raise_for_status()
-        return le_pracas(r.text)
+        return le_pracas(r.text, uf)
     except Exception as e:  # rede, formato, limite de requisições
         print(f"[precos_para] {url}: {type(e).__name__}: {e}", flush=True)
         return []
@@ -282,6 +301,28 @@ def pracas_do_para() -> list[dict]:
         return guardado[1] if guardado else []
     with _trava:
         _cache["pracas"] = (time.time(), pracas)
+    return pracas
+
+
+def pracas_do_estado(uf: str) -> list[dict]:
+    """Cotações diárias das praças de soja de outro estado, com o mesmo cache e a mesma reserva."""
+    if uf == "PA":
+        return pracas_do_para()
+    chave = f"pracas_{uf}"
+    with _trava:
+        guardado = _cache.get(chave)
+        if guardado and time.time() - guardado[0] < VALIDADE_PRACAS_S:
+            return guardado[1]
+    juntas = {}
+    for url in URLS_PRACAS_ESTADO.get(uf, []):
+        for c in _baixa_pracas(url, uf):
+            if c["praca"] not in juntas or c["data"] > juntas[c["praca"]]["data"]:
+                juntas[c["praca"]] = c
+    pracas = sorted(juntas.values(), key=lambda c: (c["data"], c["praca"]), reverse=True)
+    if not pracas:
+        return guardado[1] if guardado else []
+    with _trava:
+        _cache[chave] = (time.time(), pracas)
     return pracas
 
 

@@ -3,6 +3,7 @@ package com.agrointeligencia.app
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import java.io.File
 import java.text.SimpleDateFormat
@@ -24,6 +25,8 @@ import java.util.zip.ZipOutputStream
 // Só entra foto com ao menos uma marca: foto sem marcação não ensina nada.
 
 private const val PASTA = "amostras_treino"
+/** Os talhões, com os pontos e a colheita, num arquivo só ao lado das fotos. */
+internal const val TALHOES = "talhoes.json"
 
 /** De onde vieram as marcas de uma foto. */
 internal object MarcasDe {
@@ -107,7 +110,85 @@ internal fun guardaAmostra(
 
 /** Quantas fotos marcadas estão guardadas. */
 internal fun contaAmostras(context: Context): Int =
-    pasta(context).listFiles { f -> f.name.endsWith(".json") }?.size ?: 0
+    pasta(context).listFiles { f -> f.name.endsWith(".json") && f.name != TALHOES }?.size ?: 0
+
+// O TALHÃO E A COLHEITA.
+//
+// A estimativa no campo e o contador só se conferem de verdade com a balança:
+// quantas sacas saíram do talhão. A colheita vem semanas depois das contagens,
+// e o produtor a informa na mesma tela. O talhão vai no .zip com os pontos
+// (cada um com o número do contador, quando foi usado) e a colheita, e
+// ciclo_retreino.py colheita compara a estimativa por toque e a do contador
+// com o que foi pesado.
+
+/** Um talhão como vai no .zip. */
+data class RegistroTalhao(
+    val talhao: String,
+    val atualizado_em: String,
+    val versao_app: String,
+    val versao_contador: Int,
+    val modo_automatico: Boolean,
+    val area_ha: Double?,
+    val espacamento_m: Double,
+    val graos_por_vagem: Double,
+    val peso_mil_graos_g: Double,
+    val pontos: List<PontoAmostra>,
+    /** A estimativa da tela (CampoCalculo.kt), no pé, antes das perdas na colheita. */
+    val estimativa_kg_ha: Double?,
+    /** Sacas de 60 kg do romaneio, já descontadas umidade e impureza. */
+    val colhido_sacas: Double?,
+    val colheita_kg_ha: Double?,
+)
+
+/** Produtividade colhida, em kg/ha: as sacas de 60 kg sobre a área. */
+internal fun colheitaKgHa(sacas: Double?, areaHa: Double?): Double? =
+    if (sacas == null || areaHa == null || sacas <= 0 || areaHa <= 0) null else sacas * 60.0 / areaHa
+
+internal fun registroDoTalhao(
+    estado: EstadoCampo,
+    agora: String,
+    versaoApp: String,
+    versaoContador: Int,
+    modoAutomatico: Boolean,
+): RegistroTalhao? {
+    val id = estado.talhao ?: return null
+    if (estado.pontos.isEmpty() && estado.colhidoSacas == null) return null
+    val p = estado.parametros
+    return RegistroTalhao(
+        talhao = id, atualizado_em = agora, versao_app = versaoApp, versao_contador = versaoContador,
+        modo_automatico = modoAutomatico, area_ha = estado.areaHa, espacamento_m = p.espacamento,
+        graos_por_vagem = p.graosPorVagem, peso_mil_graos_g = p.pesoMilGraos, pontos = estado.pontos,
+        estimativa_kg_ha = estimaLavoura(estado.pontos, p)?.kgHa,
+        colhido_sacas = estado.colhidoSacas, colheita_kg_ha = colheitaKgHa(estado.colhidoSacas, estado.areaHa),
+    )
+}
+
+/** O arquivo inteiro: uma classe, e não um Map genérico, para o Gson não depender de TypeToken. */
+private data class ArquivoTalhoes(val talhoes: List<RegistroTalhao>?)
+
+private val TRAVA_TALHOES = Any()
+
+private fun leTalhoes(context: Context): List<RegistroTalhao> = try {
+    File(pasta(context), TALHOES).takeIf { it.exists() }
+        ?.let { Gson().fromJson(it.readText(), ArquivoTalhoes::class.java)?.talhoes?.filterNotNull() } ?: emptyList()
+} catch (_: Exception) {
+    emptyList()
+}
+
+/** Junta o registro aos que já estavam: o do mesmo talhão é trocado, os outros ficam. */
+internal fun comTalhao(todos: List<RegistroTalhao>, registro: RegistroTalhao): List<RegistroTalhao> =
+    todos.filter { it.talhao != registro.talhao } + registro
+
+/** Grava (ou atualiza) o talhão. Roda fora da thread principal. */
+internal fun gravaTalhao(context: Context, registro: RegistroTalhao) = synchronized(TRAVA_TALHOES) {
+    val dir = pasta(context).apply { mkdirs() }
+    val tmp = File(dir, "$TALHOES.novo")
+    tmp.writeText(GsonBuilder().setPrettyPrinting().create().toJson(ArquivoTalhoes(comTalhao(leTalhoes(context), registro))))
+    if (!tmp.renameTo(File(dir, TALHOES))) tmp.delete()
+}
+
+/** Quantos talhões têm a colheita informada. */
+internal fun talhoesComColheita(context: Context): Int = leTalhoes(context).count { it.colheita_kg_ha != null }
 
 /** Tamanho das fotos guardadas, em MB, para o produtor saber quanto ocupam. */
 internal fun tamanhoAmostrasMb(context: Context): Double =
@@ -134,11 +215,24 @@ Cada foto (.jpg) tem ao lado um .json com o mesmo nome:
 
 As imagens já estão de pé (orientação EXIF aplicada) e reduzidas a no máximo
 2048 px no lado maior: são exatamente as que foram tocadas.
+
+talhoes.json tem, na lista "talhoes", cada talhão em que se contou:
+  talhao              identificação do talhão, sorteada pelo app
+  pontos              plantas, metrosDeLinha, arrancadas e vagens de cada ponto;
+                      vagensDoContador é o número do contador automático,
+                      quando foi usado, e conferido diz se o produtor
+                      conferiu as marcas
+  espacamento_m, graos_por_vagem, peso_mil_graos_g, area_ha
+  estimativa_kg_ha    a estimativa da tela, no pé, antes das perdas na colheita
+  colhido_sacas       sacas de 60 kg do romaneio, se o produtor informou
+  colheita_kg_ha      o colhido sobre a área
+  versao_contador, modo_automatico
 """
 
 /** Junta tudo num .zip no cache, pronto para compartilhar; null se não houver fotos. */
 internal fun empacotaAmostras(context: Context): File? {
-    val arquivos = pasta(context).listFiles()?.sortedBy { it.name } ?: return null
+    val arquivos = pasta(context).listFiles()?.filter { !it.name.endsWith(".novo") }?.sortedBy { it.name }
+        ?: return null
     if (arquivos.none { it.name.endsWith(".json") }) return null
     val saida = File(context.cacheDir, "exportar").apply { mkdirs() }
     saida.listFiles()?.forEach { it.delete() }

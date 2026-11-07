@@ -184,26 +184,28 @@ def aviso_de_defasagem(hoje: date | None = None) -> str | None:
 
 
 
+# Os caminhos entram como argumento: o cache do Streamlit guarda um resultado
+# por argumento, e sem ele o contorno do Pará voltaria no mapa de outro estado.
 @st.cache_data
-def carregar_geo():
+def carregar_geo(caminho: str):
     try:
-        return json.loads(GEO_PARA.read_text(encoding="utf-8"))
+        return json.loads(Path(caminho).read_text(encoding="utf-8"))
     except OSError:
         return None
 
 
 @st.cache_data
-def carregar_rios():
+def carregar_rios(caminho: str):
     try:
-        return json.loads(RIOS_PARA.read_text(encoding="utf-8"))
+        return json.loads(Path(caminho).read_text(encoding="utf-8")) if caminho else None
     except OSError:
         return None
 
 
 @st.cache_data
-def carregar_municipios():
+def carregar_municipios(caminho: str):
     try:
-        return pd.read_csv(MUNICIPIOS)
+        return pd.read_csv(caminho)
     except OSError:
         return pd.DataFrame(
             columns=[
@@ -308,6 +310,26 @@ st.set_page_config(
     page_title="AgroInteligência — Previsão e Viabilidade de Soja no Pará",
     page_icon="🌿",
     layout="wide")
+
+# ── ESTADO ───────────────────────────────────────────────────────────────────
+# O Pará é o recorte da dissertação. Mato Grosso e Maranhão entram com a mesma
+# conta e a base de pesquisa/dados/estados/ (api_backend/estados.py), como na
+# API; sem as bases no disco, o seletor nem aparece.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
+import estados as _estados  # noqa: E402
+_UFS = [e.uf for e in _estados.disponiveis()]
+UF = (st.sidebar.selectbox(
+          "Estado", _UFS, key="uf_sel", format_func=lambda u: _estados.ESTADOS[u].nome,
+          help="O Pará é o recorte da dissertação; Mato Grosso e Maranhão usam a mesma conta, "
+               "com a base de cada estado.")
+      if len(_UFS) > 1 else "PA")
+ESTADO = _estados.ESTADOS[UF]
+NOME_ESTADO = ESTADO.nome
+if UF != "PA":
+    DADOS = ESTADO.base
+    MUNICIPIOS = ESTADO.municipios
+    GEO_PARA = ESTADO.geo
+    RIOS_PARA = ESTADO.rios
 
 try:
     theme_st = st_theme()
@@ -792,12 +814,13 @@ else:
     alt.themes.enable('default')
 
 @st.cache_resource(show_spinner="Carregando modelos de inteligência de safra...")
-def preparar(cache_buster='v3'):
-    df = M.carregar(str(DADOS))
+def preparar(cache_buster='v3', uf: str = "PA"):
+    df = M.carregar(str(_estados.ESTADOS[uf].base))
     est = M.Estimador().treinar(df)
     metricas = None
     try:
-        salvas = json.loads(METRICAS_SALVAS.read_text(encoding="utf-8"))
+        # As métricas gravadas são as do Pará; nos outros estados, calculadas aqui.
+        salvas = json.loads(METRICAS_SALVAS.read_text(encoding="utf-8")) if uf == "PA" else {}
         if salvas.get("registros") == len(df):
             est.rmse, est.mae = salvas["rmse"], salvas["mae"]
             est.r2, est.r2_baseline = salvas["r2"], salvas["r2_baseline"]
@@ -809,9 +832,9 @@ def preparar(cache_buster='v3'):
     return df, est, metricas
 
 
-df, estimador, metricas = preparar(cache_buster='v3')
+df, estimador, metricas = preparar(cache_buster='v3', uf=UF)
 
-_muni = carregar_municipios()
+_muni = carregar_municipios(str(MUNICIPIOS))
 _cod_por_nome = df.drop_duplicates("municipio").set_index("municipio")[
     "cod_ibge7"].to_dict()
 _nome_por_cod = _muni.set_index("cod_ibge7")["municipio"].to_dict()
@@ -833,11 +856,11 @@ def ano_da_safra_em_curso(hoje: date | None = None) -> int:
 
 
 @st.cache_data(ttl=7200, show_spinner=False)
-def _pracas_do_para() -> list:
+def _pracas_do_estado(uf: str = "PA") -> list:
     try:
         sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
         import precos_para
-        return precos_para.pracas_do_para()
+        return precos_para.pracas_do_estado(uf)
     except Exception as e:  # rede ou formato da fonte
         print(f"[painel] cotações das praças indisponíveis: {type(e).__name__}: {e}",
               flush=True)
@@ -860,7 +883,7 @@ def praca_para_usar(municipio: str, hoje: date | None = None) -> dict | None:
     import math
     hoje = hoje or date.today()
     em_dia = []
-    for p in _pracas_do_para():
+    for p in _pracas_do_estado(UF):
         try:
             idade = (hoje - date.fromisoformat(p["data"])).days
         except (KeyError, TypeError, ValueError):
@@ -875,7 +898,8 @@ def praca_para_usar(municipio: str, hoje: date | None = None) -> dict | None:
     la0, lo0 = math.radians(float(linha.latitude.iloc[0])), math.radians(float(linha.longitude.iloc[0]))
     coords = {_sem_acento(n): (la, lo) for n, la, lo in
               zip(_muni.municipio, _muni.latitude, _muni.longitude)}
-    coords.update(_COORD_PRACAS_EXTRA)
+    if UF == "PA":
+        coords.update(_COORD_PRACAS_EXTRA)
 
     def distancia(p):
         c = coords.get(_sem_acento(p["praca"]))
@@ -889,13 +913,13 @@ def praca_para_usar(municipio: str, hoje: date | None = None) -> dict | None:
 
 
 @st.cache_data(show_spinner=False)
-def carregar_pam_oficial() -> dict:
+def carregar_pam_oficial(uf: str = "PA") -> dict:
     """Produtividade de todas as safras publicadas pelo IBGE nos municípios da
     base, inclusive as que a máscara do MapBiomas não captou (ver
     api_backend/historico_oficial.py)."""
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
     import historico_oficial
-    return historico_oficial.carrega_pam()
+    return historico_oficial.carrega_pam(_estados.ESTADOS[uf].pam)
 
 
 def disp(municipio: str) -> str:
@@ -906,7 +930,7 @@ EXIBICAO_PARA_INTERNO = {disp(m): m for m in df.municipio.unique()}
 
 
 @st.cache_data
-def _soja_por_municipio():
+def _soja_por_municipio(uf: str = "PA"):
     if _muni.empty:
         return pd.DataFrame()
     recente = df[df.ano >= df.ano.max() - 4]
@@ -920,9 +944,11 @@ _VIRIDIS = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"]
 
 
 def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: bool = True):
-    geo = carregar_geo()
-    pts = _soja_por_municipio()
-    if geo is None or pts.empty:
+    geo = carregar_geo(str(GEO_PARA))
+    pts = _soja_por_municipio(UF)
+    # Sem o contorno, o Pará não tem mapa (sempre o teve); os outros estados
+    # saem só com os pontos até a malha do IBGE chegar.
+    if (geo is None and UF == "PA") or pts.empty:
         return None, {}, None
 
     cod_sel = _cod_por_nome.get(sel_interno)
@@ -940,6 +966,8 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: b
     fundo_mapa = "#12151a" if is_dark else "#eef1f4"
     fill_color = "#1b2d1b" if is_dark else "#e3efe4"
     border_color = "#3f5f3f" if is_dark else "#7cb17f"
+    limites = ((-10.5, 3.5, -60.0, -45.0) if UF == "PA" else
+               (latmin - 3, latmax + 3, lonmin - 4, lonmax + 4))
     m = folium.Map(
         location=[(latmin + latmax) / 2, (lonmin + lonmax) / 2],
         tiles=None,
@@ -947,25 +975,26 @@ def construir_mapa(sel_interno: str, comp_interno: str | None = None, is_dark: b
         min_zoom=5,
         max_zoom=12,
         max_bounds=True,
-        min_lat=-10.5,
-        max_lat=3.5,
-        min_lon=-60.0,
-        max_lon=-45.0,
+        min_lat=limites[0],
+        max_lat=limites[1],
+        min_lon=limites[2],
+        max_lon=limites[3],
         control_scale=True,
         prefer_canvas=True
     )
-    folium.GeoJson(
-        geo,
-        name="Pará",
-        interactive=False,
-        smooth_factor=1.0,
-        style_function=lambda f: {
-            "fillColor": fill_color,
-            "color": border_color,
-            "weight": 1.4,
-            "fillOpacity": 1.0}).add_to(m)
+    if geo is not None:
+        folium.GeoJson(
+            geo,
+            name=NOME_ESTADO,
+            interactive=False,
+            smooth_factor=1.0,
+            style_function=lambda f: {
+                "fillColor": fill_color,
+                "color": border_color,
+                "weight": 1.4,
+                "fillOpacity": 1.0}).add_to(m)
 
-    rios = carregar_rios()
+    rios = carregar_rios(str(RIOS_PARA) if RIOS_PARA else "")
     if rios is not None and rios.get("features"):
         folium.GeoJson(
             rios,
@@ -1073,7 +1102,9 @@ def resultado_por_hectare(sacas_ha: float, preco: float,
     receita = sacas_ha * preco
     if custo_do_usuario is not None:
         return receita - custo_do_usuario, None, False
-    lev = LEVANTAMENTO_CONAB
+    # O levantamento do estado escolhido (LEV_ESTADO, definido depois da
+    # escolha do município); nos testes, que executam só esta função, o do Pará.
+    lev = globals().get("LEV_ESTADO", LEVANTAMENTO_CONAB)
     comp = lev.get("custo_por_componente")
     if comp:
         custo = comp["area_ha"] + (comp["transporte_saca"] + comp["taxa_receita"] * preco) * sacas_ha
@@ -1167,8 +1198,10 @@ EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
 municipios = sorted(df.municipio.unique())
 
-if "mun_sel" not in st.session_state:
-    st.session_state.mun_sel = "Paragominas" if "Paragominas" in municipios else municipios[0]
+# Ao trocar de estado, o município escolhido no outro deixa de valer.
+if st.session_state.get("mun_sel") not in municipios:
+    _padrao = {"PA": "Paragominas", "MT": "Sorriso", "MA": "Balsas"}.get(UF)
+    st.session_state.mun_sel = _padrao if _padrao in municipios else municipios[0]
 
 if "last_map_click" not in st.session_state:
     st.session_state.last_map_click = None
@@ -1206,6 +1239,23 @@ municipio = st.sidebar.selectbox(
     key="mun_sel",
     format_func=disp,
     on_change=on_dropdown_change)
+
+# Preço e custo da CONAB: no Pará, Pedro Afonso (TO), como sempre; nos outros
+# estados, a praça da CONAB no estado mais perto da sede do município.
+LEV_ESTADO = LEVANTAMENTO_CONAB
+if UF != "PA":
+    _linha_sede = _muni[_muni.cod_ibge7 == _cod_por_nome.get(municipio)]
+    _sede = ((float(_linha_sede.latitude.iloc[0]), float(_linha_sede.longitude.iloc[0]))
+             if not _linha_sede.empty else None)
+    _praca_csv, _praca_rotulo = _estados.praca_conab(ESTADO, _sede)
+    LEV_ESTADO = _estados.levantamento_da_praca(_praca_csv, _praca_rotulo, LEVANTAMENTO_CONAB["levantamento"],
+                                                LEVANTAMENTO_CONAB["levantamento_extenso"])
+    PRACA_CONAB = LEV_ESTADO["praca"]
+    CUSTO_OPERACIONAL_PADRAO_HA = LEV_ESTADO["custo_operacional_ha"]
+    CUSTO_TOTAL_PADRAO_HA = LEV_ESTADO["custo_total_ha"]
+    PRECO_RECEBIDO_CONAB_PADRAO_SACA = PRECO_RECEBIDO_CONAB_SACA_REF = LEV_ESTADO["preco_recebido_saca"]
+    CUSTO_OPERACIONAL_CONAB_SACA_REF = LEV_ESTADO["custo_operacional_saca"]
+    PRODUTIVIDADE_REFERENCIA_CONAB_SC = LEV_ESTADO["produtividade_referencia_sc_ha"]
 
 comparar = st.sidebar.toggle("Comparar com outro município", value=False)
 mun_comp = None
@@ -1273,14 +1323,16 @@ if tela_atual == "📍 Inteligência Territorial":
     fase = fase_enso(int(ano_alvo))
     if fase == "El Niño":
         cor_faixa, texto_fase = "#d97706", (
-            "safra classificada como <b>El Niño</b> pelo Oceanic Niño Index (NOAA). "
-            "No histórico do Pará (2001-2024), safras de El Niño ficaram em média "
-            "acima da tendência; as maiores quebras vieram em safras de La Niña.")
+            "safra classificada como <b>El Niño</b> pelo Oceanic Niño Index (NOAA). " +
+            ("No histórico do Pará (2001-2024), safras de El Niño ficaram em média "
+             "acima da tendência; as maiores quebras vieram em safras de La Niña." if UF == "PA" else
+             "A projeção abaixo considera o clima observado, não a fase em si."))
     elif fase == "La Niña":
         cor_faixa, texto_fase = "#2563eb", (
-            "safra classificada como <b>La Niña</b> pelo Oceanic Niño Index (NOAA). "
-            "No histórico do Pará (2001-2024), quatro das cinco piores safras foram de "
-            "La Niña. A projeção abaixo considera o clima observado, não a fase em si.")
+            "safra classificada como <b>La Niña</b> pelo Oceanic Niño Index (NOAA). " +
+            ("No histórico do Pará (2001-2024), quatro das cinco piores safras foram de "
+             "La Niña. " if UF == "PA" else "") +
+            "A projeção abaixo considera o clima observado, não a fase em si.")
     else:
         cor_faixa, texto_fase = "#737373", (
             "safra sem El Niño ou La Niña registrado pelo Oceanic Niño Index (NOAA). "
@@ -1339,6 +1391,14 @@ if tela_atual == "📍 Inteligência Territorial":
         # tendência. É o achado da dissertação aparecendo no produto — vale
         # mais dito do que descoberto por quem for ler o código.
         contrib = r['correcao_climatica_kg_ha']
+        # No Pará, o achado da dissertação; nos outros estados, a repetição medida
+        # na base deles, onde o clima e a vegetação explicam parte do resíduo.
+        _frase_residuo = (
+            "Sobre esta base, em que 40,1% dos pares de safras sucessivas repetem o valor da "
+            "anterior, esse resíduo é quase todo ruído — daí a correção pequena."
+            if UF == "PA" else
+            f"Nesta base, {dec(M.taxa_repeticao_estadual(df))}% dos pares de safras sucessivas "
+            "repetem o valor da anterior, e o clima e a vegetação explicam parte do resíduo.")
         # Vírgula decimal, como o resto do painel; e o sinal colado no número.
         contrib_txt = f"{'+' if contrib >= 0 else '−'}{abs(contrib):.1f}".replace('.', ',')
         st.markdown(f"""
@@ -1350,10 +1410,7 @@ if tela_atual == "📍 Inteligência Territorial":
                 ± {qtd(metricas['rmse'])} {unidade}</div>
             <div class="hero-proc" title="O modelo é treinado para prever o
                 resíduo entre a produtividade observada e o histórico do
-                município somado à tendência tecnológica. Sobre esta base, em
-                que 40,1% dos pares de safras sucessivas repetem o valor da
-                anterior, esse resíduo
-                é quase todo ruído — daí a correção pequena.">
+                município somado à tendência tecnológica. {_frase_residuo}">
                 O modelo de IA foi aplicado e acrescentou
                 <b>{contrib_txt} kg/ha</b> ao histórico do
                 município. O que sustenta esta projeção é o histórico somado à
@@ -1363,46 +1420,45 @@ if tela_atual == "📍 Inteligência Territorial":
         """, unsafe_allow_html=True)
 
         with st.expander("Simular outro cenário climático"):
-            # Os limites saem da faixa observada na base. Fora dela a floresta
-            # aleatória não extrapola: devolve o valor da folha extrema, e a
-            # simulação deixa de significar alguma coisa — com chuva zero a
-            # projeção chegava a subir.
-            hist = df[df["municipio"] == municipio]
-            base_clima = hist if not hist.empty else df
-            fp = estimador.faixas.get("precip_total")
-            fe = estimador.faixas.get("etp_total")
-            p_min, p_max = (int(fp[0]), int(fp[1])) if fp else (0, 3000)
-            e_min, e_max = (int(fe[0]), int(fe[1])) if fe else (500, 2500)
+            # O mesmo cenário da API e do aplicativo (model.associacao_climatica):
+            # o efeito medido de chuva e temperatura acima ou abaixo do normal do
+            # município, só com o que tem IC95 sem o zero, preso à faixa de
+            # anomalias observada no estado. Antes os controles iam de toda a
+            # faixa de chuva do estado e pediam à rede um ano com a chuva mudada
+            # e o resto no normal, que quase não existe nos dados.
+            assoc = estimador.associacao
+            fc, ft = assoc["chuva"]["faixa"], assoc["temperatura"]["faixa"]
+            sinal = lambda v, c: f"{v:+.{c}f}".replace(".", ",")
             st.caption(
-                f"Os limites são a faixa observada nos {len(df)} registros da "
-                f"base: {br(p_min)} a {br(p_max)} mm de chuva. O modelo não tem "
-                "o que dizer fora dela.")
-            precip = st.slider("Precipitação total da safra (mm)", p_min, p_max,
-                               int(base_clima["precip_total"].mean()), step=25)
-            etp = st.slider("Evapotranspiração potencial (mm)", e_min, e_max,
-                            int(base_clima["etp_total"].mean()), step=25)
+                f"Os limites são a faixa observada nos {len(df)} registros da base: chuva de "
+                f"{sinal(fc[0], 0)}% a {sinal(fc[1], 0)}% e temperatura de {sinal(ft[0], 1)} a "
+                f"{sinal(ft[1], 1)} °C em relação ao normal de cada município. A base não tem o que "
+                "dizer fora dela.")
+            chuva_pct = st.slider("Chuva da safra (% em relação ao normal do município)",
+                                  int(round(fc[0])), int(round(fc[1])), 0, step=5)
+            temp_c = st.slider("Temperatura média (°C em relação ao normal)",
+                               float(round(ft[0], 1)), float(round(ft[1], 1)), 0.0, step=0.1)
 
             st.divider()
-            clima = base_clima[M.FEATURES].mean().to_dict()
-            clima["precip_total"] = precip
-            clima["etp_total"] = etp
-            clima["balanco_hidrico"] = clima["precip_total"] - clima["etp_total"]
-            cenario = ajustar_r(estimador.estimar(municipio, int(ano_alvo), clima=clima))
-            dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
+            efeito = estimador.cenario(1 + chuva_pct / 100, temp_c)
+            dif = efeito["delta_kg_ha"]
             st.metric("Projeção ajustada",
-                      f"{qtd(cenario['estimativa_kg_ha'])} {unidade}",
+                      f"{qtd(r['estimativa_kg_ha'] + dif)} {unidade}",
                       delta=f"{qtd(dif, '+')} {unidade}")
-            sens = M.sensibilidade_climatica(df)
-            virg = lambda v, c: f"{v:.{c}f}".replace(".", ",")
+
+            def _frase(nome, rotulo, por):
+                a = assoc[nome]
+                ic = f"IC95 de {sinal(a['ic95'][0], 1)} a {sinal(a['ic95'][1], 1)}"
+                if a["vale"]:
+                    return f"{rotulo}: {sinal(a['kg_ha'], 1)} kg/ha {por} ({ic})"
+                return f"{rotulo}: sem efeito claro ({ic}), não entra no cenário"
             st.caption(
-                "**O que este número vale.** A associação entre chuva e "
-                "produtividade nesta base não é distinguível de zero "
-                f"(r = {virg(sens['r'], 3)}; p = {virg(sens['p'], 3)}; "
-                f"n = {sens['n']}), e a diferença entre o terço mais seco e o "
-                f"mais chuvoso é de {br(round(sens['amplitude_kg_ha']))} kg/ha — "
-                f"contra margem de erro do modelo de "
-                f"{br(round(estimador.rmse or 0))} kg/ha. A variação acima está "
-                "dentro do ruído, e é assim que deve ser lida.")
+                f"**O que este número vale.** É o efeito medido na base {ESTADO.do}, em relação ao "
+                "normal de cada município, com o intervalo de confiança "
+                "por reamostragem de safras. " +
+                _frase("chuva", "Chuva", "por 1% acima do normal") + "; " +
+                _frase("temperatura", "temperatura", "por 1 °C acima do normal") +
+                f". A margem de erro do modelo é de {br(round(estimador.rmse or 0))} kg/ha.")
 
     with dir_:
         mapa, nome_para_interno, faixa_rend = construir_mapa(
@@ -1454,7 +1510,7 @@ if tela_atual == "📈 Análise Histórica":
     # Safras que o IBGE publicou e a base do modelo não tem (sem soja na
     # máscara do MapBiomas naquele ano): o aplicativo as mostra desde 06/11/2026,
     # e o painel também, para os dois contarem a mesma história do município.
-    _pam = carregar_pam_oficial()
+    _pam = carregar_pam_oficial(UF)
     _extras = []
     for _m in serie.municipio.unique():
         _cod = _cod_por_nome.get(_m)
@@ -1576,6 +1632,10 @@ if tela_atual == "💰 Viabilidade Financeira":
         preco_referencia = r.get('soja_preco_saca',
                                  PRECO_RECEBIDO_CONAB_PADRAO_SACA)
         preco_cbot = r.get('soja_preco_cbot_saca')
+        if UF != "PA":
+            # get_financas dá Chicago; preço e custo são os da praça da CONAB no estado.
+            custos_locais = {'custo_ha': CUSTO_OPERACIONAL_PADRAO_HA, 'vtn_ha': None}
+            preco_referencia = PRECO_RECEBIDO_CONAB_PADRAO_SACA
     except Exception as e:
         # O nome importado no try não existe aqui: o fallback usa a constante de
         # módulo. Foi exatamente isso que derrubou o app publicado em 30/08/2026.
@@ -1611,11 +1671,11 @@ if tela_atual == "💰 Viabilidade Financeira":
     fonte_preco = (f"**Cotação:** CONAB, preço recebido pelo produtor em "
                    f"{PRACA_CONAB}, levantamento de {LEVANTAMENTO_CONAB_EXTENSO} "
                    f"— preço de porteira, e da mesma praça de onde vem o custo "
-                   f"abaixo. {esc_md(LEVANTAMENTO_CONAB['textos']['nota_preco'])}")
+                   f"abaixo. {esc_md(LEV_ESTADO['textos']['nota_preco'])}")
     if praca_hoje:
         _dia = date.fromisoformat(praca_hoje["data"]).strftime("%d/%m")
         fonte_preco = (f"**Cotação:** {praca_hoje['praca']}, {_dia} (Agrolink): cotação do "
-                       f"dia na praça do Pará mais perto do município, a mesma que o "
+                       f"dia na praça {ESTADO.do} mais perto do município, a mesma que o "
                        f"aplicativo usa; na fazenda o preço pode ser menor, pelo frete. "
                        f"Sem cotação em dia, o padrão é o preço recebido da CONAB em "
                        f"{PRACA_CONAB} ({brl_md(PRECO_RECEBIDO_CONAB_PADRAO_SACA, 2)}), "
@@ -1623,7 +1683,7 @@ if tela_atual == "💰 Viabilidade Financeira":
     if comparacoes:
         fonte_preco += (" Para comparação: " + "; ".join(comparacoes) +
                         ". São preços de porto e de bolsa, acima do que se "
-                        "recebe na porteira no Pará.")
+                        f"recebe na porteira {ESTADO.no}.")
 
 
     # O aviso vem antes dos campos, e não como nota de rodapé: se o preço está
@@ -1648,8 +1708,9 @@ if tela_atual == "💰 Viabilidade Financeira":
         st.caption(
             f"**Custo:** CONAB, custo operacional da soja em {PRACA_CONAB}, "
             f"levantamento de {LEVANTAMENTO_CONAB_EXTENSO}. "
-            f"{esc_md(LEVANTAMENTO_CONAB['textos']['nota_custo'])} O Pará não tem "
-            f"levantamento próprio. **Atenção:** este é um custo por hectare "
+            f"{esc_md(LEV_ESTADO['textos']['nota_custo'])} "
+            f"{'O Pará não tem levantamento próprio. ' if UF == 'PA' else ''}"
+            f"**Atenção:** este é um custo por hectare "
             f"fixo, preso à produtividade de referência — ele não cresce junto "
             f"com a produtividade projetada, então parte da colheita, secagem e "
             f"frete das sacas acima de "
@@ -1688,7 +1749,7 @@ if tela_atual == "💰 Viabilidade Financeira":
     receita_ha = est_sacas_ha * preco
     # O custo editado pelo usuário é dele: não há rateio a discutir. Só quando
     # o valor ainda é o da CONAB é que a faixa do rateio faz sentido.
-    custo_e_do_usuario = abs(custo_ha - LEVANTAMENTO_CONAB["custo_operacional_ha"]) > 0.5
+    custo_e_do_usuario = abs(custo_ha - LEV_ESTADO["custo_operacional_ha"]) > 0.5
     margem_ha, margem_outro_rateio, sinal_incerto = resultado_por_hectare(
         est_sacas_ha, preco, custo_ha if custo_e_do_usuario else None)
     pct_margem = f"{margem_ha / custo_ha * 100:+.0f}%" if custo_ha else "—"
@@ -1873,7 +1934,9 @@ if tela_atual == "💰 Viabilidade Financeira":
     # página continuam. O erro vai para o log com o tipo e a mensagem, que o
     # Streamlit Cloud esconde da tela.
     try:
-        secao_preco_para()
+        # A estimativa pela base mensal da Agrolink só existe para o Pará.
+        if UF == "PA":
+            secao_preco_para()
     except Exception as e:  # noqa: BLE001 — abrir a página vale mais
         print(f"[painel] seção do Pará falhou: {type(e).__name__}: {e}", flush=True)
         st.caption("A estimativa do preço no Pará está indisponível no momento.")
@@ -1889,18 +1952,18 @@ if tela_atual == "💰 Viabilidade Financeira":
               f"{diag['taxa']:.0f}%",
               help="Porcentagem de safras em que o histórico oficial repetiu o valor anterior.")
     qb.metric("Maior sequência travada", f"{diag['maior_sequencia']} safras")
-    qc.metric("Média de repetição no Pará", f"{dec(taxa_estado)}%")
+    qc.metric(f"Média de repetição {ESTADO.no}", f"{dec(taxa_estado)}%")
 
     if diag["taxa"] >= taxa_estado:
         cor_qa, texto_qa = "#d97706", (
             f"<b>Repetição acima da média do estado.</b> O histórico oficial de "
             f"{disp(municipio)} repete o valor da safra anterior com frequência "
-            f"maior que a média do Pará, o que reforça a necessidade de corrigir "
+            f"maior que a média {ESTADO.do}, o que reforça a necessidade de corrigir "
             f"viés com satélite e clima.")
     else:
         cor_qa, texto_qa = "var(--positivo)", (
             f"<b>Repetição abaixo da média do estado.</b> O histórico oficial de "
-            f"{disp(municipio)} varia mais entre safras que a média do Pará.")
+            f"{disp(municipio)} varia mais entre safras que a média {ESTADO.do}.")
     st.markdown(
         f'<div style="background:var(--card-bg); border:1px solid var(--card-border);'
         f' border-left:3px solid {cor_qa}; border-radius:var(--raio);'

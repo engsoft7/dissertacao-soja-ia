@@ -1,6 +1,6 @@
 # Política de privacidade do aplicativo AgroInteligência
 
-Última atualização: 6 de novembro de 2026 (versão 2.7.4 do aplicativo).
+Última atualização: 7 de novembro de 2026 (versão 2.8.0 do aplicativo).
 
 O AgroInteligência é um aplicativo gratuito, sem anúncios e sem cadastro,
 desenvolvido como produto técnico de dissertação do Programa de Pós-Graduação
@@ -18,8 +18,10 @@ nem de publicidade.
 - **Fotos e marcações da Estimativa no campo.** As fotos são tiradas com a
   câmera do próprio celular e guardadas na pasta do aplicativo, regravadas sem
   os metadados de localização da câmera, com as marcas das plantas e vagens. A contagem automática de vagens roda no próprio
-  aparelho, sem Internet. Nada disso sai do celular, a não ser que o produtor
-  toque em exportar e escolha para onde enviar o arquivo .zip.
+  aparelho, sem Internet. Junto delas ficam os talhões contados: os pontos, a
+  área e, se o produtor informar, as sacas colhidas, sem a posição do talhão.
+  Nada disso sai do celular, a não ser que o produtor toque em exportar e
+  escolha para onde enviar o arquivo .zip.
 - **Posição do GPS para medir a área do talhão.** Usada só com a tela aberta,
   para calcular a área; não é enviada.
 - **Município escolhido**, para o aplicativo abrir nele da próxima vez.

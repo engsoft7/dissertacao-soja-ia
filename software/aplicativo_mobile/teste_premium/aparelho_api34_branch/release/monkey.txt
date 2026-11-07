@@ -1,5 +1,4 @@
-)
-    //[calendar_time:2026-11-06 21:42:44.705  system_uptime:2251019]
+ptime:828229]
     // Sending event #1400
 :Sending Touch (ACTION_UP): 0:(71.49121,1770.9268)
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,3.0)
@@ -16,7 +15,7 @@
 :Sending Trackball (ACTION_MOVE): 0:(-2.0,1.0)
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Touch (ACTION_DOWN): 0:(64.0,225.0)
-    //[calendar_time:2026-11-06 21:42:46.996  system_uptime:2253310]
+    //[calendar_time:2026-11-06 22:54:11.550  system_uptime:830472]
     // Sending event #1500
 :Sending Touch (ACTION_UP): 0:(63.38867,230.04102)
 :Sending Touch (ACTION_DOWN): 0:(291.0,1566.0)
@@ -35,14 +34,13 @@
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Touch (ACTION_DOWN): 0:(633.0,1535.0)
 :Sending Touch (ACTION_UP): 0:(632.25586,1535.1357)
-    // Rejecting start of Intent { act=android.settings.NOTIFICATION_SETTINGS cmp=com.android.settings/.Settings$ConfigureNotificationSettingsActivity } in package com.android.settings
 :Sending Touch (ACTION_DOWN): 0:(262.0,1441.0)
 :Sending Touch (ACTION_UP): 0:(268.63086,1481.3164)
 :Sending Trackball (ACTION_MOVE): 0:(3.0,-3.0)
 :Sending Touch (ACTION_DOWN): 0:(235.0,2185.0)
 :Sending Touch (ACTION_UP): 0:(224.12207,2181.956)
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,-4.0)
-    //[calendar_time:2026-11-06 21:42:50.653  system_uptime:2256967]
+    //[calendar_time:2026-11-06 22:54:15.196  system_uptime:834118]
     // Sending event #1600
 :Sending Trackball (ACTION_MOVE): 0:(1.0,0.0)
 :Sending Trackball (ACTION_MOVE): 0:(2.0,0.0)
@@ -57,7 +55,7 @@
 :Sending Trackball (ACTION_MOVE): 0:(0.0,0.0)
 :Sending Trackball (ACTION_MOVE): 0:(1.0,2.0)
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,4.0)
-    //[calendar_time:2026-11-06 21:42:52.120  system_uptime:2258434]
+    //[calendar_time:2026-11-06 22:54:16.756  system_uptime:835678]
     // Sending event #1700
 :Sending Touch (ACTION_DOWN): 0:(766.0,434.0)
 :Sending Touch (ACTION_UP): 0:(799.7637,483.62695)
@@ -76,7 +74,7 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Trackball (ACTION_MOVE): 0:(-4.0,3.0)
 :Sending Trackball (ACTION_MOVE): 0:(0.0,1.0)
-    //[calendar_time:2026-11-06 21:42:53.903  system_uptime:2260217]
+    //[calendar_time:2026-11-06 22:54:18.620  system_uptime:837542]
     // Sending event #1800
 :Sending Touch (ACTION_DOWN): 0:(648.0,681.0)
 :Sending Touch (ACTION_UP): 0:(710.5029,705.83203)
@@ -95,13 +93,14 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Touch (ACTION_UP): 0:(612.8828,1836.3555)
 :Sending Touch (ACTION_DOWN): 0:(363.0,199.0)
 :Sending Touch (ACTION_UP): 0:(359.45215,194.31934)
+    // Rejecting start of Intent { act=android.intent.action.SHOW_ALARMS cmp=com.google.android.deskclock/com.android.deskclock.HandleApiCalls } in package com.google.android.deskclock
 :Sending Touch (ACTION_DOWN): 0:(454.0,567.0)
 :Sending Touch (ACTION_UP): 0:(471.0293,578.834)
 :Sending Trackball (ACTION_MOVE): 0:(-4.0,1.0)
 :Sending Touch (ACTION_DOWN): 0:(750.0,1850.0)
 :Sending Touch (ACTION_UP): 0:(741.4072,1848.2793)
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,-3.0)
-    //[calendar_time:2026-11-06 21:42:56.470  system_uptime:2262784]
+    //[calendar_time:2026-11-06 22:54:22.710  system_uptime:841632]
     // Sending event #1900
 :Sending Trackball (ACTION_MOVE): 0:(1.0,4.0)
 :Sending Trackball (ACTION_MOVE): 0:(1.0,-4.0)
@@ -119,8 +118,9 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,0.0)
 :Sending Touch (ACTION_DOWN): 0:(191.0,1666.0)
 :Sending Touch (ACTION_UP): 0:(76.40137,1574.1406)
+    // Rejecting start of Intent { act=android.intent.action.SEND_MULTIPLE typ=application/zip cmp=android/com.android.internal.app.ResolverActivity } in package android
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,-3.0)
-    //[calendar_time:2026-11-06 21:42:58.817  system_uptime:2265131]
+    //[calendar_time:2026-11-06 22:54:25.020  system_uptime:843942]
     // Sending event #2000
 :Sending Trackball (ACTION_MOVE): 0:(3.0,3.0)
 :Sending Touch (ACTION_DOWN): 0:(371.0,72.0)
@@ -148,9 +148,9 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Touch (ACTION_UP): 0:(1052.1523,2177.791)
 :Sending Touch (ACTION_DOWN): 0:(743.0,272.0)
 :Sending Touch (ACTION_UP): 0:(748.49316,192.74902)
-    //[calendar_time:2026-11-06 21:43:01.903  system_uptime:2268218]
+    //[calendar_time:2026-11-06 22:54:27.593  system_uptime:846515]
     // Sending event #2100
-    //[calendar_time:2026-11-06 21:43:02.024  system_uptime:2268341]
+    //[calendar_time:2026-11-06 22:54:27.740  system_uptime:846662]
     // Sending event #2100
 :Sending Touch (ACTION_DOWN): 0:(552.0,1156.0)
 :Sending Touch (ACTION_UP): 0:(526.8252,1135.0918)
@@ -166,7 +166,7 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Touch (ACTION_DOWN): 0:(452.0,902.0)
 :Sending Touch (ACTION_UP): 0:(498.21875,857.55664)
 :Sending Touch (ACTION_DOWN): 0:(572.0,802.0)
-    //[calendar_time:2026-11-06 21:43:03.407  system_uptime:2269722]
+    //[calendar_time:2026-11-06 22:54:29.190  system_uptime:848113]
     // Sending event #2200
 :Sending Touch (ACTION_UP): 0:(548.7012,853.1582)
 :Sending Trackball (ACTION_MOVE): 0:(4.0,0.0)
@@ -195,7 +195,7 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Touch (ACTION_DOWN): 0:(1001.0,111.0)
 :Sending Touch (ACTION_UP): 0:(1004.00586,47.02539)
 :Sending Trackball (ACTION_MOVE): 0:(4.0,0.0)
-    //[calendar_time:2026-11-06 21:43:06.614  system_uptime:2272928]
+    //[calendar_time:2026-11-06 22:54:32.668  system_uptime:851590]
     // Sending event #2300
 :Sending Touch (ACTION_DOWN): 0:(903.0,1650.0)
 :Sending Touch (ACTION_UP): 0:(885.4629,1654.0859)
@@ -214,6 +214,7 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Touch (ACTION_UP): 0:(550.2471,1946.5967)
 :Sending Touch (ACTION_DOWN): 0:(218.0,1784.0)
 :Sending Touch (ACTION_UP): 0:(188.2959,1808.8086)
+    // Rejecting start of Intent { act=android.media.action.IMAGE_CAPTURE cmp=com.android.camera2/com.android.camera.CaptureActivity } in package com.android.camera2
 :Sending Touch (ACTION_DOWN): 0:(730.0,948.0)
 :Sending Touch (ACTION_UP): 0:(724.30176,947.32227)
 :Sending Touch (ACTION_DOWN): 0:(266.0,1268.0)
@@ -222,7 +223,7 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Touch (ACTION_DOWN): 0:(147.0,1520.0)
 :Sending Touch (ACTION_UP): 0:(147.42383,1538.502)
 :Sending Trackball (ACTION_MOVE): 0:(1.0,-5.0)
-    //[calendar_time:2026-11-06 21:43:10.741  system_uptime:2277056]
+    //[calendar_time:2026-11-06 22:54:36.373  system_uptime:855295]
     // Sending event #2400
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,3.0)
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
@@ -251,9 +252,9 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Touch (ACTION_DOWN): 0:(530.0,82.0)
 :Sending Touch (ACTION_UP): 0:(538.13086,96.72168)
-    //[calendar_time:2026-11-06 21:43:13.801  system_uptime:2280115]
+    //[calendar_time:2026-11-06 22:54:39.244  system_uptime:858166]
     // Sending event #2500
-    //[calendar_time:2026-11-06 21:43:13.921  system_uptime:2280236]
+    //[calendar_time:2026-11-06 22:54:39.364  system_uptime:858286]
     // Sending event #2500
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,-5.0)
 :Sending Touch (ACTION_DOWN): 0:(159.0,1663.0)
@@ -274,17 +275,18 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Touch (ACTION_UP): 0:(1065.708,500.708)
 :Sending Touch (ACTION_DOWN): 0:(190.0,821.0)
 :Sending Touch (ACTION_UP): 0:(204.39844,829.1885)
-    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://www.chc.ucsb.edu/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
+    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://sidra.ibge.gov.br/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
 :Sending Touch (ACTION_DOWN): 0:(420.0,1413.0)
-    //[calendar_time:2026-11-06 21:43:16.992  system_uptime:2283306]
+    //[calendar_time:2026-11-06 22:54:42.022  system_uptime:860944]
     // Sending event #2600
 :Sending Touch (ACTION_UP): 0:(413.58398,1407.3809)
+    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://www.cpc.ncep.noaa.gov/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
 :Sending Touch (ACTION_DOWN): 0:(196.0,983.0)
 :Sending Touch (ACTION_UP): 0:(193.66309,985.334)
-    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://cds.climate.copernicus.eu/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
+    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://portal.inmet.gov.br/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
 :Sending Touch (ACTION_DOWN): 0:(811.0,1190.0)
 :Sending Touch (ACTION_UP): 0:(817.2334,1200.252)
-    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://www.agrolink.com.br/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
+    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://www.gov.br/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
 :Sending Touch (ACTION_DOWN): 0:(337.0,105.0)
 :Sending Touch (ACTION_UP): 0:(336.84375,102.85156)
 :Sending Touch (ACTION_DOWN): 0:(62.0,1190.0)
@@ -292,7 +294,6 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Trackball (ACTION_MOVE): 0:(-4.0,-4.0)
 :Sending Touch (ACTION_DOWN): 0:(313.0,554.0)
 :Sending Touch (ACTION_UP): 0:(311.81348,562.917)
-    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://developers.google.com/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
 :Sending Touch (ACTION_DOWN): 0:(923.0,1246.0)
 :Sending Touch (ACTION_UP): 0:(889.1006,1220.8613)
 :Sending Touch (ACTION_DOWN): 0:(103.0,55.0)
@@ -312,7 +313,7 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Touch (ACTION_UP): 0:(410.31348,601.14355)
 :Sending Trackball (ACTION_MOVE): 0:(3.0,4.0)
 :Sending Touch (ACTION_DOWN): 0:(118.0,865.0)
-    //[calendar_time:2026-11-06 21:43:20.151  system_uptime:2286465]
+    //[calendar_time:2026-11-06 22:54:45.090  system_uptime:864012]
     // Sending event #2700
 :Sending Touch (ACTION_UP): 0:(56.0459,934.55566)
 :Sending Touch (ACTION_DOWN): 0:(140.0,1615.0)
@@ -337,7 +338,6 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Touch (ACTION_UP): 0:(1006.02734,1019.6846)
 :Sending Touch (ACTION_DOWN): 0:(724.0,1144.0)
 :Sending Touch (ACTION_UP): 0:(701.8447,1161.626)
-    // Rejecting start of Intent { act=android.provider.action.PICK_IMAGES typ=image/* cmp=com.google.android.providers.media.module/com.android.providers.media.photopicker.PhotoPickerActivity } in package com.google.android.providers.media.module
 :Sending Flip keyboardOpen=false
 Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0: open failed: EACCES (Permission denied)
     // Injection Failed
@@ -345,7 +345,7 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Touch (ACTION_DOWN): 0:(225.0,413.0)
 :Sending Touch (ACTION_UP): 0:(225.87793,401.1797)
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,1.0)
-    //[calendar_time:2026-11-06 21:43:22.998  system_uptime:2289312]
+    //[calendar_time:2026-11-06 22:54:47.973  system_uptime:866895]
     // Sending event #2800
 :Sending Touch (ACTION_DOWN): 0:(1030.0,989.0)
 :Sending Touch (ACTION_UP): 0:(1039.9463,953.18945)
@@ -363,7 +363,7 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 :Sending Touch (ACTION_UP): 0:(1031.3271,881.0127)
 :Sending Touch (ACTION_DOWN): 0:(842.0,361.0)
 :Sending Touch (ACTION_UP): 0:(842.3037,371.16406)
-    //[calendar_time:2026-11-06 21:43:25.949  system_uptime:2292264]
+    //[calendar_time:2026-11-06 22:54:51.255  system_uptime:870177]
     // Sending event #2900
 :Sending Touch (ACTION_DOWN): 0:(724.0,860.0)
 :Sending Touch (ACTION_UP): 0:(744.40625,864.4082)
@@ -388,7 +388,7 @@ Got IOException performing flipjava.io.FileNotFoundException: /dev/input/event0:
 Events injected: 3000
 :Sending rotation degree=0, persist=false
 :Dropped: keys=0 pointers=0 trackballs=0 flips=14 rotations=0
-## Network stats: elapsed time=87387ms (0ms mobile, 0ms wifi, 87387ms not connected)
+## Network stats: elapsed time=83756ms (0ms mobile, 0ms wifi, 83756ms not connected)
 // Monkey finished
 
 --- logcat crash ---

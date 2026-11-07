@@ -234,8 +234,11 @@ class EstadoTempo(private val prefs: SharedPreferences) {
     }
 
     /** O lugar da previsão: o GPS, quando o produtor escolheu e já há posição; senão a sede do município. */
+    /** As sedes do estado escolhido (Estados.kt); no Pará, as do aplicativo. */
+    var sedes by mutableStateOf(SEDES_MUNICIPAIS)
+
     fun lugarPara(municipio: String?): LugarTempo? =
-        gps.takeIf { usarGps } ?: municipio?.let { SEDES_MUNICIPAIS[it] }
+        gps.takeIf { usarGps } ?: municipio?.let { sedes[it] }
 
     fun usarMunicipio() {
         usarGps = false

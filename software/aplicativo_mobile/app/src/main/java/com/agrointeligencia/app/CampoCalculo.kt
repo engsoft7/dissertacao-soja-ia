@@ -29,6 +29,14 @@ data class PontoAmostra(
     val metrosDeLinha: Double,
     val arrancadas: Int,
     val vagens: Int,
+    /**
+     * O número que o contador automático deu, quando foi usado. Com [vagens]
+     * igual a ele, o número entrou sem conferência; diferente, o produtor
+     * conferiu. Vai com o talhão exportado, para a colheita medir os dois.
+     */
+    val vagensDoContador: Int? = null,
+    /** Se o produtor conferiu as marcas do contador neste ponto. */
+    val conferido: Boolean? = null,
 )
 
 data class ParametrosCampo(

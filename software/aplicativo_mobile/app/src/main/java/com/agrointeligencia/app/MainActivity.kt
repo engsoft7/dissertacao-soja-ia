@@ -176,9 +176,16 @@ fun AgroDashboard() {
     val gson = remember { Gson() }
     val avisos = remember { SnackbarHostState() }
     var municipios by remember { mutableStateOf<List<String>>(emptyList()) }
+    // O estado (Estados.kt): o Pará, se nada foi escolhido, como até a 2.7.
+    var uf by remember { mutableStateOf(sharedPrefs.getString(PREF_ESTADO, null) ?: "PA") }
+    val estado = estadoDoApp(uf)
+    // Sedes dos municípios do estado, para o GPS, o Tempo e a praça mais perto.
+    var sedes by remember { mutableStateOf(if (uf == "PA") SEDES_MUNICIPAIS else emptyMap()) }
+    // Quando o servidor ainda não atende o estado escolhido.
+    var avisoDoEstado by remember { mutableStateOf<String?>(null) }
     // O último município escolhido. Nulo na primeira abertura: o app pergunta
     // qual é, em vez de abrir no primeiro da lista (Municipio.kt).
-    var selectedMunicipio by remember { mutableStateOf(sharedPrefs.getString(PREF_MUNICIPIO, null)) }
+    var selectedMunicipio by remember { mutableStateOf(sharedPrefs.getString(chaveDoEstado(PREF_MUNICIPIO, uf), null)) }
     var previsao by remember { mutableStateOf<PrevisaoResponse?>(null) }
     var previsaoEm by remember { mutableStateOf(0L) }
     var kpis by remember { mutableStateOf<FinancaResponse?>(null) }
@@ -202,19 +209,20 @@ fun AgroDashboard() {
     // Puxar a tela para baixo: true até a previsão e a lista voltarem.
     var atualizando by remember { mutableStateOf(false) }
     var sincronizandoPrevisao by remember { mutableStateOf(false) }
-    LaunchedEffect(recarga) {
+    LaunchedEffect(recarga, uf) {
         // Sem rede, as praças guardadas ainda servem (cada uma tem a data, e as
         // de mais de uma semana são ignoradas); a estimativa guardada, não, porque
         // "estimado agora" deixaria de ser verdade.
         if (mercadoHoje == null) {
-            mercadoHoje = sharedPrefs.getString("mercado_1d", null)
+            mercadoHoje = sharedPrefs.getString(chaveDoEstado("mercado_1d", uf), null)
                 ?.let { runCatching { gson.fromJson(it, MercadoResponse::class.java) }.getOrNull() }
                 ?.copy(para = null)
         }
         try {
-            val m = RetrofitClient.getInstance().getMercado("1d")
+            val m = RetrofitClient.getInstance().getMercado("1d", ufParaApi(uf))
+            if (!respostaDoEstado(uf, m.uf)) return@LaunchedEffect
             mercadoHoje = m
-            sharedPrefs.edit().putString("mercado_1d", gson.toJson(m)).apply()
+            sharedPrefs.edit().putString(chaveDoEstado("mercado_1d", uf), gson.toJson(m)).apply()
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (_: Exception) {
@@ -224,6 +232,7 @@ fun AgroDashboard() {
     // Previsão do tempo (Tempo.kt): vem do Open-Meteo, e não da API, e por
     // isso carrega mesmo com a API dormindo. Serve o cartão do Resumo e a tela.
     val tempo = remember { EstadoTempo(sharedPrefs) }
+    LaunchedEffect(sedes) { tempo.sedes = sedes }
     val lugarTempo = tempo.lugarPara(selectedMunicipio)
     LaunchedEffect(lugarTempo) { lugarTempo?.let { tempo.carrega(it) } }
 
@@ -237,7 +246,22 @@ fun AgroDashboard() {
 
     fun escolherMunicipio(mun: String) {
         selectedMunicipio = mun
-        sharedPrefs.edit().putString(PREF_MUNICIPIO, mun).apply()
+        sharedPrefs.edit().putString(chaveDoEstado(PREF_MUNICIPIO, uf), mun).apply()
+    }
+
+    // Trocar de estado: a lista, as sedes e o mercado passam a ser os dele, e
+    // o município volta a ser o último escolhido naquele estado.
+    fun escolherEstado(novo: String) {
+        if (novo == uf) return
+        uf = novo
+        sharedPrefs.edit().putString(PREF_ESTADO, novo).apply()
+        municipios = emptyList()
+        sedes = if (novo == "PA") SEDES_MUNICIPAIS else emptyMap()
+        avisoDoEstado = null
+        selectedMunicipio = sharedPrefs.getString(chaveDoEstado(PREF_MUNICIPIO, novo), null)
+        previsao = null
+        kpis = null
+        mercadoHoje = null
     }
 
     // GPS para o município: a sede mais próxima entre os da lista, calculada
@@ -246,14 +270,14 @@ fun AgroDashboard() {
         semPermissao = "Sem a permissão de localização, escolha o município na lista.",
         aoFalhar = { avisar(it) }
     ) { lat, lon ->
-        val candidatos = municipios.ifEmpty { SEDES_MUNICIPAIS.keys.toList() }
-        val proximo = municipioMaisProximo(lat, lon, candidatos)
+        val candidatos = municipios.ifEmpty { sedes.keys.toList() }
+        val proximo = municipioMaisProximo(lat, lon, candidatos, sedes)
         if (proximo == null) {
             avisar("Não foi possível achar um município da lista perto de você. Escolha na lista.")
         } else {
             escolherMunicipio(proximo.nome)
             mostrarLista = false
-            avisar(fraseDoMaisProximo(proximo, candidatos.size))
+            avisar(fraseDoMaisProximo(proximo, candidatos.size, estado))
         }
     }
 
@@ -269,14 +293,16 @@ fun AgroDashboard() {
         }
 
         // Primeiro o que está guardado, para a tela abrir na hora.
-        val cachedMunStr = sharedPrefs.getString("municipios", null)
-        val cachedKpiStr = sharedPrefs.getString("kpis", null)
+        val ufPedida = uf
+        val cachedMunStr = sharedPrefs.getString(chaveDoEstado("municipios", ufPedida), null)
+        val cachedKpiStr = sharedPrefs.getString(chaveDoEstado("kpis", ufPedida), null)
         // Lido com runCatching: um cache gravado por outra versão, ou cortado,
         // derrubava o app na abertura; agora só é ignorado.
-        val munGuardados = cachedMunStr?.let { runCatching { gson.fromJson(it, MunicipioResponse::class.java)?.municipios }.getOrNull() }
+        val munGuardados = cachedMunStr?.let { runCatching { gson.fromJson(it, MunicipioResponse::class.java) }.getOrNull() }
         val kpisGuardados = cachedKpiStr?.let { runCatching { gson.fromJson(it, FinancaResponse::class.java) }.getOrNull() }
-        if (!munGuardados.isNullOrEmpty() && kpisGuardados != null) {
-            municipios = munGuardados
+        if (!munGuardados?.municipios.isNullOrEmpty() && kpisGuardados != null) {
+            municipios = munGuardados!!.municipios
+            sedes = sedesDoEstado(ufPedida, munGuardados.sedes)
             selectedMunicipio = municipioGuardadoValido(municipios, selectedMunicipio)
             kpis = kpisGuardados
         } else {
@@ -286,16 +312,32 @@ fun AgroDashboard() {
         // Depois a versão do servidor, sem bloquear a tela.
         coroutineScope.launch {
             try {
-                val response = RetrofitClient.getInstance().getMunicipios()
-                // Preço e custo são os da CONAB para o estado: de um município
-                // para outro só muda o VTN, que o aplicativo não mostra.
-                val kpisResponse = RetrofitClient.getInstance().getFinancas("Paragominas")
+                val api = RetrofitClient.getInstance()
+                val response = api.getMunicipios(ufParaApi(ufPedida), if (ufPedida == "PA") null else true)
+                // Trocou de estado enquanto a lista vinha: a resposta é do outro.
+                if (ufPedida != uf) return@launch
+                if (!respostaDoEstado(ufPedida, response.uf) || response.municipios.isEmpty()) {
+                    // O servidor no ar ainda é o de antes de Mato Grosso e Maranhão.
+                    avisoDoEstado = "${estadoDoApp(ufPedida).nome} ainda não está disponível no servidor. " +
+                        "Escolha o Pará ou tente de novo mais tarde."
+                    if (municipios.isEmpty()) errorMsg = avisoDoEstado
+                    return@launch
+                }
+                avisoDoEstado = null
+                // Preço e custo são os da CONAB para o estado. No Pará, de um
+                // município para outro só muda o VTN, que o aplicativo não
+                // mostra; em Mato Grosso, a praça muda com o município, e a
+                // previsão de cada um busca a sua.
+                val kpisResponse = api.getFinancas(
+                    if (ufPedida == "PA") "Paragominas" else (selectedMunicipio ?: response.municipios.first()),
+                    ufParaApi(ufPedida))
                 municipios = response.municipios
+                sedes = sedesDoEstado(ufPedida, response.sedes)
                 selectedMunicipio = municipioGuardadoValido(municipios, selectedMunicipio)
                 kpis = kpisResponse
                 sharedPrefs.edit()
-                    .putString("municipios", gson.toJson(response))
-                    .putString("kpis", gson.toJson(kpisResponse))
+                    .putString(chaveDoEstado("municipios", ufPedida), gson.toJson(response))
+                    .putString(chaveDoEstado("kpis", ufPedida), gson.toJson(kpisResponse))
                     .apply()
                 errorMsg = null
             } catch (e: Exception) {
@@ -309,7 +351,8 @@ fun AgroDashboard() {
         }
     }
 
-    LaunchedEffect(Unit) {
+    // Na abertura e a cada troca de estado.
+    LaunchedEffect(uf) {
         loadData()
     }
 
@@ -321,19 +364,20 @@ fun AgroDashboard() {
     // trocar de município cancela a busca anterior. Antes as duas corriam
     // juntas, e a resposta do município velho, se chegasse por último, ficava
     // na tela com o nome do novo.
-    LaunchedEffect(selectedMunicipio, recarga) {
+    LaunchedEffect(selectedMunicipio, recarga, uf) {
         val mun = selectedMunicipio
+        val ufPedida = uf
         if (mun == null) {
             previsao = null
             sincronizandoPrevisao = false
             return@LaunchedEffect
         }
         sincronizandoPrevisao = true
-        val guardada = sharedPrefs.getString("previsao_$mun", null)
+        val guardada = sharedPrefs.getString(chaveDoEstado("previsao_$mun", ufPedida), null)
             ?.let { runCatching { gson.fromJson(it, PrevisaoResponse::class.java) }.getOrNull() }
             ?.valida()
         previsao = guardada
-        previsaoEm = if (guardada != null) sharedPrefs.getLong("previsao_${mun}_em", 0L) else 0L
+        previsaoEm = if (guardada != null) sharedPrefs.getLong(chaveDoEstado("previsao_${mun}_em", ufPedida), 0L) else 0L
         // O "carregando" só aparece quando não há nada guardado do município.
         carregandoPrevisao = guardada == null
         // Sem rede que navegue, o aviso aparece na hora: antes esperava a
@@ -342,14 +386,23 @@ fun AgroDashboard() {
         // segue, e o aviso some se ela der certo.
         if (!temRede(context)) isOfflineMode = true
         try {
-            val resposta = RetrofitClient.getInstance().getPrevisao(mun).valida()
+            val resposta = RetrofitClient.getInstance().getPrevisao(mun, ufParaApi(ufPedida)).valida()
+                ?.takeIf { respostaDoEstado(ufPedida, it.uf) }
                 ?: throw IllegalStateException("resposta sem histórico")
             previsao = resposta
             previsaoEm = System.currentTimeMillis()
             sharedPrefs.edit()
-                .putString("previsao_$mun", gson.toJson(resposta))
-                .putLong("previsao_${mun}_em", previsaoEm)
+                .putString(chaveDoEstado("previsao_$mun", ufPedida), gson.toJson(resposta))
+                .putLong(chaveDoEstado("previsao_${mun}_em", ufPedida), previsaoEm)
                 .apply()
+            // Fora do Pará a praça da CONAB muda com o município (Sorriso ou Primavera do Leste).
+            if (ufPedida != "PA") {
+                runCatching { RetrofitClient.getInstance().getFinancas(mun, ufParaApi(ufPedida)) }
+                    .getOrNull()?.takeIf { respostaDoEstado(ufPedida, it.uf) }?.let { k ->
+                        kpis = k
+                        sharedPrefs.edit().putString(chaveDoEstado("kpis", ufPedida), gson.toJson(k)).apply()
+                    }
+            }
             isOfflineMode = false
             carregandoPrevisao = false
             sincronizandoPrevisao = false
@@ -385,7 +438,7 @@ fun AgroDashboard() {
     // perto do município (Agrolink) e, sem ela, o levantamento da CONAB. Antes a
     // Viabilidade, o Histórico e a Estimativa no campo podiam usar preços
     // diferentes para a mesma lavoura.
-    val pracaHoje = pracaParaUsar(selectedMunicipio, mercadoHoje?.pracas_para.orEmpty())
+    val pracaHoje = pracaParaUsar(selectedMunicipio, mercadoHoje?.pracasDoEstado().orEmpty(), sedes = sedes)
     val precoPadraoAtual: Double? = pracaHoje?.valor ?: kpis?.soja_preco_saca
 
     // Cada aba abre do começo: antes, quem rolava o Histórico e ia ao Mercado
@@ -403,7 +456,10 @@ fun AgroDashboard() {
                 escolherMunicipio(mun)
                 mostrarLista = false
             },
-            aoFechar = { mostrarLista = false }
+            aoFechar = { mostrarLista = false },
+            estado = estado,
+            aoEscolherEstado = { escolherEstado(it) },
+            avisoDoEstado = avisoDoEstado
         )
     }
 
@@ -519,7 +575,8 @@ fun AgroDashboard() {
                                 municipio = selectedMunicipio,
                                 procurandoPosicao = leitorMunicipio.procurando,
                                 aoAbrirLista = { mostrarLista = true },
-                                aoUsarPosicao = { leitorMunicipio.ler() }
+                                aoUsarPosicao = { leitorMunicipio.ler() },
+                                estado = estado
                             )
                         }
                     }
@@ -537,7 +594,7 @@ fun AgroDashboard() {
                 currentTab == 4 -> item {
                     // A cotação não depende da previsão do município: a aba abre
                     // mesmo quando a previsão ainda não carregou ou falhou.
-                    MercadoCard(recarga) { mercadoHoje = it }
+                    MercadoCard(recarga, uf) { mercadoHoje = it }
                 }
                 currentTab == 5 -> item {
                     // Como o Mercado, não depende da previsão: a contagem no campo
@@ -587,14 +644,15 @@ fun AgroDashboard() {
                         Card(
                             modifier = Modifier.fillParentMaxHeight(0.82f).fillMaxWidth().padding(1.dp)
                                 .semantics {
-                                    contentDescription = "Mapa da produtividade da soja nos municípios do Pará" +
+                                    contentDescription = "Mapa da produtividade da soja nos municípios ${estado.de}" +
                                         (selectedMunicipio?.let { ", com $it em destaque" } ?: "")
                                 },
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             val currentTheme = if (isDark) "dark" else "light"
                             val mapUrl = "https://agrointeligencia-api.onrender.com/api/mapa/render?theme=${currentTheme}" +
-                                (selectedMunicipio?.let { "&municipio=${URLEncoder.encode(it, "UTF-8")}" } ?: "")
+                                (selectedMunicipio?.let { "&municipio=${URLEncoder.encode(it, "UTF-8")}" } ?: "") +
+                                (ufParaApi(uf)?.let { "&uf=$it" } ?: "")
                             // Lembra a última URL para não recarregar a cada recomposição.
                             var lastLoadedUrl by remember { mutableStateOf("") }
                             AndroidView(
@@ -645,6 +703,12 @@ fun AgroDashboard() {
                 isLoading -> item {
                     CarregandoDados(selectedMunicipio)
                 }
+                errorMsg != null && avisoDoEstado != null -> item {
+                    AvisoSemDados(titulo = "${estado.nome} ainda não está no servidor", texto = avisoDoEstado!!,
+                                  rotulo = "Voltar ao Pará") {
+                        escolherEstado("PA")
+                    }
+                }
                 errorMsg != null -> item {
                     AvisoSemDados(
                         titulo = "Sem conexão com o servidor",
@@ -683,7 +747,7 @@ fun AgroDashboard() {
                                     TituloSecao(Icons.Filled.MonetizationOn, "Viabilidade Financeira",
                                                 Modifier.padding(top = 8.dp))
                                     ResumoFinanceiroCard(projecao, k, mercadoHoje?.para,
-                                                         mercadoHoje?.pracas_para.orEmpty(), selectedMunicipio)
+                                                         mercadoHoje?.pracasDoEstado().orEmpty(), selectedMunicipio, sedes)
                                 }
                             }
                             item {
@@ -694,7 +758,7 @@ fun AgroDashboard() {
                                 // em 2027) e mostrava outro número para "a safra".
                                 CenarioClimaticoCard(municipio = selectedMunicipio ?: prev.municipio,
                                                      baselineRendimento = projecao.rendimento_predito,
-                                                     ano = projecao.ano)
+                                                     ano = projecao.ano, uf = ufParaApi(uf))
                             }
                         }
                     } else if (currentTab == 2) { // Histórico

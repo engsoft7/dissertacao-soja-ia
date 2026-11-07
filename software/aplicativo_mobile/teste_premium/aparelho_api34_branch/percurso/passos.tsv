@@ -1,5 +1,5 @@
-5s	abriu	boas-vindas
-13s	lista	chegou da API
-16s	resumo	safra 2027 carregada
-16s	ok	Resumo mostra a última safra do IBGE, 2025
-114s	FALHA	ComposeTimeoutException: Condition still not satisfied after 90000 ms
+3s	abriu	boas-vindas
+9s	lista	chegou da API
+12s	resumo	safra 2027 carregada
+12s	ok	Resumo mostra a última safra do IBGE, 2025
+17s	FALHA	AssertionError: Failed: performScrollToIndex(3)

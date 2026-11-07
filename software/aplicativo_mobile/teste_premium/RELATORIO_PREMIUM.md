@@ -155,7 +155,26 @@ Nos emuladores Android 14 do Actions, o Pixel Launcher travou em duas rodadas
 dessas rodadas valem como falha do ambiente, não do app, e o script passou a
 fechar o aviso sozinho. As rodadas sem o travamento passaram em tudo.
 
-## 7. O que este relatório não cobre
+## 7. Painel web (Streamlit)
+
+- **Mesmos números do aplicativo.** A estimativa da safra 2027 do painel e a
+  da API, que o aplicativo mostra, são iguais nos 38 municípios: diferença de
+  0,0 kg/ha, porque os dois treinam o mesmo modelo na mesma base. Desde o PR
+  #183, o painel também abre na safra em curso, usa o preço do dia da praça
+  mais perto e mostra as safras do IBGE fora da base, como o aplicativo.
+- **Todas as telas em todos os municípios.** As quatro telas (Inteligência
+  Territorial, Análise Histórica, Viabilidade Financeira e Tempo na lavoura)
+  abertas nos 38 municípios com o `streamlit.testing` (152 aberturas): nenhuma
+  exceção, nenhuma mensagem de erro, todas na safra 2027. A rodada foi feita sem
+  acesso às cotações, ao Yahoo e à previsão do tempo, e o painel seguiu com as
+  reservas (preço da CONAB, avisos de fonte indisponível).
+- **No ar.** `confere-painel.yml` abre o painel num navegador e confere o mapa;
+  `mantem-painel-acordado.yml` o visita a cada 4 horas, abaixo das 12 horas sem
+  visita que fazem o Streamlit Community Cloud pôr o app para dormir.
+- **Falta**: o painel em largura de celular e as verificações automáticas de
+  acessibilidade no navegador.
+
+## 8. O que este relatório não cobre
 
 - **Aparelhos físicos.** Os testes rodam em emuladores x86_64. O relatório de
   pré-lançamento do Play Console roda o app em aparelhos reais quando um AAB

@@ -8,7 +8,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -120,7 +119,11 @@ class PercursoNoAparelhoTest {
      * podia cair num gráfico e não rolar nada.
      */
     private fun rola(nome: String, vezes: Int) {
-        val lista = regra.onNode(hasScrollToIndexAction() and hasAnyDescendant(hasText("AgroInteligência")))
+        // A lista vertical da tela: pelo cabeçalho ela some da árvore assim que
+        // o primeiro item sai da tela, e o passo seguinte não a achava mais.
+        val lista = regra.onAllNodes(
+            hasScrollToIndexAction() and SemanticsMatcher.keyIsDefined(SemanticsProperties.VerticalScrollAxisRange)
+        ).onFirst()
         repeat(vezes) { i ->
             lista.performScrollToIndex(i + 1)
             tela("${nome}_${i + 1}")

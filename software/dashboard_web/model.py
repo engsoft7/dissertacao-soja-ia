@@ -215,6 +215,9 @@ class Estimador:
 
 
 # ---------------------------------------------- qualidade do dado oficial
+REAMOSTRAGENS_SAFRAS = 2000
+
+
 def sensibilidade_climatica(df: pd.DataFrame, variavel: str = "precip_total") -> dict:
     """Associação entre um preditor climático e a produtividade observada.
 
@@ -222,17 +225,34 @@ def sensibilidade_climatica(df: pd.DataFrame, variavel: str = "precip_total") ->
     É calculado da base, e não fixado em código, porque a base se atualiza
     mensalmente e um valor digitado envelheceria sem avisar.
     """
-    from scipy import stats
-
     x, y = df[variavel].values, df[ALVO].values
-    r, p = stats.pearsonr(x, y)
+    r = float(np.corrcoef(x, y)[0, 1])
+    # O p de Pearson trata cada registro como independente, e os municípios de
+    # uma mesma safra não são: o clima de um ano é parecido no estado inteiro.
+    # Com a safra 2025 na base, ele caiu para 0,020 e passou a contradizer o
+    # "não é distinguível de zero" do painel. O teste reamostra safras
+    # inteiras, como o IC95 da Tabela 6, com semente fixa para o número não
+    # mudar de uma execução para outra.
+    anos = df["ano"].values
+    unicos = np.unique(anos)
+    por_ano = {a: np.where(anos == a)[0] for a in unicos}
+    rng = np.random.default_rng(42)
+    amostras = []
+    for _ in range(REAMOSTRAGENS_SAFRAS):
+        i = np.concatenate([por_ano[a] for a in rng.choice(unicos, len(unicos))])
+        amostras.append(np.corrcoef(x[i], y[i])[0, 1])
+    amostras = np.array(amostras)
+    ic95 = np.percentile(amostras, [2.5, 97.5])
+    p = min(1.0, 2 * min(float((amostras <= 0).mean()), float((amostras >= 0).mean())))
     tercos = pd.qcut(df[variavel], 3, labels=["menor", "medio", "maior"])
     desvio = (df[ALVO].values - _baseline(df, df["municipio"], df["ano"]))
     por_terco = pd.Series(desvio).groupby(tercos.values, observed=True).mean()
     return {
         "variavel": variavel,
-        "r": float(r),
-        "p": float(p),
+        "r": r,
+        "p": p,
+        "ic95": [float(ic95[0]), float(ic95[1])],
+        "teste": "reamostragem de safras",
         "n": int(len(df)),
         "amplitude_kg_ha": float(por_terco.max() - por_terco.min()),
     }

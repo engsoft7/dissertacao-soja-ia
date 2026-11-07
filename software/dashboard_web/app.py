@@ -1394,10 +1394,14 @@ if tela_atual == "📍 Inteligência Territorial":
                       delta=f"{qtd(dif, '+')} {unidade}")
             sens = M.sensibilidade_climatica(df)
             virg = lambda v, c: f"{v:.{c}f}".replace(".", ",")
+            # A frase segue o teste, e não fica escrita: com a safra 2025 na base,
+            # o p antigo caiu para 0,020 e contradizia o "não é distinguível de zero".
+            claro = sens["ic95"][0] > 0 or sens["ic95"][1] < 0
             st.caption(
                 "**O que este número vale.** A associação entre chuva e "
-                "produtividade nesta base não é distinguível de zero "
-                f"(r = {virg(sens['r'], 3)}; p = {virg(sens['p'], 3)}; "
+                f"produtividade nesta base {'é fraca' if claro else 'não é distinguível de zero'} "
+                f"(r = {virg(sens['r'], 3)}; IC95 por reamostragem de safras de "
+                f"{virg(sens['ic95'][0], 3)} a {virg(sens['ic95'][1], 3)}; "
                 f"n = {sens['n']}), e a diferença entre o terço mais seco e o "
                 f"mais chuvoso é de {br(round(sens['amplitude_kg_ha']))} kg/ha — "
                 f"contra margem de erro do modelo de "

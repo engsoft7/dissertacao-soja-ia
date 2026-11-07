@@ -83,3 +83,24 @@ def test_textos_da_praca_em_reais():
     assert "(3.600 kg/ha, 60 sc/ha)" in t["nota_custo"]
     assert t["nota_preco"].startswith("R$ 103,90/sc")
     assert estados.ESTADOS["MT"].no == "em Mato Grosso" and estados.ESTADOS["MA"].do == "do Maranhão"
+
+
+def test_cenario_sai_do_que_a_base_mostra(cliente):
+    """Menos chuva não dá mais soja: o cenário é o efeito medido, e só o que tem IC95 sem o zero."""
+    def sim(municipio, uf, chuva, temp):
+        corpo = {"municipio": municipio, "precip_factor": chuva, "temp_offset": temp, "ano": 2027}
+        if uf:
+            corpo["uf"] = uf
+        return cliente.post("/api/simulacao", json=corpo).json()
+
+    seca = sim("Balsas", "MA", 0.8, 0.0)
+    chuvosa = sim("Balsas", "MA", 1.2, 0.0)
+    assert seca["associacao"]["chuva"]["vale"]
+    assert seca["delta_kg_ha"] < 0 < chuvosa["delta_kg_ha"]
+    # No Pará, nem chuva nem temperatura mostram efeito claro: o cenário não move.
+    pa = sim("Paragominas", None, 0.8, 1.0)
+    assert pa["delta_kg_ha"] == 0 and not pa["associacao"]["chuva"]["vale"]
+    # Fora da faixa observada, preso ao limite e marcado.
+    assert "precip_total" in sim("Balsas", "MA", 0.5, 0.0)["fora_da_faixa"]
+    assert sim("Balsas", "MA", 0.5, 0.0)["delta_kg_ha"] == pytest.approx(
+        seca["associacao"]["chuva"]["kg_ha"] * seca["associacao"]["chuva"]["faixa"][0])

@@ -419,6 +419,22 @@ depois da mudança), e o aplicativo do Pará pede e guarda o mesmo de sempre.
   plano, e respondem 503 nos primeiros segundos.
 - **Painel.** Seletor de estado na barra lateral. As quatro telas abertas no
   `streamlit.testing` em municípios dos três estados, sem exceção.
+- **Simulador de cenário climático, corrigido.** Ele pedia à rede um ano com a
+  chuva mudada e todo o resto no normal. Nos dados, um ano mais seco também é
+  mais quente, mais ensolarado e menos verde (no Maranhão, a anomalia de chuva
+  tem correlação de −0,67 com a de radiação), e a rede respondia a essa
+  combinação, que quase não existe, ao contrário da base: 20% menos chuva dava
+  +0,9 sc/ha em Balsas. Os controles também iam a ±50% de chuva e +3 °C, muito
+  além do que um município varia (de 5% a 95% das safras, cerca de ±20% a 30%
+  de chuva e de −0,7 a +1,2 °C). O cenário passa a sair do efeito medido: o
+  quanto a produtividade fugiu da referência por 1% de chuva e por 1 °C acima
+  do normal do município, as duas juntas, só com o coeficiente de IC95 sem o
+  zero (reamostragem de safras), preso à faixa observada no estado. No Pará e
+  em Mato Grosso, nenhum dos dois passa (em Mato Grosso, a temperatura dá
+  −163 kg/ha por °C, com IC95 de −250 a +114), e o cenário não move a projeção;
+  no Maranhão, a chuva passa (+4,5 kg/ha por 1%, IC95 de +0,5 a +8,0), e 20%
+  menos chuva tira 1,5 sc/ha. O simulador do Pará continua sem mover a
+  projeção, como antes; muda a faixa dos controles e o aviso fora dela.
 - **Aplicativo 2.8.0.** Pará, Mato Grosso ou Maranhão na janela de escolha do
   município. Com a API anterior, que ignora `?uf=` e responderia pelo Pará, o
   aplicativo diz que o estado ainda não está no servidor.

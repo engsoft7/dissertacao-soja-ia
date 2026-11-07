@@ -795,26 +795,17 @@ def simular_cenario(req: SimulacaoRequest):
         ce.estimador.scaler.transform(x_base.reshape(1, -1))
     )[0])
     est_base = base_val + corr_base
-    
-    # Modified climate scenario
-    clima_novo = clima.copy()
-    clima_novo["precip_total"] *= req.precip_factor
-    clima_novo["temp_mean"] += req.temp_offset
-    clima_novo["temp_max"] += req.temp_offset
-    clima_novo["balanco_hidrico"] = clima_novo["precip_total"] - clima_novo["etp_total"]
 
-    # A floresta aleatória não extrapola. Sem prender o cenário à faixa vista no
-    # treino, chuva zero devolvia colheita acima da média e +3 °C dava o mesmo
-    # número que +6 °C. O cenário é limitado, e a interface avisa quando isso
-    # acontece — o modelo só tem o que dizer onde ele viu dado.
-    clima_novo, fora_da_faixa = ce.estimador.limitar_clima(clima_novo)
+    # O cenário sai do que a base mostra (model.associacao_climatica): quanto
+    # a produtividade fugiu da referência por 1% de chuva e por 1 °C acima do
+    # normal do município, só com o coeficiente de IC95 sem o zero, e preso à
+    # faixa de anomalias observada no estado. Antes a rede respondia à chuva
+    # mudada com todo o resto no normal, uma combinação que quase não existe nos
+    # dados, e no Maranhão dava mais soja com menos chuva.
+    efeito = ce.estimador.cenario(req.precip_factor, req.temp_offset)
+    fora_da_faixa = efeito["fora_da_faixa"]
+    est_sim = est_base + efeito["delta_kg_ha"]
 
-    x_sim = np.array([clima_novo[f] for f in M.FEATURES], dtype=float)
-    corr_sim = float(ce.estimador.modelo.predict(
-        ce.estimador.scaler.transform(x_sim.reshape(1, -1))
-    )[0])
-    est_sim = base_val + corr_sim
-    
     return {
         "municipio": req.municipio,
         "ano": ano_alvo,
@@ -827,4 +818,7 @@ def simular_cenario(req: SimulacaoRequest):
         # uma variação de dezenas de quilos como se fosse resposta agronômica.
         "margem_kg_ha": ce.estimador.rmse,
         "sensibilidade": _sensibilidade_clima(ce.estado.uf),
+        # O que o cenário usou: o efeito por 1% de chuva e por 1 °C, com o IC95,
+        # se vale (IC95 sem o zero) e a faixa de anomalias observada no estado.
+        "associacao": ce.estimador.associacao,
     }

@@ -1391,6 +1391,14 @@ if tela_atual == "📍 Inteligência Territorial":
         # tendência. É o achado da dissertação aparecendo no produto — vale
         # mais dito do que descoberto por quem for ler o código.
         contrib = r['correcao_climatica_kg_ha']
+        # No Pará, o achado da dissertação; nos outros estados, a repetição medida
+        # na base deles, onde o clima e a vegetação explicam parte do resíduo.
+        _frase_residuo = (
+            "Sobre esta base, em que 40,1% dos pares de safras sucessivas repetem o valor da "
+            "anterior, esse resíduo é quase todo ruído — daí a correção pequena."
+            if UF == "PA" else
+            f"Nesta base, {dec(M.taxa_repeticao_estadual(df))}% dos pares de safras sucessivas "
+            "repetem o valor da anterior, e o clima e a vegetação explicam parte do resíduo.")
         # Vírgula decimal, como o resto do painel; e o sinal colado no número.
         contrib_txt = f"{'+' if contrib >= 0 else '−'}{abs(contrib):.1f}".replace('.', ',')
         st.markdown(f"""
@@ -1402,10 +1410,7 @@ if tela_atual == "📍 Inteligência Territorial":
                 ± {qtd(metricas['rmse'])} {unidade}</div>
             <div class="hero-proc" title="O modelo é treinado para prever o
                 resíduo entre a produtividade observada e o histórico do
-                município somado à tendência tecnológica. Sobre esta base, em
-                que 40,1% dos pares de safras sucessivas repetem o valor da
-                anterior, esse resíduo
-                é quase todo ruído — daí a correção pequena.">
+                município somado à tendência tecnológica. {_frase_residuo}">
                 O modelo de IA foi aplicado e acrescentou
                 <b>{contrib_txt} kg/ha</b> ao histórico do
                 município. O que sustenta esta projeção é o histórico somado à
@@ -1415,46 +1420,45 @@ if tela_atual == "📍 Inteligência Territorial":
         """, unsafe_allow_html=True)
 
         with st.expander("Simular outro cenário climático"):
-            # Os limites saem da faixa observada na base. Fora dela a floresta
-            # aleatória não extrapola: devolve o valor da folha extrema, e a
-            # simulação deixa de significar alguma coisa — com chuva zero a
-            # projeção chegava a subir.
-            hist = df[df["municipio"] == municipio]
-            base_clima = hist if not hist.empty else df
-            fp = estimador.faixas.get("precip_total")
-            fe = estimador.faixas.get("etp_total")
-            p_min, p_max = (int(fp[0]), int(fp[1])) if fp else (0, 3000)
-            e_min, e_max = (int(fe[0]), int(fe[1])) if fe else (500, 2500)
+            # O mesmo cenário da API e do aplicativo (model.associacao_climatica):
+            # o efeito medido de chuva e temperatura acima ou abaixo do normal do
+            # município, só com o que tem IC95 sem o zero, preso à faixa de
+            # anomalias observada no estado. Antes os controles iam de toda a
+            # faixa de chuva do estado e pediam à rede um ano com a chuva mudada
+            # e o resto no normal, que quase não existe nos dados.
+            assoc = estimador.associacao
+            fc, ft = assoc["chuva"]["faixa"], assoc["temperatura"]["faixa"]
+            sinal = lambda v, c: f"{v:+.{c}f}".replace(".", ",")
             st.caption(
-                f"Os limites são a faixa observada nos {len(df)} registros da "
-                f"base: {br(p_min)} a {br(p_max)} mm de chuva. O modelo não tem "
-                "o que dizer fora dela.")
-            precip = st.slider("Precipitação total da safra (mm)", p_min, p_max,
-                               int(base_clima["precip_total"].mean()), step=25)
-            etp = st.slider("Evapotranspiração potencial (mm)", e_min, e_max,
-                            int(base_clima["etp_total"].mean()), step=25)
+                f"Os limites são a faixa observada nos {len(df)} registros da base: chuva de "
+                f"{sinal(fc[0], 0)}% a {sinal(fc[1], 0)}% e temperatura de {sinal(ft[0], 1)} a "
+                f"{sinal(ft[1], 1)} °C em relação ao normal de cada município. A base não tem o que "
+                "dizer fora dela.")
+            chuva_pct = st.slider("Chuva da safra (% em relação ao normal do município)",
+                                  int(round(fc[0])), int(round(fc[1])), 0, step=5)
+            temp_c = st.slider("Temperatura média (°C em relação ao normal)",
+                               float(round(ft[0], 1)), float(round(ft[1], 1)), 0.0, step=0.1)
 
             st.divider()
-            clima = base_clima[M.FEATURES].mean().to_dict()
-            clima["precip_total"] = precip
-            clima["etp_total"] = etp
-            clima["balanco_hidrico"] = clima["precip_total"] - clima["etp_total"]
-            cenario = ajustar_r(estimador.estimar(municipio, int(ano_alvo), clima=clima))
-            dif = cenario["estimativa_kg_ha"] - r["estimativa_kg_ha"]
+            efeito = estimador.cenario(1 + chuva_pct / 100, temp_c)
+            dif = efeito["delta_kg_ha"]
             st.metric("Projeção ajustada",
-                      f"{qtd(cenario['estimativa_kg_ha'])} {unidade}",
+                      f"{qtd(r['estimativa_kg_ha'] + dif)} {unidade}",
                       delta=f"{qtd(dif, '+')} {unidade}")
-            sens = M.sensibilidade_climatica(df)
-            virg = lambda v, c: f"{v:.{c}f}".replace(".", ",")
+
+            def _frase(nome, rotulo, por):
+                a = assoc[nome]
+                ic = f"IC95 de {sinal(a['ic95'][0], 1)} a {sinal(a['ic95'][1], 1)}"
+                if a["vale"]:
+                    return f"{rotulo}: {sinal(a['kg_ha'], 1)} kg/ha {por} ({ic})"
+                return f"{rotulo}: sem efeito claro ({ic}), não entra no cenário"
             st.caption(
-                "**O que este número vale.** A associação entre chuva e "
-                "produtividade nesta base não é distinguível de zero "
-                f"(r = {virg(sens['r'], 3)}; p = {virg(sens['p'], 3)}; "
-                f"n = {sens['n']}), e a diferença entre o terço mais seco e o "
-                f"mais chuvoso é de {br(round(sens['amplitude_kg_ha']))} kg/ha — "
-                f"contra margem de erro do modelo de "
-                f"{br(round(estimador.rmse or 0))} kg/ha. A variação acima está "
-                "dentro do ruído, e é assim que deve ser lida.")
+                f"**O que este número vale.** É o efeito medido na base {ESTADO.do}, em relação ao "
+                "normal de cada município, com o intervalo de confiança "
+                "por reamostragem de safras. " +
+                _frase("chuva", "Chuva", "por 1% acima do normal") + "; " +
+                _frase("temperatura", "temperatura", "por 1 °C acima do normal") +
+                f". A margem de erro do modelo é de {br(round(estimador.rmse or 0))} kg/ha.")
 
     with dir_:
         mapa, nome_para_interno, faixa_rend = construir_mapa(

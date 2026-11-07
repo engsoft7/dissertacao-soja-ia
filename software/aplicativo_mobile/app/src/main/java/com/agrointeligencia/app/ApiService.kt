@@ -173,8 +173,22 @@ data class SimulacaoResponse(
     // Opcionais para a versão antiga da API continuar sendo lida.
     val fora_da_faixa: List<String>? = null,
     val margem_kg_ha: Double? = null,
-    val sensibilidade: Sensibilidade? = null
+    val sensibilidade: Sensibilidade? = null,
+    // O efeito medido que o cenário usou (model.associacao_climatica); nulo com a API antiga.
+    val associacao: AssociacaoClimatica? = null
 )
+
+/** Quanto a produtividade fugiu da referência por 1% de chuva ou 1 °C acima do normal do município. */
+data class EfeitoClimatico(
+    val kg_ha: Double,
+    val ic95: List<Double>? = null,
+    /** IC95 sem o zero: só então o efeito entra no cenário. */
+    val vale: Boolean = false,
+    /** Anomalias observadas no estado, de 5% a 95%: % de chuva ou °C. */
+    val faixa: List<Double>? = null
+)
+
+data class AssociacaoClimatica(val chuva: EfeitoClimatico? = null, val temperatura: EfeitoClimatico? = null)
 
 data class PingResponse(val status: String, val model_loaded: Boolean)
 

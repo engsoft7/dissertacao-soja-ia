@@ -129,3 +129,6 @@ https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-produ
 # V Simpósio Internacional do NDAE: submissão, inscrição e taxa (07/11/2026)
 https://ppca.propesp.ufpa.br/index.php/br/programa/noticias/todas/675-v-simposio-internacional-do-ndae-submissoes-de-artigos-abertas
 navegador https://ppca.propesp.ufpa.br/index.php/br/programa/noticias/todas/675-v-simposio-internacional-do-ndae-submissoes-de-artigos-abertas
+# Link de submissão do V Simpósio do NDAE e a página do evento (taxa de inscrição)
+https://tinyurl.com/VSimposioNDAE2026
+navegador https://tinyurl.com/VSimposioNDAE2026

@@ -387,3 +387,41 @@ Play App Signing, em que a chave do workflow é a de envio e pode ser trocada.
   texto passa a dizer quanto ela erra. **Próximo passo:** decompor a
   discordância por critério (vento, umidade, temperatura, chuva) e testar se
   corrigir o viés do vento pela estação mais próxima aproxima as duas.
+
+## 10. Produto em Mato Grosso e no Maranhão
+
+A seção 3 mostrou que, em Mato Grosso e no Maranhão, o clima e a vegetação
+medidos por satélite explicam a produtividade além da média do município. O
+produto passa a atender os dois estados, na branch, sem publicar antes da
+defesa. O Pará continua como está: as rotas da API sem `uf` dão as mesmas
+respostas de antes (conferidas uma a uma nas 80 rotas do Pará, antes e
+depois da mudança), e o aplicativo do Pará pede e guarda o mesmo de sempre.
+
+- **Base** (`software/automacao_github/monta_base_estados.py`, rodado no
+  Actions por `monta-estados.yml` e mantido pela atualização mensal). A
+  coleta da seção 3, no formato da base do Pará, com a PAM pelo SIDRA, as
+  sedes do mesmo conjunto aberto do Pará e o contorno pela malha do IBGE.
+  Ficam em `pesquisa/dados/estados/`. RESULTADO_BASE
+- **Modelo.** O mesmo do Pará (referência mais a correção do MLP), treinado
+  na base de cada estado. Na validação temporal do produto, RESULTADO_MODELO
+- **Preço e custo.** Os da CONAB no próprio estado, no levantamento em uso
+  (março de 2026): em Mato Grosso, Sorriso (R$ 83,66/sc, R$ 5.019,60/ha) ou
+  Primavera do Leste (R$ 103,63/sc), a mais perto da sede do município; no
+  Maranhão, Balsas (R$ 105,56/sc, R$ 5.489,12/ha). Diferente de Pedro Afonso,
+  essas praças não têm o custo aberto por item na extração, e o resultado vai
+  pelos dois rateios. O preço do dia é o das praças da Agrolink no estado,
+  quando houver (RESULTADO_PRACAS); a estimativa pela base mensal fica só no
+  Pará.
+- **API** (`software/api_backend/estados.py`). As rotas aceitam `?uf=MT` ou
+  `?uf=MA`; `/api/estados` lista os estados e `/api/municipios?com_sedes=true`
+  traz as sedes. Mato Grosso e Maranhão treinam depois do Pará, em segundo
+  plano, e respondem 503 nos primeiros segundos.
+- **Painel.** Seletor de estado na barra lateral. As quatro telas abertas no
+  `streamlit.testing` em municípios dos três estados, sem exceção.
+- **Aplicativo 2.8.0.** Pará, Mato Grosso ou Maranhão na janela de escolha do
+  município. Com a API anterior, que ignora `?uf=` e responderia pelo Pará, o
+  aplicativo diz que o estado ainda não está no servidor.
+- **Falta.** Publicar (API, painel e aplicativo) depois da defesa; coletar as
+  variáveis de satélite das safras novas dos dois estados, que a coleta
+  mensal faz só para o Pará; e conferir com quem planta lá se o custo da praça
+  mais perto representa o município.

@@ -158,8 +158,12 @@ pesquisa/dados/
   rios_para.json                          principais rios (contexto do mapa)
   eventos_enso.json                       períodos históricos de El Niño/La Niña
   metricas_validacao.json                 métricas pré-calculadas para o painel
+  estados/                                Mato Grosso e Maranhão no produto: base, série
+                                          oficial, sedes e contorno de cada estado
+                                          (monta_base_estados.py; ainda não publicado)
 software/api_backend/
   api.py                                  API REST (FastAPI) para clientes
+  estados.py                              Pará, Mato Grosso e Maranhão; ?uf= nas rotas
   financas.py                             cálculos financeiros (VTN, custos)
 software/dashboard_web/
   app.py                                  interface Streamlit (SPA)

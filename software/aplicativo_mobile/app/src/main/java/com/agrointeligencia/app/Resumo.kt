@@ -159,7 +159,7 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
 }
 
 @Composable
-fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int? = null) {
+fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int? = null, uf: String? = null) {
     val isDark = isSystemInDarkTheme()
     // Tudo volta ao padrão quando o município muda: sem a chave, o cartão
     // seguia com a estimativa e o cenário do município anterior.
@@ -178,7 +178,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
         coroutineScope.launch {
             isSimulating = true
             try {
-                val req = SimulacaoRequest(municipio, precipFactor / 100.0, tempOffset.toDouble(), ano)
+                val req = SimulacaoRequest(municipio, precipFactor / 100.0, tempOffset.toDouble(), ano, uf)
                 val resp = RetrofitClient.getInstance().simularCenario(req)
                 simulado = resp.estimativa_kg_ha
                 delta = resp.delta_kg_ha
@@ -266,10 +266,12 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
             resposta?.sensibilidade?.let { sens ->
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    // Os números do teste (r, p, n) estão na dissertação; aqui, a
-                    // conclusão dele, dita conforme o resultado e não fixa.
-                    text = (if (sens.p >= 0.05) "Nesta base, a chuva não mostrou efeito claro na produtividade."
-                            else "Nesta base, a chuva tem efeito pequeno na produtividade.") +
+                    // Com a API nova, o efeito que o cenário de fato usou
+                    // (fraseDaAssociacao); com a antiga, a conclusão do teste da
+                    // chuva, cujos números (r, p, n) estão na dissertação.
+                    text = (resposta?.associacao?.let { fraseDaAssociacao(it) }
+                            ?: if (sens.p >= 0.05) "Nesta base, a chuva não mostrou efeito claro na produtividade."
+                               else "Nesta base, a chuva tem efeito pequeno na produtividade.") +
                            (resposta?.margem_kg_ha?.let {
                                if (kotlin.math.abs(delta) <= it) " A variação acima cabe na margem de erro do modelo (± ${milhar(it)} kg/ha)."
                                else " A variação acima passa da margem de erro do modelo (± ${milhar(it)} kg/ha)."
@@ -288,5 +290,33 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
                 )
             }
         }
+    }
+}
+
+/**
+ * O efeito que o cenário usou, em palavras: só o que a base mostra com IC95
+ * sem o zero (model.associacao_climatica, na API). Em Mato Grosso, por
+ * exemplo, nem a chuva nem a temperatura passam nesse teste, e o cenário não
+ * move a projeção; no Maranhão, a chuva passa.
+ */
+fun fraseDaAssociacao(a: AssociacaoClimatica): String {
+    val claros = mutableListOf<String>()
+    val semEfeito = mutableListOf<String>()
+    a.chuva?.let { c ->
+        if (c.vale) claros += "cada 10% ${if (c.kg_ha > 0) "a menos" else "a mais"} de chuva tirou, em média, " +
+                              "${milhar(kotlin.math.abs(c.kg_ha) * 10)} kg/ha"
+        else semEfeito += "a chuva"
+    }
+    a.temperatura?.let { t ->
+        if (t.vale) claros += "cada 1 °C acima do normal ${if (t.kg_ha < 0) "tirou" else "somou"}, em média, " +
+                              "${milhar(kotlin.math.abs(t.kg_ha))} kg/ha"
+        else semEfeito += "a temperatura"
+    }
+    return when {
+        claros.isEmpty() -> "Nesta base, nem a chuva nem a temperatura mostraram efeito claro na produtividade: " +
+                            "o cenário não muda a projeção."
+        semEfeito.isEmpty() -> "Nesta base, " + claros.joinToString(" e ") + "."
+        else -> "Nesta base, " + claros.joinToString(" e ") + "; " + semEfeito.joinToString(" e ") +
+                " não mostrou efeito claro."
     }
 }

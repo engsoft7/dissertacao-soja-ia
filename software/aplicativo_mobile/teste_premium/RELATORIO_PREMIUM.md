@@ -126,7 +126,16 @@ contraste, tamanho de alvo, rótulos, texto cortado) e a árvore de
 acessibilidade de cada captura do `teste_aparelho.py` (alvos menores que
 48 dp e botões sem rótulo).
 
-ATF_PENDENTE
+As verificações do Accessibility Test Framework (contraste, tamanho de alvo,
+rótulos e texto cortado) não acusaram nada nas telas que o percurso cobriu em
+Android 8 e 14: boas-vindas, lista de municípios e Resumo, rolado do alto ao
+meio. O percurso parou ao rolar adiante, por um defeito do próprio teste: ele
+achava a lista pelo cabeçalho, que deixa de existir quando sai da tela, e o
+passo seguinte não a encontrava. O teste já está corrigido para a próxima
+rodada; as demais telas ainda não passaram pelo ATF. A árvore do uiautomator,
+em todas as telas, apontou só dois alvos abaixo de 48 dp no Sobre (links do
+texto, com 42 a 46 dp de altura) e o WebView do mapa sem rótulo próprio, que
+o cartão em volta já descreve.
 
 Pelas capturas com a fonte do sistema em 200%, três defeitos, todos já na
 2.7.3 e corrigidos na 2.7.4:
@@ -135,13 +144,37 @@ Pelas capturas com a fonte do sistema em 200%, três defeitos, todos já na
 |---|---|---|
 | Barra de abas | "Resu/mo", "Histór/ico", "Merca/do": o rótulo quebrava no meio da palavra | uma linha, fonte crescendo até 1,15 vez; o ícone segue ao lado |
 | Resumo | "Safra 2025, IBGE" encostava em "Em relação a 2025" ("IBGEEm") | cada coluna com metade da largura |
-| Mercado | o nome da praça ficava com uma letra de largura ("B-a-r-c-a-r-e-n-a") | com fonte grande, a data desce para baixo do preço |
+| Mercado | o nome da praça ficava com uma letra de largura ("B-a-r-c-a-r-e-n-a") | com fonte grande, a data desce para baixo do preço; resta "Paragominas", longo demais para a coluna, quebrar em "Parago/minas" |
 
 E um de coerência: o simulador climático do Resumo dizia "Projeção com o
 cenário, safra 2026" e outro número, logo abaixo de "Resumo Agronômico (safra
 2027)". O app manda a safra em curso, e a API simula nela.
 
-## 7. O que este relatório não cobre
+Nos emuladores Android 14 do Actions, o Pixel Launcher travou em duas rodadas
+(113 avisos de "isn't responding" numa delas) e cobriu a tela: as verificações
+dessas rodadas valem como falha do ambiente, não do app, e o script passou a
+fechar o aviso sozinho. As rodadas sem o travamento passaram em tudo.
+
+## 7. Painel web (Streamlit)
+
+- **Mesmos números do aplicativo.** A estimativa da safra 2027 do painel e a
+  da API, que o aplicativo mostra, são iguais nos 38 municípios: diferença de
+  0,0 kg/ha, porque os dois treinam o mesmo modelo na mesma base. Desde o PR
+  #183, o painel também abre na safra em curso, usa o preço do dia da praça
+  mais perto e mostra as safras do IBGE fora da base, como o aplicativo.
+- **Todas as telas em todos os municípios.** As quatro telas (Inteligência
+  Territorial, Análise Histórica, Viabilidade Financeira e Tempo na lavoura)
+  abertas nos 38 municípios com o `streamlit.testing` (152 aberturas): nenhuma
+  exceção, nenhuma mensagem de erro, todas na safra 2027. A rodada foi feita sem
+  acesso às cotações, ao Yahoo e à previsão do tempo, e o painel seguiu com as
+  reservas (preço da CONAB, avisos de fonte indisponível).
+- **No ar.** `confere-painel.yml` abre o painel num navegador e confere o mapa;
+  `mantem-painel-acordado.yml` o visita a cada 4 horas, abaixo das 12 horas sem
+  visita que fazem o Streamlit Community Cloud pôr o app para dormir.
+- **Falta**: o painel em largura de celular e as verificações automáticas de
+  acessibilidade no navegador.
+
+## 8. O que este relatório não cobre
 
 - **Aparelhos físicos.** Os testes rodam em emuladores x86_64. O relatório de
   pré-lançamento do Play Console roda o app em aparelhos reais quando um AAB

@@ -1,0 +1,292 @@
+{
+  "nota": "Percentual dos estudos que mencionam cada categoria, no título ou no resumo (03_codifica_estudos.py), entre os 53 incluídos e só entre os de escala regional.",
+  "estudos": {
+    "incluídos": 53,
+    "escala regional": 39,
+    "talhão, parcela ou planta": 14
+  },
+  "fora_da_escala_regional": {
+    "10.1371/journal.pone.0252402": {
+      "titulo": "Crop yield prediction integrating genotype and weather variables using deep learning",
+      "ano": 2021,
+      "escala": "ensaios de cultivares (Uniform Soybean Tests), genótipo e clima"
+    },
+    "10.3390/rs13132555": {
+      "titulo": "Using Hybrid Artificial Intelligence and Evolutionary Optimization Algorithms for Estimating Soybean Yield and Fresh Biomass Using Hyperspectral Vegetation Indices",
+      "ano": 2021,
+      "escala": "parcelas de melhoramento, reflectância hiperespectral"
+    },
+    "10.3389/fpls.2022.1096619": {
+      "titulo": "Recognition of soybean pods and yield prediction based on improved deep learning model",
+      "ano": 2023,
+      "escala": "planta: reconhecimento de vagens em imagens"
+    },
+    "10.1016/j.heliyon.2023.e17432": {
+      "titulo": "Comparison of PlanetScope, Sentinel-2, and landsat 8 data in soybean yield estimation within-field variability with random forest regression",
+      "ano": 2023,
+      "escala": "talhão: variabilidade dentro do talhão, colhedora"
+    },
+    "10.3390/rs14092256": {
+      "titulo": "Soya Yield Prediction on a Within-Field Scale Using Machine Learning Models Trained on Sentinel-2 and Soil Data",
+      "ano": 2022,
+      "escala": "talhão: variabilidade dentro do talhão, Sentinel-2 e solo"
+    },
+    "10.1002/agj2.21473": {
+      "titulo": "Artificial intelligence and satellite‐based remote sensing can be used to predict soybean (<i>Glycine max</i>) yield",
+      "ano": 2024,
+      "escala": "talhão: três talhões em dois anos, monitor de colheita"
+    },
+    "10.1016/j.atech.2024.100442": {
+      "titulo": "Soybean yield prediction using machine learning algorithms under a cover crop management system",
+      "ano": 2024,
+      "escala": "parcelas de experimento de manejo com plantas de cobertura"
+    },
+    "10.4025/actasciagron.v40i1.35250": {
+      "titulo": "&lt;b&gt;Estimating soybean yields with artificial neural networks",
+      "ano": 2018,
+      "escala": "parcelas de experimento em Anápolis (GO), características agronômicas"
+    },
+    "10.1016/j.agrformet.2024.110022": {
+      "titulo": "Beyond assimilation of leaf area index: Leveraging additional spectral information using machine learning for site-specific soybean yield prediction",
+      "ano": 2024,
+      "escala": "talhão: previsão sítio-específica"
+    },
+    "10.1016/j.eja.2024.127498": {
+      "titulo": "Predicting spatial and temporal variability in soybean yield using deep learning and open source data",
+      "ano": 2025,
+      "escala": "talhão: 310 talhões no Uruguai, colhedora"
+    },
+    "10.1590/1413-7054202347002423": {
+      "titulo": "Comparative analysis of orbital sensors in soybean yield estimation by the random forest algorithm",
+      "ano": 2023,
+      "escala": "talhão: sensores orbitais contra a produtividade da parcela"
+    },
+    "10.1109/igarss47720.2021.9554856": {
+      "titulo": "Crop Yield Forecast at Field Scale Using Deep Neural Network Algorithm",
+      "ano": 2021,
+      "escala": "talhão: previsão em escala de talhão"
+    },
+    "10.18011/bioeng.2024.v18.1211": {
+      "titulo": "Artificial intelligence applied to estimate soybean yield",
+      "ano": 2024,
+      "escala": "planta: parâmetros morfológicos e nutricionais das plantas"
+    },
+    "10.4025/actasciagron.v46i1.67040": {
+      "titulo": "Soybean crop yield estimation using artificial intelligence techniques",
+      "ano": 2024,
+      "escala": "planta: imagens da planta e das vagens"
+    }
+  },
+  "percentuais": {
+    "Recorrentes (LSTM/RNN/GRU)": {
+      "53 incluídos": {
+        "estudos": 22,
+        "%": 42
+      },
+      "escala regional": {
+        "estudos": 19,
+        "%": 49
+      }
+    },
+    "LSTM (menção estrita)": {
+      "53 incluídos": {
+        "estudos": 17,
+        "%": 32
+      },
+      "escala regional": {
+        "estudos": 14,
+        "%": 36
+      }
+    },
+    "CNN": {
+      "53 incluídos": {
+        "estudos": 20,
+        "%": 38
+      },
+      "escala regional": {
+        "estudos": 19,
+        "%": 49
+      }
+    },
+    "Random Forest": {
+      "53 incluídos": {
+        "estudos": 18,
+        "%": 34
+      },
+      "escala regional": {
+        "estudos": 13,
+        "%": 33
+      }
+    },
+    "XGBoost": {
+      "53 incluídos": {
+        "estudos": 9,
+        "%": 17
+      },
+      "escala regional": {
+        "estudos": 8,
+        "%": 21
+      }
+    },
+    "SVR/SVM": {
+      "53 incluídos": {
+        "estudos": 10,
+        "%": 19
+      },
+      "escala regional": {
+        "estudos": 7,
+        "%": 18
+      }
+    },
+    "Rede neural rasa/MLP": {
+      "53 incluídos": {
+        "estudos": 10,
+        "%": 19
+      },
+      "escala regional": {
+        "estudos": 8,
+        "%": 21
+      }
+    },
+    "Transformer": {
+      "53 incluídos": {
+        "estudos": 9,
+        "%": 17
+      },
+      "escala regional": {
+        "estudos": 7,
+        "%": 18
+      }
+    },
+    "Regressão linear": {
+      "53 incluídos": {
+        "estudos": 9,
+        "%": 17
+      },
+      "escala regional": {
+        "estudos": 5,
+        "%": 13
+      }
+    },
+    "Climáticas": {
+      "53 incluídos": {
+        "estudos": 23,
+        "%": 43
+      },
+      "escala regional": {
+        "estudos": 20,
+        "%": 51
+      }
+    },
+    "Solo": {
+      "53 incluídos": {
+        "estudos": 12,
+        "%": 23
+      },
+      "escala regional": {
+        "estudos": 11,
+        "%": 28
+      }
+    },
+    "Índices espectrais": {
+      "53 incluídos": {
+        "estudos": 16,
+        "%": 30
+      },
+      "escala regional": {
+        "estudos": 11,
+        "%": 28
+      }
+    },
+    "Manejo": {
+      "53 incluídos": {
+        "estudos": 17,
+        "%": 32
+      },
+      "escala regional": {
+        "estudos": 13,
+        "%": 33
+      }
+    },
+    "MODIS": {
+      "53 incluídos": {
+        "estudos": 11,
+        "%": 21
+      },
+      "escala regional": {
+        "estudos": 10,
+        "%": 26
+      }
+    },
+    "Sentinel": {
+      "53 incluídos": {
+        "estudos": 11,
+        "%": 21
+      },
+      "escala regional": {
+        "estudos": 6,
+        "%": 15
+      }
+    },
+    "Landsat": {
+      "53 incluídos": {
+        "estudos": 3,
+        "%": 6
+      },
+      "escala regional": {
+        "estudos": 2,
+        "%": 5
+      }
+    },
+    "Google Earth Engine": {
+      "53 incluídos": {
+        "estudos": 5,
+        "%": 9
+      },
+      "escala regional": {
+        "estudos": 5,
+        "%": 13
+      }
+    },
+    "RMSE": {
+      "53 incluídos": {
+        "estudos": 18,
+        "%": 34
+      },
+      "escala regional": {
+        "estudos": 15,
+        "%": 38
+      }
+    },
+    "R²": {
+      "53 incluídos": {
+        "estudos": 13,
+        "%": 25
+      },
+      "escala regional": {
+        "estudos": 10,
+        "%": 26
+      }
+    },
+    "MAE": {
+      "53 incluídos": {
+        "estudos": 10,
+        "%": 19
+      },
+      "escala regional": {
+        "estudos": 8,
+        "%": 21
+      }
+    },
+    "MAPE": {
+      "53 incluídos": {
+        "estudos": 3,
+        "%": 6
+      },
+      "escala regional": {
+        "estudos": 3,
+        "%": 8
+      }
+    }
+  }
+}

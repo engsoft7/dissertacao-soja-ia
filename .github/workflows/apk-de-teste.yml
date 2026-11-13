@@ -1,0 +1,80 @@
+# APK de teste do aplicativo, sem Release: compila o build de depuração desta
+# branch, assinado com a chave de depuração, e o publica na branch
+# apk-de-teste (sobrescrita a cada execução, como a capturas-de-tela), para
+# quem quiser instalar o que ainda não foi publicado.
+#
+# Não é o APK da loja: a chave é a de depuração, e por isso ele não instala por
+# cima da versão publicada (desinstale antes). A API é a publicada, a menos que
+# a execução manual informe outra.
+#
+# Disparo: aba Actions > "APK de teste" > Run workflow, ou um push a uma branch
+# de trabalho com "[apk]" na mensagem do commit.
+name: APK de teste
+
+on:
+  workflow_dispatch:
+    inputs:
+      api:
+        description: "Endereço da API (vazio: a publicada)"
+        required: false
+        default: ""
+  push:
+    branches-ignore: [main]
+    paths:
+      - "software/aplicativo_mobile/**"
+      - ".github/workflows/apk-de-teste.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-de-teste
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[apk]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Compila o build de depuração
+        working-directory: software/aplicativo_mobile
+        env:
+          API: ${{ inputs.api }}
+        run: ./gradlew --no-daemon assembleDebug ${API:+-PapiBaseUrl=$API}
+
+      - name: Publica na branch apk-de-teste
+        env:
+          GH_TOKEN: ${{ github.token }}
+          API: ${{ inputs.api }}
+        run: |
+          v=$(grep -oP 'versionName = "\K[^"]+' software/aplicativo_mobile/app/build.gradle.kts)
+          d="$RUNNER_TEMP/apk"; mkdir -p "$d"
+          cp software/aplicativo_mobile/app/build/outputs/apk/debug/app-debug.apk "$d/AgroInteligencia-$v-debug.apk"
+          ls -la "$d"
+          {
+            echo "# APK de teste do AgroInteligência $v"
+            echo
+            echo "Build de depuração de \`${GITHUB_REF_NAME}\` (\`${GITHUB_SHA::7}\`), $(date -u +%d/%m/%Y), apk-de-teste.yml."
+            echo "API: ${API:-a publicada (agrointeligencia-api.onrender.com)}."
+            echo
+            echo "Assinado com a chave de depuração: não instala por cima da versão da loja; desinstale-a antes."
+          } > "$d/README.md"
+          cd "$d"
+          git init -q -b apk-de-teste
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add . && git commit -q -m "APK de teste $v (${{ github.run_id }})"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" apk-de-teste
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk-de-teste
+          path: software/aplicativo_mobile/app/build/outputs/apk/debug/app-debug.apk

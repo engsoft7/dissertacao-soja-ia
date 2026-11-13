@@ -1,0 +1,59 @@
+# Monta a base do produto em Mato Grosso, Maranhão, Tocantins e Rondônia (monta_base_estados.py)
+# com o que o ambiente de desenvolvimento não alcança: a PAM pelo SIDRA, com a
+# safra mais nova, e o contorno de cada estado pela malha do IBGE. Lista também
+# as praças de soja que a Agrolink publica em cada estado (precos_para.py).
+#
+# Disparo: aba Actions > "Monta os outros estados" > Run workflow, ou um
+# push a uma branch de trabalho com "[estados]" na mensagem do commit. Grava em
+# pesquisa/dados/estados/ na própria branch; nunca na main, que recebe a base
+# pela atualização mensal (atualiza-dados.yml) depois do merge.
+name: Monta os outros estados
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [main]
+    paths:
+      - "software/automacao_github/monta_base_estados.py"
+      - ".github/workflows/monta-estados.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  monta:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[estados]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Monta as bases
+        run: |
+          pip install --quiet pandas requests
+          python software/automacao_github/monta_base_estados.py
+      - name: Praças da Agrolink em cada estado
+        working-directory: software/api_backend
+        run: |
+          python - <<'PY'
+          import precos_para
+          for uf, urls in precos_para.URLS_PRACAS_ESTADO.items():
+              for url in urls:
+                  print(uf, url, [(c["praca"], c["valor"], c["data"]) for c in precos_para._baixa_pracas(url, uf)])
+              print(uf, "juntas:", precos_para.pracas_do_estado(uf))
+          PY
+      - name: Grava na branch
+        if: github.ref_name != github.event.repository.default_branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pesquisa/dados/estados
+          if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
+          git commit -m "Base dos outros estados (SIDRA e malha do IBGE)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
+            sleep $((i * 5))
+          done
+          exit 1

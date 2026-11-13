@@ -50,10 +50,19 @@ data class ManifestoContador(
     val arquivos: Map<String, ArquivoModelo>? = null,
     /** A frase sobre de onde o modelo aprendeu e quanto erra, para a tela. */
     val nota: String? = null,
+    /** Se o número do contador pode entrar sem conferência (ModoAutomatico.kt). */
+    val modo_automatico: Boolean? = null,
+    val limites_automatico: LimitesAutomatico? = null,
 )
 
 /** O que ficou gravado do último modelo baixado. */
-internal data class ModeloBaixado(val versao: Int, val sha256: Map<String, String>, val nota: String?)
+internal data class ModeloBaixado(
+    val versao: Int,
+    val sha256: Map<String, String>,
+    val nota: String?,
+    val modo_automatico: Boolean? = null,
+    val limites: LimitesAutomatico? = null,
+)
 
 private val ARQUIVOS = listOf(MODELO_CONTAGEM.arquivo, MODELO_MARCAS.arquivo)
 
@@ -150,7 +159,8 @@ internal suspend fun atualizaContador(context: Context, versaoApp: Int = BuildCo
             tmp.writeBytes(bytes)
             if (!tmp.renameTo(File(dir, nome))) { tmp.delete(); return null }
         }
-        val registro = ModeloBaixado(manifesto.versao, novos.mapValues { sha256Hex(it.value) }, manifesto.nota)
+        val registro = ModeloBaixado(manifesto.versao, novos.mapValues { sha256Hex(it.value) }, manifesto.nota,
+                                     manifesto.modo_automatico, manifesto.limites_automatico)
         File(dir, "versao.json").writeText(Gson().toJson(registro))
         manifesto.versao
     } catch (_: Exception) {

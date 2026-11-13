@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Só na depuração: libera o tráfego sem criptografia para 10.0.2.2, o host
+     visto do emulador, onde o teste-premium.yml sobe a API desta branch. A
+     release continua só com HTTPS (o manifesto principal). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:networkSecurityConfig="@xml/rede_depuracao" />
+</manifest>

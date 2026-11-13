@@ -2,6 +2,8 @@ package com.agrointeligencia.app
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +32,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -101,12 +104,12 @@ fun municipioMaisProximo(
         .minByOrNull { it.distanciaKm }
 
 /** A frase que o app mostra depois de escolher pelo GPS. */
-fun fraseDoMaisProximo(p: MunicipioProximo, total: Int): String {
+fun fraseDoMaisProximo(p: MunicipioProximo, total: Int, estado: EstadoDoApp = ESTADOS_DO_APP[0]): String {
     val km = p.distanciaKm.roundToInt()
     return when {
         km < 1 -> "Município escolhido pela sua localização: ${p.nome}."
         p.distanciaKm <= DISTANCIA_PERTO_KM -> "Município escolhido pela sua localização: ${p.nome}, a $km km da sede."
-        else -> "O mais próximo de você é ${p.nome}, a $km km. O app cobre $total municípios produtores de soja do Pará."
+        else -> "O mais próximo de você é ${p.nome}, a $km km. O app cobre $total municípios produtores de soja ${estado.no}."
     }
 }
 
@@ -148,6 +151,7 @@ fun SeletorMunicipio(
     procurandoPosicao: Boolean,
     aoAbrirLista: () -> Unit,
     aoUsarPosicao: () -> Unit,
+    estado: EstadoDoApp = ESTADOS_DO_APP[0],
 ) {
     val forma = RoundedCornerShape(12.dp)
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -164,7 +168,9 @@ fun SeletorMunicipio(
             Icon(Icons.Filled.LocationCity, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
-                Text("Município", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                // Fora do Pará, o estado junto: o produtor vê de onde é a lista.
+                Text(if (estado.uf == "PA") "Município" else "Município · ${estado.nome}",
+                     fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(municipio ?: "Escolha o seu", fontSize = 17.sp, fontWeight = FontWeight.SemiBold,
                      color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
             }
@@ -237,6 +243,7 @@ fun ListaDeMunicipios(
     busca: String,
     aoBuscar: (String) -> Unit,
     aoEscolher: (String) -> Unit,
+    estado: EstadoDoApp = ESTADOS_DO_APP[0],
 ) {
     val filtrados = filtraMunicipios(municipios, busca)
     OutlinedTextField(
@@ -254,7 +261,7 @@ fun ListaDeMunicipios(
         modifier = Modifier.fillMaxWidth()
     )
     Text(
-        if (filtrados.isEmpty()) "Nenhum município com esse nome. O app cobre ${municipios.size} municípios produtores de soja do Pará."
+        if (filtrados.isEmpty()) "Nenhum município com esse nome. O app cobre ${municipios.size} municípios produtores de soja ${estado.no}."
         else "${filtrados.size} de ${municipios.size} municípios",
         fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
@@ -288,6 +295,9 @@ fun EscolhaMunicipioDialog(
     aoUsarPosicao: () -> Unit,
     aoEscolher: (String) -> Unit,
     aoFechar: () -> Unit,
+    estado: EstadoDoApp = ESTADOS_DO_APP[0],
+    aoEscolherEstado: ((String) -> Unit)? = null,
+    avisoDoEstado: String? = null,
 ) {
     var busca by rememberSaveable { mutableStateOf("") }
     AlertDialog(
@@ -296,6 +306,11 @@ fun EscolhaMunicipioDialog(
         title = { Text("Escolha o município") },
         text = {
             Column {
+                // O estado antes do município: os de ESTADOS_DO_APP (Estados.kt).
+                aoEscolherEstado?.let { escolher ->
+                    SeletorEstado(estado, escolher)
+                    Spacer(Modifier.size(12.dp))
+                }
                 FilledTonalButton(onClick = aoUsarPosicao, enabled = !procurandoPosicao,
                                   modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                     if (procurandoPosicao) {
@@ -310,13 +325,32 @@ fun EscolhaMunicipioDialog(
                 }
                 Spacer(Modifier.size(12.dp))
                 if (municipios.isEmpty()) {
-                    Text("A lista de municípios ainda não chegou do servidor. Confira a conexão; o GPS funciona assim mesmo.",
+                    Text(avisoDoEstado ?: "A lista de municípios ainda não chegou do servidor. Confira a conexão; " +
+                         "o GPS funciona assim mesmo.",
                          fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
-                    ListaDeMunicipios(municipios, atual, busca, { busca = it }, aoEscolher)
+                    ListaDeMunicipios(municipios, atual, busca, { busca = it }, aoEscolher, estado)
                 }
             }
         },
         confirmButton = { TextButton(onClick = aoFechar) { Text("Fechar") } }
     )
+}
+
+/** Os três estados em botões de escolha; o leitor de tela diz qual está marcado. */
+@Composable
+fun SeletorEstado(estado: EstadoDoApp, aoEscolher: (String) -> Unit) {
+    Text("Estado", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    // Rola de lado se não couber: os cinco não cabem na janela.
+    Row(horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = 4.dp).horizontalScroll(rememberScrollState())) {
+        ESTADOS_DO_APP.forEach { e ->
+            FilterChip(
+                selected = e.uf == estado.uf,
+                onClick = { aoEscolher(e.uf) },
+                label = { Text(e.nome, maxLines = 1) },
+                modifier = Modifier.heightIn(min = 48.dp),
+            )
+        }
+    }
 }

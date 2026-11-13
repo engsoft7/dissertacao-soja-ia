@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -236,6 +237,56 @@ class CapturasDeTelaTest {
 
     @Config(qualifiers = "w411dp-h1100dp-night-xxhdpi")
     @Test fun municipio_escuro() = captura("municipio", true) { telaMunicipio() }
+
+    // ── outros estados (Estados.kt) ───────────────────────────────────────────
+    // As mesmas telas com as respostas de um município de cada estado, gravadas
+    // por dados_das_capturas.py: o resumo, a viabilidade (em Tocantins com o
+    // custo aberto por item; nos outros, pelos dois rateios) e o cartão do
+    // modelo, que mostra o R² dele ao lado do da referência naquele estado.
+    @Composable
+    private fun telasDoEstado(uf: String, municipio: String) {
+        val p: PrevisaoResponse? = real("previsao_$uf")
+        val f: FinancaResponse? = real("financas_$uf")
+        val m: MunicipioResponse? = real("municipios_$uf")
+        if (p == null || f == null) {
+            Text("Sem as respostas de $uf: rode dados_das_capturas.py antes.")
+            return
+        }
+        val projecaoUf = projecaoDaSafra(p.historico) ?: p.historico.maxByOrNull { it.ano }!!
+        Text("$municipio (${estadoDoApp(uf).nome})", style = MaterialTheme.typography.titleMedium)
+        ResumoAgronomicoCard(projecaoUf, ultimoObservado(p.historico))
+        ResumoFinanceiroCard(projecaoUf, f, null, emptyList(), municipio, sedesDoEstado(uf, m?.sedes))
+        MetodologiaCard(f, p.validacao)
+    }
+
+    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Test fun estado_mt_claro() = captura("estado_mt", false) { telasDoEstado("MT", "Sorriso") }
+
+    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Test fun estado_ma_claro() = captura("estado_ma", false) { telasDoEstado("MA", "Balsas") }
+
+    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Test fun estado_to_claro() = captura("estado_to", false) { telasDoEstado("TO", "Porto Nacional") }
+
+    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Test fun estado_ro_claro() = captura("estado_ro", false) { telasDoEstado("RO", "Vilhena") }
+
+    // A escolha do estado na janela do município: os cinco estados e a lista do escolhido.
+    @Composable
+    private fun telaEstados() {
+        val m: MunicipioResponse? = real("municipios_MT")
+        val estado = estadoDoApp("MT")
+        SeletorEstado(estado) {}
+        Spacer(Modifier.height(12.dp))
+        ListaDeMunicipios(m?.municipios ?: listOf("Sinop", "Sorriso"), atual = "Sorriso", busca = "so",
+                          aoBuscar = {}, aoEscolher = {}, estado = estado)
+    }
+
+    @Config(qualifiers = "w411dp-h900dp-xxhdpi")
+    @Test fun municipio_estados_claro() = captura("municipio_estados", false) { telaEstados() }
+
+    @Config(qualifiers = "w411dp-h900dp-night-xxhdpi")
+    @Test fun municipio_estados_escuro() = captura("municipio_estados", true) { telaEstados() }
 
     // O ícone do launcher, montado pelo próprio Android a partir do
     // adaptive-icon: confere que as três camadas compilam e se encaixam.

@@ -7,7 +7,16 @@ import retrofit2.http.Path
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
-data class MunicipioResponse(val municipios: List<String>)
+data class MunicipioResponse(
+    val municipios: List<String>,
+    // Só com ?uf= (Estados.kt): a sigla confirma que o servidor atendeu o estado,
+    // e as sedes servem ao GPS, ao Tempo e à praça mais perto.
+    val uf: String? = null,
+    val sedes: List<SedeMunicipio>? = null,
+)
+
+/** A sede de um município de outro estado, como a API manda em /api/municipios?com_sedes=true. */
+data class SedeMunicipio(val nome: String, val cod_ibge7: Long, val latitude: Double, val longitude: Double)
 
 data class PrevisaoHistorico(
     val ano: Int,
@@ -38,7 +47,9 @@ data class PrevisaoResponse(
     // Nulo quando a API é mais antiga que o aplicativo, ou na previsão guardada
     // em cache por uma versão anterior: a tela diz que as métricas estão
     // indisponíveis em vez de exibir números de outra base.
-    val validacao: ValidacaoModelo? = null
+    val validacao: ValidacaoModelo? = null,
+    // Com ?uf=, a sigla do estado da resposta (Estados.kt).
+    val uf: String? = null
 )
 
 
@@ -104,7 +115,9 @@ data class FinancaResponse(
     // antes dos portos do Sul na busca; nulo quando a fonte não responde, e
     // nunca um valor de reserva.
     val preco_fisico: CotacaoFisica? = null,
-    val ano_referencia: Int
+    val ano_referencia: Int,
+    // Com ?uf=, a sigla do estado da resposta (Estados.kt).
+    val uf: String? = null
 )
 
 data class KpiEconomiaResponse(
@@ -139,7 +152,9 @@ data class SimulacaoRequest(
     val precip_factor: Double,
     val temp_offset: Double,
     // A safra do cenário: a mesma do Resumo (a API aceita as três projetadas).
-    val ano: Int? = null
+    val ano: Int? = null,
+    // Sem estado, o Pará (Estados.kt).
+    val uf: String? = null
 )
 
 data class Sensibilidade(
@@ -158,8 +173,22 @@ data class SimulacaoResponse(
     // Opcionais para a versão antiga da API continuar sendo lida.
     val fora_da_faixa: List<String>? = null,
     val margem_kg_ha: Double? = null,
-    val sensibilidade: Sensibilidade? = null
+    val sensibilidade: Sensibilidade? = null,
+    // O efeito medido que o cenário usou (model.associacao_climatica); nulo com a API antiga.
+    val associacao: AssociacaoClimatica? = null
 )
+
+/** Quanto a produtividade fugiu da referência por 1% de chuva ou 1 °C acima do normal do município. */
+data class EfeitoClimatico(
+    val kg_ha: Double,
+    val ic95: List<Double>? = null,
+    /** IC95 sem o zero: só então o efeito entra no cenário. */
+    val vale: Boolean = false,
+    /** Anomalias observadas no estado, de 5% a 95%: % de chuva ou °C. */
+    val faixa: List<Double>? = null
+)
+
+data class AssociacaoClimatica(val chuva: EfeitoClimatico? = null, val temperatura: EfeitoClimatico? = null)
 
 data class PingResponse(val status: String, val model_loaded: Boolean)
 
@@ -227,7 +256,10 @@ data class MercadoResponse(
     val para: EstimativaPara? = null,
     // Nulo ou vazio com a API antiga ou a fonte fora do ar: a tela fica com a estimativa.
     val pracas_para: List<PracaPara>? = null,
-    val pracas_fonte: String? = null
+    val pracas_fonte: String? = null,
+    // Com ?uf= de outro estado: a sigla e as praças dele (pracasDoEstado, em Estados.kt).
+    val uf: String? = null,
+    val pracas: List<PracaPara>? = null
 )
 
 /**
@@ -258,20 +290,33 @@ interface AgroApiService {
     @retrofit2.http.POST("api/simulacao")
     suspend fun simularCenario(@retrofit2.http.Body request: SimulacaoRequest): SimulacaoResponse
 
+    // ?uf= nulo fica fora da consulta: o Pará pede exatamente o que as versões antigas pediam.
     @GET("api/municipios")
-    suspend fun getMunicipios(): MunicipioResponse
+    suspend fun getMunicipios(
+        @retrofit2.http.Query("uf") uf: String? = null,
+        @retrofit2.http.Query("com_sedes") comSedes: Boolean? = null
+    ): MunicipioResponse
 
     @GET("api/previsao/{municipio}")
-    suspend fun getPrevisao(@Path("municipio") municipio: String): PrevisaoResponse
+    suspend fun getPrevisao(
+        @Path("municipio") municipio: String,
+        @retrofit2.http.Query("uf") uf: String? = null
+    ): PrevisaoResponse
 
     @GET("api/financas/{municipio}")
-    suspend fun getFinancas(@Path("municipio") municipio: String): FinancaResponse
+    suspend fun getFinancas(
+        @Path("municipio") municipio: String,
+        @retrofit2.http.Query("uf") uf: String? = null
+    ): FinancaResponse
 
     @GET("api/ping")
     suspend fun ping(): PingResponse
 
     @GET("api/mercado")
-    suspend fun getMercado(@retrofit2.http.Query("periodo") periodo: String): MercadoResponse
+    suspend fun getMercado(
+        @retrofit2.http.Query("periodo") periodo: String,
+        @retrofit2.http.Query("uf") uf: String? = null
+    ): MercadoResponse
 
     // Parâmetros nulos ficam fora da consulta: o GPS da fazenda vai sem
     // geocódigo, e a API decide pelo polígono do aviso.
@@ -288,7 +333,8 @@ interface AgroApiService {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "https://agrointeligencia-api.onrender.com/"
+    // Fixa na release; na depuração pode vir de -PapiBaseUrl (build.gradle.kts).
+    private val BASE_URL = BuildConfig.API_BASE_URL
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()

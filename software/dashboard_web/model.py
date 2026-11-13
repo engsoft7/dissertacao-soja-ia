@@ -32,7 +32,7 @@ from sklearn.preprocessing import StandardScaler
 
 # Sobe quando o painel passa a depender de algo novo deste módulo: o app.py
 # recarrega o módulo se a versão em memória for mais velha (Streamlit Cloud).
-VERSAO_DO_MODULO = 2
+VERSAO_DO_MODULO = 3  # 3: associacao_climatica e Estimador.cenario (estados)
 
 FEATURES = [
     "NDVI_mean", "NDVI_max", "EVI_mean", "EVI_max",
@@ -137,7 +137,14 @@ class Estimador:
         self.modelo = _regressor().fit(
             self.scaler.transform(df[FEATURES].values), residuo)
         self.faixas = {f: (float(df[f].min()), float(df[f].max())) for f in FEATURES}
+        self.associacao = associacao_climatica(df)
         return self
+
+    def cenario(self, fator_chuva: float, delta_temp: float) -> dict:
+        """Quanto um ano com a chuva multiplicada por [fator_chuva] e a
+        temperatura [delta_temp] °C acima do normal do município muda a
+        estimativa, pelo que a base mostra (associacao_climatica)."""
+        return efeito_do_cenario(self.associacao, fator_chuva, delta_temp)
 
     def validar(self, df: pd.DataFrame) -> dict:
         """Leave-one-year-out. É a única métrica que o painel reporta."""
@@ -216,6 +223,65 @@ class Estimador:
             "intervalo": (estimativa - margem, estimativa + margem),
             "origem_das_variaveis": origem,
         }
+
+
+# ------------------------------------------------- cenário climático
+# O simulador perguntava à rede o que aconteceria com a chuva mudada e todo o
+# resto no normal. Nos dados, um ano mais seco também é mais quente, mais
+# ensolarado e menos verde (no Maranhão, a anomalia de chuva tem correlação de
+# −0,67 com a de radiação), e essa combinação quase não existe: a rede
+# respondia a ela ao contrário do que a base mostra (menos chuva, mais soja no
+# Maranhão). E os controles iam a ±50% de chuva e +3 °C, quando um município
+# raramente foge mais de 20% a 30% da sua chuva normal, e de −0,7 a +1,2 °C.
+#
+# O cenário passa a sair direto dos dados: o quanto a produtividade fugiu da
+# referência, em média, por 1% de chuva e por 1 °C acima do normal do próprio
+# município, as duas juntas. Só conta o coeficiente cujo IC95 (reamostragem de
+# safras, como na Tabela 6) não inclui o zero; o outro vale zero, e a tela diz
+# que a base não mostra efeito claro. Fora da faixa de 5% a 95% das anomalias
+# observadas no estado, o cenário é preso ao limite e marcado.
+CHUVA, TEMPERATURA = "precip_total", "temp_mean"
+
+
+def associacao_climatica(df: pd.DataFrame, reamostragens: int = 1000, semente: int = 42) -> dict:
+    """Associação da anomalia de chuva (%) e de temperatura (°C) com o resíduo da referência."""
+    medias = df.groupby("municipio")[[CHUVA, TEMPERATURA]].transform("mean")
+    x = np.column_stack([(df[CHUVA] / medias[CHUVA] - 1) * 100, df[TEMPERATURA] - medias[TEMPERATURA]])
+    y = df[ALVO].values - _baseline(df, df["municipio"], df["ano"])
+    coef = LinearRegression().fit(x, y).coef_
+    anos = df["ano"].values
+    unicos = np.unique(anos)
+    por_ano = {a: np.where(anos == a)[0] for a in unicos}
+    rng = np.random.default_rng(semente)
+    amostras = []
+    for _ in range(reamostragens):
+        idx = np.concatenate([por_ano[a] for a in rng.choice(unicos, len(unicos))])
+        amostras.append(LinearRegression().fit(x[idx], y[idx]).coef_)
+    lo, hi = np.percentile(amostras, [2.5, 97.5], axis=0)
+    faixa = np.percentile(x, [5, 95], axis=0)
+    saida = {}
+    for i, (nome, unidade) in enumerate((("chuva", "kg/ha por 1% de chuva"), ("temperatura", "kg/ha por °C"))):
+        saida[nome] = {"kg_ha": float(coef[i]), "ic95": [float(lo[i]), float(hi[i])], "unidade": unidade,
+                       "vale": bool(lo[i] > 0 or hi[i] < 0),
+                       "faixa": [float(faixa[0][i]), float(faixa[1][i])]}
+    saida["registros"] = int(len(df))
+    return saida
+
+
+def efeito_do_cenario(assoc: dict, fator_chuva: float, delta_temp: float) -> dict:
+    """Efeito do cenário, em kg/ha, com as variáveis que precisaram ser presas à faixa observada."""
+    pedido = {"chuva": (fator_chuva - 1) * 100, "temperatura": float(delta_temp)}
+    fora, efeito, usado = [], 0.0, {}
+    for nome, valor in pedido.items():
+        a = assoc[nome]
+        menor, maior = a["faixa"]
+        v = min(max(valor, menor), maior)
+        if abs(v - valor) > 1e-9:
+            fora.append(CHUVA if nome == "chuva" else TEMPERATURA)
+        usado[nome] = v
+        if a["vale"]:
+            efeito += a["kg_ha"] * v
+    return {"delta_kg_ha": efeito, "fora_da_faixa": fora, "usado": usado}
 
 
 # ---------------------------------------------- qualidade do dado oficial

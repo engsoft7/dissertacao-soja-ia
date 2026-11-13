@@ -8,7 +8,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -64,7 +63,8 @@ class PercursoNoAparelhoTest {
     @Before
     fun limpa() {
         ctx.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE).edit().clear().commit()
-        saida.deleteRecursively()
+        // Não apaga a pasta: o segundo teste da classe gravaria por cima do
+        // primeiro. O app é desinstalado antes da rodada (teste_premium_emulador.sh).
         saida.mkdirs()
         shell("svc wifi enable")
         shell("svc data enable")
@@ -120,7 +120,11 @@ class PercursoNoAparelhoTest {
      * podia cair num gráfico e não rolar nada.
      */
     private fun rola(nome: String, vezes: Int) {
-        val lista = regra.onNode(hasScrollToIndexAction() and hasAnyDescendant(hasText("AgroInteligência")))
+        // A lista vertical da tela: pelo cabeçalho ela some da árvore assim que
+        // o primeiro item sai da tela, e o passo seguinte não a achava mais.
+        val lista = regra.onAllNodes(
+            hasScrollToIndexAction() and SemanticsMatcher.keyIsDefined(SemanticsProperties.VerticalScrollAxisRange)
+        ).onFirst()
         repeat(vezes) { i ->
             lista.performScrollToIndex(i + 1)
             tela("${nome}_${i + 1}")
@@ -131,10 +135,65 @@ class PercursoNoAparelhoTest {
         regra.waitForIdle()
     }
 
-    private fun grava() {
-        File(saida, "passos.tsv").writeText(passos.joinToString("\n") + "\n")
-        File(saida, "acessibilidade.tsv").writeText(acessibilidade.joinToString("\n") + "\n")
+    private fun grava(sufixo: String = "") {
+        File(saida, "passos$sufixo.tsv").writeText(passos.joinToString("\n") + "\n")
+        File(saida, "acessibilidade$sufixo.tsv").writeText(acessibilidade.joinToString("\n") + "\n")
         acessibilidade.forEach { Log.i("PERCURSO", "a11y\t$it") }
+    }
+
+    /**
+     * Outro estado: Mato Grosso, Sorriso. Com a API desta branch (o workflow a
+     * sobe no runner e aponta BuildConfig.API_BASE_URL para ela), percorre
+     * Resumo, Histórico, Mercado e Sobre; com a API publicada, que ainda não
+     * tem o estado, confere que o app avisa em vez de mostrar o Pará com outro
+     * nome.
+     */
+    @Test
+    fun percorreOutroEstado() {
+        val safra = anoDaSafraEmCurso()
+        var cenario: ActivityScenario<MainActivity>? = null
+        try {
+            anota("api\t${BuildConfig.API_BASE_URL}")
+            cenario = ActivityScenario.launch(MainActivity::class.java)
+            espera("Qual é o seu município?")
+            regra.onNodeWithText("Escolher na lista").performClick()
+            regra.waitUntil(150_000) { regra.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty() }
+            regra.onAllNodesWithText("Mato Grosso").onFirst().performClick()
+            anota("estado\tMato Grosso escolhido")
+            regra.waitUntil(150_000) { existe("Sorriso") || existe("ainda não está") }
+            tela("20_estado_mt")
+            if (existe("ainda não está")) {
+                confere("a API publicada ainda não tem Mato Grosso, e o app avisa", true)
+                anota("fim\tsem o estado no servidor")
+                return
+            }
+            regra.onNode(hasSetTextAction()).performTextInput("Sor")
+            espera("Sorriso")
+            regra.onAllNodesWithText("Sorriso").onLast().performClick()
+            espera("(safra $safra)")
+            confere("Resumo de Sorriso com a safra em curso", existe("Sorriso"))
+            tela("21_resumo_mt")
+            rola("22_resumo_mt", 4)
+
+            aba("Histórico")
+            espera("$safra")
+            tela("23_historico_mt")
+
+            aba("Mercado")
+            espera("Soja em Chicago")
+            tela("24_mercado_mt")
+
+            aba("Sobre")
+            tela("25_sobre_mt")
+            anota("fim\tpercurso em Mato Grosso completo")
+        } catch (e: Throwable) {
+            anota("FALHA\t${e.javaClass.simpleName}: ${e.message?.lines()?.firstOrNull()}")
+            runCatching { tela("29_falha_mt") }
+            throw e
+        } finally {
+            grava("_mt")
+            cenario?.close()
+        }
     }
 
     @Test

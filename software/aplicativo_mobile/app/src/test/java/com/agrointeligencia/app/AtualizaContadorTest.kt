@@ -54,6 +54,8 @@ class AtualizaContadorTest {
         val m = Gson().fromJson(File("../../api_backend/contador_modelo.json").readText(), ManifestoContador::class.java)
         assertEquals(VERSAO_EMBUTIDA, m.versao)
         assertFalse(precisaBaixar(m, VERSAO_EMBUTIDA, BuildConfig.VERSION_CODE))
+        // O modelo embutido não foi medido no Pará: o modo automático fica desligado.
+        assertFalse(m.modo_automatico == true)
         for ((nome, a) in m.arquivos!!) {
             val bytes = File("src/main/assets/$nome").readBytes()
             assertEquals(nome, a.sha256, sha256Hex(bytes))

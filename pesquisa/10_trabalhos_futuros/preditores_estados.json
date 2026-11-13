@@ -1,0 +1,288 @@
+{
+  "nota": "Correlação entre o erro da referência da Tabela 6 (média do município mais a tendência, ajustada sem a safra) e a anomalia de cada preditor (valor menos a média do município). IC95 por reamostragem de safras (2000); \"claro\" quando o IC95 não inclui o zero. Mesmos registros de 06_amazonia_legal.py.",
+  "PA": {
+    "registros": 415,
+    "municipios": 38,
+    "preditores_com_efeito_claro": 1,
+    "preditores": {
+      "NDVI máximo": {
+        "r": -0.092,
+        "IC95": [
+          -0.175,
+          -0.004
+        ],
+        "claro": true
+      },
+      "EVI médio": {
+        "r": 0.052,
+        "IC95": [
+          -0.068,
+          0.182
+        ],
+        "claro": false
+      },
+      "chuva": {
+        "r": -0.052,
+        "IC95": [
+          -0.171,
+          0.086
+        ],
+        "claro": false
+      },
+      "temperatura média": {
+        "r": 0.046,
+        "IC95": [
+          -0.117,
+          0.162
+        ],
+        "claro": false
+      },
+      "temperatura máxima": {
+        "r": 0.044,
+        "IC95": [
+          -0.124,
+          0.165
+        ],
+        "claro": false
+      },
+      "área (log)": {
+        "r": -0.042,
+        "IC95": [
+          -0.176,
+          0.092
+        ],
+        "claro": false
+      },
+      "NDVI médio": {
+        "r": 0.036,
+        "IC95": [
+          -0.084,
+          0.161
+        ],
+        "claro": false
+      },
+      "balanço hídrico": {
+        "r": -0.03,
+        "IC95": [
+          -0.172,
+          0.122
+        ],
+        "claro": false
+      },
+      "radiação solar": {
+        "r": -0.027,
+        "IC95": [
+          -0.185,
+          0.122
+        ],
+        "claro": false
+      },
+      "EVI máximo": {
+        "r": 0.026,
+        "IC95": [
+          -0.081,
+          0.143
+        ],
+        "claro": false
+      },
+      "evapotranspiração": {
+        "r": 0.003,
+        "IC95": [
+          -0.139,
+          0.142
+        ],
+        "claro": false
+      }
+    }
+  },
+  "MT": {
+    "registros": 2290,
+    "municipios": 116,
+    "preditores_com_efeito_claro": 2,
+    "preditores": {
+      "temperatura média": {
+        "r": -0.229,
+        "IC95": [
+          -0.421,
+          0.159
+        ],
+        "claro": false
+      },
+      "EVI máximo": {
+        "r": 0.201,
+        "IC95": [
+          0.103,
+          0.287
+        ],
+        "claro": true
+      },
+      "temperatura máxima": {
+        "r": -0.181,
+        "IC95": [
+          -0.384,
+          0.21
+        ],
+        "claro": false
+      },
+      "NDVI máximo": {
+        "r": 0.127,
+        "IC95": [
+          0.027,
+          0.219
+        ],
+        "claro": true
+      },
+      "EVI médio": {
+        "r": 0.121,
+        "IC95": [
+          -0.063,
+          0.287
+        ],
+        "claro": false
+      },
+      "evapotranspiração": {
+        "r": -0.108,
+        "IC95": [
+          -0.292,
+          0.196
+        ],
+        "claro": false
+      },
+      "balanço hídrico": {
+        "r": 0.095,
+        "IC95": [
+          -0.229,
+          0.3
+        ],
+        "claro": false
+      },
+      "NDVI médio": {
+        "r": 0.065,
+        "IC95": [
+          -0.132,
+          0.241
+        ],
+        "claro": false
+      },
+      "chuva": {
+        "r": 0.05,
+        "IC95": [
+          -0.183,
+          0.237
+        ],
+        "claro": false
+      },
+      "radiação solar": {
+        "r": -0.042,
+        "IC95": [
+          -0.276,
+          0.279
+        ],
+        "claro": false
+      },
+      "área (log)": {
+        "r": 0.015,
+        "IC95": [
+          -0.135,
+          0.174
+        ],
+        "claro": false
+      }
+    }
+  },
+  "MA": {
+    "registros": 1043,
+    "municipios": 80,
+    "preditores_com_efeito_claro": 7,
+    "preditores": {
+      "temperatura máxima": {
+        "r": -0.331,
+        "IC95": [
+          -0.563,
+          -0.031
+        ],
+        "claro": true
+      },
+      "chuva": {
+        "r": 0.325,
+        "IC95": [
+          0.101,
+          0.475
+        ],
+        "claro": true
+      },
+      "temperatura média": {
+        "r": -0.321,
+        "IC95": [
+          -0.563,
+          -0.025
+        ],
+        "claro": true
+      },
+      "balanço hídrico": {
+        "r": 0.313,
+        "IC95": [
+          0.019,
+          0.513
+        ],
+        "claro": true
+      },
+      "EVI máximo": {
+        "r": 0.311,
+        "IC95": [
+          0.127,
+          0.462
+        ],
+        "claro": true
+      },
+      "NDVI máximo": {
+        "r": 0.285,
+        "IC95": [
+          0.094,
+          0.434
+        ],
+        "claro": true
+      },
+      "radiação solar": {
+        "r": -0.283,
+        "IC95": [
+          -0.503,
+          -0.013
+        ],
+        "claro": true
+      },
+      "EVI médio": {
+        "r": 0.218,
+        "IC95": [
+          -0.006,
+          0.416
+        ],
+        "claro": false
+      },
+      "evapotranspiração": {
+        "r": -0.214,
+        "IC95": [
+          -0.45,
+          0.083
+        ],
+        "claro": false
+      },
+      "NDVI médio": {
+        "r": 0.177,
+        "IC95": [
+          -0.044,
+          0.359
+        ],
+        "claro": false
+      },
+      "área (log)": {
+        "r": -0.009,
+        "IC95": [
+          -0.099,
+          0.097
+        ],
+        "claro": false
+      }
+    }
+  }
+}

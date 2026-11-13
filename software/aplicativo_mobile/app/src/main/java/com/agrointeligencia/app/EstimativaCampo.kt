@@ -65,7 +65,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
 // ESTIMATIVA NO CAMPO: A LAVOURA DO PRODUTOR, E NÃO A MÉDIA DO MUNICÍPIO.
 //
@@ -80,7 +83,13 @@ import java.util.Locale
 // preencher o número e sugerir as marcas, mas foi treinado com fotos da China
 // e ainda não foi conferido em lavouras do Pará: a tela diz isso, e o
 // produtor confere tocando na foto. Foto com marcas só do contador, sem
-// conferência, não vai para o material de treino.
+// conferência, não vai para o material de treino. O modo automático
+// (ModoAutomatico.kt), em que o número entra sem conferência, fica desligado
+// até um modelo medido no Pará ser anunciado pela API.
+//
+// Depois da colheita, o produtor informa quantas sacas saíram do talhão, e o
+// app compara com a estimativa. O talhão, com os pontos e a colheita, vai no
+// .zip das fotos (AmostrasTreino.kt) para conferir a estimativa e o contador.
 
 private const val PREF_CAMPO = "estimativa_campo"
 // Precisão mínima para aceitar um canto do talhão. Com 20 m de erro em cada
@@ -93,11 +102,20 @@ data class EstadoCampo(
     val pontos: List<PontoAmostra> = emptyList(),
     val parametros: ParametrosCampo = ParametrosCampo(),
     val areaHa: Double? = null,
+    /** Identificação do talhão em que se está contando; null nos estados guardados antes dela. */
+    val talhao: String? = null,
+    /** Sacas de 60 kg que saíram do talhão, quando o produtor informa. */
+    val colhidoSacas: Double? = null,
 )
+
+private fun novoTalhao(): String = UUID.randomUUID().toString().replace("-", "").take(12)
 
 private fun String.numero(): Double? = trim().replace(',', '.').toDoubleOrNull()
 
 private fun decimal(v: Double, casas: Int = 1): String = String.format(BR, "%,.${casas}f", v)
+
+/** Para pôr de volta num campo: sem ponto de milhar, que numero() leria como decimal. */
+private fun paraCampo(v: Double, casas: Int): String = String.format(BR, "%.${casas}f", v)
 
 @Suppress("SENSELESS_COMPARISON")
 private fun lerEstado(context: Context): EstadoCampo {
@@ -143,13 +161,30 @@ fun EstimativaCampoTela(
     var pesoMil by rememberSaveable { mutableStateOf(decimal(guardado.parametros.pesoMilGraos, 0)) }
     var area by rememberSaveable { mutableStateOf(guardado.areaHa?.let { decimal(it, 2) } ?: "") }
     var preco by rememberSaveable { mutableStateOf(precoPadrao?.let { decimal(it, 2) } ?: "") }
+    var talhao by rememberSaveable { mutableStateOf(guardado.talhao ?: novoTalhao()) }
+    var colhido by rememberSaveable {
+        mutableStateOf(guardado.colhidoSacas?.let { paraCampo(it, if (it % 1.0 == 0.0) 0 else 1) } ?: "")
+    }
 
     val parametros = ParametrosCampo(espacamento.numero() ?: 0.0, graos.numero() ?: 0.0, pesoMil.numero() ?: 0.0)
     val areaHa = area.numero()?.takeIf { it > 0 }
+    val colhidoSacas = colhido.numero()?.takeIf { it > 0 }
+
+    // O modo automático só vale com um modelo baixado que o anúncio liberou.
+    val baixado = remember { if (inicial == null) modeloBaixado(context) else null }
+    val automatico = modoAutomaticoLigado(baixado)
+    val limites = limitesDe(baixado)
 
     // Guarda a cada mudança: contar trinta vagens e perder ao fechar o app é defeito.
-    LaunchedEffect(pontos.toList(), parametros, areaHa) {
-        if (inicial == null) gravarEstado(context, EstadoCampo(pontos.toList(), parametros, areaHa))
+    LaunchedEffect(pontos.toList(), parametros, areaHa, talhao, colhidoSacas) {
+        if (inicial != null) return@LaunchedEffect
+        val estado = EstadoCampo(pontos.toList(), parametros, areaHa, talhao, colhidoSacas)
+        gravarEstado(context, estado)
+        withContext(Dispatchers.IO) {
+            val agora = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US).format(Date())
+            registroDoTalhao(estado, agora, BuildConfig.VERSION_NAME, versaoContador(context), automatico)
+                ?.let { gravaTalhao(context, it) }
+        }
     }
     // Fotos de amostragem antigas não servem para nada depois de contadas.
     LaunchedEffect(Unit) {
@@ -175,11 +210,18 @@ fun EstimativaCampoTela(
         )
 
         var fotosGuardadas by remember { mutableIntStateOf(0) }
+        var colheitas by remember { mutableIntStateOf(0) }
         LaunchedEffect(Unit) { fotosGuardadas = withContext(Dispatchers.IO) { contaAmostras(context) } }
+        LaunchedEffect(colhidoSacas, areaHa) {
+            if (inicial == null) colheitas = withContext(Dispatchers.IO) { talhoesComColheita(context) }
+        }
 
         NovoPonto(
             numero = pontos.size + 1,
             parametros = parametros,
+            automatico = automatico,
+            limites = limites,
+            automaticosAntes = pontos.count { it.vagensDoContador != null },
             aoGuardarFotos = { fotosGuardadas = contaAmostras(context) },
         ) { pontos.add(it) }
 
@@ -235,10 +277,11 @@ fun EstimativaCampoTela(
             }
         }
 
-        FotosParaTreino(fotosGuardadas) { fotosGuardadas = it }
+        FotosParaTreino(fotosGuardadas, colheitas) { fotosGuardadas = it; colheitas = 0 }
 
+        val estimativa = estimaLavoura(pontos, parametros)
         ResultadoCampo(
-            estimativa = estimaLavoura(pontos, parametros),
+            estimativa = estimativa,
             areaHa = areaHa,
             preco = preco,
             aoMudarPreco = { preco = it },
@@ -246,6 +289,20 @@ fun EstimativaCampoTela(
             referenciaKgHa = referenciaKgHa,
             rotuloReferencia = rotuloReferencia,
         )
+
+        ColheitaDoTalhao(
+            estimativa = estimativa,
+            areaHa = areaHa,
+            colhido = colhido,
+            aoMudar = { colhido = it },
+            temAlgo = pontos.isNotEmpty() || colhidoSacas != null,
+        ) {
+            // O talhão que fica para trás continua em talhoes.json, com a colheita.
+            pontos.clear()
+            area = ""
+            colhido = ""
+            talhao = novoTalhao()
+        }
     }
 }
 
@@ -254,6 +311,9 @@ fun EstimativaCampoTela(
 private fun NovoPonto(
     numero: Int,
     parametros: ParametrosCampo,
+    automatico: Boolean,
+    limites: LimitesAutomatico,
+    automaticosAntes: Int,
     aoGuardarFotos: () -> Unit,
     aoGuardar: (PontoAmostra) -> Unit,
 ) {
@@ -271,6 +331,7 @@ private fun NovoPonto(
     // já mexeu nas marcas depois disso.
     var automatica by remember { mutableStateOf<ContagemAutomatica?>(null) }
     var conferida by remember { mutableStateOf(false) }
+    var qualidade by remember { mutableStateOf<QualidadeFoto?>(null) }
 
     val ponto = PontoAmostra(
         plantas = plantas.numero()?.toInt() ?: 0,
@@ -278,6 +339,12 @@ private fun NovoPonto(
         arrancadas = arrancadas.numero()?.toInt() ?: 0,
         vagens = vagens.numero()?.toInt() ?: 0,
     )
+    // No modo automático, o número do contador entra sozinho, salvo quando a
+    // foto, o número ou a amostragem pedem a conferência do produtor. Se ele
+    // mudou o número à mão, a responsabilidade é dele, e não se pede mais nada.
+    val contada = automatica
+    val motivo = if (automatico && contada != null && !conferida && ponto.vagens == contada.vagens)
+        motivoParaConferir(qualidade, contada.vagens, ponto.arrancadas, automaticosAntes, limites) else null
 
     CartaoCampo("Ponto $numero", Icons.Filled.CameraAlt) {
         Text("1. Plantas na linha", fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
@@ -295,15 +362,21 @@ private fun NovoPonto(
         Text("2. Vagens por planta", fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
              color = MaterialTheme.colorScheme.onSurface)
         Nota("Arranque algumas plantas seguidas da mesma linha, deite sobre um pano escuro, " +
-             "sem sobrepor, e fotografe de cima. Toque em cada vagem com grão, ou use Contar sozinho " +
-             "e confira; dois dedos ampliam a foto.")
+             "sem sobrepor, e fotografe de cima. " +
+             (if (automatico) "O app conta as vagens sozinho assim que a foto chega; quando ele pedir, " +
+                              "confira tocando na foto. "
+              else "Toque em cada vagem com grão, ou use Contar sozinho e confira; ") +
+             "dois dedos ampliam a foto.")
         FotoParaContar(
             "vagens", fotoVagens,
-            { fotoVagens = it; marcasVagens.clear(); automatica = null; conferida = false },
+            { fotoVagens = it; marcasVagens.clear(); automatica = null; conferida = false; qualidade = null },
             marcasVagens, Color(0xFFD97706),
             automatica = automatica,
             conferida = conferida,
-            aoContarSozinho = { r -> automatica = r; conferida = false; vagens = r.vagens.toString() },
+            modoAutomatico = automatico,
+            aoContarSozinho = { r, q ->
+                automatica = r; conferida = false; qualidade = q; vagens = r.vagens.toString()
+            },
             // O contador marca só umas 6 em cada 10 vagens, embora estime o total.
             // Antes, o primeiro toque trocava a estimativa pela contagem das
             // marcas, e corrigir uma marca errada derrubava o número em 40%.
@@ -317,6 +390,12 @@ private fun NovoPonto(
             CampoNumero(vagens, { vagens = it }, "Vagens contadas", Modifier.weight(1f), inteiro = true)
         }
 
+        motivo?.let {
+            Text("Confira antes de guardar: $it. Marque as vagens sem marca, tire as erradas e toque em " +
+                 "Usar as marcas.",
+                 fontSize = 13.sp, lineHeight = 18.sp, color = MaterialTheme.colorScheme.error,
+                 modifier = Modifier.padding(top = 8.dp))
+        }
         if (ponto.valido() && parametros.espacamento > 0) {
             val kg = kgPorHectare(plantasPorM2(ponto, parametros.espacamento), vagensPorPlanta(ponto),
                                   parametros.graosPorVagem, parametros.pesoMilGraos)
@@ -327,7 +406,7 @@ private fun NovoPonto(
         }
         Button(
             onClick = {
-                aoGuardar(ponto)
+                aoGuardar(ponto.copy(vagensDoContador = automatica?.vagens, conferido = automatica?.let { conferida }))
                 // As fotos marcadas vão para o material de treino da contagem
                 // automática. Copia tudo antes de limpar a tela.
                 val contexto = mapOf(
@@ -359,9 +438,9 @@ private fun NovoPonto(
                 fotoLinha = null; fotoVagens = null
                 marcasLinha.clear(); marcasVagens.clear()
                 plantas = ""; vagens = ""
-                automatica = null; conferida = false
+                automatica = null; conferida = false; qualidade = null
             },
-            enabled = ponto.valido(),
+            enabled = ponto.valido() && motivo == null,
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp)
         ) {
             Text("Guardar ponto e amostrar outro")
@@ -389,7 +468,8 @@ private fun FotoParaContar(
     cor: Color,
     automatica: ContagemAutomatica? = null,
     conferida: Boolean = false,
-    aoContarSozinho: ((ContagemAutomatica) -> Unit)? = null,
+    modoAutomatico: Boolean = false,
+    aoContarSozinho: ((ContagemAutomatica, QualidadeFoto?) -> Unit)? = null,
     aoUsarMarcas: (() -> Unit)? = null,
     aoContar: (Int) -> Unit,
 ) {
@@ -445,25 +525,31 @@ private fun FotoParaContar(
         } else {
             Spacer(Modifier.height(8.dp))
             if (aoContarSozinho != null) {
-                FilledTonalButton(
-                    onClick = {
-                        contando = true
-                        falhou = false
-                        val contada = foto
-                        escopo.launch {
-                            val r = withContext(Dispatchers.Default) { contaVagens(context, img.asAndroidBitmap()) }
-                            // Se o produtor trocou a foto enquanto contava, o resultado é de outra foto.
-                            if (fotoAtual != contada) return@launch
-                            contando = false
-                            if (r == null) {
-                                falhou = true
-                            } else {
-                                marcas.clear()
-                                marcas.addAll(r.marcas.map { (x, y) -> Offset(x, y) })
-                                aoContarSozinho(r)
-                            }
+                val conta = {
+                    contando = true
+                    falhou = false
+                    val contada = foto
+                    escopo.launch {
+                        val (r, q) = withContext(Dispatchers.Default) {
+                            val bmp = img.asAndroidBitmap()
+                            contaVagens(context, bmp) to runCatching { qualidadeDaFoto(bmp) }.getOrNull()
                         }
-                    },
+                        // Se o produtor trocou a foto enquanto contava, o resultado é de outra foto.
+                        if (fotoAtual != contada) return@launch
+                        contando = false
+                        if (r == null) {
+                            falhou = true
+                        } else {
+                            marcas.clear()
+                            marcas.addAll(r.marcas.map { (x, y) -> Offset(x, y) })
+                            aoContarSozinho(r, q)
+                        }
+                    }
+                }
+                // No modo automático, conta assim que a foto abre.
+                LaunchedEffect(img) { if (modoAutomatico && automatica == null && !contando) conta() }
+                FilledTonalButton(
+                    onClick = { conta() },
                     enabled = !contando,
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                 ) {
@@ -474,7 +560,11 @@ private fun FotoParaContar(
                     } else {
                         Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text(if (automatica == null) "Contar sozinho (teste)" else "Contar sozinho de novo")
+                        Text(when {
+                            automatica != null -> "Contar sozinho de novo"
+                            modoAutomatico -> "Contar sozinho"
+                            else -> "Contar sozinho (teste)"
+                        })
                     }
                 }
                 if (falhou) Nota("Não foi possível contar sozinho neste celular. Conte tocando nas vagens.")
@@ -494,9 +584,14 @@ private fun FotoParaContar(
                     ?: ("Ele aprendeu com fotos de plantas da China, onde erra em média 6%, e ainda não foi " +
                         "conferido em lavouras do Pará.")
                 if (!conferida) {
-                    Nota("O contador estimou ${a.vagens} vagens; as marcas mostram onde viu algumas delas " +
-                         "(ele marca cerca de 6 em cada 10). $origem O número fica o do contador. Para contar " +
-                         "você mesmo, marque as vagens sem marca, tire as erradas e toque em Usar as marcas.")
+                    Nota(if (modoAutomatico)
+                             "O contador contou ${a.vagens} vagens. $origem As marcas mostram onde viu algumas " +
+                             "delas. Para conferir, marque as vagens sem marca, tire as erradas e toque em " +
+                             "Usar as marcas."
+                         else
+                             "O contador estimou ${a.vagens} vagens; as marcas mostram onde viu algumas delas " +
+                             "(ele marca cerca de 6 em cada 10). $origem O número fica o do contador. Para contar " +
+                             "você mesmo, marque as vagens sem marca, tire as erradas e toque em Usar as marcas.")
                     aoUsarMarcas?.let { usar ->
                         OutlinedButton(onClick = usar, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
                             Text("Usar as marcas (${marcas.size} vagens)")
@@ -719,7 +814,7 @@ private fun MedicaoGps(aoConcluir: (Double) -> Unit, aoCancelar: () -> Unit) {
  * escolhe para onde mandar (Drive, e-mail, WhatsApp).
  */
 @Composable
-private fun FotosParaTreino(quantas: Int, aoMudar: (Int) -> Unit) {
+private fun FotosParaTreino(quantas: Int, colheitas: Int, aoMudar: (Int) -> Unit) {
     val context = LocalContext.current
     val escopo = rememberCoroutineScope()
     var confirmarApagar by remember { mutableStateOf(false) }
@@ -735,7 +830,11 @@ private fun FotosParaTreino(quantas: Int, aoMudar: (Int) -> Unit) {
                 "$quantas ${if (quantas == 1) "foto marcada guardada" else "fotos marcadas guardadas"} " +
                 "no celular (${decimal(tamanhoAmostrasMb(context), 1)} MB). Ficam só aqui até você exportar."
         )
-        if (quantas > 0) {
+        if (colheitas > 0) {
+            Nota("${if (colheitas == 1) "1 talhão" else "$colheitas talhões"} com a colheita informada vão " +
+                 "junto: com eles se confere a estimativa e o contador com o que foi pesado.")
+        }
+        if (quantas > 0 || colheitas > 0) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
                 Button(onClick = {
                     escopo.launch {
@@ -769,7 +868,8 @@ private fun FotosParaTreino(quantas: Int, aoMudar: (Int) -> Unit) {
         AlertDialog(
             onDismissRequest = { confirmarApagar = false },
             title = { Text("Apagar as fotos marcadas?") },
-            text = { Text("As $quantas fotos e as marcações saem do celular. Exporte antes se quiser guardá-las.") },
+            text = { Text("As fotos, as marcações e as colheitas informadas saem do celular. Exporte antes " +
+                          "se quiser guardá-las.") },
             confirmButton = {
                 TextButton(onClick = {
                     confirmarApagar = false
@@ -780,6 +880,62 @@ private fun FotosParaTreino(quantas: Int, aoMudar: (Int) -> Unit) {
                 }) { Text("Apagar") }
             },
             dismissButton = { TextButton(onClick = { confirmarApagar = false }) { Text("Cancelar") } }
+        )
+    }
+}
+
+/**
+ * O que saiu do talhão, pelo romaneio, comparado com a estimativa no pé. É o
+ * único jeito de saber quanto a estimativa (e o contador) erram na lavoura.
+ */
+@Composable
+private fun ColheitaDoTalhao(
+    estimativa: Estimativa?,
+    areaHa: Double?,
+    colhido: String,
+    aoMudar: (String) -> Unit,
+    temAlgo: Boolean,
+    aoNovoTalhao: () -> Unit,
+) {
+    var confirmar by remember { mutableStateOf(false) }
+    CartaoCampo("Depois da colheita", Icons.Filled.CheckCircle) {
+        Nota("Quando colher este talhão, informe as sacas de 60 kg do romaneio, já descontadas umidade e " +
+             "impureza. O app compara com a estimativa.")
+        CampoNumero(colhido, aoMudar, "Colhido no talhão (sacas)", Modifier.fillMaxWidth().padding(top = 4.dp))
+        val kg = colheitaKgHa(colhido.numero(), areaHa)
+        when {
+            colhido.numero() == null -> {}
+            areaHa == null -> Nota("Informe a área do talhão, acima, para ver as sacas por hectare.")
+            kg != null -> {
+                Text("Colheita: ${decimal(kg / 60, 1)} sc/ha", fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
+                     color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(top = 8.dp))
+                // 3.456 digitado como milhar vira três sacas e meia: o número absurdo avisa.
+                if (kg / 60 < 5 || kg / 60 > 150) {
+                    Nota("Confira o número: ${decimal(kg / 60, 1)} sc/ha está fora do comum. Digite as sacas sem " +
+                         "ponto de milhar.")
+                }
+                if (estimativa != null) {
+                    val dif = (estimativa.kgHa / kg - 1) * 100
+                    Nota("A estimativa no pé foi de ${decimal(estimativa.scHa, 1)} sc/ha, " +
+                         "${decimal(kotlin.math.abs(dif), 0)}% ${if (dif >= 0) "acima" else "abaixo"} do colhido. " +
+                         "Parte da diferença é perda na colheita, que a estimativa não desconta.")
+                }
+            }
+        }
+        if (temAlgo) {
+            OutlinedButton(onClick = { confirmar = true }, modifier = Modifier.padding(top = 8.dp)) {
+                Text("Começar outro talhão")
+            }
+        }
+    }
+    if (confirmar) {
+        AlertDialog(
+            onDismissRequest = { confirmar = false },
+            title = { Text("Começar outro talhão?") },
+            text = { Text("Os pontos, a área e a colheita deste talhão saem da tela e ficam guardados com as " +
+                          "fotos marcadas, para exportar.") },
+            confirmButton = { TextButton(onClick = { confirmar = false; aoNovoTalhao() }) { Text("Começar") } },
+            dismissButton = { TextButton(onClick = { confirmar = false }) { Text("Cancelar") } }
         )
     }
 }

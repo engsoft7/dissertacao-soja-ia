@@ -36,8 +36,8 @@ android {
         applicationId = "com.agrointeligencia.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 28
-        versionName = "2.7.4"
+        versionCode = 29
+        versionName = "2.8.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -56,9 +56,16 @@ android {
             if (file("../agro_playstore.jks").exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
+            buildConfigField("String", "API_BASE_URL", "\"https://agrointeligencia-api.onrender.com/\"")
         }
         debug {
             // Suffix removed to avoid Android Studio Intent launch mismatch
+            // A API pode ser outra só na depuração: o teste no emulador
+            // (teste-premium.yml) sobe a API desta branch no próprio runner e
+            // compila com -PapiBaseUrl=http://10.0.2.2:8000/ (o host, visto do
+            // emulador), para percorrer o que a API publicada ainda não tem.
+            buildConfigField("String", "API_BASE_URL",
+                "\"${project.findProperty("apiBaseUrl") ?: "https://agrointeligencia-api.onrender.com/"}\"")
         }
     }
     compileOptions {

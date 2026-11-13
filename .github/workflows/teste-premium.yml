@@ -86,9 +86,33 @@ jobs:
         with:
           python-version: "3.11"
 
+      # O percurso no aparelho corre contra a API desta branch, no próprio
+      # runner (10.0.2.2, visto do emulador): é o único jeito de testar no
+      # aparelho o que a API publicada ainda não tem, como os outros estados.
+      # O APK de release continua apontado à API publicada.
+      - name: Sobe a API desta branch
+        if: matrix.apk == 'branch'
+        working-directory: software/api_backend
+        run: |
+          pip install --quiet -r requirements.txt
+          nohup python -m uvicorn api:app --host 127.0.0.1 --port 8000 > "$RUNNER_TEMP/api.log" 2>&1 &
+          python - <<'PY'
+          import json, time, urllib.request
+          for _ in range(120):
+              try:
+                  e = json.load(urllib.request.urlopen("http://127.0.0.1:8000/api/estados", timeout=10))["estados"]
+                  if all(x["carregado"] for x in e):
+                      print("API no ar:", [x["uf"] for x in e]); break
+              except Exception as erro:
+                  print("esperando a API:", type(erro).__name__)
+              time.sleep(5)
+          else:
+              raise SystemExit("a API não subiu")
+          PY
+
       - name: Compila depuração, teste no aparelho e release
         working-directory: software/aplicativo_mobile
-        run: ./gradlew --no-daemon assembleDebug assembleDebugAndroidTest assembleRelease
+        run: ./gradlew --no-daemon assembleDebug assembleDebugAndroidTest assembleRelease ${{ matrix.apk == 'branch' && '-PapiBaseUrl=http://10.0.2.2:8000/' || '' }}
 
       - name: Prepara o APK de release
         env:

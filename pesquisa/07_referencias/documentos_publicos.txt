@@ -126,3 +126,13 @@ navegador https://www.agrolink.com.br/regional/pa/paragominas/cotacoes
 # Nona leva: a série histórica de custos de soja da CONAB, para conferir se
 # algum município do Pará já teve levantamento de custo.
 https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-soja-1997-a-2026.xls
+# V Simpósio Internacional do NDAE: submissão, inscrição e taxa (07/11/2026)
+https://ppca.propesp.ufpa.br/index.php/br/programa/noticias/todas/675-v-simposio-internacional-do-ndae-submissoes-de-artigos-abertas
+navegador https://ppca.propesp.ufpa.br/index.php/br/programa/noticias/todas/675-v-simposio-internacional-do-ndae-submissoes-de-artigos-abertas
+# Link de submissão do V Simpósio do NDAE e a página do evento (taxa de inscrição)
+https://tinyurl.com/VSimposioNDAE2026
+navegador https://tinyurl.com/VSimposioNDAE2026
+# SBC: ERAD/ERAMIA Norte 2 e JEMS (o site está no ar? 08/11/2026)
+https://sol.sbc.org.br/index.php/erad-eramia-no2
+https://www.sbc.org.br/
+https://jems3.sbc.org.br/

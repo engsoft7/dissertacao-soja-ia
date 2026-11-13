@@ -26,6 +26,14 @@ def test_anuncio_tem_o_que_o_aplicativo_exige():
         assert 100_000 <= a["bytes"] <= 50_000_000
 
 
+def test_modo_automatico_so_com_modelo_novo():
+    """O contador embutido não foi medido no Pará: o anúncio dele não liga o modo automático."""
+    m = manifesto()
+    assert isinstance(m.get("modo_automatico", False), bool)
+    if m["versao"] == 1:
+        assert m.get("modo_automatico") is False
+
+
 def test_versao_1_e_a_dos_assets():
     """Enquanto o anúncio for a versão 1, ele descreve os modelos que vêm no aplicativo."""
     m = manifesto()

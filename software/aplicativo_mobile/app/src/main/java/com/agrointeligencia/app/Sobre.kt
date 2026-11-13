@@ -111,9 +111,12 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
             // CONAB fica de reserva. O custo é sempre o da CONAB, e de outro estado:
             // a série de custos de soja de 1997 a 2026 tem 35 praças em 13 UFs e
             // nenhuma no Pará (conferido em 06/11/2026, pesquisa/dados/conab/LEIA-ME.md).
-            Text(text = "Preço padrão: cotação do dia na praça do Pará mais perto (Agrolink); sem ela, o preço " +
+            val estado = estadoDoApp(kpis?.uf)
+            Text(text = "Preço padrão: cotação do dia na praça ${estado.de} mais perto (Agrolink); sem ela, o preço " +
                         "de porteira da CONAB. Custo: " + (kpis?.fonte_preco ?: "CONAB (levantamento indisponível offline)") +
-                        ". A CONAB não levanta custo de soja no Pará; Pedro Afonso (TO) é a praça mais próxima. " +
+                        (if (estado.uf == "PA") ". A CONAB não levanta custo de soja no Pará; Pedro Afonso (TO) é a " +
+                                                "praça mais próxima. "
+                         else ", a praça da CONAB no estado mais perto do município. ") +
                         "Preço e custo são editáveis na Viabilidade.",
                  fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
             kpis?.nota_preco?.let {

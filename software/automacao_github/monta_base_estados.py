@@ -35,7 +35,14 @@ estado, como em 06_amazonia_legal.py, e o que não pareia é listado. Com dois
 nomes corrigidos à mão (ALIASES), Mato Grosso fica com 118 municípios, dois a
 mais que na análise da pesquisa.
 
+Quando a PAM publica uma safra que a coleta ainda não tem, a base do modelo
+para na safra anterior, e só a série oficial avança. `--faltam` lista essas
+safras ("UF ano", uma por linha), a partir do que já está em
+pesquisa/dados/estados/; a atualização mensal as coleta no Earth Engine
+(coleta/coleta_amazonia_legal.py) e monta a base de novo.
+
 Uso:   python software/automacao_github/monta_base_estados.py [MT MA TO RO]
+       python software/automacao_github/monta_base_estados.py --faltam
        SEM_IBGE=1 python ...   sem tentar o SIDRA e a malha (onde o IBGE não é alcançável)
 """
 from __future__ import annotations
@@ -184,6 +191,22 @@ def contorno(uf: str, destino: Path) -> bool:
     return True
 
 
+def safras_novas(anos_pam, anos_coletados) -> list[int]:
+    """Safras publicadas na PAM depois da última que a coleta tem."""
+    ultima = max(anos_coletados, default=0)
+    return sorted(int(a) for a in set(anos_pam) if a > ultima)
+
+
+def faltam(ufs: list[str]) -> list[tuple[str, int]]:
+    saida = []
+    for uf in ufs:
+        pam = SAIDA / f"pam_soja_{uf}.csv"
+        if not pam.exists():
+            continue
+        saida += [(uf, a) for a in safras_novas(pd.read_csv(pam).ano, coleta_do_estado(uf).ano)]
+    return saida
+
+
 def main(ufs: list[str]) -> int:
     SAIDA.mkdir(parents=True, exist_ok=True)
     resumo = {}
@@ -210,4 +233,8 @@ def main(ufs: list[str]) -> int:
 
 
 if __name__ == "__main__":
+    if "--faltam" in sys.argv[1:]:
+        for uf, ano in faltam([a.upper() for a in sys.argv[1:] if a != "--faltam"] or list(ESTADOS)):
+            print(uf, ano)
+        sys.exit(0)
     sys.exit(main([a.upper() for a in sys.argv[1:]] or list(ESTADOS)))

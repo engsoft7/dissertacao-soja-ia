@@ -241,16 +241,33 @@ jobs:
 
       # Os outros estados (estados.py): a série oficial do SIDRA e a base
       # do modelo, remontadas com as revisões e a safra nova da PAM. As
-      # variáveis de satélite deles vêm da coleta da pesquisa e só mudam
-      # quando ela roda de novo.
+      # variáveis de satélite deles vêm da coleta da pesquisa
+      # (coleta_amazonia_legal.py, a mesma conta do Pará): quando a PAM traz
+      # uma safra que a coleta ainda não tem, ela é coletada aqui, um estado
+      # por vez, e a base é montada de novo. Sem a chave do Earth Engine, ou
+      # se a coleta falhar, a base do modelo fica na safra anterior e só a
+      # série oficial avança.
       - name: Atualiza os outros estados
         id: estados
         if: steps.pam.outcome == 'success'
+        env:
+          GEE_SERVICE_ACCOUNT_JSON: ${{ secrets.GEE_SERVICE_ACCOUNT_JSON }}
         run: |
           python software/automacao_github/monta_base_estados.py
+          if [ "$TEM_CHAVE_GEE" = "true" ]; then
+            faltam=$(python software/automacao_github/monta_base_estados.py --faltam)
+            if [ -n "$faltam" ]; then
+              pip install --quiet earthengine-api
+              while read -r uf ano; do
+                (cd pesquisa/10_trabalhos_futuros/coleta && python coleta_amazonia_legal.py "$uf" --anos "$ano-$ano" --paralelo 1) \
+                  || echo "::warning::A coleta de $uf $ano no Earth Engine falhou; a base de $uf fica na safra anterior."
+              done <<< "$faltam"
+              python software/automacao_github/monta_base_estados.py
+            fi
+          fi
           # git status, e não git diff: o contorno do estado é arquivo novo
           # quando a malha do IBGE enfim responde, e o diff não vê arquivo novo.
-          if [ -z "$(git status --porcelain -- pesquisa/dados/estados ':!pesquisa/dados/estados/LEIA-ME.json')" ]; then
+          if [ -z "$(git status --porcelain -- pesquisa/dados/estados pesquisa/10_trabalhos_futuros/dados ':!pesquisa/dados/estados/LEIA-ME.json')" ]; then
             echo "csv_alterado=false" >> "$GITHUB_OUTPUT"
             git checkout -- pesquisa/dados/estados 2>/dev/null || true
           else
@@ -369,6 +386,7 @@ jobs:
           # testes, que é o que se quer.
           add-paths: |
             pesquisa/dados/*
+            pesquisa/10_trabalhos_futuros/dados/amazonia_legal_*.csv
             software/api_backend/financas.py
             software/dashboard_web/app.py
           commit-message: "Atualiza a base do painel com dados oficiais (PAM/SIDRA + GEE)"

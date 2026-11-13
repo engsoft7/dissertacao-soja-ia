@@ -584,7 +584,9 @@ depois da mudança), e o aplicativo do Pará pede e guarda o mesmo de sempre.
   respostas de um município de cada estado e `CapturasDeTelaTest` desenha
   com elas o resumo, a viabilidade e o cartão do modelo, e a escolha do
   estado com os cinco.
-- **Falta.** Publicar (API, painel e aplicativo) depois da defesa; conferir
-  com quem planta lá se o custo da praça mais perto representa o município;
-  e o teste em emulador com os estados novos (o Teste Premium roda contra a
-  API em produção, que ainda não os tem).
+- **Publicado em 13/11/2026**, na v2.5.0 (API no Render, painel no Streamlit
+  e aplicativo 2.8.0 no Release), com autorização do autor antes da defesa; a
+  dissertação e o Anexo 01 passaram a descrever a extensão. O Teste Premium
+  ganhou o percurso em Mato Grosso no emulador, contra a API da própria branch.
+- **Falta.** Conferir com quem planta lá se o custo da praça mais perto
+  representa o município.

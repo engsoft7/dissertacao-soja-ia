@@ -21,7 +21,8 @@ Em `app/src/main/java/com/agrointeligencia/app/`, um arquivo por tela ou assunto
 | `Resumo.kt` | atalho da Estimativa no campo, produtividade esperada da safra e simulador climático |
 | `Viabilidade.kt` | receita, custo e margem com os números do produtor; resultado pelos dois rateios do custo |
 | `Historico.kt` | gráfico da série do IBGE com a projeção e cartão por safra |
-| `Mercado.kt` | cotação do dia nas praças do Pará, Chicago em reais, média do Pará estimada e base mensal |
+| `Mercado.kt` | cotação do dia nas praças do estado, Chicago em reais e, no Pará, a média estimada e a base mensal |
+| `Estados.kt` | os cinco estados do produto: o Pará como sempre, e `?uf=` para os outros |
 | `Sobre.kt` | aviso de não afiliação, fontes, preço e custo, métricas da validação |
 | `Tempo.kt`, `TempoCalculo.kt` | tela Tempo na lavoura e as contas da janela de pulverização |
 | `EstimativaCampo.kt`, `CampoCalculo.kt`, `ContadorVagens.kt`, `AmostrasTreino.kt`, `AtualizaContador.kt` | Estimativa no campo e contador de vagens |

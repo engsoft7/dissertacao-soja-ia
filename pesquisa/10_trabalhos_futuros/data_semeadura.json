@@ -1,0 +1,191 @@
+{
+  "nota": "Início do verdor por município-safra na série de NDVI de 16 dias do MODIS sobre a máscara de soja: primeiro dia acima de 20% da subida até o pico (NDVI suavizado pela mediana de 3 imagens). Semeadura estimada = verdor menos 20 dias. Datas em dias desde 1º de setembro do ano anterior à colheita.",
+  "safras_com_data": 540,
+  "plausibilidade": {
+    "por_regiao": {
+      "sul (latitude abaixo de -7)": {
+        "safras": 169,
+        "municipios": 9,
+        "semeadura_mediana": "28/10",
+        "semeadura_quartis": [
+          "19/10",
+          "13/11"
+        ],
+        "dias_ate_pico_mediana": 47.0
+      },
+      "nordeste (acima de -4)": {
+        "safras": 217,
+        "municipios": 13,
+        "semeadura_mediana": "20/12",
+        "semeadura_quartis": [
+          "28/11",
+          "09/01"
+        ],
+        "dias_ate_pico_mediana": 92.0
+      },
+      "todos": {
+        "safras": 540,
+        "municipios": 37,
+        "semeadura_mediana": "25/11",
+        "semeadura_quartis": [
+          "24/10",
+          "30/12"
+        ],
+        "dias_ate_pico_mediana": 68.0
+      }
+    },
+    "semeadura_mediana_por_municipio": {
+      "Curionópolis": "03/10",
+      "Sapucaia": "07/10",
+      "Altamira": "14/10",
+      "Tucumã": "15/10",
+      "São Félix do Xingu": "16/10",
+      "Jacareacanga": "16/10",
+      "Água Azul do Norte": "17/10",
+      "Xinguara": "21/10",
+      "Santana do Araguaia": "25/10",
+      "Rio Maria": "27/10",
+      "Cumaru do Norte": "27/10",
+      "Novo Progresso": "28/10",
+      "Santa Maria das Barreiras": "29/10",
+      "Conceição do Araguaia": "29/10",
+      "Redenção": "29/10",
+      "Piçarra": "31/10",
+      "São João do Araguaia": "31/10",
+      "Floresta do Araguaia": "31/10",
+      "Marabá": "09/11",
+      "Jacundá": "14/11",
+      "Tailândia": "17/11",
+      "Breu Branco": "29/11",
+      "Abel Figueiredo": "03/12",
+      "Rondon do Pará": "08/12",
+      "Ipixuna do Pará": "09/12",
+      "Goianésia do Pará": "12/12",
+      "Tomé-Açu": "12/12",
+      "Paragominas": "13/12",
+      "Rurópolis": "24/12",
+      "Ulianópolis": "29/12",
+      "Dom Eliseu": "29/12",
+      "Belterra": "01/01",
+      "Placas": "03/01",
+      "Uruará": "03/01",
+      "Brejo Grande do Araguaia": "03/01",
+      "Santarém": "07/01",
+      "Monte Alegre": "10/01"
+    }
+  },
+  "variaveis": [
+    "inicio_verdor_dias",
+    "dias_ate_pico"
+  ],
+  "registros": 407,
+  "municipios": 37,
+  "sem_fenologia": {
+    "Random Forest": {
+      "RMSE": 430.8,
+      "MAE": 307.7,
+      "R2": 0.165,
+      "rRMSE_%": 14.4,
+      "ganho_sobre_referencia": -0.065,
+      "IC95": [
+        -0.168,
+        0.026
+      ],
+      "p_unilateral": 0.904,
+      "p_holm": 1.0
+    },
+    "XGBoost": {
+      "RMSE": 430.6,
+      "MAE": 306.0,
+      "R2": 0.166,
+      "rRMSE_%": 14.4,
+      "ganho_sobre_referencia": -0.064,
+      "IC95": [
+        -0.151,
+        0.007
+      ],
+      "p_unilateral": 0.964,
+      "p_holm": 1.0
+    },
+    "SVR": {
+      "RMSE": 419.8,
+      "MAE": 296.9,
+      "R2": 0.208,
+      "rRMSE_%": 14.0,
+      "ganho_sobre_referencia": -0.011,
+      "IC95": [
+        -0.048,
+        0.03
+      ],
+      "p_unilateral": 0.7315,
+      "p_holm": 1.0
+    },
+    "MLP": {
+      "RMSE": 422.6,
+      "MAE": 300.6,
+      "R2": 0.197,
+      "rRMSE_%": 14.1,
+      "ganho_sobre_referencia": -0.025,
+      "IC95": [
+        -0.075,
+        0.0
+      ],
+      "p_unilateral": 0.9645,
+      "p_holm": 1.0
+    }
+  },
+  "com_fenologia": {
+    "Random Forest": {
+      "RMSE": 438.8,
+      "MAE": 311.8,
+      "R2": 0.134,
+      "rRMSE_%": 14.7,
+      "ganho_sobre_referencia": -0.105,
+      "IC95": [
+        -0.205,
+        -0.019
+      ],
+      "p_unilateral": 0.993,
+      "p_holm": 1.0
+    },
+    "XGBoost": {
+      "RMSE": 429.9,
+      "MAE": 304.7,
+      "R2": 0.169,
+      "rRMSE_%": 14.4,
+      "ganho_sobre_referencia": -0.061,
+      "IC95": [
+        -0.157,
+        0.011
+      ],
+      "p_unilateral": 0.943,
+      "p_holm": 1.0
+    },
+    "SVR": {
+      "RMSE": 420.8,
+      "MAE": 298.5,
+      "R2": 0.204,
+      "rRMSE_%": 14.1,
+      "ganho_sobre_referencia": -0.016,
+      "IC95": [
+        -0.048,
+        0.017
+      ],
+      "p_unilateral": 0.841,
+      "p_holm": 1.0
+    },
+    "MLP": {
+      "RMSE": 419.7,
+      "MAE": 299.3,
+      "R2": 0.208,
+      "rRMSE_%": 14.0,
+      "ganho_sobre_referencia": -0.011,
+      "IC95": [
+        -0.031,
+        0.006
+      ],
+      "p_unilateral": 0.9035,
+      "p_holm": 1.0
+    }
+  }
+}

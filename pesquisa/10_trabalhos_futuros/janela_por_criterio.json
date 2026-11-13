@@ -1,0 +1,303 @@
+{
+  "nota": "Janela de pulverização do aplicativo (regras de TempoCalculo.kt) sobre a previsão de curto prazo do Open-Meteo e sobre o medido nas estações do INMET, 2025-11-01 a 2026-04-30. Concordância: acerto e kappa de Cohen entre as três classes; vento a 10 m levado a 2 m como no aplicativo.",
+  "estacoes": {
+    "A211": "Placas",
+    "A212": "Paragominas",
+    "A213": "Tomé-Açu",
+    "A216": "São Félix do Xingu",
+    "A234": "Tucumã",
+    "A239": "Monte Alegre",
+    "A241": "Conceição do Araguaia",
+    "A250": "Santarém",
+    "A252": "Dom Eliseu",
+    "A253": "Altamira",
+    "A254": "Redenção",
+    "A256": "Santa Maria das Barreiras"
+  },
+  "como_esta": {
+    "horas": 38079,
+    "acerto": 0.419,
+    "kappa": 0.147,
+    "boa_prevista_que_era_evitar": 0.106,
+    "boa_prevista_que_era_boa": 0.262,
+    "horas_previstas_boas": 7875
+  },
+  "criterios": {
+    "chuva na hora": {
+      "medido_%": 9.9,
+      "previsto_%": 47.2,
+      "acerto_do_medido_%": 66.6,
+      "alarme_falso_%": 86.1
+    },
+    "temperatura acima de 30 °C": {
+      "medido_%": 18.0,
+      "previsto_%": 14.5,
+      "acerto_do_medido_%": 65.4,
+      "alarme_falso_%": 18.9
+    },
+    "umidade abaixo de 60%": {
+      "medido_%": 9.0,
+      "previsto_%": 9.8,
+      "acerto_do_medido_%": 65.2,
+      "alarme_falso_%": 40.1
+    },
+    "vento acima de 10 km/h": {
+      "medido_%": 3.7,
+      "previsto_%": 6.6,
+      "acerto_do_medido_%": 43.1,
+      "alarme_falso_%": 75.8
+    },
+    "vento de 8 a 10 km/h": {
+      "medido_%": 5.6,
+      "previsto_%": 11.2,
+      "acerto_do_medido_%": 24.7,
+      "alarme_falso_%": 87.6
+    },
+    "vento abaixo de 3 km/h": {
+      "medido_%": 45.3,
+      "previsto_%": 21.7,
+      "acerto_do_medido_%": 31.8,
+      "alarme_falso_%": 33.6
+    }
+  },
+  "substituicao": {
+    "temperatura": {
+      "horas": 38079,
+      "acerto": 0.436,
+      "kappa": 0.173,
+      "boa_prevista_que_era_evitar": 0.074,
+      "boa_prevista_que_era_boa": 0.275,
+      "horas_previstas_boas": 7672
+    },
+    "umidade": {
+      "horas": 38079,
+      "acerto": 0.425,
+      "kappa": 0.156,
+      "boa_prevista_que_era_evitar": 0.094,
+      "boa_prevista_que_era_boa": 0.265,
+      "horas_previstas_boas": 7837
+    },
+    "vento": {
+      "horas": 38079,
+      "acerto": 0.585,
+      "kappa": 0.374,
+      "boa_prevista_que_era_evitar": 0.146,
+      "boa_prevista_que_era_boa": 0.816,
+      "horas_previstas_boas": 3980
+    },
+    "chuva": {
+      "horas": 38079,
+      "acerto": 0.575,
+      "kappa": 0.369,
+      "boa_prevista_que_era_evitar": 0.089,
+      "boa_prevista_que_era_boa": 0.375,
+      "horas_previstas_boas": 16147
+    },
+    "vento e chuva": {
+      "horas": 38079,
+      "acerto": 0.916,
+      "kappa": 0.872,
+      "boa_prevista_que_era_evitar": 0.125,
+      "boa_prevista_que_era_boa": 0.875,
+      "horas_previstas_boas": 11072
+    }
+  },
+  "correcao_do_vento": {
+    "reta da própria estação (ajuste nov-jan, teste fev-abr)": {
+      "antes": {
+        "horas": 17866,
+        "acerto": 0.377,
+        "kappa": 0.106,
+        "boa_prevista_que_era_evitar": 0.107,
+        "boa_prevista_que_era_boa": 0.264,
+        "horas_previstas_boas": 3199
+      },
+      "depois": {
+        "horas": 17866,
+        "acerto": 0.4,
+        "kappa": 0.138,
+        "boa_prevista_que_era_evitar": 0.124,
+        "boa_prevista_que_era_boa": 0.318,
+        "horas_previstas_boas": 3197
+      }
+    },
+    "viés por hora do dia da própria estação (ajuste nov-jan, teste fev-abr)": {
+      "antes": {
+        "horas": 17866,
+        "acerto": 0.377,
+        "kappa": 0.106,
+        "boa_prevista_que_era_evitar": 0.107,
+        "boa_prevista_que_era_boa": 0.264,
+        "horas_previstas_boas": 3199
+      },
+      "depois": {
+        "horas": 17866,
+        "acerto": 0.423,
+        "kappa": 0.158,
+        "boa_prevista_que_era_evitar": 0.123,
+        "boa_prevista_que_era_boa": 0.352,
+        "horas_previstas_boas": 2065
+      }
+    },
+    "reta da estação mais próxima (período inteiro)": {
+      "antes": {
+        "horas": 38079,
+        "acerto": 0.419,
+        "kappa": 0.147,
+        "boa_prevista_que_era_evitar": 0.106,
+        "boa_prevista_que_era_boa": 0.262,
+        "horas_previstas_boas": 7875
+      },
+      "depois": {
+        "horas": 38079,
+        "acerto": 0.403,
+        "kappa": 0.133,
+        "boa_prevista_que_era_evitar": 0.137,
+        "boa_prevista_que_era_boa": 0.256,
+        "horas_previstas_boas": 9921
+      }
+    },
+    "retas": {
+      "A211": {
+        "a_kmh": 1.47,
+        "b": 0.57,
+        "vizinha": "A250",
+        "distancia_km": 161
+      },
+      "A212": {
+        "a_kmh": -1.08,
+        "b": 0.88,
+        "vizinha": "A213",
+        "distancia_km": 102
+      },
+      "A213": {
+        "a_kmh": -0.2,
+        "b": 0.48,
+        "vizinha": "A212",
+        "distancia_km": 102
+      },
+      "A216": {
+        "a_kmh": 3.49,
+        "b": 0.64,
+        "vizinha": "A234",
+        "distancia_km": 91
+      },
+      "A234": {
+        "a_kmh": 1.85,
+        "b": 0.33,
+        "vizinha": "A216",
+        "distancia_km": 91
+      },
+      "A239": {
+        "a_kmh": 4.0,
+        "b": 0.55,
+        "vizinha": "A250",
+        "distancia_km": 91
+      },
+      "A241": {
+        "a_kmh": 2.99,
+        "b": 0.3,
+        "vizinha": "A256",
+        "distancia_km": 79
+      },
+      "A250": {
+        "a_kmh": 1.54,
+        "b": 0.43,
+        "vizinha": "A239",
+        "distancia_km": 91
+      },
+      "A252": {
+        "a_kmh": 2.78,
+        "b": 0.41,
+        "vizinha": "A212",
+        "distancia_km": 154
+      },
+      "A253": {
+        "a_kmh": 0.67,
+        "b": 0.45,
+        "vizinha": "A211",
+        "distancia_km": 213
+      },
+      "A254": {
+        "a_kmh": 2.7,
+        "b": 0.42,
+        "vizinha": "A256",
+        "distancia_km": 78
+      },
+      "A256": {
+        "a_kmh": 3.89,
+        "b": 0.34,
+        "vizinha": "A254",
+        "distancia_km": 78
+      }
+    }
+  },
+  "limiar_da_chance_de_chuva": {
+    "50% (o do aplicativo)": {
+      "horas": 38079,
+      "acerto": 0.419,
+      "kappa": 0.147,
+      "boa_prevista_que_era_evitar": 0.106,
+      "boa_prevista_que_era_boa": 0.262,
+      "horas_previstas_boas": 7875,
+      "horas_de_chuva_previstas_%": 36.8,
+      "acerto_da_chuva_medida_%": 66.6,
+      "alarme_falso_de_chuva_%": 86.1
+    },
+    "60%": {
+      "horas": 38079,
+      "acerto": 0.426,
+      "kappa": 0.155,
+      "boa_prevista_que_era_evitar": 0.111,
+      "boa_prevista_que_era_boa": 0.266,
+      "horas_previstas_boas": 8380,
+      "horas_de_chuva_previstas_%": 33.9,
+      "acerto_da_chuva_medida_%": 62.6,
+      "alarme_falso_de_chuva_%": 85.8
+    },
+    "70%": {
+      "horas": 38079,
+      "acerto": 0.431,
+      "kappa": 0.161,
+      "boa_prevista_que_era_evitar": 0.114,
+      "boa_prevista_que_era_boa": 0.269,
+      "horas_previstas_boas": 8791,
+      "horas_de_chuva_previstas_%": 31.6,
+      "acerto_da_chuva_medida_%": 59.6,
+      "alarme_falso_de_chuva_%": 85.5
+    },
+    "80%": {
+      "horas": 38079,
+      "acerto": 0.435,
+      "kappa": 0.164,
+      "boa_prevista_que_era_evitar": 0.117,
+      "boa_prevista_que_era_boa": 0.272,
+      "horas_previstas_boas": 9066,
+      "horas_de_chuva_previstas_%": 29.7,
+      "acerto_da_chuva_medida_%": 56.2,
+      "alarme_falso_de_chuva_%": 85.5
+    },
+    "90%": {
+      "horas": 38079,
+      "acerto": 0.436,
+      "kappa": 0.165,
+      "boa_prevista_que_era_evitar": 0.119,
+      "boa_prevista_que_era_boa": 0.272,
+      "horas_previstas_boas": 9217,
+      "horas_de_chuva_previstas_%": 28.7,
+      "acerto_da_chuva_medida_%": 54.3,
+      "alarme_falso_de_chuva_%": 85.4
+    },
+    "só a chuva prevista": {
+      "horas": 38079,
+      "acerto": 0.437,
+      "kappa": 0.165,
+      "boa_prevista_que_era_evitar": 0.121,
+      "boa_prevista_que_era_boa": 0.272,
+      "horas_previstas_boas": 9322,
+      "horas_de_chuva_previstas_%": 28.1,
+      "acerto_da_chuva_medida_%": 53.3,
+      "alarme_falso_de_chuva_%": 85.4
+    }
+  }
+}

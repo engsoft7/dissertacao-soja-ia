@@ -110,7 +110,7 @@ class EstadoCarregado:
 
 
 def _carrega_outros_estados() -> None:
-    """Mato Grosso e Maranhão depois do Pará, sem atrasar a subida da API."""
+    """Os outros estados depois do Pará, sem atrasar a subida da API."""
     for e in estados.disponiveis():
         if e.uf in AppState.estados:
             continue
@@ -189,6 +189,7 @@ def _financas_de_outro_estado(municipio: str, ce: "EstadoCarregado", fin: dict) 
     praca_csv, rotulo = estados.praca_conab(ce.estado, sede)
     lev = estados.levantamento_da_praca(praca_csv, rotulo, LEVANTAMENTO["levantamento"],
                                         LEVANTAMENTO["levantamento_extenso"])
+    comp = lev.get("custo_por_componente") or {}
     return {
         "municipio": municipio,
         "uf": ce.estado.uf,
@@ -201,8 +202,10 @@ def _financas_de_outro_estado(municipio: str, ce: "EstadoCarregado", fin: dict) 
         "custo_variavel_saca": lev["custo_variavel_saca"],
         "custo_fixo_ha": lev["custo_fixo_saca"] * lev["produtividade_referencia_sc_ha"],
         "produtividade_referencia_sc": lev["produtividade_referencia_sc_ha"],
-        # Sem o custo aberto por item nessas praças: o aplicativo usa os dois rateios.
-        "custo_area_ha": None, "custo_transporte_saca": None, "taxa_cessr": None,
+        # Sem o custo aberto por item, o aplicativo usa os dois rateios; só Pedro
+        # Afonso (Tocantins), o levantamento do Pará, traz os itens.
+        "custo_area_ha": comp.get("area_ha"), "custo_transporte_saca": comp.get("transporte_saca"),
+        "taxa_cessr": comp.get("taxa_receita"),
         # A tabela de VTN da Receita Federal no produto é só a do Pará.
         "vtn_ha": None,
         "fonte_preco": lev["textos"]["descricao"],

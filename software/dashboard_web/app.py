@@ -319,16 +319,16 @@ st.set_page_config(
     layout="wide")
 
 # ── ESTADO ───────────────────────────────────────────────────────────────────
-# O Pará é o recorte da dissertação. Mato Grosso e Maranhão entram com a mesma
-# conta e a base de pesquisa/dados/estados/ (api_backend/estados.py), como na
+# O Pará é o recorte da dissertação. Mato Grosso, Maranhão, Tocantins e Rondônia
+# entram com a mesma conta e a base de pesquisa/dados/estados/ (api_backend/estados.py), como na
 # API; sem as bases no disco, o seletor nem aparece.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
 import estados as _estados  # noqa: E402
 _UFS = [e.uf for e in _estados.disponiveis()]
 UF = (st.sidebar.selectbox(
           "Estado", _UFS, key="uf_sel", format_func=lambda u: _estados.ESTADOS[u].nome,
-          help="O Pará é o recorte da dissertação; Mato Grosso e Maranhão usam a mesma conta, "
-               "com a base de cada estado.")
+          help="O Pará é o recorte da dissertação; os outros estados usam a mesma conta, "
+               "com a base de cada um.")
       if len(_UFS) > 1 else "PA")
 ESTADO = _estados.ESTADOS[UF]
 NOME_ESTADO = ESTADO.nome
@@ -1207,7 +1207,8 @@ municipios = sorted(df.municipio.unique())
 
 # Ao trocar de estado, o município escolhido no outro deixa de valer.
 if st.session_state.get("mun_sel") not in municipios:
-    _padrao = {"PA": "Paragominas", "MT": "Sorriso", "MA": "Balsas"}.get(UF)
+    _padrao = {"PA": "Paragominas", "MT": "Sorriso", "MA": "Balsas", "TO": "Porto Nacional",
+               "RO": "Vilhena"}.get(UF)
     st.session_state.mun_sel = _padrao if _padrao in municipios else municipios[0]
 
 if "last_map_click" not in st.session_state:

@@ -115,7 +115,8 @@ pesquisa/02_revisao_sistematica/
   01_busca_bases_abertas.py               busca em OpenAlex e Crossref (PRISMA)
   02_recupera_autoria_crossref.py         autoria real via DOI, formato ABNT
   03_codifica_estudos.py                  técnicas, variáveis e métricas dos 53 → Figuras 1 a 5
-  estudos_triados.csv                     70 elegíveis, com a decisão (coluna DECISAO)
+  estudos_triados.csv                     70 elegíveis, com a decisão e o motivo (DECISAO, JUSTIFICATIVA)
+  05_sensibilidade_escala.py              a síntese só com os 39 estudos de escala regional
   codificacao_53_estudos.csv              a codificação que as Figuras 2 a 5 mostram
   referencias_53_estudos_abnt.txt         os 53 incluídos, em ABNT
 pesquisa/03_analise_nacional/

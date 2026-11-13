@@ -1,13 +1,13 @@
-# Monta a base do produto em Mato Grosso e no Maranhão (monta_base_estados.py)
+# Monta a base do produto em Mato Grosso, Maranhão, Tocantins e Rondônia (monta_base_estados.py)
 # com o que o ambiente de desenvolvimento não alcança: a PAM pelo SIDRA, com a
 # safra mais nova, e o contorno de cada estado pela malha do IBGE. Lista também
-# as praças de soja que a Agrolink publica nos dois estados (precos_para.py).
+# as praças de soja que a Agrolink publica em cada estado (precos_para.py).
 #
-# Disparo: aba Actions > "Monta Mato Grosso e Maranhão" > Run workflow, ou um
+# Disparo: aba Actions > "Monta os outros estados" > Run workflow, ou um
 # push a uma branch de trabalho com "[estados]" na mensagem do commit. Grava em
 # pesquisa/dados/estados/ na própria branch; nunca na main, que recebe a base
 # pela atualização mensal (atualiza-dados.yml) depois do merge.
-name: Monta Mato Grosso e Maranhão
+name: Monta os outros estados
 
 on:
   workflow_dispatch:
@@ -34,7 +34,7 @@ jobs:
         run: |
           pip install --quiet pandas requests
           python software/automacao_github/monta_base_estados.py
-      - name: Praças da Agrolink em Mato Grosso e no Maranhão
+      - name: Praças da Agrolink em cada estado
         working-directory: software/api_backend
         run: |
           python - <<'PY'
@@ -51,7 +51,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add pesquisa/dados/estados
           if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
-          git commit -m "Base de Mato Grosso e do Maranhão (SIDRA e malha do IBGE)"
+          git commit -m "Base dos outros estados (SIDRA e malha do IBGE)"
           for i in 1 2 3 4 5; do
             git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
             sleep $((i * 5))

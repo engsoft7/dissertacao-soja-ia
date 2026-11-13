@@ -215,6 +215,9 @@ URLS_PRACAS_ESTADO = {
     "MT": [f"https://www.agrolink.com.br/regional/mt/{c}/cotacoes"
            for c in ("sorriso", "rondonopolis", "primavera-do-leste", "lucas-do-rio-verde", "sinop")],
     "MA": [f"https://www.agrolink.com.br/regional/ma/{c}/cotacoes" for c in ("balsas", "imperatriz")],
+    "TO": [f"https://www.agrolink.com.br/regional/to/{c}/cotacoes"
+           for c in ("pedro-afonso", "porto-nacional", "gurupi", "guarai")],
+    "RO": [f"https://www.agrolink.com.br/regional/ro/{c}/cotacoes" for c in ("vilhena", "cerejeiras")],
 }
 
 

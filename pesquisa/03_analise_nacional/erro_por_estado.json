@@ -1,0 +1,392 @@
+{
+  "nota": "Previsões do protocolo da Tabela 3 (04_avalia_ajustado.py, safras de 2016 a 2020) repartidas por estado. Erro relativo = RMSE sobre a produtividade média do estado nas safras de teste; viés = previsto menos observado; repetição = pares de safras sucessivas com produtividade idêntica, nas vinte safras da base. Ganho do SVR sobre a referência (média do município + tendência) = 1 − MSE(SVR)/MSE(referência), IC95 por reamostragem de municípios.",
+  "produtividade_media": {
+    "base inteira (2001-2020)": 2693.4,
+    "safras de teste (2016-2020)": 3171.0
+  },
+  "conjunto": {
+    "Random Forest": {
+      "RMSE": 476.0,
+      "MAE": 353.5,
+      "erro_relativo_%": 15.0,
+      "vies": 76.7,
+      "R2": 0.387
+    },
+    "XGBoost": {
+      "RMSE": 480.6,
+      "MAE": 352.8,
+      "erro_relativo_%": 15.2,
+      "vies": 80.0,
+      "R2": 0.374
+    },
+    "SVR": {
+      "RMSE": 460.7,
+      "MAE": 339.6,
+      "erro_relativo_%": 14.5,
+      "vies": 93.6,
+      "R2": 0.425
+    },
+    "MLP": {
+      "RMSE": 549.6,
+      "MAE": 409.6,
+      "erro_relativo_%": 17.3,
+      "vies": 89.9,
+      "R2": 0.182
+    }
+  },
+  "estados": {
+    "BAHIA": {
+      "registros": 50,
+      "municipios": 10,
+      "produtividade_media": 3246.8,
+      "desvio_padrao": 650.5,
+      "repeticao_%": 4.7,
+      "Referência": {
+        "RMSE": 572.7,
+        "MAE": 461.8,
+        "erro_relativo_%": 17.6,
+        "vies": -82.8,
+        "R2": 0.225
+      },
+      "Random Forest": {
+        "RMSE": 616.9,
+        "MAE": 484.5,
+        "erro_relativo_%": 19.0,
+        "vies": -275.2,
+        "R2": 0.1
+      },
+      "XGBoost": {
+        "RMSE": 605.0,
+        "MAE": 488.5,
+        "erro_relativo_%": 18.6,
+        "vies": -203.6,
+        "R2": 0.135
+      },
+      "SVR": {
+        "RMSE": 580.0,
+        "MAE": 471.9,
+        "erro_relativo_%": 17.9,
+        "vies": -126.3,
+        "R2": 0.205
+      },
+      "MLP": {
+        "RMSE": 489.3,
+        "MAE": 368.8,
+        "erro_relativo_%": 15.1,
+        "vies": -121.2,
+        "R2": 0.434
+      },
+      "ganho_do_SVR_sobre_a_referencia": {
+        "ganho": -0.026,
+        "IC95": [
+          -1.203,
+          0.4
+        ]
+      }
+    },
+    "GOIAS": {
+      "registros": 845,
+      "municipios": 169,
+      "produtividade_media": 3178.7,
+      "desvio_padrao": 425.3,
+      "repeticao_%": 23.2,
+      "Referência": {
+        "RMSE": 399.7,
+        "MAE": 289.3,
+        "erro_relativo_%": 12.6,
+        "vies": 78.4,
+        "R2": 0.117
+      },
+      "Random Forest": {
+        "RMSE": 424.9,
+        "MAE": 314.8,
+        "erro_relativo_%": 13.4,
+        "vies": 149.1,
+        "R2": 0.002
+      },
+      "XGBoost": {
+        "RMSE": 400.7,
+        "MAE": 290.5,
+        "erro_relativo_%": 12.6,
+        "vies": 85.7,
+        "R2": 0.112
+      },
+      "SVR": {
+        "RMSE": 407.3,
+        "MAE": 299.1,
+        "erro_relativo_%": 12.8,
+        "vies": 129.8,
+        "R2": 0.083
+      },
+      "MLP": {
+        "RMSE": 413.2,
+        "MAE": 300.6,
+        "erro_relativo_%": 13.0,
+        "vies": 140.1,
+        "R2": 0.056
+      },
+      "ganho_do_SVR_sobre_a_referencia": {
+        "ganho": -0.038,
+        "IC95": [
+          -0.132,
+          0.041
+        ]
+      }
+    },
+    "MATO_GROSSO": {
+      "registros": 495,
+      "municipios": 99,
+      "produtividade_media": 3250.3,
+      "desvio_padrao": 317.7,
+      "repeticao_%": 12.7,
+      "Referência": {
+        "RMSE": 339.0,
+        "MAE": 259.3,
+        "erro_relativo_%": 10.4,
+        "vies": 197.9,
+        "R2": -0.138
+      },
+      "Random Forest": {
+        "RMSE": 309.5,
+        "MAE": 237.3,
+        "erro_relativo_%": 9.5,
+        "vies": 122.7,
+        "R2": 0.052
+      },
+      "XGBoost": {
+        "RMSE": 298.7,
+        "MAE": 223.3,
+        "erro_relativo_%": 9.2,
+        "vies": 103.1,
+        "R2": 0.116
+      },
+      "SVR": {
+        "RMSE": 280.4,
+        "MAE": 214.5,
+        "erro_relativo_%": 8.6,
+        "vies": 80.4,
+        "R2": 0.221
+      },
+      "MLP": {
+        "RMSE": 358.2,
+        "MAE": 274.3,
+        "erro_relativo_%": 11.0,
+        "vies": 144.0,
+        "R2": -0.271
+      },
+      "ganho_do_SVR_sobre_a_referencia": {
+        "ganho": 0.316,
+        "IC95": [
+          0.189,
+          0.419
+        ]
+      }
+    },
+    "MATO_GROSSO_DO_SUL": {
+      "registros": 325,
+      "municipios": 65,
+      "produtividade_media": 3162.2,
+      "desvio_padrao": 478.8,
+      "repeticao_%": 9.1,
+      "Referência": {
+        "RMSE": 471.4,
+        "MAE": 353.4,
+        "erro_relativo_%": 14.9,
+        "vies": -64.9,
+        "R2": 0.031
+      },
+      "Random Forest": {
+        "RMSE": 400.4,
+        "MAE": 307.0,
+        "erro_relativo_%": 12.7,
+        "vies": 66.3,
+        "R2": 0.301
+      },
+      "XGBoost": {
+        "RMSE": 398.7,
+        "MAE": 307.8,
+        "erro_relativo_%": 12.6,
+        "vies": 65.8,
+        "R2": 0.307
+      },
+      "SVR": {
+        "RMSE": 376.7,
+        "MAE": 291.6,
+        "erro_relativo_%": 11.9,
+        "vies": 78.0,
+        "R2": 0.381
+      },
+      "MLP": {
+        "RMSE": 543.0,
+        "MAE": 429.8,
+        "erro_relativo_%": 17.2,
+        "vies": 51.5,
+        "R2": -0.286
+      },
+      "ganho_do_SVR_sobre_a_referencia": {
+        "ganho": 0.361,
+        "IC95": [
+          0.218,
+          0.479
+        ]
+      }
+    },
+    "MINAS_GERAIS": {
+      "registros": 675,
+      "municipios": 135,
+      "produtividade_media": 3352.0,
+      "desvio_padrao": 459.6,
+      "repeticao_%": 27.6,
+      "Referência": {
+        "RMSE": 486.0,
+        "MAE": 376.9,
+        "erro_relativo_%": 14.5,
+        "vies": -181.4,
+        "R2": -0.118
+      },
+      "Random Forest": {
+        "RMSE": 442.0,
+        "MAE": 334.9,
+        "erro_relativo_%": 13.2,
+        "vies": -53.2,
+        "R2": 0.075
+      },
+      "XGBoost": {
+        "RMSE": 434.2,
+        "MAE": 328.3,
+        "erro_relativo_%": 13.0,
+        "vies": -89.2,
+        "R2": 0.108
+      },
+      "SVR": {
+        "RMSE": 430.2,
+        "MAE": 320.2,
+        "erro_relativo_%": 12.8,
+        "vies": -45.3,
+        "R2": 0.124
+      },
+      "MLP": {
+        "RMSE": 448.9,
+        "MAE": 336.7,
+        "erro_relativo_%": 13.4,
+        "vies": -45.3,
+        "R2": 0.046
+      },
+      "ganho_do_SVR_sobre_a_referencia": {
+        "ganho": 0.216,
+        "IC95": [
+          0.105,
+          0.319
+        ]
+      }
+    },
+    "PARANA": {
+      "registros": 1840,
+      "municipios": 368,
+      "produtividade_media": 3305.5,
+      "desvio_padrao": 556.5,
+      "repeticao_%": 4.4,
+      "Referência": {
+        "RMSE": 508.9,
+        "MAE": 385.5,
+        "erro_relativo_%": 15.4,
+        "vies": -10.4,
+        "R2": 0.164
+      },
+      "Random Forest": {
+        "RMSE": 479.0,
+        "MAE": 358.9,
+        "erro_relativo_%": 14.5,
+        "vies": 76.2,
+        "R2": 0.259
+      },
+      "XGBoost": {
+        "RMSE": 464.2,
+        "MAE": 353.0,
+        "erro_relativo_%": 14.0,
+        "vies": 88.5,
+        "R2": 0.304
+      },
+      "SVR": {
+        "RMSE": 449.7,
+        "MAE": 336.8,
+        "erro_relativo_%": 13.6,
+        "vies": 109.5,
+        "R2": 0.347
+      },
+      "MLP": {
+        "RMSE": 535.3,
+        "MAE": 416.6,
+        "erro_relativo_%": 16.2,
+        "vies": 71.2,
+        "R2": 0.075
+      },
+      "ganho_do_SVR_sobre_a_referencia": {
+        "ganho": 0.219,
+        "IC95": [
+          0.16,
+          0.276
+        ]
+      }
+    },
+    "RIO_GRANDE_DO_SUL": {
+      "registros": 1985,
+      "municipios": 397,
+      "produtividade_media": 2961.3,
+      "desvio_padrao": 757.2,
+      "repeticao_%": 12.3,
+      "Referência": {
+        "RMSE": 786.2,
+        "MAE": 663.6,
+        "erro_relativo_%": 26.6,
+        "vies": -227.2,
+        "R2": -0.078
+      },
+      "Random Forest": {
+        "RMSE": 541.9,
+        "MAE": 404.7,
+        "erro_relativo_%": 18.3,
+        "vies": 89.6,
+        "R2": 0.488
+      },
+      "XGBoost": {
+        "RMSE": 577.6,
+        "MAE": 423.6,
+        "erro_relativo_%": 19.5,
+        "vies": 131.0,
+        "R2": 0.418
+      },
+      "SVR": {
+        "RMSE": 540.4,
+        "MAE": 401.9,
+        "erro_relativo_%": 18.2,
+        "vies": 122.1,
+        "R2": 0.491
+      },
+      "MLP": {
+        "RMSE": 672.7,
+        "MAE": 505.8,
+        "erro_relativo_%": 22.7,
+        "vies": 129.9,
+        "R2": 0.211
+      },
+      "ganho_do_SVR_sobre_a_referencia": {
+        "ganho": 0.528,
+        "IC95": [
+          0.496,
+          0.556
+        ]
+      }
+    }
+  },
+  "repeticao_contra_desempenho_(Spearman, 7 estados)": {
+    "ganho do SVR sobre a referência": {
+      "rho": -0.21,
+      "p": 0.645
+    },
+    "R² do SVR": {
+      "rho": -0.54,
+      "p": 0.215
+    }
+  }
+}

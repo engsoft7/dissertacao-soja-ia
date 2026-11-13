@@ -2,8 +2,9 @@ package com.agrointeligencia.app
 
 // ── O ESTADO ──────────────────────────────────────────────────────────────
 //
-// O Pará é o recorte da dissertação. Mato Grosso e Maranhão entram com a
-// mesma conta, a base de cada estado e o custo da CONAB no próprio estado
+// O Pará é o recorte da dissertação. Mato Grosso, Maranhão, Tocantins e
+// Rondônia entram com a mesma conta, a base de cada estado e o custo da CONAB
+// no próprio estado ou, em Rondônia, na praça mais perto
 // (software/api_backend/estados.py). Sem escolha, o Pará, como até a 2.7: as
 // consultas do Pará vão sem ?uf= e as chaves dele no AgroAppCache são as de
 // sempre, e quem atualiza o aplicativo não perde nada do que estava guardado.
@@ -21,6 +22,8 @@ val ESTADOS_DO_APP = listOf(
     EstadoDoApp("PA", "Pará", "no Pará", "do Pará"),
     EstadoDoApp("MT", "Mato Grosso", "em Mato Grosso", "de Mato Grosso"),
     EstadoDoApp("MA", "Maranhão", "no Maranhão", "do Maranhão"),
+    EstadoDoApp("TO", "Tocantins", "no Tocantins", "do Tocantins"),
+    EstadoDoApp("RO", "Rondônia", "em Rondônia", "de Rondônia"),
 )
 
 /** Chave do estado escolhido em AgroAppCache. */

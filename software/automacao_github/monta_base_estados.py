@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-"""Monta a base do produto em Mato Grosso e no Maranhão, no formato da do Pará.
+"""Monta a base do produto nos outros estados da Amazônia Legal, no formato da do Pará.
 
 A dissertação deixa como trabalho futuro estender o produto a outros estados
 da Amazônia Legal. O protocolo da Tabela 6 já rodou neles
 (pesquisa/10_trabalhos_futuros/06_amazonia_legal.py): em Mato Grosso os quatro
-modelos superam a referência; no Maranhão, a Random Forest e a SVR. Este script
+modelos superam a referência; no Maranhão, a Random Forest e a SVR; em Rondônia,
+só a SVR; em Tocantins, nenhum ganho resiste à correção para comparações
+múltiplas. Nos dois últimos o produto entra como no Pará: a estimativa quase
+coincide com a referência, e a tela mostra as duas lado a lado. Este script
 leva os mesmos registros ao formato que a API e o painel leem, um arquivo por
 estado em pesquisa/dados/estados/:
 
@@ -32,7 +35,7 @@ estado, como em 06_amazonia_legal.py, e o que não pareia é listado. Com dois
 nomes corrigidos à mão (ALIASES), Mato Grosso fica com 118 municípios, dois a
 mais que na análise da pesquisa.
 
-Uso:   python software/automacao_github/monta_base_estados.py [MT MA]
+Uso:   python software/automacao_github/monta_base_estados.py [MT MA TO RO]
        SEM_IBGE=1 python ...   sem tentar o SIDRA e a malha (onde o IBGE não é alcançável)
 """
 from __future__ import annotations
@@ -57,7 +60,7 @@ COLETA = RAIZ / "pesquisa" / "10_trabalhos_futuros" / "dados"
 PAM_NACIONAL = RAIZ / "pesquisa" / "03_analise_nacional" / "pam_soja_municipios.csv"
 SAIDA = RAIZ / "pesquisa" / "dados" / "estados"
 
-ESTADOS = {"MT": 51, "MA": 21}
+ESTADOS = {"MT": 51, "MA": 21, "TO": 17, "RO": 11}
 COLUNAS = ["municipio", "ano", "soy_area_ha", "NDVI_mean", "NDVI_max", "EVI_mean", "EVI_max",
            "precip_total", "temp_mean", "temp_max", "srad_mean", "etp_total", "cod_ibge7",
            "rendimento_kg_ha"]

@@ -306,7 +306,7 @@ fun EscolhaMunicipioDialog(
         title = { Text("Escolha o município") },
         text = {
             Column {
-                // O estado antes do município: Pará, Mato Grosso ou Maranhão (Estados.kt).
+                // O estado antes do município: os de ESTADOS_DO_APP (Estados.kt).
                 aoEscolherEstado?.let { escolher ->
                     SeletorEstado(estado, escolher)
                     Spacer(Modifier.size(12.dp))
@@ -341,7 +341,7 @@ fun EscolhaMunicipioDialog(
 @Composable
 fun SeletorEstado(estado: EstadoDoApp, aoEscolher: (String) -> Unit) {
     Text("Estado", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    // Rola de lado se não couber: com a fonte do sistema grande, os três não cabem na janela.
+    // Rola de lado se não couber: os cinco não cabem na janela.
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.fillMaxWidth().padding(top = 4.dp).horizontalScroll(rememberScrollState())) {
         ESTADOS_DO_APP.forEach { e ->

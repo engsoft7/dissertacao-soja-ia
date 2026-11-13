@@ -239,11 +239,11 @@ jobs:
           RESUMO_MD: /tmp/resumo_pam.md
         run: python software/automacao_github/atualiza_pam.py
 
-      # Mato Grosso e Maranhão (estados.py): a série oficial do SIDRA e a base
+      # Os outros estados (estados.py): a série oficial do SIDRA e a base
       # do modelo, remontadas com as revisões e a safra nova da PAM. As
       # variáveis de satélite deles vêm da coleta da pesquisa e só mudam
       # quando ela roda de novo.
-      - name: Atualiza Mato Grosso e Maranhão
+      - name: Atualiza os outros estados
         id: estados
         if: steps.pam.outcome == 'success'
         run: |
@@ -256,7 +256,7 @@ jobs:
           else
             echo "csv_alterado=true" >> "$GITHUB_OUTPUT"
             echo "" >> /tmp/resumo_pam.md
-            echo "- Mato Grosso e Maranhão: série oficial, base do modelo ou contorno mudou." >> /tmp/resumo_pam.md
+            echo "- Outros estados: série oficial, base do modelo ou contorno mudou." >> /tmp/resumo_pam.md
           fi
 
       # O README listava atualiza_enso.py como automático, mas nenhum workflow o

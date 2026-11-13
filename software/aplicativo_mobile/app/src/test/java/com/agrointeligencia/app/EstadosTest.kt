@@ -20,6 +20,9 @@ class EstadosTest {
         assertEquals("PA", estadoDoApp("SP").uf)
         assertEquals("no Maranhão", estadoDoApp("MA").no)
         assertEquals("de Mato Grosso", estadoDoApp("MT").de)
+        assertEquals("no Tocantins", estadoDoApp("TO").no)
+        assertEquals("de Rondônia", estadoDoApp("RO").de)
+        assertEquals("previsao_Vilhena_RO", chaveDoEstado("previsao_Vilhena", "RO"))
     }
 
     @Test

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Os estados do produto: o Pará da dissertação e, como extensão, Mato Grosso e Maranhão.
+"""Os estados do produto: o Pará da dissertação e, como extensão, Mato Grosso, Maranhão,
+Tocantins e Rondônia.
 
 O Pará é o recorte da dissertação, e tudo dele fica como estava: base, nomes,
 custo de Pedro Afonso (TO), praças da Agrolink. Mato Grosso e Maranhão entram
@@ -13,12 +14,21 @@ do Leste em Mato Grosso, a mais perto da sede do município, e Balsas no
 Maranhão. Diferente de Pedro Afonso, essas praças não têm o custo aberto por
 item na extração, e o aplicativo usa os dois rateios do custo variável.
 
+Tocantins e Rondônia entraram depois, com o que a pesquisa mediu neles: em
+Tocantins nenhum ganho sobre a referência resiste à correção para comparações
+múltiplas, e em Rondônia só o da SVR. Nos dois a estimativa quase coincide com
+a referência, como no Pará. Tocantins usa o levantamento de Pedro Afonso, que
+é do próprio estado: o mesmo do Pará (levantamento_atual.json), com o custo
+aberto por item. Rondônia não tem praça de custo na extração da CONAB e usa
+Sorriso (MT), a mais perto, com o nome da praça sempre à vista.
+
 Sem parâmetro de estado, a API responde pelo Pará: o aplicativo já instalado
 não manda estado e continua igual.
 """
 from __future__ import annotations
 
 import csv
+import json
 import math
 from dataclasses import dataclass
 from pathlib import Path
@@ -37,18 +47,19 @@ class Estado:
     municipios: Path
     geo: Path
     rios: Path | None
-    # Praças da CONAB no estado, com a sede (latitude, longitude); vazio no Pará,
-    # que usa o levantamento de Pedro Afonso (financas.LEVANTAMENTO).
+    # Praças da CONAB do estado (ou a mais perto dele), com a sede (latitude,
+    # longitude); vazio no Pará, que usa o levantamento de Pedro Afonso
+    # (financas.LEVANTAMENTO).
     pracas_conab: tuple[tuple[str, str, float, float], ...] = ()
 
     @property
     def no(self) -> str:
         """"no Pará", "em Mato Grosso", "no Maranhão": para as frases das telas."""
-        return {"PA": "no Pará", "MA": "no Maranhão"}.get(self.uf, f"em {self.nome}")
+        return {"PA": "no Pará", "MA": "no Maranhão", "TO": "no Tocantins"}.get(self.uf, f"em {self.nome}")
 
     @property
     def do(self) -> str:
-        return {"PA": "do Pará", "MA": "do Maranhão"}.get(self.uf, f"de {self.nome}")
+        return {"PA": "do Pará", "MA": "do Maranhão", "TO": "do Tocantins"}.get(self.uf, f"de {self.nome}")
 
 
 # Sedes das praças: kelvins/municipios-brasileiros, como municipios_<UF>.csv.
@@ -62,6 +73,12 @@ ESTADOS: dict[str, Estado] = {
     "MA": Estado("MA", "Maranhão", DADOS / "estados" / "soja_MA_painel.csv", DADOS / "estados" / "pam_soja_MA.csv",
                  DADOS / "estados" / "municipios_MA.csv", DADOS / "estados" / "ma_geo.json", None,
                  (("BALSAS-MA", "Balsas (MA)", -7.53214, -46.0372),)),
+    "TO": Estado("TO", "Tocantins", DADOS / "estados" / "soja_TO_painel.csv", DADOS / "estados" / "pam_soja_TO.csv",
+                 DADOS / "estados" / "municipios_TO.csv", DADOS / "estados" / "to_geo.json", None,
+                 (("PEDRO AFONSO-TO", "Pedro Afonso (TO)", -8.97034, -48.1729),)),
+    "RO": Estado("RO", "Rondônia", DADOS / "estados" / "soja_RO_painel.csv", DADOS / "estados" / "pam_soja_RO.csv",
+                 DADOS / "estados" / "municipios_RO.csv", DADOS / "estados" / "ro_geo.json", None,
+                 (("SORRISO-MT", "Sorriso (MT)", -12.5425, -55.7211),)),
 }
 PADRAO = "PA"
 
@@ -111,8 +128,16 @@ def levantamento_da_praca(praca_csv: str, rotulo: str, levantamento: str, extens
     """Preço e custo da praça no levantamento em uso, no formato de financas.LEVANTAMENTO.
 
     A CONAB publica por saca; o hectare sai da produtividade de referência da
-    própria praça, como em gera_levantamento_conab.py.
+    própria praça, como em gera_levantamento_conab.py. Se a praça é a do
+    levantamento em uso no Pará (Pedro Afonso), devolve esse levantamento
+    inteiro, que traz o custo aberto por item.
     """
+    atual = CONAB / "levantamento_atual.json"
+    if atual.exists():
+        with open(atual, encoding="utf-8") as f:
+            lev = json.load(f)
+        if lev.get("praca_csv") == praca_csv and lev.get("levantamento") == levantamento:
+            return lev
     comp = _le_conab("custo_producao_por_municipio.csv")[praca_csv]
     prod = _le_conab("custo_variavel_e_produtividade_por_municipio.csv")[praca_csv]
     kg = prod["Produtividade"]

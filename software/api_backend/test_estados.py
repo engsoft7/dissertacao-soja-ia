@@ -1,4 +1,4 @@
-"""Mato Grosso e Maranhão na API (estados.py): mesmas rotas, com ?uf=, e o Pará sem mudar.
+"""Os outros estados na API (estados.py): mesmas rotas, com ?uf=, e o Pará sem mudar.
 
 Precisa da API inteira (FastAPI, scikit-learn, folium): o job de testes do
 Python não a instala, e o teste fica de fora lá; roda onde ela está instalada.
@@ -46,6 +46,24 @@ def cliente():
             time.sleep(1)
         yield c
     requests.get = original
+
+
+def test_tocantins_e_rondonia(cliente):
+    """Tocantins usa o levantamento de Pedro Afonso, do próprio estado e o mesmo do
+    Pará, com o custo aberto por item; Rondônia, sem praça de custo na CONAB, a
+    mais perto, Sorriso (MT)."""
+    e = {x["uf"]: x for x in cliente.get("/api/estados").json()["estados"]}
+    assert {"TO", "RO"} <= set(e) and e["TO"]["municipios"] > 50
+    to = cliente.get("/api/financas/Porto Nacional", params={"uf": "TO"}).json()
+    pa = cliente.get("/api/financas/Paragominas").json()
+    assert to["uf"] == "TO" and to["fonte_preco"].startswith("CONAB, Pedro Afonso")
+    assert to["custo_ha"] == pa["custo_ha"] and to["custo_area_ha"] == pa["custo_area_ha"] is not None
+    ro = cliente.get("/api/financas/Vilhena", params={"uf": "RO"}).json()
+    assert ro["fonte_preco"].startswith("CONAB, Sorriso") and ro["custo_area_ha"] is None
+    p = cliente.get("/api/previsao/Vilhena", params={"uf": "RO"}).json()
+    assert p["uf"] == "RO" and p["validacao"]["municipios"] > 30
+    assert cliente.get("/api/mercado", params={"uf": "TO"}).json()["conab_fonte"].startswith("CONAB, Pedro Afonso")
+    assert estados.ESTADOS["TO"].no == "no Tocantins" and estados.ESTADOS["RO"].do == "de Rondônia"
 
 
 def test_estados_e_municipios(cliente):

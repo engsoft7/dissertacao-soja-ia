@@ -63,6 +63,64 @@
         "Vargem Grande"
       ],
       "contorno": false
+    },
+    "TO": {
+      "fonte_pam": "SIDRA, tabela 5457",
+      "registros": 1741,
+      "municipios": 108,
+      "safras": [
+        2001,
+        2025
+      ],
+      "ultima_safra_pam": 2025,
+      "municipios_na_pam": 117,
+      "coleta_sem_par_no_ibge": [
+        "Aguiarnopolis",
+        "Araguatins",
+        "Axixa Do Tocantins",
+        "Buriti Do Tocantins",
+        "Cachoeirinha",
+        "Carrasco Bonito",
+        "Colmeia",
+        "Combinado",
+        "Couto De Magalhaes",
+        "Esperantina",
+        "Filadelfia",
+        "Fortaleza Do Tabocao",
+        "Itaguatins",
+        "Itapora Do Tocantins",
+        "Lajeado",
+        "Maurilandia Do Tocantins",
+        "Mosquito",
+        "Novo Alegre",
+        "Praia Norte",
+        "Sampaio",
+        "Santa Terezinha Do Tocantins",
+        "Sao Miguel Do Tocantins",
+        "Sao Valerio Da Natividade",
+        "Sitio Novo Do Tocantins",
+        "Tocantinopolis"
+      ],
+      "contorno": false
+    },
+    "RO": {
+      "fonte_pam": "SIDRA, tabela 5457",
+      "registros": 526,
+      "municipios": 41,
+      "safras": [
+        2001,
+        2025
+      ],
+      "ultima_safra_pam": 2025,
+      "municipios_na_pam": 46,
+      "coleta_sem_par_no_ibge": [
+        "Governador Jorge Teixeira",
+        "Jamari",
+        "Ministro Andreazza",
+        "Urupa",
+        "Vale Do Paraiso"
+      ],
+      "contorno": false
     }
   }
 }

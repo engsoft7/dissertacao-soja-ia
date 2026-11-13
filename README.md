@@ -88,8 +88,20 @@ Esse resultado se sustenta sob dois controles adicionais:
 A investigação da variável-alvo revelou que **40,1% dos pares de safras
 sucessivas da PAM/IBGE nos municípios paraenses apresentam produtividade
 rigorosamente idêntica** (151 de 377; contando só anos seguidos, sem lacuna na
-série, 147 de 367, também 40,1%), o que indica imputação nos levantamentos oficiais e
-impõe um teto estrutural à acurácia de qualquer modelo calibrado sobre essa base.
+série, 147 de 367, também 40,1%), padrão compatível com imputação, repetição ou
+arredondamento nos levantamentos oficiais. O efeito não é um teto sobre o quanto
+se pode prever: com repetição injetada no alvo e os preditores intactos
+(`07_injecao_de_repeticao.py`), o R² aparente sobe e a diferença entre o modelo
+e a referência desaparece (de −0,052 para −0,001). O que a repetição compromete
+é a capacidade de verificar se um modelo é melhor que outro.
+
+No recorte nacional o mesmo contraste dá o resultado oposto
+(`pesquisa/08_previsao_futura/04_referencia_nacional.py`): a referência (média do
+município mais tendência) erra 587 kg/ha, com R² de 0,066, contra 461 kg/ha e
+0,425 do SVR. E em Mato Grosso e no Maranhão, onde a PAM repete 12,1% e 9,5%
+dos pares, os quatro modelos (Mato Grosso) e dois deles (Maranhão) superam a
+referência no protocolo da Tabela 6
+(`pesquisa/10_trabalhos_futuros/06_amazonia_legal.py`).
 
 ---
 
@@ -102,7 +114,9 @@ pesquisa/01_coleta_dados/
 pesquisa/02_revisao_sistematica/
   01_busca_bases_abertas.py               busca em OpenAlex e Crossref (PRISMA)
   02_recupera_autoria_crossref.py         autoria real via DOI, formato ABNT
-  estudos_triados.csv                     70 elegíveis, com decisão e motivo
+  03_codifica_estudos.py                  técnicas, variáveis e métricas dos 53 → Figuras 1 a 5
+  estudos_triados.csv                     70 elegíveis, com a decisão (coluna DECISAO)
+  codificacao_53_estudos.csv              a codificação que as Figuras 2 a 5 mostram
   referencias_53_estudos_abnt.txt         os 53 incluídos, em ABNT
 pesquisa/03_analise_nacional/
   00_baixa_dados.py                       baixa a base de von Bloh et al. (2023)
@@ -111,8 +125,13 @@ pesquisa/03_analise_nacional/
   03_busca_hiperparametros.py             busca aleatória na janela 2001–2015
   06_confirma_busca.py                    reavalia o topo do ranking com 7.000 registros
   07_repeticao_27_estados.py              repetição da PAM nas 27 UFs, da fonte primária
+  08_nulo_com_dependencia.py              teste de acaso com IAAFT e AR(1), na PAM nacional
+  09_coerencia_interna.py                 rendimento que repete com a área mudando
+  11_lstm_series_mensais.py               LSTM no recorte nacional → subseção 5.1
+  12_sem_subamostragem.py                 Tabela 3 com o treino completo
+  13_variaveis_extras.py                  solo (SoilGrids) e variáveis por fase no nacional
   04_avalia_ajustado.py                   avaliação em 2016–2020 → Tabela 3
-  05_gera_figuras_ajustado.py             Figuras 2, 3 e 4 (importância por permutação)
+  05_gera_figuras_ajustado.py             Figuras 7, 8 e 9 (importância por permutação)
   10_mede_custo_escalabilidade.py         custo de ajuste e memória até a base completa
   resultados_busca.json                   ranking completo da busca
   confirmacao_7000.json                   confirmação do topo do ranking
@@ -121,12 +140,15 @@ pesquisa/03_analise_nacional/
                                           registro da medição de custo (um ajuste por linha)
   custo_agregado.csv                      custo e acurácia por modelo e tamanho de treino
 pesquisa/04_analise_para/
-  01_compara_mascara_controlada.py        com/sem máscara na amostra comum → Tabela 5, Figura 5
+  01_compara_mascara_controlada.py        com/sem máscara na amostra comum → Tabela 5, Figura 10
   02_desempenho_base_completa.py          os cinco modelos na base completa → Tabela 6
   02_gera_figuras.py
   03_busca_hiperparametros.py             busca aninhada, um algoritmo por chamada
-  04_gera_fig6_aninhada.py                Figura 6
+  04_gera_fig6_aninhada.py                Figura 11
   05_natureza_da_repeticao.py             repetição na PAM → subseção 6.4
+  06_repeticao_e_sinal_espectral.py       repetição contra NDVI, área e chuva → subseção 6.4
+  07_injecao_de_repeticao.py              teste da hipótese subsidiária → subseção 6.4
+  09_lstm_series_para.py                  LSTM com séries de 16 dias no Pará
   08_nulo_com_dependencia_para.py         teste de acaso com IAAFT e AR(1) → subseção 6.4
   nulo_com_dependencia_para.json          resultados do teste de acaso
   comparacao_controlada.json              métricas da Tabela 5
@@ -136,6 +158,8 @@ pesquisa/04_analise_para/
                                           como registro histórico (não usar)
 pesquisa/05_artigo/
   gera_figuras_artigo.py                  figuras do artigo sobre a PAM
+pesquisa/06_figuras_defesa/              figuras dos slides da defesa
+pesquisa/07_referencias/                 conferência das referências na Crossref (Actions)
 pesquisa/08_previsao_futura/             previsão em janela crescente (só o passado)
   01_enso_para.py                         El Niño/La Niña x chuva e produtividade no Pará
   02_previsao_rendimento_para.py          produtividade 1-3 safras à frente e ao fim do ciclo
@@ -149,6 +173,19 @@ pesquisa/08_previsao_futura/             previsão em janela crescente (só o pa
   coleta/                                 coleta pelo Actions (SIDRA, NOAA, CONAB, Earth Engine)
   dados/                                  o que a coleta trouxe
   README.md, TRABALHOS_FUTUROS.md         resultados e protocolos do que falta testar
+pesquisa/09_contagem_por_imagem/         contador de vagens do aplicativo
+  treina_contador_vagens.py               mapa de densidade, treinado com a YOLO POD
+  converte_para_celular.py                conversão para o LiteRT e conferência no caminho do celular
+  ciclo_retreino.py                       junta, mede, retreina, colheita e publica (fotos do Pará)
+  LEVANTAMENTO_DE_BASES.md                bases públicas de imagens e suas licenças
+pesquisa/10_trabalhos_futuros/           trabalhos futuros já testados
+  02_sensores_recentes.py                 Sentinel-1, Sentinel-2 e SMAP no Pará
+  03_retroteste_preco_para.py             retroteste do preço estimado do Pará
+  04_valida_tempo_inmet.py                previsão e janela de pulverização contra o INMET
+  05_solo_na_tabela6.py                   SoilGrids na Tabela 6
+  06_amazonia_legal.py                    Tabela 6 em TO, MA, RO e MT, e nos cinco juntos
+  07_data_semeadura.py                    semeadura estimada pelo NDVI de 16 dias
+  08_preditores_estados.py                quais preditores acompanham o erro da referência
 pesquisa/dados/
   soja_para_mascarado_2001_2024.csv       base da dissertação (congelada: Tabelas 5 e 6, subseção 6.4)
   soja_para_painel.csv                    base do produto (painel, API; atualizada por automação)
@@ -165,6 +202,9 @@ software/api_backend/
   api.py                                  API REST (FastAPI) para clientes
   estados.py                              Pará, Mato Grosso e Maranhão; ?uf= nas rotas
   financas.py                             cálculos financeiros (VTN, custos)
+  mercado.py, precos.py, precos_para.py   Chicago em reais, cotações por praça, preço estimado do Pará
+  tempo.py, avisos_inmet.py               tempo na lavoura, janela de pulverização, avisos
+  historico_oficial.py, validacao.py      série oficial do IBGE e validação das entradas
 software/dashboard_web/
   app.py                                  interface Streamlit (SPA)
   model.py                                núcleo preditivo (produto técnico)
@@ -172,7 +212,9 @@ software/dashboard_web/
   data/                                   carregadores de dados
   README.md                               como executar e limitações
 software/aplicativo_mobile/
-  app/.../MainActivity.kt                 app Android (Jetpack Compose)
+  app/.../MainActivity.kt                 app Android (Jetpack Compose), uma tela por arquivo
+  README.md                               telas, arquivos e publicação
+  teste_premium/, auditoria/              relatórios de teste e de conferência dos números
   app/.../ApiService.kt                   cliente Retrofit da API
   app/build.gradle.kts                    configuração de build
 software/automacao_github/
@@ -180,6 +222,9 @@ software/automacao_github/
   atualiza_enso.py                        atualização automática NOAA ONI
   coleta_gee_safra.py                     coleta headless de safra nova no GEE
   gera_metricas.py                        pré-calcula a validação para o painel
+  atualiza_conab.py, gera_levantamento_conab.py
+                                          levantamento de custos da CONAB
+  monta_base_estados.py                   base de Mato Grosso e do Maranhão
   gera_municipios.py                      nomes acentuados (IBGE) + coordenadas
   gera_geo_para.py                        contorno do Pará (malha do IBGE)
   gera_rios_para.py                       principais rios do Pará (Natural Earth)
@@ -192,7 +237,7 @@ software/automacao_github/
 Requisitos: Python 3.10+.
 
 ```bash
-pip install pandas numpy scikit-learn xgboost matplotlib openpyxl
+pip install -r requirements.txt   # fixa scikit-learn < 1.9, sem o que a Tabela 3 não se reproduz
 ```
 
 **Estudo nacional** — os números da dissertação (Tabela 3) vêm dos scripts
@@ -215,7 +260,7 @@ python 06_confirma_busca.py              # reavalia o topo com 7.000 registros
 python 07_repeticao_27_estados.py
 python 07_repeticao_27_estados.py --conferir   # refaz a análise do CSV já baixado
 python 04_avalia_ajustado.py             # avalia em 2016–2020 → Tabela 3
-python 05_gera_figuras_ajustado.py       # Figuras 2, 3 e 4
+python 05_gera_figuras_ajustado.py       # Figuras 7, 8 e 9
 
 # custo de ajuste e memória, da subamostra à base completa (cerca de meia hora)
 python 10_mede_custo_escalabilidade.py
@@ -252,7 +297,7 @@ sua máquina produz com o que está no texto, sem sobrescrever o registro.
 
 **Sobre reproduzir os números exatos.** O SVR e o MLP reproduzem os valores da
 dissertação dígito a dígito, safra a safra, e a importância por permutação da
-Figura 4 sai idêntica até a casa decimal. O Random Forest e o XGBoost dependem
+Figura 9 sai idêntica até a casa decimal. O Random Forest e o XGBoost dependem
 da versão da biblioteca, e os dois se reproduzem nas versões indicadas abaixo.
 
 **Random Forest — resolvido pelo pin.** A partir do scikit-learn 1.9 o Random
@@ -297,10 +342,10 @@ reavalia o topo do ranking com 7.000 registros justamente para mostrar isso.
 
 ```bash
 cd pesquisa/04_analise_para
-python 01_compara_mascara_controlada.py  # Tabela 5 e Figura 5
+python 01_compara_mascara_controlada.py  # Tabela 5 e Figura 10
 python 02_desempenho_base_completa.py    # Tabela 6 (cerca de 10 minutos)
 python 02_gera_figuras.py
-python 04_gera_fig6_aninhada.py          # Figura 6
+python 04_gera_fig6_aninhada.py          # Figura 11
 python 05_natureza_da_repeticao.py       # números da subseção 6.4
 python 08_nulo_com_dependencia_para.py   # teste de acaso com IAAFT e AR(1) (~30 s)
 ```
@@ -350,6 +395,11 @@ Capítulo 6 tampouco: em qualquer das duas leituras o XGBoost é o pior dos quat
 e fica bem abaixo do modelo de referência (R² 0,216). Quem rodar com o 3.2.0 e
 obtiver 0,148 onde o texto traz 0,123 está vendo isto, e `--conferir` diz isso
 na tela.
+
+Os números de figura acima são os da versão atual da dissertação. Os nomes dos
+scripts e os comentários dentro deles guardam a numeração de antes de a revisão
+sistemática e o fluxograma ganharem as Figuras 1 a 6: a antiga Figura 2 é a 7, a
+3 é a 8, a 4 é a 9, a 5 é a 10 e a 6 é a 11.
 
 `01_compara_mascara_controlada.py` aborta com mensagem explícita se os baselines
 dos dois cenários divergirem — isso indicaria que o controle da amostra falhou e
@@ -598,10 +648,15 @@ pull request. Para rodar localmente, da raiz do repositório:
 
 ```bash
 pip install pytest pandas requests
-python -m pytest software -q
+python -m pytest software pesquisa/09_contagem_por_imagem/test_ciclo_retreino.py -q
 ```
 
-Os testes são poucos e específicos, cada um preso a um erro que já aconteceu:
+São 118 testes em Python (13/11/2026), em `software/api_backend/` (preços,
+mercado, tempo, avisos, estados, contador, validação das entradas),
+`software/automacao_github/` (PAM, ENSO, CONAB, municípios, DOI),
+`software/dashboard_web/` e `pesquisa/09_contagem_por_imagem/`. O mesmo
+workflow compila o aplicativo e roda os testes de unidade em Kotlin. Dois
+exemplos, cada um preso a um erro que já aconteceu:
 
 - `software/automacao_github/test_atualiza_pam_paths.py` — os caminhos que a
   automação escreve são os que o painel lê.
@@ -618,8 +673,10 @@ Os testes são poucos e específicos, cada um preso a um erro que já aconteceu:
 - **Alvo:** produtividade municipal da soja (kg/ha), da PAM/IBGE (tabela 5457).
 - **Janela:** novembro do ano anterior a maio do ano de colheita (ciclo da soja no Pará).
 - **Máscara:** MapBiomas Coleção 10.1, classe 39 (soja), resolução 30 m.
-- **Decomposição:** produtividade = tendência tecnológica + anomalia climática.
-  Os modelos preveem a anomalia; a produtividade é reconstruída somando a tendência.
+- **Decomposição:** no recorte nacional, produtividade = tendência tecnológica +
+  anomalia; os modelos preveem a anomalia, e a produtividade é reconstruída
+  somando a tendência. No Pará, os modelos preveem o resíduo sobre o modelo de
+  referência (subseção 6.2).
 - **Validação:** *leave-one-year-out* — cada safra é prevista por um modelo treinado
   sem ela, simulando a previsão de um ano futuro e evitando vazamento temporal.
 - **Baseline:** média histórica do município + tendência, sem clima nem NDVI.
@@ -673,17 +730,21 @@ Esse DOI representa todas as versões e resolve sempre para a mais recente.
 Para citar o estado exato usado no artigo sobre a repetição na PAM, use a
 versão v2.3.7: DOI: 10.5281/zenodo.22343315.
 
-## 🌟 Lançamento Oficial v2.1.1 (AgroInteligência Mobile)
-- **Migração Cloud-Native:** Lógica de predição isolada em servidor próprio (FastAPI / Render).
-- **Interface Nativa:** Aplicativo Android 100% desenvolvido em Jetpack Compose.
-- **Experiência Sensorial (Haptics):** Física elástica na inferência dos cards (*Spring Animations*) e resposta tátil profunda no processamento usando o `LocalHapticFeedback`.
-- **Geovisualização Integrada:** Mapa interativo (Folium) com enquadramento automático no recorte da base e destaque do município selecionado e do comparado. O desenho usa apenas geometrias versionadas no repositório — contorno do estado (malha do IBGE) e rios (Natural Earth) —, sem camada de terceiros em tempo de execução e sem imagem de satélite: MODIS, CHIRPS, ERA5-Land e MapBiomas alimentam o modelo, não o fundo do mapa.
-- **Offline First:** Cascatas de resiliência UI/UX operando perfeitamente sem conexão com a internet.
+## Notas das primeiras versões do produto
 
-## 🌐 AgroInteligência Web v2.0 (Executive SPA Dashboard)
-- **Single Page Application (SPA):** Navegação redesenhada para uma "Sidebar" global, fluida e com responsividade estrita. O encadeamento do painel elimina tabulações e se comporta como um SaaS nativo multi-tenant.
-- **Ecossistema Modular:** Código fonte fragmentado num ecossistema elegante e sustentável, separando roteamento de manipulação do layout via Python e consumo (ETL) da cotação física em Paranaguá (Notícias Agrícolas), exibida como comparação — a referência da simulação é o preço recebido pelo produtor no levantamento da CONAB, que é preço de porteira.
+Registro do que as versões 2.0 do painel e 2.1.1 do aplicativo trouxeram. O
+estado atual de cada um está em `software/dashboard_web/README.md` e em
+`software/aplicativo_mobile/README.md`.
+
+**Aplicativo 2.1.1**
+- **API própria:** a previsão roda num servidor (FastAPI, no Render), e o aplicativo a consulta.
+- **Interface nativa:** Android em Kotlin com Jetpack Compose, com animações e resposta tátil nos cartões.
+- **Mapa:** interativo (Folium), enquadrado no recorte da base, com destaque do município selecionado e do comparado. O desenho usa apenas geometrias versionadas no repositório — contorno do estado (malha do IBGE) e rios (Natural Earth) —, sem camada de terceiros em tempo de execução e sem imagem de satélite: MODIS, CHIRPS, ERA5-Land e MapBiomas alimentam o modelo, não o fundo do mapa.
+- **Sem conexão:** a estimativa e o resumo financeiro continuam disponíveis; cotações, tempo e mapa pedem Internet.
+
+**Painel 2.0**
+- **Navegação:** uma barra lateral leva às telas, sem abas, e a página se ajusta à largura do celular.
+- **Código em módulos:** leitura dos dados, gráficos e temas em arquivos separados (`data/`, `ui/`). A cotação física (Notícias Agrícolas) aparece como comparação; a referência da simulação é o preço recebido pelo produtor no levantamento da CONAB, que é preço de porteira.
 - **Parâmetros econômicos com fonte declarada:** o custo operacional vem do levantamento da CONAB para Pedro Afonso (TO), de março de 2026, e o Valor da Terra Nua da tabela da Receita Federal do exercício 2026, classe lavoura de aptidão boa. O preço recebido no mesmo levantamento, R$ 105,09 por saca, é o menor dos 13 levantamentos da praça desde março de 2023 (mediana R$ 116,91); o produto informa essa posição na série, para o padrão ser lido como cenário conservador e não como previsão de preço. São tabelas estáticas versionadas em `pesquisa/dados/`, não coleta em tempo real. Preço e custo são editáveis na interface, porque entram na conta da margem; o Valor da Terra Nua não, porque é referência fiscal (base de cálculo do ITR) e não preço de mercado — aparece como nota de contexto. A Receita Federal publica VTN para 13 dos 38 municípios; nos demais o painel informa que não há valor oficial.
-- **Visibilidade Asynchronous de AI:** Processamento dinâmico do modelo (MLP) encapsulado em "shimmers" / Spinners UX, indicando cálculo simultâneo na simulação de cenários operacionais e previsões em tempo real do Agro-mercado do Pará.
-- **Plotly Analytics (Fintech Interactivity):** Upgrade massivo das engines gráficas do Altair para o *Plotly.js*. Anotação autônoma de Zonas de Risco Climático (El Niño e La Niña Históricos mapeados via *VRects*) e regressões lineares paramétricas sobrepondo a série cronológica de produtividade, além de Full-Zoom Crosshairs.
-- **Agente de Linguagem Natural (LLM Heurístico):** Um sintetizador inteligente lê as matrizes de cálculo e o fluxo de caixa final simulado, formulando sentenças interpretativas em parágrafos para o produtor. Ele transcreve a matemática dura para relatórios humanos como *"Alto risco crítico projetado"* ou *"Viabilidade Econômica Robusta de Safra"*.
+- **Gráficos:** em Plotly, com as safras de El Niño e de La Niña marcadas no histórico e a tendência sobre a série de produtividade.
+- **Resultado em palavras:** frases escritas por regras a partir do cálculo (lucro, prejuízo ou resultado indeterminado, com a faixa e o motivo). Não há modelo de linguagem no produto.

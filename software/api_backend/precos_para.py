@@ -2,9 +2,9 @@
 """Preço estimado da soja no Pará ao longo do dia: Chicago em reais + base do Pará.
 
 Nenhuma fonte pública publica o físico paraense em tempo real. A Agrolink
-publica a praça de Barcarena (PA) todo dia, mas o valor diário vem como imagem,
-de propósito, e este módulo não tenta lê-lo. O que a Agrolink publica em texto
-é a média mensal do estado, ao lado da média nacional, e é dela que sai a base:
+publica a cotação de cada praça uma vez por dia (em texto desde out/2026; antes
+o valor vinha como imagem), e este módulo a lê mais abaixo, em le_pracas. Para
+acompanhar o dia, usa-se a média mensal do estado, e é dela que sai a base:
 
     base do mês = média do Pará no mês − média de Chicago no mês, em R$/saca
 

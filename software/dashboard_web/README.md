@@ -1,4 +1,4 @@
-# Painel de estimativa da produtividade da soja — Pará
+# Painel de estimativa da produtividade da soja — Pará, Mato Grosso e Maranhão
 
 Produto técnico da dissertação *Aplicação da Inteligência Artificial na previsão
 da produtividade da soja* (PPCA/UFPA).
@@ -19,20 +19,27 @@ Abre em `http://localhost:8501`.
 ## O que o painel faz
 
 - Estima a produtividade municipal da soja para a próxima safra, **sempre com a
-  margem de erro** (± 416 kg/ha, ou 13,9% da média).
+  margem de erro** da validação temporal. No Pará ela é de ± 413 kg/ha (13,6% da
+  média) na base do produto, que vai até a safra de 2025 e é a que o painel
+  mostra; na base congelada da dissertação, até 2024, é de ± 416 kg/ha (13,9%).
+- O estado se escolhe na barra lateral: o **Pará**, que é o recorte da
+  dissertação, e, como extensão, **Mato Grosso** e **Maranhão**, com a base, o
+  custo e as praças de cada um (`software/api_backend/estados.py`).
 - Exibe os valores em **kg/ha** ou em **sacas de 60 kg por hectare (sc/ha)**,
   à escolha do usuário; a conversão é apenas de exibição, o modelo opera em kg/ha.
-- Permite **simular cenários climáticos** (chuva e temperatura da safra) e ver o
-  efeito sobre a estimativa — que é quase nulo, demonstrando na prática o achado
-  central da dissertação: a produtividade oficial pouco reflete o clima
-  observado, e o painel explica isso ao usuário em vez de esconder.
+- Permite **simular cenários climáticos** (chuva e temperatura da safra). O
+  cenário sai do efeito medido na base do estado: o quanto a produtividade fugiu
+  da referência por 1% de chuva e por 1 °C, e só conta o que tem intervalo de
+  confiança sem o zero. No Pará e em Mato Grosso nenhum dos dois passa, e o
+  cenário não move a estimativa: é o achado da dissertação aparecendo no
+  produto, e o painel diz isso ao usuário. No Maranhão a chuva passa.
 - Mostra a **evolução da área de soja** do município (máscara MapBiomas) e
   oferece **download em CSV** da série do município e da base completa.
 - Exibe um **mapa do Pará** com o contorno do estado (IBGE) e os **principais
   rios** (Natural Earth): cada município produtor é um ponto **dimensionado pela
   área plantada** e **colorido pela produtividade média** recente, com o
-  selecionado destacado. O mapa é responsivo (bom no celular) e estático — não
-  arrasta nem dá zoom; a seleção do município é feita pelo menu.
+  selecionado destacado. O mapa é responsivo (bom no celular), aceita arrastar
+  e aproximar dentro do estado, e a seleção do município é feita pelo menu.
 - Usa a **grafia oficial acentuada** dos nomes de município (IBGE) — a base
   bruta vem do GAUL, sem acentos.
 - Na tela **Tempo na lavoura**, mostra o tempo agora, os avisos do INMET, a

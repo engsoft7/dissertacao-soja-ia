@@ -231,5 +231,73 @@
         "distancia_km": 78
       }
     }
+  },
+  "limiar_da_chance_de_chuva": {
+    "50% (o do aplicativo)": {
+      "horas": 38079,
+      "acerto": 0.419,
+      "kappa": 0.147,
+      "boa_prevista_que_era_evitar": 0.106,
+      "boa_prevista_que_era_boa": 0.262,
+      "horas_previstas_boas": 7875,
+      "horas_de_chuva_previstas_%": 36.8,
+      "acerto_da_chuva_medida_%": 66.6,
+      "alarme_falso_de_chuva_%": 86.1
+    },
+    "60%": {
+      "horas": 38079,
+      "acerto": 0.426,
+      "kappa": 0.155,
+      "boa_prevista_que_era_evitar": 0.111,
+      "boa_prevista_que_era_boa": 0.266,
+      "horas_previstas_boas": 8380,
+      "horas_de_chuva_previstas_%": 33.9,
+      "acerto_da_chuva_medida_%": 62.6,
+      "alarme_falso_de_chuva_%": 85.8
+    },
+    "70%": {
+      "horas": 38079,
+      "acerto": 0.431,
+      "kappa": 0.161,
+      "boa_prevista_que_era_evitar": 0.114,
+      "boa_prevista_que_era_boa": 0.269,
+      "horas_previstas_boas": 8791,
+      "horas_de_chuva_previstas_%": 31.6,
+      "acerto_da_chuva_medida_%": 59.6,
+      "alarme_falso_de_chuva_%": 85.5
+    },
+    "80%": {
+      "horas": 38079,
+      "acerto": 0.435,
+      "kappa": 0.164,
+      "boa_prevista_que_era_evitar": 0.117,
+      "boa_prevista_que_era_boa": 0.272,
+      "horas_previstas_boas": 9066,
+      "horas_de_chuva_previstas_%": 29.7,
+      "acerto_da_chuva_medida_%": 56.2,
+      "alarme_falso_de_chuva_%": 85.5
+    },
+    "90%": {
+      "horas": 38079,
+      "acerto": 0.436,
+      "kappa": 0.165,
+      "boa_prevista_que_era_evitar": 0.119,
+      "boa_prevista_que_era_boa": 0.272,
+      "horas_previstas_boas": 9217,
+      "horas_de_chuva_previstas_%": 28.7,
+      "acerto_da_chuva_medida_%": 54.3,
+      "alarme_falso_de_chuva_%": 85.4
+    },
+    "só a chuva prevista": {
+      "horas": 38079,
+      "acerto": 0.437,
+      "kappa": 0.165,
+      "boa_prevista_que_era_evitar": 0.121,
+      "boa_prevista_que_era_boa": 0.272,
+      "horas_previstas_boas": 9322,
+      "horas_de_chuva_previstas_%": 28.1,
+      "acerto_da_chuva_medida_%": 53.3,
+      "alarme_falso_de_chuva_%": 85.4
+    }
   }
 }

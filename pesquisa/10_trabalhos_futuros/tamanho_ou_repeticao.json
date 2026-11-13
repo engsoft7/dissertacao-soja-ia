@@ -315,6 +315,152 @@
           "ganho_mediano_contra_o_original": 0.133
         }
       }
+    },
+    "tamanho do Pará, repetição de 55,0%": {
+      "replicas": 100,
+      "registros": 415,
+      "municipios": 38,
+      "repeticao_media_%": 55.2,
+      "modelos": {
+        "Random Forest": {
+          "ganho_mediano": 0.115,
+          "ganho_quartis": [
+            0.091,
+            0.141
+          ],
+          "ganho_min_max": [
+            -0.009,
+            0.192
+          ],
+          "replicas_com_ganho_detectado_%": 77.0,
+          "ganho_mediano_contra_o_original": 0.125
+        },
+        "XGBoost": {
+          "ganho_mediano": 0.098,
+          "ganho_quartis": [
+            0.057,
+            0.132
+          ],
+          "ganho_min_max": [
+            -0.042,
+            0.214
+          ],
+          "replicas_com_ganho_detectado_%": 46.0,
+          "ganho_mediano_contra_o_original": 0.11
+        },
+        "SVR": {
+          "ganho_mediano": 0.049,
+          "ganho_quartis": [
+            0.036,
+            0.063
+          ],
+          "ganho_min_max": [
+            0.013,
+            0.097
+          ],
+          "replicas_com_ganho_detectado_%": 80.0,
+          "ganho_mediano_contra_o_original": 0.05
+        },
+        "MLP": {
+          "ganho_mediano": 0.048,
+          "ganho_quartis": [
+            0.03,
+            0.075
+          ],
+          "ganho_min_max": [
+            -0.007,
+            0.149
+          ],
+          "replicas_com_ganho_detectado_%": 50.0,
+          "ganho_mediano_contra_o_original": 0.062
+        },
+        "SVR (busca aninhada)": {
+          "ganho_mediano": 0.085,
+          "ganho_quartis": [
+            0.059,
+            0.109
+          ],
+          "ganho_min_max": [
+            0.008,
+            0.195
+          ],
+          "replicas_com_ganho_detectado_%": 66.0,
+          "ganho_mediano_contra_o_original": 0.094
+        }
+      }
+    },
+    "tamanho do Pará, repetição de 67,4%": {
+      "replicas": 100,
+      "registros": 415,
+      "municipios": 38,
+      "repeticao_media_%": 67.6,
+      "modelos": {
+        "Random Forest": {
+          "ganho_mediano": 0.104,
+          "ganho_quartis": [
+            0.087,
+            0.13
+          ],
+          "ganho_min_max": [
+            -0.055,
+            0.22
+          ],
+          "replicas_com_ganho_detectado_%": 79.0,
+          "ganho_mediano_contra_o_original": 0.071
+        },
+        "XGBoost": {
+          "ganho_mediano": 0.084,
+          "ganho_quartis": [
+            0.05,
+            0.118
+          ],
+          "ganho_min_max": [
+            -0.165,
+            0.223
+          ],
+          "replicas_com_ganho_detectado_%": 47.0,
+          "ganho_mediano_contra_o_original": 0.048
+        },
+        "SVR": {
+          "ganho_mediano": 0.042,
+          "ganho_quartis": [
+            0.032,
+            0.058
+          ],
+          "ganho_min_max": [
+            0.007,
+            0.087
+          ],
+          "replicas_com_ganho_detectado_%": 74.0,
+          "ganho_mediano_contra_o_original": 0.029
+        },
+        "MLP": {
+          "ganho_mediano": 0.04,
+          "ganho_quartis": [
+            0.014,
+            0.064
+          ],
+          "ganho_min_max": [
+            -0.044,
+            0.138
+          ],
+          "replicas_com_ganho_detectado_%": 47.0,
+          "ganho_mediano_contra_o_original": 0.032
+        },
+        "SVR (busca aninhada)": {
+          "ganho_mediano": 0.071,
+          "ganho_quartis": [
+            0.038,
+            0.092
+          ],
+          "ganho_min_max": [
+            -0.014,
+            0.176
+          ],
+          "replicas_com_ganho_detectado_%": 56.0,
+          "ganho_mediano_contra_o_original": 0.051
+        }
+      }
     }
   },
   "MA": {
@@ -588,6 +734,152 @@
           ],
           "replicas_com_ganho_detectado_%": 66.0,
           "ganho_mediano_contra_o_original": 0.088
+        }
+      }
+    },
+    "tamanho do Pará, repetição de 55,0%": {
+      "replicas": 100,
+      "registros": 415,
+      "municipios": 38,
+      "repeticao_media_%": 55.2,
+      "modelos": {
+        "Random Forest": {
+          "ganho_mediano": 0.082,
+          "ganho_quartis": [
+            0.057,
+            0.104
+          ],
+          "ganho_min_max": [
+            0.006,
+            0.204
+          ],
+          "replicas_com_ganho_detectado_%": 35.0,
+          "ganho_mediano_contra_o_original": 0.116
+        },
+        "XGBoost": {
+          "ganho_mediano": 0.057,
+          "ganho_quartis": [
+            0.025,
+            0.09
+          ],
+          "ganho_min_max": [
+            -0.099,
+            0.18
+          ],
+          "replicas_com_ganho_detectado_%": 18.0,
+          "ganho_mediano_contra_o_original": 0.099
+        },
+        "SVR": {
+          "ganho_mediano": 0.031,
+          "ganho_quartis": [
+            0.025,
+            0.043
+          ],
+          "ganho_min_max": [
+            0.008,
+            0.079
+          ],
+          "replicas_com_ganho_detectado_%": 47.0,
+          "ganho_mediano_contra_o_original": 0.058
+        },
+        "MLP": {
+          "ganho_mediano": 0.015,
+          "ganho_quartis": [
+            -0.005,
+            0.035
+          ],
+          "ganho_min_max": [
+            -0.047,
+            0.139
+          ],
+          "replicas_com_ganho_detectado_%": 8.0,
+          "ganho_mediano_contra_o_original": 0.038
+        },
+        "SVR (busca aninhada)": {
+          "ganho_mediano": 0.048,
+          "ganho_quartis": [
+            0.025,
+            0.073
+          ],
+          "ganho_min_max": [
+            -0.007,
+            0.12
+          ],
+          "replicas_com_ganho_detectado_%": 35.0,
+          "ganho_mediano_contra_o_original": 0.083
+        }
+      }
+    },
+    "tamanho do Pará, repetição de 67,4%": {
+      "replicas": 100,
+      "registros": 415,
+      "municipios": 38,
+      "repeticao_media_%": 67.6,
+      "modelos": {
+        "Random Forest": {
+          "ganho_mediano": 0.073,
+          "ganho_quartis": [
+            0.043,
+            0.106
+          ],
+          "ganho_min_max": [
+            -0.042,
+            0.236
+          ],
+          "replicas_com_ganho_detectado_%": 45.0,
+          "ganho_mediano_contra_o_original": 0.08
+        },
+        "XGBoost": {
+          "ganho_mediano": 0.051,
+          "ganho_quartis": [
+            0.007,
+            0.086
+          ],
+          "ganho_min_max": [
+            -0.077,
+            0.206
+          ],
+          "replicas_com_ganho_detectado_%": 19.0,
+          "ganho_mediano_contra_o_original": 0.054
+        },
+        "SVR": {
+          "ganho_mediano": 0.024,
+          "ganho_quartis": [
+            0.015,
+            0.032
+          ],
+          "ganho_min_max": [
+            -0.003,
+            0.075
+          ],
+          "replicas_com_ganho_detectado_%": 39.0,
+          "ganho_mediano_contra_o_original": 0.034
+        },
+        "MLP": {
+          "ganho_mediano": 0.011,
+          "ganho_quartis": [
+            -0.001,
+            0.037
+          ],
+          "ganho_min_max": [
+            -0.104,
+            0.116
+          ],
+          "replicas_com_ganho_detectado_%": 17.0,
+          "ganho_mediano_contra_o_original": 0.015
+        },
+        "SVR (busca aninhada)": {
+          "ganho_mediano": 0.034,
+          "ganho_quartis": [
+            0.013,
+            0.054
+          ],
+          "ganho_min_max": [
+            -0.04,
+            0.102
+          ],
+          "replicas_com_ganho_detectado_%": 25.0,
+          "ganho_mediano_contra_o_original": 0.049
         }
       }
     }

@@ -15,7 +15,8 @@
         "Jauru",
         "Reserva Do Cabacal"
       ],
-      "contorno": false
+      "contorno": true,
+      "contorno_fonte": "limites do IBGE no Click That Hood (Code for America), simplificados"
     },
     "MA": {
       "fonte_pam": "SIDRA, tabela 5457",
@@ -62,7 +63,8 @@
         "Tutoia",
         "Vargem Grande"
       ],
-      "contorno": false
+      "contorno": true,
+      "contorno_fonte": "limites do IBGE no Click That Hood (Code for America), simplificados"
     },
     "TO": {
       "fonte_pam": "SIDRA, tabela 5457",
@@ -101,7 +103,8 @@
         "Sitio Novo Do Tocantins",
         "Tocantinopolis"
       ],
-      "contorno": false
+      "contorno": true,
+      "contorno_fonte": "limites do IBGE no Click That Hood (Code for America), simplificados"
     },
     "RO": {
       "fonte_pam": "SIDRA, tabela 5457",
@@ -120,7 +123,8 @@
         "Urupa",
         "Vale Do Paraiso"
       ],
-      "contorno": false
+      "contorno": true,
+      "contorno_fonte": "limites do IBGE no Click That Hood (Code for America), simplificados"
     }
   }
 }

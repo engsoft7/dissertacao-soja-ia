@@ -21,6 +21,9 @@ reduzi-la. Com as mesmas estações, o mesmo período e as mesmas regras:
      estação mais próxima e aplicada à estação, o que o aplicativo poderia
      fazer num lugar sem estação. Em cada caso, a concordância e a fração de
      horas boas que eram a evitar, antes e depois, nas mesmas horas.
+  4. Limiar da chance de chuva: o aplicativo trata como hora de chuva a que
+     tem chuva prevista ou chance de 50% ou mais. A janela é refeita com o
+     limiar em 60%, 70%, 80% e 90%, e só com a chuva prevista.
 
 Roda no Actions (o INMET e o Open-Meteo não respondem a todo ambiente).
 
@@ -163,10 +166,30 @@ def main():
                       'distancia_km': round(km((tab[c]['lat'], tab[c]['lon']),
                                                (tab[vizinha[c]]['lat'], tab[vizinha[c]]['lon'])))} for c in tab},
     }
+    # 4. limiar da chance de chuva
+    saida['limiar_da_chance_de_chuva'] = {}
+    chove_o = np.concatenate([t['j'].chove_o.values.astype(bool) for t in tab.values()])
+    for rotulo, lim in ((f'{v.CHANCE:.0f}% (o do aplicativo)', v.CHANCE), ('60%', 60.0), ('70%', 70.0),
+                        ('80%', 80.0), ('90%', 90.0), ('só a chuva prevista', None)):
+        classes, chuvas = [], []
+        for t in tab.values():
+            j = t['j']
+            chove = j.chuva_p.fillna(0) >= v.CHUVA_MM
+            if lim is not None and j.chance.notna().any():
+                chove = chove | (j.chance.fillna(0) >= lim)
+            classes.append(classe(v, j.assign(chove_x=chove), chove='chove_x'))
+            chuvas.append(chove.values.astype(bool))
+        p = np.concatenate(chuvas)
+        saida['limiar_da_chance_de_chuva'][rotulo] = {
+            **concordancia(v, np.concatenate(classes), medida),
+            'horas_de_chuva_previstas_%': round(float(p.mean() * 100), 1),
+            'acerto_da_chuva_medida_%': round(float((p & chove_o).sum() / max(chove_o.sum(), 1) * 100), 1),
+            'alarme_falso_de_chuva_%': round(float((p & ~chove_o).sum() / max(p.sum(), 1) * 100), 1)}
     with open(os.path.join(AQUI, 'janela_por_criterio.json'), 'w', encoding='utf-8') as f:
         json.dump(saida, f, indent=2, ensure_ascii=False)
     print(json.dumps({k: saida[k] for k in ('como_esta', 'criterios', 'substituicao')}, indent=1, ensure_ascii=False))
     print(json.dumps({k: w for k, w in saida['correcao_do_vento'].items() if k != 'retas'}, indent=1, ensure_ascii=False))
+    print(json.dumps(saida['limiar_da_chance_de_chuva'], indent=1, ensure_ascii=False))
 
 
 if __name__ == '__main__':

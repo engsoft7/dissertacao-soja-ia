@@ -15,6 +15,9 @@ desenho. Este script a faz, cruzando os dois fatores no mesmo estado:
   repetição    a do próprio estado, ou injetada até os 40,1% do Pará, como em
                04_analise_para/07_injecao_de_repeticao.py (o registro passa a
                repetir o valor da safra anterior; os preditores ficam intactos).
+               Nas amostras do tamanho do Pará, também até 55% e até 67,4%, a
+               maior taxa daquele experimento, para ver com quanta repetição o
+               ganho deixa de aparecer.
 
 Em cada célula, o protocolo da Tabela 6 (leave-one-year-out, modelos
 ajustados ao resíduo sobre a média do município mais a tendência), com a
@@ -28,7 +31,8 @@ Pergunta: reduzido ao tamanho do Pará, o estado ainda mostra o ganho? E com a
 repetição do Pará?
 
 Uso:   python 09_tamanho_ou_repeticao.py [MT MA] [--replicas 100] [--processos 4]
-Saída: tamanho_ou_repeticao.json
+Saída: tamanho_ou_repeticao.json (as células já gravadas com o mesmo número de
+       réplicas não são refeitas)
 """
 import importlib.util
 import json
@@ -46,6 +50,7 @@ sys.path.insert(0, os.path.join(PESQUISA, '08_previsao_futura'))
 from comum import ganho_sobre_referencia  # noqa: E402
 
 ALVO_REPETICAO = 40.1          # % dos pares de safras sucessivas, a taxa do Pará
+DOSES = (55.0, 67.4)           # só nas amostras do tamanho do Pará
 REPLICAS, REPLICAS_INTEIRA = 100, 20
 MODELOS = ['Random Forest', 'XGBoost', 'SVR', 'MLP']
 ANINHADO, ORCAMENTO_ANINHADO = 'SVR', 15
@@ -164,7 +169,10 @@ def replica(args):
         pa = m.carrega()
         df = painel_do_para(df, {u: set(g.ano) for u, g in pa.groupby('municipio')}, rng)
     y0 = df.rendimento_kg_ha.values.astype(float)
-    y = injeta_ate(df, ALVO_REPETICAO, rng) if celula.endswith('repetição do Pará') else y0
+    alvo = (ALVO_REPETICAO if celula.endswith('repetição do Pará')
+            else float(celula.split('repetição de ')[1].rstrip('%').replace(',', '.')) if 'repetição de ' in celula
+            else None)
+    y = injeta_ate(df, alvo, rng) if alvo is not None else y0
     return {'registros': int(len(df)), 'municipios': int(df.municipio.nunique()),
             'repeticao': round(taxa_de_repeticao(df.municipio.values, y), 1),
             'modelos': mede(m, df, y, y0, aninhado=reduzida)}
@@ -208,22 +216,36 @@ def main(args):
                       'repeticao_%': round(taxa_de_repeticao(pa.municipio.values, y_pa), 1),
                       'modelos': mede(m, pa, y_pa, y_pa, aninhado=True)}}
     print('Pará', json.dumps(saida['Pará']['modelos'], ensure_ascii=False), flush=True)
+    arquivo = os.path.join(AQUI, 'tamanho_ou_repeticao.json')
+    feito = {}
+    if os.path.exists(arquivo):
+        with open(arquivo, encoding='utf-8') as f:
+            feito = json.load(f)
+    # As quatro células do desenho tiram as sementes desta sequência, na ordem em
+    # que rodam (por isso ela avança mesmo quando a célula já está gravada); as
+    # doses, acrescentadas depois, têm sequência própria e não mudam as outras.
     sementes = np.random.SeedSequence(SEED)
     # 'spawn': um processo que herda por fork o OpenMP já iniciado pelo XGBoost trava no primeiro ajuste
     with get_context('spawn').Pool(processos) as pool:
         for uf in ufs:
             saida[uf] = {}
-            for celula, r in (('base inteira, repetição do estado', 1),
-                              ('base inteira, repetição do Pará', n_int),
-                              ('tamanho do Pará, repetição do estado', n),
-                              ('tamanho do Pará, repetição do Pará', n)):
+            desenho = [('base inteira, repetição do estado', 1, None), ('base inteira, repetição do Pará', n_int, None),
+                       ('tamanho do Pará, repetição do estado', n, None), ('tamanho do Pará, repetição do Pará', n, None)]
+            doses = [(f'tamanho do Pará, repetição de {str(d).replace(".", ",")}%', n,
+                      np.random.SeedSequence([SEED, int(d * 10), ord(uf[0]), ord(uf[1])])) for d in DOSES]
+            for celula, r, propria in desenho + doses:
                 t0 = time.time()
-                tarefas = [(uf, celula, s) for s in sementes.spawn(r)]
+                tarefas = [(uf, celula, s) for s in (propria or sementes).spawn(r)]
+                pronta = feito.get(uf, {}).get(celula)
+                if pronta and pronta.get('replicas') == r:
+                    saida[uf][celula] = pronta
+                    print(f'{uf} | {celula}: já gravada, mantida', flush=True)
+                    continue
                 saida[uf][celula] = resume(pool.map(replica, tarefas, chunksize=1))
                 print(f'{uf} | {celula} ({r} réplicas, {time.time() - t0:.0f} s): '
                       + '; '.join(f"{k} {v['ganho_mediano']:+.3f} ({v['replicas_com_ganho_detectado_%']:.0f}%)"
                                   for k, v in saida[uf][celula]['modelos'].items()), flush=True)
-                with open(os.path.join(AQUI, 'tamanho_ou_repeticao.json'), 'w', encoding='utf-8') as f:
+                with open(arquivo, 'w', encoding='utf-8') as f:
                     json.dump(saida, f, indent=2, ensure_ascii=False)
 
 

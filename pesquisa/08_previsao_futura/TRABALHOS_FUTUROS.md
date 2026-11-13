@@ -35,6 +35,21 @@ com intervalo de 95% por reamostragem de safras, em janela crescente.
 - **Teste que falta.** Repetir os dois testes a cada safra nova.
 - **Critério.** O intervalo do ganho deixa de incluir o zero. Com 24 safras isso
   é improvável; o teste ganha poder a cada safra acrescentada.
+- **Feito em 13/11/2026, a janela do nacional ampliada**
+  (`03_analise_nacional/14_vinte_safras_e_enso.py`). A subseção 5.4 nota que
+  2016, El Niño forte, é a pior safra dos quatro modelos, com um só evento
+  intenso na janela de teste. O protocolo da Tabela 3 foi repetido com cada
+  uma das vinte safras de 2001 a 2020 deixada de fora: 2016 segue a pior para
+  os quatro (R² do SVR de 0,077), mas a intensidade do evento não acompanha o
+  desempenho nas vinte (Spearman entre |ONI| e o R² do SVR de −0,09, p = 0,71;
+  no ganho sobre a referência, −0,12), e a La Niña forte de 2008 está entre as
+  melhores (R² de 0,57). Nas duas safras de |ONI| ≥ 1,5, o R² médio do SVR é
+  0,33 contra 0,38 nas outras dezoito. Reunidas as vinte safras, o SVR erra
+  436 kg/ha (R² de 0,63) contra 562 da referência (ganho de 0,40, IC95 de 0,25
+  a 0,52 por reamostragem de safras), e supera a referência em 17 delas. A
+  ressalva fica registrada no JSON: as safras de 2001 a 2015 participaram da
+  busca de hiperparâmetros, como treino ou validação, e só as de 2016 a 2020
+  são uma leitura limpa.
 
 ## 3. Variáveis ambientais novas
 
@@ -180,6 +195,38 @@ radiação solar (−0,28). No Pará, só o NDVI máximo, fraco (−0,09) e com 
 ao contrário do esperado. Entrou como uma frase, com alteração controlada, na
 conclusão da dissertação, depois da Amazônia Legal.
 
+**Feito em 13/11/2026, tamanho da base ou repetição do alvo**
+(`10_trabalhos_futuros/09_tamanho_ou_repeticao.py`, rodado no Actions). O
+desenho que a seção pedia: Mato Grosso e Maranhão reduzidos, em 100 amostras,
+à estrutura exata do painel do Pará (38 municípios, cada um com as safras de
+um município paraense, 415 registros), com a repetição do estado e com ela
+injetada até os 40,1% do Pará, como em `07_injecao_de_repeticao.py`. Ganho
+sobre a referência com a configuração fixa de cada modelo e, nas amostras,
+também o SVR com a busca aninhada da Tabela 6; "detectado" é o IC95 acima de
+zero.
+
+| Estado | Célula | SVR, ganho mediano (detectado em) | SVR com busca aninhada | Random Forest |
+|---|---|---|---|---|
+| Mato Grosso | base inteira (2.290), repetição do estado (11,9%) | +0,067 (sim) | — | +0,121 (sim) |
+| | base inteira, repetição do Pará (20 réplicas) | +0,041 (70%) | — | +0,073 (100%) |
+| | tamanho do Pará, repetição do estado (9,8%) | +0,074 (91%) | +0,161 (76%) | +0,191 (50%) |
+| | tamanho do Pará, repetição do Pará (40,3%) | +0,052 (83%) | +0,107 (68%) | +0,128 (62%) |
+| Maranhão | base inteira (1.043), repetição do estado (9,6%) | +0,091 (sim) | — | +0,146 (não) |
+| | base inteira, repetição do Pará (20 réplicas) | +0,046 (80%) | — | +0,090 (35%) |
+| | tamanho do Pará, repetição do estado (8,3%) | +0,069 (99%) | +0,089 (98%) | +0,145 (8%) |
+| | tamanho do Pará, repetição do Pará (40,3%) | +0,043 (66%) | +0,062 (66%) | +0,102 (23%) |
+
+No Pará, nas mesmas condições, o SVR dá −0,008 (IC95 −0,032 a +0,014) e a
+busca aninhada −0,010. Reduzidos ao tamanho do Pará, os dois estados continuam
+mostrando o ganho; com a repetição do Pará injetada, o ganho encolhe e passa a
+escapar em parte das amostras, mas não desaparece. O tamanho da base não
+explica, sozinho, a ausência de ganho no Pará; a repetição a reduz sem a
+produzir; o que resta está nos preditores, que no Pará são os que menos
+acompanham o erro da referência (item anterior). Os modelos de árvore são os
+mais instáveis entre amostras (detectados em 8% a 62% delas): com 415
+registros, só o SVR dá uma resposta estável. Entrou na conclusão da
+dissertação, com alteração controlada, em 13/11/2026.
+
 **Feito em 07/11/2026, data de semeadura por satélite**
 (`10_trabalhos_futuros/07_data_semeadura.py`, rodado no Actions). Não há
 registro público da data de semeadura nem da cultivar por município. A data,
@@ -204,6 +251,33 @@ A cultivar continua sem fonte.
 "outras lavouras temporárias", junto com o que se planta depois da soja. Sem a
 máscara, as variáveis de vegetação do milho se misturariam às da soja na
 mesma área, e o desenho da base do Pará não se repete.
+
+## 3b. O erro do nacional por estado
+
+- **Por quê.** O objetivo específico d da dissertação pede o comportamento do
+  erro por região, e o texto só o tinha por safra.
+- **Feito em 13/11/2026** (`03_analise_nacional/15_erro_por_estado.py`). As
+  previsões da Tabela 3, repartidas pelos sete estados nas safras de 2016 a
+  2020, com o ganho do SVR sobre a referência (média do município + tendência,
+  IC95 por reamostragem de municípios) e a repetição da PAM em cada estado:
+
+| Estado | Registros | Repetição | SVR: erro relativo | R² | Ganho sobre a referência (IC95) |
+|---|---|---|---|---|---|
+| Bahia | 50 | 4.7% | 17.9% | 0.205 | -0.026 (-1.203 a +0.400) |
+| Goias | 845 | 23.2% | 12.8% | 0.083 | -0.038 (-0.132 a +0.041) |
+| Mato Grosso | 495 | 12.7% | 8.6% | 0.221 | +0.316 (+0.189 a +0.419) |
+| Mato Grosso do Sul | 325 | 9.1% | 11.9% | 0.381 | +0.361 (+0.218 a +0.479) |
+| Minas Gerais | 675 | 27.6% | 12.8% | 0.124 | +0.216 (+0.105 a +0.319) |
+| Parana | 1840 | 4.4% | 13.6% | 0.347 | +0.219 (+0.160 a +0.276) |
+| Rio Grande do Sul | 1985 | 12.3% | 18.2% | 0.491 | +0.528 (+0.496 a +0.556) |
+
+  O ganho vai de 0,53 no Rio Grande do Sul a nada em Goiás e na Bahia (50
+  registros de teste, intervalo largo). Goiás e Minas Gerais, onde a PAM mais
+  repete, estão entre os de menor R², mas com sete estados a associação não se
+  estabelece (Spearman de −0,21 no ganho, −0,54 no R², p > 0,2). O erro
+  relativo de 14,5% no conjunto é sobre a média das safras de teste (3.171
+  kg/ha); os 17,1% da Tabela 3 são sobre a média da base inteira (2.693).
+  Entrou na subseção 5.5 da dissertação, com alteração controlada.
 
 ## 4. Triangular a variável-alvo
 
@@ -398,11 +472,31 @@ Play App Signing, em que a chave do workflow é a de envio e pode ser trocada.
   boa e atenção, coerente com o vento que a previsão põe nas horas calmas; os
   10,6% de horas boas que eram a evitar são o erro que importa ao produtor.
   A janela orienta, não garante: a tela já pede a conferência no local, e o
-  texto passa a dizer quanto ela erra. **Próximo passo:** decompor a
-  discordância por critério (vento, umidade, temperatura, chuva) e testar se
-  corrigir o viés do vento pela estação mais próxima aproxima as duas.
+  texto passa a dizer quanto ela erra.
+- **Feito em 13/11/2026, a discordância por critério**
+  (`10_trabalhos_futuros/10_janela_por_criterio.py`, rodado no Actions, nas
+  mesmas 12 estações e 38.079 horas). Por critério, o que mais pesa é a chuva
+  na hora: a previsão a aciona em 47% das horas, o medido em 10%, e 86% dos
+  acionamentos previstos são alarme falso (a hora com chance de chuva de 50%
+  ou mais conta como chuva). O vento vem em seguida: acima de 10 km/h a 2 m,
+  previsto em 6,6% das horas contra 3,7% medidas, com 76% de alarme falso;
+  abaixo de 3 km/h, medido em 45% das horas e previsto em 22%. Temperatura e
+  umidade acertam cerca de 65% do que o medido aciona. Trocando uma variável
+  prevista pela medida: só a temperatura, a concordância vai de 42% para 44%;
+  só a umidade, 43%; só o vento, 59%; só a chuva, 58%; vento e chuva juntos,
+  92% (kappa de 0,87). Quase toda a discordância está, portanto, no vento e
+  na chuva. Corrigir o vento ajuda pouco: a reta ajustada na própria estação
+  de novembro a janeiro e aplicada de fevereiro a abril leva a concordância de
+  38% para 40%, e o viés por hora do dia, para 42%, mas as horas boas que eram
+  a evitar sobem de 10,7% para 12%; a reta da estação mais próxima (79 a 213
+  km) piora (40%, e 13,7% de boas a evitar). O limiar da chance de chuva
+  também não resolve: de 50% para 90%, ou só com a chuva prevista, a
+  concordância vai de 41,9% para 43,7% e as boas que eram a evitar sobem de
+  10,6% para 12,1%. O critério do aplicativo fica como está, e a tela segue
+  pedindo a conferência no local; o que reduziria o erro é a previsão
+  horária de chuva e de vento, não a regra.
 
-## 10. Produto em Mato Grosso e no Maranhão
+## 10. Produto em Mato Grosso, no Maranhão, em Tocantins e em Rondônia
 
 A seção 3 mostrou que, em Mato Grosso e no Maranhão, o clima e a vegetação
 medidos por satélite explicam a produtividade além da média do município. O
@@ -452,7 +546,32 @@ depois da mudança), e o aplicativo do Pará pede e guarda o mesmo de sempre.
 - **Aplicativo 2.8.0.** Pará, Mato Grosso ou Maranhão na janela de escolha do
   município. Com a API anterior, que ignora `?uf=` e responderia pelo Pará, o
   aplicativo diz que o estado ainda não está no servidor.
-- **Falta.** Publicar (API, painel e aplicativo) depois da defesa; coletar as
-  variáveis de satélite das safras novas dos dois estados, que a coleta
-  mensal faz só para o Pará; e conferir com quem planta lá se o custo da praça
-  mais perto representa o município.
+- **Feito em 13/11/2026, Tocantins e Rondônia.** Os dois entram como os
+  outros (base, API, painel e aplicativo 2.8.0), com o que a seção 3 mediu
+  neles: em Tocantins nenhum ganho resiste à correção de Holm e em Rondônia
+  só o da SVR, e a tela mostra modelo e referência lado a lado, como no Pará
+  (validação temporal do produto: Tocantins 328 kg/ha, R² 0,365 contra 0,310
+  da referência; Rondônia 319 kg/ha, 0,303 contra 0,282). Tocantins usa o
+  levantamento de Pedro Afonso, do próprio estado, o mesmo do Pará, com o
+  custo aberto por item; Rondônia não tem praça de custo na CONAB e usa
+  Sorriso (MT), a mais perto, com o nome da praça à vista. Bases pelo SIDRA
+  até 2025: Tocantins 1.741 registros de 108 municípios, Rondônia 526 de 41.
+- **Feito em 13/11/2026, contorno dos quatro estados.** A API de malhas do
+  IBGE não atendeu do Actions em nenhuma tentativa de novembro; a montagem
+  ganhou uma segunda fonte, os limites estaduais do IBGE republicados no
+  Click That Hood (Code for America), simplificados ao detalhe do contorno do
+  Pará (cerca de 300 vértices, 5 KB por estado). O mapa dos quatro estados
+  sai com o contorno.
+- **Feito em 13/11/2026, safra nova dos outros estados.** A atualização
+  mensal, quando a PAM publica uma safra que a coleta de um estado ainda não
+  tem, a coleta no Earth Engine (`coleta_amazonia_legal.py`, um estado e uma
+  safra por vez) e monta a base de novo; sem a chave, só a série oficial
+  avança (`monta_base_estados.py --faltam`).
+- **Feito em 13/11/2026, capturas.** `dados_das_capturas.py` grava as
+  respostas de um município de cada estado e `CapturasDeTelaTest` desenha
+  com elas o resumo, a viabilidade e o cartão do modelo, e a escolha do
+  estado com os cinco.
+- **Falta.** Publicar (API, painel e aplicativo) depois da defesa; conferir
+  com quem planta lá se o custo da praça mais perto representa o município;
+  e o teste em emulador com os estados novos (o Teste Premium roda contra a
+  API em produção, que ainda não os tem).

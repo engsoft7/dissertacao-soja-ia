@@ -1,14 +1,24 @@
 --------- beginning of main
 --------- beginning of system
 --------- beginning of crash
-11-06 22:41:40.897  4554  4572 I PERCURSO: 2s	abriu	boas-vindas
-11-06 22:41:42.549  4554  4572 I PERCURSO: 3s	lista	chegou da API
-11-06 22:41:43.195  4554  4572 I PERCURSO: 4s	resumo	safra 2027 carregada
-11-06 22:41:43.213  4554  4572 I PERCURSO: 4s	ok	Resumo mostra a última safra do IBGE, 2025
-11-06 22:41:44.179  4554  4572 I PERCURSO: 5s	FALHA	AssertionError: Failed: performScrollToIndex(3)
-11-06 22:41:44.392  4554  4572 I PERCURSO: a11y	01_boas_vindas	sem achados
-11-06 22:41:44.392  4554  4572 I PERCURSO: a11y	02_lista	sem achados
-11-06 22:41:44.392  4554  4572 I PERCURSO: a11y	03_resumo	sem achados
-11-06 22:41:44.392  4554  4572 I PERCURSO: a11y	04_resumo_1	sem achados
-11-06 22:41:44.392  4554  4572 I PERCURSO: a11y	04_resumo_2	sem achados
-11-06 22:41:44.392  4554  4572 I PERCURSO: a11y	99_falha	sem achados
+11-13 16:22:03.425  4559  4576 I PERCURSO: 2s	abriu	boas-vindas
+11-13 16:22:05.091  4559  4576 I PERCURSO: 3s	lista	chegou da API
+11-13 16:22:05.717  4559  4576 I PERCURSO: 4s	resumo	safra 2027 carregada
+11-13 16:22:05.732  4559  4576 I PERCURSO: 4s	ok	Resumo mostra a última safra do IBGE, 2025
+11-13 16:22:07.291  4559  4576 I PERCURSO: 5s	tempo	previsão carregada
+11-13 16:24:46.338  4559  4576 I PERCURSO: 164s	FALHA	ComposeTimeoutException: Condition still not satisfied after 150000 ms
+11-13 16:24:46.523  4559  4576 I PERCURSO: a11y	01_boas_vindas	sem achados
+11-13 16:24:46.523  4559  4576 I PERCURSO: a11y	02_lista	sem achados
+11-13 16:24:46.523  4559  4576 I PERCURSO: a11y	03_resumo	sem achados
+11-13 16:24:46.523  4559  4576 I PERCURSO: a11y	04_resumo_1	sem achados
+11-13 16:24:46.523  4559  4576 I PERCURSO: a11y	04_resumo_2	sem achados
+11-13 16:24:46.523  4559  4576 I PERCURSO: a11y	04_resumo_3	sem achados
+11-13 16:24:46.523  4559  4576 I PERCURSO: a11y	04_resumo_4	sem achados
+11-13 16:24:46.523  4559  4576 I PERCURSO: a11y	05_tempo	sem achados
+11-13 16:24:46.523  4559  4576 I PERCURSO: a11y	06_estimativa_no_campo	sem achados
+11-13 16:24:46.523  4559  4576 I PERCURSO: a11y	07_mapa	sem achados
+11-13 16:24:46.523  4559  4576 I PERCURSO: a11y	99_falha	sem achados
+11-13 16:24:46.806  4559  4576 I PERCURSO: 0s	api	http://10.0.2.2:8000/
+11-13 16:24:47.506  4559  4576 I PERCURSO: 0s	estado	Mato Grosso escolhido
+11-13 16:27:17.516  4559  4576 I PERCURSO: 150s	FALHA	ComposeTimeoutException: Condition still not satisfied after 150000 ms
+11-13 16:27:17.680  4559  4576 I PERCURSO: a11y	29_falha_mt	sem achados

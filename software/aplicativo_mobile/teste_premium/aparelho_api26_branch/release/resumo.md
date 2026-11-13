@@ -32,26 +32,26 @@
  "altura_px": 2400,
  "densidade_dpi": 420,
  "apk_mb": 27.6,
- "partida_fria_primeira_ms": 776,
- "partida_fria_sem_municipio_ms": 801.5,
+ "partida_fria_primeira_ms": 720,
+ "partida_fria_sem_municipio_ms": 672.0,
  "dados_do_municipio_s": 3.7,
- "memoria_resumo_kb": 36935,
+ "memoria_resumo_kb": 35054,
  "rolagem_resumo": {
-  "quadros": 379.0,
-  "lentos_pct": 98.15,
-  "p50_ms": 65.0,
-  "p90_ms": 85.0,
-  "p99_ms": 93.0
+  "quadros": 509.0,
+  "lentos_pct": 96.07,
+  "p50_ms": 46.0,
+  "p90_ms": 61.0,
+  "p99_ms": 77.0
  },
  "rolagem_historico": {
-  "quadros": 276.0,
-  "lentos_pct": 96.38,
-  "p50_ms": 61.0,
-  "p90_ms": 81.0,
-  "p99_ms": 93.0
+  "quadros": 439.0,
+  "lentos_pct": 96.58,
+  "p50_ms": 46.0,
+  "p90_ms": 61.0,
+  "p99_ms": 69.0
  },
- "memoria_depois_das_abas_kb": 79309,
- "partida_fria_com_municipio_ms": 918,
+ "memoria_depois_das_abas_kb": 79438,
+ "partida_fria_com_municipio_ms": 714,
  "monkey": {
   "eventos": 3000,
   "falhas": 0,
@@ -62,6 +62,7 @@
 
 ## Acessibilidade pela árvore do uiautomator
 
+- **r04_resumo_1**: alvos < 48 dp: 152,50 (166×33 dp), 53,8 (166×33 dp); sem rótulo: nenhum
 - **r05_mapa**: alvos < 48 dp: nenhum; sem rótulo: WebView em (45,465)
 - **r08_sobre**: alvos < 48 dp: View (339×33 dp), View (339×44 dp), View (339×46 dp); sem rótulo: nenhum
 - **r09_estimativa_no_campo**: alvos < 48 dp: View (347×32 dp); sem rótulo: nenhum

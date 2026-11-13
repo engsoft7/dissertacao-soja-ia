@@ -1,47 +1,36 @@
 
 com.agrointeligencia.app.PercursoNoAparelhoTest:
 Error in percorreAsTelasComDadosReais(com.agrointeligencia.app.PercursoNoAparelhoTest):
-java.lang.AssertionError: Failed: performScrollToIndex(3)
-The node is no longer in the tree, last known semantics:
-Node #64 at (l=0.0, t=128.0, r=1080.0, b=2127.0)px
-CollectionInfo = 'CollectionInfo(rowCount=5, columnCount=1)'
-IsTraversalGroup = 'true'
-Shape = 'androidx.compose.foundation.VerticalScrollableClipShape@87e67fa'
-VerticalScrollAxisRange = 'ScrollAxisRange(value=500.0, maxValue=600.0, reverseScrolling=false)'
-Actions = [GetScrollViewportLength, IndexForKey, ScrollBy, ScrollByOffset, ScrollToIndex]
-Has 10 children, 2 siblings
-Original selector: (ScrollToIndex is defined) && (hasAnyDescendantThat(Text + InputText + EditableText contains 'AgroInteligência' (ignoreCase: false)))
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 150000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:887)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:482)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.espera(PercursoNoAparelhoTest.kt:80)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.espera$default(PercursoNoAparelhoTest.kt:80)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:241)
 
-	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:165)
-	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
-	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
-	at androidx.compose.ui.test.ActionsKt.performScrollToIndex(Actions.kt:159)
-	at com.agrointeligencia.app.PercursoNoAparelhoTest.rola(PercursoNoAparelhoTest.kt:125)
-	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:163)
+Error in percorreOutroEstado(com.agrointeligencia.app.PercursoNoAparelhoTest):
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 150000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:887)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:482)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreOutroEstado(PercursoNoAparelhoTest.kt:163)
 
 
-Time: 20.36
-There was 1 failure:
+Time: 343.396
+There were 2 failures:
 1) percorreAsTelasComDadosReais(com.agrointeligencia.app.PercursoNoAparelhoTest)
-java.lang.AssertionError: Failed: performScrollToIndex(3)
-The node is no longer in the tree, last known semantics:
-Node #64 at (l=0.0, t=128.0, r=1080.0, b=2127.0)px
-CollectionInfo = 'CollectionInfo(rowCount=5, columnCount=1)'
-IsTraversalGroup = 'true'
-Shape = 'androidx.compose.foundation.VerticalScrollableClipShape@87e67fa'
-VerticalScrollAxisRange = 'ScrollAxisRange(value=500.0, maxValue=600.0, reverseScrolling=false)'
-Actions = [GetScrollViewportLength, IndexForKey, ScrollBy, ScrollByOffset, ScrollToIndex]
-Has 10 children, 2 siblings
-Original selector: (ScrollToIndex is defined) && (hasAnyDescendantThat(Text + InputText + EditableText contains 'AgroInteligência' (ignoreCase: false)))
-
-	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:165)
-	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
-	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
-	at androidx.compose.ui.test.ActionsKt.performScrollToIndex(Actions.kt:159)
-	at com.agrointeligencia.app.PercursoNoAparelhoTest.rola(PercursoNoAparelhoTest.kt:125)
-	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:163)
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 150000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:887)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:482)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.espera(PercursoNoAparelhoTest.kt:80)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.espera$default(PercursoNoAparelhoTest.kt:80)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:241)
+2) percorreOutroEstado(com.agrointeligencia.app.PercursoNoAparelhoTest)
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 150000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:887)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:482)
+	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreOutroEstado(PercursoNoAparelhoTest.kt:163)
 
 FAILURES!!!
-Tests run: 1,  Failures: 1
+Tests run: 2,  Failures: 2
 
 

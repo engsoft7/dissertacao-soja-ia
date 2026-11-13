@@ -333,7 +333,8 @@ interface AgroApiService {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "https://agrointeligencia-api.onrender.com/"
+    // Fixa na release; na depuração pode vir de -PapiBaseUrl (build.gradle.kts).
+    private val BASE_URL = BuildConfig.API_BASE_URL
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()

@@ -2,7 +2,7 @@
 
 > Este documento contém as informações necessárias para o preenchimento do
 > formulário de registro de programa de computador no Instituto Nacional da
-> Propriedade Industrial (INPI), conforme a Instrução Normativa nº 199/2024.
+> Propriedade Industrial (INPI), conforme a Instrução Normativa INPI/PR nº 99/2019.
 
 ---
 

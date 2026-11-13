@@ -9,16 +9,47 @@ o teste lê. A rota de mercado consulta o Yahoo Finance; quando ele não
 responde, o arquivo não é gravado e o teste volta aos dados de exemplo só
 naquela tela.
 
+Grava também as respostas de um município de cada um dos outros estados
+(previsao_MT.json, financas_MT.json, municipios_MT.json e assim por diante),
+para as capturas das mesmas telas fora do Pará.
+
 Uso: python software/automacao_github/dados_das_capturas.py [município]
 """
 import json
 import sys
+import time
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
 DESTINO = RAIZ / "software" / "aplicativo_mobile" / "app" / "build" / "dados_capturas"
 
 sys.path.insert(0, str(RAIZ / "software" / "api_backend"))
+
+# Um município de cada estado que não o Pará: o de mais soja, ou a praça.
+OUTROS_ESTADOS = {"MT": "Sorriso", "MA": "Balsas", "TO": "Porto Nacional", "RO": "Vilhena"}
+
+
+def grava_outros_estados(cliente) -> None:
+    """As rotas que o aplicativo pede com ?uf=, de um município por estado."""
+    # Os outros estados treinam depois do Pará; até lá a API responde 503.
+    for _ in range(300):
+        estados = cliente.get("/api/estados").json()["estados"]
+        if all(e["carregado"] for e in estados):
+            break
+        time.sleep(1)
+    disponiveis = {e["uf"] for e in estados if e["carregado"]}
+    for uf, municipio in OUTROS_ESTADOS.items():
+        rotas = {"previsao": f"/api/previsao/{municipio}", "financas": f"/api/financas/{municipio}",
+                 "municipios": "/api/municipios?com_sedes=true"}
+        for nome, rota in rotas.items():
+            alvo = DESTINO / f"{nome}_{uf}.json"
+            r = cliente.get(rota, params={"uf": uf}) if uf in disponiveis else None
+            if r is None or r.status_code != 200:
+                print(f"{nome} de {uf}: sem dados, a captura fica de fora")
+                alvo.unlink(missing_ok=True)
+                continue
+            alvo.write_text(json.dumps(r.json(), ensure_ascii=False), encoding="utf-8")
+            print(f"{nome} de {uf}: gravado")
 
 
 def main(municipio: str = "Paragominas") -> None:
@@ -49,6 +80,7 @@ def main(municipio: str = "Paragominas") -> None:
                 continue
             (DESTINO / f"{nome}.json").write_text(json.dumps(dados, ensure_ascii=False), encoding="utf-8")
             print(f"{nome}: gravado")
+        grava_outros_estados(cliente)
 
 
 def grava_tempo(lat: float = -3.0, lon: float = -47.35) -> None:

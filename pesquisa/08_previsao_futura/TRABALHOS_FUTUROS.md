@@ -216,6 +216,19 @@ zero.
 | | tamanho do Pará, repetição do estado (8,3%) | +0,069 (99%) | +0,089 (98%) | +0,145 (8%) |
 | | tamanho do Pará, repetição do Pará (40,3%) | +0,043 (66%) | +0,062 (66%) | +0,102 (23%) |
 
+Com mais repetição injetada nas amostras do tamanho do Pará (100 réplicas
+cada), o ganho do SVR encolhe aos poucos e não some:
+
+| Repetição injetada | SVR em Mato Grosso (detectado em) | SVR no Maranhão (detectado em) |
+|---|---|---|
+| a do estado (9,8% e 8,3%) | +0,074 (91%) | +0,069 (99%) |
+| 40,1%, a do Pará | +0,052 (83%) | +0,043 (66%) |
+| 55% | +0,049 (80%) | +0,031 (47%) |
+| 67,4% | +0,042 (74%) | +0,024 (39%) |
+
+Medido contra o valor original, e não contra o alvo corrompido, o ganho fica
+parecido (MT +0,061, +0,050 e +0,029; MA +0,064, +0,058 e +0,034).
+
 No Pará, nas mesmas condições, o SVR dá −0,008 (IC95 −0,032 a +0,014) e a
 busca aninhada −0,010. Reduzidos ao tamanho do Pará, os dois estados continuam
 mostrando o ganho; com a repetição do Pará injetada, o ganho encolhe e passa a

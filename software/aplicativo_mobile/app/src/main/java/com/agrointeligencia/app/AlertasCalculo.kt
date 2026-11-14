@@ -95,7 +95,7 @@ fun precoParaNotificar(
 /** "hoje", "amanhã" ou "dd/MM", para o texto da notificação. */
 enum class QuandoJanela { HOJE, AMANHA, OUTRO_DIA }
 
-fun quandoJanela(j: Janela, agora: LocalDateTime): QuandoJanela = when (j.inicio.toLocalDate()) {
+fun diaDaJanela(j: Janela, agora: LocalDateTime): QuandoJanela = when (j.inicio.toLocalDate()) {
     agora.toLocalDate() -> QuandoJanela.HOJE
     agora.toLocalDate().plusDays(1) -> QuandoJanela.AMANHA
     else -> QuandoJanela.OUTRO_DIA

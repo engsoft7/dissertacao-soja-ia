@@ -302,7 +302,7 @@ object Notificacoes {
     fun janelaDePulverizacao(context: Context, j: Janela, agora: LocalDateTime, lugar: LugarTempo) {
         val ini = "${j.inicio.hour}h"
         val fim = "${j.fim.hour}h"
-        val texto = when (quandoJanela(j, agora)) {
+        val texto = when (diaDaJanela(j, agora)) {
             QuandoJanela.HOJE -> context.getString(R.string.alerta_pulverizacao_hoje, ini, fim, lugar.nome)
             QuandoJanela.AMANHA -> context.getString(R.string.alerta_pulverizacao_amanha, ini, fim, lugar.nome)
             QuandoJanela.OUTRO_DIA -> context.getString(R.string.alerta_pulverizacao_dia,
@@ -330,11 +330,8 @@ object Notificacoes {
  * o decimal e o ponto separa milhar; sem vírgula, o ponto é o decimal. Null se
  * não for um preço de saca plausível.
  */
-fun precoDigitado(texto: String): Double? {
-    val t = texto.trim().removePrefix("R$").trim()
-    val numero = if (',' in t) t.replace(".", "").replace(',', '.') else t
-    return numero.toDoubleOrNull()?.takeIf { it > 0.0 && it < 10_000.0 }
-}
+fun precoDigitado(texto: String): Double? =
+    numeroDigitado(texto.trim().removePrefix("R$"))?.takeIf { it > 0.0 && it < 10_000.0 }
 
 /** A tela Alertas: o que receber, a praça e o preço-alvo, e a permissão de notificar. */
 @OptIn(ExperimentalLayoutApi::class)

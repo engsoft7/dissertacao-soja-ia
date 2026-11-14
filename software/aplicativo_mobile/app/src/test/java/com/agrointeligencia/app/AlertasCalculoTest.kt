@@ -39,7 +39,7 @@ class AlertasCalculoTest {
         val j = janelaParaNotificar(h, t("2026-11-15T06:30"), ultimoDiaAvisado = null)!!
         assertEquals(t("2026-11-15T07:00"), j.inicio)
         assertEquals(t("2026-11-15T11:00"), j.fim)
-        assertEquals(QuandoJanela.HOJE, quandoJanela(j, t("2026-11-15T06:30")))
+        assertEquals(QuandoJanela.HOJE, diaDaJanela(j, t("2026-11-15T06:30")))
         // o mesmo dia já avisado não avisa de novo
         assertNull(janelaParaNotificar(h, t("2026-11-15T06:30"), LocalDate.parse("2026-11-15")))
         // de madrugada não notifica, mesmo com janela
@@ -50,7 +50,7 @@ class AlertasCalculoTest {
     fun janelaDeAmanhaSoDentroDoHorizonte() {
         val h = horas("2026-11-14T15:00", setOf(6, 7, 8))
         val j = janelaParaNotificar(h, t("2026-11-14T15:00"), null)!!
-        assertEquals(QuandoJanela.AMANHA, quandoJanela(j, t("2026-11-14T15:00")))
+        assertEquals(QuandoJanela.AMANHA, diaDaJanela(j, t("2026-11-14T15:00")))
         assertNull(janelaParaNotificar(h, t("2026-11-14T15:00"), null, horizonte = 6))
     }
 

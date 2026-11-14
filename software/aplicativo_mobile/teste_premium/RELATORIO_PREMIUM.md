@@ -5,7 +5,7 @@ Testes de 06/11/2026 sobre o app publicado (2.7.3, versionCode 27) e a versão
 `auditoria-app.yml` (números) e `teste-premium.yml` (API e aparelhos). As
 tabelas completas estão nas pastas ao lado, e as capturas de tela na branch
 `teste-premium-capturas`. A seção 8 traz a rodada de 13 e 14/11/2026, com o
-2.8.0 publicado na v2.5.0 (cinco estados) e o 2.8.1 desta branch.
+2.8.0 publicado na v2.5.0 (cinco estados) e o 2.8.1, publicado na v2.5.1.
 
 ## Resumo
 
@@ -211,7 +211,7 @@ release, que usa root no mesmo emulador e passou.
 |---|---|---|
 | Sobre | As fontes com link de uma linha, INMET e MapBiomas, tinham 44 e 46 dp de alvo de toque (Accessibility Test Framework). | Mínimo de 48 dp, no 2.8.1. |
 | Cartão do tempo, no Resumo | Dois avisos do mesmo evento apareciam como "2 avisos do INMET: tempestade, tempestade". | O nome entra uma vez, no 2.8.1, com teste de unidade. |
-| API no Render | A cada deploy ou reinício, a API treinava os quatro estados novos depois do Pará: uns 90 s de CPU numa máquina comum, na ordem de 15 minutos no décimo de CPU do plano gratuito. Nesse tempo os quatro respondem 503 e dividem a CPU com o Pará. Na leitura de 13/11 às 16h34 UTC, logo depois do deploy, nenhum estava pronto. | Os estados saem prontos da build (`prepara_estados.py`). Na API do runner, os cinco vieram do cache. Em produção, vale depois do merge do PR #190. |
+| API no Render | A cada deploy ou reinício, a API treinava os quatro estados novos depois do Pará: uns 90 s de CPU numa máquina comum, na ordem de 15 minutos no décimo de CPU do plano gratuito. Nesse tempo os quatro respondem 503 e dividem a CPU com o Pará. Na leitura de 13/11 às 16h34 UTC, logo depois do deploy, nenhum estava pronto. | Os estados saem prontos da build (`prepara_estados.py`). Na API do runner, os cinco vieram do cache. Em produção desde a v2.5.1: na leitura de 14/11, os cinco vieram do cache da build. |
 
 **Do próprio teste.** Quatro coisas paravam o percurso sem defeito do app, e
 o teste foi corrigido:

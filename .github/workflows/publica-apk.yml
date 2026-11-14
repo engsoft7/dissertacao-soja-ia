@@ -158,6 +158,28 @@ jobs:
             $(find app/build/outputs -name '*.aab' -o -name '*-release*.apk') \
             --clobber --repo "${{ github.repository }}"
 
+      # O mesmo .aab vai à Google Play, pela API oficial (envia_play.py), quando
+      # o segredo da conta de serviço do Play Console está configurado. Sem ele,
+      # o passo só avisa, e o envio continua manual, pelo .aab do Release. As
+      # notas da versão na loja são o título do Release.
+      - name: Envia à Google Play
+        if: steps.chave.outputs.presente == 'sim' && env.ETIQUETA != ''
+        working-directory: software/aplicativo_mobile
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          PLAY_FAIXA: ${{ vars.PLAY_FAIXA }}
+        run: |
+          if [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::notice::PLAY_SERVICE_ACCOUNT_JSON não configurado: o .aab fica no Release para o envio manual à Google Play."
+            exit 0
+          fi
+          python3 -m venv /tmp/play
+          /tmp/play/bin/pip install --quiet google-api-python-client google-auth
+          aab=$(find app/build/outputs -name '*.aab' | head -1)
+          notas=$(gh release view "$ETIQUETA" --repo "${{ github.repository }}" --json name -q .name)
+          /tmp/play/bin/python ../automacao_github/envia_play.py "$aab" "$notas"
+
       # O runner é efêmero, mas apagar é barato e evita que a chave sobreviva
       # num passo posterior que alguém acrescente sem pensar nisso.
       - name: Apaga a chave

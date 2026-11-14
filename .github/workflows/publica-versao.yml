@@ -9,8 +9,13 @@
 # pelo próprio Actions não dispara o evento "release" que os aciona. O depósito
 # no Zenodo, que gera o DOI, é disparado pelo webhook do próprio GitHub.
 #
-# Publicar continua sendo uma decisão: cada versão ganha um DOI permanente, por
-# isso o workflow não roda sozinho a cada merge.
+# Desde 14/11/2026 roda também sozinho, quando um merge na main sobe a versão
+# do aplicativo (versionName em app/build.gradle.kts): o app é vivo, e a
+# decisão de publicar passa a ser a de mergear a versão nova. O título vem do
+# PR mergeado, e o nível da etiqueta, de quanto a versão do app subiu. Merges
+# que não mudam a versão, como as atualizações automáticas da base, não
+# publicam nada: cada versão ganha um DOI permanente, e a base nova chega ao
+# aplicativo pela API, sem versão nova.
 name: Publicar versão
 
 on:
@@ -24,6 +29,10 @@ on:
         type: choice
         options: [correcao, funcionalidade, principal]
         default: correcao
+  push:
+    branches: [main]
+    paths:
+      - "software/aplicativo_mobile/app/build.gradle.kts"
 
 permissions:
   contents: write
@@ -40,6 +49,7 @@ jobs:
     outputs:
       tag: ${{ steps.numero.outputs.tag }}
       titulo: ${{ steps.numero.outputs.titulo }}
+      publicar: ${{ steps.numero.outputs.publicar }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,10 +61,35 @@ jobs:
         env:
           TITULO: ${{ inputs.titulo }}
           INCREMENTO: ${{ inputs.incremento }}
+          ANTES: ${{ github.event.before }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [ "$GITHUB_REF_NAME" != "main" ]; then
             echo "::error::Dispare a partir da main: a versão é criada sobre ela."
             exit 1
+          fi
+          # No merge, só publica se a versão do aplicativo subiu; o título é o
+          # do PR mergeado, e o nível da etiqueta acompanha o da versão do app.
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            GRADLE=software/aplicativo_mobile/app/build.gradle.kts
+            le_versao() { sed -n 's/.*versionName *= *"\([^"]*\)".*/\1/p' | head -1; }
+            base="$ANTES"
+            git cat-file -e "$base^{commit}" 2>/dev/null || base=$(git rev-parse "$GITHUB_SHA~1")
+            antes=$(git show "$base:$GRADLE" 2>/dev/null | le_versao) || true
+            depois=$(git show "$GITHUB_SHA:$GRADLE" 2>/dev/null | le_versao) || true
+            if [ -z "$depois" ] || [ "$antes" = "$depois" ]; then
+              echo "A versão do aplicativo não mudou (${depois:-?}): nada a publicar." | tee -a "$GITHUB_STEP_SUMMARY"
+              echo "publicar=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            IFS=. read -r a1 a2 _ <<< "$antes"
+            IFS=. read -r d1 d2 _ <<< "$depois"
+            if [ "$a1" != "$d1" ]; then INCREMENTO=principal
+            elif [ "$a2" != "$d2" ]; then INCREMENTO=funcionalidade
+            else INCREMENTO=correcao; fi
+            TITULO=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" -q '.[0].title' 2>/dev/null || true)
+            [ -n "$TITULO" ] || TITULO="App $depois"
+            echo "Versão do aplicativo: $antes -> $depois ($INCREMENTO)."
           fi
           ultima=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -1)
           [ -n "$ultima" ] || { echo "::error::Nenhuma etiqueta vX.Y.Z encontrada."; exit 1; }
@@ -75,8 +110,10 @@ jobs:
           echo "Última: $ultima; nova: $tag"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "titulo=$tag — $TITULO" >> "$GITHUB_OUTPUT"
+          echo "publicar=true" >> "$GITHUB_OUTPUT"
 
       - name: Cria a etiqueta e o Release
+        if: steps.numero.outputs.publicar == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.numero.outputs.tag }}
@@ -88,6 +125,7 @@ jobs:
 
   apk:
     needs: versao
+    if: needs.versao.outputs.publicar == 'true'
     uses: ./.github/workflows/publica-apk.yml
     with:
       tag: ${{ needs.versao.outputs.tag }}
@@ -95,6 +133,7 @@ jobs:
 
   doi:
     needs: versao
+    if: needs.versao.outputs.publicar == 'true'
     uses: ./.github/workflows/registra-doi.yml
     with:
       tag: ${{ needs.versao.outputs.tag }}

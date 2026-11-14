@@ -34,6 +34,9 @@ pesquisa/05_artigo/saida/
 # em qualquer lugar que não fosse a máquina onde foi gerado.
 software/aplicativo_mobile/local.properties
 
+# Estados prontos para a API (prepara_estados.py): cada build faz o seu.
+software/api_backend/cache/
+
 # Figuras geradas da revisão: saem do script, como as demais figuras.
 pesquisa/02_revisao_sistematica/fig_revisao_*.png
 

@@ -3,7 +3,10 @@ services:
     name: agrointeligencia-api
     env: python
     plan: free
-    buildCommand: "pip install -r requirements.txt && pip install -r software/api_backend/requirements.txt"
+    # Depois das dependências, deixa os cinco estados prontos (modelo treinado e
+    # históricos): no plano gratuito, treinar na subida levava dezenas de minutos
+    # e deixava até o Pará lento. Se a preparação falhar, a API treina na subida.
+    buildCommand: "pip install -r requirements.txt && pip install -r software/api_backend/requirements.txt && (cd software/api_backend && python prepara_estados.py || echo 'estados não preparados; a API treina na subida')"
     startCommand: "cd software/api_backend && uvicorn api:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: PYTHON_VERSION

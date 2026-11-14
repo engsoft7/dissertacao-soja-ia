@@ -207,6 +207,7 @@ pesquisa/dados/
 software/api_backend/
   api.py                                  API REST (FastAPI) para clientes
   estados.py                              os cinco estados do produto; ?uf= nas rotas
+  prepara_estados.py                      estados prontos na build (modelo e históricos)
   financas.py                             cálculos financeiros (VTN, custos)
   mercado.py, precos.py, precos_para.py   Chicago em reais, cotações por praça, preço estimado do Pará
   tempo.py, avisos_inmet.py               tempo na lavoura, janela de pulverização, avisos
@@ -657,7 +658,7 @@ pip install pytest pandas requests
 python -m pytest software pesquisa/09_contagem_por_imagem/test_ciclo_retreino.py -q
 ```
 
-São 118 testes em Python (13/11/2026), em `software/api_backend/` (preços,
+São 119 testes em Python (14/11/2026), em `software/api_backend/` (preços,
 mercado, tempo, avisos, estados, contador, validação das entradas),
 `software/automacao_github/` (PAM, ENSO, CONAB, municípios, DOI),
 `software/dashboard_web/` e `pesquisa/09_contagem_por_imagem/`. O mesmo

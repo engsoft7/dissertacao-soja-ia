@@ -588,5 +588,11 @@ depois da mudança), e o aplicativo do Pará pede e guarda o mesmo de sempre.
   e aplicativo 2.8.0 no Release), com autorização do autor antes da defesa; a
   dissertação e o Anexo 01 passaram a descrever a extensão. O Teste Premium
   ganhou o percurso em Mato Grosso no emulador, contra a API da própria branch.
+- **Feito em 14/11/2026, subida da API.** No Render gratuito (0,1 CPU),
+  treinar os quatro estados depois do Pará levava dezenas de minutos, e nesse
+  tempo até a lista do Pará demorava (Teste Premium de 13/11: não chegou em
+  150 s). A build passou a deixar os cinco estados prontos
+  (`prepara_estados.py`, cache lido na subida, válido para a base com que foi
+  feito); com ele, os cinco ficam prontos em menos de um segundo.
 - **Falta.** Conferir com quem planta lá se o custo da praça mais perto
   representa o município.

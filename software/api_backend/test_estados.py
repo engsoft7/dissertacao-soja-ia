@@ -122,3 +122,27 @@ def test_cenario_sai_do_que_a_base_mostra(cliente):
     assert "precip_total" in sim("Balsas", "MA", 0.5, 0.0)["fora_da_faixa"]
     assert sim("Balsas", "MA", 0.5, 0.0)["delta_kg_ha"] == pytest.approx(
         seca["associacao"]["chuva"]["kg_ha"] * seca["associacao"]["chuva"]["faixa"][0])
+
+
+def test_cache_do_estado(tmp_path, monkeypatch):
+    """prepara_estados.py grava o estado pronto; a subida lê o arquivo e dá o mesmo
+    modelo e os mesmos históricos; com outra base, treina de novo."""
+    pytest.importorskip("fastapi")
+    pytest.importorskip("sklearn")
+    pytest.importorskip("folium")
+    import api
+
+    monkeypatch.setattr(api, "CACHE_ESTADOS", tmp_path)
+    ro = estados.ESTADOS["RO"]
+    preparado = api.prepara_estado(ro)
+    assert (tmp_path / "RO.joblib").exists()
+    assert len(preparado.historicos) == preparado.df["municipio"].nunique()
+
+    carregado = api.carrega_estado(ro)
+    assert carregado.metricas == preparado.metricas and carregado.last_year == preparado.last_year
+    municipio = next(iter(preparado.historicos))
+    assert carregado.historicos[municipio] == preparado.historicos[municipio]
+    assert carregado.estimador.estimar(municipio, 2027) == preparado.estimador.estimar(municipio, 2027)
+
+    monkeypatch.setattr(api, "CACHE_VERSAO", 999)  # como uma base ou biblioteca diferente
+    assert not api.carrega_estado(ro).historicos  # treinado agora, sem históricos prontos

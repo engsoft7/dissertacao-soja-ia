@@ -148,9 +148,9 @@ class PercursoNoAparelhoTest {
     /**
      * Outro estado: Mato Grosso, Sorriso. Com a API desta branch (o workflow a
      * sobe no runner e aponta BuildConfig.API_BASE_URL para ela), percorre
-     * Resumo, Histórico, Mercado e Sobre; com a API publicada, que ainda não
-     * tem o estado, confere que o app avisa em vez de mostrar o Pará com outro
-     * nome.
+     * Resumo, Histórico, Mercado e Sobre; com um servidor que ainda não tenha
+     * o estado (a API publicada antes da v2.5.0), confere que o app avisa em
+     * vez de mostrar o Pará com outro nome.
      */
     @Test
     fun percorreOutroEstado() {
@@ -173,7 +173,7 @@ class PercursoNoAparelhoTest {
             }
             tela("20_estado_mt")
             if (existe("ainda não está")) {
-                confere("a API publicada ainda não tem Mato Grosso, e o app avisa", true)
+                confere("o servidor ainda não tem Mato Grosso, e o app avisa", true)
                 anota("fim\tsem o estado no servidor")
                 return
             }

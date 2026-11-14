@@ -317,7 +317,7 @@ fun AgroDashboard() {
                 // Trocou de estado enquanto a lista vinha: a resposta é do outro.
                 if (ufPedida != uf) return@launch
                 if (!respostaDoEstado(ufPedida, response.uf) || response.municipios.isEmpty()) {
-                    // O servidor no ar ainda é o de antes de Mato Grosso e Maranhão.
+                    // Um servidor de antes da v2.5.0 não tem os outros estados.
                     avisoDoEstado = "${estadoDoApp(ufPedida).nome} ainda não está disponível no servidor. " +
                         "Escolha o Pará ou tente de novo mais tarde."
                     if (municipios.isEmpty()) errorMsg = avisoDoEstado

@@ -4,7 +4,7 @@ s_glBindAttribLocation: bind attrib 1 name color
 s_glBindAttribLocation: bind attrib 2 name localCoord
 ..
 
-Time: 105,186
+Time: 72,481
 
 OK (2 tests)
 

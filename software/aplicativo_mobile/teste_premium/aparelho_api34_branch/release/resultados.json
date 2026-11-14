@@ -106,11 +106,15 @@
    "sem_rotulo": []
   },
   "r03_resumo": {
-   "alvos_pequenos": [],
+   "alvos_pequenos": [
+    "View (379×36 dp)"
+   ],
    "sem_rotulo": []
   },
   "r04_resumo_1": {
-   "alvos_pequenos": [],
+   "alvos_pequenos": [
+    "View (379×40 dp)"
+   ],
    "sem_rotulo": []
   },
   "r04_resumo_2": {
@@ -172,7 +176,9 @@
    "sem_rotulo": []
   },
   "r14_escuro_resumo": {
-   "alvos_pequenos": [],
+   "alvos_pequenos": [
+    "View (379×36 dp)"
+   ],
    "sem_rotulo": []
   },
   "r15_escuro_historico": {
@@ -188,7 +194,10 @@
    "sem_rotulo": []
   },
   "r18_sem_internet": {
-   "alvos_pequenos": [],
+   "alvos_pequenos": [
+    "View (154×44 dp)",
+    "View (167×44 dp)"
+   ],
    "sem_rotulo": []
   },
   "r19_sem_internet_mercado": {
@@ -203,26 +212,26 @@
   "altura_px": 2400,
   "densidade_dpi": 420,
   "apk_mb": 28.0,
-  "partida_fria_primeira_ms": 1248,
-  "partida_fria_sem_municipio_ms": 1226.5,
+  "partida_fria_primeira_ms": 1176,
+  "partida_fria_sem_municipio_ms": 1028.5,
   "dados_do_municipio_s": 5.3,
-  "memoria_resumo_kb": 44698,
+  "memoria_resumo_kb": 38277,
   "rolagem_resumo": {
-   "quadros": 205.0,
-   "lentos_pct": 93.17,
-   "p50_ms": 69.0,
-   "p90_ms": 125.0,
+   "quadros": 200.0,
+   "lentos_pct": 92.0,
+   "p50_ms": 57.0,
+   "p90_ms": 105.0,
    "p99_ms": 150.0
   },
   "rolagem_historico": {
-   "quadros": 143.0,
-   "lentos_pct": 88.11,
+   "quadros": 156.0,
+   "lentos_pct": 91.03,
    "p50_ms": 73.0,
-   "p90_ms": 117.0,
+   "p90_ms": 113.0,
    "p99_ms": 150.0
   },
-  "memoria_depois_das_abas_kb": 90464,
-  "partida_fria_com_municipio_ms": 1312,
+  "memoria_depois_das_abas_kb": 89714,
+  "partida_fria_com_municipio_ms": 1189,
   "monkey": {
    "eventos": 3000,
    "falhas": 0,

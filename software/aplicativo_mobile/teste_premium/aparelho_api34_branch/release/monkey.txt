@@ -1,4 +1,23 @@
- typ=application/zip cmp=android/com.android.internal.app.ResolverActivity } in package android
+of Intent { act=android.intent.action.VIEW dat=https://support.google.com/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
+:Sending Touch (ACTION_DOWN): 0:(886.0,1117.0)
+:Sending Touch (ACTION_UP): 0:(925.7197,1082.0527)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,-5.0)
+:Sending Touch (ACTION_DOWN): 0:(133.0,533.0)
+:Sending Touch (ACTION_UP): 0:(124.625,549.75)
+:Sending Touch (ACTION_DOWN): 0:(525.0,263.0)
+:Sending Touch (ACTION_UP): 0:(523.9971,239.80566)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,2.0)
+:Sending Touch (ACTION_DOWN): 0:(973.0,1003.0)
+:Sending Touch (ACTION_UP): 0:(952.6367,967.99805)
+:Sending Flip keyboardOpen=true
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(72.0,1787.0)
+    //[calendar_time:2026-11-14 21:45:37.961  system_uptime:592699]
+    // Sending event #1400
+:Sending Touch (ACTION_UP): 0:(71.49121,1770.9268)
+:Sending Trackball (ACTION_MOVE): 0:(-1.0,3.0)
+:Sending Trackball (ACTION_MOVE): 0:(4.0,3.0)
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,-1.0)
 :Sending Touch (ACTION_DOWN): 0:(803.0,976.0)
 :Sending Touch (ACTION_UP): 0:(811.65234,964.22754)
@@ -11,7 +30,7 @@
 :Sending Trackball (ACTION_MOVE): 0:(-2.0,1.0)
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Touch (ACTION_DOWN): 0:(64.0,225.0)
-    //[calendar_time:2026-11-14 21:25:28.288  system_uptime:653072]
+    //[calendar_time:2026-11-14 21:45:40.413  system_uptime:595152]
     // Sending event #1500
 :Sending Touch (ACTION_UP): 0:(63.38867,230.04102)
 :Sending Touch (ACTION_DOWN): 0:(291.0,1566.0)
@@ -30,13 +49,14 @@
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Touch (ACTION_DOWN): 0:(633.0,1535.0)
 :Sending Touch (ACTION_UP): 0:(632.25586,1535.1357)
+    // Rejecting start of Intent { act=android.settings.NOTIFICATION_SETTINGS cmp=com.android.settings/.Settings$ConfigureNotificationSettingsActivity } in package com.android.settings
 :Sending Touch (ACTION_DOWN): 0:(262.0,1441.0)
 :Sending Touch (ACTION_UP): 0:(268.63086,1481.3164)
 :Sending Trackball (ACTION_MOVE): 0:(3.0,-3.0)
 :Sending Touch (ACTION_DOWN): 0:(235.0,2185.0)
 :Sending Touch (ACTION_UP): 0:(224.12207,2181.956)
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,-4.0)
-    //[calendar_time:2026-11-14 21:25:31.939  system_uptime:656723]
+    //[calendar_time:2026-11-14 21:45:44.256  system_uptime:598994]
     // Sending event #1600
 :Sending Trackball (ACTION_MOVE): 0:(1.0,0.0)
 :Sending Trackball (ACTION_MOVE): 0:(2.0,0.0)
@@ -47,12 +67,11 @@
 :Sending Touch (ACTION_UP): 0:(486.07422,1940.3867)
 :Sending Touch (ACTION_DOWN): 0:(64.0,989.0)
 :Sending Touch (ACTION_UP): 0:(70.416016,990.2871)
-    // Rejecting start of Intent { act=android.intent.action.SHOW_ALARMS cmp=com.google.android.deskclock/com.android.deskclock.HandleApiCalls } in package com.google.android.deskclock
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,2.0)
 :Sending Trackball (ACTION_MOVE): 0:(0.0,0.0)
 :Sending Trackball (ACTION_MOVE): 0:(1.0,2.0)
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,4.0)
-    //[calendar_time:2026-11-14 21:25:33.874  system_uptime:658658]
+    //[calendar_time:2026-11-14 21:45:46.687  system_uptime:601425]
     // Sending event #1700
 :Sending Touch (ACTION_DOWN): 0:(766.0,434.0)
 :Sending Touch (ACTION_UP): 0:(799.7637,483.62695)
@@ -71,7 +90,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Trackball (ACTION_MOVE): 0:(-4.0,3.0)
 :Sending Trackball (ACTION_MOVE): 0:(0.0,1.0)
-    //[calendar_time:2026-11-14 21:25:36.032  system_uptime:660816]
+    //[calendar_time:2026-11-14 21:45:49.068  system_uptime:603806]
     // Sending event #1800
 :Sending Touch (ACTION_DOWN): 0:(648.0,681.0)
 :Sending Touch (ACTION_UP): 0:(710.5029,705.83203)
@@ -96,7 +115,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(750.0,1850.0)
 :Sending Touch (ACTION_UP): 0:(741.4072,1848.2793)
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,-3.0)
-    //[calendar_time:2026-11-14 21:25:38.586  system_uptime:663370]
+    //[calendar_time:2026-11-14 21:45:52.305  system_uptime:607043]
     // Sending event #1900
 :Sending Trackball (ACTION_MOVE): 0:(1.0,4.0)
 :Sending Trackball (ACTION_MOVE): 0:(1.0,-4.0)
@@ -115,7 +134,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(191.0,1666.0)
 :Sending Touch (ACTION_UP): 0:(76.40137,1574.1406)
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,-3.0)
-    //[calendar_time:2026-11-14 21:25:41.406  system_uptime:666191]
+    //[calendar_time:2026-11-14 21:45:55.577  system_uptime:610315]
     // Sending event #2000
 :Sending Trackball (ACTION_MOVE): 0:(3.0,3.0)
 :Sending Touch (ACTION_DOWN): 0:(371.0,72.0)
@@ -143,9 +162,9 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_UP): 0:(1052.1523,2177.791)
 :Sending Touch (ACTION_DOWN): 0:(743.0,272.0)
 :Sending Touch (ACTION_UP): 0:(748.49316,192.74902)
-    //[calendar_time:2026-11-14 21:25:44.602  system_uptime:669386]
+    //[calendar_time:2026-11-14 21:45:58.849  system_uptime:613587]
     // Sending event #2100
-    //[calendar_time:2026-11-14 21:25:44.752  system_uptime:669537]
+    //[calendar_time:2026-11-14 21:45:58.969  system_uptime:613707]
     // Sending event #2100
 :Sending Touch (ACTION_DOWN): 0:(552.0,1156.0)
 :Sending Touch (ACTION_UP): 0:(526.8252,1135.0918)
@@ -161,7 +180,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(452.0,902.0)
 :Sending Touch (ACTION_UP): 0:(498.21875,857.55664)
 :Sending Touch (ACTION_DOWN): 0:(572.0,802.0)
-    //[calendar_time:2026-11-14 21:25:47.189  system_uptime:671973]
+    //[calendar_time:2026-11-14 21:46:01.202  system_uptime:615940]
     // Sending event #2200
 :Sending Touch (ACTION_UP): 0:(548.7012,853.1582)
 :Sending Trackball (ACTION_MOVE): 0:(4.0,0.0)
@@ -190,7 +209,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(1001.0,111.0)
 :Sending Touch (ACTION_UP): 0:(1004.00586,47.02539)
 :Sending Trackball (ACTION_MOVE): 0:(4.0,0.0)
-    //[calendar_time:2026-11-14 21:25:51.728  system_uptime:676512]
+    //[calendar_time:2026-11-14 21:46:05.952  system_uptime:620690]
     // Sending event #2300
 :Sending Touch (ACTION_DOWN): 0:(903.0,1650.0)
 :Sending Touch (ACTION_UP): 0:(885.4629,1654.0859)
@@ -217,7 +236,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(147.0,1520.0)
 :Sending Touch (ACTION_UP): 0:(147.42383,1538.502)
 :Sending Trackball (ACTION_MOVE): 0:(1.0,-5.0)
-    //[calendar_time:2026-11-14 21:25:55.651  system_uptime:680435]
+    //[calendar_time:2026-11-14 21:46:09.517  system_uptime:624255]
     // Sending event #2400
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,3.0)
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
@@ -246,19 +265,17 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Touch (ACTION_DOWN): 0:(530.0,82.0)
 :Sending Touch (ACTION_UP): 0:(538.13086,96.72168)
-    //[calendar_time:2026-11-14 21:25:58.741  system_uptime:683526]
+    //[calendar_time:2026-11-14 21:46:12.997  system_uptime:627735]
     // Sending event #2500
-    //[calendar_time:2026-11-14 21:25:58.862  system_uptime:683646]
+    //[calendar_time:2026-11-14 21:46:13.119  system_uptime:627858]
     // Sending event #2500
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,-5.0)
-    // Rejecting start of Intent { act=android.content.pm.action.REQUEST_PERMISSIONS pkg=com.google.android.permissioncontroller cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.permission.ui.GrantPermissionsActivity } in package com.google.android.permissioncontroller
 :Sending Touch (ACTION_DOWN): 0:(159.0,1663.0)
 :Sending Touch (ACTION_UP): 0:(138.28223,1686.4941)
 :Sending Touch (ACTION_DOWN): 0:(218.0,406.0)
 :Sending Touch (ACTION_UP): 0:(241.3711,427.41504)
 :Sending Trackball (ACTION_MOVE): 0:(-4.0,1.0)
 :Sending Trackball (ACTION_MOVE): 0:(3.0,0.0)
-    // Rejecting start of Intent { act=android.content.pm.action.REQUEST_PERMISSIONS pkg=com.google.android.permissioncontroller cmp=com.google.android.permissioncontroller/com.android.permissioncontroller.permission.ui.GrantPermissionsActivity } in package com.google.android.permissioncontroller
 :Sending Touch (ACTION_DOWN): 0:(1076.0,2167.0)
 :Sending Touch (ACTION_UP): 0:(1080.0,2184.255)
 :Sending Touch (ACTION_DOWN): 0:(544.0,1866.0)
@@ -271,17 +288,15 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_UP): 0:(1065.708,500.708)
 :Sending Touch (ACTION_DOWN): 0:(190.0,821.0)
 :Sending Touch (ACTION_UP): 0:(204.39844,829.1885)
-    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://www.in.gov.br/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
 :Sending Touch (ACTION_DOWN): 0:(420.0,1413.0)
-    //[calendar_time:2026-11-14 21:26:01.760  system_uptime:686544]
+    //[calendar_time:2026-11-14 21:46:15.734  system_uptime:630472]
     // Sending event #2600
 :Sending Touch (ACTION_UP): 0:(413.58398,1407.3809)
+    // Rejecting start of Intent { act=android.settings.NOTIFICATION_SETTINGS cmp=com.android.settings/.Settings$ConfigureNotificationSettingsActivity } in package com.android.settings
 :Sending Touch (ACTION_DOWN): 0:(196.0,983.0)
 :Sending Touch (ACTION_UP): 0:(193.66309,985.334)
-    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://dados.agricultura.gov.br/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
 :Sending Touch (ACTION_DOWN): 0:(811.0,1190.0)
 :Sending Touch (ACTION_UP): 0:(817.2334,1200.252)
-    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://ainfo.cnptia.embrapa.br/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
 :Sending Touch (ACTION_DOWN): 0:(337.0,105.0)
 :Sending Touch (ACTION_UP): 0:(336.84375,102.85156)
 :Sending Touch (ACTION_DOWN): 0:(62.0,1190.0)
@@ -289,7 +304,6 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Trackball (ACTION_MOVE): 0:(-4.0,-4.0)
 :Sending Touch (ACTION_DOWN): 0:(313.0,554.0)
 :Sending Touch (ACTION_UP): 0:(311.81348,562.917)
-    // Rejecting start of Intent { act=android.intent.action.VIEW dat=https://www.gov.br/... cmp=com.android.chrome/com.google.android.apps.chrome.IntentDispatcher } in package com.android.chrome
 :Sending Touch (ACTION_DOWN): 0:(923.0,1246.0)
 :Sending Touch (ACTION_UP): 0:(889.1006,1220.8613)
 :Sending Touch (ACTION_DOWN): 0:(103.0,55.0)
@@ -309,9 +323,10 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_UP): 0:(410.31348,601.14355)
 :Sending Trackball (ACTION_MOVE): 0:(3.0,4.0)
 :Sending Touch (ACTION_DOWN): 0:(118.0,865.0)
-    //[calendar_time:2026-11-14 21:26:04.809  system_uptime:689594]
+    //[calendar_time:2026-11-14 21:46:18.932  system_uptime:633671]
     // Sending event #2700
 :Sending Touch (ACTION_UP): 0:(56.0459,934.55566)
+    // Rejecting start of Intent { act=android.intent.action.MAIN cmp=com.google.android.inputmethod.latin/com.google.android.apps.inputmethod.latin.preference.SettingsActivity } in package com.google.android.inputmethod.latin
 :Sending Touch (ACTION_DOWN): 0:(140.0,1615.0)
 :Sending Touch (ACTION_UP): 0:(142.3584,1618.6045)
 :Sending Touch (ACTION_DOWN): 0:(1047.0,2073.0)
@@ -341,7 +356,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(225.0,413.0)
 :Sending Touch (ACTION_UP): 0:(225.87793,401.1797)
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,1.0)
-    //[calendar_time:2026-11-14 21:26:07.436  system_uptime:692221]
+    //[calendar_time:2026-11-14 21:46:22.419  system_uptime:637157]
     // Sending event #2800
 :Sending Touch (ACTION_DOWN): 0:(1030.0,989.0)
 :Sending Touch (ACTION_UP): 0:(1039.9463,953.18945)
@@ -359,7 +374,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_UP): 0:(1031.3271,881.0127)
 :Sending Touch (ACTION_DOWN): 0:(842.0,361.0)
 :Sending Touch (ACTION_UP): 0:(842.3037,371.16406)
-    //[calendar_time:2026-11-14 21:26:10.684  system_uptime:695468]
+    //[calendar_time:2026-11-14 21:46:25.698  system_uptime:640436]
     // Sending event #2900
 :Sending Touch (ACTION_DOWN): 0:(724.0,860.0)
 :Sending Touch (ACTION_UP): 0:(744.40625,864.4082)
@@ -384,7 +399,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 Events injected: 3000
 :Sending rotation degree=0, persist=false
 :Dropped: keys=0 pointers=0 trackballs=0 flips=14 rotations=0
-## Network stats: elapsed time=90083ms (0ms mobile, 0ms wifi, 90083ms not connected)
+## Network stats: elapsed time=96552ms (0ms mobile, 0ms wifi, 96552ms not connected)
 // Monkey finished
 
 --- logcat crash ---

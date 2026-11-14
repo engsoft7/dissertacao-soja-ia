@@ -1,7 +1,7 @@
 
 com.agrointeligencia.app.PercursoNoAparelhoTest:..
 
-Time: 35,546
+Time: 32,257
 
 OK (2 tests)
 

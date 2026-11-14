@@ -115,9 +115,12 @@ BUSCA = """<html><body><script id="_br_com_seatecnologia_in_buscadou_BuscaDouPor
  ]}</script></body></html>"""
 
 
-def test_busca_do_diario_oficial_acha_as_portarias_da_soja():
+def test_busca_do_diario_oficial_poe_as_portarias_da_soja_na_frente():
     c = cp.candidatas(cp.resultados_da_busca(BUSCA))
-    assert [x["titulo"][:30] for x in c] == ["PORTARIA SDA/MAPA Nº 2.001, DE", "PORTARIA SDA/MAPA Nº 1.579, DE"]
+    # As que o resumo diz ser do calendário da soja vêm antes, as mais novas
+    # primeiro; a do algodão fica por último (a página inteira decide).
+    assert [x["titulo"][:30] for x in c] == ["PORTARIA SDA/MAPA Nº 2.001, DE", "PORTARIA SDA/MAPA Nº 1.579, DE",
+                                             "PORTARIA SDA/MAPA Nº 2.002, DE"]
     assert c[0]["url"] == "https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-2.001-de-7-de-abril-de-2027-1"
     assert cp.resultados_da_busca("<html>formato novo</html>") == []
 

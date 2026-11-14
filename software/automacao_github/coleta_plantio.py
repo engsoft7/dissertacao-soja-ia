@@ -258,19 +258,24 @@ def resultados_da_busca(pagina: str) -> list[dict]:
 
 
 def candidatas(resultados: list[dict]) -> list[dict]:
-    """Portarias da SDA/MAPA sobre o calendário de semeadura da soja, as mais novas primeiro."""
+    """Portarias da SDA/MAPA da busca: primeiro as que o resumo diz ser do calendário da soja, as mais novas antes.
+
+    O resumo da busca é um trecho curto em volta dos termos procurados e pode
+    não trazer "soja"; quem decide é a página inteira (portaria_mais_nova).
+    """
     saida = []
     for r in resultados:
         titulo = r.get("title") or r.get("titulo") or ""
-        resumo = texto_da_pagina(r.get("content") or "").lower()
-        if not TITULO_PORTARIA.search(titulo) or "semeadura" not in resumo or "soja" not in resumo:
+        if not TITULO_PORTARIA.search(titulo) or not r.get("urlTitle"):
             continue
         try:
             publicada = datetime.strptime(r.get("pubDate", ""), "%d/%m/%Y").date()
         except ValueError:
             continue
-        saida.append({"titulo": titulo, "url": PAGINA_DOU + r["urlTitle"], "publicada": publicada})
-    return sorted(saida, key=lambda c: c["publicada"], reverse=True)
+        resumo = texto_da_pagina(r.get("content") or "").lower()
+        da_soja = "semeadura" in resumo and "soja" in resumo
+        saida.append({"titulo": titulo, "url": PAGINA_DOU + r["urlTitle"], "publicada": publicada, "da_soja": da_soja})
+    return sorted(saida, key=lambda c: (c["da_soja"], c["publicada"]), reverse=True)
 
 
 def portaria_mais_nova(hoje: date | None = None) -> dict | None:
@@ -280,12 +285,20 @@ def portaria_mais_nova(hoje: date | None = None) -> dict | None:
         "q": '"calendário de semeadura" soja', "s": "todos", "exactDate": "personalizado", "sortType": "0",
         "publishFrom": f"01-01-{hoje.year - 1}", "publishTo": hoje.strftime("%d-%m-%Y"), "delta": "50"})
     r.raise_for_status()
-    for c in candidatas(resultados_da_busca(r.text))[:5]:
+    resultados = resultados_da_busca(r.text)
+    # O que a busca devolveu, no log: é por aqui que se vê um formato novo do DOU.
+    print(f"::group::busca no Diário Oficial: {len(resultados)} atos")
+    print(f"{r.status_code} {r.url} ({len(r.text)} caracteres)")
+    for x in resultados[:15]:
+        print(f"- {x.get('pubDate')} | {x.get('artType')} | {x.get('title') or x.get('titulo')} | "
+              f"{texto_da_pagina(x.get('content') or '')[:140]}")
+    print("::endgroup::")
+    for c in candidatas(resultados)[:8]:
         pagina = requests.get(c["url"], headers=UA, timeout=120)
         pagina.raise_for_status()
         texto = texto_da_pagina(pagina.text)
         safras = safras_no_texto(texto)
-        if safras and "CALENDÁRIO DE SEMEADURA" in texto.upper():
+        if safras and "CALENDÁRIO DE SEMEADURA" in texto.upper() and "SOJA" in texto.upper():
             return {"safra": max(safras), "fonte": nome_da_portaria(c["titulo"]), "url": c["url"]}
     return None
 

@@ -51,7 +51,17 @@ jobs:
                   with urllib.request.urlopen(req, timeout=60) as r:
                       dados, tipo, final = r.read(), r.headers.get("Content-Type", ""), r.geturl()
               except Exception as e:
-                  indice.append(f"FALHOU  {url}  {type(e).__name__}: {e}")
+                  # Numa recusa (403, 503), quem recusou: o servidor, se o
+                  # Cloudflare mandou um desafio, e o título da página de erro.
+                  detalhe = ""
+                  if getattr(e, "headers", None) is not None:
+                      h = e.headers
+                      corpo = e.read()[:20000].decode("utf-8", "replace") if hasattr(e, "read") else ""
+                      t = re.search(r"(?is)<title>(.*?)</title>", corpo)
+                      titulo = re.sub(r"\s+", " ", t.group(1)).strip()[:80] if t else "sem título"
+                      detalhe = (f"  [server: {h.get('Server')}; cf-mitigated: {h.get('cf-mitigated')}; "
+                                 f"cf-ray: {'sim' if h.get('cf-ray') else 'não'}; título: {titulo}]")
+                  indice.append(f"FALHOU  {url}  {type(e).__name__}: {e}{detalhe}")
                   continue
               if dados[:4] == b"%PDF" or "pdf" in tipo:
                   (destino / f"{nome}.pdf").write_bytes(dados)

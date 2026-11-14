@@ -1,49 +1,49 @@
 --------- beginning of main
-11-14 10:29:41.336  3142  3568 I PERCURSO: 3s	abriu	boas-vindas
-11-14 10:29:48.219  3142  3568 I PERCURSO: 10s	lista	chegou da API
-11-14 10:29:50.552  3142  3568 I PERCURSO: 13s	resumo	safra 2027 carregada
-11-14 10:29:50.595  3142  3568 I PERCURSO: 13s	ok	Resumo mostra a última safra do IBGE, 2025
-11-14 10:29:59.413  3142  3568 I PERCURSO: 22s	ok	a tela do Tempo mostra a previsão ou explica que não a baixou
-11-14 10:29:59.426  3142  3568 I PERCURSO: 22s	tempo	previsão carregada
-11-14 10:30:12.341  3142  3568 I PERCURSO: 34s	ok	Histórico começa na projeção mais distante ou na safra em curso
-11-14 10:30:26.608  3142  3568 I PERCURSO: 49s	ok	sem internet, o Resumo abre com os dados guardados
-11-14 10:30:26.630  3142  3568 I PERCURSO: 49s	ok	sem internet, o app avisa
-11-14 10:30:27.317  3142  3568 I PERCURSO: 49s	ok	sem internet, o Mapa explica
-11-14 10:30:31.975  3142  3568 I PERCURSO: 54s	ok	sem internet, a Estimativa no campo abre
-11-14 10:30:31.975  3142  3568 I PERCURSO: 54s	fim	percurso completo
-11-14 10:30:32.006  3142  3568 I PERCURSO: a11y	01_boas_vindas	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	02_lista	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	03_resumo	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	04_resumo_1	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	04_resumo_2	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	04_resumo_3	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	04_resumo_4	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	05_tempo	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	06_estimativa_no_campo	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	07_mapa	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	08_historico	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	09_historico_1	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	09_historico_2	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	09_historico_3	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	10_mercado	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	11_mercado_1	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	12_sobre	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	13_sem_internet	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	14_mapa_sem_internet	sem achados
-11-14 10:30:32.007  3142  3568 I PERCURSO: a11y	15_mercado_sem_internet	sem achados
-11-14 10:30:35.868  3142  3568 I PERCURSO: 2s	api	http://10.0.2.2:8000/
-11-14 10:30:37.671  3142  3568 I PERCURSO: 3s	estado	Mato Grosso escolhido
-11-14 10:30:40.195  3142  3568 I PERCURSO: 6s	ok	a lista de Mato Grosso chegou da API, com Sorriso
-11-14 10:30:43.445  3142  3568 I PERCURSO: 9s	ok	Resumo de Sorriso com a safra em curso
-11-14 10:30:48.890  3142  3568 I PERCURSO: 15s	ok	Histórico de Sorriso com o gráfico e os cartões por safra
-11-14 10:30:51.389  3142  3568 I PERCURSO: 17s	fim	percurso em Mato Grosso completo
-11-14 10:30:51.389  3142  3568 I PERCURSO: a11y	20_estado_mt	sem achados
-11-14 10:30:51.389  3142  3568 I PERCURSO: a11y	20_busca_mt	sem achados
-11-14 10:30:51.389  3142  3568 I PERCURSO: a11y	21_resumo_mt	sem achados
-11-14 10:30:51.389  3142  3568 I PERCURSO: a11y	22_resumo_mt_1	sem achados
-11-14 10:30:51.389  3142  3568 I PERCURSO: a11y	22_resumo_mt_2	sem achados
-11-14 10:30:51.389  3142  3568 I PERCURSO: a11y	22_resumo_mt_3	sem achados
-11-14 10:30:51.389  3142  3568 I PERCURSO: a11y	22_resumo_mt_4	sem achados
-11-14 10:30:51.389  3142  3568 I PERCURSO: a11y	23_historico_mt	sem achados
-11-14 10:30:51.389  3142  3568 I PERCURSO: a11y	24_mercado_mt	sem achados
-11-14 10:30:51.389  3142  3568 I PERCURSO: a11y	25_sobre_mt	sem achados
+11-14 20:43:05.044  6092  6323 I PERCURSO: 2s	abriu	boas-vindas
+11-14 20:43:10.913  6092  6323 I PERCURSO: 8s	lista	chegou da API
+11-14 20:43:12.575  6092  6323 I PERCURSO: 10s	resumo	safra 2027 carregada
+11-14 20:43:12.610  6092  6323 I PERCURSO: 10s	ok	Resumo mostra a última safra do IBGE, 2025
+11-14 20:43:17.505  6092  6323 I PERCURSO: 15s	ok	a tela do Tempo mostra a previsão ou explica que não a baixou
+11-14 20:43:17.532  6092  6323 I PERCURSO: 15s	tempo	previsão carregada
+11-14 20:43:30.398  6092  6323 I PERCURSO: 28s	ok	Histórico começa na projeção mais distante ou na safra em curso
+11-14 20:43:43.408  6092  6323 I PERCURSO: 41s	ok	sem internet, o Resumo abre com os dados guardados
+11-14 20:43:43.417  6092  6323 I PERCURSO: 41s	ok	sem internet, o app avisa
+11-14 20:43:44.260  6092  6323 I PERCURSO: 42s	ok	sem internet, o Mapa explica
+11-14 20:43:48.917  6092  6323 I PERCURSO: 46s	ok	sem internet, a Estimativa no campo abre
+11-14 20:43:48.917  6092  6323 I PERCURSO: 46s	fim	percurso completo
+11-14 20:43:48.931  6092  6323 I PERCURSO: a11y	01_boas_vindas	sem achados
+11-14 20:43:48.931  6092  6323 I PERCURSO: a11y	02_lista	sem achados
+11-14 20:43:48.931  6092  6323 I PERCURSO: a11y	03_resumo	sem achados
+11-14 20:43:48.931  6092  6323 I PERCURSO: a11y	04_resumo_1	sem achados
+11-14 20:43:48.931  6092  6323 I PERCURSO: a11y	04_resumo_2	sem achados
+11-14 20:43:48.931  6092  6323 I PERCURSO: a11y	04_resumo_3	sem achados
+11-14 20:43:48.931  6092  6323 I PERCURSO: a11y	04_resumo_4	sem achados
+11-14 20:43:48.931  6092  6323 I PERCURSO: a11y	05_tempo	sem achados
+11-14 20:43:48.931  6092  6323 I PERCURSO: a11y	06_estimativa_no_campo	sem achados
+11-14 20:43:48.931  6092  6323 I PERCURSO: a11y	07_mapa	sem achados
+11-14 20:43:48.932  6092  6323 I PERCURSO: a11y	08_historico	sem achados
+11-14 20:43:48.932  6092  6323 I PERCURSO: a11y	09_historico_1	sem achados
+11-14 20:43:48.932  6092  6323 I PERCURSO: a11y	09_historico_2	sem achados
+11-14 20:43:48.932  6092  6323 I PERCURSO: a11y	09_historico_3	sem achados
+11-14 20:43:48.932  6092  6323 I PERCURSO: a11y	10_mercado	sem achados
+11-14 20:43:48.932  6092  6323 I PERCURSO: a11y	11_mercado_1	sem achados
+11-14 20:43:48.932  6092  6323 I PERCURSO: a11y	12_sobre	sem achados
+11-14 20:43:48.932  6092  6323 I PERCURSO: a11y	13_sem_internet	sem achados
+11-14 20:43:48.932  6092  6323 I PERCURSO: a11y	14_mapa_sem_internet	sem achados
+11-14 20:43:48.932  6092  6323 I PERCURSO: a11y	15_mercado_sem_internet	sem achados
+11-14 20:43:54.374  6092  6323 I PERCURSO: 4s	api	http://10.0.2.2:8000/
+11-14 20:43:57.817  6092  6323 I PERCURSO: 7s	estado	Mato Grosso escolhido
+11-14 20:44:02.021  6092  6323 I PERCURSO: 11s	ok	a lista de Mato Grosso chegou da API, com Sorriso
+11-14 20:44:04.136  6092  6323 I PERCURSO: 14s	ok	Resumo de Sorriso com a safra em curso
+11-14 20:44:08.481  6092  6323 I PERCURSO: 18s	ok	Histórico de Sorriso com o gráfico e os cartões por safra
+11-14 20:44:10.984  6092  6323 I PERCURSO: 20s	fim	percurso em Mato Grosso completo
+11-14 20:44:10.985  6092  6323 I PERCURSO: a11y	20_estado_mt	sem achados
+11-14 20:44:10.985  6092  6323 I PERCURSO: a11y	20_busca_mt	sem achados
+11-14 20:44:10.985  6092  6323 I PERCURSO: a11y	21_resumo_mt	sem achados
+11-14 20:44:10.985  6092  6323 I PERCURSO: a11y	22_resumo_mt_1	sem achados
+11-14 20:44:10.985  6092  6323 I PERCURSO: a11y	22_resumo_mt_2	sem achados
+11-14 20:44:10.985  6092  6323 I PERCURSO: a11y	22_resumo_mt_3	sem achados
+11-14 20:44:10.985  6092  6323 I PERCURSO: a11y	22_resumo_mt_4	sem achados
+11-14 20:44:10.985  6092  6323 I PERCURSO: a11y	23_historico_mt	sem achados
+11-14 20:44:10.985  6092  6323 I PERCURSO: a11y	24_mercado_mt	sem achados
+11-14 20:44:10.985  6092  6323 I PERCURSO: a11y	25_sobre_mt	sem achados

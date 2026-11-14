@@ -47,7 +47,7 @@
   },
   {
    "item": "tela pequena: Resumo abre",
-   "ok": true,
+   "ok": false,
    "detalhe": ""
   },
   {
@@ -111,7 +111,8 @@
   },
   "r04_resumo_1": {
    "alvos_pequenos": [
-    "View (379×36 dp)"
+    "5277,12 (166×42 dp)",
+    "View (379×30 dp)"
    ],
    "sem_rotulo": []
   },
@@ -120,17 +121,23 @@
    "sem_rotulo": []
   },
   "r04_resumo_3": {
-   "alvos_pequenos": [],
+   "alvos_pequenos": [
+    "152,50 (166×38 dp)",
+    "53,8 (166×38 dp)"
+   ],
    "sem_rotulo": []
   },
   "r04_resumo_4": {
-   "alvos_pequenos": [],
+   "alvos_pequenos": [
+    "152,50 (166×1 dp)",
+    "53,8 (166×1 dp)"
+   ],
    "sem_rotulo": []
   },
   "r05_mapa": {
    "alvos_pequenos": [],
    "sem_rotulo": [
-    "WebView em (45,530)"
+    "WebView em (45,465)"
    ]
   },
   "r06_historico": {
@@ -143,18 +150,20 @@
   },
   "r08_sobre": {
    "alvos_pequenos": [
-    "View (339×34 dp)"
+    "View (339×11 dp)"
    ],
    "sem_rotulo": []
   },
   "r09_estimativa_no_campo": {
    "alvos_pequenos": [
-    "View (347×31 dp)"
+    "View (347×36 dp)"
    ],
    "sem_rotulo": []
   },
   "r10_tempo": {
-   "alvos_pequenos": [],
+   "alvos_pequenos": [
+    "View (102×37 dp)"
+   ],
    "sem_rotulo": []
   },
   "r11_fonte_200": {
@@ -162,7 +171,10 @@
    "sem_rotulo": []
   },
   "r12_fonte_200_rolado": {
-   "alvos_pequenos": [],
+   "alvos_pequenos": [
+    "View (120×14 dp)",
+    "View (252×14 dp)"
+   ],
    "sem_rotulo": []
   },
   "r13_fonte_200_mercado": {
@@ -200,27 +212,27 @@
   "largura_px": 1080,
   "altura_px": 2400,
   "densidade_dpi": 420,
-  "apk_mb": 27.6,
-  "partida_fria_primeira_ms": 1086,
-  "partida_fria_sem_municipio_ms": 946.5,
+  "apk_mb": 28.0,
+  "partida_fria_primeira_ms": 1181,
+  "partida_fria_sem_municipio_ms": 1045.5,
   "dados_do_municipio_s": 5.3,
-  "memoria_resumo_kb": 40350,
+  "memoria_resumo_kb": 41609,
   "rolagem_resumo": {
-   "quadros": 188.0,
-   "lentos_pct": 83.51,
-   "p50_ms": 61.0,
-   "p90_ms": 105.0,
-   "p99_ms": 150.0
+   "quadros": 207.0,
+   "lentos_pct": 84.54,
+   "p50_ms": 53.0,
+   "p90_ms": 101.0,
+   "p99_ms": 133.0
   },
   "rolagem_historico": {
-   "quadros": 140.0,
-   "lentos_pct": 82.86,
-   "p50_ms": 57.0,
+   "quadros": 167.0,
+   "lentos_pct": 85.63,
+   "p50_ms": 65.0,
    "p90_ms": 97.0,
-   "p99_ms": 150.0
+   "p99_ms": 129.0
   },
-  "memoria_depois_das_abas_kb": 83255,
-  "partida_fria_com_municipio_ms": 1105,
+  "memoria_depois_das_abas_kb": 88813,
+  "partida_fria_com_municipio_ms": 962,
   "monkey": {
    "eventos": 3000,
    "falhas": 0,

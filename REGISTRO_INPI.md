@@ -223,6 +223,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.18` (06/11/2026) — app 2.7.3: Histórico e Viabilidade com o mesmo valor e texto do tempo de noite | 168 | 30.859 | `c367e28dd70ff551f4efbfbd14acafac10c28a1cbddca7004b8548a41cde6fff` |
 | Tag `v2.4.19` (06/11/2026) — app 2.7.4: app mais leve com R8, fonte grande sem quebras, simulador na safra do Resumo, sem backup na nuvem e API mais rápida | 175 | 32.451 | `05d8d35c2f47f961d9d8b610ad7ee652ea234c2a2bfb7ca4eb3aa2fdab387f34` |
 | Tag `v2.5.0` (13/11/2026) — app 2.8.0: colheita do talhão, Mato Grosso, Maranhão, Tocantins e Rondônia no painel, na API e no app, simulador pelo efeito medido | 193 | 35.982 | `fc31913a3cfd678c4e780d7583fe29655d85013f9e59422c54be85b9a0add6ef` |
+| Tag `v2.5.1` (14/11/2026) — app 2.8.1: alvos de toque de 48 dp no Sobre, avisos do INMET sem repetição e API com os cinco estados prontos na subida | 194 | 36.269 | `9006b2be7c0707661288454802f845e2e91a29c72b0de0a3443004c3af2d9867` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -820,6 +821,26 @@ arquivos e 35.982 linhas. O DOI de versão desta etiqueta é
 10.5281/zenodo.24201917, atribuído pelo Zenodo no depósito disparado pela
 publicação do Release em 13/11/2026.
 
+A `v2.5.1` foi registrada pelo workflow `registra-doi.yml` na publicação do
+Release, em 14/11/2026, com o título “v2.5.1 — App 2.8.1: alvos de toque de 48
+dp no Sobre, avisos do INMET sem repetição e API com os cinco estados prontos na
+subida”. Em relação à `v2.5.0`, entra 1 arquivo-fonte
+(`software/api_backend/prepara_estados.py`); mudam 9
+(`software/api_backend/api.py`, `software/api_backend/test_estados.py`,
+`software/aplicativo_mobile/app/build.gradle.kts`,
+`software/aplicativo_mobile/app/src/androidTest/java/com/agrointeligencia/app/PercursoNoAparelhoTest.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/FontesOficiais.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/MainActivity.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Tempo.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/TempoCalculoTest.kt`
+e `software/automacao_github/teste_aparelho.py`).
+
+O resumo criptográfico da `v2.5.1` foi calculado pelo mesmo workflow sobre uma
+cópia limpa da etiqueta (commit `0de72c3`), com o critério do comando acima: 194
+arquivos e 36.269 linhas. O DOI de versão desta etiqueta é
+10.5281/zenodo.24218986, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 14/11/2026.
+
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
 calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
@@ -1071,6 +1092,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.17`:** 10.5281/zenodo.24013526
 - **DOI da `v2.4.18`:** 10.5281/zenodo.24013809
 - **DOI da `v2.4.19`:** 10.5281/zenodo.24022243
-- **DOI da versão mais recente (`v2.5.0`):** 10.5281/zenodo.24201917
+- **DOI da `v2.5.0`:** 10.5281/zenodo.24201917
+- **DOI da versão mais recente (`v2.5.1`):** 10.5281/zenodo.24218986
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

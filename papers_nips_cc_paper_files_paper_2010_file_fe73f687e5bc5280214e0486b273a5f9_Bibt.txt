@@ -1,0 +1,3 @@
+@inproceedings{NIPS2010_fe73f687, author = {Lempitsky, Victor and Zisserman, Andrew}, booktitle = {Advances in Neural Information Processing Systems}, editor = {J. Lafferty and C. Williams and J. Shawe-Taylor and R. Zemel and A. Culotta}, pages = {}, publisher = {Curran Associates, Inc.}, title = {Learning To Count Objects in Images}, url = {https://proceedings.neurips.cc/paper_files/paper/2010/file/fe73f687e5bc5280214e0486b273a5f9-Paper.pdf}, volume = {23}, year = {2010} } 
+
+LINKS:

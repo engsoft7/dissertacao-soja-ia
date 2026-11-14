@@ -383,4 +383,63 @@
     <string name="hist_legenda_projecao">Projeção</string>
     <string name="hist_legenda_nino">Safra de El Niño</string>
     <string name="hist_legenda_nina">Safra de La Niña</string>
+
+    <!-- Sobre, fontes oficiais e localização (Sobre.kt, FontesOficiais.kt, Localizacao.kt) -->
+    <string name="sobre_titulo">Origem dos Dados &amp; IA</string>
+    <string name="sobre_preco_custo_pa">Preço padrão: cotação do dia na praça %1$s mais perto (Agrolink); sem ela, o preço de porteira da CONAB. Custo: %3$s. A CONAB não levanta custo de soja no Pará; Pedro Afonso (TO) é a praça mais próxima. Preço e custo são editáveis na Viabilidade.</string>
+    <string name="sobre_preco_custo_outro">Preço padrão: cotação do dia na praça %1$s mais perto (Agrolink); sem ela, o preço de porteira da CONAB. Custo: %3$s, a praça da CONAB no estado mais perto do município. Preço e custo são editáveis na Viabilidade.</string>
+    <string name="sobre_custo_offline">CONAB (levantamento indisponível offline)</string>
+    <string name="sobre_r2_modelo">R² do modelo</string>
+    <string name="sobre_r2_tendencia">R² da tendência (referência)</string>
+    <string name="sobre_erro">Erro típico de ± %1$d kg/ha, ou %2$s%% da produtividade média, sobre %3$d registros de %4$d municípios.</string>
+    <string name="sobre_sem_metricas">Métricas de validação indisponíveis sem conexão com o servidor.</string>
+    <string name="sobre_aviso_legal">Aviso Legal: Este é um projeto de pesquisa acadêmica em Inteligência Artificial. As estimativas projetadas pela IA e os valores financeiros não configuram recomendação de investimento ou consultoria agronômica. Consulte profissionais certificados antes de tomar decisões financeiras reais.</string>
+    <string name="aviso_nao_governo">O AgroInteligência não é um aplicativo do governo e não representa nenhum órgão público. Não tem vínculo com o IBGE, o INMET, a CONAB, a Embrapa, o Ministério da Agricultura, a NOAA ou a NASA: apenas usa dados abertos publicados por essas instituições, nos endereços abaixo.</string>
+    <string name="fontes_oficiais_titulo">Fontes oficiais (órgãos públicos)</string>
+    <string name="outras_fontes_titulo">Outras fontes</string>
+    <string name="fonte_produtividade">Produtividade municipal</string>
+    <string name="fonte_produtividade_inst">IBGE, Produção Agrícola Municipal</string>
+    <string name="fonte_avisos">Avisos meteorológicos</string>
+    <string name="fonte_custo">Custo de produção e preço de referência</string>
+    <string name="fonte_calendario">Calendário de semeadura e vazio sanitário</string>
+    <string name="fonte_calendario_inst">Ministério da Agricultura, Portaria SDA/MAPA nº 1.579/2026</string>
+    <string name="fonte_zarc">Risco climático do plantio (ZARC)</string>
+    <string name="fonte_ministerio">Ministério da Agricultura</string>
+    <string name="fonte_pulverizacao">Critérios da janela de pulverização</string>
+    <string name="fonte_enso">El Niño e La Niña (índice ONI)</string>
+    <string name="fonte_vegetacao">Vegetação por satélite</string>
+    <string name="fonte_vegetacao_inst">MODIS (NASA), pelo Google Earth Engine</string>
+    <string name="fonte_mascara">Máscara de soja</string>
+    <string name="fonte_chuva">Chuva</string>
+    <string name="fonte_clima">Clima</string>
+    <string name="fonte_previsao">Previsão do tempo</string>
+    <string name="fonte_preco_para">Preço do Pará</string>
+    <string name="local_nao_achou">Não foi possível achar sua posição. Tente ao ar livre ou perto de uma janela.</string>
+    <string name="local_desligada">A localização do celular está desligada. Ligue-a e toque de novo.</string>
+    <string name="local_erro">Não foi possível ler a posição do celular.</string>
+
+    <!-- Escolha do município (Municipio.kt) -->
+    <string name="mun_escolhido">Município escolhido pela sua localização: %1$s.</string>
+    <string name="mun_escolhido_km">Município escolhido pela sua localização: %1$s, a %2$d km da sede.</string>
+    <string name="mun_mais_proximo">O mais próximo de você é %1$s, a %2$d km. O app cobre %3$d municípios produtores de soja %4$s.</string>
+    <string name="mun_trocar">trocar o município</string>
+    <string name="mun_rotulo">Município</string>
+    <string name="mun_rotulo_estado">Município · %1$s</string>
+    <string name="mun_escolha_o_seu">Escolha o seu</string>
+    <string name="mun_gps_descricao">Escolher o município mais próximo pela sua localização</string>
+    <string name="mun_procurando">Procurando sua posição…</string>
+    <string name="mun_qual">Qual é o seu município?</string>
+    <string name="mun_boas_vindas">Escolha na lista ou deixe o celular achar o mais próximo. O app guarda a escolha e abre nele da próxima vez.</string>
+    <string name="mun_usar_localizacao">Usar minha localização</string>
+    <string name="mun_escolher_lista">Escolher na lista</string>
+    <string name="mun_privacidade">A posição serve só para achar o município, no próprio celular, e não é enviada.</string>
+    <string name="mun_buscar">Buscar pelo nome</string>
+    <string name="mun_limpar">Limpar a busca</string>
+    <string name="mun_nenhum">Nenhum município com esse nome. O app cobre %1$d municípios produtores de soja %2$s.</string>
+    <string name="mun_contagem">%1$d de %2$d municípios</string>
+    <string name="mun_escolha_titulo">Escolha o município</string>
+    <string name="mun_mais_proximo_botao">O mais próximo de mim</string>
+    <string name="mun_sem_lista">A lista de municípios ainda não chegou do servidor. Confira a conexão; o GPS funciona assim mesmo.</string>
+    <string name="fechar">Fechar</string>
+    <string name="estado_rotulo">Estado</string>
 </resources>

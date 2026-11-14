@@ -385,4 +385,63 @@
     <string name="hist_legenda_projecao">Projection</string>
     <string name="hist_legenda_nino">El Niño season</string>
     <string name="hist_legenda_nina">La Niña season</string>
+
+    <!-- Sobre, fontes oficiais e localização (Sobre.kt, FontesOficiais.kt, Localizacao.kt) -->
+    <string name="sobre_titulo">Data sources &amp; AI</string>
+    <string name="sobre_preco_custo_pa">Default price: today\'s quote at the nearest market in %2$s (Agrolink); without it, CONAB\'s farm-gate price. Cost: %3$s. CONAB does not survey soybean costs in Pará; Pedro Afonso (TO) is the nearest survey location. Price and cost can be edited in Viability.</string>
+    <string name="sobre_preco_custo_outro">Default price: today\'s quote at the nearest market in %2$s (Agrolink); without it, CONAB\'s farm-gate price. Cost: %3$s, the CONAB survey location in the state nearest to the municipality. Price and cost can be edited in Viability.</string>
+    <string name="sobre_custo_offline">CONAB (survey unavailable offline)</string>
+    <string name="sobre_r2_modelo">Model R²</string>
+    <string name="sobre_r2_tendencia">Trend R² (reference)</string>
+    <string name="sobre_erro">Typical error of ± %1$d kg/ha, or %2$s%% of the average yield, over %3$d records from %4$d municipalities.</string>
+    <string name="sobre_sem_metricas">Validation metrics unavailable without a connection to the server.</string>
+    <string name="sobre_aviso_legal">Legal notice: This is an academic research project in Artificial Intelligence. The AI\'s projected estimates and the financial values are not investment advice or agronomic consulting. Consult certified professionals before making real financial decisions.</string>
+    <string name="aviso_nao_governo">AgroInteligência is not a government app and does not represent any public agency. It has no ties to IBGE, INMET, CONAB, Embrapa, the Ministry of Agriculture, NOAA or NASA: it only uses open data published by these institutions, at the addresses below.</string>
+    <string name="fontes_oficiais_titulo">Official sources (public agencies)</string>
+    <string name="outras_fontes_titulo">Other sources</string>
+    <string name="fonte_produtividade">Municipal yield</string>
+    <string name="fonte_produtividade_inst">IBGE, Municipal Agricultural Production</string>
+    <string name="fonte_avisos">Weather warnings</string>
+    <string name="fonte_custo">Production cost and reference price</string>
+    <string name="fonte_calendario">Sowing calendar and soybean-free period</string>
+    <string name="fonte_calendario_inst">Ministry of Agriculture, Ordinance SDA/MAPA No. 1,579/2026</string>
+    <string name="fonte_zarc">Planting climate risk (ZARC)</string>
+    <string name="fonte_ministerio">Ministry of Agriculture</string>
+    <string name="fonte_pulverizacao">Spraying window criteria</string>
+    <string name="fonte_enso">El Niño and La Niña (ONI index)</string>
+    <string name="fonte_vegetacao">Vegetation from satellite</string>
+    <string name="fonte_vegetacao_inst">MODIS (NASA), via Google Earth Engine</string>
+    <string name="fonte_mascara">Soybean mask</string>
+    <string name="fonte_chuva">Rainfall</string>
+    <string name="fonte_clima">Climate</string>
+    <string name="fonte_previsao">Weather forecast</string>
+    <string name="fonte_preco_para">Pará price</string>
+    <string name="local_nao_achou">Could not find your position. Try outdoors or near a window.</string>
+    <string name="local_desligada">The phone\'s location is off. Turn it on and tap again.</string>
+    <string name="local_erro">Could not read the phone\'s position.</string>
+
+    <!-- Escolha do município (Municipio.kt) -->
+    <string name="mun_escolhido">Municipality chosen by your location: %1$s.</string>
+    <string name="mun_escolhido_km">Municipality chosen by your location: %1$s, %2$d km from the seat.</string>
+    <string name="mun_mais_proximo">The nearest to you is %1$s, %2$d km away. The app covers %3$d soybean-producing municipalities in %5$s.</string>
+    <string name="mun_trocar">change the municipality</string>
+    <string name="mun_rotulo">Municipality</string>
+    <string name="mun_rotulo_estado">Municipality · %1$s</string>
+    <string name="mun_escolha_o_seu">Choose yours</string>
+    <string name="mun_gps_descricao">Choose the nearest municipality by your location</string>
+    <string name="mun_procurando">Looking for your position…</string>
+    <string name="mun_qual">What is your municipality?</string>
+    <string name="mun_boas_vindas">Choose from the list or let the phone find the nearest one. The app saves your choice and opens on it next time.</string>
+    <string name="mun_usar_localizacao">Use my location</string>
+    <string name="mun_escolher_lista">Choose from the list</string>
+    <string name="mun_privacidade">The position is only used to find the municipality, on the phone itself, and is not sent.</string>
+    <string name="mun_buscar">Search by name</string>
+    <string name="mun_limpar">Clear the search</string>
+    <string name="mun_nenhum">No municipality with that name. The app covers %1$d soybean-producing municipalities in %3$s.</string>
+    <string name="mun_contagem">%1$d of %2$d municipalities</string>
+    <string name="mun_escolha_titulo">Choose the municipality</string>
+    <string name="mun_mais_proximo_botao">The nearest to me</string>
+    <string name="mun_sem_lista">The list of municipalities has not arrived from the server yet. Check the connection; GPS works anyway.</string>
+    <string name="fechar">Close</string>
+    <string name="estado_rotulo">State</string>
 </resources>

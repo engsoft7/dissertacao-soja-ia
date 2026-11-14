@@ -316,7 +316,7 @@ fun AgroDashboard(abaInicial: Int = 0) {
         } else {
             escolherMunicipio(proximo.nome)
             mostrarLista = false
-            avisar(fraseDoMaisProximo(proximo, candidatos.size, estado))
+            avisar(fraseDoMaisProximo(context, proximo, candidatos.size, estado))
         }
     }
 

@@ -22,6 +22,22 @@ adb shell getprop ro.build.version.sdk
 # no teste_aparelho.py).
 adb shell settings put secure anr_show_background 0 >/dev/null 2>&1 || true
 
+# O app segue o idioma do aparelho (2.9.0 em diante), e os testes procuram os
+# textos em português: o emulador passa a pt-BR antes de instalar o app. A
+# imagem google_apis aceita adb root; o zygote reinicia com o idioma novo.
+if [ "$(adb shell getprop persist.sys.locale | tr -d '\r')" != "pt-BR" ]; then
+  adb root >/dev/null 2>&1; sleep 3; adb wait-for-device
+  adb shell "setprop persist.sys.locale pt-BR; setprop ctl.restart zygote"
+  sleep 20; adb wait-for-device
+  for i in $(seq 1 90); do
+    adb shell pm path android >/dev/null 2>&1 && \
+      [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1" ] && break
+    sleep 2
+  done
+  adb shell settings put secure anr_show_background 0 >/dev/null 2>&1 || true
+fi
+echo "idioma do emulador: $(adb shell getprop persist.sys.locale | tr -d '\r')"
+
 if [ "$PERCURSO" = "1" ]; then
   P="$SAIDA/percurso"; mkdir -p "$P"
   adb uninstall "$PKG.test" >/dev/null 2>&1

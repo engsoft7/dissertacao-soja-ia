@@ -48,43 +48,56 @@ jobs:
           import json, re, requests
           URL = "https://www.in.gov.br/consulta/-/buscar/dou"
           UA = {"User-Agent": "AgroInteligencia-Dissertacao/1.0 (UFPA; pesquisa academica)"}
-          NAV = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
-                 "Accept": "text/html,application/xhtml+xml", "Accept-Language": "pt-BR,pt;q=0.9"}
-          base = {"s": "todos", "sortType": "0"}
-          variantes = [
-              ("atual", UA, {"q": '"calendário de semeadura" soja', "exactDate": "personalizado",
-                             "publishFrom": "01-01-2025", "publishTo": "14-11-2026", "delta": "50"}),
-              ("frase, tudo", UA, {"q": '"calendário de semeadura"', "exactDate": "all"}),
-              ("frase, tudo, navegador", NAV, {"q": '"calendário de semeadura"', "exactDate": "all"}),
-              ("palavras, tudo", UA, {"q": "calendário de semeadura soja", "exactDate": "all"}),
-              ("frase, ano", UA, {"q": '"calendário de semeadura"', "exactDate": "ano"}),
-              ("frase, do1, ano", UA, {"q": '"calendário de semeadura"', "exactDate": "ano", "s": "do1"}),
-              ("ro-dou, 364 dias", UA, {"q": 'tudo-"calendário de semeadura"', "exactDate": "personalizado",
-                                        "publishFrom": "15-11-2025", "publishTo": "14-11-2026"}),
-              ("frase, 364 dias", UA, {"q": '"calendário de semeadura"', "exactDate": "personalizado",
-                                       "publishFrom": "15-11-2025", "publishTo": "14-11-2026"}),
-              ("frase, abril 2026", UA, {"q": '"calendário de semeadura"', "exactDate": "personalizado",
-                                         "publishFrom": "01-04-2026", "publishTo": "30-04-2026"}),
-              ("frase, barras", UA, {"q": '"calendário de semeadura"', "exactDate": "personalizado",
-                                     "publishFrom": "01/01/2026", "publishTo": "14/11/2026"}),
-              ("1.579, ano", UA, {"q": '"1.579"', "exactDate": "ano", "s": "do1"}),
-              ("soja, mês", UA, {"q": "soja", "exactDate": "mes"}),
-              ("asterisco, dia 10/04", UA, {"q": "*", "exactDate": "personalizado",
-                                            "publishFrom": "10-04-2026", "publishTo": "10-04-2026", "s": "do1"}),
-          ]
-          for nome, cab, p in variantes:
+          F = '"calendário de semeadura"'
+          ANO = {"exactDate": "personalizado", "publishFrom": "15-11-2025", "publishTo": "14-11-2026"}
+          def busca(p):
+              r = requests.get(URL, headers=UA, params={"s": "todos", "sortType": "0", **p}, timeout=90)
+              m = re.search(r'id="_br_com_seatecnologia_in_buscadou_BuscaDouPortlet_params"[^>]*>(.*?)</script>', r.text, re.S)
+              return r, ((json.loads(m.group(1)).get("jsonArray") or []) if m else None)
+          def mostra(nome, p, todos=False):
               try:
-                  r = requests.get(URL, headers=cab, params={**base, **p}, timeout=90)
-                  m = re.search(r'id="_br_com_seatecnologia_in_buscadou_BuscaDouPortlet_params"[^>]*>(.*?)</script>', r.text, re.S)
-                  hits = (json.loads(m.group(1)).get("jsonArray") or []) if m else None
-                  total = re.search(r'"?totalArquivos"?\s*[:=]\s*"?(\d+)', r.text)
-                  print(f"== {nome}: {r.status_code}, {len(r.text)} car., atos={None if hits is None else len(hits)}"
-                        f", total={total.group(1) if total else '?'}")
-                  print("   ", r.url)
-                  for h in (hits or [])[:4]:
-                      print("    -", h.get("pubDate"), "|", h.get("pubName"), "|", (h.get("title") or "")[:90], "|", h.get("urlTitle"))
+                  r, hits = busca(p)
               except Exception as e:
-                  print(f"== {nome}: {type(e).__name__}: {e}")
+                  print(f"== {nome}: {type(e).__name__}: {e}"); return []
+              hits = hits or []
+              sda = [h for h in hits if "SDA/MAPA" in (h.get("title") or "")]
+              datas = sorted({h.get("pubDate", "") for h in hits}, key=lambda d: d[6:] + d[3:5] + d[:2])
+              print(f"== {nome}: {r.status_code}, atos={len(hits)}, SDA/MAPA={len(sda)}, datas {datas[:1]}..{datas[-1:]}")
+              print("   ", r.url)
+              for h in (hits if todos else (sda or hits)[:3]):
+                  print("    -", h.get("pubDate"), "|", (h.get("title") or "")[:70], "|", texto(h.get("content"))[:90])
+              return hits
+          def texto(c):
+              return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", c or ""))
+          h1 = mostra("frase, 364 dias, página 1 (todos)", {"q": F, **ANO}, todos=True)
+          if h1:
+              print("chaves de um ato:", sorted(h1[-1].keys()))
+              u = h1[-1]
+              print("último ato:", {k: u.get(k) for k in ("classPK", "displayDateSortable", "score", "id", "pubOrder")})
+          mostra("frase, 364 dias, delta 50", {"q": F, **ANO, "delta": "50"})
+          mostra("frase, 22 meses", {"q": F, "exactDate": "personalizado", "publishFrom": "01-01-2025", "publishTo": "14-11-2026"})
+          mostra("frase + soja, 364 dias", {"q": F + " soja", **ANO})
+          mostra("+frase +vazio", {"q": '+' + F + ' +"vazio sanitário"', **ANO})
+          mostra("frase AND vazio", {"q": F + ' AND "vazio sanitário"', **ANO})
+          mostra("duas frases", {"q": F + ' "vazio sanitário"', **ANO})
+          mostra("só vazio sanitário", {"q": '"vazio sanitário"', **ANO})
+          mostra("órgão SDA", {"q": F, **ANO, "orgPrin": "Ministério da Agricultura e Pecuária",
+                               "orgSub": "Secretaria de Defesa Agropecuária"})
+          mostra("ementa", {"q": 'ddm__text__21040__ementa_pt_BR-' + F, **ANO})
+          mostra("conteúdo", {"q": 'ddm__text__21040__texto_pt_BR-' + F, **ANO})
+          mostra("título SDA/MAPA", {"q": 'title_pt_BR-"SDA/MAPA"', **ANO})
+          mostra("relevância (sortType 1)", {"q": F, **ANO, "sortType": "1"})
+          mostra("artType Portaria", {"q": F, **ANO, "artType": "Portaria"})
+          if h1:
+              u = h1[-1]
+              for nome, extra in [
+                  ("página 2, search_after", {"currentPage": "1", "newPage": "2", "score": str(u.get("score", 0)),
+                                              "id": str(u.get("classPK", "")), "displayDate": str(u.get("displayDateSortable", ""))}),
+                  ("página 2, start", {"start": "20"}),
+                  ("página 2, cur", {"cur": "2"}),
+              ]:
+                  h2 = mostra(nome, {"q": F, **ANO, **extra})
+                  print("    mesma primeira?", bool(h2) and h2[0].get("urlTitle") == h1[0].get("urlTitle"))
           PY
       - name: Coleta o ZARC e o calendário
         run: python software/automacao_github/coleta_plantio.py

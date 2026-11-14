@@ -397,6 +397,47 @@ class CapturasDeTelaTest {
 
     // O ícone do launcher, montado pelo próprio Android a partir do
     // adaptive-icon: confere que as três camadas compilam e se encaixam.
+    // O app em inglês (2.9.0): as mesmas telas num aparelho em inglês, com os
+    // números no formato do idioma. Formatos volta ao português no fim, para
+    // não valer nos testes seguintes.
+    private fun emIngles(bloco: () -> Unit) {
+        val app = org.robolectric.RuntimeEnvironment.getApplication()
+        Formatos.doIdioma(app)
+        try {
+            bloco()
+        } finally {
+            val pt = android.content.res.Configuration(app.resources.configuration).apply {
+                setLocale(java.util.Locale("pt", "BR"))
+            }
+            Formatos.doIdioma(app.createConfigurationContext(pt))
+        }
+    }
+
+    @Config(qualifiers = "en-w411dp-h1800dp-xxhdpi")
+    @Test fun ingles_resumo_claro() = emIngles {
+        captura("ingles_resumo", false) {
+            ResumoAgronomicoCard(projecao, ultimoReal)
+            Spacer(Modifier.height(16.dp))
+            val preco = pracaParaUsar("Paragominas", mercado.pracas_para.orEmpty())?.valor
+            PrevisaoCard(projecao, financas, preco)
+            Spacer(Modifier.height(16.dp))
+            financas?.let { ResumoFinanceiroCard(projecao, it, mercado.para, mercado.pracas_para.orEmpty(), "Paragominas") }
+        }
+    }
+
+    @Config(qualifiers = "en-w411dp-h2100dp-xxhdpi")
+    @Test fun ingles_tempo_claro() = emIngles {
+        captura("ingles_tempo", false) {
+            TempoConteudo(tempo, avisos, SEDES_MUNICIPAIS["Paragominas"], agoraTempo, null, false, false)
+        }
+    }
+
+    @Config(qualifiers = "en-w411dp-h1700dp-xxhdpi")
+    @Test fun ingles_plantio_claro() = emIngles {
+        val estado = estadoPlantio()
+        captura("ingles_plantio", false) { telaPlantio(estado) }
+    }
+
     @Test fun icone() = captura("icone", false) {
         AndroidView(
             factory = { ImageView(it).apply { setImageResource(R.mipmap.ic_launcher) } },

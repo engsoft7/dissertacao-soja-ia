@@ -11,7 +11,8 @@ import mercado
 import precos_para
 import avisos_inmet
 import plantio
-from fastapi import FastAPI, HTTPException
+from idioma import idioma as idioma_do_pedido, textos_en
+from fastapi import FastAPI, Header, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
 from fastapi.responses import HTMLResponse
@@ -228,7 +229,7 @@ def _componentes_do_custo() -> dict:
             "taxa_cessr": c.get("taxa_receita")}
 
 
-def _financas_de_outro_estado(municipio: str, ce: "EstadoCarregado", fin: dict) -> dict:
+def _financas_de_outro_estado(municipio: str, ce: "EstadoCarregado", fin: dict, lang: str = "pt") -> dict:
     """O mesmo formato do Pará, com preço e custo da praça da CONAB no estado."""
     cod = next((c for c, (nome, _, _) in ce.sedes.items() if nome == municipio), None)
     sede = ce.sedes[cod][1:] if cod is not None else None
@@ -236,6 +237,7 @@ def _financas_de_outro_estado(municipio: str, ce: "EstadoCarregado", fin: dict) 
     lev = estados.levantamento_da_praca(praca_csv, rotulo, LEVANTAMENTO["levantamento"],
                                         LEVANTAMENTO["levantamento_extenso"])
     comp = lev.get("custo_por_componente") or {}
+    textos = textos_en(lev) if lang == "en" else lev["textos"]
     return {
         "municipio": municipio,
         "uf": ce.estado.uf,
@@ -254,24 +256,30 @@ def _financas_de_outro_estado(municipio: str, ce: "EstadoCarregado", fin: dict) 
         "taxa_cessr": comp.get("taxa_receita"),
         # A tabela de VTN da Receita Federal no produto é só a do Pará.
         "vtn_ha": None,
-        "fonte_preco": lev["textos"]["descricao"],
-        "nota_preco": lev["textos"]["nota_preco"],
+        "fonte_preco": textos["descricao"],
+        "nota_preco": textos["nota_preco"],
         "levantamento": lev["levantamento"],
         "defasagem_meses": meses_desde_o_levantamento(),
-        "aviso_preco": aviso_de_defasagem(),
-        "aviso_custo": aviso_sobre_o_custo(),
+        "aviso_preco": aviso_de_defasagem(lang=lang),
+        "aviso_custo": aviso_sobre_o_custo(lang=lang),
         "ano_referencia": int(ce.last_year),
     }
 
 
+# As frases que a API monta (fonte, nota e avisos do preço e do custo, a
+# observação do plantio, a legenda do mapa) saem no idioma do pedido: ?lang=en,
+# ou o cabeçalho Accept-Language que o aplicativo e o WebView mandam
+# (idioma.py). Sem nenhum dos dois, em português, como sempre foram.
 @app.get("/api/financas/{municipio}")
-def get_financas(municipio: str, uf: str | None = None):
+def get_financas(municipio: str, uf: str | None = None, lang: str | None = None,
+                 accept_language: str | None = Header(default=None)):
+    lg = idioma_do_pedido(lang, accept_language)
     fin = _get_cached_finance()
     ce = _estado_carregado(uf)
     if ce.estado.uf != "PA":
         if municipio not in set(ce.df["municipio"]):
             raise HTTPException(status_code=404, detail="Município não encontrado")
-        return _financas_de_outro_estado(municipio, ce, fin)
+        return _financas_de_outro_estado(municipio, ce, fin, lg)
 
     raw_municipio = REVERSE_FORMATADOS.get(municipio, municipio)
     custos = get_custos_locais(raw_municipio)
@@ -306,16 +314,16 @@ def get_financas(municipio: str, uf: str | None = None):
         # levantamento novo, o aplicativo passa a exibir a praça, a data e a
         # posição do preço na série corretas sem recompilar o APK. Antes eram
         # strings fixas no Kotlin, que envelheciam em silêncio.
-        "fonte_preco": descricao_do_levantamento(),
-        "nota_preco": nota_sobre_o_preco(),
+        "fonte_preco": descricao_do_levantamento(lg),
+        "nota_preco": nota_sobre_o_preco(lg),
         "levantamento": LEVANTAMENTO["levantamento"],
         # Calculado a cada requisição, nunca gravado: um levantamento estático
         # envelhece calado, e é o servidor que sabe que dia é hoje. Sem isto, o
         # aplicativo aberto daqui a dois anos exibiria o preço de 2026 como se
         # fosse o de agora.
         "defasagem_meses": meses_desde_o_levantamento(),
-        "aviso_preco": aviso_de_defasagem(),
-        "aviso_custo": aviso_sobre_o_custo(),
+        "aviso_preco": aviso_de_defasagem(lang=lg),
+        "aviso_custo": aviso_sobre_o_custo(lang=lg),
         "ano_referencia": int(AppState.last_year) if AppState.df is not None else 2024
     }
 
@@ -389,7 +397,8 @@ def list_municipios(uf: str | None = None, com_sedes: bool = False):
     return resposta
 
 @app.get("/api/kpis_economia")
-def get_kpis_economia():
+def get_kpis_economia(lang: str | None = None, accept_language: str | None = Header(default=None)):
+    lg = idioma_do_pedido(lang, accept_language)
     if AppState.df is None:
          raise HTTPException(status_code=503, detail="Modelo não carregado")
     
@@ -420,12 +429,12 @@ def get_kpis_economia():
          "custo_fixo_ha": LEVANTAMENTO["custo_fixo_saca"] * LEVANTAMENTO["produtividade_referencia_sc_ha"],
          "produtividade_referencia_sc": LEVANTAMENTO["produtividade_referencia_sc_ha"],
          **_componentes_do_custo(),
-         "fonte_preco": descricao_do_levantamento(),
-         "nota_preco": nota_sobre_o_preco(),
+         "fonte_preco": descricao_do_levantamento(lg),
+         "nota_preco": nota_sobre_o_preco(lg),
          "levantamento": LEVANTAMENTO["levantamento"],
          "defasagem_meses": meses_desde_o_levantamento(),
-         "aviso_preco": aviso_de_defasagem(),
-         "aviso_custo": aviso_sobre_o_custo(),
+         "aviso_preco": aviso_de_defasagem(lang=lg),
+         "aviso_custo": aviso_sobre_o_custo(lang=lg),
          "ano_referencia": int(AppState.last_year)
     }
 
@@ -516,7 +525,8 @@ def get_avisos(lat: float | None = None, lon: float | None = None, geocode: str 
     return avisos_inmet.avisos(lat, lon, geocode)
 
 @app.get("/api/plantio/{municipio}")
-def get_plantio(municipio: str, uf: str | None = None):
+def get_plantio(municipio: str, uf: str | None = None, lang: str | None = None,
+                accept_language: str | None = Header(default=None)):
     """Janela de plantio da soja no município (plantio.py).
 
     O calendário de semeadura e o vazio sanitário da Portaria SDA/MAPA nº
@@ -532,7 +542,8 @@ def get_plantio(municipio: str, uf: str | None = None):
     linhas = ce.df[ce.df["municipio"] == raw_municipio]
     if linhas.empty:
         raise HTTPException(status_code=404, detail="Município não encontrado")
-    dados = plantio.para_municipio(ce.estado.uf, int(linhas["cod_ibge7"].iloc[0]))
+    dados = plantio.para_municipio(ce.estado.uf, int(linhas["cod_ibge7"].iloc[0]),
+                                   lang=idioma_do_pedido(lang, accept_language))
     if dados is None:
         raise HTTPException(status_code=503, detail="Janela de plantio indisponível")
     dados["municipio"] = ce.nome_exibido(raw_municipio)
@@ -662,7 +673,7 @@ def get_mapa_geo():
          raise HTTPException(status_code=500, detail=f"Erro ao carregar mapa: {str(e)}")
 
 @lru_cache(maxsize=256)
-def _generate_map_html_cached(municipio: str, theme: str, uf: str = "PA") -> str:
+def _generate_map_html_cached(municipio: str, theme: str, uf: str = "PA", lang: str = "pt") -> str:
     import folium
     import branca.colormap as cm
     import math
@@ -778,13 +789,17 @@ def _generate_map_html_cached(municipio: str, theme: str, uf: str = "PA") -> str
     # Custom responsive HTML legend for mobile
     bg_color = "rgba(0,0,0,0.75)" if theme == "dark" else "rgba(255,255,255,0.85)"
     text_color = "white" if theme == "dark" else "black"
+    if lang == "en":
+        titulo_legenda, nota_legenda = "YIELD (KG/HA)", "observed average of the last five seasons"
+    else:
+        titulo_legenda, nota_legenda = "PRODUTIVIDADE (KG/HA)", "média observada das cinco últimas safras"
     legend_html = f'''
     <div style="position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); 
                 width: 75%; max-width: 320px; background: {bg_color}; padding: 8px 12px; 
                 border-radius: 8px; z-index: 9999; color: {text_color}; 
                 font-family: Arial, sans-serif; font-size: 13px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-        <div style="text-align: center; margin-bottom: 2px; font-weight: bold; letter-spacing: 0.5px;">PRODUTIVIDADE (KG/HA)</div>
-        <div style="text-align: center; margin-bottom: 5px; font-size: 10px; opacity: 0.75;">média observada das cinco últimas safras</div>
+        <div style="text-align: center; margin-bottom: 2px; font-weight: bold; letter-spacing: 0.5px;">{titulo_legenda}</div>
+        <div style="text-align: center; margin-bottom: 5px; font-size: 10px; opacity: 0.75;">{nota_legenda}</div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-weight: 500;">
             <span>{int(rmin)}</span>
             <span>{int((rmin+rmax)/2)}</span>
@@ -811,10 +826,11 @@ def _generate_map_html_cached(municipio: str, theme: str, uf: str = "PA") -> str
     return html_content
 
 @app.get("/api/mapa/render", response_class=HTMLResponse)
-def render_mapa(municipio: str = None, theme: str = "dark", uf: str | None = None):
+def render_mapa(municipio: str = None, theme: str = "dark", uf: str | None = None, lang: str | None = None,
+                accept_language: str | None = Header(default=None)):
     ce = _estado_carregado(uf)
     try:
-        html = _generate_map_html_cached(municipio, theme, ce.estado.uf)
+        html = _generate_map_html_cached(municipio, theme, ce.estado.uf, idioma_do_pedido(lang, accept_language))
         return HTMLResponse(content=html)
     except Exception as e:
         return HTMLResponse(f"Erro ao gerar mapa: {str(e)}", status_code=500)

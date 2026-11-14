@@ -65,6 +65,21 @@ def test_distritos_que_seguem_outra_regiao_so_aparecem_para_o_municipio_deles(pa
     assert plantio.para_municipio("PA", 1505502, pasta)["calendario"]["observacao"] is None
 
 
+def test_observacao_em_ingles(pasta):
+    """O app em inglês (Accept-Language) recebe a mesma frase, com datas em inglês e os nomes da portaria."""
+    d = plantio.para_municipio("PA", 1500602, pasta, lang="en")
+    assert d["calendario"]["observacao"] == (
+        "The districts of Cachoeira da Serra and Castelo de Sonhos follow Region I: soybean-free period from "
+        "Jun 15, 2026 to Sep 15, 2026 and sowing from Sep 16, 2026 to Jan 14, 2027.")
+    # Sem a frase dos distritos, a exceção da própria região, também em inglês.
+    regioes = plantio.carrega(pasta)["calendario"]["estados"]["PA"]
+    assert plantio.observacao(regioes[2:], regioes[2], 1500602, "en") == (
+        "The ordinance places the municipality in this region, except the districts of Cachoeira Grande and "
+        "Castelo de Sonhos.")
+    assert plantio.observacao(regioes[2:], regioes[2], 1500602) == (
+        "A portaria põe o município nesta região, exceto os distritos de Cachoeira Grande e Castelo de Sonhos.")
+
+
 def test_estado_sem_regioes_vale_para_todos(pasta):
     d = plantio.para_municipio("MT", 5107925, pasta)
     assert d["calendario"]["regiao"] is None and d["calendario"]["vazio"] == ["2026-06-08", "2026-09-06"]

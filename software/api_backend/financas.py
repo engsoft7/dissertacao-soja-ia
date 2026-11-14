@@ -6,6 +6,8 @@ from pathlib import Path
 
 import requests
 
+from idioma import mes_por_extenso_en, textos_en
+
 
 REV_MUNICIPIOS = {
     "Goianesia Do Para": "GOIANESIA DO PARA",
@@ -202,15 +204,27 @@ def meses_desde_o_levantamento(hoje: date | None = None) -> int | None:
     return (hoje.year - int(ano)) * 12 + (hoje.month - MESES_SIGLA[sigla.upper()])
 
 
-def aviso_de_defasagem(hoje: date | None = None) -> str | None:
+def aviso_de_defasagem(hoje: date | None = None, lang: str = "pt") -> str | None:
     """Frase a exibir quando o levantamento está velho, ou None se está em dia.
 
     Servida pela API para o aplicativo poder exibi-la sem recompilar, e montada
-    aqui para painel e aplicativo dizerem exatamente a mesma coisa.
+    aqui para painel e aplicativo dizerem exatamente a mesma coisa. Com [lang]
+    "en", a mesma frase em inglês, para o aplicativo em inglês (idioma.py).
     """
     meses = meses_desde_o_levantamento(hoje)
     if meses is None or meses < MESES_PARA_AVISAR:
         return None
+    if lang == "en":
+        quando_en = mes_por_extenso_en(LEVANTAMENTO.get("levantamento", "")) or "an unknown date"
+        if meses < MESES_PARA_ALERTAR:
+            return (f"This survey is from {quando_en}, {meses} months ago. CONAB does not "
+                    f"publish on a fixed schedule — check its portal for a more recent one "
+                    f"before relying on this price.")
+        anos_en = meses // 12
+        tempo_en = "more than a year" if anos_en == 1 else f"more than {anos_en} years"
+        return (f"This survey is from {quando_en}, {meses} months ago ({tempo_en}). "
+                f"Treat the price as a historical reference, not a current quote, and "
+                f"edit the field with the price you receive today.")
     quando = LEVANTAMENTO.get("levantamento_extenso", "data desconhecida")
     if meses < MESES_PARA_ALERTAR:
         return (f"Este levantamento é de {quando}, há {meses} meses. A CONAB "
@@ -223,7 +237,7 @@ def aviso_de_defasagem(hoje: date | None = None) -> str | None:
             f"e edite o campo com o preço que você recebe hoje.")
 
 
-def aviso_sobre_o_custo(hoje: date | None = None) -> str | None:
+def aviso_sobre_o_custo(hoje: date | None = None, lang: str = "pt") -> str | None:
     """Mesma idade, dita do lado do custo.
 
     Quando o usuário informa o próprio preço, o aviso do preço deixa de fazer
@@ -234,18 +248,24 @@ def aviso_sobre_o_custo(hoje: date | None = None) -> str | None:
     meses = meses_desde_o_levantamento(hoje)
     if meses is None or meses < MESES_PARA_AVISAR:
         return None
+    if lang == "en":
+        quando_en = mes_por_extenso_en(LEVANTAMENTO.get("levantamento", "")) or "an unknown date"
+        return (f"The cost still comes from the {quando_en} survey, {meses} months ago. "
+                f"If your costs have changed since then, edit the cost field too.")
     quando = LEVANTAMENTO.get("levantamento_extenso", "data desconhecida")
     return (f"O custo continua vindo do levantamento de {quando}, há {meses} "
             f"meses. Se o seu custeio mudou desde então, edite também o campo "
             f"de custo.")
 
 
-def descricao_do_levantamento() -> str:
-    """'CONAB, Pedro Afonso (TO), março de 2026'."""
+def descricao_do_levantamento(lang: str = "pt") -> str:
+    """'CONAB, Pedro Afonso (TO), março de 2026' (em inglês, '..., March 2026')."""
+    if lang == "en":
+        return textos_en(LEVANTAMENTO)["descricao"]
     return LEVANTAMENTO["textos"]["descricao"]
 
 
-def nota_sobre_o_preco() -> str:
+def nota_sobre_o_preco(lang: str = "pt") -> str:
     """Onde o preço padrão está na série histórica da praça.
 
     O preço adotado é oficial, mas em março de 2026 era o MENOR dos 13
@@ -255,8 +275,11 @@ def nota_sobre_o_preco() -> str:
 
     A frase é escrita pelo gerador, junto com os números, e servida por esta
     função à interface: quando o levantamento muda, o texto muda junto, sem
-    recompilar o aplicativo.
+    recompilar o aplicativo. Em inglês ([lang] "en"), a frase sai dos mesmos
+    números, com a regra do gerador (idioma.textos_en).
     """
+    if lang == "en":
+        return textos_en(LEVANTAMENTO)["nota_preco"]
     return LEVANTAMENTO["textos"]["nota_preco"]
 
 

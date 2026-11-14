@@ -24,6 +24,8 @@ from datetime import date, timedelta
 from functools import lru_cache
 from pathlib import Path
 
+from idioma import data_en, juntar_com_and
+
 PASTA = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "plantio"
 RISCO = {"0": 0, "2": 20, "3": 30, "4": 40}
 
@@ -69,12 +71,13 @@ def _br(iso: str) -> str:
     return date.fromisoformat(iso).strftime("%d/%m/%Y")
 
 
-def observacao(regioes: list[dict], reg: dict, cod_ibge7: int) -> str | None:
+def observacao(regioes: list[dict], reg: dict, cod_ibge7: int, lang: str = "pt") -> str | None:
     """O que a portaria diz de diferente para uma parte do município.
 
     Hoje, Altamira: o município está numa região, mas dois distritos seguem
     outra ("além dos distritos de ..., pertencentes ao município de Altamira").
-    Para os demais municípios, None.
+    Para os demais municípios, None. Com [lang] "en", em inglês, com os nomes
+    dos distritos como a portaria os escreve.
     """
     frases = []
     for outra in regioes:
@@ -84,18 +87,28 @@ def observacao(regioes: list[dict], reg: dict, cod_ibge7: int) -> str | None:
             if d.get("municipio") != cod_ibge7:
                 continue
             m = re.search(r"distritos?\s+(?:de\s+)?(.+?),?\s+(?:pertencentes?\s+ao|do)\s+município", d["texto"])
+            if lang == "en":
+                quais = f"The districts of {juntar_com_and(m.group(1))}" if m else "Part of the municipality"
+                frases.append(f"{quais} follow Region {outra['regiao']}: soybean-free period from "
+                              f"{data_en(outra['vazio'][0])} to {data_en(outra['vazio'][1])} and sowing from "
+                              f"{data_en(outra['semeadura'][0])} to {data_en(outra['semeadura'][1])}.")
+                continue
             quais = f"Os distritos de {m.group(1)}" if m else "Parte do município"
             frases.append(f"{quais} seguem a Região {outra['regiao']}: vazio sanitário de "
                           f"{_br(outra['vazio'][0])} a {_br(outra['vazio'][1])} e semeadura de "
                           f"{_br(outra['semeadura'][0])} a {_br(outra['semeadura'][1])}.")
     if not frases:
         excecao = (reg.get("excecoes") or {}).get(str(cod_ibge7))
-        if excecao:
+        if excecao and lang == "en":
+            m = re.match(r"exceto\s+os\s+distritos\s+de\s+(.+)$", excecao)
+            parte = f"except the districts of {juntar_com_and(m.group(1))}" if m else excecao
+            frases.append(f"The ordinance places the municipality in this region, {parte}.")
+        elif excecao:
             frases.append(f"A portaria põe o município nesta região, {excecao}.")
     return " ".join(frases) or None
 
 
-def para_municipio(uf: str, cod_ibge7: int, pasta: Path = PASTA) -> dict | None:
+def para_municipio(uf: str, cod_ibge7: int, pasta: Path = PASTA, lang: str = "pt") -> dict | None:
     """Calendário e ZARC do município; None quando não há dados da janela de plantio."""
     dados = carrega(pasta)
     if dados is None:
@@ -107,7 +120,7 @@ def para_municipio(uf: str, cod_ibge7: int, pasta: Path = PASTA) -> dict | None:
     calendario_mun = None
     if reg is not None:
         calendario_mun = {"regiao": reg.get("regiao"), "vazio": reg["vazio"], "semeadura": reg["semeadura"],
-                          "observacao": observacao(regioes, reg, cod_ibge7),
+                          "observacao": observacao(regioes, reg, cod_ibge7, lang),
                           "fonte": cal["fonte"], "url": cal["url"]}
     z = dados["zarc"].get(cod_ibge7)
     zarc_mun = None

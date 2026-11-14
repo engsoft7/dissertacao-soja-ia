@@ -46,12 +46,33 @@ def test_notas_de_rodape_e_distritos():
              "10Abaetetuba, Altamira e Belém.")
     notas = cp.notas_de_rodape(texto)
     assert set(notas) == {"5", "8", "10"}
-    nomes, obs = cp.municipios_da_nota(notas["5"])
-    assert nomes == ["Alto Parnaíba", "Balsas", "São Raimundo das Mangabeiras", "Tasso Fragoso"] and obs is None
-    nomes, obs = cp.municipios_da_nota(notas["8"])
+    nomes, exc, dist = cp.municipios_da_nota(notas["5"])
+    assert nomes == ["Alto Parnaíba", "Balsas", "São Raimundo das Mangabeiras", "Tasso Fragoso"]
+    assert exc == {} and dist is None
+    nomes, exc, dist = cp.municipios_da_nota(notas["8"])
     assert nomes == ["Bannach", "PauD'Arco", "Redenção", "Trairão"]
-    assert obs.startswith("além dos distritos de Cachoeira da Serra") and obs.endswith("Altamira")
+    assert dist.startswith("além dos distritos de Cachoeira da Serra") and dist.endswith("Altamira")
+    assert cp.DO_MUNICIPIO.search(dist).group(1) == "Altamira"
     assert cp.municipios_da_nota(notas["10"])[0] == ["Abaetetuba", "Altamira", "Belém"]
+
+
+def test_parentese_depois_do_nome_vira_excecao():
+    """Na Região III do Pará: 'Altamira (exceto os distritos de ...)', com vírgula e 'e' dentro."""
+    nomes, exc, dist = cp.municipios_da_nota(
+        "Abaetetuba, Altamira (exceto os distritos de Cachoeira Grande e Castelo de Sonhos), Anapu e Belém")
+    assert nomes == ["Abaetetuba", "Altamira", "Anapu", "Belém"] and dist is None
+    assert exc == {"Altamira": "exceto os distritos de Cachoeira Grande e Castelo de Sonhos"}
+    nomes, exc, _ = cp.municipios_da_nota("Anapu, Belém e Altamira (exceto os distritos de A e B)")
+    assert nomes == ["Anapu", "Belém", "Altamira"] and exc == {"Altamira": "exceto os distritos de A e B"}
+
+
+def test_grafia_conferida_so_no_estado_dela():
+    """O anexo escreve 'Lagoa da Pedra' no Maranhão; o município é Lago da Pedra."""
+    ibge = {cp.normaliza("Lago da Pedra"): (2105708, "Lago da Pedra")}
+    assert cp.codigo_ibge("MA", "Lagoa da Pedra", ibge) == (2105708, "Lago da Pedra")
+    assert cp.codigo_ibge("MA", "Lago da Pedra", ibge) == (2105708, "Lago da Pedra")
+    assert cp.codigo_ibge("PA", "Lagoa da Pedra", ibge) is None
+    assert cp.codigo_ibge("MA", "Lagoa do Mato", ibge) is None
 
 
 def test_nome_sem_espaco_bate_com_o_do_ibge():

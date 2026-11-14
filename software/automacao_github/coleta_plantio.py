@@ -58,6 +58,15 @@ MESES = {"janeiro": 1, "fevereiro": 2, "março": 3, "marco": 3, "abril": 4, "mai
 DATA = re.compile(r"(\d{1,2})\s*º?\s+de\s+([a-zçã]+)\s+de\s+(\d{4})", re.I)
 REGIAO = re.compile(r"Região\s+([IVX]+)\s*(\d{1,2})\s*:\s*(.+?)(?=Região\s+[IVX]+\s*\d|$)")
 CODIGO_RISCO = {"0": "0", "20": "2", "30": "3", "40": "4"}
+DO_MUNICIPIO = re.compile(r"(?:pertencentes?\s+ao|do)\s+município\s+de\s+(.+)$")
+# Grafias do anexo que não batem com a lista do IBGE, conferidas uma a uma. Um
+# nome novo que não bata continua fazendo a coleta falhar.
+GRAFIAS = {
+    # Região II do Maranhão: o anexo escreve "Lagoa da Pedra"; o município é Lago
+    # da Pedra (IBGE 2105708, que planta soja na PAM), o único do estado com nome
+    # parecido.
+    ("MA", "lagoadapedra"): "Lago da Pedra",
+}
 
 
 def normaliza(nome: str) -> str:
@@ -123,18 +132,37 @@ def notas_de_rodape(texto: str) -> dict[str, str]:
     return notas
 
 
-def municipios_da_nota(nota: str) -> tuple[list[str], str | None]:
-    """'A, B e C' -> ['A', 'B', 'C']; separa a menção a distritos, que vira observação."""
-    observacao = None
+def municipios_da_nota(nota: str) -> tuple[list[str], dict[str, str], str | None]:
+    """'A, B (exceto ...) e C' -> (['A', 'B', 'C'], {'B': 'exceto ...'}, distritos).
+
+    O parêntese depois de um nome ("Altamira (exceto os distritos de ...)") e a
+    menção a distritos de outro município ("além dos distritos de ..., do
+    município de ...") saem da lista antes de separá-la, porque também têm
+    vírgulas e "e".
+    """
+    distritos = None
     m = re.search(r",?\s*além d[oa]s? distritos? .*$", nota)
     if m:
-        observacao = m.group(0).lstrip(", ").strip()
+        distritos = m.group(0).lstrip(", ").strip()
         nota = nota[:m.start()]
+    excecoes: dict[str, str] = {}
+
+    def tira_parentese(mp: re.Match) -> str:
+        antes = mp.group(1)
+        excecoes[re.split(r"\s+e\s+", antes.strip())[-1]] = mp.group(2).strip()
+        return antes.rstrip()
+
+    nota = re.sub(r"([^,()]+?)\s*\(([^()]*)\)", tira_parentese, nota)
     partes = [p.strip() for p in nota.split(",") if p.strip()]
     if partes and " e " in partes[-1]:
         ultimo = partes.pop()
         partes += [p.strip() for p in ultimo.split(" e ") if p.strip()]
-    return partes, observacao
+    return partes, excecoes, distritos
+
+
+def codigo_ibge(uf: str, nome: str, ibge: dict[str, tuple[int, str]]) -> tuple[int, str] | None:
+    """(código, nome no IBGE) de um nome do anexo, com as grafias conferidas; None se não bate."""
+    return ibge.get(normaliza(GRAFIAS.get((uf, normaliza(nome)), nome)))
 
 
 def municipios_ibge(uf: str) -> dict[str, tuple[int, str]]:
@@ -172,29 +200,49 @@ def calendario() -> dict:
             problemas.append(f"{uf}: {len(vazio)} períodos de vazio e {len(semeadura)} de semeadura")
             continue
         ibge = municipios_ibge(uf) if vazio[0]["regiao"] else {}
-        regioes, cobertos = [], set()
+
+        def codigo(nome: str, regiao: str) -> int | None:
+            achado = codigo_ibge(uf, nome, ibge)
+            if achado is None:
+                problemas.append(f"{uf} região {regiao}: {nome!r} não está na lista do IBGE")
+                return None
+            if normaliza(achado[1]) != normaliza(nome):
+                print(f"{uf} região {regiao}: {nome!r} do anexo lido como {achado[1]} ({achado[0]})")
+            return achado[0]
+
+        regioes, onde = [], {}
         for v, s in zip(vazio, semeadura):
             reg = {"regiao": v["regiao"], "vazio": [v["inicio"], v["fim"]],
-                   "semeadura": [s["inicio"], s["fim"]], "municipios": None, "observacao": None}
+                   "semeadura": [s["inicio"], s["fim"]], "municipios": None, "excecoes": {}, "distritos": []}
             if v["regiao"]:
                 nota = notas.get(v["nota"], "")
+                if not nota:
+                    problemas.append(f"{uf} região {v['regiao']}: sem a nota {v['nota']}")
                 if "demais" in nota.lower():
                     reg["municipios"] = "demais"
                 else:
-                    nomes, reg["observacao"] = municipios_da_nota(nota)
-                    codigos = []
-                    for nome in nomes:
-                        achado = ibge.get(normaliza(nome))
-                        if achado is None:
-                            problemas.append(f"{uf} região {v['regiao']}: {nome!r} não está na lista do IBGE")
-                        else:
-                            codigos.append(achado[0])
+                    nomes, excecoes, distritos = municipios_da_nota(nota)
+                    codigos = [c for c in (codigo(n, v["regiao"]) for n in nomes) if c is not None]
+                    for c in codigos:
+                        if c in onde:
+                            problemas.append(f"{uf}: o município {c} está nas regiões {onde[c]} e {v['regiao']}")
+                        onde[c] = v["regiao"]
                     reg["municipios"] = sorted(codigos)
-                    cobertos |= set(codigos)
+                    for nome, texto in excecoes.items():
+                        c = codigo(nome, v["regiao"])
+                        if c is not None:
+                            reg["excecoes"][str(c)] = texto
+                    if distritos:
+                        m = DO_MUNICIPIO.search(distritos)
+                        c = codigo(m.group(1).strip(), v["regiao"]) if m else None
+                        if m is None:
+                            problemas.append(f"{uf} região {v['regiao']}: distritos sem o município: {distritos!r}")
+                        elif c is not None:
+                            reg["distritos"].append({"municipio": c, "texto": distritos})
             regioes.append(reg)
         for reg in regioes:
             if reg["municipios"] == "demais":
-                reg["municipios"] = sorted({c for c, _ in ibge.values()} - cobertos)
+                reg["municipios"] = sorted({c for c, _ in ibge.values()} - set(onde))
         saida[uf] = regioes
     if problemas:
         for p in problemas:
@@ -257,8 +305,10 @@ def grava(saida: Path) -> None:
     for uf, regs in cal.items():
         for reg in regs:
             n = len(reg["municipios"]) if isinstance(reg["municipios"], list) else "todos"
+            extra = [f"exceção em {c}: {t}" for c, t in reg["excecoes"].items()]
+            extra += [f"distritos de {d['municipio']}: {d['texto']}" for d in reg["distritos"]]
             print(f"{uf} região {reg['regiao'] or '-'}: vazio {reg['vazio']}, semeadura {reg['semeadura']}, "
-                  f"{n} municípios{'; ' + reg['observacao'] if reg['observacao'] else ''}")
+                  f"{n} municípios" + "".join("; " + e for e in extra))
     print(f"ZARC: {len(linhas)} linhas; portarias {meta['portarias']}")
 
 

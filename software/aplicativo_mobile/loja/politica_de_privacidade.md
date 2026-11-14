@@ -57,6 +57,7 @@ para o Google Drive nem passa para um celular novo na transferência de dados.
 | Dado | Para quê | Para onde |
 |---|---|---|
 | Nome do município escolhido e o estado | estimativa de produtividade, histórico, mapa, finanças, cotações das praças, janela de plantio | API do produto (servidor no Render) |
+| O idioma em que o aplicativo está (português ou inglês) | receber no mesmo idioma as frases que a API monta (preço, custo, janela de plantio, legenda do mapa) | API do produto |
 | Posição aproximada, arredondada a cerca de 1 km: a sede do município ou, se o produtor escolher "Minha localização", a posição do GPS | previsão do tempo e janela de pulverização | Open-Meteo (open-meteo.com) |
 | A mesma posição aproximada e, quando é a sede, o código IBGE do município | avisos meteorológicos do INMET para o lugar | API do produto, que consulta o INMET |
 | Nada além da própria consulta, ao abrir a aba Mapa | as bibliotecas que desenham o mapa (Leaflet, jQuery, Bootstrap) | servidores públicos de bibliotecas: cdn.jsdelivr.net, cdnjs.cloudflare.com, code.jquery.com e netdna.bootstrapcdn.com |

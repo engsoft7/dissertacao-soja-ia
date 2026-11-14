@@ -31,6 +31,10 @@ nem de publicidade.
   colheita e vendas. Ficam num arquivo na pasta do aplicativo e só saem do
   celular se o produtor exportar a planilha (.csv) e escolher para onde
   enviá-la.
+- **Leitura em voz alta e resumo para compartilhar.** O texto lido é entregue
+  ao mecanismo de voz do próprio Android, e o aplicativo não o envia a nenhum
+  servidor. O resumo em imagem ou PDF é gerado no celular e só sai dele pelo
+  compartilhamento, para onde o produtor escolher.
 - **Escolhas dos alertas** (o que avisar, a praça e o preço-alvo), o lugar da
   previsão e o estado, para a conferência em segundo plano, e os avisos já
   mostrados, para não repetir. Com todos os alertas desligados, nada é

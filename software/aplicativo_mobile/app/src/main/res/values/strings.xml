@@ -173,8 +173,28 @@
     <string name="relatorio_rodape">Estimativas de apoio à decisão: não substituem a avaliação de um profissional nem a verificação das condições no local. Fontes: IBGE, CONAB, Agrolink e Ministério da Agricultura (portaria do calendário de semeadura e ZARC). O AgroInteligência não é um aplicativo do governo; é um produto técnico de pesquisa da Universidade Federal do Pará (UFPA).</string>
     <string name="relatorio_assunto">Resumo da soja (AgroInteligência)</string>
     <string name="relatorio_compartilhar">Compartilhar o resumo</string>
+    <string name="relatorio_botao">Compartilhar</string>
     <string name="relatorio_escolha">A imagem cabe numa conversa do WhatsApp; o PDF serve para imprimir ou mandar por e-mail.</string>
     <string name="relatorio_imagem">Imagem (WhatsApp)</string>
     <string name="relatorio_pdf">PDF</string>
     <string name="relatorio_sem_app">Não foi possível compartilhar o resumo.</string>
+
+    <!-- Leitura em voz alta (Fala.kt) -->
+    <string name="fala_ouvir_resumo">Ouvir o resumo</string>
+    <string name="fala_ouvir_tempo">Ouvir o tempo</string>
+    <string name="fala_parar">Parar a leitura</string>
+    <string name="fala_indisponivel">A voz do Android não está disponível neste celular.</string>
+    <string name="fala_kg_ha">quilos por hectare</string>
+    <string name="fala_mais_ou_menos">mais ou menos</string>
+    <string name="fala_menos">menos</string>
+    <string name="fala_tempo_agora">Tempo em %1$s agora: %2$d graus, %3$s, umidade de %4$d por cento e vento na lavoura de %5$d quilômetros por hora.</string>
+    <string name="fala_pulverizar_boa">Esta hora está boa para pulverizar.</string>
+    <string name="fala_pulverizar_atencao">Esta hora pede atenção para pulverizar.</string>
+    <string name="fala_pulverizar_evitar">Evite pulverizar nesta hora.</string>
+    <string name="fala_proxima_janela">Próxima janela boa para pulverizar: %1$s.</string>
+    <string name="fala_janela_hoje">hoje, das %1$d às %2$d horas</string>
+    <string name="fala_janela_amanha">amanhã, das %1$d às %2$d horas</string>
+    <string name="fala_janela_dia">em %1$s, das %2$d às %3$d horas</string>
+    <string name="fala_sem_janela">Nenhuma janela boa para pulverizar nas próximas %1$d horas.</string>
+    <string name="fala_hoje">Hoje, máxima de %1$d e mínima de %2$d graus, com %3$d por cento de chance de chuva.</string>
 </resources>

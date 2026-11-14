@@ -413,7 +413,7 @@ fun TempoResumoCard(estado: EstadoTempo, aoAbrir: () -> Unit) {
 
 /** A tela com rede e GPS; o desenho em si é [TempoConteudo]. */
 @Composable
-fun TempoTela(estado: EstadoTempo, municipio: String?, aoVoltar: () -> Unit) {
+fun TempoTela(estado: EstadoTempo, municipio: String?, ouvir: @Composable () -> Unit = {}, aoVoltar: () -> Unit) {
     val lugar = estado.lugarPara(municipio)
     // A carga ao mudar de lugar é feita no AgroDashboard, que serve também o
     // cartão do Resumo; aqui só o botão de atualizar.
@@ -430,6 +430,8 @@ fun TempoTela(estado: EstadoTempo, municipio: String?, aoVoltar: () -> Unit) {
         aoVoltar = aoVoltar
     ) {
         EscolhaDoLugar(estado, municipio) { atualizar++ }
+        // Ler em voz alta (Fala.kt), quando o AgroDashboard o oferece.
+        ouvir()
     }
 }
 

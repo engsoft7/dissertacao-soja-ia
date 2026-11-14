@@ -206,6 +206,17 @@ fun AgroDashboard(abaInicial: Int = 0) {
     var mostrarLista by rememberSaveable { mutableStateOf(false) }
     // A escolha entre imagem e PDF para compartilhar o resumo (Relatorio.kt).
     var mostrarCompartilhar by remember { mutableStateOf(false) }
+    // A voz do Android (Fala.kt), criada no primeiro toque em "Ouvir" e
+    // encerrada com a tela; a leitura para ao trocar de aba.
+    var leitor by remember { mutableStateOf<Leitor?>(null) }
+    DisposableEffect(Unit) { onDispose { leitor?.encerra() } }
+    LaunchedEffect(currentTab) { leitor?.para() }
+    fun ouve(texto: String?) {
+        val l = leitor
+        if (l?.falando == true) { l.para(); return }
+        if (texto == null) return
+        (l ?: Leitor(context).also { leitor = it }).fala(texto)
+    }
     // Aumenta a cada "atualizar" e refaz a busca da previsão do município.
     var recarga by remember { mutableStateOf(0) }
     // Mercado de hoje (praças do Pará e estimativa), um só para o app inteiro:
@@ -263,6 +274,11 @@ fun AgroDashboard(abaInicial: Int = 0) {
             avisos.currentSnackbarData?.dismiss()
             avisos.showSnackbar(msg)
         }
+    }
+
+    // Sem a voz do Android no aparelho, o botão "Ouvir" avisa em vez de calar.
+    LaunchedEffect(leitor?.indisponivel) {
+        if (leitor?.indisponivel == true) avisar(context.getString(R.string.fala_indisponivel))
     }
 
     fun escolherMunicipio(mun: String) {
@@ -463,10 +479,11 @@ fun AgroDashboard(abaInicial: Int = 0) {
     val pracaHoje = pracaParaUsar(selectedMunicipio, mercadoHoje?.pracasDoEstado().orEmpty(), sedes = sedes)
     val precoPadraoAtual: Double? = pracaHoje?.valor ?: kpis?.soja_preco_saca
 
-    // O resumo para compartilhar (Relatorio.kt), com os números que as telas
-    // mostram: a produtividade e o preço do produtor quando ele os informou.
-    fun compartilhaResumo(imagem: Boolean) {
-        val prev = previsao ?: return
+    // O resumo para compartilhar (Relatorio.kt) e para ouvir (Fala.kt), com os
+    // números que as telas mostram: a produtividade e o preço do produtor
+    // quando ele os informou.
+    fun dadosDoResumo(): DadosDoRelatorio? {
+        val prev = previsao ?: return null
         val hoje = java.time.LocalDate.now()
         val projecao = projecaoDaSafra(prev.historico)
         val sacas = sharedPrefs.valorDoProdutor(PREF_PROD) ?: projecao?.let { sacasDoCampo(it.rendimento_predito / 60) }
@@ -487,6 +504,11 @@ fun AgroDashboard(abaInicial: Int = 0) {
                 ?.let { resumoDoCaderno(it) },
             safraDoCaderno = safraDoCaderno,
         )
+        return dados
+    }
+
+    fun compartilhaResumo(imagem: Boolean) {
+        val dados = dadosDoResumo() ?: return
         coroutineScope.launch {
             val arquivo = withContext(Dispatchers.IO) {
                 runCatching {
@@ -611,11 +633,6 @@ fun AgroDashboard(abaInicial: Int = 0) {
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.weight(1f).semantics { heading() }
                         )
-                        if (currentTab == 0 && previsao != null) {
-                            IconButton(onClick = { mostrarCompartilhar = true }) {
-                                Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.relatorio_compartilhar))
-                            }
-                        }
                         val alertasLigados = remember(currentTab) { Alertas.algumLigado(sharedPrefs) }
                         IconButton(onClick = { currentTab = 8 }) {
                             Icon(if (alertasLigados) Icons.Filled.NotificationsActive else Icons.Filled.NotificationsNone,
@@ -710,7 +727,14 @@ fun AgroDashboard(abaInicial: Int = 0) {
                     )
                 }
                 currentTab == 6 -> item {
-                    TempoTela(tempo, selectedMunicipio) { currentTab = 0 }
+                    TempoTela(tempo, selectedMunicipio, ouvir = {
+                        if (tempo.previsao != null) {
+                            BotaoOuvir(leitor?.falando == true, stringResource(R.string.fala_ouvir_tempo)) {
+                                ouve(falaDoTempo(context, tempo.previsao, tempo.avisos, lugarTempo?.nome.orEmpty(),
+                                                 agoraNoLugar(tempo.previsao)))
+                            }
+                        }
+                    }) { currentTab = 0 }
                 }
                 currentTab == 9 -> item {
                     // A estimativa do município para a safra em curso, para comparar com o colhido.
@@ -857,6 +881,17 @@ fun AgroDashboard(abaInicial: Int = 0) {
                             item {
                                 TituloSecao(Icons.Filled.BarChart, "Resumo Agronômico (safra ${projecao.ano})")
                                 ResumoAgronomicoCard(projecao, ultimoReal)
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    BotaoOuvir(leitor?.falando == true, stringResource(R.string.fala_ouvir_resumo)) {
+                                        ouve(dadosDoResumo()?.let { falaDoResumo(context, montaRelatorio(context, it)) })
+                                    }
+                                    OutlinedButton(onClick = { mostrarCompartilhar = true },
+                                                   modifier = Modifier.heightIn(min = 48.dp)) {
+                                        Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                                        Spacer(Modifier.width(6.dp))
+                                        Text(stringResource(R.string.relatorio_botao))
+                                    }
+                                }
                             }
                             // A Viabilidade antes do Simulador: é a conta que o produtor
                             // faz; o simulador climático é ilustração do modelo.

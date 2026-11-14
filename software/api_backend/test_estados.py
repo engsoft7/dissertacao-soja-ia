@@ -149,3 +149,41 @@ def test_cache_do_estado(tmp_path, monkeypatch):
     monkeypatch.setattr(api, "CACHE_VERSAO", 999)  # como uma base ou biblioteca diferente
     treinado = api.carrega_estado(ro)
     assert not treinado.historicos and treinado.origem == "treinado na subida"
+
+
+def test_janela_de_plantio_pela_rota(cliente):
+    """A rota acha o código do IBGE pelo nome e devolve a região certa; sem os
+    arquivos da coleta, responde 503 em vez de inventar datas."""
+    import plantio
+    r = cliente.get("/api/plantio/Sorriso", params={"uf": "MT"})
+    if plantio.carrega() is None:
+        assert r.status_code == 503
+        return
+    d = r.json()
+    assert d["municipio"] == "Sorriso" and d["uf"] == "MT" and d["calendario"]["regiao"] is None
+    assert d["calendario"]["semeadura"] == ["2026-09-07", "2027-01-07"]
+    pa = cliente.get("/api/plantio/Paragominas").json()
+    assert pa["uf"] == "PA" and pa["calendario"]["regiao"] == "II"
+    assert cliente.get("/api/plantio/Atlantida").status_code == 404
+    altamira = cliente.get("/api/plantio/Altamira", headers={"Accept-Language": "en-US,en;q=0.9"}).json()
+    assert altamira["calendario"]["observacao"].startswith("The districts of")
+    assert cliente.get("/api/plantio/Altamira").json()["calendario"]["observacao"].startswith("Os distritos de")
+
+
+def test_frases_no_idioma_do_pedido(cliente):
+    """O app em inglês manda Accept-Language; ?lang=en serve no navegador. Sem
+    nenhum dos dois, as frases continuam em português."""
+    pt = cliente.get("/api/financas/Paragominas").json()
+    en = cliente.get("/api/financas/Paragominas", headers={"Accept-Language": "en-US"}).json()
+    assert pt["fonte_preco"].startswith("CONAB, Pedro Afonso") and "/sc é" in pt["nota_preco"]
+    assert en["fonte_preco"].startswith("CONAB, Pedro Afonso") and "/bag is" in en["nota_preco"]
+    assert en["soja_preco_saca"] == pt["soja_preco_saca"] and en["custo_ha"] == pt["custo_ha"]
+    assert (en["aviso_preco"] is None) == (pt["aviso_preco"] is None)
+    mt = cliente.get("/api/financas/Sorriso", params={"uf": "MT", "lang": "en"}).json()
+    assert mt["nota_preco"].endswith("Reference scenario, not a price forecast.")
+    kpis = cliente.get("/api/kpis_economia", params={"lang": "en"}).json()
+    assert "/bag is" in kpis["nota_preco"]
+    mapa_en = cliente.get("/api/mapa/render", params={"municipio": "Paragominas"},
+                          headers={"Accept-Language": "en"}).text
+    assert "YIELD (KG/HA)" in mapa_en
+    assert "PRODUTIVIDADE (KG/HA)" in cliente.get("/api/mapa/render", params={"municipio": "Paragominas"}).text

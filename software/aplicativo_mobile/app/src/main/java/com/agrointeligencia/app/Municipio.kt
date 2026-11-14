@@ -1,5 +1,6 @@
 package com.agrointeligencia.app
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -104,12 +105,13 @@ fun municipioMaisProximo(
         .minByOrNull { it.distanciaKm }
 
 /** A frase que o app mostra depois de escolher pelo GPS. */
-fun fraseDoMaisProximo(p: MunicipioProximo, total: Int, estado: EstadoDoApp = ESTADOS_DO_APP[0]): String {
+fun fraseDoMaisProximo(context: android.content.Context, p: MunicipioProximo, total: Int,
+                       estado: EstadoDoApp = ESTADOS_DO_APP[0]): String {
     val km = p.distanciaKm.roundToInt()
     return when {
-        km < 1 -> "Município escolhido pela sua localização: ${p.nome}."
-        p.distanciaKm <= DISTANCIA_PERTO_KM -> "Município escolhido pela sua localização: ${p.nome}, a $km km da sede."
-        else -> "O mais próximo de você é ${p.nome}, a $km km. O app cobre $total municípios produtores de soja ${estado.no}."
+        km < 1 -> context.getString(R.string.mun_escolhido, p.nome)
+        p.distanciaKm <= DISTANCIA_PERTO_KM -> context.getString(R.string.mun_escolhido_km, p.nome, km)
+        else -> context.getString(R.string.mun_mais_proximo, p.nome, km, total, estado.no, estado.nome)
     }
 }
 
@@ -154,6 +156,7 @@ fun SeletorMunicipio(
     estado: EstadoDoApp = ESTADOS_DO_APP[0],
 ) {
     val forma = RoundedCornerShape(12.dp)
+    val rotuloTrocar = stringResource(R.string.mun_trocar)
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -162,16 +165,16 @@ fun SeletorMunicipio(
                 .heightIn(min = 56.dp)
                 .clip(forma)
                 .border(1.dp, MaterialTheme.colorScheme.outline, forma)
-                .clickable(onClickLabel = "trocar o município", role = Role.Button) { aoAbrirLista() }
+                .clickable(onClickLabel = rotuloTrocar, role = Role.Button) { aoAbrirLista() }
                 .padding(horizontal = 14.dp, vertical = 8.dp)
         ) {
             Icon(Icons.Filled.LocationCity, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
                 // Fora do Pará, o estado junto: o produtor vê de onde é a lista.
-                Text(if (estado.uf == "PA") "Município" else "Município · ${estado.nome}",
+                Text(if (estado.uf == "PA") stringResource(R.string.mun_rotulo) else stringResource(R.string.mun_rotulo_estado, estado.nome),
                      fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(municipio ?: "Escolha o seu", fontSize = 17.sp, fontWeight = FontWeight.SemiBold,
+                Text(municipio ?: stringResource(R.string.mun_escolha_o_seu), fontSize = 17.sp, fontWeight = FontWeight.SemiBold,
                      color = MaterialTheme.colorScheme.onSurface, maxLines = 1)
             }
             Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -185,12 +188,12 @@ fun SeletorMunicipio(
             if (procurandoPosicao) {
                 CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.dp)
             } else {
-                Icon(Icons.Filled.MyLocation, contentDescription = "Escolher o município mais próximo pela sua localização")
+                Icon(Icons.Filled.MyLocation, contentDescription = stringResource(R.string.mun_gps_descricao))
             }
         }
     }
     if (procurandoPosicao) {
-        Text("Procurando sua posição…", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
+        Text(stringResource(R.string.mun_procurando), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
              modifier = Modifier.padding(top = 4.dp))
     }
 }
@@ -206,10 +209,9 @@ fun BoasVindasMunicipio(procurandoPosicao: Boolean, aoUsarPosicao: () -> Unit, a
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Qual é o seu município?", fontSize = 20.sp, fontWeight = FontWeight.Bold,
+            Text(stringResource(R.string.mun_qual), fontSize = 20.sp, fontWeight = FontWeight.Bold,
                  color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.semantics { heading() })
-            Text("Escolha na lista ou deixe o celular achar o mais próximo. O app guarda a escolha e " +
-                 "abre nele da próxima vez.",
+            Text(stringResource(R.string.mun_boas_vindas),
                  fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface, lineHeight = 20.sp)
             Button(onClick = aoUsarPosicao, enabled = !procurandoPosicao,
                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
@@ -217,19 +219,19 @@ fun BoasVindasMunicipio(procurandoPosicao: Boolean, aoUsarPosicao: () -> Unit, a
                     CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp,
                                               color = MaterialTheme.colorScheme.onPrimary)
                     Spacer(Modifier.width(8.dp))
-                    Text("Procurando sua posição…")
+                    Text(stringResource(R.string.mun_procurando))
                 } else {
                     Icon(Icons.Filled.MyLocation, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Usar minha localização")
+                    Text(stringResource(R.string.mun_usar_localizacao))
                 }
             }
             OutlinedButton(onClick = aoAbrirLista, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                 Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Escolher na lista")
+                Text(stringResource(R.string.mun_escolher_lista))
             }
-            Text("A posição serve só para achar o município, no próprio celular, e não é enviada.",
+            Text(stringResource(R.string.mun_privacidade),
                  fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
         }
     }
@@ -250,19 +252,19 @@ fun ListaDeMunicipios(
         value = busca,
         onValueChange = aoBuscar,
         singleLine = true,
-        placeholder = { Text("Buscar pelo nome") },
+        placeholder = { Text(stringResource(R.string.mun_buscar)) },
         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
         trailingIcon = {
             if (busca.isNotEmpty()) {
-                IconButton(onClick = { aoBuscar("") }) { Icon(Icons.Filled.Clear, contentDescription = "Limpar a busca") }
+                IconButton(onClick = { aoBuscar("") }) { Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.mun_limpar)) }
             }
         },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         modifier = Modifier.fillMaxWidth()
     )
     Text(
-        if (filtrados.isEmpty()) "Nenhum município com esse nome. O app cobre ${municipios.size} municípios produtores de soja ${estado.no}."
-        else "${filtrados.size} de ${municipios.size} municípios",
+        if (filtrados.isEmpty()) stringResource(R.string.mun_nenhum, municipios.size, estado.no, estado.nome)
+        else stringResource(R.string.mun_contagem, filtrados.size, municipios.size),
         fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
     )
@@ -303,7 +305,7 @@ fun EscolhaMunicipioDialog(
     AlertDialog(
         onDismissRequest = aoFechar,
         icon = { Icon(Icons.Filled.LocationCity, contentDescription = null) },
-        title = { Text("Escolha o município") },
+        title = { Text(stringResource(R.string.mun_escolha_titulo)) },
         text = {
             Column {
                 // O estado antes do município: os de ESTADOS_DO_APP (Estados.kt).
@@ -316,31 +318,30 @@ fun EscolhaMunicipioDialog(
                     if (procurandoPosicao) {
                         CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                         Spacer(Modifier.width(8.dp))
-                        Text("Procurando sua posição…")
+                        Text(stringResource(R.string.mun_procurando))
                     } else {
                         Icon(Icons.Filled.MyLocation, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("O mais próximo de mim")
+                        Text(stringResource(R.string.mun_mais_proximo_botao))
                     }
                 }
                 Spacer(Modifier.size(12.dp))
                 if (municipios.isEmpty()) {
-                    Text(avisoDoEstado ?: "A lista de municípios ainda não chegou do servidor. Confira a conexão; " +
-                         "o GPS funciona assim mesmo.",
+                    Text(avisoDoEstado ?: stringResource(R.string.mun_sem_lista),
                          fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
                     ListaDeMunicipios(municipios, atual, busca, { busca = it }, aoEscolher, estado)
                 }
             }
         },
-        confirmButton = { TextButton(onClick = aoFechar) { Text("Fechar") } }
+        confirmButton = { TextButton(onClick = aoFechar) { Text(stringResource(R.string.fechar)) } }
     )
 }
 
 /** Os três estados em botões de escolha; o leitor de tela diz qual está marcado. */
 @Composable
 fun SeletorEstado(estado: EstadoDoApp, aoEscolher: (String) -> Unit) {
-    Text("Estado", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(R.string.estado_rotulo), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     // Rola de lado se não couber: os cinco não cabem na janela.
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.fillMaxWidth().padding(top = 4.dp).horizontalScroll(rememberScrollState())) {

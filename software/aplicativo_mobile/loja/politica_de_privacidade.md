@@ -1,6 +1,6 @@
 # Política de privacidade do aplicativo AgroInteligência
 
-Última atualização: 7 de novembro de 2026 (versão 2.8.0 do aplicativo).
+Última atualização: 14 de novembro de 2026 (versão 2.9.0 do aplicativo).
 
 O AgroInteligência é um aplicativo gratuito, sem anúncios e sem cadastro,
 desenvolvido como produto técnico de dissertação do Programa de Pós-Graduação
@@ -25,6 +25,20 @@ nem de publicidade.
 - **Posição do GPS para medir a área do talhão.** Usada só com a tela aberta,
   para calcular a área; não é enviada.
 - **Município escolhido**, para o aplicativo abrir nele da próxima vez.
+- **Grupo de cultivar e classe de solo** escolhidos na janela de plantio, para
+  a tela abrir com a mesma escolha.
+- **Caderno da safra:** os lançamentos de plantio, insumos, operações,
+  colheita e vendas. Ficam num arquivo na pasta do aplicativo e só saem do
+  celular se o produtor exportar a planilha (.csv) e escolher para onde
+  enviá-la.
+- **Leitura em voz alta e resumo para compartilhar.** O texto lido é entregue
+  ao mecanismo de voz do próprio Android, e o aplicativo não o envia a nenhum
+  servidor. O resumo em imagem ou PDF é gerado no celular e só sai dele pelo
+  compartilhamento, para onde o produtor escolher.
+- **Escolhas dos alertas** (o que avisar, a praça e o preço-alvo), o lugar da
+  previsão e o estado, para a conferência em segundo plano, e os avisos já
+  mostrados, para não repetir. Com todos os alertas desligados, nada é
+  conferido em segundo plano.
 - **Posição para a previsão do tempo**, se o produtor escolher "Minha
   localização": guardada já arredondada a cerca de 1 km, para a previsão abrir
   no mesmo lugar da próxima vez. Sai quando ele volta à sede do município ou
@@ -42,11 +56,13 @@ para o Google Drive nem passa para um celular novo na transferência de dados.
 
 | Dado | Para quê | Para onde |
 |---|---|---|
-| Nome do município escolhido | estimativa de produtividade, histórico, mapa, finanças | API do produto (servidor no Render) |
+| Nome do município escolhido e o estado | estimativa de produtividade, histórico, mapa, finanças, cotações das praças, janela de plantio | API do produto (servidor no Render) |
+| O idioma em que o aplicativo está (português ou inglês) | receber no mesmo idioma as frases que a API monta (preço, custo, janela de plantio, legenda do mapa) | API do produto |
 | Posição aproximada, arredondada a cerca de 1 km: a sede do município ou, se o produtor escolher "Minha localização", a posição do GPS | previsão do tempo e janela de pulverização | Open-Meteo (open-meteo.com) |
 | A mesma posição aproximada e, quando é a sede, o código IBGE do município | avisos meteorológicos do INMET para o lugar | API do produto, que consulta o INMET |
 | Nada além da própria consulta, ao abrir a aba Mapa | as bibliotecas que desenham o mapa (Leaflet, jQuery, Bootstrap) | servidores públicos de bibliotecas: cdn.jsdelivr.net, cdnjs.cloudflare.com, code.jquery.com e netdna.bootstrapcdn.com |
 | Nada além da própria consulta, uma vez por dia | saber se há versão nova do modelo de contagem de vagens e, se houver, baixá-la | API do produto e GitHub (raw.githubusercontent.com) |
+| Só com algum alerta ligado, a cada 3 horas, mesmo com o aplicativo fechado: a mesma posição aproximada (avisos e previsão) e o estado (cotação das praças) | conferir os alertas ligados (avisos do INMET, janela de pulverização, preço da saca) | API do produto e Open-Meteo, como acima |
 
 Como em qualquer acesso à Internet, os servidores que recebem essas
 requisições registram o endereço IP do aparelho. A API do produto usa a
@@ -66,6 +82,10 @@ celular; a previsão volta então à sede do município.
 - **Localização:** medir a área do talhão, achar o município mais próximo e,
   se o produtor pedir, a previsão do tempo no lugar dele. Só com o aplicativo
   aberto, e só depois de o produtor tocar no botão correspondente.
+- **Notificações:** mostrar os alertas que o produtor ligar. No Android 13 ou
+  mais novo, o aplicativo pede a autorização ao ligar o primeiro alerta.
+- **Iniciar com o celular:** voltar a agendar a conferência dos alertas depois
+  que o celular reinicia. Sem alerta ligado, nada é agendado.
 - **Internet:** buscar estimativas, cotações, previsão do tempo, avisos e
   versões novas do modelo de contagem de vagens. O modelo baixado só é usado
   depois de conferido (tamanho e resumo SHA-256 anunciados); as fotos

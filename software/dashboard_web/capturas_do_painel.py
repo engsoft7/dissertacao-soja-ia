@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Fotografa as três telas do painel num navegador de verdade.
+"""Fotografa as telas do painel num navegador de verdade.
 
 Par das capturas do aplicativo (CapturasDeTelaTest): sobe o painel com a base
 do produto, abre cada página da navegação principal e grava em PNG a área de
@@ -25,6 +25,7 @@ PAGINAS = {
     "Inteligência Territorial": "painel_territorial",
     "Análise Histórica": "painel_historico",
     "Viabilidade Financeira": "painel_viabilidade",
+    "Janela de plantio": "painel_plantio",
 }
 
 

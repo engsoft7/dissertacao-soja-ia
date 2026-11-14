@@ -1,5 +1,6 @@
 package com.agrointeligencia.app
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
@@ -23,6 +24,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
@@ -39,7 +42,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -208,7 +210,7 @@ private const val VALIDADE_PREVISAO_MS = 30 * 60 * 1000L
  * A última previsão de cada lugar fica guardada no aparelho: sem rede, a
  * tela mostra a última, com a hora em que foi obtida.
  */
-class EstadoTempo(private val prefs: SharedPreferences) {
+class EstadoTempo(private val prefs: SharedPreferences, private val nomeDoGps: String = "Sua localização") {
     private val gson = Gson()
     var lugar by mutableStateOf<LugarTempo?>(null)
         private set
@@ -230,7 +232,7 @@ class EstadoTempo(private val prefs: SharedPreferences) {
     private fun lerGps(): LugarTempo? {
         val lat = prefs.getFloat(PREF_TEMPO_GPS_LAT, Float.NaN)
         val lon = prefs.getFloat(PREF_TEMPO_GPS_LON, Float.NaN)
-        return if (lat.isNaN() || lon.isNaN()) null else LugarTempo("Sua localização", lat.toDouble(), lon.toDouble(), null)
+        return if (lat.isNaN() || lon.isNaN()) null else LugarTempo(nomeDoGps, lat.toDouble(), lon.toDouble(), null)
     }
 
     /** O lugar da previsão: o GPS, quando o produtor escolheu e já há posição; senão a sede do município. */
@@ -246,7 +248,7 @@ class EstadoTempo(private val prefs: SharedPreferences) {
     }
 
     fun usarPosicao(lat: Double, lon: Double) {
-        val l = LugarTempo("Sua localização", arredonda(lat), arredonda(lon), null)
+        val l = LugarTempo(nomeDoGps, arredonda(lat), arredonda(lon), null)
         gps = l
         usarGps = true
         prefs.edit().putBoolean(PREF_TEMPO_GPS, true)
@@ -299,38 +301,70 @@ class EstadoTempo(private val prefs: SharedPreferences) {
 
 // ── formatação ────────────────────────────────────────────────────────────
 
-private val PT = Locale("pt", "BR")
+// Os eventos e níveis do INMET que o app conhece, para o inglês; os outros
+// ficam como o INMET publica. Os riscos e as orientações vêm só em português.
+private val EVENTOS_INMET = mapOf(
+    "tempestade" to R.string.inmet_tempestade,
+    "chuvas intensas" to R.string.inmet_chuvas_intensas,
+    "acumulado de chuva" to R.string.inmet_acumulado_chuva,
+    "vendaval" to R.string.inmet_vendaval,
+    "baixa umidade" to R.string.inmet_baixa_umidade,
+    "onda de calor" to R.string.inmet_onda_calor,
+    "onda de frio" to R.string.inmet_onda_frio,
+    "declínio de temperatura" to R.string.inmet_declinio_temperatura,
+    "geada" to R.string.inmet_geada,
+    "granizo" to R.string.inmet_granizo,
+    "perigo potencial" to R.string.inmet_sev_perigo_potencial,
+    "perigo" to R.string.inmet_sev_perigo,
+    "grande perigo" to R.string.inmet_sev_grande_perigo,
+)
+
+/** O nome de um evento ou nível do INMET no idioma do app, ou como veio, se o app não o conhece. */
+fun nomeDoInmet(context: Context, nome: String): String =
+    EVENTOS_INMET[nome.trim().lowercase(java.util.Locale.ROOT)]?.let { context.getString(it) } ?: nome
+
+private fun localDe(context: Context) = context.resources.configuration.locales[0]
 
 /**
  * "2 avisos do INMET: tempestade". Dois avisos do mesmo evento, com outro nível
  * ou outro horário, apareciam como "tempestade, tempestade" no cartão do Resumo
  * (Teste Premium de 14/11/2026): o nome entra uma vez, e a contagem é a da lista.
  */
-fun resumoDosAvisos(avisos: List<AvisoMeteorologico>): String {
-    val nomes = avisos.map { (it.evento ?: "aviso").lowercase(PT) }.distinct()
-    return "${avisos.size} aviso${if (avisos.size > 1) "s" else ""} do INMET: " + nomes.joinToString(", ")
+fun resumoDosAvisos(context: Context, avisos: List<AvisoMeteorologico>): String {
+    val nomes = avisos.map { a -> a.evento?.let { nomeDoInmet(context, it) } ?: context.getString(R.string.tempo_aviso) }
+        .map { it.lowercase(localDe(context)) }.distinct()
+    return context.resources.getQuantityString(R.plurals.tempo_resumo_avisos, avisos.size, avisos.size,
+                                               nomes.joinToString(", "))
 }
-private val DIA_SEMANA = DateTimeFormatter.ofPattern("EEE dd/MM", PT)
-private val DATA_HORA = DateTimeFormatter.ofPattern("dd/MM 'às' HH:mm", PT)
 
 private fun graus(v: Double?) = v?.let { "${it.roundToInt()} °C" } ?: "–"
-private fun mm(v: Double) = if (v < 10) String.format(PT, "%.1f mm", v) else "${v.roundToInt()} mm"
-private fun hora(t: LocalDateTime) = "${t.hour}h"
+private fun mm(v: Double) = if (v < 10) String.format(LOCAL_NUMEROS, "%.1f mm", v) else "${v.roundToInt()} mm"
 
-private fun nomeDoDia(d: LocalDate, hoje: LocalDate): String = when (d) {
-    hoje -> "Hoje"
-    hoje.plusDays(1) -> "Amanhã"
-    else -> d.format(DIA_SEMANA).replaceFirstChar { it.uppercase() }.replace(".", "")
+/** A hora cheia: "7h" em português, "7:00" em inglês. */
+fun horaCurta(context: Context, t: LocalDateTime): String = context.getString(R.string.formato_hora, t.hour)
+
+private fun diaDaSemana(context: Context, d: LocalDate): String =
+    d.format(DateTimeFormatter.ofPattern(context.getString(R.string.tempo_formato_dia_semana), localDe(context)))
+        .replaceFirstChar { it.uppercase() }.replace(".", "")
+
+private fun nomeDoDia(context: Context, d: LocalDate, hoje: LocalDate): String = when (d) {
+    hoje -> context.getString(R.string.tempo_hoje)
+    hoje.plusDays(1) -> context.getString(R.string.tempo_amanha)
+    else -> diaDaSemana(context, d)
 }
 
-private fun quandoJanela(j: Janela, agora: LocalDateTime): String {
-    val dia = when (j.inicio.toLocalDate()) {
-        agora.toLocalDate() -> "hoje"
-        agora.toLocalDate().plusDays(1) -> "amanhã"
-        else -> j.inicio.format(DIA_SEMANA)
+private fun quandoJanela(context: Context, j: Janela, agora: LocalDateTime): String {
+    val ini = horaCurta(context, j.inicio)
+    val fim = horaCurta(context, j.fim)
+    return when (diaDaJanela(j, agora)) {
+        QuandoJanela.HOJE -> context.getString(R.string.tempo_janela_hoje, ini, fim)
+        QuandoJanela.AMANHA -> context.getString(R.string.tempo_janela_amanha, ini, fim)
+        QuandoJanela.OUTRO_DIA -> context.getString(R.string.tempo_janela_dia, diaDaSemana(context, j.inicio.toLocalDate()), ini, fim)
     }
-    return "$dia, das ${hora(j.inicio)} às ${hora(j.fim)}"
 }
+
+/** O motivo de uma hora não ser boa, com os limites da conta (TempoCalculo.kt). */
+fun textoDoMotivo(context: Context, m: MotivoHora): String = context.getString(m.texto, *m.limites.toTypedArray())
 
 fun iconeTempo(codigo: Int?, dia: Boolean = true): ImageVector = when (codigo) {
     0, 1 -> if (dia) Icons.Filled.WbSunny else Icons.Filled.NightsStay
@@ -351,11 +385,11 @@ private fun corDoNivel(n: NivelJanela): Color {
     }
 }
 
-private fun nomeDoNivel(n: NivelJanela) = when (n) {
-    NivelJanela.BOA -> "boa"
-    NivelJanela.ATENCAO -> "atenção"
-    NivelJanela.EVITAR -> "evitar"
-}
+private fun nomeDoNivel(context: Context, n: NivelJanela) = context.getString(when (n) {
+    NivelJanela.BOA -> R.string.nivel_boa
+    NivelJanela.ATENCAO -> R.string.nivel_atencao
+    NivelJanela.EVITAR -> R.string.nivel_evitar
+})
 
 /** Instante "agora" no fuso do lugar da previsão. */
 fun agoraNoLugar(p: PrevisaoTempo?): LocalDateTime =
@@ -371,6 +405,7 @@ fun TempoResumoCard(estado: EstadoTempo, aoAbrir: () -> Unit) {
     val atual = p?.current
     val horaAgora = p?.hourly?.let { horasDePulverizacao(it, agora, 1).firstOrNull() }
     val avisos = estado.avisos?.avisos.orEmpty()
+    val context = LocalContext.current
     Card(
         onClick = aoAbrir,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -382,28 +417,28 @@ fun TempoResumoCard(estado: EstadoTempo, aoAbrir: () -> Unit) {
                  tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("Tempo em ${estado.lugar?.nome ?: "…"}", fontSize = 12.sp,
+                Text(stringResource(R.string.tempo_em, estado.lugar?.nome ?: "…"), fontSize = 12.sp,
                      color = MaterialTheme.colorScheme.onSurfaceVariant)
                 when {
-                    atual != null -> Text("${graus(atual.temperature_2m)} · ${descricaoTempo(atual.weather_code)}",
+                    atual != null -> Text("${graus(atual.temperature_2m)} · ${stringResource(descricaoTempo(atual.weather_code))}",
                                           fontWeight = FontWeight.SemiBold, fontSize = 16.sp,
                                           color = MaterialTheme.colorScheme.onSurface)
-                    estado.carregando -> Text("Carregando a previsão do tempo…", fontSize = 14.sp,
+                    estado.carregando -> Text(stringResource(R.string.tempo_carregando), fontSize = 14.sp,
                                               color = MaterialTheme.colorScheme.onSurface)
-                    else -> Text("Previsão indisponível. Toque para abrir e tentar de novo.", fontSize = 14.sp,
+                    else -> Text(stringResource(R.string.tempo_indisponivel_toque), fontSize = 14.sp,
                                  color = MaterialTheme.colorScheme.onSurface)
                 }
                 horaAgora?.let {
-                    Text("Pulverizar agora: ${nomeDoNivel(it.nivel)}" +
-                         (it.motivos.firstOrNull()?.let { m -> " (${m.substringBefore(':')})" } ?: ""),
+                    Text(stringResource(R.string.tempo_pulverizar_agora, nomeDoNivel(context, it.nivel)) +
+                         (it.motivos.firstOrNull()?.let { m -> " (${textoDoMotivo(context, m).substringBefore(':')})" } ?: ""),
                          fontSize = 13.sp, color = corDoNivel(it.nivel), fontWeight = FontWeight.SemiBold)
                 }
                 if (avisos.isNotEmpty()) {
-                    Text(resumoDosAvisos(avisos),
+                    Text(resumoDosAvisos(context, avisos),
                          fontSize = 13.sp, color = corDoNivel(NivelJanela.ATENCAO), fontWeight = FontWeight.SemiBold)
                 }
             }
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Abrir a previsão do tempo",
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.tempo_abrir),
                  tint = MaterialTheme.colorScheme.primary)
         }
     }
@@ -413,7 +448,7 @@ fun TempoResumoCard(estado: EstadoTempo, aoAbrir: () -> Unit) {
 
 /** A tela com rede e GPS; o desenho em si é [TempoConteudo]. */
 @Composable
-fun TempoTela(estado: EstadoTempo, municipio: String?, aoVoltar: () -> Unit) {
+fun TempoTela(estado: EstadoTempo, municipio: String?, ouvir: @Composable () -> Unit = {}, aoVoltar: () -> Unit) {
     val lugar = estado.lugarPara(municipio)
     // A carga ao mudar de lugar é feita no AgroDashboard, que serve também o
     // cartão do Resumo; aqui só o botão de atualizar.
@@ -430,6 +465,8 @@ fun TempoTela(estado: EstadoTempo, municipio: String?, aoVoltar: () -> Unit) {
         aoVoltar = aoVoltar
     ) {
         EscolhaDoLugar(estado, municipio) { atualizar++ }
+        // Ler em voz alta (Fala.kt), quando o AgroDashboard o oferece.
+        ouvir()
     }
 }
 
@@ -439,7 +476,7 @@ private fun EscolhaDoLugar(estado: EstadoTempo, municipio: String?, aoAtualizar:
     var mensagem by remember { mutableStateOf<String?>(null) }
     // A leitura da posição é a mesma da escolha do município (Localizacao.kt).
     val leitor = rememberLeitorDePosicao(
-        semPermissao = "Sem a permissão de localização, a previsão fica na sede do município.",
+        semPermissao = stringResource(R.string.tempo_sem_permissao),
         aoFalhar = { mensagem = it }
     ) { lat, lon ->
         mensagem = null
@@ -448,17 +485,17 @@ private fun EscolhaDoLugar(estado: EstadoTempo, municipio: String?, aoAtualizar:
 
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         FilterChip(selected = !estado.usarGps, onClick = { estado.usarMunicipio() },
-                   label = { Text(municipio ?: "Município", maxLines = 1) },
+                   label = { Text(municipio ?: stringResource(R.string.mun_rotulo), maxLines = 1) },
                    leadingIcon = { Icon(Icons.Filled.LocationCity, contentDescription = null, modifier = Modifier.size(18.dp)) },
                    modifier = Modifier.weight(1f, fill = false))
         FilterChip(selected = estado.usarGps, onClick = { mensagem = null; leitor.ler() },
-                   label = { Text("Minha localização", maxLines = 1) },
+                   label = { Text(stringResource(R.string.tempo_minha_localizacao), maxLines = 1) },
                    leadingIcon = { Icon(Icons.Filled.MyLocation, contentDescription = null, modifier = Modifier.size(18.dp)) })
-        IconButton(onClick = aoAtualizar) { Icon(Icons.Filled.Refresh, contentDescription = "Atualizar a previsão") }
+        IconButton(onClick = aoAtualizar) { Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.tempo_atualizar)) }
     }
     if (leitor.procurando) {
         LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
-        Text("Procurando sua posição…", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.mun_procurando), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     mensagem?.let { Text(it, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
 }
@@ -482,13 +519,15 @@ fun TempoConteudo(
     val secundaria = MaterialTheme.colorScheme.onSurfaceVariant
     Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = aoVoltar) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar ao Resumo") }
-            Text("Tempo na lavoura", fontWeight = FontWeight.Bold, fontSize = 20.sp,
+            IconButton(onClick = aoVoltar) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.voltar_ao_resumo))
+            }
+            Text(stringResource(R.string.tempo_titulo), fontWeight = FontWeight.Bold, fontSize = 20.sp,
                  color = MaterialTheme.colorScheme.onBackground)
         }
         controles()
         lugar?.let {
-            Text(if (it.geocode != null) "${it.nome}, na sede do município" else "${it.nome}, arredondada a cerca de 1 km",
+            Text(stringResource(if (it.geocode != null) R.string.tempo_na_sede else R.string.tempo_arredondada, it.nome),
                  fontSize = 12.sp, color = secundaria)
         }
 
@@ -496,11 +535,11 @@ fun TempoConteudo(
             previsao == null && carregando ->
                 CircularProgressIndicator(modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally))
             previsao == null ->
-                Text(if (falhou) "Não foi possível baixar a previsão. Confira a conexão e toque em atualizar."
-                     else "Escolha um município para ver a previsão.", fontSize = 14.sp, color = secundaria)
+                Text(stringResource(if (falhou) R.string.tempo_falhou else R.string.tempo_escolha_municipio),
+                     fontSize = 14.sp, color = secundaria)
             else -> {
                 if (falhou) {
-                    Text("Sem conexão: mostrando a última previsão baixada.", fontSize = 12.sp,
+                    Text(stringResource(R.string.tempo_sem_conexao), fontSize = 12.sp,
                          color = corDoNivel(NivelJanela.ATENCAO), fontWeight = FontWeight.SemiBold)
                 }
                 val listaDias = previsao.daily?.let { dias(it) }.orEmpty()
@@ -515,13 +554,14 @@ fun TempoConteudo(
             }
         }
 
+        val formatoQuando = stringResource(R.string.formato_data_hora)
         val quando = obtidaEm?.let {
-            java.time.Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DATA_HORA)
+            java.time.Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern(formatoQuando, localDe(LocalContext.current)))
         }
-        Text("Previsão: Open-Meteo.com (CC BY 4.0), a partir de modelos meteorológicos" +
-             (quando?.let { "; obtida em $it" } ?: "") + ". Avisos: INMET.",
+        Text(quando?.let { stringResource(R.string.tempo_fonte_obtida, it) } ?: stringResource(R.string.tempo_fonte),
              fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
-        Text("A previsão do tempo não entra na estimativa de produtividade.",
+        Text(stringResource(R.string.tempo_nao_entra),
              fontSize = 12.sp, color = secundaria, lineHeight = 16.sp, fontStyle = FontStyle.Italic)
     }
 }
@@ -555,7 +595,7 @@ private fun Medida(rotulo: String, valor: String, modifier: Modifier = Modifier)
 
 @Composable
 private fun CartaoAgora(a: TempoAtual, hoje: DiaTempo?) {
-    Cartao("Agora", Icons.Filled.Thermostat) {
+    Cartao(stringResource(R.string.tempo_agora), Icons.Filled.Thermostat) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(iconeTempo(a.weather_code, a.is_day != 0), contentDescription = null,
                  tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(44.dp))
@@ -563,38 +603,50 @@ private fun CartaoAgora(a: TempoAtual, hoje: DiaTempo?) {
             Column {
                 Text(graus(a.temperature_2m), fontSize = 32.sp, fontWeight = FontWeight.Bold,
                      color = MaterialTheme.colorScheme.onSurface)
-                Text(descricaoTempo(a.weather_code) + (a.apparent_temperature?.let { " · sensação de ${graus(it)}" } ?: ""),
+                Text(stringResource(descricaoTempo(a.weather_code)) +
+                     (a.apparent_temperature?.let { " · " + stringResource(R.string.tempo_sensacao, graus(it)) } ?: ""),
                      fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         Spacer(Modifier.height(10.dp))
         Row(Modifier.fillMaxWidth()) {
-            Medida("Umidade", a.relative_humidity_2m?.let { "${it.roundToInt()}%" } ?: "–", Modifier.weight(1f))
-            Medida("Vento", a.wind_speed_10m?.let { "${it.roundToInt()} km/h ${direcaoVento(a.wind_direction_10m)}".trim() } ?: "–",
+            val direcao = direcaoVento(a.wind_direction_10m)?.let { stringResource(it) } ?: ""
+            Medida(stringResource(R.string.tempo_umidade), a.relative_humidity_2m?.let { "${it.roundToInt()}%" } ?: "–",
                    Modifier.weight(1f))
-            Medida("Rajadas", a.wind_gusts_10m?.let { "${it.roundToInt()} km/h" } ?: "–", Modifier.weight(1f))
+            Medida(stringResource(R.string.tempo_vento), a.wind_speed_10m?.let { "${it.roundToInt()} km/h $direcao".trim() } ?: "–",
+                   Modifier.weight(1f))
+            Medida(stringResource(R.string.tempo_rajadas), a.wind_gusts_10m?.let { "${it.roundToInt()} km/h" } ?: "–",
+                   Modifier.weight(1f))
         }
         hoje?.let { d ->
             Spacer(Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth()) {
-                Medida("Hoje", "${graus(d.minima)} a ${graus(d.maxima)}", Modifier.weight(1f))
-                Medida("UV máximo", d.uv?.let { "${it.roundToInt()} (${categoriaUv(it)})" } ?: "–", Modifier.weight(1f))
-                Medida("Sol", if (d.nascer != null && d.por != null) "${d.nascer} – ${d.por}" else "–", Modifier.weight(1f))
+                Medida(stringResource(R.string.tempo_hoje), stringResource(R.string.tempo_faixa, graus(d.minima), graus(d.maxima)),
+                       Modifier.weight(1f))
+                val uv = d.uv?.let { u -> "${u.roundToInt()} (${categoriaUv(u)?.let { stringResource(it) } ?: ""})" } ?: "–"
+                Medida(stringResource(R.string.tempo_uv_maximo), uv, Modifier.weight(1f))
+                Medida(stringResource(R.string.tempo_sol), if (d.nascer != null && d.por != null) "${d.nascer} – ${d.por}" else "–",
+                       Modifier.weight(1f))
             }
         }
         // Só o que muda a leitura: a altura do vento e, quando é o caso, o UV.
-        Text("Vento a 10 m de altura." +
-             (if ((hoje?.uv ?: 0.0) >= 8.0) " UV muito alto: proteja quem trabalha ao sol." else ""),
+        Text(stringResource(R.string.tempo_vento_10m) +
+             (if ((hoje?.uv ?: 0.0) >= 8.0) " " + stringResource(R.string.tempo_uv_alerta) else ""),
              fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp,
              modifier = Modifier.padding(top = 8.dp))
     }
 }
 
-/** "2026-10-26 00:00", como o INMET publica, para "26/10 às 00:00". */
+/**
+ * "2026-10-26 00:00", como o INMET publica, para "26/10 às 00:00" (em inglês,
+ * "Oct 26 at 00:00"), no formato que Formatos guardou do idioma.
+ */
 internal fun dataDoAviso(t: String?): String {
     val m = Regex("""(\d{4})-(\d{2})-(\d{2})[ T](\d{2}:\d{2})""").find(t ?: "") ?: return t ?: "?"
-    val (_, mes, dia, hm) = m.destructured
-    return "$dia/$mes às $hm"
+    val (ano, mes, dia, hm) = m.destructured
+    return runCatching {
+        LocalDateTime.parse("$ano-$mes-${dia}T$hm").format(DateTimeFormatter.ofPattern(Formatos.dataHora, Formatos.locale))
+    }.getOrDefault(t ?: "?")
 }
 
 private fun corDoAviso(cor: String?, padrao: Color): Color =
@@ -605,9 +657,9 @@ internal fun CartaoAvisos(avisos: AvisosResponse?) {
     val lista = avisos?.avisos.orEmpty()
     if (lista.isEmpty()) {
         val texto = when {
-            avisos == null -> "Consultando os avisos do INMET…"
-            !avisos.disponivel -> "Não foi possível consultar os avisos do INMET agora."
-            else -> "Nenhum aviso meteorológico do INMET para este lugar."
+            avisos == null -> stringResource(R.string.tempo_avisos_consultando)
+            !avisos.disponivel -> stringResource(R.string.tempo_avisos_falhou)
+            else -> stringResource(R.string.tempo_avisos_nenhum)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(if (avisos?.disponivel == true) Icons.Filled.CheckCircle else Icons.Filled.Warning, contentDescription = null,
@@ -619,7 +671,8 @@ internal fun CartaoAvisos(avisos: AvisosResponse?) {
         return
     }
     val padrao = corDoNivel(NivelJanela.ATENCAO)
-    Cartao("Avisos do INMET", Icons.Filled.Warning) {
+    val context = LocalContext.current
+    Cartao(stringResource(R.string.tempo_avisos_titulo), Icons.Filled.Warning) {
         lista.forEachIndexed { i, a ->
             var aberto by remember(a.id) { mutableStateOf(false) }
             val cor = corDoAviso(a.cor, padrao)
@@ -627,16 +680,20 @@ internal fun CartaoAvisos(avisos: AvisosResponse?) {
                 Box(Modifier.width(5.dp).fillMaxHeight().background(cor, RoundedCornerShape(3.dp)))
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
-                    Text("${a.evento ?: "Aviso"} · ${a.severidade ?: ""}".trimEnd(' ', '·'), fontWeight = FontWeight.SemiBold,
+                    val evento = a.evento?.let { nomeDoInmet(context, it) } ?: stringResource(R.string.tempo_aviso)
+                        .replaceFirstChar { it.uppercase() }
+                    Text("$evento · ${a.severidade?.let { nomeDoInmet(context, it) } ?: ""}".trimEnd(' ', '·'),
+                         fontWeight = FontWeight.SemiBold,
                          fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
-                    Text("De ${dataDoAviso(a.inicio)} a ${dataDoAviso(a.fim)}", fontSize = 12.sp,
+                    Text(stringResource(R.string.tempo_aviso_periodo, dataDoAviso(a.inicio), dataDoAviso(a.fim)), fontSize = 12.sp,
                          color = MaterialTheme.colorScheme.onSurfaceVariant)
                     a.riscos?.firstOrNull()?.let {
                         Text(it, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface, lineHeight = 16.sp)
                     }
                     if (!a.instrucoes.isNullOrEmpty()) {
                         TextButton(onClick = { aberto = !aberto }, contentPadding = PaddingValues(0.dp)) {
-                            Text(if (aberto) "Ocultar as orientações" else "Ver as orientações", fontSize = 12.sp)
+                            Text(stringResource(if (aberto) R.string.tempo_ocultar_orientacoes else R.string.tempo_ver_orientacoes),
+                                 fontSize = 12.sp)
                         }
                         if (aberto) a.instrucoes.forEach {
                             Text("• $it", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
@@ -656,26 +713,26 @@ private fun CartaoPulverizacao(horas: List<HoraPulverizacao>, agora: LocalDateTi
     val janela = proximaJanela(horas)
     val corTexto = MaterialTheme.colorScheme.onSurfaceVariant
     val cores = NivelJanela.entries.associateWith { corDoNivel(it) }
-    Cartao("Janela de pulverização", Icons.Filled.Agriculture) {
+    val context = LocalContext.current
+    Cartao(stringResource(R.string.tempo_janela_titulo), Icons.Filled.Agriculture) {
         val primeira = horas.first()
-        Text("Agora: ${nomeDoNivel(primeira.nivel)}", fontSize = 18.sp, fontWeight = FontWeight.Bold,
-             color = cores.getValue(primeira.nivel))
+        Text(stringResource(R.string.tempo_agora_nivel, nomeDoNivel(context, primeira.nivel)), fontSize = 18.sp,
+             fontWeight = FontWeight.Bold, color = cores.getValue(primeira.nivel))
         if (primeira.motivos.isNotEmpty()) {
-            Text(primeira.motivos.joinToString("; "), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface,
-                 lineHeight = 17.sp)
+            Text(primeira.motivos.joinToString("; ") { textoDoMotivo(context, it) }, fontSize = 13.sp,
+                 color = MaterialTheme.colorScheme.onSurface, lineHeight = 17.sp)
         }
-        Text(janela?.let { "Próxima janela boa: ${quandoJanela(it, agora)}." }
-                 ?: "Nenhuma janela boa de 2 horas ou mais nas próximas ${horas.size} horas.",
+        Text(janela?.let { stringResource(R.string.tempo_proxima_janela, quandoJanela(context, it, agora)) }
+                 ?: stringResource(R.string.tempo_sem_janela, horas.size),
              fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface,
              modifier = Modifier.padding(top = 6.dp))
 
         Canvas(
             modifier = Modifier.fillMaxWidth().height(48.dp).padding(top = 10.dp)
                 .semantics {
-                    contentDescription = "Condição para pulverizar nas próximas ${horas.size} horas: " +
-                        "${horas.count { it.nivel == NivelJanela.BOA }} boas, " +
-                        "${horas.count { it.nivel == NivelJanela.ATENCAO }} de atenção e " +
-                        "${horas.count { it.nivel == NivelJanela.EVITAR }} a evitar."
+                    contentDescription = context.getString(R.string.tempo_janela_descricao, horas.size,
+                        horas.count { it.nivel == NivelJanela.BOA }, horas.count { it.nivel == NivelJanela.ATENCAO },
+                        horas.count { it.nivel == NivelJanela.EVITAR })
                 }
                 .pointerInput(horas) {
                     detectTapGestures { pos ->
@@ -690,7 +747,7 @@ private fun CartaoPulverizacao(horas: List<HoraPulverizacao>, agora: LocalDateTi
                 drawRect(color = cores.getValue(h.nivel).copy(alpha = if (i == tocada) 1f else 0.75f),
                          topLeft = Offset(i * passo + 1, 0f), size = Size(passo - 2, altura))
                 if (i % 3 == 0) {
-                    val r = hora(h.hora)
+                    val r = horaCurta(context, h.hora)
                     drawContext.canvas.nativeCanvas.drawText(r, (i * passo).coerceAtMost(size.width - paint.measureText(r)),
                                                              altura + 14.dp.toPx(), paint)
                 }
@@ -698,20 +755,21 @@ private fun CartaoPulverizacao(horas: List<HoraPulverizacao>, agora: LocalDateTi
             drawRect(color = corTexto, topLeft = Offset(tocada * passo, 0f), size = Size(passo, altura),
                      style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx()))
         }
-        Text("${nomeDoDia(sel.hora.toLocalDate(), agora.toLocalDate())}, ${hora(sel.hora)}: ${nomeDoNivel(sel.nivel)} · " +
-             "${graus(sel.temperatura)}, umidade ${sel.umidade?.let { "${it.roundToInt()}%" } ?: "–"}, " +
-             "vento ${sel.vento2m?.let { "${it.roundToInt()} km/h" } ?: "–"} na lavoura" +
-             (sel.chanceChuva?.let { ", chuva ${it.roundToInt()}%" } ?: ""),
+        Text(stringResource(R.string.tempo_hora_selecionada, nomeDoDia(context, sel.hora.toLocalDate(), agora.toLocalDate()),
+                            horaCurta(context, sel.hora), nomeDoNivel(context, sel.nivel), graus(sel.temperatura),
+                            sel.umidade?.let { "${it.roundToInt()}%" } ?: "–", sel.vento2m?.let { "${it.roundToInt()} km/h" } ?: "–") +
+             (sel.chanceChuva?.let { ", " + stringResource(R.string.tempo_chuva_pct, it.roundToInt()) } ?: ""),
              fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface, lineHeight = 16.sp)
         if (sel !== primeira && sel.motivos.isNotEmpty()) {
-            Text(sel.motivos.joinToString("; "), fontSize = 12.sp, color = corTexto, lineHeight = 16.sp)
+            Text(sel.motivos.joinToString("; ") { textoDoMotivo(context, it) }, fontSize = 12.sp, color = corTexto,
+                 lineHeight = 16.sp)
         }
         Row(modifier = Modifier.padding(top = 4.dp)) {
             NivelJanela.entries.forEach { n ->
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 14.dp)) {
                     Box(Modifier.size(12.dp).background(cores.getValue(n), RoundedCornerShape(2.dp)))
                     Spacer(Modifier.width(4.dp))
-                    Text(nomeDoNivel(n).replaceFirstChar { it.uppercase() }, fontSize = 12.sp, color = corTexto)
+                    Text(nomeDoNivel(context, n).replaceFirstChar { it.uppercase() }, fontSize = 12.sp, color = corTexto)
                 }
             }
         }
@@ -719,34 +777,35 @@ private fun CartaoPulverizacao(horas: List<HoraPulverizacao>, agora: LocalDateTi
         // Quanto a janela erra, medido contra 12 estações do INMET de nov/2025 a
         // abr/2026 (pesquisa/10_trabalhos_futuros/04_valida_tempo_inmet.py):
         // das horas previstas boas, 26% eram boas, 63% de atenção e 10,6% a evitar.
-        Text("Embrapa Soja: até 30 °C, umidade acima de 60%, vento de 3 a 8 km/h e sem chuva nas 2 h " +
-             "seguintes. Toque numa hora para ver os números. Conferida com 12 estações do INMET, só 1 " +
-             "em cada 4 horas previstas boas foi boa de fato (em geral o vento era mais fraco que o " +
-             "previsto) e 1 em 10 era para evitar: confira vento e umidade no local e a bula antes de aplicar.",
+        Text(stringResource(R.string.tempo_embrapa, TEMPERATURA_MAXIMA.toInt(), UMIDADE_MINIMA.toInt(), VENTO_MINIMO.toInt(),
+                            VENTO_IDEAL_MAXIMO.toInt(), HORAS_SEM_CHUVA),
              fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 8.dp))
     }
 }
 
 @Composable
 private fun CartaoSeteDias(lista: List<DiaTempo>, hoje: LocalDate) {
-    Cartao("Próximos dias", Icons.Filled.DateRange) {
+    val context = LocalContext.current
+    Cartao(stringResource(R.string.tempo_proximos_dias), Icons.Filled.DateRange) {
         lista.forEachIndexed { i, d ->
             if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-                Text(nomeDoDia(d.data, hoje), fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
+                Text(nomeDoDia(context, d.data, hoje), fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
                      color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.width(78.dp))
-                Icon(iconeTempo(d.codigo), contentDescription = descricaoTempo(d.codigo),
+                val descricao = stringResource(descricaoTempo(d.codigo))
+                Icon(iconeTempo(d.codigo), contentDescription = descricao,
                      tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
                 Column(Modifier.weight(1f)) {
-                    Text("${graus(d.minima)} a ${graus(d.maxima)}", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface)
-                    Text(descricaoTempo(d.codigo) + (d.ventoMaximo?.let { " · vento até ${it.roundToInt()} km/h" } ?: ""),
+                    Text(stringResource(R.string.tempo_faixa, graus(d.minima), graus(d.maxima)), fontSize = 13.sp,
+                         color = MaterialTheme.colorScheme.onSurface)
+                    Text(descricao + (d.ventoMaximo?.let { " · " + stringResource(R.string.tempo_vento_ate, it.roundToInt()) } ?: ""),
                          fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(d.chuva?.let { mm(it) } ?: "–", fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
                          color = MaterialTheme.colorScheme.onSurface)
-                    Text(d.chance?.let { "chance ${it.roundToInt()}%" } ?: "", fontSize = 11.sp,
+                    Text(d.chance?.let { stringResource(R.string.tempo_chance, it.roundToInt()) } ?: "", fontSize = 11.sp,
                          color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
@@ -761,21 +820,24 @@ private fun CartaoChuva(lista: List<DiaTempo>, hoje: LocalDate) {
     val corChuva = if (escuro) Color(0xFF58A6FF) else Color(0xFF1D4ED8)
     val corTexto = MaterialTheme.colorScheme.onSurfaceVariant
     val corGrade = MaterialTheme.colorScheme.outlineVariant
-    Cartao("Chuva e evapotranspiração", Icons.Filled.WaterDrop) {
+    val context = LocalContext.current
+    val formatoRotulo = DateTimeFormatter.ofPattern(stringResource(R.string.tempo_formato_rotulo_dia), localDe(context))
+    val rotuloHoje = stringResource(R.string.tempo_rotulo_hoje)
+    Cartao(stringResource(R.string.tempo_chuva_titulo), Icons.Filled.WaterDrop) {
         if (b.diasPassados > 0) {
             val sinal = if (b.saldo >= 0) "+" else "−"
-            Text("Últimos ${b.diasPassados} dias: ${mm(b.chuvaPassada)} de chuva e ${mm(b.et0Passada)} de " +
-                 "evapotranspiração de referência (saldo $sinal${mm(kotlin.math.abs(b.saldo))}).",
+            Text(stringResource(R.string.tempo_chuva_passada, b.diasPassados, mm(b.chuvaPassada), mm(b.et0Passada),
+                                sinal + mm(kotlin.math.abs(b.saldo))),
                  fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface, lineHeight = 17.sp)
         }
-        Text("Próximos ${b.diasPrevistos} dias: ${mm(b.chuvaPrevista)} previstos.", fontSize = 13.sp,
+        Text(stringResource(R.string.tempo_chuva_prevista, b.diasPrevistos, mm(b.chuvaPrevista)), fontSize = 13.sp,
              color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(top = 2.dp))
         val maximo = (lista.maxOfOrNull { it.chuva ?: 0.0 } ?: 0.0).coerceAtLeast(5.0)
         Canvas(
             modifier = Modifier.fillMaxWidth().height(110.dp).padding(top = 10.dp)
                 .semantics {
-                    contentDescription = "Chuva por dia, ${b.diasPassados} dias passados e ${b.diasPrevistos} previstos; " +
-                        "maior valor ${mm(lista.maxOfOrNull { it.chuva ?: 0.0 } ?: 0.0)}."
+                    contentDescription = context.getString(R.string.tempo_chuva_descricao, b.diasPassados, b.diasPrevistos,
+                                                           mm(lista.maxOfOrNull { it.chuva ?: 0.0 } ?: 0.0))
                 }
         ) {
             val padY = 18.dp.toPx()
@@ -790,12 +852,12 @@ private fun CartaoChuva(lista: List<DiaTempo>, hoje: LocalDate) {
                 drawRect(color = corChuva.copy(alpha = if (passado) 0.45f else 1f),
                          topLeft = Offset(i * passo + passo * 0.2f, h - alt), size = Size(passo * 0.6f, alt))
                 if (v >= 0.5) {
-                    val r = if (v < 10) String.format(PT, "%.1f", v) else "${v.roundToInt()}"
+                    val r = if (v < 10) String.format(LOCAL_NUMEROS, "%.1f", v) else "${v.roundToInt()}"
                     drawContext.canvas.nativeCanvas.drawText(r, i * passo + (passo - paint.measureText(r)) / 2,
                                                              h - alt - 3.dp.toPx(), paint)
                 }
                 if (d.data == hoje || i == 0 || i == lista.size - 1) {
-                    val r = if (d.data == hoje) "hoje" else "${d.data.dayOfMonth}/${d.data.monthValue}"
+                    val r = if (d.data == hoje) rotuloHoje else d.data.format(formatoRotulo)
                     drawContext.canvas.nativeCanvas.drawText(
                         r, (i * passo + (passo - paint.measureText(r)) / 2).coerceIn(0f, size.width - paint.measureText(r)),
                         h + 14.dp.toPx(), paint)
@@ -807,7 +869,7 @@ private fun CartaoChuva(lista: List<DiaTempo>, hoje: LocalDate) {
                 }
             }
         }
-        Text("Barras claras: chuva estimada nos dias passados (não medida); escuras: prevista.",
+        Text(stringResource(R.string.tempo_chuva_legenda),
              fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 6.dp))
     }
 }

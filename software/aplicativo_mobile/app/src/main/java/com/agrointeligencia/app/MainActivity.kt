@@ -64,6 +64,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.lazy.rememberLazyListState
 import kotlinx.coroutines.flow.first
 import androidx.lifecycle.Lifecycle
@@ -110,6 +111,8 @@ fun esquemaAgro(isDark: Boolean): ColorScheme = if (isDark) {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Números no formato do idioma do app (Comum.kt).
+        Formatos.doIdioma(this)
         setContent {
             val isDark = isSystemInDarkTheme()
             val colors = esquemaAgro(isDark)
@@ -132,7 +135,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AgroDashboard()
+                    // A notificação de um alerta abre a aba do assunto (Alertas.kt).
+                    AgroDashboard(abaInicial = intent?.getIntExtra(Notificacoes.EXTRA_ABA, 0) ?: 0)
                 }
             }
         }
@@ -168,7 +172,7 @@ fun temRede(context: Context): Boolean {
 }
 
 @Composable
-fun AgroDashboard() {
+fun AgroDashboard(abaInicial: Int = 0) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -197,9 +201,24 @@ fun AgroDashboard() {
     var errorMsg by remember { mutableStateOf<String?>(null) }
     // Salvável: a câmera da Estimativa no campo pode levar o Android a
     // encerrar o app, e na volta ele precisa reabrir na mesma tela.
-    var currentTab by rememberSaveable { mutableStateOf(0) }
+    var currentTab by rememberSaveable {
+        mutableStateOf(abaInicial.takeIf { it in setOf(Notificacoes.ABA_MERCADO, Notificacoes.ABA_TEMPO) } ?: 0)
+    }
     var isOfflineMode by remember { mutableStateOf(false) }
     var mostrarLista by rememberSaveable { mutableStateOf(false) }
+    // A escolha entre imagem e PDF para compartilhar o resumo (Relatorio.kt).
+    var mostrarCompartilhar by remember { mutableStateOf(false) }
+    // A voz do Android (Fala.kt), criada no primeiro toque em "Ouvir" e
+    // encerrada com a tela; a leitura para ao trocar de aba.
+    var leitor by remember { mutableStateOf<Leitor?>(null) }
+    DisposableEffect(Unit) { onDispose { leitor?.encerra() } }
+    LaunchedEffect(currentTab) { leitor?.para() }
+    fun ouve(texto: String?) {
+        val l = leitor
+        if (l?.falando == true) { l.para(); return }
+        if (texto == null) return
+        (l ?: Leitor(context).also { leitor = it }).fala(texto)
+    }
     // Aumenta a cada "atualizar" e refaz a busca da previsão do município.
     var recarga by remember { mutableStateOf(0) }
     // Mercado de hoje (praças do Pará e estimativa), um só para o app inteiro:
@@ -231,10 +250,26 @@ fun AgroDashboard() {
 
     // Previsão do tempo (Tempo.kt): vem do Open-Meteo, e não da API, e por
     // isso carrega mesmo com a API dormindo. Serve o cartão do Resumo e a tela.
-    val tempo = remember { EstadoTempo(sharedPrefs) }
+    val nomeDoGps = stringResource(R.string.tempo_sua_localizacao)
+    val tempo = remember { EstadoTempo(sharedPrefs, nomeDoGps) }
     LaunchedEffect(sedes) { tempo.sedes = sedes }
     val lugarTempo = tempo.lugarPara(selectedMunicipio)
     LaunchedEffect(lugarTempo) { lugarTempo?.let { tempo.carrega(it) } }
+
+    // Alertas (Alertas.kt): o lugar da previsão e o estado, para a conferência
+    // em segundo plano, que não abre a tela; e a agenda refeita a cada abertura
+    // (com tudo desligado, nada fica agendado).
+    LaunchedEffect(lugarTempo, uf) {
+        Alertas.guardaContexto(sharedPrefs, lugarTempo, uf)
+        Alertas.atualizaAgenda(context, sharedPrefs)
+    }
+
+    // Caderno da safra (Caderno.kt): os lançamentos do produtor, só no celular.
+    val caderno = remember { EstadoCaderno(context.applicationContext) }
+
+    // Janela de plantio (Plantio.kt): calendário da portaria e ZARC do município.
+    val plantio = remember { EstadoPlantio(sharedPrefs) }
+    LaunchedEffect(selectedMunicipio, uf) { selectedMunicipio?.let { plantio.carrega(it, uf) } }
 
     // Mensagens curtas na barra de baixo; o TalkBack as lê em voz alta.
     fun avisar(msg: String) {
@@ -242,6 +277,11 @@ fun AgroDashboard() {
             avisos.currentSnackbarData?.dismiss()
             avisos.showSnackbar(msg)
         }
+    }
+
+    // Sem a voz do Android no aparelho, o botão "Ouvir" avisa em vez de calar.
+    LaunchedEffect(leitor?.indisponivel) {
+        if (leitor?.indisponivel == true) avisar(context.getString(R.string.fala_indisponivel))
     }
 
     fun escolherMunicipio(mun: String) {
@@ -267,17 +307,17 @@ fun AgroDashboard() {
     // GPS para o município: a sede mais próxima entre os da lista, calculada
     // no celular. A posição não é guardada nem enviada.
     val leitorMunicipio = rememberLeitorDePosicao(
-        semPermissao = "Sem a permissão de localização, escolha o município na lista.",
+        semPermissao = stringResource(R.string.erro_sem_permissao_localizacao_lista),
         aoFalhar = { avisar(it) }
     ) { lat, lon ->
         val candidatos = municipios.ifEmpty { sedes.keys.toList() }
         val proximo = municipioMaisProximo(lat, lon, candidatos, sedes)
         if (proximo == null) {
-            avisar("Não foi possível achar um município da lista perto de você. Escolha na lista.")
+            avisar(context.getString(R.string.erro_municipio_perto))
         } else {
             escolherMunicipio(proximo.nome)
             mostrarLista = false
-            avisar(fraseDoMaisProximo(proximo, candidatos.size, estado))
+            avisar(fraseDoMaisProximo(context, proximo, candidatos.size, estado))
         }
     }
 
@@ -318,8 +358,7 @@ fun AgroDashboard() {
                 if (ufPedida != uf) return@launch
                 if (!respostaDoEstado(ufPedida, response.uf) || response.municipios.isEmpty()) {
                     // Um servidor de antes da v2.5.0 não tem os outros estados.
-                    avisoDoEstado = "${estadoDoApp(ufPedida).nome} ainda não está disponível no servidor. " +
-                        "Escolha o Pará ou tente de novo mais tarde."
+                    avisoDoEstado = context.getString(R.string.estado_indisponivel, estadoDoApp(ufPedida).nome)
                     if (municipios.isEmpty()) errorMsg = avisoDoEstado
                     return@launch
                 }
@@ -343,7 +382,7 @@ fun AgroDashboard() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 if (municipios.isEmpty()) {
-                    errorMsg = "Erro na API: ${e.message}"
+                    errorMsg = context.getString(R.string.erro_api, e.message.orEmpty())
                 }
             } finally {
                 carregandoLista = false
@@ -425,6 +464,7 @@ fun AgroDashboard() {
         loadData()
         recarga++
         lugarTempo?.let { l -> coroutineScope.launch { tempo.carrega(l, forcar = true) } }
+        selectedMunicipio?.let { m -> coroutineScope.launch { plantio.carrega(m, uf, forcar = true) } }
         coroutineScope.launch {
             kotlinx.coroutines.delay(300)
             kotlinx.coroutines.withTimeoutOrNull(60_000) {
@@ -440,6 +480,67 @@ fun AgroDashboard() {
     // diferentes para a mesma lavoura.
     val pracaHoje = pracaParaUsar(selectedMunicipio, mercadoHoje?.pracasDoEstado().orEmpty(), sedes = sedes)
     val precoPadraoAtual: Double? = pracaHoje?.valor ?: kpis?.soja_preco_saca
+
+    // O resumo para compartilhar (Relatorio.kt) e para ouvir (Fala.kt), com os
+    // números que as telas mostram: a produtividade e o preço do produtor
+    // quando ele os informou.
+    fun dadosDoResumo(): DadosDoRelatorio? {
+        val prev = previsao ?: return null
+        val hoje = java.time.LocalDate.now()
+        val projecao = projecaoDaSafra(prev.historico)
+        val sacas = sharedPrefs.valorDoProdutor(PREF_PROD) ?: projecao?.let { sacasDoCampo(it.rendimento_predito / 60) }
+        val preco = sharedPrefs.valorDoProdutor(PREF_PRECO) ?: precoPadraoAtual
+        val k = kpis
+        val resultado = if (k != null && sacas != null && preco != null)
+            resultadoPorHectare(sacas, preco, sharedPrefs.valorDoProdutor(PREF_CUSTO), k).valor else null
+        val safraDoCaderno = anoDaSafraEmCurso(hoje)
+        val dados = DadosDoRelatorio(
+            municipio = prev.municipio, uf = uf, hoje = hoje,
+            projecao = projecao, ultimoReal = ultimoObservado(prev.historico),
+            praca = pracaHoje.takeIf { sharedPrefs.valorDoProdutor(PREF_PRECO) == null },
+            precoUsado = preco, resultadoPorHa = resultado, sacasPorHa = sacas,
+            plantioCalendario = plantio.dados?.let { textoDoCalendario(context, it.calendario, hoje) },
+            plantioZarc = plantio.dados?.let { textoDoZarc(context, plantio, hoje).first },
+            plantioRegiao = plantio.dados?.calendario?.regiao,
+            caderno = caderno.registros.filter { it.safra == safraDoCaderno }.takeIf { it.isNotEmpty() }
+                ?.let { resumoDoCaderno(it) },
+            safraDoCaderno = safraDoCaderno,
+        )
+        return dados
+    }
+
+    fun compartilhaResumo(imagem: Boolean) {
+        val dados = dadosDoResumo() ?: return
+        coroutineScope.launch {
+            val arquivo = withContext(Dispatchers.IO) {
+                runCatching {
+                    val r = montaRelatorio(context, dados)
+                    if (imagem) geraImagem(context, r) else geraPdf(context, r)
+                }.getOrNull()
+            }
+            if (arquivo == null || !compartilhaArquivo(context, arquivo, if (imagem) "image/png" else "application/pdf")) {
+                avisar(context.getString(R.string.relatorio_sem_app))
+            }
+        }
+    }
+
+    if (mostrarCompartilhar) {
+        AlertDialog(
+            onDismissRequest = { mostrarCompartilhar = false },
+            title = { Text(stringResource(R.string.relatorio_compartilhar)) },
+            text = { Text(stringResource(R.string.relatorio_escolha)) },
+            confirmButton = {
+                TextButton(onClick = { mostrarCompartilhar = false; compartilhaResumo(imagem = true) }) {
+                    Text(stringResource(R.string.relatorio_imagem))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarCompartilhar = false; compartilhaResumo(imagem = false) }) {
+                    Text(stringResource(R.string.relatorio_pdf))
+                }
+            },
+        )
+    }
 
     // Cada aba abre do começo: antes, quem rolava o Histórico e ia ao Mercado
     // caía no meio da tela.
@@ -478,32 +579,32 @@ fun AgroDashboard() {
                     selected = currentTab == 0,
                     onClick = { irPara(0) },
                     icon = { Icon(Icons.Filled.Home, contentDescription = null) },
-                    label = { RotuloAba("Resumo") }
+                    label = { RotuloAba(stringResource(R.string.aba_resumo)) }
                 )
                 NavigationBarItem(
                     selected = currentTab == 1,
                     onClick = { irPara(1) },
                     icon = { Icon(Icons.Filled.LocationOn, contentDescription = null) },
-                    label = { RotuloAba("Mapa") }
+                    label = { RotuloAba(stringResource(R.string.aba_mapa)) }
                 )
                 @Suppress("DEPRECATION")
                 NavigationBarItem(
                     selected = currentTab == 2,
                     onClick = { irPara(2) },
                     icon = { Icon(Icons.Filled.List, contentDescription = null) },
-                    label = { RotuloAba("Histórico") }
+                    label = { RotuloAba(stringResource(R.string.aba_historico)) }
                 )
                 NavigationBarItem(
                     selected = currentTab == 4,
                     onClick = { irPara(4) },
                     icon = { Icon(Icons.Filled.CandlestickChart, contentDescription = null) },
-                    label = { RotuloAba("Mercado") }
+                    label = { RotuloAba(stringResource(R.string.aba_mercado)) }
                 )
                 NavigationBarItem(
                     selected = currentTab == 3,
                     onClick = { irPara(3) },
                     icon = { Icon(Icons.Filled.Info, contentDescription = null) },
-                    label = { RotuloAba("Sobre") }
+                    label = { RotuloAba(stringResource(R.string.aba_sobre)) }
                 )
             }
         }
@@ -528,15 +629,21 @@ fun AgroDashboard() {
                              modifier = Modifier.size(28.dp))
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "AgroInteligência",
+                            text = stringResource(R.string.app_name),
                             fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.weight(1f).semantics { heading() }
                         )
+                        val alertasLigados = remember(currentTab) { Alertas.algumLigado(sharedPrefs) }
+                        IconButton(onClick = { currentTab = 8 }) {
+                            Icon(if (alertasLigados) Icons.Filled.NotificationsActive else Icons.Filled.NotificationsNone,
+                                 contentDescription = stringResource(R.string.alertas_abrir),
+                                 tint = if (alertasLigados) MaterialTheme.colorScheme.primary else LocalContentColor.current)
+                        }
                         if (currentTab in 0..2 && selectedMunicipio != null) {
                             IconButton(onClick = { atualizarTudo() }, enabled = !isLoading && !atualizando) {
-                                Icon(Icons.Filled.Refresh, contentDescription = "Atualizar os dados")
+                                Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.atualizar_dados))
                             }
                         }
                     }
@@ -544,8 +651,9 @@ fun AgroDashboard() {
                     // O aviso fala dos dados do município: só nas abas que os mostram.
                     if (isOfflineMode && currentTab in 0..2) {
                         val cor = corAtencao(isDark)
+                        val formatoQuando = stringResource(R.string.formato_data_hora)
                         val quando = previsaoEm.takeIf { it > 0 }?.let {
-                            java.text.SimpleDateFormat("dd/MM 'às' HH:mm", PT_BR).format(java.util.Date(it))
+                            java.text.SimpleDateFormat(formatoQuando, LOCAL_NUMEROS).format(java.util.Date(it))
                         }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -554,8 +662,8 @@ fun AgroDashboard() {
                             Icon(Icons.Filled.WifiOff, contentDescription = null, tint = cor, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = if (quando != null) "Sem conexão: mostrando os dados guardados em $quando."
-                                       else "Sem conexão: mostrando os últimos dados guardados.",
+                                text = if (quando != null) stringResource(R.string.sem_conexao_quando, quando)
+                                       else stringResource(R.string.sem_conexao),
                                 fontSize = 12.sp, color = cor, fontWeight = FontWeight.Bold
                             )
                         }
@@ -589,6 +697,21 @@ fun AgroDashboard() {
                 }
             }
 
+            // A janela de plantio vem de arquivos da API, e não do modelo, e o
+            // caderno fica no celular: os dois aparecem também quando a previsão
+            // de produtividade demora ou falha. Quando ela chega, vêm depois da
+            // estimativa: no alto, numa tela pequena, empurravam a produtividade
+            // quase uma tela para baixo.
+            fun plantioECaderno() {
+                if (currentTab != 0) return
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (selectedMunicipio != null) PlantioResumoCard(plantio) { currentTab = 7 }
+                        CadernoResumoCard(caderno) { currentTab = 9 }
+                    }
+                }
+            }
+
             val prev = previsao
             when {
                 currentTab == 4 -> item {
@@ -604,17 +727,48 @@ fun AgroDashboard() {
                     EstimativaCampoTela(
                         precoPadrao = precoDoProdutor ?: precoPadraoAtual,
                         fontePreco = when {
-                            precoDoProdutor != null -> "Seu preço, informado na Viabilidade."
-                            pracaHoje != null -> "Cotação de ${pracaHoje.praca} em ${dataCurta(pracaHoje.data)} (Agrolink)."
-                            else -> kpis?.fonte_preco?.let { "Preço de referência: $it." }
+                            precoDoProdutor != null -> stringResource(R.string.preco_do_produtor)
+                            pracaHoje != null -> stringResource(R.string.preco_da_praca, pracaHoje.praca, dataCurta(pracaHoje.data))
+                            else -> kpis?.fonte_preco?.let { stringResource(R.string.preco_referencia_fonte, it) }
                         },
                         referenciaKgHa = projecao?.rendimento_predito,
-                        rotuloReferencia = projecao?.let { "${prev?.municipio ?: selectedMunicipio} em ${it.ano}" },
+                        rotuloReferencia = projecao?.let {
+                            stringResource(R.string.referencia_municipio_ano, prev?.municipio ?: selectedMunicipio.orEmpty(), it.ano)
+                        },
                         aoVoltar = { currentTab = 0 }
                     )
                 }
                 currentTab == 6 -> item {
-                    TempoTela(tempo, selectedMunicipio) { currentTab = 0 }
+                    TempoTela(tempo, selectedMunicipio, ouvir = {
+                        if (tempo.previsao != null) {
+                            BotaoOuvir(leitor?.falando == true, stringResource(R.string.fala_ouvir_tempo)) {
+                                ouve(falaDoTempo(context, tempo.previsao, tempo.avisos, lugarTempo?.nome.orEmpty(),
+                                                 agoraNoLugar(tempo.previsao)))
+                            }
+                        }
+                    }) { currentTab = 0 }
+                }
+                currentTab == 9 -> item {
+                    // A estimativa do município para a safra em curso, para comparar com o colhido.
+                    val projecao = prev?.historico?.let { projecaoDaSafra(it) }
+                    CadernoTela(
+                        caderno, plantio,
+                        estimativaScHa = projecao?.rendimento_predito?.div(60.0),  // saca de 60 kg
+                        municipio = prev?.municipio ?: selectedMunicipio,
+                        aoVoltar = { currentTab = 0 }
+                    )
+                }
+                currentTab == 8 -> item {
+                    AlertasTela(sharedPrefs, lugarTempo, mercadoHoje?.pracasDoEstado().orEmpty(), pracaHoje) {
+                        currentTab = 0
+                    }
+                }
+                currentTab == 7 -> item {
+                    PlantioTela(
+                        plantio, selectedMunicipio,
+                        aoAtualizar = { selectedMunicipio?.let { m -> coroutineScope.launch { plantio.carrega(m, uf, forcar = true) } } },
+                        aoVoltar = { currentTab = 0 }
+                    )
                 }
                 // O Sobre traz o aviso de não afiliação e as fontes oficiais que
                 // o Google Play exige: abre sempre, com ou sem previsão carregada.
@@ -634,19 +788,18 @@ fun AgroDashboard() {
                             // Nunca houve imagem de satélite aqui: o mapa é vetorial,
                             // com o contorno do Pará da malha do IBGE, rios do Natural
                             // Earth e círculos coloridos pela produtividade observada.
-                            Text("Mapa indisponível sem conexão", fontWeight = FontWeight.Bold,
+                            Text(stringResource(R.string.mapa_indisponivel), fontWeight = FontWeight.Bold,
                                  color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("O mapa é desenhado pelo servidor. Conecte-se para carregá-lo.",
+                            Text(stringResource(R.string.mapa_servidor),
                                  color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp, textAlign = TextAlign.Center)
                         }
                     } else {
+                        val descricaoDoMapa = stringResource(R.string.mapa_descricao, estado.de, estado.nome) +
+                            (selectedMunicipio?.let { stringResource(R.string.mapa_destaque, it) } ?: "")
                         Card(
                             modifier = Modifier.fillParentMaxHeight(0.82f).fillMaxWidth().padding(1.dp)
-                                .semantics {
-                                    contentDescription = "Mapa da produtividade da soja nos municípios ${estado.de}" +
-                                        (selectedMunicipio?.let { ", com $it em destaque" } ?: "")
-                                },
+                                .semantics { contentDescription = descricaoDoMapa },
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             val currentTheme = if (isDark) "dark" else "light"
@@ -700,30 +853,39 @@ fun AgroDashboard() {
                         }
                     }
                 }
-                isLoading -> item {
-                    CarregandoDados(selectedMunicipio)
+                isLoading -> {
+                    item { CarregandoDados(selectedMunicipio) }
+                    plantioECaderno()
                 }
-                errorMsg != null && avisoDoEstado != null -> item {
-                    AvisoSemDados(titulo = "${estado.nome} ainda não está no servidor", texto = avisoDoEstado!!,
-                                  rotulo = "Voltar ao Pará") {
-                        escolherEstado("PA")
+                errorMsg != null && avisoDoEstado != null -> {
+                    item {
+                        AvisoSemDados(titulo = stringResource(R.string.estado_nao_esta, estado.nome), texto = avisoDoEstado!!,
+                                      rotulo = stringResource(R.string.voltar_ao_para)) {
+                            escolherEstado("PA")
+                        }
                     }
+                    plantioECaderno()
                 }
-                errorMsg != null -> item {
-                    AvisoSemDados(
-                        titulo = "Sem conexão com o servidor",
-                        texto = "Não foi possível baixar a lista de municípios e as estimativas. O servidor pode " +
-                                "levar até um minuto para acordar: confira a internet e tente de novo. " +
-                                "A Estimativa no campo funciona sem internet."
-                    ) { loadData(); recarga++ }
+                errorMsg != null -> {
+                    item {
+                        AvisoSemDados(
+                            titulo = stringResource(R.string.sem_servidor_titulo),
+                            texto = stringResource(R.string.sem_servidor_texto)
+                        ) { loadData(); recarga++ }
+                    }
+                    plantioECaderno()
                 }
-                // Primeira abertura: o cartão de boas-vindas, lá em cima, pergunta o município.
-                selectedMunicipio == null -> {}
-                prev == null -> item {
-                    AvisoSemDados(
-                        titulo = "Sem dados de $selectedMunicipio neste celular",
-                        texto = "A estimativa deste município ainda não foi baixada. Confira a internet e tente de novo."
-                    ) { recarga++ }
+                // Primeira abertura: o cartão de boas-vindas, lá em cima, pergunta o
+                // município; o caderno vem logo abaixo, como antes.
+                selectedMunicipio == null -> plantioECaderno()
+                prev == null -> {
+                    item {
+                        AvisoSemDados(
+                            titulo = stringResource(R.string.sem_dados_titulo, selectedMunicipio.orEmpty()),
+                            texto = stringResource(R.string.sem_dados_texto)
+                        ) { recarga++ }
+                    }
+                    plantioECaderno()
                 }
                 else -> {
                     val historicoOrdenado = prev.historico.sortedByDescending { it.ano }
@@ -737,21 +899,35 @@ fun AgroDashboard() {
                         }
                         if (projecao != null) {
                             item {
-                                TituloSecao(Icons.Filled.BarChart, "Resumo Agronômico (safra ${projecao.ano})")
+                                TituloSecao(Icons.Filled.BarChart, stringResource(R.string.secao_resumo_agronomico, projecao.ano))
                                 ResumoAgronomicoCard(projecao, ultimoReal)
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    BotaoOuvir(leitor?.falando == true, stringResource(R.string.fala_ouvir_resumo)) {
+                                        ouve(dadosDoResumo()?.let { falaDoResumo(context, montaRelatorio(context, it)) })
+                                    }
+                                    OutlinedButton(onClick = { mostrarCompartilhar = true },
+                                                   modifier = Modifier.heightIn(min = 48.dp)) {
+                                        Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                                        Spacer(Modifier.width(6.dp))
+                                        Text(stringResource(R.string.relatorio_botao))
+                                    }
+                                }
                             }
+                        }
+                        plantioECaderno()
+                        if (projecao != null) {
                             // A Viabilidade antes do Simulador: é a conta que o produtor
                             // faz; o simulador climático é ilustração do modelo.
                             kpis?.let { k ->
                                 item {
-                                    TituloSecao(Icons.Filled.MonetizationOn, "Viabilidade Financeira",
+                                    TituloSecao(Icons.Filled.MonetizationOn, stringResource(R.string.secao_viabilidade),
                                                 Modifier.padding(top = 8.dp))
                                     ResumoFinanceiroCard(projecao, k, mercadoHoje?.para,
                                                          mercadoHoje?.pracasDoEstado().orEmpty(), selectedMunicipio, sedes)
                                 }
                             }
                             item {
-                                TituloSecao(Icons.Filled.SettingsSuggest, "Simulador de cenário climático",
+                                TituloSecao(Icons.Filled.SettingsSuggest, stringResource(R.string.secao_simulador),
                                             Modifier.padding(top = 8.dp))
                                 // A safra em curso, a mesma do Resumo: antes o simulador
                                 // partia da seguinte à última divulgada (2026 com o Resumo
@@ -763,11 +939,9 @@ fun AgroDashboard() {
                         }
                     } else if (currentTab == 2) { // Histórico
                         item {
-                            TituloSecao(Icons.Filled.DateRange, "Histórico Completo", Modifier.padding(top = 8.dp))
+                            TituloSecao(Icons.Filled.DateRange, stringResource(R.string.secao_historico), Modifier.padding(top = 8.dp))
                             Text(
-                                text = "A estimativa das safras passadas parte do histórico " +
-                                       "do município e da tendência, com o clima médio da série. " +
-                                       "Ela não é uma previsão refeita ano a ano.",
+                                text = stringResource(R.string.historico_nota),
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 lineHeight = 16.sp,

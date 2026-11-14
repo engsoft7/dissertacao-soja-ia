@@ -28,8 +28,8 @@ import kotlin.math.roundToInt
 // limites são do aplicativo, e não da Embrapa: o menor valor que o modelo
 // publica e a chance em que chover passa a ser o mais provável.
 //
-// Ficam fora da tela, sem nada de Android, para os testes de unidade
-// alcançarem sem emulador.
+// Ficam fora da tela, sem nada de Android além dos ids de strings.xml, para
+// os testes de unidade alcançarem sem emulador.
 
 const val TEMPERATURA_MAXIMA = 30.0
 const val TEMPERATURA_MINIMA = 10.0
@@ -47,10 +47,26 @@ fun ventoA2m(vento10m: Double): Double = vento10m * 4.87 / ln(67.8 * 10 - 5.42)
 
 enum class NivelJanela { BOA, ATENCAO, EVITAR }
 
+/**
+ * Por que uma hora não é boa: o texto está em strings.xml ([texto]), com os
+ * limites daqui como argumentos, para o número da tela ser o mesmo da conta.
+ */
+enum class MotivoHora(val texto: Int, val limites: List<Int> = emptyList()) {
+    CHUVA_NA_HORA(R.string.motivo_chuva_na_hora),
+    CALOR(R.string.motivo_calor, listOf(TEMPERATURA_MAXIMA.toInt())),
+    UMIDADE_BAIXA(R.string.motivo_umidade_baixa, listOf(UMIDADE_MINIMA.toInt())),
+    VENTO_FORTE(R.string.motivo_vento_forte, listOf(VENTO_MAXIMO_ANTIDERIVA.toInt())),
+    VENTO_ANTIDERIVA(R.string.motivo_vento_antideriva, listOf(VENTO_IDEAL_MAXIMO.toInt(), VENTO_MAXIMO_ANTIDERIVA.toInt())),
+    VENTO_FRACO(R.string.motivo_vento_fraco, listOf(VENTO_MINIMO.toInt())),
+    FRIO(R.string.motivo_frio, listOf(TEMPERATURA_MINIMA.toInt())),
+    CHUVA_LOGO(R.string.motivo_chuva_logo, listOf(HORAS_SEM_CHUVA)),
+    PREVISAO_INCOMPLETA(R.string.motivo_previsao_incompleta),
+}
+
 data class HoraPulverizacao(
     val hora: LocalDateTime,
     val nivel: NivelJanela,
-    val motivos: List<String>,
+    val motivos: List<MotivoHora>,
     val temperatura: Double?,
     val umidade: Double?,
     val vento2m: Double?,
@@ -64,20 +80,20 @@ fun avaliaHora(
     vento10m: Double?,
     chuvaNaHora: Boolean,
     chuvaLogo: Boolean,
-): Pair<NivelJanela, List<String>> {
-    val evitar = mutableListOf<String>()
-    val atencao = mutableListOf<String>()
+): Pair<NivelJanela, List<MotivoHora>> {
+    val evitar = mutableListOf<MotivoHora>()
+    val atencao = mutableListOf<MotivoHora>()
     val vento = vento10m?.let { ventoA2m(it) }
-    if (chuvaNaHora) evitar += "chuva prevista nesta hora"
-    if (temperatura != null && temperatura > TEMPERATURA_MAXIMA) evitar += "temperatura acima de 30 °C"
-    if (umidade != null && umidade < UMIDADE_MINIMA) evitar += "umidade abaixo de 60%"
-    if (vento != null && vento > VENTO_MAXIMO_ANTIDERIVA) evitar += "vento acima de 10 km/h"
+    if (chuvaNaHora) evitar += MotivoHora.CHUVA_NA_HORA
+    if (temperatura != null && temperatura > TEMPERATURA_MAXIMA) evitar += MotivoHora.CALOR
+    if (umidade != null && umidade < UMIDADE_MINIMA) evitar += MotivoHora.UMIDADE_BAIXA
+    if (vento != null && vento > VENTO_MAXIMO_ANTIDERIVA) evitar += MotivoHora.VENTO_FORTE
     if (vento != null && vento > VENTO_IDEAL_MAXIMO && vento <= VENTO_MAXIMO_ANTIDERIVA)
-        atencao += "vento entre 8 e 10 km/h: só com ponta antideriva"
-    if (vento != null && vento < VENTO_MINIMO) atencao += "vento abaixo de 3 km/h: gotas finas ficam no ar"
-    if (temperatura != null && temperatura < TEMPERATURA_MINIMA) atencao += "temperatura abaixo de 10 °C"
-    if (!chuvaNaHora && chuvaLogo) atencao += "chuva prevista nas $HORAS_SEM_CHUVA horas seguintes"
-    if (temperatura == null || umidade == null || vento == null) atencao += "previsão incompleta para esta hora"
+        atencao += MotivoHora.VENTO_ANTIDERIVA
+    if (vento != null && vento < VENTO_MINIMO) atencao += MotivoHora.VENTO_FRACO
+    if (temperatura != null && temperatura < TEMPERATURA_MINIMA) atencao += MotivoHora.FRIO
+    if (!chuvaNaHora && chuvaLogo) atencao += MotivoHora.CHUVA_LOGO
+    if (temperatura == null || umidade == null || vento == null) atencao += MotivoHora.PREVISAO_INCOMPLETA
     val nivel = when {
         evitar.isNotEmpty() -> NivelJanela.EVITAR
         atencao.isNotEmpty() -> NivelJanela.ATENCAO
@@ -183,48 +199,50 @@ fun balancoChuva(lista: List<DiaTempo>, hoje: LocalDate): BalancoChuva {
     )
 }
 
-/** Descrição do código de tempo da OMM, como a documentação do Open-Meteo o define. */
-fun descricaoTempo(codigo: Int?): String = when (codigo) {
-    0 -> "Céu limpo"
+/** Descrição do código de tempo da OMM, como a documentação do Open-Meteo o define (id em strings.xml). */
+fun descricaoTempo(codigo: Int?): Int = when (codigo) {
+    0 -> R.string.tempo_ceu_limpo
     // "Predomínio de sol" aparecia de noite, ao lado do ícone da lua.
-    1 -> "Poucas nuvens"
-    2 -> "Parcialmente nublado"
-    3 -> "Nublado"
-    45, 48 -> "Nevoeiro"
-    51 -> "Garoa fraca"
-    53 -> "Garoa"
-    55 -> "Garoa forte"
-    56, 57 -> "Garoa congelante"
-    61 -> "Chuva fraca"
-    63 -> "Chuva moderada"
-    65 -> "Chuva forte"
-    66, 67 -> "Chuva congelante"
-    71, 73, 75, 77 -> "Neve"
-    80 -> "Pancadas de chuva fracas"
-    81 -> "Pancadas de chuva"
-    82 -> "Pancadas de chuva fortes"
-    85, 86 -> "Pancadas de neve"
-    95 -> "Trovoada"
-    96, 99 -> "Trovoada com granizo"
-    97 -> "Trovoada forte"
-    else -> "Sem descrição"
+    1 -> R.string.tempo_poucas_nuvens
+    2 -> R.string.tempo_parcialmente_nublado
+    3 -> R.string.tempo_nublado
+    45, 48 -> R.string.tempo_nevoeiro
+    51 -> R.string.tempo_garoa_fraca
+    53 -> R.string.tempo_garoa
+    55 -> R.string.tempo_garoa_forte
+    56, 57 -> R.string.tempo_garoa_congelante
+    61 -> R.string.tempo_chuva_fraca
+    63 -> R.string.tempo_chuva_moderada
+    65 -> R.string.tempo_chuva_forte
+    66, 67 -> R.string.tempo_chuva_congelante
+    71, 73, 75, 77 -> R.string.tempo_neve
+    80 -> R.string.tempo_pancadas_fracas
+    81 -> R.string.tempo_pancadas
+    82 -> R.string.tempo_pancadas_fortes
+    85, 86 -> R.string.tempo_pancadas_neve
+    95 -> R.string.tempo_trovoada
+    96, 99 -> R.string.tempo_trovoada_granizo
+    97 -> R.string.tempo_trovoada_forte
+    else -> R.string.tempo_sem_descricao
 }
 
-/** De onde o vento vem, em oito direções. */
-fun direcaoVento(graus: Double?): String {
-    if (graus == null) return ""
-    val nomes = listOf("N", "NE", "L", "SE", "S", "SO", "O", "NO")
-    return nomes[(((graus % 360) + 360) % 360 / 45.0).roundToInt() % 8]
+private val DIRECOES_VENTO = listOf(R.string.vento_n, R.string.vento_ne, R.string.vento_l, R.string.vento_se,
+                                    R.string.vento_s, R.string.vento_so, R.string.vento_o, R.string.vento_no)
+
+/** De onde o vento vem, em oito direções (id em strings.xml: "L" e "O" em português, "E" e "W" em inglês). */
+fun direcaoVento(graus: Double?): Int? {
+    if (graus == null) return null
+    return DIRECOES_VENTO[(((graus % 360) + 360) % 360 / 45.0).roundToInt() % 8]
 }
 
-/** Categoria do índice ultravioleta pela escala da OMS. */
-fun categoriaUv(uv: Double?): String? = uv?.roundToInt()?.let {
+/** Categoria do índice ultravioleta pela escala da OMS (id em strings.xml). */
+fun categoriaUv(uv: Double?): Int? = uv?.roundToInt()?.let {
     when {
-        it <= 2 -> "baixo"
-        it <= 5 -> "moderado"
-        it <= 7 -> "alto"
-        it <= 10 -> "muito alto"
-        else -> "extremo"
+        it <= 2 -> R.string.uv_baixo
+        it <= 5 -> R.string.uv_moderado
+        it <= 7 -> R.string.uv_alto
+        it <= 10 -> R.string.uv_muito_alto
+        else -> R.string.uv_extremo
     }
 }
 

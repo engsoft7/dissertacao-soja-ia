@@ -315,3 +315,50 @@ def plot_chuva_et0(diario: dict, hoje, is_dark: bool = True):
     fig = _layout_preco(fig, is_dark, "mm por dia")
     fig.update_yaxes(tickformat=",.0f")
     return fig
+
+
+# Cores do risco do ZARC, as mesmas do aplicativo (corDoRisco, Plantio.kt).
+CORES_RISCO_ZARC = {20: "#2E7D32", 30: "#F9A825", 40: "#EF6C00"}
+
+
+def plot_janela_plantio(calendario: dict | None, janelas: list[dict], safra_ini: int, hoje,
+                        is_dark: bool = True):
+    """De julho a junho: o vazio sanitário e a semeadura da portaria numa faixa e
+    as janelas do ZARC na outra, com o dia de hoje (LinhaDoTempo, Plantio.kt)."""
+    from datetime import date, timedelta
+    inicio, fim = date(safra_ini, 7, 1), date(safra_ini + 1, 7, 1)
+    cal = calendario or {}
+    barras = []
+    if cal.get("vazio"):
+        barras.append(("Portaria", cal["vazio"], "Vazio sanitário", "#f87171" if is_dark else "#dc2626"))
+    if cal.get("semeadura"):
+        barras.append(("Portaria", cal["semeadura"], "Semeadura", cor_para(is_dark)))
+    for j in janelas:
+        barras.append(("ZARC", [j["inicio"], j["fim"]], f"Risco de {j['risco']}%", CORES_RISCO_ZARC[j["risco"]]))
+    fig = go.Figure()
+    vistos = set()
+    for linha, (a, b), rotulo, cor in barras:
+        ini, ultimo = date.fromisoformat(a), date.fromisoformat(b)
+        fig.add_trace(go.Bar(
+            y=[linha], x=[((ultimo + timedelta(days=1)) - ini).days * 86_400_000], base=[ini.isoformat()],
+            orientation="h", marker_color=cor, name=rotulo, legendgroup=rotulo, showlegend=rotulo not in vistos,
+            hovertemplate=f"<b>{rotulo}</b><br>{ini:%d/%m/%Y} a {ultimo:%d/%m/%Y}<extra></extra>"))
+        vistos.add(rotulo)
+    cinza = "#a1a1a6" if is_dark else "#6e6e73"
+    if inicio <= hoje < fim:
+        fig.add_shape(type="line", x0=hoje.isoformat(), x1=hoje.isoformat(), y0=0, y1=1, yref="paper",
+                      line=dict(color="#e2e8f0" if is_dark else "#1e293b", width=2))
+        fig.add_annotation(x=hoje.isoformat(), y=1, yref="paper", text="hoje", showarrow=False,
+                           yanchor="bottom", font=dict(color=cinza, size=11))
+    meses = [date(safra_ini + (m < 7), m, 1) for m in (7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6)]
+    fig.update_layout(
+        barmode="overlay", bargap=0.35, height=200,
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, sans-serif", color=cinza),
+        xaxis=dict(type="date", range=[inicio.isoformat(), fim.isoformat()], showgrid=True,
+                   gridcolor="rgba(255,255,255,0.09)" if is_dark else "rgba(0,0,0,0.08)",
+                   tickvals=[m.isoformat() for m in meses], ticktext=[_MESES[m.month - 1] for m in meses]),
+        yaxis=dict(categoryorder="array", categoryarray=["ZARC", "Portaria"]),
+        legend=dict(orientation="h", yanchor="top", y=-0.25, xanchor="left", x=0),
+        margin=dict(t=24, b=60, l=10, r=10))
+    return fig

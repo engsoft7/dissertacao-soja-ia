@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícone pequeno das notificações (Alertas.kt): a folha de ic_launcher_monochrome,
+     recortada para ocupar o quadrado. O Android usa só a silhueta. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    <group android:translateX="-22" android:translateY="-23">
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M54.0,52.0 A12.6,12.6 0 0,1 54.0,28.0 A12.6,12.6 0 0,1 54.0,52.0 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M49.6,54.7 A10,10 0 0,1 32.8,45.7 A10,10 0 0,1 49.6,54.7 Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M58.4,54.7 A10,10 0 0,1 75.2,45.7 A10,10 0 0,1 58.4,54.7 Z" />
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="3.2"
+            android:strokeLineCap="round"
+            android:pathData="M54,57 L54.0,52.0 M54,57 L49.6,54.7 M54,57 L58.4,54.7 M54,57 Q55.5,70 52,82" />
+    </group>
+</vector>

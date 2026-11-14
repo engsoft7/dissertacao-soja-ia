@@ -87,3 +87,13 @@ def test_linhas_da_tabela():
               "<td>07 de setembro de 2026 a 07 de janeiro de 2027</td></tr></table>")
     assert cp.linhas_da_tabela(pagina) == {
         "MT": ("08 de junho de 2026 a 06 de setembro de 2026", "07 de setembro de 2026 a 07 de janeiro de 2027")}
+
+
+def test_municipio_fora_das_regioes_distingue_omissao_de_leitura_perdida(capsys):
+    """Fora de todas as listas: aviso, se a portaria não o cita; falha, se o
+    nome está no texto das notas e a leitura o perdeu."""
+    ibge = {cp.normaliza(n): (c, n) for c, n in [(1, "Belém"), (2, "Bannach"), (3, "Redenção")]}
+    regioes = [{"municipios": [2]}]
+    problemas = cp.fora_das_regioes("PA", ibge, regioes, ["Bannach, Redenção e Trairão"])
+    assert problemas == ["PA: Redenção (3) aparece nas notas, mas não entrou em região nenhuma"]
+    assert "Belém (1) não está em região nenhuma" in capsys.readouterr().out

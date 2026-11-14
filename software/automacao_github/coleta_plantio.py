@@ -165,6 +165,28 @@ def codigo_ibge(uf: str, nome: str, ibge: dict[str, tuple[int, str]]) -> tuple[i
     return ibge.get(normaliza(GRAFIAS.get((uf, normaliza(nome)), nome)))
 
 
+def fora_das_regioes(uf: str, ibge: dict[str, tuple[int, str]], regioes: list[dict],
+                     textos: list[str]) -> list[str]:
+    """Os municípios do estado que não entraram em região nenhuma.
+
+    Se o nome aparece no texto das notas do estado, a leitura perdeu o nome: é
+    problema, e a coleta falha. Se não aparece, a portaria não o lista: fica um
+    aviso no log, e o aplicativo diz que não há calendário para ele.
+    """
+    cobertos = {c for r in regioes for c in (r["municipios"] or [])}
+    corrido = normaliza(" ".join(textos))
+    problemas = []
+    for chave, (cod, nome) in sorted(ibge.items(), key=lambda x: x[1][1]):
+        if cod in cobertos:
+            continue
+        if chave in corrido:
+            problemas.append(f"{uf}: {nome} ({cod}) aparece nas notas, mas não entrou em região nenhuma")
+        else:
+            print(f"::warning::{uf}: {nome} ({cod}) não está em região nenhuma da portaria; "
+                  "o aplicativo diz que não há calendário para ele")
+    return problemas
+
+
 def municipios_ibge(uf: str) -> dict[str, tuple[int, str]]:
     """Nome normalizado -> (código do IBGE, nome) de todos os municípios do estado."""
     try:
@@ -188,6 +210,13 @@ def calendario() -> dict:
     texto = html_mod.unescape(re.sub(r"\s+", " ", re.sub(r"(?is)<[^>]+>", " ", pagina)))
     # as notas ficam depois da tabela; antes dela o texto não tem listas
     notas = notas_de_rodape(texto[texto.find("CALENDÁRIO DE SEMEADURA"):])
+    # As notas dos estados com regiões, por inteiro, para quem conferir a leitura.
+    for uf, celulas in linhas_da_tabela(pagina).items():
+        if uf in ESTADOS and "Região" in celulas[0]:
+            print(f"::group::notas do anexo para {uf}")
+            for p in periodos(celulas[0]):
+                print(f"Região {p['regiao']} (nota {p['nota']}): {notas.get(p['nota'], '(sem nota)')}")
+            print("::endgroup::")
     tabela = linhas_da_tabela(pagina)
     saida = {}
     problemas = []
@@ -243,6 +272,8 @@ def calendario() -> dict:
         for reg in regioes:
             if reg["municipios"] == "demais":
                 reg["municipios"] = sorted({c for c, _ in ibge.values()} - set(onde))
+        if ibge:
+            problemas += fora_das_regioes(uf, ibge, regioes, [notas.get(v["nota"], "") for v in vazio])
         saida[uf] = regioes
     if problemas:
         for p in problemas:

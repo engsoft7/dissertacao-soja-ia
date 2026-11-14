@@ -152,4 +152,29 @@
     <string name="caderno_apagar_rotulo">Apagar %1$s de %2$s</string>
     <string name="caderno_apagar">Apagar</string>
     <string name="caderno_cancelar">Cancelar</string>
+
+    <!-- Resumo para compartilhar (Relatorio.kt) -->
+    <string name="relatorio_titulo">AgroInteligência · %1$s (%2$s)</string>
+    <string name="relatorio_subtitulo">Resumo de %1$s</string>
+    <string name="relatorio_secao_produtividade">Produtividade</string>
+    <string name="relatorio_esperada">Esperada na safra %1$d: %2$s kg/ha (cerca de %3$s sacas por hectare), com erro típico de ± %4$s kg/ha.</string>
+    <string name="relatorio_esperada_sem_erro">Esperada na safra %1$d: %2$s kg/ha (cerca de %3$s sacas por hectare).</string>
+    <string name="relatorio_ultimo_ibge">Último dado do IBGE, safra %1$d: %2$s kg/ha.</string>
+    <string name="relatorio_secao_preco">Preço e resultado</string>
+    <string name="relatorio_praca">Saca em %1$s: R$ %2$s (Agrolink, %3$s).</string>
+    <string name="relatorio_preco_referencia">Preço de referência: R$ %1$s por saca.</string>
+    <string name="relatorio_resultado">Resultado estimado: R$ %1$s por hectare, com %2$s sacas por hectare a R$ %3$s.</string>
+    <string name="relatorio_secao_plantio">Janela de plantio</string>
+    <string name="relatorio_regiao">%1$s (Região %2$s do estado na portaria).</string>
+    <string name="relatorio_secao_caderno">Caderno da safra %1$s</string>
+    <string name="relatorio_caderno_area">Área plantada: %1$s ha; custos lançados: R$ %2$s.</string>
+    <string name="relatorio_caderno_colhido">Colhido: %1$s sacas por hectare.</string>
+    <string name="relatorio_caderno_vendido">Vendido: %1$s sacas, a R$ %2$s em média.</string>
+    <string name="relatorio_rodape">Estimativas de apoio à decisão: não substituem a avaliação de um profissional nem a verificação das condições no local. Fontes: IBGE, CONAB, Agrolink e Ministério da Agricultura (portaria do calendário de semeadura e ZARC). O AgroInteligência não é um aplicativo do governo; é um produto técnico de pesquisa da Universidade Federal do Pará (UFPA).</string>
+    <string name="relatorio_assunto">Resumo da soja (AgroInteligência)</string>
+    <string name="relatorio_compartilhar">Compartilhar o resumo</string>
+    <string name="relatorio_escolha">A imagem cabe numa conversa do WhatsApp; o PDF serve para imprimir ou mandar por e-mail.</string>
+    <string name="relatorio_imagem">Imagem (WhatsApp)</string>
+    <string name="relatorio_pdf">PDF</string>
+    <string name="relatorio_sem_app">Não foi possível compartilhar o resumo.</string>
 </resources>

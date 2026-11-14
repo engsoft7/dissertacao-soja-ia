@@ -285,6 +285,26 @@ class CapturasDeTelaTest {
         }
     }
 
+    // O resumo para compartilhar, como imagem: os dados desta classe (reais, quando
+    // o script os gravou), a janela de plantio e o caderno de exemplo acima.
+    @Test fun relatorio_imagem() {
+        val app = org.robolectric.RuntimeEnvironment.getApplication()
+        val projecao = projecaoDaSafra(previsao.historico)
+        val praca = pracaParaUsar("Paragominas", mercado.pracas_para.orEmpty())
+        val estado = estadoPlantio()
+        val r = montaRelatorio(app, DadosDoRelatorio(
+            municipio = previsao.municipio, uf = "PA", hoje = hojePlantio,
+            projecao = projecao, ultimoReal = ultimoObservado(previsao.historico),
+            praca = praca, precoUsado = praca?.valor,
+            plantioCalendario = textoDoCalendario(app, plantio.calendario, hojePlantio),
+            plantioZarc = textoDoZarc(app, estado, hojePlantio).first,
+            plantioRegiao = plantio.calendario?.regiao,
+            caderno = resumoDoCaderno(estadoCaderno().registros), safraDoCaderno = 2027,
+        ))
+        File("build/capturas").mkdirs()
+        geraImagem(app, r).copyTo(File("build/capturas/relatorio_imagem.png"), overwrite = true)
+    }
+
     // Alertas: INMET e preço ligados, com a praça de Paragominas e o alvo de R$ 140.
     private fun prefsDosAlertas() = org.robolectric.RuntimeEnvironment.getApplication()
         .getSharedPreferences("capturas_alertas", android.content.Context.MODE_PRIVATE).also {

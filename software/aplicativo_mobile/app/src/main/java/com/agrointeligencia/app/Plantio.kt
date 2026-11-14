@@ -1,5 +1,6 @@
 package com.agrointeligencia.app
 
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -47,6 +48,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -153,38 +155,51 @@ class EstadoPlantio(private val prefs: SharedPreferences) {
 private fun formato(idPadrao: Int): DateTimeFormatter =
     DateTimeFormatter.ofPattern(stringResource(idPadrao), LocalConfiguration.current.locales[0])
 
-/** A frase do calendário para o dia: semeadura até tal dia, vazio até tal dia, ou encerrada. */
-@Composable
-private fun fraseDoCalendario(c: CalendarioPlantio?, hoje: LocalDate): String? {
+/** O formato de data dos textos (res/values/strings.xml), no idioma do aparelho. */
+internal fun formatoDeData(context: Context, idPadrao: Int): DateTimeFormatter =
+    DateTimeFormatter.ofPattern(context.getString(idPadrao), context.resources.configuration.locales[0])
+
+/**
+ * A frase do calendário para o dia: semeadura até tal dia, vazio até tal dia,
+ * ou encerrada. Sem Compose, para o relatório (Relatorio.kt) usar a mesma.
+ */
+internal fun textoDoCalendario(context: Context, c: CalendarioPlantio?, hoje: LocalDate): String? {
     val semeadura = periodoDeSemeadura(c) ?: return null
     val vazio = periodoDoVazio(c)
-    val f = formato(R.string.plantio_formato_data)
+    val f = formatoDeData(context, R.string.plantio_formato_data)
     return when (situacaoNoDia(c, hoje)) {
-        SituacaoCalendario.SEMEADURA -> stringResource(R.string.plantio_semeadura_ate, semeadura.second.format(f))
+        SituacaoCalendario.SEMEADURA -> context.getString(R.string.plantio_semeadura_ate, semeadura.second.format(f))
         SituacaoCalendario.VAZIO_SANITARIO ->
-            stringResource(R.string.plantio_vazio_ate, vazio!!.second.format(f), semeadura.first.format(f))
+            context.getString(R.string.plantio_vazio_ate, vazio!!.second.format(f), semeadura.first.format(f))
         else -> if (vazio != null && hoje.isBefore(vazio.first))
-            stringResource(R.string.plantio_vazio_comeca, vazio.first.format(f))
-        else stringResource(R.string.plantio_semeadura_encerrada, semeadura.second.format(f))
+            context.getString(R.string.plantio_vazio_comeca, vazio.first.format(f))
+        else context.getString(R.string.plantio_semeadura_encerrada, semeadura.second.format(f))
     }
 }
 
-/** A frase do ZARC para o dia, com o grupo e o solo escolhidos. */
-@Composable
-private fun fraseDoZarc(estado: EstadoPlantio, hoje: LocalDate): Pair<String, Int> {
+/** A frase do ZARC para o dia, com o grupo e o solo escolhidos, e o risco (0 fora da janela). */
+internal fun textoDoZarc(context: Context, estado: EstadoPlantio, hoje: LocalDate): Pair<String, Int> {
     val d = estado.dados
-    val z = d?.zarc ?: return stringResource(R.string.plantio_zarc_sem_zoneamento) to 0
-    val ini = anoInicialDaSafra(d.safra) ?: return stringResource(R.string.plantio_zarc_sem_zoneamento) to 0
+    val z = d?.zarc ?: return context.getString(R.string.plantio_zarc_sem_zoneamento) to 0
+    val ini = anoInicialDaSafra(d.safra) ?: return context.getString(R.string.plantio_zarc_sem_zoneamento) to 0
     val grupo = z.ciclos?.firstOrNull { it.codigo == estado.ciclo }?.nome.orEmpty()
     val solo = z.solos?.firstOrNull { it.codigo == estado.solo }?.nome.orEmpty()
-    val riscos = estado.riscos() ?: return stringResource(R.string.plantio_zarc_sem_combinacao, grupo, solo) to 0
+    val riscos = estado.riscos() ?: return context.getString(R.string.plantio_zarc_sem_combinacao, grupo, solo) to 0
     val risco = riscoNoDia(riscos, ini, hoje)
-    if (risco > 0) return stringResource(R.string.plantio_zarc_hoje, risco, grupo, solo) to risco
+    if (risco > 0) return context.getString(R.string.plantio_zarc_hoje, risco, grupo, solo) to risco
     val prox = proximaJanelaZarc(janelasZarc(riscos, ini), hoje)
-    val f = formato(R.string.plantio_formato_dia)
-    return if (prox != null) stringResource(R.string.plantio_zarc_proxima, grupo, solo, prox.inicio.format(f), prox.risco) to 0
-    else stringResource(R.string.plantio_zarc_encerrado, grupo, solo) to 0
+    val f = formatoDeData(context, R.string.plantio_formato_dia)
+    return if (prox != null) context.getString(R.string.plantio_zarc_proxima, grupo, solo, prox.inicio.format(f), prox.risco) to 0
+    else context.getString(R.string.plantio_zarc_encerrado, grupo, solo) to 0
 }
+
+@Composable
+private fun fraseDoCalendario(c: CalendarioPlantio?, hoje: LocalDate): String? =
+    textoDoCalendario(LocalContext.current, c, hoje)
+
+@Composable
+private fun fraseDoZarc(estado: EstadoPlantio, hoje: LocalDate): Pair<String, Int> =
+    textoDoZarc(LocalContext.current, estado, hoje)
 
 @Composable
 fun PlantioResumoCard(estado: EstadoPlantio, hoje: LocalDate = LocalDate.now(), aoAbrir: () -> Unit) {

@@ -204,6 +204,8 @@ fun AgroDashboard(abaInicial: Int = 0) {
     }
     var isOfflineMode by remember { mutableStateOf(false) }
     var mostrarLista by rememberSaveable { mutableStateOf(false) }
+    // A escolha entre imagem e PDF para compartilhar o resumo (Relatorio.kt).
+    var mostrarCompartilhar by remember { mutableStateOf(false) }
     // Aumenta a cada "atualizar" e refaz a busca da previsão do município.
     var recarga by remember { mutableStateOf(0) }
     // Mercado de hoje (praças do Pará e estimativa), um só para o app inteiro:
@@ -461,6 +463,61 @@ fun AgroDashboard(abaInicial: Int = 0) {
     val pracaHoje = pracaParaUsar(selectedMunicipio, mercadoHoje?.pracasDoEstado().orEmpty(), sedes = sedes)
     val precoPadraoAtual: Double? = pracaHoje?.valor ?: kpis?.soja_preco_saca
 
+    // O resumo para compartilhar (Relatorio.kt), com os números que as telas
+    // mostram: a produtividade e o preço do produtor quando ele os informou.
+    fun compartilhaResumo(imagem: Boolean) {
+        val prev = previsao ?: return
+        val hoje = java.time.LocalDate.now()
+        val projecao = projecaoDaSafra(prev.historico)
+        val sacas = sharedPrefs.valorDoProdutor(PREF_PROD) ?: projecao?.let { sacasDoCampo(it.rendimento_predito / 60) }
+        val preco = sharedPrefs.valorDoProdutor(PREF_PRECO) ?: precoPadraoAtual
+        val k = kpis
+        val resultado = if (k != null && sacas != null && preco != null)
+            resultadoPorHectare(sacas, preco, sharedPrefs.valorDoProdutor(PREF_CUSTO), k).valor else null
+        val safraDoCaderno = anoDaSafraEmCurso(hoje)
+        val dados = DadosDoRelatorio(
+            municipio = prev.municipio, uf = uf, hoje = hoje,
+            projecao = projecao, ultimoReal = ultimoObservado(prev.historico),
+            praca = pracaHoje.takeIf { sharedPrefs.valorDoProdutor(PREF_PRECO) == null },
+            precoUsado = preco, resultadoPorHa = resultado, sacasPorHa = sacas,
+            plantioCalendario = plantio.dados?.let { textoDoCalendario(context, it.calendario, hoje) },
+            plantioZarc = plantio.dados?.let { textoDoZarc(context, plantio, hoje).first },
+            plantioRegiao = plantio.dados?.calendario?.regiao,
+            caderno = caderno.registros.filter { it.safra == safraDoCaderno }.takeIf { it.isNotEmpty() }
+                ?.let { resumoDoCaderno(it) },
+            safraDoCaderno = safraDoCaderno,
+        )
+        coroutineScope.launch {
+            val arquivo = withContext(Dispatchers.IO) {
+                runCatching {
+                    val r = montaRelatorio(context, dados)
+                    if (imagem) geraImagem(context, r) else geraPdf(context, r)
+                }.getOrNull()
+            }
+            if (arquivo == null || !compartilhaArquivo(context, arquivo, if (imagem) "image/png" else "application/pdf")) {
+                avisar(context.getString(R.string.relatorio_sem_app))
+            }
+        }
+    }
+
+    if (mostrarCompartilhar) {
+        AlertDialog(
+            onDismissRequest = { mostrarCompartilhar = false },
+            title = { Text(stringResource(R.string.relatorio_compartilhar)) },
+            text = { Text(stringResource(R.string.relatorio_escolha)) },
+            confirmButton = {
+                TextButton(onClick = { mostrarCompartilhar = false; compartilhaResumo(imagem = true) }) {
+                    Text(stringResource(R.string.relatorio_imagem))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarCompartilhar = false; compartilhaResumo(imagem = false) }) {
+                    Text(stringResource(R.string.relatorio_pdf))
+                }
+            },
+        )
+    }
+
     // Cada aba abre do começo: antes, quem rolava o Histórico e ia ao Mercado
     // caía no meio da tela.
     val lista = rememberLazyListState()
@@ -554,6 +611,11 @@ fun AgroDashboard(abaInicial: Int = 0) {
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.weight(1f).semantics { heading() }
                         )
+                        if (currentTab == 0 && previsao != null) {
+                            IconButton(onClick = { mostrarCompartilhar = true }) {
+                                Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.relatorio_compartilhar))
+                            }
+                        }
                         val alertasLigados = remember(currentTab) { Alertas.algumLigado(sharedPrefs) }
                         IconButton(onClick = { currentTab = 8 }) {
                             Icon(if (alertasLigados) Icons.Filled.NotificationsActive else Icons.Filled.NotificationsNone,

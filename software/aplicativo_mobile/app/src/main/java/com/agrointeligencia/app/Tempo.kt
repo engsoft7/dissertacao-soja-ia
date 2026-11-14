@@ -300,6 +300,16 @@ class EstadoTempo(private val prefs: SharedPreferences) {
 // ── formatação ────────────────────────────────────────────────────────────
 
 private val PT = Locale("pt", "BR")
+
+/**
+ * "2 avisos do INMET: tempestade". Dois avisos do mesmo evento, com outro nível
+ * ou outro horário, apareciam como "tempestade, tempestade" no cartão do Resumo
+ * (Teste Premium de 14/11/2026): o nome entra uma vez, e a contagem é a da lista.
+ */
+fun resumoDosAvisos(avisos: List<AvisoMeteorologico>): String {
+    val nomes = avisos.map { (it.evento ?: "aviso").lowercase(PT) }.distinct()
+    return "${avisos.size} aviso${if (avisos.size > 1) "s" else ""} do INMET: " + nomes.joinToString(", ")
+}
 private val DIA_SEMANA = DateTimeFormatter.ofPattern("EEE dd/MM", PT)
 private val DATA_HORA = DateTimeFormatter.ofPattern("dd/MM 'às' HH:mm", PT)
 
@@ -389,8 +399,7 @@ fun TempoResumoCard(estado: EstadoTempo, aoAbrir: () -> Unit) {
                          fontSize = 13.sp, color = corDoNivel(it.nivel), fontWeight = FontWeight.SemiBold)
                 }
                 if (avisos.isNotEmpty()) {
-                    Text("${avisos.size} aviso${if (avisos.size > 1) "s" else ""} do INMET: " +
-                         avisos.joinToString(", ") { it.evento ?: "aviso" }.lowercase(PT),
+                    Text(resumoDosAvisos(avisos),
                          fontSize = 13.sp, color = corDoNivel(NivelJanela.ATENCAO), fontWeight = FontWeight.SemiBold)
                 }
             }

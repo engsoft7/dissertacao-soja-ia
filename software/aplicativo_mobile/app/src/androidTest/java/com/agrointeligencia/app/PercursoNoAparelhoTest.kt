@@ -69,12 +69,48 @@ class PercursoNoAparelhoTest {
         // Não apaga a pasta: o segundo teste da classe gravaria por cima do
         // primeiro. O app é desinstalado antes da rodada (teste_premium_emulador.sh).
         saida.mkdirs()
-        shell("svc wifi enable")
-        shell("svc data enable")
+        ligaRede()
     }
 
     private fun shell(cmd: String) {
         instrumentacao.uiAutomation.executeShellCommand(cmd).close()
+    }
+
+    /** A API do app responde daqui: o teste roda no processo do app, com a mesma rede. */
+    private fun apiResponde(): Boolean = runCatching {
+        val c = java.net.URL(BuildConfig.API_BASE_URL + "api/ping").openConnection() as java.net.HttpURLConnection
+        c.connectTimeout = 4_000
+        c.readTimeout = 4_000
+        try { c.responseCode in 200..499 } finally { c.disconnect() }
+    }.getOrDefault(false)
+
+    /**
+     * Liga a rede e espera a API responder. Depois do modo avião do percurso do
+     * Pará, a rede do emulador levou mais de 150 s para voltar, e o percurso de
+     * Mato Grosso, logo em seguida, abriu sem a lista (run 43551339779).
+     */
+    private fun ligaRede(limiteMs: Long = 180_000) {
+        val t0 = System.currentTimeMillis()
+        if (android.os.Build.VERSION.SDK_INT >= 30) shell("cmd connectivity airplane-mode disable")
+        shell("svc wifi enable")
+        shell("svc data enable")
+        var empurrou = false
+        while (System.currentTimeMillis() - t0 < limiteMs) {
+            if (apiResponde()) {
+                val s = (System.currentTimeMillis() - t0) / 1000
+                if (s >= 5) anota("aviso\ta rede voltou em $s s")
+                return
+            }
+            if (!empurrou && System.currentTimeMillis() - t0 > 60_000) {
+                // Um empurrão: o Wi-Fi do emulador às vezes só reconecta assim.
+                shell("svc wifi disable")
+                Thread.sleep(2_000)
+                shell("svc wifi enable")
+                empurrou = true
+            }
+            Thread.sleep(2_000)
+        }
+        anota("aviso\ta API não respondeu em ${limiteMs / 1000} s depois de ligar a rede")
     }
 
     private fun existe(texto: String) =
@@ -281,17 +317,23 @@ class PercursoNoAparelhoTest {
 
             espera("Tempo em", 60_000)
             regra.onAllNodesWithText("Tempo em", substring = true).onFirst().performClick()
-            // A previsão vem do Open-Meteo pela API; no runner ela às vezes não
-            // chega (run 43548652966). Uma segunda tentativa pelo botão da tela;
-            // a falta dela fica registrada, sem parar o percurso.
+            // A previsão vem do Open-Meteo pela API do runner, que às vezes não a
+            // recebe (runs 43548652966 e 43551339779; em produção, na mesma hora,
+            // ela chegou). O app tem de mostrar a previsão ou dizer que não a
+            // baixou; a falta do Open-Meteo fica como aviso, com o log da API.
             val semPrevisao = "Não foi possível baixar a previsão"
             regra.waitUntil(90_000) { fechaAvisoDoSistema(); existe("Agora") || existe(semPrevisao) }
             if (!existe("Agora")) {
                 anota("aviso\ta previsão do tempo não chegou; tentando de novo pelo botão")
                 regra.onNode(hasContentDescription("Atualizar a previsão")).performClick()
+                // A mensagem sai enquanto a tela tenta de novo; depois, o resultado.
+                runCatching { regra.waitUntil(10_000) { !existe(semPrevisao) } }
                 regra.waitUntil(60_000) { fechaAvisoDoSistema(); existe("Agora") || existe(semPrevisao) }
             }
-            confere("previsão do tempo carregada (Open-Meteo, pela API)", existe("Agora"))
+            confere("a tela do Tempo mostra a previsão ou explica que não a baixou",
+                    existe("Agora") || existe(semPrevisao))
+            if (existe("Agora")) anota("tempo\tprevisão carregada")
+            else anota("aviso\to Open-Meteo não respondeu à API do runner (api_da_branch.txt)")
             tela("05_tempo")
 
             aba("Resumo")
@@ -325,10 +367,20 @@ class PercursoNoAparelhoTest {
 
             // Sem internet: o app abre de novo com o que guardou.
             cenario.close()
+            cenario = null
             shell("svc wifi disable")
             shell("svc data disable")
             if (android.os.Build.VERSION.SDK_INT >= 30) shell("cmd connectivity airplane-mode enable")
             Thread.sleep(5_000)
+            if (apiResponde()) {
+                // No Android 8 o svc não derruba a rede do emulador, e o modo avião
+                // pede root (run 43551339779): com a rede no ar, as verificações sem
+                // internet não valeriam. O teste do app de release cobre esse caso
+                // no mesmo emulador, com root (teste_aparelho.py).
+                anota("aviso\to emulador continuou com rede; a parte sem internet fica com o teste do app de release")
+                anota("fim\tpercurso completo, sem a parte sem internet")
+                return
+            }
             cenario = ActivityScenario.launch(MainActivity::class.java)
             espera("(safra $safra)", 60_000)
             confere("sem internet, o Resumo abre com os dados guardados", true)

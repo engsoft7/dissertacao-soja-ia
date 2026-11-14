@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -69,7 +70,11 @@ fun FontesDosDados() {
             Text(titulo, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             for (f in fontes) {
                 Column(
+                    // 48 dp de alvo de toque: as fontes de link curto (INMET,
+                    // MapBiomas) ficavam com 44 a 46 dp (Accessibility Test
+                    // Framework, Teste Premium de 14/11/2026).
                     modifier = Modifier.fillMaxWidth()
+                        .heightIn(min = 48.dp)
                         .clickable { runCatching { abre.openUri(f.url) } }
                         .padding(vertical = 6.dp)
                 ) {

@@ -306,13 +306,13 @@ fun AgroDashboard(abaInicial: Int = 0) {
     // GPS para o município: a sede mais próxima entre os da lista, calculada
     // no celular. A posição não é guardada nem enviada.
     val leitorMunicipio = rememberLeitorDePosicao(
-        semPermissao = "Sem a permissão de localização, escolha o município na lista.",
+        semPermissao = stringResource(R.string.erro_sem_permissao_localizacao_lista),
         aoFalhar = { avisar(it) }
     ) { lat, lon ->
         val candidatos = municipios.ifEmpty { sedes.keys.toList() }
         val proximo = municipioMaisProximo(lat, lon, candidatos, sedes)
         if (proximo == null) {
-            avisar("Não foi possível achar um município da lista perto de você. Escolha na lista.")
+            avisar(context.getString(R.string.erro_municipio_perto))
         } else {
             escolherMunicipio(proximo.nome)
             mostrarLista = false
@@ -357,8 +357,7 @@ fun AgroDashboard(abaInicial: Int = 0) {
                 if (ufPedida != uf) return@launch
                 if (!respostaDoEstado(ufPedida, response.uf) || response.municipios.isEmpty()) {
                     // Um servidor de antes da v2.5.0 não tem os outros estados.
-                    avisoDoEstado = "${estadoDoApp(ufPedida).nome} ainda não está disponível no servidor. " +
-                        "Escolha o Pará ou tente de novo mais tarde."
+                    avisoDoEstado = context.getString(R.string.estado_indisponivel, estadoDoApp(ufPedida).nome)
                     if (municipios.isEmpty()) errorMsg = avisoDoEstado
                     return@launch
                 }
@@ -382,7 +381,7 @@ fun AgroDashboard(abaInicial: Int = 0) {
             } catch (e: Exception) {
                 e.printStackTrace()
                 if (municipios.isEmpty()) {
-                    errorMsg = "Erro na API: ${e.message}"
+                    errorMsg = context.getString(R.string.erro_api, e.message.orEmpty())
                 }
             } finally {
                 carregandoLista = false
@@ -579,32 +578,32 @@ fun AgroDashboard(abaInicial: Int = 0) {
                     selected = currentTab == 0,
                     onClick = { irPara(0) },
                     icon = { Icon(Icons.Filled.Home, contentDescription = null) },
-                    label = { RotuloAba("Resumo") }
+                    label = { RotuloAba(stringResource(R.string.aba_resumo)) }
                 )
                 NavigationBarItem(
                     selected = currentTab == 1,
                     onClick = { irPara(1) },
                     icon = { Icon(Icons.Filled.LocationOn, contentDescription = null) },
-                    label = { RotuloAba("Mapa") }
+                    label = { RotuloAba(stringResource(R.string.aba_mapa)) }
                 )
                 @Suppress("DEPRECATION")
                 NavigationBarItem(
                     selected = currentTab == 2,
                     onClick = { irPara(2) },
                     icon = { Icon(Icons.Filled.List, contentDescription = null) },
-                    label = { RotuloAba("Histórico") }
+                    label = { RotuloAba(stringResource(R.string.aba_historico)) }
                 )
                 NavigationBarItem(
                     selected = currentTab == 4,
                     onClick = { irPara(4) },
                     icon = { Icon(Icons.Filled.CandlestickChart, contentDescription = null) },
-                    label = { RotuloAba("Mercado") }
+                    label = { RotuloAba(stringResource(R.string.aba_mercado)) }
                 )
                 NavigationBarItem(
                     selected = currentTab == 3,
                     onClick = { irPara(3) },
                     icon = { Icon(Icons.Filled.Info, contentDescription = null) },
-                    label = { RotuloAba("Sobre") }
+                    label = { RotuloAba(stringResource(R.string.aba_sobre)) }
                 )
             }
         }
@@ -629,7 +628,7 @@ fun AgroDashboard(abaInicial: Int = 0) {
                              modifier = Modifier.size(28.dp))
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "AgroInteligência",
+                            text = stringResource(R.string.app_name),
                             fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.primary,
@@ -643,7 +642,7 @@ fun AgroDashboard(abaInicial: Int = 0) {
                         }
                         if (currentTab in 0..2 && selectedMunicipio != null) {
                             IconButton(onClick = { atualizarTudo() }, enabled = !isLoading && !atualizando) {
-                                Icon(Icons.Filled.Refresh, contentDescription = "Atualizar os dados")
+                                Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.atualizar_dados))
                             }
                         }
                     }
@@ -651,8 +650,9 @@ fun AgroDashboard(abaInicial: Int = 0) {
                     // O aviso fala dos dados do município: só nas abas que os mostram.
                     if (isOfflineMode && currentTab in 0..2) {
                         val cor = corAtencao(isDark)
+                        val formatoQuando = stringResource(R.string.formato_data_hora)
                         val quando = previsaoEm.takeIf { it > 0 }?.let {
-                            java.text.SimpleDateFormat("dd/MM 'às' HH:mm", LOCAL_NUMEROS).format(java.util.Date(it))
+                            java.text.SimpleDateFormat(formatoQuando, LOCAL_NUMEROS).format(java.util.Date(it))
                         }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -661,8 +661,8 @@ fun AgroDashboard(abaInicial: Int = 0) {
                             Icon(Icons.Filled.WifiOff, contentDescription = null, tint = cor, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = if (quando != null) "Sem conexão: mostrando os dados guardados em $quando."
-                                       else "Sem conexão: mostrando os últimos dados guardados.",
+                                text = if (quando != null) stringResource(R.string.sem_conexao_quando, quando)
+                                       else stringResource(R.string.sem_conexao),
                                 fontSize = 12.sp, color = cor, fontWeight = FontWeight.Bold
                             )
                         }
@@ -719,12 +719,14 @@ fun AgroDashboard(abaInicial: Int = 0) {
                     EstimativaCampoTela(
                         precoPadrao = precoDoProdutor ?: precoPadraoAtual,
                         fontePreco = when {
-                            precoDoProdutor != null -> "Seu preço, informado na Viabilidade."
-                            pracaHoje != null -> "Cotação de ${pracaHoje.praca} em ${dataCurta(pracaHoje.data)} (Agrolink)."
-                            else -> kpis?.fonte_preco?.let { "Preço de referência: $it." }
+                            precoDoProdutor != null -> stringResource(R.string.preco_do_produtor)
+                            pracaHoje != null -> stringResource(R.string.preco_da_praca, pracaHoje.praca, dataCurta(pracaHoje.data))
+                            else -> kpis?.fonte_preco?.let { stringResource(R.string.preco_referencia_fonte, it) }
                         },
                         referenciaKgHa = projecao?.rendimento_predito,
-                        rotuloReferencia = projecao?.let { "${prev?.municipio ?: selectedMunicipio} em ${it.ano}" },
+                        rotuloReferencia = projecao?.let {
+                            stringResource(R.string.referencia_municipio_ano, prev?.municipio ?: selectedMunicipio.orEmpty(), it.ano)
+                        },
                         aoVoltar = { currentTab = 0 }
                     )
                 }
@@ -778,19 +780,18 @@ fun AgroDashboard(abaInicial: Int = 0) {
                             // Nunca houve imagem de satélite aqui: o mapa é vetorial,
                             // com o contorno do Pará da malha do IBGE, rios do Natural
                             // Earth e círculos coloridos pela produtividade observada.
-                            Text("Mapa indisponível sem conexão", fontWeight = FontWeight.Bold,
+                            Text(stringResource(R.string.mapa_indisponivel), fontWeight = FontWeight.Bold,
                                  color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("O mapa é desenhado pelo servidor. Conecte-se para carregá-lo.",
+                            Text(stringResource(R.string.mapa_servidor),
                                  color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp, textAlign = TextAlign.Center)
                         }
                     } else {
+                        val descricaoDoMapa = stringResource(R.string.mapa_descricao, estado.de, estado.nome) +
+                            (selectedMunicipio?.let { stringResource(R.string.mapa_destaque, it) } ?: "")
                         Card(
                             modifier = Modifier.fillParentMaxHeight(0.82f).fillMaxWidth().padding(1.dp)
-                                .semantics {
-                                    contentDescription = "Mapa da produtividade da soja nos municípios ${estado.de}" +
-                                        (selectedMunicipio?.let { ", com $it em destaque" } ?: "")
-                                },
+                                .semantics { contentDescription = descricaoDoMapa },
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             val currentTheme = if (isDark) "dark" else "light"
@@ -848,25 +849,23 @@ fun AgroDashboard(abaInicial: Int = 0) {
                     CarregandoDados(selectedMunicipio)
                 }
                 errorMsg != null && avisoDoEstado != null -> item {
-                    AvisoSemDados(titulo = "${estado.nome} ainda não está no servidor", texto = avisoDoEstado!!,
-                                  rotulo = "Voltar ao Pará") {
+                    AvisoSemDados(titulo = stringResource(R.string.estado_nao_esta, estado.nome), texto = avisoDoEstado!!,
+                                  rotulo = stringResource(R.string.voltar_ao_para)) {
                         escolherEstado("PA")
                     }
                 }
                 errorMsg != null -> item {
                     AvisoSemDados(
-                        titulo = "Sem conexão com o servidor",
-                        texto = "Não foi possível baixar a lista de municípios e as estimativas. O servidor pode " +
-                                "levar até um minuto para acordar: confira a internet e tente de novo. " +
-                                "A Estimativa no campo funciona sem internet."
+                        titulo = stringResource(R.string.sem_servidor_titulo),
+                        texto = stringResource(R.string.sem_servidor_texto)
                     ) { loadData(); recarga++ }
                 }
                 // Primeira abertura: o cartão de boas-vindas, lá em cima, pergunta o município.
                 selectedMunicipio == null -> {}
                 prev == null -> item {
                     AvisoSemDados(
-                        titulo = "Sem dados de $selectedMunicipio neste celular",
-                        texto = "A estimativa deste município ainda não foi baixada. Confira a internet e tente de novo."
+                        titulo = stringResource(R.string.sem_dados_titulo, selectedMunicipio.orEmpty()),
+                        texto = stringResource(R.string.sem_dados_texto)
                     ) { recarga++ }
                 }
                 else -> {
@@ -881,7 +880,7 @@ fun AgroDashboard(abaInicial: Int = 0) {
                         }
                         if (projecao != null) {
                             item {
-                                TituloSecao(Icons.Filled.BarChart, "Resumo Agronômico (safra ${projecao.ano})")
+                                TituloSecao(Icons.Filled.BarChart, stringResource(R.string.secao_resumo_agronomico, projecao.ano))
                                 ResumoAgronomicoCard(projecao, ultimoReal)
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     BotaoOuvir(leitor?.falando == true, stringResource(R.string.fala_ouvir_resumo)) {
@@ -899,14 +898,14 @@ fun AgroDashboard(abaInicial: Int = 0) {
                             // faz; o simulador climático é ilustração do modelo.
                             kpis?.let { k ->
                                 item {
-                                    TituloSecao(Icons.Filled.MonetizationOn, "Viabilidade Financeira",
+                                    TituloSecao(Icons.Filled.MonetizationOn, stringResource(R.string.secao_viabilidade),
                                                 Modifier.padding(top = 8.dp))
                                     ResumoFinanceiroCard(projecao, k, mercadoHoje?.para,
                                                          mercadoHoje?.pracasDoEstado().orEmpty(), selectedMunicipio, sedes)
                                 }
                             }
                             item {
-                                TituloSecao(Icons.Filled.SettingsSuggest, "Simulador de cenário climático",
+                                TituloSecao(Icons.Filled.SettingsSuggest, stringResource(R.string.secao_simulador),
                                             Modifier.padding(top = 8.dp))
                                 // A safra em curso, a mesma do Resumo: antes o simulador
                                 // partia da seguinte à última divulgada (2026 com o Resumo
@@ -918,11 +917,9 @@ fun AgroDashboard(abaInicial: Int = 0) {
                         }
                     } else if (currentTab == 2) { // Histórico
                         item {
-                            TituloSecao(Icons.Filled.DateRange, "Histórico Completo", Modifier.padding(top = 8.dp))
+                            TituloSecao(Icons.Filled.DateRange, stringResource(R.string.secao_historico), Modifier.padding(top = 8.dp))
                             Text(
-                                text = "A estimativa das safras passadas parte do histórico " +
-                                       "do município e da tendência, com o clima médio da série. " +
-                                       "Ela não é uma previsão refeita ano a ano.",
+                                text = stringResource(R.string.historico_nota),
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 lineHeight = 16.sp,

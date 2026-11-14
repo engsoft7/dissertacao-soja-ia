@@ -1,5 +1,6 @@
 package com.agrointeligencia.app
 
+import androidx.compose.ui.res.stringResource
 import android.os.Bundle
 import android.content.Context
 import android.content.SharedPreferences
@@ -116,7 +117,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?, precoPadr
                 // pela PAM; imprimir esse zero anunciaria colheita nula.
                 Text(
                     text = if (observado) milhar(historico.rendimento_real) + " kg/ha"
-                           else situacaoSemDado(historico.ano),
+                           else stringResource(situacaoSemDado(historico.ano)),
                     fontWeight = FontWeight.Bold,
                     fontSize = if (observado) 16.sp else 12.sp,
                     maxLines = 1,

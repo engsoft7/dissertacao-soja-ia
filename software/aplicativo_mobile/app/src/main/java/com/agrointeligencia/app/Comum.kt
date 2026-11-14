@@ -1,5 +1,6 @@
 package com.agrointeligencia.app
 
+import androidx.compose.ui.res.stringResource
 import android.os.Bundle
 import android.content.Context
 import android.content.SharedPreferences
@@ -105,7 +106,7 @@ fun TituloSecao(icone: ImageVector, texto: String, modifier: Modifier = Modifier
 
 /** Sem dados para mostrar: o que aconteceu, o que ainda funciona e o botão de tentar de novo. */
 @Composable
-fun AvisoSemDados(titulo: String, texto: String, rotulo: String = "Tentar de novo", aoTentar: () -> Unit) {
+fun AvisoSemDados(titulo: String, texto: String, rotulo: String = stringResource(R.string.tentar_de_novo), aoTentar: () -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
@@ -141,9 +142,10 @@ fun CarregandoDados(municipio: String?) {
     ) {
         CircularProgressIndicator()
         Spacer(Modifier.height(12.dp))
-        Text("Carregando os dados" + (municipio?.let { " de $it" } ?: "") + "…", fontSize = 15.sp,
+        Text(municipio?.let { stringResource(R.string.carregando_dados_de, it) } ?: stringResource(R.string.carregando_dados),
+             fontSize = 15.sp,
              fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
-        Text("Na primeira consulta do dia o servidor pode levar até um minuto para responder.",
+        Text(stringResource(R.string.servidor_acorda),
              fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center,
              lineHeight = 16.sp, modifier = Modifier.padding(top = 4.dp))
     }
@@ -179,10 +181,16 @@ fun reaisInteiros(v: Double): String =
 
 private val MESES_CURTOS = listOf("jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez")
 
-/** "2026-10" -> "out/26"; com ano por extenso, "out/2026". */
+/**
+ * "2026-10" -> "out/26"; com ano por extenso, "out/2026". Em português, as
+ * abreviações sem ponto de MESES_CURTOS; nos outros idiomas, as do idioma
+ * ("Oct/26").
+ */
 fun mesCurto(mes: String, anoCompleto: Boolean = false): String {
     val (ano, m) = mes.split("-").let { it[0] to it[1].toInt() }
-    return MESES_CURTOS[m - 1] + "/" + if (anoCompleto) ano else ano.takeLast(2)
+    val nome = if (LOCAL_NUMEROS.language == "pt") MESES_CURTOS[m - 1]
+               else java.time.Month.of(m).getDisplayName(java.time.format.TextStyle.SHORT, LOCAL_NUMEROS)
+    return nome + "/" + if (anoCompleto) ano else ano.takeLast(2)
 }
 
 /** Amostra de cor e rótulo de uma legenda de gráfico. */

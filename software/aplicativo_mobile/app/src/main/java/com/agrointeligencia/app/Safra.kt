@@ -39,9 +39,9 @@ fun projecaoDaSafra(historico: List<PrevisaoHistorico>, hoje: LocalDate = LocalD
     return projecoes(historico).minWithOrNull(compareBy({ abs(it.ano - alvo) }, { -it.ano }))
 }
 
-/** O que dizer de uma safra sem dado do IBGE: ainda por colher, ou colhida e não divulgada. */
-fun situacaoSemDado(ano: Int, hoje: LocalDate = LocalDate.now()): String =
-    if (ano >= anoDaSafraEmCurso(hoje)) "a colher" else "IBGE ainda não divulgou"
+/** O que dizer de uma safra sem dado do IBGE (o texto, em strings.xml): ainda por colher, ou colhida e não divulgada. */
+fun situacaoSemDado(ano: Int, hoje: LocalDate = LocalDate.now()): Int =
+    if (ano >= anoDaSafraEmCurso(hoje)) R.string.safra_a_colher else R.string.safra_sem_ibge
 
 /** "a", "a e b", "a, b e c". */
 fun juntaComE(partes: List<String>): String = when (partes.size) {

@@ -201,4 +201,82 @@
     <string name="fala_janela_dia">on %1$s, between %2$d:00 and %3$d:00</string>
     <string name="fala_sem_janela">No good spraying window in the next %1$d hours.</string>
     <string name="fala_hoje">Today, a high of %1$d and a low of %2$d degrees, with a %3$d percent chance of rain.</string>
+
+    <!-- Tela principal (MainActivity.kt) -->
+    <string name="erro_sem_permissao_localizacao_lista">Without location permission, choose the municipality from the list.</string>
+    <string name="erro_municipio_perto">Could not find a municipality from the list near you. Choose from the list.</string>
+    <string name="estado_indisponivel">%1$s is not available on the server yet. Choose Pará or try again later.</string>
+    <string name="erro_api">API error: %1$s</string>
+    <string name="aba_resumo">Summary</string>
+    <string name="aba_mapa">Map</string>
+    <string name="aba_historico">History</string>
+    <string name="aba_mercado">Market</string>
+    <string name="aba_sobre">About</string>
+    <string name="atualizar_dados">Refresh the data</string>
+    <string name="formato_data_hora">MMM d \'at\' HH:mm</string>
+    <string name="sem_conexao_quando">No connection: showing the data saved on %1$s.</string>
+    <string name="sem_conexao">No connection: showing the last saved data.</string>
+    <string name="preco_do_produtor">Your price, entered in Viability.</string>
+    <string name="preco_da_praca">Quote for %1$s on %2$s (Agrolink).</string>
+    <string name="preco_referencia_fonte">Reference price: %1$s.</string>
+    <string name="referencia_municipio_ano">%1$s in %2$d</string>
+    <string name="mapa_indisponivel">Map unavailable offline</string>
+    <string name="mapa_servidor">The map is drawn by the server. Connect to load it.</string>
+    <string name="mapa_descricao">Map of soybean yield in the municipalities of %2$s</string>
+    <string name="mapa_destaque">, with %1$s highlighted</string>
+    <string name="estado_nao_esta">%1$s is not on the server yet</string>
+    <string name="voltar_ao_para">Back to Pará</string>
+    <string name="sem_servidor_titulo">No connection to the server</string>
+    <string name="sem_servidor_texto">Could not download the list of municipalities and the estimates. The server can take up to a minute to wake up: check the internet and try again. The Field estimate works offline.</string>
+    <string name="sem_dados_titulo">No data for %1$s on this phone</string>
+    <string name="sem_dados_texto">This municipality\'s estimate has not been downloaded yet. Check the internet and try again.</string>
+    <string name="secao_resumo_agronomico">Agronomic summary (%1$d season)</string>
+    <string name="secao_viabilidade">Financial viability</string>
+    <string name="secao_simulador">Climate scenario simulator</string>
+    <string name="secao_historico">Full history</string>
+    <string name="historico_nota">The estimate for past seasons starts from the municipality\'s history and trend, with the series\' average climate. It is not a forecast redone year by year.</string>
+
+    <!-- Resumo (Resumo.kt) -->
+    <string name="campo_atalho_titulo">Field estimate</string>
+    <string name="campo_atalho_texto">Take photos, count plants and pods and see your field\'s yield.</string>
+    <string name="resumo_esperada">Expected yield in the %1$d season</string>
+    <string name="resumo_sacas_ha">(~ %1$d bags/ha)</string>
+    <string name="resumo_erro_tipico">Model estimate, with a typical error of ± %1$s kg/ha.</string>
+    <string name="resumo_tipo_ibge">IBGE</string>
+    <string name="resumo_tipo_estimada">estimated</string>
+    <string name="resumo_safra_tipo">%1$d season, %2$s</string>
+    <string name="resumo_em_relacao">Compared with %1$d</string>
+    <string name="cenario_projecao">Projection with the scenario</string>
+    <string name="cenario_projecao_safra">Projection with the scenario, %1$d season</string>
+    <string name="cenario_chuva_media">%1$d%% of average rain</string>
+    <string name="cenario_temperatura_media">average temperature</string>
+    <string name="cenario_temperatura_desvio">%1$s °C on the average temperature</string>
+    <string name="cenario_chuva_rotulo">Rain: %1$s</string>
+    <string name="cenario_temperatura_rotulo">Temperature: %1$s</string>
+    <string name="cenario_chuva_descricao">Season rainfall</string>
+    <string name="cenario_temperatura_descricao">Season temperature</string>
+    <string name="cenario_falhou">Could not simulate now. Check the internet and move the control again.</string>
+    <string name="cenario_chuva_sem_efeito">In this dataset, rain showed no clear effect on yield.</string>
+    <string name="cenario_chuva_pequeno">In this dataset, rain has a small effect on yield.</string>
+    <string name="cenario_cabe_margem">The change above fits within the model\'s margin of error (± %1$s kg/ha).</string>
+    <string name="cenario_passa_margem">The change above exceeds the model\'s margin of error (± %1$s kg/ha).</string>
+    <string name="cenario_fora_faixa">Scenario outside the range observed in the dataset; the result was capped at the limit of what the model saw.</string>
+    <string name="assoc_chuva_menos">every 10%% less rain took off, on average, %1$s kg/ha</string>
+    <string name="assoc_chuva_mais">every 10%% more rain took off, on average, %1$s kg/ha</string>
+    <string name="assoc_temp_tirou">every 1 °C above normal took off, on average, %1$s kg/ha</string>
+    <string name="assoc_temp_somou">every 1 °C above normal added, on average, %1$s kg/ha</string>
+    <string name="assoc_a_chuva">rain</string>
+    <string name="assoc_a_temperatura">temperature</string>
+    <string name="assoc_e">and</string>
+    <string name="assoc_nenhum">In this dataset, neither rain nor temperature showed a clear effect on yield: the scenario does not change the projection.</string>
+    <string name="assoc_claros">In this dataset, %1$s.</string>
+    <string name="assoc_claros_sem_efeito">In this dataset, %1$s; %2$s showed no clear effect.</string>
+
+    <!-- Comum.kt e Safra.kt -->
+    <string name="tentar_de_novo">Try again</string>
+    <string name="carregando_dados">Loading the data…</string>
+    <string name="carregando_dados_de">Loading the data for %1$s…</string>
+    <string name="servidor_acorda">On the first request of the day the server can take up to a minute to respond.</string>
+    <string name="safra_a_colher">to be harvested</string>
+    <string name="safra_sem_ibge">IBGE has not published yet</string>
 </resources>

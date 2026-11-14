@@ -199,4 +199,82 @@
     <string name="fala_janela_dia">em %1$s, das %2$d às %3$d horas</string>
     <string name="fala_sem_janela">Nenhuma janela boa para pulverizar nas próximas %1$d horas.</string>
     <string name="fala_hoje">Hoje, máxima de %1$d e mínima de %2$d graus, com %3$d por cento de chance de chuva.</string>
+
+    <!-- Tela principal (MainActivity.kt) -->
+    <string name="erro_sem_permissao_localizacao_lista">Sem a permissão de localização, escolha o município na lista.</string>
+    <string name="erro_municipio_perto">Não foi possível achar um município da lista perto de você. Escolha na lista.</string>
+    <string name="estado_indisponivel">%1$s ainda não está disponível no servidor. Escolha o Pará ou tente de novo mais tarde.</string>
+    <string name="erro_api">Erro na API: %1$s</string>
+    <string name="aba_resumo">Resumo</string>
+    <string name="aba_mapa">Mapa</string>
+    <string name="aba_historico">Histórico</string>
+    <string name="aba_mercado">Mercado</string>
+    <string name="aba_sobre">Sobre</string>
+    <string name="atualizar_dados">Atualizar os dados</string>
+    <string name="formato_data_hora">dd/MM \'às\' HH:mm</string>
+    <string name="sem_conexao_quando">Sem conexão: mostrando os dados guardados em %1$s.</string>
+    <string name="sem_conexao">Sem conexão: mostrando os últimos dados guardados.</string>
+    <string name="preco_do_produtor">Seu preço, informado na Viabilidade.</string>
+    <string name="preco_da_praca">Cotação de %1$s em %2$s (Agrolink).</string>
+    <string name="preco_referencia_fonte">Preço de referência: %1$s.</string>
+    <string name="referencia_municipio_ano">%1$s em %2$d</string>
+    <string name="mapa_indisponivel">Mapa indisponível sem conexão</string>
+    <string name="mapa_servidor">O mapa é desenhado pelo servidor. Conecte-se para carregá-lo.</string>
+    <string name="mapa_descricao">Mapa da produtividade da soja nos municípios %1$s</string>
+    <string name="mapa_destaque">, com %1$s em destaque</string>
+    <string name="estado_nao_esta">%1$s ainda não está no servidor</string>
+    <string name="voltar_ao_para">Voltar ao Pará</string>
+    <string name="sem_servidor_titulo">Sem conexão com o servidor</string>
+    <string name="sem_servidor_texto">Não foi possível baixar a lista de municípios e as estimativas. O servidor pode levar até um minuto para acordar: confira a internet e tente de novo. A Estimativa no campo funciona sem internet.</string>
+    <string name="sem_dados_titulo">Sem dados de %1$s neste celular</string>
+    <string name="sem_dados_texto">A estimativa deste município ainda não foi baixada. Confira a internet e tente de novo.</string>
+    <string name="secao_resumo_agronomico">Resumo Agronômico (safra %1$d)</string>
+    <string name="secao_viabilidade">Viabilidade Financeira</string>
+    <string name="secao_simulador">Simulador de cenário climático</string>
+    <string name="secao_historico">Histórico Completo</string>
+    <string name="historico_nota">A estimativa das safras passadas parte do histórico do município e da tendência, com o clima médio da série. Ela não é uma previsão refeita ano a ano.</string>
+
+    <!-- Resumo (Resumo.kt) -->
+    <string name="campo_atalho_titulo">Estimativa no campo</string>
+    <string name="campo_atalho_texto">Fotografe, conte plantas e vagens e veja a produtividade da sua lavoura.</string>
+    <string name="resumo_esperada">Produtividade esperada na safra %1$d</string>
+    <string name="resumo_sacas_ha">(~ %1$d sc/ha)</string>
+    <string name="resumo_erro_tipico">Estimativa do modelo, com erro típico de ± %1$s kg/ha.</string>
+    <string name="resumo_tipo_ibge">IBGE</string>
+    <string name="resumo_tipo_estimada">estimada</string>
+    <string name="resumo_safra_tipo">Safra %1$d, %2$s</string>
+    <string name="resumo_em_relacao">Em relação a %1$d</string>
+    <string name="cenario_projecao">Projeção com o cenário</string>
+    <string name="cenario_projecao_safra">Projeção com o cenário, safra %1$d</string>
+    <string name="cenario_chuva_media">%1$d%% da chuva média</string>
+    <string name="cenario_temperatura_media">temperatura média</string>
+    <string name="cenario_temperatura_desvio">%1$s °C na temperatura média</string>
+    <string name="cenario_chuva_rotulo">Chuva: %1$s</string>
+    <string name="cenario_temperatura_rotulo">Temperatura: %1$s</string>
+    <string name="cenario_chuva_descricao">Chuva da safra</string>
+    <string name="cenario_temperatura_descricao">Temperatura da safra</string>
+    <string name="cenario_falhou">Não foi possível simular agora. Confira a internet e mova o controle de novo.</string>
+    <string name="cenario_chuva_sem_efeito">Nesta base, a chuva não mostrou efeito claro na produtividade.</string>
+    <string name="cenario_chuva_pequeno">Nesta base, a chuva tem efeito pequeno na produtividade.</string>
+    <string name="cenario_cabe_margem">A variação acima cabe na margem de erro do modelo (± %1$s kg/ha).</string>
+    <string name="cenario_passa_margem">A variação acima passa da margem de erro do modelo (± %1$s kg/ha).</string>
+    <string name="cenario_fora_faixa">Cenário fora da faixa observada na base; o resultado foi preso ao limite do que o modelo viu.</string>
+    <string name="assoc_chuva_menos">cada 10%% a menos de chuva tirou, em média, %1$s kg/ha</string>
+    <string name="assoc_chuva_mais">cada 10%% a mais de chuva tirou, em média, %1$s kg/ha</string>
+    <string name="assoc_temp_tirou">cada 1 °C acima do normal tirou, em média, %1$s kg/ha</string>
+    <string name="assoc_temp_somou">cada 1 °C acima do normal somou, em média, %1$s kg/ha</string>
+    <string name="assoc_a_chuva">a chuva</string>
+    <string name="assoc_a_temperatura">a temperatura</string>
+    <string name="assoc_e">e</string>
+    <string name="assoc_nenhum">Nesta base, nem a chuva nem a temperatura mostraram efeito claro na produtividade: o cenário não muda a projeção.</string>
+    <string name="assoc_claros">Nesta base, %1$s.</string>
+    <string name="assoc_claros_sem_efeito">Nesta base, %1$s; %2$s não mostrou efeito claro.</string>
+
+    <!-- Comum.kt e Safra.kt -->
+    <string name="tentar_de_novo">Tentar de novo</string>
+    <string name="carregando_dados">Carregando os dados…</string>
+    <string name="carregando_dados_de">Carregando os dados de %1$s…</string>
+    <string name="servidor_acorda">Na primeira consulta do dia o servidor pode levar até um minuto para responder.</string>
+    <string name="safra_a_colher">a colher</string>
+    <string name="safra_sem_ibge">IBGE ainda não divulgou</string>
 </resources>

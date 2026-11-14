@@ -293,16 +293,16 @@ object Notificacoes {
     }
 
     fun avisoDoInmet(context: Context, a: AvisoMeteorologico, lugar: LugarTempo) {
-        val evento = a.evento ?: context.getString(R.string.alerta_inmet_evento)
-        val titulo = a.severidade?.let { context.getString(R.string.alerta_inmet_titulo_severidade, evento, it) }
+        val evento = a.evento?.let { nomeDoInmet(context, it) } ?: context.getString(R.string.alerta_inmet_evento)
+        val titulo = a.severidade?.let { context.getString(R.string.alerta_inmet_titulo_severidade, evento, nomeDoInmet(context, it)) }
             ?: context.getString(R.string.alerta_inmet_titulo, evento)
         val texto = context.getString(R.string.alerta_inmet_texto, lugar.nome, dataDoAviso(a.inicio), dataDoAviso(a.fim))
         mostra(context, a.id.hashCode(), CANAL_INMET, titulo, texto, ABA_TEMPO)
     }
 
     fun janelaDePulverizacao(context: Context, j: Janela, agora: LocalDateTime, lugar: LugarTempo) {
-        val ini = "${j.inicio.hour}h"
-        val fim = "${j.fim.hour}h"
+        val ini = horaCurta(context, j.inicio)
+        val fim = horaCurta(context, j.fim)
         val texto = when (diaDaJanela(j, agora)) {
             QuandoJanela.HOJE -> context.getString(R.string.alerta_pulverizacao_hoje, ini, fim, lugar.nome)
             QuandoJanela.AMANHA -> context.getString(R.string.alerta_pulverizacao_amanha, ini, fim, lugar.nome)

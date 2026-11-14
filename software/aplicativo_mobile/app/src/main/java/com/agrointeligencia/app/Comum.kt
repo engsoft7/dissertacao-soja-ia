@@ -159,9 +159,19 @@ object Formatos {
     @Volatile
     var locale: java.util.Locale = java.util.Locale("pt", "BR")
         private set
+    /** Dia e mês curtos ("26/10"; em inglês, "Oct 26"). */
+    @Volatile
+    var diaMes: String = "dd/MM"
+        private set
+    /** Dia, mês e hora ("26/10 às 00:00"; em inglês, "Oct 26 at 00:00"). */
+    @Volatile
+    var dataHora: String = "dd/MM 'às' HH:mm"
+        private set
 
     fun doIdioma(context: android.content.Context) {
         locale = java.util.Locale.forLanguageTag(context.getString(R.string.formato_numeros))
+        diaMes = context.getString(R.string.formato_dia_mes)
+        dataHora = context.getString(R.string.formato_data_hora)
     }
 }
 

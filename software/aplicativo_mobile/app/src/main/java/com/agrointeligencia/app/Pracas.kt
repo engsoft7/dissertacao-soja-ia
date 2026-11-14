@@ -51,6 +51,6 @@ fun pracaParaUsar(
     }
 }
 
-/** "2026-11-05" -> "05/11". */
+/** "2026-11-05" -> "05/11" (em inglês, "Nov 5"), no formato que Formatos guardou do idioma. */
 fun dataCurta(data: String): String =
-    runCatching { LocalDate.parse(data).format(DateTimeFormatter.ofPattern("dd/MM")) }.getOrDefault(data)
+    runCatching { LocalDate.parse(data).format(DateTimeFormatter.ofPattern(Formatos.diaMes, Formatos.locale)) }.getOrDefault(data)

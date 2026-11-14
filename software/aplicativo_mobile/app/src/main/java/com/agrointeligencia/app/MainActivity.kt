@@ -250,7 +250,8 @@ fun AgroDashboard(abaInicial: Int = 0) {
 
     // Previsão do tempo (Tempo.kt): vem do Open-Meteo, e não da API, e por
     // isso carrega mesmo com a API dormindo. Serve o cartão do Resumo e a tela.
-    val tempo = remember { EstadoTempo(sharedPrefs) }
+    val nomeDoGps = stringResource(R.string.tempo_sua_localizacao)
+    val tempo = remember { EstadoTempo(sharedPrefs, nomeDoGps) }
     LaunchedEffect(sedes) { tempo.sedes = sedes }
     val lugarTempo = tempo.lugarPara(selectedMunicipio)
     LaunchedEffect(lugarTempo) { lugarTempo?.let { tempo.carrega(it) } }

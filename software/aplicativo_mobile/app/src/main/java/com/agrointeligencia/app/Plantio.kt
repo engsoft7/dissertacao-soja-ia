@@ -227,7 +227,7 @@ fun PlantioResumoCard(estado: EstadoPlantio, hoje: LocalDate = LocalDate.now(), 
 }
 
 @Composable
-private fun CartaoPlantio(titulo: String, icone: androidx.compose.ui.graphics.vector.ImageVector,
+internal fun CartaoComTitulo(titulo: String, icone: androidx.compose.ui.graphics.vector.ImageVector,
                           conteudo: @Composable ColumnScope.() -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -290,11 +290,11 @@ fun PlantioTela(estado: EstadoPlantio, municipio: String?, aoAtualizar: () -> Un
 private fun CartaoCalendario(c: CalendarioPlantio?, hoje: LocalDate) {
     val secundaria = MaterialTheme.colorScheme.onSurfaceVariant
     val uri = LocalUriHandler.current
-    CartaoPlantio(stringResource(R.string.plantio_secao_calendario), Icons.Filled.CalendarMonth) {
+    CartaoComTitulo(stringResource(R.string.plantio_secao_calendario), Icons.Filled.CalendarMonth) {
         val semeadura = periodoDeSemeadura(c)
         if (c == null || semeadura == null) {
             Text(stringResource(R.string.plantio_sem_calendario), fontSize = 14.sp, color = secundaria)
-            return@CartaoPlantio
+            return@CartaoComTitulo
         }
         val f = formato(R.string.plantio_formato_data)
         fraseDoCalendario(c, hoje)?.let {
@@ -328,10 +328,10 @@ private fun CartaoZarc(estado: EstadoPlantio, hoje: LocalDate) {
     val d = estado.dados
     val z = d?.zarc
     val ini = anoInicialDaSafra(d?.safra)
-    CartaoPlantio(stringResource(R.string.plantio_secao_zarc), Icons.Filled.WbSunny) {
+    CartaoComTitulo(stringResource(R.string.plantio_secao_zarc), Icons.Filled.WbSunny) {
         if (z == null || ini == null) {
             Text(stringResource(R.string.plantio_zarc_sem_zoneamento), fontSize = 14.sp, color = secundaria)
-            return@CartaoPlantio
+            return@CartaoComTitulo
         }
         val (frase, risco) = fraseDoZarc(estado, hoje)
         Text(frase, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,

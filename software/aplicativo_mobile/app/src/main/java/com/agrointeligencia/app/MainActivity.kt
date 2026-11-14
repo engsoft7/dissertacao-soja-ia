@@ -64,6 +64,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.lazy.rememberLazyListState
 import kotlinx.coroutines.flow.first
 import androidx.lifecycle.Lifecycle
@@ -132,7 +133,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AgroDashboard()
+                    // A notificação de um alerta abre a aba do assunto (Alertas.kt).
+                    AgroDashboard(abaInicial = intent?.getIntExtra(Notificacoes.EXTRA_ABA, 0) ?: 0)
                 }
             }
         }
@@ -168,7 +170,7 @@ fun temRede(context: Context): Boolean {
 }
 
 @Composable
-fun AgroDashboard() {
+fun AgroDashboard(abaInicial: Int = 0) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -197,7 +199,9 @@ fun AgroDashboard() {
     var errorMsg by remember { mutableStateOf<String?>(null) }
     // Salvável: a câmera da Estimativa no campo pode levar o Android a
     // encerrar o app, e na volta ele precisa reabrir na mesma tela.
-    var currentTab by rememberSaveable { mutableStateOf(0) }
+    var currentTab by rememberSaveable {
+        mutableStateOf(abaInicial.takeIf { it in setOf(Notificacoes.ABA_MERCADO, Notificacoes.ABA_TEMPO) } ?: 0)
+    }
     var isOfflineMode by remember { mutableStateOf(false) }
     var mostrarLista by rememberSaveable { mutableStateOf(false) }
     // Aumenta a cada "atualizar" e refaz a busca da previsão do município.
@@ -235,6 +239,14 @@ fun AgroDashboard() {
     LaunchedEffect(sedes) { tempo.sedes = sedes }
     val lugarTempo = tempo.lugarPara(selectedMunicipio)
     LaunchedEffect(lugarTempo) { lugarTempo?.let { tempo.carrega(it) } }
+
+    // Alertas (Alertas.kt): o lugar da previsão e o estado, para a conferência
+    // em segundo plano, que não abre a tela; e a agenda refeita a cada abertura
+    // (com tudo desligado, nada fica agendado).
+    LaunchedEffect(lugarTempo, uf) {
+        Alertas.guardaContexto(sharedPrefs, lugarTempo, uf)
+        Alertas.atualizaAgenda(context, sharedPrefs)
+    }
 
     // Janela de plantio (Plantio.kt): calendário da portaria e ZARC do município.
     val plantio = remember { EstadoPlantio(sharedPrefs) }
@@ -539,6 +551,12 @@ fun AgroDashboard() {
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.weight(1f).semantics { heading() }
                         )
+                        val alertasLigados = remember(currentTab) { Alertas.algumLigado(sharedPrefs) }
+                        IconButton(onClick = { currentTab = 8 }) {
+                            Icon(if (alertasLigados) Icons.Filled.NotificationsActive else Icons.Filled.NotificationsNone,
+                                 contentDescription = stringResource(R.string.alertas_abrir),
+                                 tint = if (alertasLigados) MaterialTheme.colorScheme.primary else LocalContentColor.current)
+                        }
                         if (currentTab in 0..2 && selectedMunicipio != null) {
                             IconButton(onClick = { atualizarTudo() }, enabled = !isLoading && !atualizando) {
                                 Icon(Icons.Filled.Refresh, contentDescription = "Atualizar os dados")
@@ -625,6 +643,11 @@ fun AgroDashboard() {
                 }
                 currentTab == 6 -> item {
                     TempoTela(tempo, selectedMunicipio) { currentTab = 0 }
+                }
+                currentTab == 8 -> item {
+                    AlertasTela(sharedPrefs, lugarTempo, mercadoHoje?.pracasDoEstado().orEmpty(), pracaHoje) {
+                        currentTab = 0
+                    }
                 }
                 currentTab == 7 -> item {
                     PlantioTela(

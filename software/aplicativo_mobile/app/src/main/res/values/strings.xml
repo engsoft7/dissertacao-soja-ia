@@ -50,4 +50,44 @@
     <string name="plantio_legenda_vazio">Vazio sanitário</string>
     <string name="plantio_legenda_semeadura">Semeadura</string>
     <string name="plantio_regras">Fora do calendário de semeadura, plantar soja é proibido. Fora da janela do ZARC, é permitido, mas sem o Proagro e sem boa parte do crédito rural.</string>
+
+    <!-- Alertas no celular (Alertas.kt) -->
+    <string name="alerta_canal_inmet">Avisos do INMET</string>
+    <string name="alerta_canal_pulverizacao">Janela de pulverização</string>
+    <string name="alerta_canal_preco">Preço da soja</string>
+    <string name="alerta_inmet_titulo">Aviso do INMET: %1$s</string>
+    <string name="alerta_inmet_titulo_severidade">Aviso do INMET: %1$s (%2$s)</string>
+    <string name="alerta_inmet_evento">tempo severo</string>
+    <string name="alerta_inmet_texto">Em %1$s, de %2$s a %3$s. Toque para ver os riscos e o que fazer.</string>
+    <string name="alerta_pulverizacao_titulo">Janela boa para pulverizar</string>
+    <string name="alerta_pulverizacao_hoje">Hoje, das %1$s às %2$s, em %3$s. Confira a bula e o vento no local antes de aplicar.</string>
+    <string name="alerta_pulverizacao_amanha">Amanhã, das %1$s às %2$s, em %3$s. Confira a bula e o vento no local antes de aplicar.</string>
+    <string name="alerta_pulverizacao_dia">Em %1$s, das %2$s às %3$s, em %4$s. Confira a bula e o vento no local antes de aplicar.</string>
+    <string name="alerta_preco_titulo">Soja a R$ %1$s em %2$s</string>
+    <string name="alerta_preco_texto">A cotação de %1$s em %2$s chegou ao seu preço-alvo de R$ %3$s por saca (Agrolink).</string>
+    <string name="alerta_teste_titulo">Alertas do AgroInteligência</string>
+    <string name="alerta_teste_texto">É assim que os alertas vão chegar.</string>
+
+    <string name="alertas_titulo">Alertas</string>
+    <string name="alertas_abrir">Alertas no celular</string>
+    <string name="alertas_voltar">Voltar ao Resumo</string>
+    <string name="alertas_explicacao">Ligue o que quer receber. O celular confere a cada 3 horas, com internet, mesmo com o app fechado, e avisa por notificação. O Android pode atrasar a conferência para poupar bateria.</string>
+    <string name="alertas_sem_permissao_titulo">Notificações desligadas</string>
+    <string name="alertas_sem_permissao">O Android não está deixando o app mostrar notificações. Sem isso, os alertas não aparecem.</string>
+    <string name="alertas_permitir">Permitir notificações</string>
+    <string name="alertas_inmet">Avisos do INMET</string>
+    <string name="alertas_inmet_lugar">Avisar quando o INMET publicar um aviso de tempo severo para %1$s.</string>
+    <string name="alertas_sem_lugar">Escolha um município, ou a sua localização na tela Tempo, para ligar este alerta.</string>
+    <string name="alertas_pulverizacao">Janela de pulverização</string>
+    <string name="alertas_pulverizacao_lugar">Avisar, no máximo uma vez por dia, a próxima janela de ao menos 2 horas boas para pulverizar em %1$s, pelos critérios da Embrapa Soja.</string>
+    <string name="alertas_preco">Preço da saca</string>
+    <string name="alertas_preco_explicacao">Avisar quando a cotação do dia na praça chegar ao preço-alvo. Avisa de novo só depois de a cotação cair abaixo dele.</string>
+    <string name="alertas_praca">Praça</string>
+    <string name="alertas_praca_valor">%1$s · R$ %2$s (%3$s)</string>
+    <string name="alertas_sem_pracas">Sem a cotação das praças agora. Abra o Mercado com internet para carregar as praças.</string>
+    <string name="alertas_preco_alvo">Preço-alvo por saca</string>
+    <string name="alertas_testar">Mandar uma notificação de teste</string>
+    <string name="alertas_privacidade">Para conferir, o app manda o lugar da previsão (a sede do município ou a sua posição arredondada a cerca de 1 km) e o estado, como as telas Tempo e Mercado já fazem. Nada mais sai do celular.</string>
+    <string name="alertas_ligado">ligado</string>
+    <string name="alertas_desligado">desligado</string>
 </resources>

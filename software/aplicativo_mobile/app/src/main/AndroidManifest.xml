@@ -12,6 +12,11 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Nem câmera nem GPS são obrigatórios: sem eles a área e as contagens
          podem ser digitadas, e a loja não deve esconder o app desses aparelhos. -->
+    <!-- Alertas no celular (Alertas.kt), só se o produtor ligar algum: mostrar
+         a notificação (Android 13+) e voltar a agendar a conferência depois que
+         o celular reinicia. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
     <!-- Só HTTPS: a API, o Open-Meteo e as bibliotecas que o mapa carrega
@@ -37,6 +42,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- A conferência dos alertas, chamada pelo JobScheduler do Android. -->
+        <service
+            android:name=".AlertasJob"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fotos"

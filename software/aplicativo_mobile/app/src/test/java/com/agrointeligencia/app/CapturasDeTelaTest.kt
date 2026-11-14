@@ -258,6 +258,22 @@ class CapturasDeTelaTest {
         captura("plantio", false) { telaPlantio(estado) }
     }
 
+    // Alertas: INMET e preço ligados, com a praça de Paragominas e o alvo de R$ 140.
+    private fun prefsDosAlertas() = org.robolectric.RuntimeEnvironment.getApplication()
+        .getSharedPreferences("capturas_alertas", android.content.Context.MODE_PRIVATE).also {
+            it.edit().clear().putBoolean(PREF_ALERTA_INMET, true).putBoolean(PREF_ALERTA_PRECO, true)
+                .putString(PREF_ALERTA_PRECO_PRACA, "Paragominas").putFloat(PREF_ALERTA_PRECO_ALVO, 140f).commit()
+        }
+
+    @Config(qualifiers = "w411dp-h1500dp-xxhdpi")
+    @Test fun alertas_claro() {
+        val prefs = prefsDosAlertas()
+        captura("alertas", false) {
+            AlertasTela(prefs, SEDES_MUNICIPAIS["Paragominas"], mercado.pracas_para.orEmpty(),
+                        mercado.pracas_para?.firstOrNull()) {}
+        }
+    }
+
     @Config(qualifiers = "w411dp-h1700dp-night-xxhdpi")
     @Test fun plantio_escuro() {
         val estado = estadoPlantio()

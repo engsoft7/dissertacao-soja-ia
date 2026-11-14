@@ -1,0 +1,22 @@
+# Preço da soja recebido pelo produtor, por semana e município, da CONAB:
+# a fonte aberta que substitui a Notícias Agrícolas (issue #187).
+name: Preços da CONAB
+
+on:
+  push:
+    paths:
+      - "software/automacao_github/coleta_precos_conab.py"
+      - ".github/workflows/precos-conab.yml"
+  workflow_dispatch:
+
+jobs:
+  coleta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet requests
+      - name: Diagnóstico dos arquivos de preço
+        run: python software/automacao_github/coleta_precos_conab.py --diagnostico

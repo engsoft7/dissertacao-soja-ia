@@ -1,4 +1,4 @@
-INFO:     Started server process [2573]
+INFO:     Started server process [2383]
 INFO:     Waiting for application startup.
 Pará: pronto, do cache da build.
 Modelo carregado e treinado com sucesso.
@@ -13,29 +13,29 @@ Tocantins: modelo pronto (1741 registros).
 Rondônia: pronto, do cache da build.
 Rondônia: modelo pronto (526 registros).
 Finance cache atualizado: R$ 153.85/sc
-INFO:     127.0.0.1:55452 - "GET /api/estados HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44782 - "GET /api/ping HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44798 - "GET /api/ping HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44800 - "GET /api/municipios HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44798 - "GET /api/contador HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44798 - "GET /api/financas/Paragominas HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44796 - "GET /api/mercado?periodo=1d HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44798 - "GET /api/previsao/Pau%20D%27Arco HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44796 - "GET /api/plantio/Pau%20D%27Arco HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50512 - "GET /api/avisos?lat=-7.83874&lon=-50.04423&geocode=1505551 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57632 - "GET /api/avisos?lat=-7.83874&lon=-50.04423&geocode=1505551 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33524 - "GET /api/mercado?periodo=1d HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58724 - "GET /api/ping HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58734 - "GET /api/ping HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58734 - "GET /api/mercado?periodo=1d HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58738 - "GET /api/contador HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58738 - "GET /api/municipios HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58734 - "GET /api/financas/Paragominas HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58738 - "GET /api/municipios?uf=MT&com_sedes=true HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58754 - "GET /api/ping HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58738 - "GET /api/financas/Alta%20Floresta?uf=MT HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58734 - "GET /api/mercado?periodo=1d&uf=MT HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58734 - "GET /api/plantio/Sorriso?uf=MT HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58738 - "GET /api/previsao/Sorriso?uf=MT HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58734 - "GET /api/financas/Sorriso?uf=MT HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58734 - "GET /api/mercado?periodo=1d&uf=MT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58498 - "GET /api/estados HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59446 - "GET /api/ping HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59470 - "GET /api/ping HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59480 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59470 - "GET /api/financas/Paragominas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59470 - "GET /api/contador HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59458 - "GET /api/mercado?periodo=1d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59470 - "GET /api/previsao/Pau%20D%27Arco HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59458 - "GET /api/plantio/Pau%20D%27Arco HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59458 - "GET /api/avisos?lat=-7.83874&lon=-50.04423&geocode=1505551 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45260 - "GET /api/mercado?periodo=1d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49510 - "GET /api/ping HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49540 - "GET /api/mercado?periodo=1d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49530 - "GET /api/ping HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49524 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49524 - "GET /api/financas/Paragominas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49530 - "GET /api/contador HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49524 - "GET /api/ping HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49540 - "GET /api/municipios?uf=MT&com_sedes=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49524 - "GET /api/financas/Alta%20Floresta?uf=MT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49530 - "GET /api/mercado?periodo=1d&uf=MT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49530 - "GET /api/previsao/Sorriso?uf=MT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49524 - "GET /api/plantio/Sorriso?uf=MT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49530 - "GET /api/financas/Sorriso?uf=MT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49530 - "GET /api/avisos?lat=-12.5425&lon=-55.7211&geocode=5107925 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49530 - "GET /api/mercado?periodo=1d&uf=MT HTTP/1.1" 200 OK

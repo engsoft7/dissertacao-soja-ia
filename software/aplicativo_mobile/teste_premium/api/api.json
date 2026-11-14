@@ -4,7 +4,7 @@
   {
    "item": "API responde",
    "ok": true,
-   "detalhe": "200 em 215 ms"
+   "detalhe": "200 em 227 ms"
   },
   {
    "item": "API serve a correção da main (Pau D'Arco projeta 2026–2028)",
@@ -154,7 +154,7 @@
   {
    "item": "30 requisições simultâneas sem erro",
    "ok": true,
-   "detalhe": "p95 1030 ms"
+   "detalhe": "p95 1062 ms"
   },
   {
    "item": "HTTP sem criptografia redireciona para HTTPS",
@@ -163,85 +163,85 @@
   }
  ],
  "medidas": {
-  "ping_inicial_ms": 215,
+  "ping_inicial_ms": 227,
   "rotas": {
    "previsao": {
     "n": 38,
     "erros": 0,
-    "p50_ms": 70.0,
-    "p95_ms": 82.0,
+    "p50_ms": 104.0,
+    "p95_ms": 120.0,
     "kb_medio": 2.1,
     "comprimido": "38/38"
    },
    "financas": {
     "n": 38,
     "erros": 0,
-    "p50_ms": 103.0,
-    "p95_ms": 699.0,
+    "p50_ms": 102.0,
+    "p95_ms": 502.0,
     "kb_medio": 1.0,
     "comprimido": "38/38"
    },
    "municipios": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 66.0,
-    "p95_ms": 73.0,
+    "p50_ms": 93.0,
+    "p95_ms": 101.0,
     "kb_medio": 0.6,
     "comprimido": "5/5"
    },
    "kpis_economia": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 65.0,
-    "p95_ms": 67.0,
+    "p50_ms": 87.0,
+    "p95_ms": 92.0,
     "kb_medio": 0.9,
     "comprimido": "5/5"
    },
    "mercado 1d": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 68.0,
-    "p95_ms": 69.0,
+    "p50_ms": 83.0,
+    "p95_ms": 94.0,
     "kb_medio": 7.8,
     "comprimido": "5/5"
    },
    "mercado 1mo": {
     "n": 3,
     "erros": 0,
-    "p50_ms": 66.0,
-    "p95_ms": 66.0,
+    "p50_ms": 86.0,
+    "p95_ms": 103.0,
     "kb_medio": 4.4,
     "comprimido": "3/3"
    },
    "contador": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 66.0,
-    "p95_ms": 70.0,
+    "p50_ms": 85.0,
+    "p95_ms": 87.0,
     "kb_medio": 1.1,
     "comprimido": "5/5"
    },
    "avisos (geocode)": {
     "n": 3,
     "erros": 0,
-    "p50_ms": 66.0,
-    "p95_ms": 68.0,
+    "p50_ms": 90.0,
+    "p95_ms": 127.0,
     "kb_medio": 0.1,
     "comprimido": "3/3"
    },
    "avisos (lat/lon)": {
     "n": 3,
     "erros": 0,
-    "p50_ms": 68.0,
-    "p95_ms": 69.0,
+    "p50_ms": 85.0,
+    "p95_ms": 95.0,
     "kb_medio": 0.1,
     "comprimido": "3/3"
    },
    "mapa/render": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 313.0,
-    "p95_ms": 488.0,
+    "p50_ms": 108.0,
+    "p95_ms": 123.0,
     "kb_medio": 88.0,
     "comprimido": "5/5"
    }
@@ -250,90 +250,90 @@
    {
     "caso": "município inexistente",
     "status": "404",
-    "ms": 70
+    "ms": 81
    },
    {
     "caso": "nome com 5.000 letras",
     "status": "404",
-    "ms": 70
+    "ms": 83
    },
    {
     "caso": "aspas e ponto e vírgula",
     "status": "403",
-    "ms": 32
+    "ms": 94
    },
    {
     "caso": "caminho com ../",
     "status": "404",
-    "ms": 67
+    "ms": 88
    },
    {
     "caso": "emoji",
     "status": "404",
-    "ms": 69
+    "ms": 82
    },
    {
     "caso": "finanças de município inexistente",
     "status": "200",
-    "ms": 67
+    "ms": 79
    },
    {
     "caso": "avisos sem parâmetros",
     "status": "400",
-    "ms": 63
+    "ms": 91
    },
    {
     "caso": "avisos com lat não numérica",
     "status": "422",
-    "ms": 71
+    "ms": 90
    },
    {
     "caso": "avisos fora da Terra",
     "status": "200",
-    "ms": 66
+    "ms": 83
    },
    {
     "caso": "avisos com geocode estranho",
     "status": "200",
-    "ms": 65
+    "ms": 88
    },
    {
     "caso": "mercado com período inválido",
     "status": "400",
-    "ms": 67
+    "ms": 83
    },
    {
     "caso": "simulação sem corpo",
     "status": "422",
-    "ms": 82
+    "ms": 78
    },
    {
     "caso": "simulação com tipos errados",
     "status": "422",
-    "ms": 66
+    "ms": 85
    },
    {
     "caso": "simulação com fator enorme",
     "status": "200",
-    "ms": 1448
+    "ms": 113
    },
    {
     "caso": "simulação de município inexistente",
     "status": "404",
-    "ms": 72
+    "ms": 89
    },
    {
     "caso": "rota inexistente",
     "status": "404",
-    "ms": 65
+    "ms": 84
    }
   ],
   "simultaneas_30": {
    "erros": 0,
-   "total_ms": 1046,
-   "p50_ms": 889.0,
-   "p95_ms": 1030.0,
-   "max_ms": 1034
+   "total_ms": 1163,
+   "p50_ms": 950.0,
+   "p95_ms": 1062.0,
+   "max_ms": 1153
   },
   "cabecalhos_ping": {
    "access-control-allow-origin": "*",

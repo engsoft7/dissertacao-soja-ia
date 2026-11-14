@@ -1,3 +1,6 @@
 0s	api	http://10.0.2.2:8000/
 2s	estado	Mato Grosso escolhido
-152s	FALHA	ComposeTimeoutException: Condition still not satisfied after 150000 ms
+5s	ok	a lista de Mato Grosso chegou da API, com Sorriso
+6s	ok	Resumo de Sorriso com a safra em curso
+10s	ok	Histórico de Sorriso com o gráfico e os cartões por safra
+12s	fim	percurso em Mato Grosso completo

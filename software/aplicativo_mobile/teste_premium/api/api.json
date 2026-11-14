@@ -4,7 +4,7 @@
   {
    "item": "API responde",
    "ok": true,
-   "detalhe": "200 em 115 ms"
+   "detalhe": "200 em 186 ms"
   },
   {
    "item": "API serve a correção da main (Pau D'Arco projeta 2026–2028)",
@@ -154,7 +154,7 @@
   {
    "item": "30 requisições simultâneas sem erro",
    "ok": true,
-   "detalhe": "p95 1066 ms"
+   "detalhe": "p95 953 ms"
   },
   {
    "item": "HTTP sem criptografia redireciona para HTTPS",
@@ -163,85 +163,85 @@
   }
  ],
  "medidas": {
-  "ping_inicial_ms": 115,
+  "ping_inicial_ms": 186,
   "rotas": {
    "previsao": {
     "n": 38,
     "erros": 0,
-    "p50_ms": 32.0,
-    "p95_ms": 59.0,
+    "p50_ms": 95.0,
+    "p95_ms": 137.0,
     "kb_medio": 2.1,
     "comprimido": "38/38"
    },
    "financas": {
     "n": 38,
     "erros": 0,
-    "p50_ms": 29.0,
-    "p95_ms": 37.0,
-    "kb_medio": 1.3,
+    "p50_ms": 101.0,
+    "p95_ms": 1103.0,
+    "kb_medio": 1.0,
     "comprimido": "38/38"
    },
    "municipios": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 35.0,
-    "p95_ms": 52.0,
+    "p50_ms": 86.0,
+    "p95_ms": 94.0,
     "kb_medio": 0.6,
     "comprimido": "5/5"
    },
    "kpis_economia": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 27.0,
-    "p95_ms": 28.0,
-    "kb_medio": 1.2,
+    "p50_ms": 92.0,
+    "p95_ms": 99.0,
+    "kb_medio": 0.9,
     "comprimido": "5/5"
    },
    "mercado 1d": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 28.0,
-    "p95_ms": 38.0,
-    "kb_medio": 7.0,
+    "p50_ms": 87.0,
+    "p95_ms": 92.0,
+    "kb_medio": 7.8,
     "comprimido": "5/5"
    },
    "mercado 1mo": {
     "n": 3,
     "erros": 0,
-    "p50_ms": 27.0,
-    "p95_ms": 30.0,
-    "kb_medio": 4.5,
+    "p50_ms": 81.0,
+    "p95_ms": 86.0,
+    "kb_medio": 4.4,
     "comprimido": "3/3"
    },
    "contador": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 27.0,
-    "p95_ms": 28.0,
-    "kb_medio": 0.9,
+    "p50_ms": 87.0,
+    "p95_ms": 231.0,
+    "kb_medio": 1.1,
     "comprimido": "5/5"
    },
    "avisos (geocode)": {
     "n": 3,
     "erros": 0,
-    "p50_ms": 26.0,
-    "p95_ms": 30.0,
+    "p50_ms": 85.0,
+    "p95_ms": 94.0,
     "kb_medio": 0.1,
     "comprimido": "3/3"
    },
    "avisos (lat/lon)": {
     "n": 3,
     "erros": 0,
-    "p50_ms": 27.0,
-    "p95_ms": 30.0,
+    "p50_ms": 89.0,
+    "p95_ms": 94.0,
     "kb_medio": 0.1,
     "comprimido": "3/3"
    },
    "mapa/render": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 49.0,
-    "p95_ms": 302.0,
+    "p50_ms": 328.0,
+    "p95_ms": 403.0,
     "kb_medio": 88.0,
     "comprimido": "5/5"
    }
@@ -250,90 +250,90 @@
    {
     "caso": "município inexistente",
     "status": "404",
-    "ms": 28
+    "ms": 107
    },
    {
     "caso": "nome com 5.000 letras",
     "status": "404",
-    "ms": 33
+    "ms": 90
    },
    {
     "caso": "aspas e ponto e vírgula",
     "status": "403",
-    "ms": 36
+    "ms": 103
    },
    {
     "caso": "caminho com ../",
     "status": "404",
-    "ms": 27
+    "ms": 94
    },
    {
     "caso": "emoji",
     "status": "404",
-    "ms": 30
+    "ms": 83
    },
    {
     "caso": "finanças de município inexistente",
     "status": "200",
-    "ms": 28
+    "ms": 89
    },
    {
     "caso": "avisos sem parâmetros",
     "status": "400",
-    "ms": 28
+    "ms": 93
    },
    {
     "caso": "avisos com lat não numérica",
     "status": "422",
-    "ms": 38
+    "ms": 98
    },
    {
     "caso": "avisos fora da Terra",
     "status": "200",
-    "ms": 28
+    "ms": 86
    },
    {
     "caso": "avisos com geocode estranho",
     "status": "200",
-    "ms": 36
+    "ms": 137
    },
    {
     "caso": "mercado com período inválido",
     "status": "400",
-    "ms": 26
+    "ms": 95
    },
    {
     "caso": "simulação sem corpo",
     "status": "422",
-    "ms": 40
+    "ms": 101
    },
    {
     "caso": "simulação com tipos errados",
     "status": "422",
-    "ms": 27
+    "ms": 94
    },
    {
     "caso": "simulação com fator enorme",
     "status": "200",
-    "ms": 82
+    "ms": 106
    },
    {
     "caso": "simulação de município inexistente",
     "status": "404",
-    "ms": 38
+    "ms": 90
    },
    {
     "caso": "rota inexistente",
     "status": "404",
-    "ms": 27
+    "ms": 84
    }
   ],
   "simultaneas_30": {
    "erros": 0,
-   "total_ms": 1079,
-   "p50_ms": 1030.0,
-   "p95_ms": 1066.0,
-   "max_ms": 1068
+   "total_ms": 976,
+   "p50_ms": 843.0,
+   "p95_ms": 953.0,
+   "max_ms": 969
   },
   "cabecalhos_ping": {
    "access-control-allow-origin": "*",

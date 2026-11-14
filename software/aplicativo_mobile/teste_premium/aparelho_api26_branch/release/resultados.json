@@ -2,98 +2,68 @@
  "verificacoes": [
   {
    "item": "abre na tela de boas-vindas",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "acha Pau D'Arco na busca",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "Resumo carrega a safra em curso",
-   "ok": true,
-   "detalhe": "Resumo Agronômico (safra 2027)"
-  },
-  {
-   "item": "Resumo mostra a última safra do IBGE, 2025",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "abre a aba Mapa",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "abre a aba Histórico",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "abre a aba Mercado",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "abre a aba Sobre",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "fonte 200%: Resumo abre",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "tela pequena: Resumo abre",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "tela tablet: Resumo abre",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "tela deitada: Resumo abre",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "o emulador ficou sem internet",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "sem internet: Resumo abre com os dados guardados",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "sem internet: o app avisa",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "sem internet: o Mapa explica",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "sem internet: a Estimativa no campo abre",
-   "ok": true,
-   "detalhe": ""
-  },
-  {
-   "item": "a internet do emulador voltou",
    "ok": false,
    "detalhe": ""
   },
   {
-   "item": "monkey: sem falhas nem ANR",
-   "ok": true,
-   "detalhe": "3000 eventos, 0 falhas, 0 ANR"
+   "item": "acha Pau D'Arco na busca",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "Resumo carrega a safra em curso",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "Resumo mostra a última safra do IBGE, 2025",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "abre a aba Mapa",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "abre a aba Histórico",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "abre a aba Mercado",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "abre a aba Sobre",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "fonte 200%: Resumo abre",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "tela pequena: Resumo abre",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "tela tablet: Resumo abre",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "tela deitada: Resumo abre",
+   "ok": false,
+   "detalhe": ""
+  },
+  {
+   "item": "roteiro completo",
+   "ok": false,
+   "detalhe": "TimeoutExpired: Command '['adb', 'wait-for-device']' timed out after 60 seconds"
   }
  ],
  "acessibilidade": {
@@ -110,10 +80,7 @@
    "sem_rotulo": []
   },
   "r04_resumo_1": {
-   "alvos_pequenos": [
-    "152,50 (166×33 dp)",
-    "53,8 (166×33 dp)"
-   ],
+   "alvos_pequenos": [],
    "sem_rotulo": []
   },
   "r04_resumo_2": {
@@ -130,9 +97,7 @@
   },
   "r05_mapa": {
    "alvos_pequenos": [],
-   "sem_rotulo": [
-    "WebView em (45,465)"
-   ]
+   "sem_rotulo": []
   },
   "r06_historico": {
    "alvos_pequenos": [],
@@ -143,20 +108,6 @@
    "sem_rotulo": []
   },
   "r08_sobre": {
-   "alvos_pequenos": [
-    "View (339×33 dp)",
-    "View (339×44 dp)",
-    "View (339×46 dp)"
-   ],
-   "sem_rotulo": []
-  },
-  "r09_estimativa_no_campo": {
-   "alvos_pequenos": [
-    "View (347×32 dp)"
-   ],
-   "sem_rotulo": []
-  },
-  "r10_tempo": {
    "alvos_pequenos": [],
    "sem_rotulo": []
   },
@@ -179,14 +130,6 @@
   "r16_tela_tablet": {
    "alvos_pequenos": [],
    "sem_rotulo": []
-  },
-  "r18_sem_internet": {
-   "alvos_pequenos": [],
-   "sem_rotulo": []
-  },
-  "r19_sem_internet_mercado": {
-   "alvos_pequenos": [],
-   "sem_rotulo": []
   }
  },
  "medidas": {
@@ -196,30 +139,25 @@
   "altura_px": 2400,
   "densidade_dpi": 420,
   "apk_mb": 27.6,
-  "partida_fria_primeira_ms": 720,
-  "partida_fria_sem_municipio_ms": 672.0,
-  "dados_do_municipio_s": 3.7,
-  "memoria_resumo_kb": 35054,
+  "partida_fria_primeira_ms": 624,
+  "partida_fria_sem_municipio_ms": 645,
+  "dados_do_municipio_s": 185.0,
+  "memoria_resumo_kb": null,
   "rolagem_resumo": {
-   "quadros": 509.0,
-   "lentos_pct": 96.07,
-   "p50_ms": 46.0,
-   "p90_ms": 61.0,
-   "p99_ms": 77.0
+   "quadros": null,
+   "lentos_pct": null,
+   "p50_ms": null,
+   "p90_ms": null,
+   "p99_ms": null
   },
   "rolagem_historico": {
-   "quadros": 439.0,
-   "lentos_pct": 96.58,
-   "p50_ms": 46.0,
-   "p90_ms": 61.0,
-   "p99_ms": 69.0
+   "quadros": null,
+   "lentos_pct": null,
+   "p50_ms": null,
+   "p90_ms": null,
+   "p99_ms": null
   },
-  "memoria_depois_das_abas_kb": 79438,
-  "partida_fria_com_municipio_ms": 714,
-  "monkey": {
-   "eventos": 3000,
-   "falhas": 0,
-   "anrs": 0
-  }
+  "memoria_depois_das_abas_kb": null,
+  "partida_fria_com_municipio_ms": null
  }
 }

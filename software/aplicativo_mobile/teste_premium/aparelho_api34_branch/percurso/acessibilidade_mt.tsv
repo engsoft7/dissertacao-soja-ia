@@ -1,1 +1,12 @@
-29_falha_mt	sem achados
+20_estado_mt	sem achados
+20_busca_mt	sem achados
+21_resumo_mt	sem achados
+22_resumo_mt_1	sem achados
+22_resumo_mt_2	sem achados
+22_resumo_mt_3	sem achados
+22_resumo_mt_4	sem achados
+23_historico_mt	sem achados
+24_mercado_mt	sem achados
+25_sobre_mt	There were 2 accessibility results:
+25_sobre_mt	View with bounds: [95,1022][985,1143]: This item's height is 46dp. Consider making the height of this touch target 48dp or larger. Reported by com.google.android.apps.common.testing.accessibility.framework.checks.TouchTargetSizeCheck,
+25_sobre_mt	View with bounds: [95,1896][985,2012]: This item's height is 44dp. Consider making the height of this touch target 48dp or larger. Reported by com.google.android.apps.common.testing.accessibility.framework.checks.TouchTargetSizeCheck

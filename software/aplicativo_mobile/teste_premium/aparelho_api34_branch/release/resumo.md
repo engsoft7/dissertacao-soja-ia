@@ -32,10 +32,10 @@
  "altura_px": 2400,
  "densidade_dpi": 420,
  "apk_mb": 27.6,
- "partida_fria_primeira_ms": 1279,
- "partida_fria_sem_municipio_ms": 1169.5,
- "dados_do_municipio_s": 183.6,
- "memoria_resumo_kb": 36420,
+ "partida_fria_primeira_ms": 1074,
+ "partida_fria_sem_municipio_ms": 920.5,
+ "dados_do_municipio_s": 184.4,
+ "memoria_resumo_kb": 33691,
  "rolagem_resumo": {
   "quadros": 0.0,
   "lentos_pct": 0.0,
@@ -44,14 +44,14 @@
   "p99_ms": 4950.0
  },
  "rolagem_historico": {
-  "quadros": 11.0,
-  "lentos_pct": 100.0,
-  "p50_ms": 73.0,
-  "p90_ms": 150.0,
-  "p99_ms": 200.0
+  "quadros": 0.0,
+  "lentos_pct": 0.0,
+  "p50_ms": 4950.0,
+  "p90_ms": 4950.0,
+  "p99_ms": 4950.0
  },
- "memoria_depois_das_abas_kb": 36025,
- "partida_fria_com_municipio_ms": 1112,
+ "memoria_depois_das_abas_kb": 35397,
+ "partida_fria_com_municipio_ms": 913,
  "monkey": {
   "eventos": 3000,
   "falhas": 0,

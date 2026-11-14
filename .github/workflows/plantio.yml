@@ -1,0 +1,23 @@
+# Janela de plantio da soja: ZARC (tábua de risco, dado aberto do Ministério
+# da Agricultura) e calendário de semeadura e vazio sanitário (Portaria
+# SDA/MAPA nº 1.579/2026 e normas estaduais).
+name: Janela de plantio
+
+on:
+  push:
+    paths:
+      - "software/automacao_github/coleta_plantio.py"
+      - ".github/workflows/plantio.yml"
+  workflow_dispatch:
+
+jobs:
+  coleta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet requests pypdf pdfplumber
+      - name: Diagnóstico das fontes
+        run: python software/automacao_github/coleta_plantio.py --diagnostico

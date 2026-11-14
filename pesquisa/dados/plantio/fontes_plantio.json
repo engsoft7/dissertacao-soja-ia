@@ -1,0 +1,32 @@
+{
+ "safra": "2026/2027",
+ "calendario": {
+  "fonte": "Portaria SDA/MAPA nº 1.579, de 9 de abril de 2026",
+  "url": "https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-1.579-de-9-de-abril-de-2026-698696654"
+ },
+ "zarc": {
+  "fonte": "Tábua de risco do ZARC, Ministério da Agricultura (dados abertos, licença Creative Commons Atribuição)",
+  "url": "https://dados.agricultura.gov.br/dataset/6d3d141c-885e-41a4-ab7f-dc8ff323b96f/resource/139e5a60-1f43-4cc8-aeab-a35dbbf816c0/download/dados-abertos-tabua-de-risco-safra-2026-2027.csv",
+  "portarias": {
+   "MA": "Port.199_de_03-07-2026",
+   "MT": "Port.202_de_03-07-2026",
+   "PA": "Port.203_de_03-07-2026",
+   "TO": "Port.212_de_03-07-2026",
+   "RO": "Port.207_de_03-07-2026"
+  },
+  "ciclos": {
+   "20": "Grupo I",
+   "21": "Grupo II",
+   "22": "Grupo III"
+  },
+  "solos": {
+   "11": "AD1",
+   "12": "AD2",
+   "13": "AD3",
+   "14": "AD4",
+   "15": "AD5",
+   "16": "AD6"
+  }
+ },
+ "lido_em": "2026-11-14"
+}

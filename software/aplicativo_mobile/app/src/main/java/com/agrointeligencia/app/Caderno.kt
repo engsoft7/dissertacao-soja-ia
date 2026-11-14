@@ -100,8 +100,13 @@ class EstadoCaderno(private val context: Context) {
 /** 2027 -> "2026/27": a safra pelo ano da colheita, como no resto do app. */
 fun rotuloDaSafra(safra: Int): String = "${safra - 1}/${(safra % 100).toString().padStart(2, '0')}"
 
-private fun numeroCaderno(v: Double, casas: Int = 1): String =
-    String.format(PT_BR, "%,.${casas}f", v).let { if (casas > 0) it.trimEnd('0').trimEnd(',') else it }
+/** Com até [casas] decimais, sem os zeros do fim: "12,5", "120"; no separador do idioma. */
+private fun numeroCaderno(v: Double, casas: Int = 1): String {
+    val texto = String.format(LOCAL_NUMEROS, "%,.${casas}f", v)
+    if (casas == 0) return texto
+    val decimal = java.text.DecimalFormatSymbols.getInstance(LOCAL_NUMEROS).decimalSeparator
+    return texto.trimEnd('0').trimEnd(decimal)
+}
 
 private fun dataBr(iso: String): String = runCatching { LocalDate.parse(iso).format(DATA_BR) }.getOrDefault(iso)
 
@@ -140,7 +145,10 @@ private fun exportaCaderno(context: Context, registros: List<RegistroCaderno>): 
     val pasta = File(context.cacheDir, "exportar").apply { mkdirs() }
     val arquivo = File(pasta, "caderno_safra.csv")
     // A marca de ordem de bytes faz o Excel abrir os acentos certos.
-    arquivo.writeText("﻿" + cadernoEmCsv(registros))
+    // Em português, ponto e vírgula e vírgula decimal (o Excel em português abre
+    // direto); nos outros idiomas, vírgula e ponto.
+    val portugues = LOCAL_NUMEROS.language == "pt"
+    arquivo.writeText("\uFEFF" + cadernoEmCsv(registros, if (portugues) ';' else ',', if (portugues) ',' else '.'))
     val uri = FileProvider.getUriForFile(context, context.packageName + ".fotos", arquivo)
     val envio = Intent(Intent.ACTION_SEND).apply {
         type = "text/csv"

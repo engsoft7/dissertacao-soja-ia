@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- English. The app follows the phone's language: English here, Brazilian
+     Portuguese (values/strings.xml) for Portuguese and for any language
+     without a translation. Official names (IBGE, CONAB, ZARC, Proagro, the
+     ordinance) stay as published; data from the sources stays in Portuguese. -->
+<resources>
+    <string name="app_name">AgroInteligência</string>
+    <!-- Formato dos números (Formatos, em Comum.kt). -->
+    <string name="formato_numeros" translatable="false">en-US</string>
+
+    <!-- Planting window (Plantio.kt) -->
+    <string name="plantio_formato_data">MMM d, yyyy</string>
+    <string name="plantio_formato_dia">MMM d</string>
+    <string name="plantio_titulo_cartao">Planting, %1$s season</string>
+    <string name="plantio_titulo_tela">Planting window</string>
+    <string name="plantio_subtitulo">%1$s, %2$s season</string>
+    <string name="plantio_abrir">Open the planting window</string>
+    <string name="plantio_voltar">Back to Summary</string>
+    <string name="plantio_atualizar">Refresh the planting window</string>
+    <string name="plantio_carregando">Loading the planting window…</string>
+    <string name="plantio_indisponivel">Planting window unavailable. Tap to open and try again.</string>
+    <string name="plantio_indisponivel_tela">Could not download the planting window. Check the connection and tap refresh.</string>
+    <string name="plantio_sem_conexao">No connection: showing the last planting window downloaded.</string>
+
+    <string name="plantio_semeadura_ate">Sowing allowed until %1$s</string>
+    <string name="plantio_vazio_ate">Soybean-free period until %1$s; sowing starts on %2$s</string>
+    <string name="plantio_vazio_comeca">The soybean-free period starts on %1$s</string>
+    <string name="plantio_semeadura_encerrada">Sowing closed on %1$s</string>
+
+    <string name="plantio_zarc_hoje">ZARC today: %1$d%% risk (%2$s, %3$s)</string>
+    <string name="plantio_zarc_proxima">ZARC (%1$s, %2$s): outside the window today; the next one starts on %3$s, with %4$d%% risk</string>
+    <string name="plantio_zarc_encerrado">ZARC (%1$s, %2$s): this season\'s window is over</string>
+    <string name="plantio_zarc_sem_combinacao">ZARC: no window listed for %1$s and %2$s in this municipality</string>
+    <string name="plantio_zarc_sem_zoneamento">This season\'s ZARC does not list soybean planting in this municipality.</string>
+    <string name="plantio_zarc_sem_janela">No ten-day period listed for this group and this soil.</string>
+
+    <string name="plantio_secao_calendario">Sowing calendar</string>
+    <string name="plantio_sem_calendario">The sowing calendar ordinance does not place this municipality in any region of the state. Check the dates with the state agricultural defense agency.</string>
+    <string name="plantio_regiao">Region %1$s of the state in the ordinance</string>
+    <string name="plantio_vazio_periodo">Soybean-free period: %1$s to %2$s</string>
+    <string name="plantio_semeadura_periodo">Sowing: %1$s to %2$s</string>
+
+    <string name="plantio_secao_zarc">Climate risk (ZARC)</string>
+    <string name="plantio_grupo">Cultivar group</string>
+    <string name="plantio_grupo_ajuda">The group comes from the cultivar cycle: Group I is the shortest and Group III the longest. The ZARC ordinance lists the cultivars in each group.</string>
+    <string name="plantio_solo">Soil available water</string>
+    <string name="plantio_solo_ajuda">AD1 holds the least water and AD6 the most. A soil analysis or your agronomist can tell your field\'s class.</string>
+    <string name="plantio_janela">%1$s to %2$s: %3$d%% risk</string>
+    <string name="plantio_janela_fora">(outside the sowing calendar)</string>
+    <string name="plantio_janela_parte_fora">(partly outside the sowing calendar)</string>
+    <string name="plantio_risco_explicacao">The risk is the chance of losing part of the crop to adverse weather, such as drought at flowering, according to ZARC.</string>
+    <string name="plantio_fonte_zarc">ZARC: %1$s, risk table of the Ministry of Agriculture</string>
+    <string name="plantio_linha_do_tempo">Timeline from July to June with the soybean-free period, the sowing period and the ZARC windows. The list below has the same dates.</string>
+    <string name="plantio_legenda_vazio">Soybean-free</string>
+    <string name="plantio_legenda_semeadura">Sowing</string>
+    <string name="plantio_regras">Planting soybean outside the sowing calendar is prohibited. Outside the ZARC window it is allowed, but without Proagro insurance and most rural credit.</string>
+
+    <!-- Phone alerts (Alertas.kt) -->
+    <string name="alerta_canal_inmet">INMET warnings</string>
+    <string name="alerta_canal_pulverizacao">Spraying window</string>
+    <string name="alerta_canal_preco">Soybean price</string>
+    <string name="alerta_inmet_titulo">INMET warning: %1$s</string>
+    <string name="alerta_inmet_titulo_severidade">INMET warning: %1$s (%2$s)</string>
+    <string name="alerta_inmet_evento">severe weather</string>
+    <string name="alerta_inmet_texto">In %1$s, from %2$s to %3$s. Tap to see the risks and what to do.</string>
+    <string name="alerta_pulverizacao_titulo">Good window for spraying</string>
+    <string name="alerta_pulverizacao_hoje">Today, from %1$s to %2$s, in %3$s. Check the label and the wind on site before applying.</string>
+    <string name="alerta_pulverizacao_amanha">Tomorrow, from %1$s to %2$s, in %3$s. Check the label and the wind on site before applying.</string>
+    <string name="alerta_pulverizacao_dia">On %1$s, from %2$s to %3$s, in %4$s. Check the label and the wind on site before applying.</string>
+    <string name="alerta_preco_titulo">Soybean at R$ %1$s in %2$s</string>
+    <string name="alerta_preco_texto">The %1$s quote on %2$s reached your target price of R$ %3$s per bag (Agrolink).</string>
+    <string name="alerta_teste_titulo">AgroInteligência alerts</string>
+    <string name="alerta_teste_texto">This is how the alerts will arrive.</string>
+
+    <string name="alertas_titulo">Alerts</string>
+    <string name="alertas_abrir">Phone alerts</string>
+    <string name="alertas_voltar">Back to Summary</string>
+    <string name="alertas_explicacao">Turn on what you want to receive. The phone checks every 3 hours, with internet, even with the app closed, and notifies you. Android may delay the check to save battery.</string>
+    <string name="alertas_sem_permissao_titulo">Notifications off</string>
+    <string name="alertas_sem_permissao">Android is not letting the app show notifications. Without them, the alerts do not appear.</string>
+    <string name="alertas_permitir">Allow notifications</string>
+    <string name="alertas_inmet">INMET warnings</string>
+    <string name="alertas_inmet_lugar">Notify me when INMET issues a severe weather warning for %1$s.</string>
+    <string name="alertas_sem_lugar">Choose a municipality, or your location on the Weather screen, to turn on this alert.</string>
+    <string name="alertas_pulverizacao">Spraying window</string>
+    <string name="alertas_pulverizacao_lugar">Notify me, at most once a day, of the next window of at least 2 good hours for spraying in %1$s, by Embrapa Soja\'s criteria.</string>
+    <string name="alertas_preco">Price per bag</string>
+    <string name="alertas_preco_explicacao">Notify me when the day\'s quote at the market reaches the target price. It notifies again only after the quote falls below it.</string>
+    <string name="alertas_praca">Market</string>
+    <string name="alertas_praca_valor">%1$s · R$ %2$s (%3$s)</string>
+    <string name="alertas_sem_pracas">No market quotes right now. Open Market with internet to load them.</string>
+    <string name="alertas_preco_alvo">Target price per bag</string>
+    <string name="alertas_testar">Send a test notification</string>
+    <string name="alertas_privacidade">To check, the app sends the forecast location (the municipality seat or your position rounded to about 1 km) and the state, as the Weather and Market screens already do. Nothing else leaves the phone.</string>
+    <string name="alertas_ligado">on</string>
+    <string name="alertas_desligado">off</string>
+
+    <!-- Season notebook (Caderno.kt) -->
+    <string name="caderno_titulo">Season notebook</string>
+    <string name="caderno_titulo_cartao">Season notebook %1$s</string>
+    <string name="caderno_cartao_vazio">Record planting, inputs, operations, harvest and sales. It stays on your phone.</string>
+    <string name="caderno_cartao_resumo">%1$d entries · costs of R$ %2$s</string>
+    <string name="caderno_abrir">Open the season notebook</string>
+    <string name="caderno_voltar">Back to Summary</string>
+    <string name="caderno_exportar">Export the notebook spreadsheet</string>
+    <string name="caderno_exportar_assunto">Season notebook (AgroInteligência)</string>
+    <string name="caderno_exportar_sem_app">No app to share the spreadsheet.</string>
+    <string name="caderno_privacidade">The entries stay on this phone only. They leave it only if you export the spreadsheet.</string>
+    <string name="caderno_safra">%1$s season</string>
+    <string name="caderno_resumo">Season summary</string>
+    <string name="caderno_resumo_vazio">No entries this season. Start with the planting, with the area, and record the costs, the harvest and the sales.</string>
+    <string name="caderno_area_plantada">Planted area: %1$s ha</string>
+    <string name="caderno_custos">Recorded costs: R$ %1$s</string>
+    <string name="caderno_por_ha">R$ %1$s per hectare</string>
+    <string name="caderno_por_saca">R$ %1$s per harvested bag</string>
+    <string name="caderno_colhido">Harvested: %1$s bags</string>
+    <string name="caderno_colhido_produtividade">Harvested: %1$s bags on %2$s ha, %3$s bags per hectare</string>
+    <string name="caderno_comparacao">The app\'s estimate for %1$s this season is %2$s bags per hectare.</string>
+    <string name="caderno_vendido">Sold: %1$s bags at R$ %2$s on average, R$ %3$s in total</string>
+    <string name="caderno_estoque">Still to sell: %1$s bags</string>
+    <string name="caderno_resultado">Result: R$ %1$s</string>
+    <string name="caderno_resultado_nota">Sales minus the recorded costs. Costs that were not recorded, such as land and depreciation, are not included.</string>
+    <string name="caderno_datas_plantio">Planting dates</string>
+    <string name="caderno_sem_janela">Open the planting window, with internet, to check the dates against the ordinance and ZARC.</string>
+    <string name="caderno_dentro_calendario">Within the ordinance\'s sowing calendar</string>
+    <string name="caderno_no_vazio">In the soybean-free period: planting soybean on this date is prohibited</string>
+    <string name="caderno_fora_calendario">Outside the ordinance\'s sowing calendar</string>
+    <string name="caderno_risco_zarc">ZARC: %1$d%% risk (%2$s, %3$s)</string>
+    <string name="caderno_fora_zarc">Outside the ZARC window for %1$s and %2$s: no Proagro</string>
+    <string name="caderno_sem_conferencia">No ordinance or ZARC for this date.</string>
+    <string name="caderno_novo">New entry</string>
+    <string name="caderno_tipo_plantio">Planting</string>
+    <string name="caderno_tipo_insumo">Input</string>
+    <string name="caderno_tipo_operacao">Operation</string>
+    <string name="caderno_tipo_colheita">Harvest</string>
+    <string name="caderno_tipo_venda">Sale</string>
+    <string name="caderno_data">Date (day/month/year)</string>
+    <string name="caderno_cultivar">Cultivar</string>
+    <string name="caderno_area_ha">Planted area (ha)</string>
+    <string name="caderno_produto">Product</string>
+    <string name="caderno_quantidade">Quantity</string>
+    <string name="caderno_unidade">Unit (kg, L, bag)</string>
+    <string name="caderno_custo_total">Total cost (R$)</string>
+    <string name="caderno_operacao">What was done</string>
+    <string name="caderno_area_colhida">Harvested area (ha)</string>
+    <string name="caderno_sacas_colhidas">Bags harvested</string>
+    <string name="caderno_sacas_vendidas">Bags sold</string>
+    <string name="caderno_preco_saca">Price per bag (R$)</string>
+    <string name="caderno_comprador">Buyer (optional)</string>
+    <string name="caderno_guardar">Save</string>
+    <string name="caderno_lancamentos">Entries</string>
+    <string name="caderno_sem_lancamentos">No entries this season.</string>
+    <string name="caderno_sacas">%1$s bags</string>
+    <string name="caderno_a_preco">at R$ %1$s</string>
+    <string name="caderno_apagar_titulo">Delete this entry?</string>
+    <string name="caderno_apagar_rotulo">Delete %1$s of %2$s</string>
+    <string name="caderno_apagar">Delete</string>
+    <string name="caderno_cancelar">Cancel</string>
+
+    <!-- Shareable summary (Relatorio.kt) -->
+    <string name="relatorio_titulo">AgroInteligência · %1$s (%2$s)</string>
+    <string name="relatorio_subtitulo">Summary of %1$s</string>
+    <string name="relatorio_secao_produtividade">Yield</string>
+    <string name="relatorio_esperada">Expected in the %1$d season: %2$s kg/ha (about %3$s bags per hectare), with a typical error of ± %4$s kg/ha.</string>
+    <string name="relatorio_esperada_sem_erro">Expected in the %1$d season: %2$s kg/ha (about %3$s bags per hectare).</string>
+    <string name="relatorio_ultimo_ibge">Latest IBGE figure, %1$d season: %2$s kg/ha.</string>
+    <string name="relatorio_secao_preco">Price and result</string>
+    <string name="relatorio_praca">Bag in %1$s: R$ %2$s (Agrolink, %3$s).</string>
+    <string name="relatorio_preco_referencia">Reference price: R$ %1$s per bag.</string>
+    <string name="relatorio_resultado">Estimated result: R$ %1$s per hectare, with %2$s bags per hectare at R$ %3$s.</string>
+    <string name="relatorio_secao_plantio">Planting window</string>
+    <string name="relatorio_regiao">%1$s (Region %2$s of the state in the ordinance).</string>
+    <string name="relatorio_secao_caderno">Season notebook %1$s</string>
+    <string name="relatorio_caderno_area">Planted area: %1$s ha; recorded costs: R$ %2$s.</string>
+    <string name="relatorio_caderno_colhido">Harvested: %1$s bags per hectare.</string>
+    <string name="relatorio_caderno_vendido">Sold: %1$s bags, at R$ %2$s on average.</string>
+    <string name="relatorio_rodape">Decision-support estimates: they do not replace a professional\'s assessment or checking conditions on site. Sources: IBGE, CONAB, Agrolink and the Ministry of Agriculture (sowing calendar ordinance and ZARC). AgroInteligência is not a government app; it is a technical research product of the Federal University of Pará (UFPA).</string>
+    <string name="relatorio_assunto">Soybean summary (AgroInteligência)</string>
+    <string name="relatorio_compartilhar">Share the summary</string>
+    <string name="relatorio_botao">Share</string>
+    <string name="relatorio_escolha">The image fits in a WhatsApp chat; the PDF is for printing or sending by email.</string>
+    <string name="relatorio_imagem">Image (WhatsApp)</string>
+    <string name="relatorio_pdf">PDF</string>
+    <string name="relatorio_sem_app">Could not share the summary.</string>
+
+    <!-- Read aloud (Fala.kt) -->
+    <string name="fala_ouvir_resumo">Listen to the summary</string>
+    <string name="fala_ouvir_tempo">Listen to the weather</string>
+    <string name="fala_parar">Stop reading</string>
+    <string name="fala_indisponivel">Android\'s voice is not available on this phone.</string>
+    <string name="fala_kg_ha">kilograms per hectare</string>
+    <string name="fala_mais_ou_menos">plus or minus</string>
+    <string name="fala_menos">minus</string>
+    <string name="fala_tempo_agora">Weather in %1$s now: %2$d degrees, %3$s, humidity %4$d percent and wind in the field %5$d kilometers per hour.</string>
+    <string name="fala_pulverizar_boa">This hour is good for spraying.</string>
+    <string name="fala_pulverizar_atencao">This hour calls for care when spraying.</string>
+    <string name="fala_pulverizar_evitar">Avoid spraying this hour.</string>
+    <string name="fala_proxima_janela">Next good spraying window: %1$s.</string>
+    <string name="fala_janela_hoje">today, between %1$d:00 and %2$d:00</string>
+    <string name="fala_janela_amanha">tomorrow, between %1$d:00 and %2$d:00</string>
+    <string name="fala_janela_dia">on %1$s, between %2$d:00 and %3$d:00</string>
+    <string name="fala_sem_janela">No good spraying window in the next %1$d hours.</string>
+    <string name="fala_hoje">Today, a high of %1$d and a low of %2$d degrees, with a %3$d percent chance of rain.</string>
+</resources>

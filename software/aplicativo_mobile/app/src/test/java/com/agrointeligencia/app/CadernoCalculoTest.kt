@@ -77,6 +77,10 @@ class CadernoCalculoTest {
         val linhas = csv.trim().lines()
         assertEquals("safra;tipo;data;descricao;area_ha;quantidade;unidade;valor_rs", linhas[0])
         assertEquals("2027;venda;2027-03-20;\"Cooperativa; filial \"\"Norte\"\"\";;3000;;120,5", linhas[1])
+        val ingles = cadernoEmCsv(listOf(r(TipoRegistro.VENDA, "2027-03-20", qtd = 3_000.0, valor = 120.5,
+                                            descricao = "Coop, Norte")), ',', '.').trim().lines()
+        assertEquals("safra,tipo,data,descricao,area_ha,quantidade,unidade,valor_rs", ingles[0])
+        assertEquals("2027,venda,2027-03-20,\"Coop, Norte\",,3000,,120.5", ingles[1])
     }
 
     @Test

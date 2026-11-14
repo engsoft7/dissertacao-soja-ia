@@ -231,7 +231,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
             // no meio da faixa), e não o valor: a descrição diz o cenário.
             val chuva = "${precipFactor.roundToInt()}% da chuva média"
             val temperatura = if (kotlin.math.abs(tempOffset) < 0.05f) "temperatura média"
-                              else String.format(PT_BR, "%+.1f °C na temperatura média", tempOffset)
+                              else String.format(LOCAL_NUMEROS, "%+.1f °C na temperatura média", tempOffset)
             Text(text = "Chuva: $chuva", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Slider(
                 modifier = Modifier.semantics { contentDescription = "Chuva da safra"; stateDescription = chuva },

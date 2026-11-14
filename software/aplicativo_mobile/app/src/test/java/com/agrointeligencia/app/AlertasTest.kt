@@ -23,7 +23,7 @@ import java.time.LocalDateTime
  * o toque abrindo a aba do assunto. As fontes são respostas fixas.
  */
 @RunWith(AndroidJUnit4::class)
-@Config(sdk = [35])
+@Config(sdk = [35], qualifiers = "pt-rBR")
 class AlertasTest {
     private val app = RuntimeEnvironment.getApplication()
     private val prefs = app.getSharedPreferences("AgroAppCache", Context.MODE_PRIVATE)

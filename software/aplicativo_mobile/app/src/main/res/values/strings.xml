@@ -3,6 +3,8 @@
      values-<idioma>/strings.xml, e o Android escolhe pelo idioma do aparelho. -->
 <resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pt">
     <string name="app_name">AgroInteligência</string>
+    <!-- Formato dos números (Formatos, em Comum.kt). -->
+    <string name="formato_numeros" translatable="false">pt-BR</string>
 
     <!-- Janela de plantio (Plantio.kt) -->
     <string name="plantio_formato_data">dd/MM/yyyy</string>

@@ -102,25 +102,28 @@ fun conferePlantio(data: LocalDate, calendario: CalendarioPlantio?, riscos: Stri
     return ConferenciaPlantio(noCalendario, risco)
 }
 
-private fun numeroCsv(v: Double?): String =
-    v?.let { String.format(Locale.US, "%.2f", it).trimEnd('0').trimEnd('.').replace('.', ',') } ?: ""
+private fun numeroCsv(v: Double?, decimal: Char): String =
+    v?.let { String.format(Locale.US, "%.2f", it).trimEnd('0').trimEnd('.').replace('.', decimal) } ?: ""
 
-private fun textoCsv(s: String?): String {
+private fun textoCsv(s: String?, separador: Char): String {
     val t = s.orEmpty()
-    return if (t.any { it == ';' || it == '"' || it == '\n' }) "\"" + t.replace("\"", "\"\"") + "\"" else t
+    return if (t.any { it == separador || it == '"' || it == '\n' }) "\"" + t.replace("\"", "\"\"") + "\"" else t
 }
 
 /**
- * A planilha do caderno: ponto e vírgula entre colunas e vírgula nos decimais,
- * como o Excel e o LibreOffice em português abrem direto.
+ * A planilha do caderno. O padrão é o do Excel e do LibreOffice em português:
+ * ponto e vírgula entre colunas e vírgula nos decimais; em inglês, vírgula e
+ * ponto (Caderno.kt escolhe pelo idioma do app).
  */
-fun cadernoEmCsv(registros: List<RegistroCaderno>): String = buildString {
-    append("safra;tipo;data;descricao;area_ha;quantidade;unidade;valor_rs\n")
+fun cadernoEmCsv(registros: List<RegistroCaderno>, separador: Char = ';', decimal: Char = ','): String = buildString {
+    append(listOf("safra", "tipo", "data", "descricao", "area_ha", "quantidade", "unidade", "valor_rs")
+               .joinToString(separador.toString())).append('\n')
     registros.sortedWith(compareBy({ it.safra }, { it.data }, { it.id })).forEach { r ->
         append(listOf(
-            r.safra.toString(), r.tipo.name.lowercase(), r.data, textoCsv(r.descricao), numeroCsv(r.area),
-            numeroCsv(r.quantidade), textoCsv(r.unidade), numeroCsv(r.valor),
-        ).joinToString(";"))
+            r.safra.toString(), r.tipo.name.lowercase(), r.data, textoCsv(r.descricao, separador),
+            numeroCsv(r.area, decimal), numeroCsv(r.quantidade, decimal), textoCsv(r.unidade, separador),
+            numeroCsv(r.valor, decimal),
+        ).joinToString(separador.toString()))
         append('\n')
     }
 }

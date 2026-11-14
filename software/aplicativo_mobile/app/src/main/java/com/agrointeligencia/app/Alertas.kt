@@ -190,6 +190,7 @@ private suspend fun <T> tenta(bloco: suspend () -> T): T? = try {
 
 /** Uma rodada: confere o que está ligado e notifica o que for novo. */
 suspend fun confereAlertas(context: Context, fontes: FontesDosAlertas = FontesDosAlertas()) {
+    Formatos.doIdioma(context)
     // Sem permissão de notificar, nada é marcado como avisado: quando o
     // produtor permitir, o aviso que ainda valer chega.
     if (!Notificacoes.podeNotificar(context)) return

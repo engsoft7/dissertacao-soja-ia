@@ -48,7 +48,7 @@ data class DadosDoRelatorio(
     val safraDoCaderno: Int? = null,
 )
 
-private fun numeroBr(v: Double, casas: Int): String = String.format(PT_BR, "%,.${casas}f", v)
+private fun numeroBr(v: Double, casas: Int): String = String.format(LOCAL_NUMEROS, "%,.${casas}f", v)
 
 fun montaRelatorio(context: Context, d: DadosDoRelatorio): Relatorio {
     val secoes = mutableListOf<SecaoRelatorio>()
@@ -104,8 +104,8 @@ private const val VERDE = 0xFF047857.toInt()
 private const val TEXTO = 0xFF1E293B.toInt()
 private const val CINZA = 0xFF475569.toInt()
 
-/** Escreve [texto] com quebra de linha a partir de [y] e devolve onde ele termina. */
-private fun escreve(canvas: Canvas, texto: String, x: Float, y: Float, largura: Float, tamanho: Float,
+/** Escreve [texto] com quebra de linha a partir de [y] e devolve onde ele termina; sem canvas, só mede. */
+private fun escreve(canvas: Canvas?, texto: String, x: Float, y: Float, largura: Float, tamanho: Float,
                     negrito: Boolean, cor: Int): Float {
     val pincel = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = tamanho
@@ -116,20 +116,24 @@ private fun escreve(canvas: Canvas, texto: String, x: Float, y: Float, largura: 
         .setAlignment(Layout.Alignment.ALIGN_NORMAL)
         .setLineSpacing(0f, 1.15f)
         .build()
-    canvas.save()
-    canvas.translate(x, y)
-    layout.draw(canvas)
-    canvas.restore()
+    if (canvas != null) {
+        canvas.save()
+        canvas.translate(x, y)
+        layout.draw(canvas)
+        canvas.restore()
+    }
     return y + layout.height
 }
 
 /**
- * Desenha o resumo numa página de [largura] x [altura]; [escala] 1 é a página A4
- * do PDF em pontos (595 x 842), e a imagem usa a mesma página ampliada.
+ * Desenha o resumo numa página de [largura] x [altura] e devolve a altura de
+ * que ele precisa, até o fim do rodapé; sem [canvas], só mede. [escala] 1 é a
+ * página A4 do PDF em pontos (595 x 842); a imagem usa a mesma página com a
+ * letra maior que couber (escalaDaImagem).
  */
-fun desenhaRelatorio(canvas: Canvas, r: Relatorio, largura: Float, altura: Float, escala: Float) {
-    canvas.drawColor(android.graphics.Color.WHITE)
-    canvas.drawRect(0f, 0f, largura, 10f * escala, Paint().apply { color = VERDE })
+fun desenhaRelatorio(canvas: Canvas?, r: Relatorio, largura: Float, altura: Float, escala: Float): Float {
+    canvas?.drawColor(android.graphics.Color.WHITE)
+    canvas?.drawRect(0f, 0f, largura, 10f * escala, Paint().apply { color = VERDE })
     val margem = 36f * escala
     val util = largura - 2 * margem
     var y = margem
@@ -146,10 +150,13 @@ fun desenhaRelatorio(canvas: Canvas, r: Relatorio, largura: Float, altura: Float
     val pincel = TextPaint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 8.5f * escala; color = CINZA }
     val rodape = StaticLayout.Builder.obtain(r.rodape, 0, r.rodape.length, pincel, util.toInt())
         .setLineSpacing(0f, 1.1f).build()
-    canvas.save()
-    canvas.translate(margem, maxOf(y + 16f * escala, altura - margem - rodape.height))
-    rodape.draw(canvas)
-    canvas.restore()
+    if (canvas != null) {
+        canvas.save()
+        canvas.translate(margem, maxOf(y + 16f * escala, altura - margem - rodape.height))
+        rodape.draw(canvas)
+        canvas.restore()
+    }
+    return y + 16f * escala + rodape.height + margem
 }
 
 private fun pastaDeExportar(context: Context): File = File(context.cacheDir, "exportar").apply { mkdirs() }
@@ -166,10 +173,19 @@ fun geraPdf(context: Context, r: Relatorio): File {
     return arquivo
 }
 
+/**
+ * A escala da imagem: a maior que ainda cabe na página. Na escala do PDF, a
+ * letra do corpo saía com 21 px, uns 8 pontos na tela do celular, e metade da
+ * página ficava vazia.
+ */
+fun escalaDaImagem(r: Relatorio, largura: Float = 1080f, altura: Float = 1350f): Float =
+    listOf(2.6f, 2.4f, 2.2f, 2.0f).firstOrNull { desenhaRelatorio(null, r, largura, altura, it) <= altura }
+        ?: (largura / 595f)
+
 /** O resumo como imagem de 1080 x 1350, o tamanho que o WhatsApp mostra inteiro. */
 fun geraImagem(context: Context, r: Relatorio): File {
     val bitmap = Bitmap.createBitmap(1080, 1350, Bitmap.Config.ARGB_8888)
-    desenhaRelatorio(Canvas(bitmap), r, 1080f, 1350f, 1080f / 595f)
+    desenhaRelatorio(Canvas(bitmap), r, 1080f, 1350f, escalaDaImagem(r))
     val arquivo = File(pastaDeExportar(context), "resumo_agrointeligencia.png")
     arquivo.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
     bitmap.recycle()

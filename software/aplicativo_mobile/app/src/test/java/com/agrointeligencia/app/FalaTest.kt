@@ -18,7 +18,7 @@ import java.time.LocalDateTime
  * voz lê mal.
  */
 @RunWith(AndroidJUnit4::class)
-@Config(sdk = [35])
+@Config(sdk = [35], qualifiers = "pt-rBR")
 class FalaTest {
     private val app = RuntimeEnvironment.getApplication()
 

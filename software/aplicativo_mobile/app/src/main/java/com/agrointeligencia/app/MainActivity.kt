@@ -111,6 +111,8 @@ fun esquemaAgro(isDark: Boolean): ColorScheme = if (isDark) {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Números no formato do idioma do app (Comum.kt).
+        Formatos.doIdioma(this)
         setContent {
             val isDark = isSystemInDarkTheme()
             val colors = esquemaAgro(isDark)
@@ -650,7 +652,7 @@ fun AgroDashboard(abaInicial: Int = 0) {
                     if (isOfflineMode && currentTab in 0..2) {
                         val cor = corAtencao(isDark)
                         val quando = previsaoEm.takeIf { it > 0 }?.let {
-                            java.text.SimpleDateFormat("dd/MM 'às' HH:mm", PT_BR).format(java.util.Date(it))
+                            java.text.SimpleDateFormat("dd/MM 'às' HH:mm", LOCAL_NUMEROS).format(java.util.Date(it))
                         }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,

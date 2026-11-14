@@ -46,7 +46,7 @@ import kotlin.math.sin
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(sdk = [35], qualifiers = "w411dp-h891dp-xxhdpi")
+@Config(sdk = [35], qualifiers = "pt-rBR-w411dp-h891dp-xxhdpi")
 class CapturasDeTelaTest {
 
     @get:Rule
@@ -180,10 +180,10 @@ class CapturasDeTelaTest {
     // A tela Mercado passa da altura do celular: no aplicativo ela rola, mas a
     // captura só pega o que cabe na tela, e o fim saía espremido. Estas duas
     // são desenhadas num celular mais alto.
-    @Config(qualifiers = "w411dp-h1400dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h1400dp-xxhdpi")
     @Test fun mercado_claro() = captura("mercado", false) { MercadoConteudo(mercado, false, periodoMercado) {} }
 
-    @Config(qualifiers = "w411dp-h1400dp-night-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h1400dp-night-xxhdpi")
     @Test fun mercado_escuro() = captura("mercado", true) { MercadoConteudo(mercado, false, periodoMercado) {} }
 
     @Test fun resumo_claro() = captura("resumo", false) { ResumoAgronomicoCard(projecao, ultimoReal) }
@@ -208,12 +208,12 @@ class CapturasDeTelaTest {
     @Test fun sobre_escuro() = captura("sobre", true) { MetodologiaCard(financas, previsao.validacao) }
 
     // A tela Tempo é longa: desenhada num celular alto, como a do Mercado.
-    @Config(qualifiers = "w411dp-h2100dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2100dp-xxhdpi")
     @Test fun tempo_claro() = captura("tempo", false) {
         TempoConteudo(tempo, avisos, SEDES_MUNICIPAIS["Paragominas"], agoraTempo, null, false, false)
     }
 
-    @Config(qualifiers = "w411dp-h2100dp-night-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2100dp-night-xxhdpi")
     @Test fun tempo_escuro() = captura("tempo", true) {
         TempoConteudo(tempo, avisos, SEDES_MUNICIPAIS["Paragominas"], agoraTempo, null, false, false)
     }
@@ -252,7 +252,7 @@ class CapturasDeTelaTest {
         PlantioTela(estado, plantio.municipio, aoAtualizar = {}, aoVoltar = {}, hoje = hojePlantio)
     }
 
-    @Config(qualifiers = "w411dp-h1700dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h1700dp-xxhdpi")
     @Test fun plantio_claro() {
         val estado = estadoPlantio()
         captura("plantio", false) { telaPlantio(estado) }
@@ -275,7 +275,7 @@ class CapturasDeTelaTest {
         return EstadoCaderno(app)
     }
 
-    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2600dp-xxhdpi")
     @Test fun caderno_claro() {
         val caderno = estadoCaderno()
         val plantio = estadoPlantio()
@@ -312,7 +312,7 @@ class CapturasDeTelaTest {
                 .putString(PREF_ALERTA_PRECO_PRACA, "Paragominas").putFloat(PREF_ALERTA_PRECO_ALVO, 140f).commit()
         }
 
-    @Config(qualifiers = "w411dp-h1500dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h1500dp-xxhdpi")
     @Test fun alertas_claro() {
         val prefs = prefsDosAlertas()
         captura("alertas", false) {
@@ -321,7 +321,7 @@ class CapturasDeTelaTest {
         }
     }
 
-    @Config(qualifiers = "w411dp-h1700dp-night-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h1700dp-night-xxhdpi")
     @Test fun plantio_escuro() {
         val estado = estadoPlantio()
         captura("plantio", true) { telaPlantio(estado) }
@@ -339,10 +339,10 @@ class CapturasDeTelaTest {
         ListaDeMunicipios(lista, atual = "Paragominas", busca = "pa", aoBuscar = {}, aoEscolher = {})
     }
 
-    @Config(qualifiers = "w411dp-h1100dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h1100dp-xxhdpi")
     @Test fun municipio_claro() = captura("municipio", false) { telaMunicipio() }
 
-    @Config(qualifiers = "w411dp-h1100dp-night-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h1100dp-night-xxhdpi")
     @Test fun municipio_escuro() = captura("municipio", true) { telaMunicipio() }
 
     // ── outros estados (Estados.kt) ───────────────────────────────────────────
@@ -366,16 +366,16 @@ class CapturasDeTelaTest {
         MetodologiaCard(f, p.validacao)
     }
 
-    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2600dp-xxhdpi")
     @Test fun estado_mt_claro() = captura("estado_mt", false) { telasDoEstado("MT", "Sorriso") }
 
-    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2600dp-xxhdpi")
     @Test fun estado_ma_claro() = captura("estado_ma", false) { telasDoEstado("MA", "Balsas") }
 
-    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2600dp-xxhdpi")
     @Test fun estado_to_claro() = captura("estado_to", false) { telasDoEstado("TO", "Porto Nacional") }
 
-    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2600dp-xxhdpi")
     @Test fun estado_ro_claro() = captura("estado_ro", false) { telasDoEstado("RO", "Vilhena") }
 
     // A escolha do estado na janela do município: os cinco estados e a lista do escolhido.
@@ -389,10 +389,10 @@ class CapturasDeTelaTest {
                           aoBuscar = {}, aoEscolher = {}, estado = estado)
     }
 
-    @Config(qualifiers = "w411dp-h900dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h900dp-xxhdpi")
     @Test fun municipio_estados_claro() = captura("municipio_estados", false) { telaEstados() }
 
-    @Config(qualifiers = "w411dp-h900dp-night-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h900dp-night-xxhdpi")
     @Test fun municipio_estados_escuro() = captura("municipio_estados", true) { telaEstados() }
 
     // O ícone do launcher, montado pelo próprio Android a partir do

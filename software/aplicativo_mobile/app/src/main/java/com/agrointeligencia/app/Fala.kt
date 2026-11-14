@@ -124,7 +124,7 @@ fun falaDoTempo(context: Context, p: PrevisaoTempo?, avisos: AvisosResponse?, lu
     val umidade = a.relative_humidity_2m?.roundToInt()
     val vento = a.wind_speed_10m?.let { ventoA2m(it).roundToInt() }
     if (temperatura != null && umidade != null && vento != null) {
-        partes += context.getString(R.string.fala_tempo_agora, lugar, temperatura, descricaoTempo(a.weather_code).lowercase(PT_BR),
+        partes += context.getString(R.string.fala_tempo_agora, lugar, temperatura, descricaoTempo(a.weather_code).lowercase(LOCAL_NUMEROS),
                                     umidade, vento)
     }
     avisos?.avisos?.takeIf { it.isNotEmpty() }?.let { partes += resumoDosAvisos(it) }

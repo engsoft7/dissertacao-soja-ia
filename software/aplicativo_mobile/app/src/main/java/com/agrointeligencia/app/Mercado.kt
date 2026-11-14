@@ -198,7 +198,7 @@ fun MercadoConteudo(
                         Text("R$ ${reais(cot.ultimo_brl_saca)}", fontSize = 28.sp, fontWeight = FontWeight.Bold,
                              color = MaterialTheme.colorScheme.onSurface)
                         Spacer(Modifier.width(10.dp))
-                        Text((if (subiu) "▲ +" else "▼ ") + String.format(PT_BR, "%.2f", cot.variacao_periodo_pct) + "% no período",
+                        Text((if (subiu) "▲ +" else "▼ ") + String.format(LOCAL_NUMEROS, "%.2f", cot.variacao_periodo_pct) + "% no período",
                              fontSize = 13.sp, color = corVar, fontWeight = FontWeight.SemiBold,
                              modifier = Modifier.padding(bottom = 5.dp))
                     }
@@ -208,12 +208,12 @@ fun MercadoConteudo(
                         PrecoEstimadoPara(para, estimado, isDark)
                     } }
                     GraficoVelas(cot.velas, isDark, cot.periodo)
-                    val quando = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", PT_BR)
+                    val quando = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", LOCAL_NUMEROS)
                         .format(java.util.Date(cot.atualizado_em * 1000))
                     Text("Cotação de $quando, com cerca de ${cot.atraso_min} min de atraso.",
                          fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
                     if (cot.ultimo_usd_bushel != null && cot.cambio != null) {
-                        Text("US$ ${reais(cot.ultimo_usd_bushel)}/bushel · dólar a R$ ${String.format(PT_BR, "%.4f", cot.cambio)}",
+                        Text("US$ ${reais(cot.ultimo_usd_bushel)}/bushel · dólar a R$ ${String.format(LOCAL_NUMEROS, "%.4f", cot.cambio)}",
                              fontSize = 12.sp, color = secundaria)
                     }
                 }
@@ -453,13 +453,13 @@ fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
     val faixa = if (maxP > minP) maxP - minP else 1.0
     // Rótulo do eixo de tempo e da vela tocada conforme o tamanho da vela:
     // hora no dia, dia e hora em cinco dias, data no mês, semana em seis meses.
-    val formato = java.text.SimpleDateFormat(if (periodo == "1d") "HH:mm" else "dd/MM", PT_BR)
+    val formato = java.text.SimpleDateFormat(if (periodo == "1d") "HH:mm" else "dd/MM", LOCAL_NUMEROS)
     val formatoToque = java.text.SimpleDateFormat(
         when (periodo) {
             "1d", "5d" -> "dd/MM HH:mm"
             "6mo" -> "'semana de' dd/MM/yyyy"
             else -> "dd/MM/yyyy"
-        }, PT_BR)
+        }, LOCAL_NUMEROS)
     var tocada by remember(velas) { mutableStateOf<Int?>(null) }
     val ultima = velas.last()
     val corUltima = if (ultima.c >= ultima.o) alta else baixa

@@ -133,7 +133,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?, precoPadr
             // município, e não o da safra: ela acompanha a tendência. Chamá-la
             // de "IA" sugeria uma previsão ano a ano que o modelo não faz.
             Text(
-                text = String.format(PT_BR, "Estimativa %,d kg/ha · erro típico ± %,d kg/ha", 
+                text = String.format(LOCAL_NUMEROS, "Estimativa %,d kg/ha · erro típico ± %,d kg/ha", 
                     historico.rendimento_predito.roundToInt(), historico.margem_erro.roundToInt()),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

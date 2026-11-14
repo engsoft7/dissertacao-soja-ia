@@ -17,7 +17,7 @@ import java.time.LocalDate
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(sdk = [35])
+@Config(sdk = [35], qualifiers = "pt-rBR")
 class RelatorioTest {
     private val app = RuntimeEnvironment.getApplication()
     private val dados = DadosDoRelatorio(
@@ -66,5 +66,10 @@ class RelatorioTest {
         BitmapFactory.decodeFile(arquivo.path, opcoes)
         assertEquals(1080, opcoes.outWidth)
         assertEquals(1350, opcoes.outHeight)
+        // A letra cresce até onde a página deixa, e o texto todo cabe nela.
+        val r = montaRelatorio(app, dados)
+        val escala = escalaDaImagem(r)
+        assertTrue("escala $escala", escala >= 2.0f)
+        assertTrue(desenhaRelatorio(null, r, 1080f, 1350f, escala) <= 1350f)
     }
 }

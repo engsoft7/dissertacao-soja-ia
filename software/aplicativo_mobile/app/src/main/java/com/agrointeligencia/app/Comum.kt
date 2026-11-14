@@ -149,13 +149,25 @@ fun CarregandoDados(municipio: String?) {
     }
 }
 
-// Números no formato brasileiro em qualquer aparelho: "3.230", e não "3,230"
-// num celular configurado em inglês.
-internal val PT_BR = java.util.Locale("pt", "BR")
+// Números no formato do idioma em que o app abriu: "3.230" em português (e em
+// qualquer idioma sem tradução, que mostra o app em português) e "3,230" em
+// inglês. MainActivity e AlertasJob leem formato_numeros dos recursos; fora
+// deles (testes de unidade, capturas) vale o português.
+object Formatos {
+    @Volatile
+    var locale: java.util.Locale = java.util.Locale("pt", "BR")
+        private set
 
-fun milhar(v: Double): String = String.format(PT_BR, "%,d", v.roundToInt())
+    fun doIdioma(context: android.content.Context) {
+        locale = java.util.Locale.forLanguageTag(context.getString(R.string.formato_numeros))
+    }
+}
 
-fun reais(v: Double): String = String.format(PT_BR, "%,.2f", v)
+internal val LOCAL_NUMEROS: java.util.Locale get() = Formatos.locale
+
+fun milhar(v: Double): String = String.format(LOCAL_NUMEROS, "%,d", v.roundToInt())
+
+fun reais(v: Double): String = String.format(LOCAL_NUMEROS, "%,.2f", v)
 
 /**
  * Reais sem centavos, com o sinal antes do símbolo: "−R$ 86", e não "R$ -86".

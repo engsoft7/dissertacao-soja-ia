@@ -264,15 +264,15 @@ fun ResumoFinanceiroCard(
     // Com a chave, o campo passa ao preço da praça quando ele chega da rede
     // (o do produtor, se houver, continua valendo).
     var customPreco by remember(precoPadrao) {
-        mutableStateOf(String.format(PT_BR, "%.2f", prefs.valorDoProdutor(PREF_PRECO) ?: precoPadrao))
+        mutableStateOf(String.format(LOCAL_NUMEROS, "%.2f", prefs.valorDoProdutor(PREF_PRECO) ?: precoPadrao))
     }
     var customCusto by remember {
-        mutableStateOf(String.format(PT_BR, "%.2f", custoSalvo ?: kpis.custo_ha))
+        mutableStateOf(String.format(LOCAL_NUMEROS, "%.2f", custoSalvo ?: kpis.custo_ha))
     }
     // Com a chave, o campo acompanha o município: sem ela, ao trocar de
     // município, seguia a estimativa do anterior até o produtor redigitar.
     var customProd by remember(prodModelo) {
-        mutableStateOf(String.format(PT_BR, "%.1f", prefs.valorDoProdutor(PREF_PROD) ?: prodModelo))
+        mutableStateOf(String.format(LOCAL_NUMEROS, "%.1f", prefs.valorDoProdutor(PREF_PROD) ?: prodModelo))
     }
 
     Card(
@@ -430,7 +430,7 @@ fun ResumoFinanceiroCard(
                              fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 8.dp))
                     } else {
                         TextButton(onClick = {
-                            customPreco = String.format(PT_BR, "%.2f", pa)
+                            customPreco = String.format(LOCAL_NUMEROS, "%.2f", pa)
                             temPreco = true
                             precoEm = System.currentTimeMillis()
                             prefs.guardarDoProdutor(PREF_PRECO, pa, precoEm)
@@ -450,7 +450,7 @@ fun ResumoFinanceiroCard(
                 if (temPreco) "preço" else null,
                 if (temCusto) "custo" else null
             )
-            val quando = java.text.SimpleDateFormat("dd/MM/yyyy", PT_BR)
+            val quando = java.text.SimpleDateFormat("dd/MM/yyyy", LOCAL_NUMEROS)
             // "Informados em" com uma data só deixava dúvida: era a data do
             // preço digitado ou a da cotação? Agora cada número diz quando foi
             // informado pelo produtor.
@@ -490,9 +490,9 @@ fun ResumoFinanceiroCard(
                         prefs.esquecerDoProdutor(PREF_PRECO, PREF_CUSTO, PREF_PROD)
                         temPreco = false; temCusto = false; temProd = false
                         precoEm = 0L; custoEm = 0L; prodEm = 0L
-                        customPreco = String.format(PT_BR, "%.2f", precoPadrao)
-                        customCusto = String.format(PT_BR, "%.2f", kpis.custo_ha)
-                        customProd = String.format(PT_BR, "%.1f", prodModelo)
+                        customPreco = String.format(LOCAL_NUMEROS, "%.2f", precoPadrao)
+                        customCusto = String.format(LOCAL_NUMEROS, "%.2f", kpis.custo_ha)
+                        customProd = String.format(LOCAL_NUMEROS, "%.1f", prodModelo)
                     },
                     contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
                 ) {
@@ -527,7 +527,7 @@ fun ResumoFinanceiroCard(
                     // O campo traz o custo da CONAB na produtividade dela (48 sc/ha); aqui vai o
                     // custo para a produtividade da conta, com frete e CESSR das sacas.
                     Text(text = if (temCusto) "Seu custo operacional"
-                                else "Custo para ${String.format(PT_BR, "%.0f", scHa)} sc/ha",
+                                else "Custo para ${String.format(LOCAL_NUMEROS, "%.0f", scHa)} sc/ha",
                          fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "${reaisInteiros(custoUsado)}/ha", fontSize = 18.sp,
                          color = if (isDark) Color(0xFFf85149) else Color(0xFFdc2626), fontWeight = FontWeight.Bold)

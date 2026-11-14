@@ -108,7 +108,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?, precoPadr
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Ano ${historico.ano}",
+                    text = stringResource(R.string.hist_ano, historico.ano),
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     modifier = Modifier.weight(1f)
@@ -134,8 +134,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?, precoPadr
             // município, e não o da safra: ela acompanha a tendência. Chamá-la
             // de "IA" sugeria uma previsão ano a ano que o modelo não faz.
             Text(
-                text = String.format(LOCAL_NUMEROS, "Estimativa %,d kg/ha · erro típico ± %,d kg/ha", 
-                    historico.rendimento_predito.roundToInt(), historico.margem_erro.roundToInt()),
+                text = stringResource(R.string.hist_estimativa, milhar(historico.rendimento_predito), milhar(historico.margem_erro)),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp)
@@ -161,8 +160,8 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?, precoPadr
                     // "A preços de hoje" dizia mais do que é: o preço e o custo
                     // são os da Viabilidade, do produtor ou do levantamento da
                     // CONAB, que pode ter meses.
-                    text = (if (observado) "Com o preço e o custo da Viabilidade: "
-                            else "Projetado, com o preço e o custo da Viabilidade: ") + reaisInteiros(r.valor) + "/ha",
+                    text = stringResource(if (observado) R.string.hist_resultado_observado else R.string.hist_resultado_projetado,
+                                          reaisInteiros(r.valor)),
                     fontSize = 13.sp,
                     color = color,
                     fontWeight = FontWeight.SemiBold,
@@ -170,8 +169,7 @@ fun PrevisaoCard(historico: PrevisaoHistorico, kpis: FinancaResponse?, precoPadr
                 )
                 if (r.sinalIncerto && outro != null) {
                     Text(
-                        text = "Pode ir de ${reaisInteiros(minOf(r.valor, outro))} a ${reaisInteiros(maxOf(r.valor, outro))}, " +
-                               "conforme o rateio do custo.",
+                        text = stringResource(R.string.hist_faixa, reaisInteiros(minOf(r.valor, outro)), reaisInteiros(maxOf(r.valor, outro))),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 2.dp)
@@ -212,9 +210,9 @@ fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>, previsao: Pr
     var anoTocado by remember(historico) { mutableStateOf<Int?>(null) }
 
     fun fase(ano: Int) = when (ano) { in elNinos -> " · El Niño"; in laNinas -> " · La Niña"; else -> "" }
-    val descricao = "Gráfico da produtividade de $minYear a $maxYear. " +
-        (ultimoObservado?.let { "Última safra observada, ${it.ano}: ${milhar(it.rendimento_real)} kg/ha. " } ?: "") +
-        "Projeção para $maxYear: ${milhar(ordenado.last().rendimento_predito)} kg/ha."
+    val descricao = stringResource(R.string.hist_descricao, minYear, maxYear) + " " +
+        (ultimoObservado?.let { stringResource(R.string.hist_descricao_observada, it.ano, milhar(it.rendimento_real)) + " " } ?: "") +
+        stringResource(R.string.hist_descricao_projecao, maxYear, milhar(ordenado.last().rendimento_predito))
 
     Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -223,16 +221,16 @@ fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>, previsao: Pr
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text("Evolução histórica e projeção (kg/ha)", fontWeight = FontWeight.Bold, fontSize = 16.sp,
+            Text(stringResource(R.string.hist_titulo), fontWeight = FontWeight.Bold, fontSize = 16.sp,
                  color = MaterialTheme.colorScheme.onSurface)
             val sel = anoTocado?.let { a -> ordenado.firstOrNull { it.ano == a } }
             Text(
                 text = sel?.let {
                     if (it.rendimento_real > 0)
-                        "${it.ano}: observado ${milhar(it.rendimento_real)} · estimado ${milhar(it.rendimento_predito)} kg/ha${fase(it.ano)}"
+                        stringResource(R.string.hist_observado_ano, it.ano, milhar(it.rendimento_real), milhar(it.rendimento_predito)) + fase(it.ano)
                     else
-                        "${it.ano}: projeção ${milhar(it.rendimento_predito)} kg/ha (± ${milhar(it.margem_erro)})${fase(it.ano)}"
-                } ?: "Toque no gráfico para ver o valor de um ano.",
+                        stringResource(R.string.hist_projecao_ano, it.ano, milhar(it.rendimento_predito), milhar(it.margem_erro)) + fase(it.ano)
+                } ?: stringResource(R.string.hist_toque),
                 fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 4.dp)
             )
             Canvas(
@@ -313,12 +311,12 @@ fun HistoricoProdutividadeChart(historico: List<PrevisaoHistorico>, previsao: Pr
                     width = 2.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 10f), 0f)))
             }
             Row {
-                ItemLegenda(corReal, "Observado (IBGE)")
-                ItemLegenda(corProj, "Projeção", tracejada = true)
+                ItemLegenda(corReal, stringResource(R.string.hist_legenda_observado))
+                ItemLegenda(corProj, stringResource(R.string.hist_legenda_projecao), tracejada = true)
             }
             Row {
-                ItemLegenda(corNino, "Safra de El Niño", faixa = true)
-                ItemLegenda(corNina, "Safra de La Niña", faixa = true)
+                ItemLegenda(corNino, stringResource(R.string.hist_legenda_nino), faixa = true)
+                ItemLegenda(corNina, stringResource(R.string.hist_legenda_nina), faixa = true)
             }
         }
     }

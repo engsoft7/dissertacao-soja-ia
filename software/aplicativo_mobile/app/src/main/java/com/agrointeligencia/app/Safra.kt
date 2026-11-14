@@ -43,9 +43,9 @@ fun projecaoDaSafra(historico: List<PrevisaoHistorico>, hoje: LocalDate = LocalD
 fun situacaoSemDado(ano: Int, hoje: LocalDate = LocalDate.now()): Int =
     if (ano >= anoDaSafraEmCurso(hoje)) R.string.safra_a_colher else R.string.safra_sem_ibge
 
-/** "a", "a e b", "a, b e c". */
-fun juntaComE(partes: List<String>): String = when (partes.size) {
+/** "a", "a e b", "a, b e c"; [e] é a conjunção do idioma (conjuncao_e). */
+fun juntaComE(partes: List<String>, e: String = "e"): String = when (partes.size) {
     0 -> ""
     1 -> partes[0]
-    else -> partes.dropLast(1).joinToString(", ") + " e " + partes.last()
+    else -> partes.dropLast(1).joinToString(", ") + " " + e + " " + partes.last()
 }

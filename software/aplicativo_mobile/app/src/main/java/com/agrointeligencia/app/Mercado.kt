@@ -1,5 +1,6 @@
 package com.agrointeligencia.app
 
+import androidx.compose.ui.res.stringResource
 import android.os.Bundle
 import android.content.Context
 import android.content.SharedPreferences
@@ -79,7 +80,8 @@ import androidx.compose.ui.text.input.KeyboardType
 // Períodos da tela Mercado: chave da API e rótulo do botão.
 private val PERIODOS_MERCADO = listOf("1d" to "1D", "5d" to "5D", "1mo" to "1M", "6mo" to "6M")
 // "1D" lido em voz alta não diz nada; o leitor de tela lê o período por extenso.
-private val PERIODOS_POR_EXTENSO = mapOf("1d" to "1 dia", "5d" to "5 dias", "1mo" to "1 mês", "6mo" to "6 meses")
+private val PERIODOS_POR_EXTENSO = mapOf("1d" to R.string.periodo_1d, "5d" to R.string.periodo_5d,
+                                         "1mo" to R.string.periodo_1mo, "6mo" to R.string.periodo_6mo)
 
 /**
  * Busca a cotação e entrega à tela; a tela em si é MercadoConteudo.
@@ -162,7 +164,7 @@ fun MercadoConteudo(
             // Sem conexão, a tela mostra a última leitura; a data dela está em
             // cada número, e esta linha diz por que não mudou.
             if (falhou && mercado != null) {
-                Text("Sem conexão: mostrando a última cotação baixada.", fontSize = 12.sp,
+                Text(stringResource(R.string.mercado_sem_conexao), fontSize = 12.sp,
                      color = corAtencao(isDark), fontWeight = FontWeight.SemiBold,
                      modifier = Modifier.padding(bottom = 8.dp).semantics { liveRegion = LiveRegionMode.Polite })
             }
@@ -170,16 +172,17 @@ fun MercadoConteudo(
                 CotacoesPracasPara(pracas, estado = estadoDoApp(mercado?.uf))
                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
             }
-            Text("Soja em Chicago, em R$/saca", fontWeight = FontWeight.Bold, fontSize = 16.sp,
+            Text(stringResource(R.string.mercado_chicago_titulo), fontWeight = FontWeight.Bold, fontSize = 16.sp,
                  color = MaterialTheme.colorScheme.onSurface)
-            Text("Bolsa de Chicago (CBOT), contrato mais próximo, convertido pelo dólar de cada momento",
+            Text(stringResource(R.string.mercado_chicago_texto),
                  fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PERIODOS_MERCADO.forEach { (chave, rotulo) ->
+                    val extenso = PERIODOS_POR_EXTENSO[chave]?.let { stringResource(it) } ?: rotulo
                     FilterChip(selected = periodo == chave, onClick = { aoMudarPeriodo(chave) },
                                label = { Text(rotulo) },
-                               modifier = Modifier.semantics { contentDescription = PERIODOS_POR_EXTENSO[chave] ?: rotulo })
+                               modifier = Modifier.semantics { contentDescription = extenso })
                 }
             }
             Spacer(Modifier.height(10.dp))
@@ -188,7 +191,7 @@ fun MercadoConteudo(
                 carregando && cot == null ->
                     CircularProgressIndicator(modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally))
                 cot == null ->
-                    Text("Cotação indisponível no momento. Tente de novo em alguns minutos.",
+                    Text(stringResource(R.string.mercado_indisponivel),
                          fontSize = 13.sp, color = secundaria)
                 else -> {
                     val subiu = cot.variacao_periodo_pct >= 0
@@ -198,22 +201,24 @@ fun MercadoConteudo(
                         Text("R$ ${reais(cot.ultimo_brl_saca)}", fontSize = 28.sp, fontWeight = FontWeight.Bold,
                              color = MaterialTheme.colorScheme.onSurface)
                         Spacer(Modifier.width(10.dp))
-                        Text((if (subiu) "▲ +" else "▼ ") + String.format(LOCAL_NUMEROS, "%.2f", cot.variacao_periodo_pct) + "% no período",
+                        Text((if (subiu) "▲ +" else "▼ ") +
+                             stringResource(R.string.mercado_variacao, String.format(LOCAL_NUMEROS, "%.2f", cot.variacao_periodo_pct)),
                              fontSize = 13.sp, color = corVar, fontWeight = FontWeight.SemiBold,
                              modifier = Modifier.padding(bottom = 5.dp))
                     }
-                    Text("Máxima R$ ${reais(cot.maxima_periodo)} · mínima R$ ${reais(cot.minima_periodo)}",
+                    Text(stringResource(R.string.mercado_max_min, reais(cot.maxima_periodo), reais(cot.minima_periodo)),
                          fontSize = 12.sp, color = secundaria)
                     mercado.para?.let { para -> para.estimado_brl_saca?.let { estimado ->
                         PrecoEstimadoPara(para, estimado, isDark)
                     } }
                     GraficoVelas(cot.velas, isDark, cot.periodo)
-                    val quando = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", LOCAL_NUMEROS)
+                    val quando = java.text.SimpleDateFormat(stringResource(R.string.mercado_formato_data_hora), LOCAL_NUMEROS)
                         .format(java.util.Date(cot.atualizado_em * 1000))
-                    Text("Cotação de $quando, com cerca de ${cot.atraso_min} min de atraso.",
+                    Text(stringResource(R.string.mercado_atraso, quando, cot.atraso_min.toString()),
                          fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
                     if (cot.ultimo_usd_bushel != null && cot.cambio != null) {
-                        Text("US$ ${reais(cot.ultimo_usd_bushel)}/bushel · dólar a R$ ${String.format(LOCAL_NUMEROS, "%.4f", cot.cambio)}",
+                        Text(stringResource(R.string.mercado_bushel, reais(cot.ultimo_usd_bushel),
+                                            String.format(LOCAL_NUMEROS, "%.4f", cot.cambio)),
                              fontSize = 12.sp, color = secundaria)
                     }
                 }
@@ -225,19 +230,19 @@ fun MercadoConteudo(
             } }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
-            Text("Referências de preço físico", fontWeight = FontWeight.Bold, fontSize = 14.sp,
+            Text(stringResource(R.string.mercado_referencias), fontWeight = FontWeight.Bold, fontSize = 14.sp,
                  color = MaterialTheme.colorScheme.onSurface)
             mercado?.fisico?.let {
-                Text("${it.praca} (${it.uf}), ${it.tipo}: R$ ${reais(it.valor)}/sc, cotação do dia" +
-                     (if (it.uf != (mercado?.uf ?: "PA")) ", em outro estado" else ""),
+                Text(stringResource(R.string.mercado_fisico, it.praca, it.uf, it.tipo, reais(it.valor)) +
+                     (if (it.uf != (mercado?.uf ?: "PA")) stringResource(R.string.mercado_outro_estado) else ""),
                      fontSize = 13.sp, color = secundaria)
             }
             mercado?.conab_saca?.let {
-                Text("Porteira, ${mercado?.conab_fonte ?: "CONAB"}: R$ ${reais(it)}/sc, padrão da simulação",
+                Text(stringResource(R.string.mercado_porteira, mercado?.conab_fonte ?: "CONAB", reais(it)),
                      fontSize = 13.sp, color = secundaria)
             }
             Spacer(Modifier.height(8.dp))
-            Text("Informação de mercado, não recomendação de compra ou venda.",
+            Text(stringResource(R.string.mercado_aviso),
                  fontSize = 12.sp, color = secundaria, lineHeight = 16.sp,
                  fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
         }
@@ -256,9 +261,9 @@ fun CotacoesPracasPara(
     estado: EstadoDoApp = ESTADOS_DO_APP[0],
 ) {
     val secundaria = MaterialTheme.colorScheme.onSurfaceVariant
-    Text("Soja ${estado.no}, cotação do dia", fontWeight = FontWeight.Bold, fontSize = 16.sp,
+    Text(stringResource(R.string.pracas_titulo, estado.no, estado.nome), fontWeight = FontWeight.Bold, fontSize = 16.sp,
          color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.semantics { heading() })
-    Text("Agrolink, por praça. Na fazenda o preço pode ser menor, pelo frete.",
+    Text(stringResource(R.string.pracas_fonte),
          fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
     Spacer(Modifier.height(6.dp))
     // Com a fonte do sistema grande, a data desce para baixo do preço: na mesma
@@ -266,7 +271,7 @@ fun CotacoesPracasPara(
     val fonteGrande = LocalDensity.current.fontScale > 1.3f
     pracas.forEach { p ->
         val emDia = cotacaoEmDia(p, hoje)
-        val data = if (emDia) dataCurta(p.data) else "parada desde ${dataCurta(p.data)}"
+        val data = if (emDia) dataCurta(p.data) else stringResource(R.string.pracas_parada, dataCurta(p.data))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp).semantics(mergeDescendants = true) {}
@@ -305,11 +310,11 @@ fun PrecoEstimadoPara(para: EstimativaPara, estimado: Double, isDark: Boolean) {
             .background(cor.copy(alpha = 0.08f), RoundedCornerShape(10.dp))
             .padding(horizontal = 12.dp, vertical = 10.dp)
     ) {
-        Text("Média do Pará, estimada agora", fontSize = 12.sp, color = cor, fontWeight = FontWeight.SemiBold)
-        Text("R$ ${reais(estimado)}/sc", fontSize = 22.sp, fontWeight = FontWeight.Bold,
+        Text(stringResource(R.string.para_estimada), fontSize = 12.sp, color = cor, fontWeight = FontWeight.SemiBold)
+        Text(stringResource(R.string.para_sc, reais(estimado)), fontSize = 22.sp, fontWeight = FontWeight.Bold,
              color = MaterialTheme.colorScheme.onSurface)
-        Text("Chicago agora $sinal R$ ${reais(kotlin.math.abs(para.base_brl_saca))} de base média do Pará " +
-             "(${mesCurto(para.mes_base, anoCompleto = true)}). Acompanha Chicago ao longo do dia.",
+        Text(stringResource(R.string.para_base, sinal, reais(kotlin.math.abs(para.base_brl_saca)),
+                            mesCurto(para.mes_base, anoCompleto = true)),
              fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
     }
 }
@@ -340,21 +345,19 @@ fun GraficoMensalPara(meses: List<MesPara>, fonte: String, isDark: Boolean) {
         return ((xToque - padX) / passo).roundToInt().coerceIn(0, meses.size - 1)
     }
 
-    Text("Pará × Chicago, médias mensais (R$/saca)", fontWeight = FontWeight.Bold, fontSize = 14.sp,
+    Text(stringResource(R.string.mensal_titulo), fontWeight = FontWeight.Bold, fontSize = 14.sp,
          color = MaterialTheme.colorScheme.onSurface)
     val sel = tocado?.let { meses.getOrNull(it) } ?: ultimo
     Text(
-        "${mesCurto(sel.mes, anoCompleto = true)} · Pará ${reais(sel.para)} · Chicago ${reais(sel.chicago)} · " +
-            "base ${if (sel.base >= 0) "+" else "−"}${reais(kotlin.math.abs(sel.base))}",
+        stringResource(R.string.mensal_selecao, mesCurto(sel.mes, anoCompleto = true), reais(sel.para), reais(sel.chicago),
+                       (if (sel.base >= 0) "+" else "−") + reais(kotlin.math.abs(sel.base))),
         fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 4.dp)
     )
+    val descricaoMensal = stringResource(R.string.mensal_descricao, mesCurto(meses.first().mes, true),
+                                         mesCurto(ultimo.mes, true), reais(ultimo.para), reais(ultimo.chicago))
     Canvas(
         modifier = Modifier.fillMaxWidth().height(180.dp).padding(top = 6.dp, bottom = 6.dp)
-            .semantics {
-                contentDescription = "Médias mensais da soja no Pará e em Chicago, em reais por saca, de " +
-                    "${mesCurto(meses.first().mes, true)} a ${mesCurto(ultimo.mes, true)}; no último mês, " +
-                    "Pará R$ ${reais(ultimo.para)} e Chicago R$ ${reais(ultimo.chicago)}."
-            }
+            .semantics { contentDescription = descricaoMensal }
             .pointerInput(meses) {
                 detectTapGestures { pos -> tocado = indiceTocado(pos.x, size.width.toFloat(), 56.dp.toPx()) }
             }
@@ -390,19 +393,18 @@ fun GraficoMensalPara(meses: List<MesPara>, fonte: String, isDark: Boolean) {
     }
     Row {
         ItemLegenda(cPara, "Pará")
-        ItemLegenda(cChicago, "Chicago em R$", tracejada = true)
+        ItemLegenda(cChicago, stringResource(R.string.legenda_chicago_rs), tracejada = true)
     }
 
     // Base de cada mês em barras, com escala simétrica em torno de zero.
     val limite = eixoRedondo(0.0, meses.maxOf { kotlin.math.abs(it.base) }, divisoes = 2).last().coerceAtLeast(1.0)
-    Text("Base do Pará (Pará − Chicago)", fontSize = 12.sp, color = corTexto, fontWeight = FontWeight.SemiBold,
+    Text(stringResource(R.string.base_titulo), fontSize = 12.sp, color = corTexto, fontWeight = FontWeight.SemiBold,
          modifier = Modifier.padding(top = 10.dp))
+    val descricaoBase = stringResource(R.string.base_descricao, reais(meses.minOf { it.base }),
+                                       reais(meses.maxOf { it.base }), reais(ultimo.base))
     Canvas(
         modifier = Modifier.fillMaxWidth().height(84.dp).padding(top = 4.dp)
-            .semantics {
-                contentDescription = "Base do Pará por mês, de ${reais(meses.minOf { it.base })} a " +
-                    "${reais(meses.maxOf { it.base })} reais por saca; no último mês, ${reais(ultimo.base)}."
-            }
+            .semantics { contentDescription = descricaoBase }
             .pointerInput(meses) {
                 detectTapGestures { pos -> tocado = indiceTocado(pos.x, size.width.toFloat(), 56.dp.toPx()) }
             }
@@ -429,7 +431,7 @@ fun GraficoMensalPara(meses: List<MesPara>, fonte: String, isDark: Boolean) {
                      size = Size(largura, kotlin.math.abs(y(m.base) - zero).coerceAtLeast(1.dp.toPx())))
         }
     }
-    Text("Base = Pará − Chicago, médias do mês (o mês atual é parcial). Pará: $fonte.",
+    Text(stringResource(R.string.base_nota, fonte),
          fontSize = 12.sp, color = corTexto, lineHeight = 16.sp, modifier = Modifier.padding(top = 4.dp))
 }
 
@@ -453,28 +455,29 @@ fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
     val faixa = if (maxP > minP) maxP - minP else 1.0
     // Rótulo do eixo de tempo e da vela tocada conforme o tamanho da vela:
     // hora no dia, dia e hora em cinco dias, data no mês, semana em seis meses.
-    val formato = java.text.SimpleDateFormat(if (periodo == "1d") "HH:mm" else "dd/MM", LOCAL_NUMEROS)
+    val formato = java.text.SimpleDateFormat(
+        if (periodo == "1d") "HH:mm" else stringResource(R.string.velas_formato_dia), LOCAL_NUMEROS)
     val formatoToque = java.text.SimpleDateFormat(
         when (periodo) {
-            "1d", "5d" -> "dd/MM HH:mm"
-            "6mo" -> "'semana de' dd/MM/yyyy"
-            else -> "dd/MM/yyyy"
+            "1d", "5d" -> stringResource(R.string.velas_formato_dia_hora)
+            "6mo" -> stringResource(R.string.velas_formato_semana)
+            else -> stringResource(R.string.velas_formato_data)
         }, LOCAL_NUMEROS)
     var tocada by remember(velas) { mutableStateOf<Int?>(null) }
     val ultima = velas.last()
     val corUltima = if (ultima.c >= ultima.o) alta else baixa
-    val descricao = "Gráfico de velas da soja em reais por saca, de R$ ${reais(velas.first().o)} " +
-                    "a R$ ${reais(ultima.c)}; máxima R$ ${reais(velas.maxOf { it.h })}, mínima R$ ${reais(velas.minOf { it.l })}."
+    val descricao = stringResource(R.string.velas_descricao, reais(velas.first().o), reais(ultima.c),
+                                   reais(velas.maxOf { it.h }), reais(velas.minOf { it.l }))
 
     // A vela tocada, por extenso: o gráfico mostra a forma, e o número exato
     // fica aqui em cima, legível.
     val sel = tocada?.let { velas.getOrNull(it) }
     Text(
         text = sel?.let {
-            formatoToque.format(java.util.Date(it.t * 1000)) +
-                " · abertura ${reais(it.o)} · máxima ${reais(it.h)} · mínima ${reais(it.l)} · fechamento ${reais(it.c)}" +
-                (it.pa?.let { pa -> " · Pará estimado ${reais(pa)}" } ?: "")
-        } ?: "Toque numa vela para ver os valores.",
+            stringResource(R.string.velas_tocada, formatoToque.format(java.util.Date(it.t * 1000)),
+                           reais(it.o), reais(it.h), reais(it.l), reais(it.c)) +
+                (it.pa?.let { pa -> " · " + stringResource(R.string.velas_para_estimado, reais(pa)) } ?: "")
+        } ?: stringResource(R.string.velas_toque),
         fontSize = 12.sp, color = corTexto, lineHeight = 16.sp,
         modifier = Modifier.padding(top = 10.dp)
     )
@@ -555,8 +558,8 @@ fun GraficoVelas(velas: List<Vela>, isDark: Boolean, periodo: String) {
         }
     }
     Row {
-        ItemLegenda(alta, "Fechou acima da abertura", faixa = true)
-        ItemLegenda(baixa, "Fechou abaixo", faixa = true)
+        ItemLegenda(alta, stringResource(R.string.velas_alta), faixa = true)
+        ItemLegenda(baixa, stringResource(R.string.velas_baixa), faixa = true)
     }
-    if (comPara) ItemLegenda(cPara, "Pará estimado (Chicago + base do mês)", tracejada = true)
+    if (comPara) ItemLegenda(cPara, stringResource(R.string.velas_para), tracejada = true)
 }

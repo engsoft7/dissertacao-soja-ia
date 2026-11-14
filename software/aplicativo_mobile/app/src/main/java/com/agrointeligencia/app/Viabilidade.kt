@@ -1,5 +1,6 @@
 package com.agrointeligencia.app
 
+import androidx.compose.ui.res.stringResource
 import android.os.Bundle
 import android.content.Context
 import android.content.SharedPreferences
@@ -220,7 +221,8 @@ fun ResumoFinanceiroCard(
     // Pará, a média do Pará estimada com Chicago e a base do mês.
     val praca = remember(pracas, municipio, sedes) { pracaParaUsar(municipio, pracas, sedes = sedes) }
     val precoHoje: Double? = praca?.valor ?: paraHoje?.estimado_brl_saca
-    val rotuloHoje: String = praca?.let { "${it.praca}, ${dataCurta(it.data)}" } ?: "Pará, estimado agora"
+    val rotuloHoje: String = praca?.let { "${it.praca}, ${dataCurta(it.data)}" } ?: stringResource(R.string.viab_estimado_agora)
+    val e = stringResource(R.string.conjuncao_e)
     // O padrão do preço é a cotação do dia na praça (a mesma do Histórico e da
     // Estimativa no campo); o levantamento da CONAB, só quando não há praça em dia.
     val precoPadrao: Double = praca?.valor ?: kpis.soja_preco_saca
@@ -300,25 +302,25 @@ fun ResumoFinanceiroCard(
             // margem: aí o alerta troca de assunto em vez de sumir.
             val alerta = when {
                 temPreco && diasDoPrecoProprio >= DIAS_PARA_RECONFERIR_PRECO ->
-                    "Você informou este preço há $diasDoPrecoProprio dias. Confirme se ainda é o que recebe."
+                    stringResource(R.string.viab_preco_proprio_velho, diasDoPrecoProprio.toString())
                 // Com preço próprio, o custo é que continua vindo do
                 // levantamento — a menos que o produtor já tenha informado o
                 // dele também, e aí não há o que avisar.
                 // Preço em dia (do produtor ou da praça): o que envelhece é o
                 // custo do levantamento, a menos que o produtor informe o dele.
                 (temPreco || praca != null) && !temCusto -> kpis.defasagem_meses?.let { m ->
-                    if (m >= 5) "Custo padrão da CONAB de $m meses atrás: informe o seu para a conta ficar certa." else null
+                    if (m >= 5) stringResource(R.string.viab_custo_velho, m.toString()) else null
                 } ?: kpis.aviso_custo
                 temPreco || praca != null -> null
                 // Preço padrão da CONAB: a idade dele e, ao lado, o preço de hoje.
                 // O texto longo do servidor fica só quando ele não manda a idade.
                 else -> {
                     val meses = kpis.defasagem_meses
-                    val hoje = precoHoje?.let { " $rotuloHoje: R$\u00A0${reais(it)}/sc." } ?: ""
+                    val hoje = precoHoje?.let { " " + stringResource(R.string.viab_hoje_praca, rotuloHoje, reais(it)) } ?: ""
                     when {
-                        meses == null -> kpis.aviso_preco?.let { "Preço possivelmente desatualizado. $it" }
-                        meses >= 12 -> "Preço padrão da CONAB de mais de um ano atrás.$hoje"
-                        meses >= 5 -> "Preço padrão da CONAB de $meses meses atrás.$hoje"
+                        meses == null -> kpis.aviso_preco?.let { stringResource(R.string.viab_preco_desatualizado, it) }
+                        meses >= 12 -> stringResource(R.string.viab_preco_ano) + hoje
+                        meses >= 5 -> stringResource(R.string.viab_preco_meses, meses.toString()) + hoje
                         else -> null
                     }
                 }
@@ -347,7 +349,7 @@ fun ResumoFinanceiroCard(
                             prefs.guardarDoProdutor(PREF_PROD, valor, prodEm)
                         }
                     },
-                    label = { Text(if (temProd) "Sua produtividade (sc/ha)" else "Produtividade (sc/ha)", fontSize = 12.sp) },
+                    label = { Text(stringResource(if (temProd) R.string.viab_sua_produtividade else R.string.viab_produtividade), fontSize = 12.sp) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = tecladoNumero,
@@ -369,7 +371,7 @@ fun ResumoFinanceiroCard(
                             prefs.guardarDoProdutor(PREF_PRECO, valor, precoEm)
                         }
                     },
-                    label = { Text(if (temPreco) "Seu preço (R$/sc)" else "Preço da saca (R$)", fontSize = 12.sp) },
+                    label = { Text(stringResource(if (temPreco) R.string.viab_seu_preco else R.string.viab_preco_saca), fontSize = 12.sp) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = tecladoNumero,
@@ -396,7 +398,7 @@ fun ResumoFinanceiroCard(
                             prefs.guardarDoProdutor(PREF_CUSTO, valor, custoEm)
                         }
                     },
-                    label = { Text(if (temCusto) "Seu custo/ha (R$)" else "Custo/ha (R$)", fontSize = 12.sp) },
+                    label = { Text(stringResource(if (temCusto) R.string.viab_seu_custo else R.string.viab_custo), fontSize = 12.sp) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
@@ -419,14 +421,13 @@ fun ResumoFinanceiroCard(
                     modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
                 ) {
                     Column(Modifier.weight(1f)) {
-                        Text("$rotuloHoje: R$ ${reais(pa)}/sc", fontSize = 13.sp,
+                        Text(stringResource(R.string.viab_preco_hoje, rotuloHoje, reais(pa)), fontSize = 13.sp,
                              fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                        Text(if (praca != null) "Cotação do dia na praça (Agrolink); na fazenda pode ser menor, pelo frete."
-                             else "Chicago agora + base do Pará no mês; na fazenda pode ser menor.",
+                        Text(stringResource(if (praca != null) R.string.viab_praca_nota else R.string.viab_chicago_nota),
                              fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
                     }
                     if (usandoEste) {
-                        Text("Em uso", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary,
+                        Text(stringResource(R.string.viab_em_uso), fontSize = 12.sp, color = MaterialTheme.colorScheme.primary,
                              fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 8.dp))
                     } else {
                         TextButton(onClick = {
@@ -435,7 +436,7 @@ fun ResumoFinanceiroCard(
                             precoEm = System.currentTimeMillis()
                             prefs.guardarDoProdutor(PREF_PRECO, pa, precoEm)
                         }) {
-                            Text("Usar este preço")
+                            Text(stringResource(R.string.viab_usar_preco))
                         }
                     }
                 }
@@ -446,38 +447,41 @@ fun ResumoFinanceiroCard(
             // ainda é padrão. Quem usa isto no talhão precisa saber de onde vem
             // o número antes de decidir com ele.
             val seus = listOfNotNull(
-                if (temProd) "produtividade" else null,
-                if (temPreco) "preço" else null,
-                if (temCusto) "custo" else null
+                if (temProd) stringResource(R.string.viab_produtividade_min) else null,
+                if (temPreco) stringResource(R.string.viab_preco_min) else null,
+                if (temCusto) stringResource(R.string.viab_custo_min) else null
             )
-            val quando = java.text.SimpleDateFormat("dd/MM/yyyy", LOCAL_NUMEROS)
+            val quando = java.text.SimpleDateFormat(stringResource(R.string.velas_formato_data), LOCAL_NUMEROS)
             // "Informados em" com uma data só deixava dúvida: era a data do
             // preço digitado ou a da cotação? Agora cada número diz quando foi
             // informado pelo produtor.
             val datas = listOfNotNull(
-                if (temProd && prodEm > 0L) "a produtividade em ${quando.format(java.util.Date(prodEm))}" else null,
-                if (temPreco && precoEm > 0L) "o preço em ${quando.format(java.util.Date(precoEm))}" else null,
-                if (temCusto && custoEm > 0L) "o custo em ${quando.format(java.util.Date(custoEm))}" else null
+                if (temProd && prodEm > 0L) stringResource(R.string.viab_prod_em, quando.format(java.util.Date(prodEm))) else null,
+                if (temPreco && precoEm > 0L) stringResource(R.string.viab_preco_em, quando.format(java.util.Date(precoEm))) else null,
+                if (temCusto && custoEm > 0L) stringResource(R.string.viab_custo_em, quando.format(java.util.Date(custoEm))) else null
             )
             // Duas frases: o que é do produtor (e quando informou) e o que
             // ainda é padrão. A nota sobre a série de preços da CONAB fica no
             // Sobre; o físico de outro estado, no Mercado.
             val conab = kpis.fonte_preco?.removePrefix("CONAB, ")
-            val daConab = listOfNotNull(if (temPreco || praca != null) null else "preço", if (temCusto) null else "custo")
+            val daConab = listOfNotNull(
+                if (temPreco || praca != null) null else stringResource(R.string.viab_preco_min),
+                if (temCusto) null else stringResource(R.string.viab_custo_min))
             val padrao = listOfNotNull(
-                if (temProd) null else "produtividade do modelo",
-                if (!temPreco && praca != null) "preço de ${praca.praca} em ${dataCurta(praca.data)} (Agrolink)" else null,
-                if (daConab.isNotEmpty() && conab != null) juntaComE(daConab) + " da CONAB ($conab)" else null
+                if (temProd) null else stringResource(R.string.viab_prod_modelo),
+                if (!temPreco && praca != null) stringResource(R.string.viab_preco_praca, praca.praca, dataCurta(praca.data)) else null,
+                if (daConab.isNotEmpty() && conab != null) stringResource(R.string.viab_da_conab, juntaComE(daConab, e), conab) else null
             )
             val legenda = listOfNotNull(
                 when {
-                    datas.isNotEmpty() -> "Você informou ${juntaComE(datas)}." +
-                        (if (temPreco) " Seu preço não muda sozinho com o mercado." else "")
-                    seus.isNotEmpty() -> "Seus números: " + seus.joinToString(", ") + "."
+                    datas.isNotEmpty() -> stringResource(R.string.viab_voce_informou, juntaComE(datas, e)) +
+                        (if (temPreco) " " + stringResource(R.string.viab_preco_nao_muda) else "")
+                    seus.isNotEmpty() -> stringResource(R.string.viab_seus_numeros, seus.joinToString(", "))
                     else -> null
                 },
                 if (padrao.isEmpty()) null
-                else "Padrão: ${juntaComE(padrao)}." + (if (seus.isEmpty()) " Toque num campo para usar os seus números." else "")
+                else stringResource(R.string.viab_padrao, juntaComE(padrao, e)) +
+                    (if (seus.isEmpty()) " " + stringResource(R.string.viab_toque_campo) else "")
             ).joinToString(" ")
             if (legenda.isNotBlank()) {
                 Text(text = legenda, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -496,7 +500,7 @@ fun ResumoFinanceiroCard(
                     },
                     contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
                 ) {
-                    Text(text = "Voltar aos valores padrão", fontSize = 12.sp)
+                    Text(text = stringResource(R.string.viab_voltar_padrao), fontSize = 12.sp)
                 }
             }
 
@@ -519,15 +523,15 @@ fun ResumoFinanceiroCard(
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text(text = if (temProd) "Receita bruta" else "Receita bruta estimada",
+                    Text(text = stringResource(if (temProd) R.string.viab_receita else R.string.viab_receita_estimada),
                          fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "${reaisInteiros(receita)}/ha", fontSize = 18.sp, color = (if(isDark) Color(0xFF58a6ff) else Color(0xFF2563eb)), fontWeight = FontWeight.Bold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     // O campo traz o custo da CONAB na produtividade dela (48 sc/ha); aqui vai o
                     // custo para a produtividade da conta, com frete e CESSR das sacas.
-                    Text(text = if (temCusto) "Seu custo operacional"
-                                else "Custo para ${String.format(LOCAL_NUMEROS, "%.0f", scHa)} sc/ha",
+                    Text(text = if (temCusto) stringResource(R.string.viab_seu_custo_op)
+                                else stringResource(R.string.viab_custo_para, String.format(LOCAL_NUMEROS, "%.0f", scHa)),
                          fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "${reaisInteiros(custoUsado)}/ha", fontSize = 18.sp,
                          color = if (isDark) Color(0xFFf85149) else Color(0xFFdc2626), fontWeight = FontWeight.Bold)
@@ -538,20 +542,19 @@ fun ResumoFinanceiroCard(
             
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text(text = "Lucro líquido projetado", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = stringResource(R.string.viab_lucro), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "${reaisInteiros(lucro)}/ha", fontSize = 22.sp, color = profitColor, fontWeight = FontWeight.ExtraBold)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "Retorno sobre o custo", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = stringResource(R.string.viab_retorno), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(text = "${roi.toInt()}%", fontSize = 22.sp, color = profitColor, fontWeight = FontWeight.ExtraBold)
                 }
             }
             
             if (r.sinalIncerto && outroRateio != null) {
                 Text(
-                    text = "O resultado pode ir de ${reaisInteiros(minOf(lucro, outroRateio))} a " +
-                           "${reaisInteiros(maxOf(lucro, outroRateio))}/ha, conforme o rateio do custo da CONAB. " +
-                           "Informe o seu custo para fechar a conta.",
+                    text = stringResource(R.string.viab_faixa, reaisInteiros(minOf(lucro, outroRateio)),
+                                          reaisInteiros(maxOf(lucro, outroRateio))),
                     fontSize = 12.sp,
                     color = corAtencao(isDark),
                     modifier = Modifier.padding(top = 12.dp)
@@ -562,7 +565,7 @@ fun ResumoFinanceiroCard(
             // O ponto de equilíbrio arredonda para cima: com 54,2 sacas de
             // equilíbrio, 54 ainda dá prejuízo.
             pontoDeEquilibrio(preco, if (temCusto) custo else null, kpis)?.let { eq ->
-                Text(text = "Ponto de equilíbrio: ${kotlin.math.ceil(eq).toInt()} sc/ha para cobrir o custo",
+                Text(text = stringResource(R.string.viab_equilibrio, kotlin.math.ceil(eq).toInt()),
                      fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }

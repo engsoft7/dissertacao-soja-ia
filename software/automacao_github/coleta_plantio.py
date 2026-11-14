@@ -292,6 +292,13 @@ def portaria_mais_nova(hoje: date | None = None) -> dict | None:
     for x in resultados[:15]:
         print(f"- {x.get('pubDate')} | {x.get('artType')} | {x.get('title') or x.get('titulo')} | "
               f"{texto_da_pagina(x.get('content') or '')[:140]}")
+    if not resultados:
+        # Sem atos lidos, o trecho da página em volta das marcas que o leitor
+        # procura, para ver o formato que a busca passou a usar.
+        print("scripts com id:", re.findall(r'<script[^>]*\bid="([^"]+)"', r.text)[:20])
+        for marca in ("jsonArray", "BuscaDouPortlet", "urlTitle", "semeadura"):
+            i = r.text.find(marca)
+            print(f"{marca}: " + (f"posição {i}: {r.text[max(0, i - 250):i + 450]!r}" if i >= 0 else "ausente"))
     print("::endgroup::")
     for c in candidatas(resultados)[:8]:
         pagina = requests.get(c["url"], headers=UA, timeout=120)

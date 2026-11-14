@@ -138,12 +138,3 @@ https://jems3.sbc.org.br/
 # A API em produção, depois do merge do PR 184 (13/11/2026): os cinco estados carregados?
 https://agrointeligencia-api.onrender.com/api/estados
 https://agrointeligencia-api.onrender.com/api/previsao/Sorriso?uf=MT
-
-# Preços da soja abertos da CONAB, para o lugar da Notícias Agrícolas (issue
-# #187). O portal de informações está com o certificado HTTPS emitido para
-# outro nome (14/11/2026); procura-se o mesmo dado num endereço com certificado
-# válido. A verificação de certificado nunca é desligada.
-https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/precos-agropecuarios
-https://sisdep.conab.gov.br/precosiagroweb/
-navegador https://sisdep.conab.gov.br/precosiagroweb/
-https://portaldeinformacoes.conab.gov.br/precos-agropecuarios.html

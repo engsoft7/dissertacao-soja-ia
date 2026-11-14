@@ -1,7 +1,7 @@
-5s	abriu	boas-vindas
-6s	lista	chegou da API
-7s	resumo	safra 2027 carregada
-7s	ok	Resumo mostra a última safra do IBGE, 2025
-9s	tempo	previsão carregada
-18s	ok	Histórico começa na projeção mais distante ou na safra em curso
-19s	FALHA	IllegalArgumentException: Can't scroll to index 2, it is out of bounds [0, 2)
+2s	abriu	boas-vindas
+4s	lista	chegou da API
+5s	resumo	safra 2027 carregada
+5s	ok	Resumo mostra a última safra do IBGE, 2025
+7s	tempo	previsão carregada
+16s	ok	Histórico começa na projeção mais distante ou na safra em curso
+18s	FALHA	IllegalArgumentException: Can't scroll to index 2, it is out of bounds [0, 2)

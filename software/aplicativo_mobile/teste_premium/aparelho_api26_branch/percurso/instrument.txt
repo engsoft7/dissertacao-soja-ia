@@ -26,8 +26,8 @@ java.lang.IllegalArgumentException: Can't scroll to index 2, it is out of bounds
 		at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidTestOwner.runOnUiThread(ComposeUiTest.android.kt:949)
 		at androidx.compose.ui.test.ActionsKt.scrollToIndex(Actions.kt:167)
 		at androidx.compose.ui.test.ActionsKt.performScrollToIndex(Actions.kt:159)
-		at com.agrointeligencia.app.PercursoNoAparelhoTest.rola(PercursoNoAparelhoTest.kt:133)
-		at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:267)
+		at com.agrointeligencia.app.PercursoNoAparelhoTest.rola(PercursoNoAparelhoTest.kt:170)
+		at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:304)
 		at java.lang.reflect.Method.invoke(Native Method)
 		at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
 		at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
@@ -98,7 +98,7 @@ java.lang.IllegalArgumentException: Can't scroll to index 2, it is out of bounds
 		at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2074)
 .
 
-Time: 25.19
+Time: 25.92
 There was 1 failure:
 1) percorreAsTelasComDadosReais(com.agrointeligencia.app.PercursoNoAparelhoTest)
 java.lang.IllegalArgumentException: Can't scroll to index 2, it is out of bounds [0, 2)
@@ -126,8 +126,8 @@ java.lang.IllegalArgumentException: Can't scroll to index 2, it is out of bounds
 		at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidTestOwner.runOnUiThread(ComposeUiTest.android.kt:949)
 		at androidx.compose.ui.test.ActionsKt.scrollToIndex(Actions.kt:167)
 		at androidx.compose.ui.test.ActionsKt.performScrollToIndex(Actions.kt:159)
-		at com.agrointeligencia.app.PercursoNoAparelhoTest.rola(PercursoNoAparelhoTest.kt:133)
-		at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:267)
+		at com.agrointeligencia.app.PercursoNoAparelhoTest.rola(PercursoNoAparelhoTest.kt:170)
+		at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreAsTelasComDadosReais(PercursoNoAparelhoTest.kt:304)
 		at java.lang.reflect.Method.invoke(Native Method)
 		at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
 		at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)

@@ -32,26 +32,26 @@
  "altura_px": 2400,
  "densidade_dpi": 420,
  "apk_mb": 27.6,
- "partida_fria_primeira_ms": 854,
- "partida_fria_sem_municipio_ms": 728.5,
+ "partida_fria_primeira_ms": 826,
+ "partida_fria_sem_municipio_ms": 983.5,
  "dados_do_municipio_s": 5.3,
- "memoria_resumo_kb": 40685,
+ "memoria_resumo_kb": 38652,
  "rolagem_resumo": {
-  "quadros": 240.0,
-  "lentos_pct": 76.25,
-  "p50_ms": 48.0,
-  "p90_ms": 81.0,
-  "p99_ms": 117.0
+  "quadros": 188.0,
+  "lentos_pct": 88.3,
+  "p50_ms": 61.0,
+  "p90_ms": 109.0,
+  "p99_ms": 150.0
  },
  "rolagem_historico": {
-  "quadros": 180.0,
-  "lentos_pct": 80.0,
-  "p50_ms": 53.0,
-  "p90_ms": 93.0,
-  "p99_ms": 117.0
+  "quadros": 137.0,
+  "lentos_pct": 86.86,
+  "p50_ms": 65.0,
+  "p90_ms": 109.0,
+  "p99_ms": 129.0
  },
- "memoria_depois_das_abas_kb": 86987,
- "partida_fria_com_municipio_ms": 674,
+ "memoria_depois_das_abas_kb": 86467,
+ "partida_fria_com_municipio_ms": 1025,
  "monkey": {
   "eventos": 3000,
   "falhas": 0,
@@ -62,7 +62,8 @@
 
 ## Acessibilidade pela árvore do uiautomator
 
-- **r04_resumo_1**: alvos < 48 dp: 152,50 (166×7 dp), 53,8 (166×7 dp); sem rótulo: nenhum
+- **r04_resumo_1**: alvos < 48 dp: View (379×42 dp); sem rótulo: nenhum
 - **r05_mapa**: alvos < 48 dp: nenhum; sem rótulo: WebView em (45,530)
 - **r08_sobre**: alvos < 48 dp: View (339×44 dp), View (339×46 dp); sem rótulo: nenhum
 - **r09_estimativa_no_campo**: alvos < 48 dp: View (347×31 dp); sem rótulo: nenhum
+- **r14_escuro_resumo**: alvos < 48 dp: 152,50 (166×12 dp), 53,8 (166×12 dp); sem rótulo: nenhum

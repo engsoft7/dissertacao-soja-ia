@@ -3,6 +3,7 @@ package com.agrointeligencia.app
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import android.view.accessibility.AccessibilityNodeInfo
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -78,7 +79,39 @@ class PercursoNoAparelhoTest {
     private fun existe(texto: String) =
         regra.onAllNodesWithText(texto, substring = true).fetchSemanticsNodes().isNotEmpty()
 
-    private fun espera(texto: String, ms: Long = 150_000) = regra.waitUntil(ms) { existe(texto) }
+    private fun espera(texto: String, ms: Long = 150_000) =
+        regra.waitUntil(ms) { fechaAvisoDoSistema(); existe(texto) }
+
+    private var ultimaOlhada = 0L
+
+    /**
+     * Fecha o aviso "Pixel Launcher isn't responding" do emulador, que nos
+     * runners do Actions aparece de vez em quando por cima do app (112 vezes
+     * numa rodada do app de release, run 43545034400) e parava o percurso: é
+     * outra janela, fora da árvore do Compose, e só o UiAutomation a vê.
+     * Olha no máximo duas vezes por segundo; devolve se fechou um.
+     */
+    private fun fechaAvisoDoSistema(): Boolean {
+        val agora = System.currentTimeMillis()
+        if (agora - ultimaOlhada < 500) return false
+        ultimaOlhada = agora
+        val raiz = instrumentacao.uiAutomation.rootInActiveWindow ?: return false
+        if (raiz.packageName == ctx.packageName) return false
+        val aviso = listOf("isn't responding", "não está respondendo")
+            .any { raiz.findAccessibilityNodeInfosByText(it).isNotEmpty() }
+        if (!aviso) return false
+        // "Close app" encerra o Launcher, que volta limpo; "Wait" só adia.
+        for (rotulo in listOf("Close app", "Fechar app", "OK", "Wait", "Aguardar")) {
+            var no: AccessibilityNodeInfo? = raiz.findAccessibilityNodeInfosByText(rotulo).firstOrNull() ?: continue
+            while (no != null && !no.isClickable) no = no.parent
+            if (no?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+                anota("aviso\tLauncher travado, aviso do sistema fechado com \"$rotulo\"")
+                regra.waitForIdle()
+                return true
+            }
+        }
+        return false
+    }
 
     private fun anota(linha: String) {
         val l = "${(System.currentTimeMillis() - inicio) / 1000}s\t$linha"
@@ -88,13 +121,16 @@ class PercursoNoAparelhoTest {
 
     private fun confere(oQue: String, ok: Boolean) = anota((if (ok) "ok" else "FALHA") + "\t$oQue")
 
-    private fun aba(nome: String) =
+    private fun aba(nome: String) {
+        fechaAvisoDoSistema()
         regra.onNode(hasText(nome) and SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab))
             .performClick()
+    }
 
     /** Captura e verificações de acessibilidade da tela como está agora. */
     private fun tela(nome: String) {
         regra.waitForIdle()
+        fechaAvisoDoSistema()
         val raiz = regra.onAllNodes(isRoot()).onLast()
         try {
             // A tela inteira, pelo UiAutomation: a janela de escolha do município
@@ -130,6 +166,7 @@ class PercursoNoAparelhoTest {
             hasScrollToIndexAction() and SemanticsMatcher.keyIsDefined(SemanticsProperties.VerticalScrollAxisRange)
         ).onFirst()
         repeat(vezes) { i ->
+            fechaAvisoDoSistema()
             lista.performScrollToIndex(i + 1)
             tela("${nome}_${i + 1}")
         }

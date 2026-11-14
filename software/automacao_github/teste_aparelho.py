@@ -103,10 +103,13 @@ def acha(texto: str, nos: list[dict] | None = None, parcial: bool = True, mais_b
 
 
 def fecha_dialogo_do_sistema(nos: list[dict]) -> bool:
-    """Toca em "Wait" num aviso de app do sistema travado (o Pixel Launcher do
-    emulador trava às vezes e cobre a tela, e o teste inteiro falhava)."""
+    """Fecha o aviso de app do sistema travado (o Pixel Launcher do emulador
+    trava às vezes e cobre a tela, e o teste inteiro falhava). Prefere
+    "Close app", que encerra o Launcher e ele volta limpo: com "Wait" o aviso
+    voltou 112 vezes numa rodada (run 43545034400)."""
     if any("isn't responding" in n["texto"] or "não está respondendo" in n["texto"] for n in nos):
-        botao = next((n for n in nos if n["texto"] in ("Wait", "Aguardar")), None)
+        botao = next((n for r in ("Close app", "Fechar app", "OK", "Wait", "Aguardar")
+                      for n in nos if n["texto"] == r), None)
         if botao:
             res.setdefault("dialogos_do_sistema_fechados", 0)
             res["dialogos_do_sistema_fechados"] += 1

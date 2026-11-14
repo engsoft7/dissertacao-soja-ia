@@ -15,6 +15,12 @@ APP=software/aplicativo_mobile/app/build/outputs/apk
 mkdir -p "$SAIDA"
 adb wait-for-device
 adb shell getprop ro.build.version.sdk
+# O Pixel Launcher do emulador trava de vez em quando e o aviso "isn't
+# responding" cobre o app (112 vezes numa rodada). Isto pede ao sistema para
+# não mostrar o aviso de app em segundo plano; os testes ainda o fecham se
+# aparecer (fechaAvisoDoSistema no PercursoNoAparelhoTest, fecha_dialogo_do_sistema
+# no teste_aparelho.py).
+adb shell settings put secure anr_show_background 0 >/dev/null 2>&1 || true
 
 if [ "$PERCURSO" = "1" ]; then
   P="$SAIDA/percurso"; mkdir -p "$P"

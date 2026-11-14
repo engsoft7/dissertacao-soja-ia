@@ -18,7 +18,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import copy
+import hashlib
+import joblib
 import json
+import sklearn
 import requests
 import sys
 import threading
@@ -100,6 +103,9 @@ class EstadoCarregado:
         self.pam = historico_oficial.carrega_pam(e.pam)
         self.historicos: dict = {}
         self.sedes = estados.sedes(e)
+        # De onde o estado veio nesta subida, em /api/estados: é o que mostra,
+        # de fora, se o Render rodou prepara_estados.py na build.
+        self.origem = "treinado na subida"
 
     def nome_na_base(self, municipio: str) -> str:
         """O nome como está na base: no Pará, sem acento (do GAUL); nos outros, o oficial."""
@@ -109,14 +115,69 @@ class EstadoCarregado:
         return MUNICIPIOS_FORMATADOS.get(municipio, municipio) if self.estado.uf == "PA" else municipio
 
 
+# ── Estados prontos na build ───────────────────────────────────────────────
+# Treinar Mato Grosso, Maranhão, Tocantins e Rondônia e preparar os históricos
+# leva uns 90 s de CPU numa máquina comum, o que no décimo de CPU do Render
+# gratuito dá na ordem de 15 minutos, a cada deploy ou reinício. Nesse tempo os
+# quatro respondem 503 ("modelo em preparação") e dividem a CPU com as
+# respostas do Pará; na leitura de 13/11/2026 às 16h34 UTC, logo depois do
+# deploy, nenhum dos quatro estava pronto. A build do Render roda
+# prepara_estados.py, que grava cada estado pronto em CACHE_ESTADOS, e a subida
+# só lê o arquivo. O cache vale para a base, o arquivo do IBGE e a lista de
+# sedes com que foi feito (assinatura); com qualquer um diferente, ou sem o
+# arquivo, treina como antes.
+CACHE_ESTADOS = Path(__file__).resolve().parent / "cache"
+CACHE_VERSAO = 1
+
+
+def _assinatura_do_estado(e: "estados.Estado") -> str:
+    h = hashlib.sha256(f"{CACHE_VERSAO}|{sklearn.__version__}|{pd.__version__}".encode())
+    for arquivo in (e.base, e.pam, e.municipios):
+        if arquivo.exists():
+            h.update(arquivo.read_bytes())
+    return h.hexdigest()
+
+
+def _arquivo_do_cache(e: "estados.Estado") -> Path:
+    return CACHE_ESTADOS / f"{e.uf}.joblib"
+
+
+def prepara_estado(e: "estados.Estado") -> "EstadoCarregado":
+    """Treina o estado, prepara o histórico de cada município e grava tudo no cache."""
+    ce = EstadoCarregado(e)
+    for raw in ce.df["municipio"].unique():
+        _historico_do_municipio(raw, ce.df[ce.df["municipio"] == raw], ce)
+    CACHE_ESTADOS.mkdir(exist_ok=True)
+    joblib.dump({"assinatura": _assinatura_do_estado(e), "estado": ce}, _arquivo_do_cache(e))
+    return ce
+
+
+def carrega_estado(e: "estados.Estado") -> "EstadoCarregado":
+    """O estado pronto do cache, se é o desta base; senão, treinado agora."""
+    arquivo = _arquivo_do_cache(e)
+    if arquivo.exists():
+        try:
+            guardado = joblib.load(arquivo)
+            if guardado.get("assinatura") == _assinatura_do_estado(e):
+                print(f"{e.nome}: pronto, do cache da build.", flush=True)
+                ce = guardado["estado"]
+                ce.estado = e  # os caminhos desta máquina, e não os da build
+                ce.origem = "cache da build"
+                return ce
+            print(f"{e.nome}: o cache é de outra base; treinando.", flush=True)
+        except Exception as erro:  # arquivo de outra versão das bibliotecas, cortado…
+            print(f"{e.nome}: cache ilegível ({type(erro).__name__}); treinando.", flush=True)
+    return EstadoCarregado(e)
+
+
 def _carrega_outros_estados() -> None:
     """Os outros estados depois do Pará, sem atrasar a subida da API."""
     for e in estados.disponiveis():
         if e.uf in AppState.estados:
             continue
         try:
-            AppState.estados[e.uf] = EstadoCarregado(e)
-            print(f"{e.nome}: modelo treinado ({len(AppState.estados[e.uf].df)} registros).", flush=True)
+            AppState.estados[e.uf] = carrega_estado(e)
+            print(f"{e.nome}: modelo pronto ({len(AppState.estados[e.uf].df)} registros).", flush=True)
             _aquece_historicos(e.uf)
         except Exception as erro:  # um estado com problema não derruba os outros
             print(f"{e.nome} não carregado: {type(erro).__name__}: {erro}", flush=True)
@@ -124,7 +185,7 @@ def _carrega_outros_estados() -> None:
 
 @asynccontextmanager
 async def app_lifespan(app: FastAPI):
-    pa = EstadoCarregado(estados.ESTADOS["PA"])
+    pa = carrega_estado(estados.ESTADOS["PA"])
     AppState.estados = {"PA": pa}
     AppState.df = pa.df
     AppState.estimador = pa.estimador
@@ -317,7 +378,8 @@ def list_estados():
     for e in estados.disponiveis():
         ce = AppState.estados.get(e.uf)
         saida.append({"uf": e.uf, "nome": e.nome, "carregado": ce is not None,
-                      "municipios": int(ce.df["municipio"].nunique()) if ce is not None else None})
+                      "municipios": int(ce.df["municipio"].nunique()) if ce is not None else None,
+                      "origem": getattr(ce, "origem", None)})
     return {"estados": saida, "padrao": estados.PADRAO}
 
 
@@ -536,6 +598,8 @@ def _historico_do_municipio(raw_municipio: str, df_mun, ce: "EstadoCarregado | N
 def _aquece_historicos(uf: str = "PA") -> None:
     ce = AppState.estados[uf]
     for raw in ce.df["municipio"].unique():
+        if raw in ce.historicos:  # já veio pronto do cache da build
+            continue
         try:
             _historico_do_municipio(raw, ce.df[ce.df["municipio"] == raw], ce)
         except Exception as e:  # um município ruim não impede os outros

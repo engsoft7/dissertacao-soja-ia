@@ -4,7 +4,8 @@ Testes de 06/11/2026 sobre o app publicado (2.7.3, versionCode 27) e a versão
 2.7.4 desta branch, com a API em produção. Tudo roda de novo pelo Actions:
 `auditoria-app.yml` (números) e `teste-premium.yml` (API e aparelhos). As
 tabelas completas estão nas pastas ao lado, e as capturas de tela na branch
-`teste-premium-capturas`.
+`teste-premium-capturas`. A seção 8 traz a rodada de 13 e 14/11/2026, com o
+2.8.0 publicado na v2.5.0 (cinco estados) e o 2.8.1 desta branch.
 
 ## Resumo
 
@@ -19,6 +20,9 @@ tabelas completas estão nas pastas ao lado, e as capturas de tela na branch
 | App: percurso, sem internet, monkey | tudo passa; com sinal fraco, o aviso de sem conexão levava até 1 min | tudo passa; aviso na hora |
 | App: fonte do sistema em 200% | rótulos das abas quebrados, textos encavalados no Resumo e no Mercado | corrigidos |
 | App: coerência | simulador na safra 2026 com o Resumo em 2027 | mesma safra |
+
+Na rodada de 14/11 (seção 8), o 2.8.0 publicado e o 2.8.1 passaram em todas as
+verificações nos três emuladores, e o percurso passou no Pará e em Mato Grosso.
 
 ## 1. Números
 
@@ -174,11 +178,73 @@ fechar o aviso sozinho. As rodadas sem o travamento passaram em tudo.
 - **Falta**: o painel em largura de celular e as verificações automáticas de
   acessibilidade no navegador.
 
-## 8. O que este relatório não cobre
+## 8. Rodada de 13 e 14/11/2026: 2.8.0 publicado e 2.8.1
+
+Depois do Release v2.5.0, com o app 2.8.0 e a extensão a Mato Grosso,
+Maranhão, Tocantins e Rondônia, o `teste-premium.yml` rodou cinco vezes nesta
+branch, da run 43460955234 à 43585073563. O percurso no emulador ganhou Mato
+Grosso e passou a usar a API da própria branch, que o workflow sobe no runner
+com os estados preparados como no Render. O app de release segue apontado à
+API em produção, e suas 19 verificações vão da abertura ao monkey: percurso
+pelas abas, fonte em 200%, telas pequena, tablet e deitada, sem internet e a
+volta da rede.
+
+Na última rodada, de 14/11, tudo passou:
+
+| | Android 8, 2.8.1 | Android 14, 2.8.1 | Android 14, 2.8.0 publicado |
+|---|---|---|---|
+| App de release, 19 verificações | 19 ok | 19 ok | 19 ok |
+| Percurso do Pará | completo, sem a parte sem internet¹ | completo | — |
+| Percurso de Mato Grosso, em Sorriso | completo | completo | — |
+| Telas sem achado de acessibilidade | 27 de 27 | 30 de 30 | — |
+| Dados de Pau D'Arco na tela | 3,7 s | 5,3 s | 5,6 s |
+| Memória (PSS) no Resumo | 33,8 MB | 40,4 MB | 41,0 MB |
+| Memória depois das cinco abas | 80,3 MB | 83,3 MB | 94,0 MB |
+
+¹ No Android 8, o `svc` não derruba a rede do emulador, e o modo avião pede
+root, que o percurso não tem. A parte sem internet fica com o teste do app de
+release, que usa root no mesmo emulador e passou.
+
+**Achados no app e na API**, corrigidos nesta branch:
+
+| Onde | Achado | Correção |
+|---|---|---|
+| Sobre | As fontes com link de uma linha, INMET e MapBiomas, tinham 44 e 46 dp de alvo de toque (Accessibility Test Framework). | Mínimo de 48 dp, no 2.8.1. |
+| Cartão do tempo, no Resumo | Dois avisos do mesmo evento apareciam como "2 avisos do INMET: tempestade, tempestade". | O nome entra uma vez, no 2.8.1, com teste de unidade. |
+| API no Render | A cada deploy ou reinício, a API treinava os quatro estados novos depois do Pará: uns 90 s de CPU numa máquina comum, na ordem de 15 minutos no décimo de CPU do plano gratuito. Nesse tempo os quatro respondem 503 e dividem a CPU com o Pará. Na leitura de 13/11 às 16h34 UTC, logo depois do deploy, nenhum estava pronto. | Os estados saem prontos da build (`prepara_estados.py`). Na API do runner, os cinco vieram do cache. Em produção, vale depois do merge do PR #190. |
+
+**Do próprio teste.** Quatro coisas paravam o percurso sem defeito do app, e
+o teste foi corrigido:
+
+- A lista de municípios só desenha os nomes que cabem na janela, e Sorriso só
+  aparece pela busca.
+- O Histórico começa pela projeção mais distante, 2028, e não pela safra em
+  curso.
+- A aba Mercado tem dois itens, e o teste rolava até o terceiro.
+- O percurso de Mato Grosso começava logo depois do modo avião do percurso do
+  Pará, antes de a rede do emulador voltar. Agora cada percurso espera a API
+  responder.
+
+**Do ambiente do Actions.**
+
+- O aviso "Pixel Launcher isn't responding" cobriu a tela do Android 14 em
+  três emuladores das duas primeiras rodadas, com 112 ou 113 avisos em cada
+  um, e neles o app de release não chegou aos dados de Pau D'Arco. O teste
+  tocava em "Wait", que só adia o aviso. Agora toca em "Close app", e o emulador não mostra o aviso de apps em
+  segundo plano. Nas três rodadas seguintes apareceu um aviso só, fechado pelo
+  teste.
+- A previsão do tempo vem direto do Open-Meteo, do celular, e não pela API. No
+  emulador ela não chegou em duas das cinco rodadas, e chegou nas demais. O
+  percurso confere que a tela mostra a previsão ou diz que não a baixou.
+- A conferência de que a rede voltou falhava em todas as rodadas desde 06/11,
+  só com ping. Agora usa a rede padrão do Android, com o ping de reserva e mais
+  tempo de espera, e passou nos três emuladores.
+
+## 9. O que este relatório não cobre
 
 - **Aparelhos físicos.** Os testes rodam em emuladores x86_64. O relatório de
   pré-lançamento do Play Console roda o app em aparelhos reais quando um AAB
-  entra numa faixa de teste: vale olhar o da 2.7.4.
+  entra numa faixa de teste: vale olhar o de cada versão enviada.
 - **TalkBack de verdade.** As verificações automáticas não substituem ouvir
   as telas com o leitor de tela ligado.
 - **Câmera, GPS e redes lentas reais.** A câmera é a do próprio Android (por

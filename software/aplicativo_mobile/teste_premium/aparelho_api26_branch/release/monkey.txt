@@ -1,7 +1,25 @@
- IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
+g Touch (ACTION_DOWN): 0:(788.0,1237.0)
+:Sending Touch (ACTION_UP): 0:(756.4163,1234.9624)
+:Sending Touch (ACTION_DOWN): 0:(871.0,1720.0)
+:Sending Touch (ACTION_UP): 0:(881.95,1718.5779)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(886.0,11.0)
+:Sending Touch (ACTION_UP): 0:(925.7194,0.0)
+:Sending Trackball (ACTION_MOVE): 0:(2.0,-5.0)
+:Sending Touch (ACTION_DOWN): 0:(133.0,1557.0)
+:Sending Touch (ACTION_UP): 0:(124.62521,1573.7504)
+    // Injection Failed
+:Sending Touch (ACTION_DOWN): 0:(525.0,473.0)
+:Sending Touch (ACTION_UP): 0:(523.9967,449.80527)
+:Sending Trackball (ACTION_MOVE): 0:(-5.0,2.0)
+:Sending Touch (ACTION_DOWN): 0:(973.0,1545.0)
+:Sending Touch (ACTION_UP): 0:(952.63666,1509.9983)
+    // Injection Failed
+:Sending Flip keyboardOpen=true
+Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invalid argument)
     // Injection Failed
 :Sending Touch (ACTION_DOWN): 0:(72.0,4.0)
-    //[calendar_time:2026-11-06 22:53:20.225  system_uptime:779460]
+    //[calendar_time:2026-11-14 10:37:38.846  system_uptime:516436]
     // Sending event #1400
 :Sending Touch (ACTION_UP): 0:(71.49076,0.0)
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,3.0)
@@ -18,7 +36,7 @@
 :Sending Trackball (ACTION_MOVE): 0:(-2.0,1.0)
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Touch (ACTION_DOWN): 0:(64.0,1272.0)
-    //[calendar_time:2026-11-06 22:53:22.430  system_uptime:781665]
+    //[calendar_time:2026-11-14 10:37:41.140  system_uptime:518730]
     // Sending event #1500
 :Sending Touch (ACTION_UP): 0:(63.388607,1277.041)
 :Sending Touch (ACTION_DOWN): 0:(291.0,324.0)
@@ -32,6 +50,7 @@
 :Sending Trackball (ACTION_MOVE): 0:(2.0,2.0)
 :Sending Touch (ACTION_DOWN): 0:(160.0,2062.0)
 :Sending Touch (ACTION_UP): 0:(142.83401,2060.8706)
+    // Injection Failed
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,3.0)
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,2.0)
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
@@ -43,7 +62,7 @@
 :Sending Touch (ACTION_DOWN): 0:(235.0,1667.0)
 :Sending Touch (ACTION_UP): 0:(224.12166,1663.9562)
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,-4.0)
-    //[calendar_time:2026-11-06 22:53:25.295  system_uptime:784531]
+    //[calendar_time:2026-11-14 10:37:44.043  system_uptime:521633]
     // Sending event #1600
 :Sending Trackball (ACTION_MOVE): 0:(1.0,0.0)
 :Sending Trackball (ACTION_MOVE): 0:(2.0,0.0)
@@ -58,7 +77,7 @@
 :Sending Trackball (ACTION_MOVE): 0:(0.0,0.0)
 :Sending Trackball (ACTION_MOVE): 0:(1.0,2.0)
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,4.0)
-    //[calendar_time:2026-11-06 22:53:26.704  system_uptime:785940]
+    //[calendar_time:2026-11-14 10:37:45.454  system_uptime:523044]
     // Sending event #1700
 :Sending Touch (ACTION_DOWN): 0:(766.0,180.0)
     // Injection Failed
@@ -81,20 +100,10 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Trackball (ACTION_MOVE): 0:(-4.0,3.0)
 :Sending Trackball (ACTION_MOVE): 0:(0.0,1.0)
-    //[calendar_time:2026-11-06 22:53:28.490  system_uptime:787725]
+    //[calendar_time:2026-11-14 10:37:47.258  system_uptime:524848]
     // Sending event #1800
 :Sending Touch (ACTION_DOWN): 0:(648.0,1494.0)
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
 :Sending Touch (ACTION_UP): 0:(710.5031,1518.8322)
-    // Injection Failed
 :Sending Touch (ACTION_DOWN): 0:(303.0,2085.0)
 :Sending Touch (ACTION_UP): 0:(308.51224,2093.9587)
 :Sending Touch (ACTION_DOWN): 0:(966.0,1831.0)
@@ -108,16 +117,16 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Touch (ACTION_DOWN): 0:(619.0,1834.0)
 :Sending Touch (ACTION_UP): 0:(612.8825,1850.3553)
+    // Injection Failed
 :Sending Touch (ACTION_DOWN): 0:(363.0,2106.0)
 :Sending Touch (ACTION_UP): 0:(359.45187,2101.319)
-    // Injection Failed
 :Sending Touch (ACTION_DOWN): 0:(454.0,354.0)
 :Sending Touch (ACTION_UP): 0:(471.0291,365.83405)
 :Sending Trackball (ACTION_MOVE): 0:(-4.0,1.0)
 :Sending Touch (ACTION_DOWN): 0:(750.0,594.0)
 :Sending Touch (ACTION_UP): 0:(741.4072,592.2796)
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,-3.0)
-    //[calendar_time:2026-11-06 22:53:31.059  system_uptime:790295]
+    //[calendar_time:2026-11-14 10:37:49.866  system_uptime:527456]
     // Sending event #1900
 :Sending Trackball (ACTION_MOVE): 0:(1.0,4.0)
 :Sending Trackball (ACTION_MOVE): 0:(1.0,-4.0)
@@ -146,16 +155,17 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_UP): 0:(76.400894,1306.141)
     // Injection Failed
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,-3.0)
-    //[calendar_time:2026-11-06 22:53:33.367  system_uptime:792603]
+    //[calendar_time:2026-11-14 10:37:52.178  system_uptime:529769]
     // Sending event #2000
 :Sending Trackball (ACTION_MOVE): 0:(3.0,3.0)
 :Sending Touch (ACTION_DOWN): 0:(371.0,1166.0)
 :Sending Touch (ACTION_UP): 0:(370.37302,1173.1316)
-    // Injection Failed
 :Sending Touch (ACTION_DOWN): 0:(937.0,2060.0)
 :Sending Touch (ACTION_UP): 0:(981.40936,2088.1677)
 :Sending Touch (ACTION_DOWN): 0:(805.0,1442.0)
+    // Injection Failed
 :Sending Touch (ACTION_UP): 0:(821.94965,1409.3251)
+    // Injection Failed
 :Sending Touch (ACTION_DOWN): 0:(773.0,1269.0)
 :Sending Touch (ACTION_UP): 0:(781.4502,1275.5033)
 :Sending Touch (ACTION_DOWN): 0:(960.0,716.0)
@@ -176,9 +186,9 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_UP): 0:(1052.1522,1994.7909)
 :Sending Touch (ACTION_DOWN): 0:(743.0,1745.0)
 :Sending Touch (ACTION_UP): 0:(748.49316,1665.7487)
-    //[calendar_time:2026-11-06 22:53:36.050  system_uptime:795286]
+    //[calendar_time:2026-11-14 10:37:54.913  system_uptime:532503]
     // Sending event #2100
-    //[calendar_time:2026-11-06 22:53:36.171  system_uptime:795406]
+    //[calendar_time:2026-11-14 10:37:55.034  system_uptime:532624]
     // Sending event #2100
 :Sending Touch (ACTION_DOWN): 0:(552.0,1926.0)
 :Sending Touch (ACTION_UP): 0:(526.8247,1905.0914)
@@ -194,7 +204,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(452.0,512.0)
 :Sending Touch (ACTION_UP): 0:(498.2187,467.557)
 :Sending Touch (ACTION_DOWN): 0:(572.0,2056.0)
-    //[calendar_time:2026-11-06 22:53:37.525  system_uptime:796761]
+    //[calendar_time:2026-11-14 10:37:56.420  system_uptime:534010]
     // Sending event #2200
 :Sending Touch (ACTION_UP): 0:(548.70105,2107.1584)
 :Sending Trackball (ACTION_MOVE): 0:(4.0,0.0)
@@ -202,20 +212,12 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(1021.0,236.0)
 :Sending Touch (ACTION_UP): 0:(1028.4022,241.29533)
 :Sending Touch (ACTION_DOWN): 0:(786.0,1510.0)
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
 :Sending Touch (ACTION_UP): 0:(829.1679,1511.8002)
-    // Injection Failed
 :Sending Trackball (ACTION_MOVE): 0:(0.0,-3.0)
 :Sending Touch (ACTION_DOWN): 0:(743.0,1537.0)
 :Sending Touch (ACTION_UP): 0:(740.0067,1540.2709)
 :Sending Touch (ACTION_DOWN): 0:(11.0,1784.0)
 :Sending Touch (ACTION_UP): 0:(12.556906,1794.2605)
-    // Injection Failed
 :Sending Touch (ACTION_DOWN): 0:(98.0,803.0)
 :Sending Touch (ACTION_UP): 0:(88.90605,793.72296)
 :Sending Touch (ACTION_DOWN): 0:(887.0,1602.0)
@@ -231,7 +233,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(1001.0,1024.0)
 :Sending Touch (ACTION_UP): 0:(1004.00616,960.0249)
 :Sending Trackball (ACTION_MOVE): 0:(4.0,0.0)
-    //[calendar_time:2026-11-06 22:53:41.016  system_uptime:800251]
+    //[calendar_time:2026-11-14 10:37:59.813  system_uptime:537403]
     // Sending event #2300
 :Sending Touch (ACTION_DOWN): 0:(903.0,781.0)
 :Sending Touch (ACTION_UP): 0:(885.46326,785.08594)
@@ -258,7 +260,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(147.0,13.0)
 :Sending Touch (ACTION_UP): 0:(147.42354,31.501429)
 :Sending Trackball (ACTION_MOVE): 0:(1.0,-5.0)
-    //[calendar_time:2026-11-06 22:53:44.833  system_uptime:804069]
+    //[calendar_time:2026-11-14 10:38:03.570  system_uptime:541161]
     // Sending event #2400
 :Sending Trackball (ACTION_MOVE): 0:(-3.0,3.0)
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
@@ -283,14 +285,13 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Trackball (ACTION_MOVE): 0:(2.0,2.0)
 :Sending Touch (ACTION_DOWN): 0:(503.0,655.0)
 :Sending Touch (ACTION_UP): 0:(502.5884,651.61084)
-    // Rejecting start of Intent { act=android.intent.action.OPEN_DOCUMENT typ=image/* cmp=com.android.documentsui/.picker.PickActivity } in package com.android.documentsui
 :Sending Trackball (ACTION_MOVE): 0:(-2.0,-2.0)
 :Sending Trackball (ACTION_UP): 0:(0.0,0.0)
 :Sending Touch (ACTION_DOWN): 0:(530.0,740.0)
 :Sending Touch (ACTION_UP): 0:(538.13086,754.7221)
-    //[calendar_time:2026-11-06 22:53:47.753  system_uptime:806989]
+    //[calendar_time:2026-11-14 10:38:06.459  system_uptime:544049]
     // Sending event #2500
-    //[calendar_time:2026-11-06 22:53:47.874  system_uptime:807109]
+    //[calendar_time:2026-11-14 10:38:06.581  system_uptime:544172]
     // Sending event #2500
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,-5.0)
 :Sending Touch (ACTION_DOWN): 0:(159.0,1807.0)
@@ -312,7 +313,7 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(190.0,1591.0)
 :Sending Touch (ACTION_UP): 0:(204.39847,1599.1886)
 :Sending Touch (ACTION_DOWN): 0:(420.0,328.0)
-    //[calendar_time:2026-11-06 22:53:50.741  system_uptime:809976]
+    //[calendar_time:2026-11-14 10:38:09.581  system_uptime:547171]
     // Sending event #2600
 :Sending Touch (ACTION_UP): 0:(413.58374,322.3808)
 :Sending Touch (ACTION_DOWN): 0:(196.0,842.0)
@@ -345,9 +346,10 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_UP): 0:(410.31366,1414.1438)
 :Sending Trackball (ACTION_MOVE): 0:(3.0,4.0)
 :Sending Touch (ACTION_DOWN): 0:(118.0,131.0)
-    //[calendar_time:2026-11-06 22:53:53.656  system_uptime:812891]
+    //[calendar_time:2026-11-14 10:38:12.557  system_uptime:550148]
     // Sending event #2700
 :Sending Touch (ACTION_UP): 0:(56.04618,200.55583)
+    // Injection Failed
 :Sending Touch (ACTION_DOWN): 0:(140.0,1251.0)
 :Sending Touch (ACTION_UP): 0:(142.35849,1254.6044)
 :Sending Touch (ACTION_DOWN): 0:(1047.0,430.0)
@@ -377,12 +379,13 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Touch (ACTION_DOWN): 0:(225.0,370.0)
 :Sending Touch (ACTION_UP): 0:(225.87747,358.17935)
 :Sending Trackball (ACTION_MOVE): 0:(-1.0,1.0)
-    //[calendar_time:2026-11-06 22:53:56.499  system_uptime:815735]
+    //[calendar_time:2026-11-14 10:38:15.396  system_uptime:552986]
     // Sending event #2800
 :Sending Touch (ACTION_DOWN): 0:(1030.0,1786.0)
 :Sending Touch (ACTION_UP): 0:(1039.9464,1750.1896)
 :Sending Touch (ACTION_DOWN): 0:(88.0,1235.0)
 :Sending Touch (ACTION_UP): 0:(97.99933,1208.6478)
+    // Injection Failed
 :Sending Touch (ACTION_DOWN): 0:(196.0,952.0)
 :Sending Touch (ACTION_UP): 0:(190.65128,948.3966)
 :Sending Trackball (ACTION_MOVE): 0:(3.0,0.0)
@@ -391,22 +394,11 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Trackball (ACTION_MOVE): 0:(0.0,-4.0)
 :Sending Touch (ACTION_DOWN): 0:(209.0,335.0)
 :Sending Touch (ACTION_UP): 0:(214.50816,334.69946)
-    // Injection Failed
 :Sending Touch (ACTION_DOWN): 0:(933.0,533.0)
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
-    // Injection Failed
 :Sending Touch (ACTION_UP): 0:(1031.3273,492.01245)
-    // Injection Failed
 :Sending Touch (ACTION_DOWN): 0:(842.0,1786.0)
 :Sending Touch (ACTION_UP): 0:(842.3041,1796.1643)
-    //[calendar_time:2026-11-06 22:53:59.400  system_uptime:818635]
+    //[calendar_time:2026-11-14 10:38:18.356  system_uptime:555947]
     // Sending event #2900
 :Sending Touch (ACTION_DOWN): 0:(724.0,276.0)
 :Sending Touch (ACTION_UP): 0:(744.40607,280.40823)
@@ -430,8 +422,8 @@ Got IOException performing flipjava.io.IOException: write failed: EINVAL (Invali
 :Sending Trackball (ACTION_MOVE): 0:(2.0,0.0)
 Events injected: 3000
 :Sending rotation degree=0, persist=false
-:Dropped: keys=0 pointers=78 trackballs=0 flips=14 rotations=0
-## Network stats: elapsed time=81703ms (0ms mobile, 0ms wifi, 81703ms not connected)
+:Dropped: keys=0 pointers=50 trackballs=0 flips=14 rotations=0
+## Network stats: elapsed time=81212ms (0ms mobile, 0ms wifi, 81212ms not connected)
 // Monkey finished
 
 --- logcat crash ---

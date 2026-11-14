@@ -103,10 +103,13 @@ def acha(texto: str, nos: list[dict] | None = None, parcial: bool = True, mais_b
 
 
 def fecha_dialogo_do_sistema(nos: list[dict]) -> bool:
-    """Toca em "Wait" num aviso de app do sistema travado (o Pixel Launcher do
-    emulador trava às vezes e cobre a tela, e o teste inteiro falhava)."""
+    """Fecha o aviso de app do sistema travado (o Pixel Launcher do emulador
+    trava às vezes e cobre a tela, e o teste inteiro falhava). Prefere
+    "Close app", que encerra o Launcher e ele volta limpo: com "Wait" o aviso
+    voltou 112 vezes numa rodada (run 43545034400)."""
     if any("isn't responding" in n["texto"] or "não está respondendo" in n["texto"] for n in nos):
-        botao = next((n for n in nos if n["texto"] in ("Wait", "Aguardar")), None)
+        botao = next((n for r in ("Close app", "Fechar app", "OK", "Wait", "Aguardar")
+                      for n in nos if n["texto"] == r), None)
         if botao:
             res.setdefault("dialogos_do_sistema_fechados", 0)
             res["dialogos_do_sistema_fechados"] += 1
@@ -136,7 +139,10 @@ def espera_rolando(texto: str, rolagens: int = 8, **kw) -> dict | None:
     """
     achado = None
     for i in range(rolagens + 1):
-        achado = acha(texto, **kw)
+        # Uma leitura só da árvore às vezes falha (o uiautomator não acha a tela
+        # parada) ou cai num aviso do sistema: a fonte em 200% do app publicado
+        # falhou assim numa rodada e passou na seguinte. Alguns segundos por posição.
+        achado = espera(texto, 3, **kw)
         if achado or i == rolagens:
             break
         rola(1)
@@ -227,6 +233,15 @@ def fluidez() -> dict:
 
 
 def tem_internet() -> bool:
+    """Se o Android tem uma rede padrão (dumpsys connectivity); o ping, de reserva.
+
+    Só o ping falhava em toda rodada depois de religar a rede ("a internet do
+    emulador voltou", em todas as rodadas desde 06/11), e então também não
+    provava que a rede tinha caído antes.
+    """
+    m = re.search(r"Active default network:\s*(\S+)", sh("dumpsys connectivity", timeout=30))
+    if m:
+        return m.group(1) != "none"
     saida = sh("ping -c 1 -W 3 8.8.8.8 2>&1", timeout=30)
     return "1 received" in saida or "1 packets received" in saida
 
@@ -250,7 +265,7 @@ def rede(ligada: bool) -> bool:
         if ligada:
             sh("svc wifi enable; svc data enable")
     # Desligar é rápido; a rede do emulador leva mais para voltar.
-    for _ in range(10 if not ligada else 30):
+    for _ in range(10 if not ligada else 60):
         time.sleep(2)
         if tem_internet() == ligada:
             return True

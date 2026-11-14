@@ -1,0 +1,40 @@
+INFO:     Started server process [2370]
+INFO:     Waiting for application startup.
+Pará: pronto, do cache da build.
+Modelo carregado e treinado com sucesso.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+Mato Grosso: pronto, do cache da build.
+Mato Grosso: modelo pronto (2452 registros).
+Maranhão: pronto, do cache da build.
+Maranhão: modelo pronto (1121 registros).
+Tocantins: pronto, do cache da build.
+Tocantins: modelo pronto (1741 registros).
+Rondônia: pronto, do cache da build.
+Rondônia: modelo pronto (526 registros).
+Finance cache atualizado: R$ 153.85/sc
+[precos] fonte indisponivel: HTTPError: HTTP Error 403: Forbidden
+INFO:     127.0.0.1:56976 - "GET /api/estados HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58240 - "GET /api/ping HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58256 - "GET /api/ping HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58272 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58256 - "GET /api/financas/Paragominas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58256 - "GET /api/contador HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58248 - "GET /api/mercado?periodo=1d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41026 - "GET /api/previsao/Pau%20D%27Arco HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41026 - "GET /api/avisos?lat=-7.83874&lon=-50.04423&geocode=1505551 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50798 - "GET /api/mercado?periodo=1d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51174 - "GET /api/ping HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51186 - "GET /api/mercado?periodo=1d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51196 - "GET /api/ping HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51208 - "GET /api/municipios HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51186 - "GET /api/contador HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51186 - "GET /api/financas/Paragominas HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51196 - "GET /api/ping HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51208 - "GET /api/municipios?uf=MT&com_sedes=true HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51196 - "GET /api/financas/Alta%20Floresta?uf=MT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51186 - "GET /api/mercado?periodo=1d&uf=MT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51186 - "GET /api/previsao/Sorriso?uf=MT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51186 - "GET /api/financas/Sorriso?uf=MT HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51186 - "GET /api/avisos?lat=-12.5425&lon=-55.7211&geocode=5107925 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38290 - "GET /api/mercado?periodo=1d&uf=MT HTTP/1.1" 200 OK

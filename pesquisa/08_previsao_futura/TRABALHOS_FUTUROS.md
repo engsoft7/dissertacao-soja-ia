@@ -584,7 +584,21 @@ depois da mudança), e o aplicativo do Pará pede e guarda o mesmo de sempre.
   respostas de um município de cada estado e `CapturasDeTelaTest` desenha
   com elas o resumo, a viabilidade e o cartão do modelo, e a escolha do
   estado com os cinco.
-- **Falta.** Publicar (API, painel e aplicativo) depois da defesa; conferir
-  com quem planta lá se o custo da praça mais perto representa o município;
-  e o teste em emulador com os estados novos (o Teste Premium roda contra a
-  API em produção, que ainda não os tem).
+- **Publicado em 13/11/2026**, na v2.5.0 (API no Render, painel no Streamlit
+  e aplicativo 2.8.0 no Release), com autorização do autor antes da defesa; a
+  dissertação e o Anexo 01 passaram a descrever a extensão. O Teste Premium
+  ganhou o percurso em Mato Grosso no emulador, contra a API da própria branch.
+- **Feito em 14/11/2026, subida da API.** A cada deploy ou reinício, a API
+  treinava os quatro estados depois do Pará: uns 90 s de CPU numa máquina
+  comum, na ordem de 15 minutos no décimo de CPU do Render gratuito, com os
+  quatro respondendo 503 nesse tempo (na leitura de 13/11 às 16h34 UTC, logo
+  depois do deploy, nenhum estava pronto). A build passou a deixar os cinco estados
+  prontos (`prepara_estados.py`, cache lido na subida, válido para a base com
+  que foi feito); com ele, os cinco ficam prontos em menos de um segundo, e a
+  API do Teste Premium já sobe assim. Em produção, vale depois do merge.
+- **Feito em 14/11/2026, Teste Premium.** O app de release (2.8.0 publicado e
+  2.8.1) passou nas 19 verificações nos três emuladores, e o percurso no
+  emulador passou no Pará e em Mato Grosso, no Android 8 e no 14
+  (`software/aplicativo_mobile/teste_premium/RELATORIO_PREMIUM.md`, seção 8).
+- **Falta.** Conferir com quem planta lá se o custo da praça mais perto
+  representa o município.

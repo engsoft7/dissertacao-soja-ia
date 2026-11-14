@@ -42,7 +42,7 @@
   },
   {
    "item": "fonte 200%: Resumo abre",
-   "ok": false,
+   "ok": true,
    "detalhe": ""
   },
   {
@@ -87,7 +87,7 @@
   },
   {
    "item": "a internet do emulador voltou",
-   "ok": false,
+   "ok": true,
    "detalhe": ""
   },
   {
@@ -111,11 +111,9 @@
   },
   "r04_resumo_1": {
    "alvos_pequenos": [
-    "View (379×5 dp)"
+    "View (379×36 dp)"
    ],
-   "sem_rotulo": [
-    "View em (42,128)"
-   ]
+   "sem_rotulo": []
   },
   "r04_resumo_2": {
    "alvos_pequenos": [],
@@ -145,8 +143,7 @@
   },
   "r08_sobre": {
    "alvos_pequenos": [
-    "View (339×44 dp)",
-    "View (339×46 dp)"
+    "View (339×34 dp)"
    ],
    "sem_rotulo": []
   },
@@ -204,26 +201,26 @@
   "altura_px": 2400,
   "densidade_dpi": 420,
   "apk_mb": 27.6,
-  "partida_fria_primeira_ms": 1239,
-  "partida_fria_sem_municipio_ms": 1085.5,
+  "partida_fria_primeira_ms": 1086,
+  "partida_fria_sem_municipio_ms": 946.5,
   "dados_do_municipio_s": 5.3,
-  "memoria_resumo_kb": 40123,
+  "memoria_resumo_kb": 40350,
   "rolagem_resumo": {
-   "quadros": 194.0,
-   "lentos_pct": 86.08,
-   "p50_ms": 65.0,
+   "quadros": 188.0,
+   "lentos_pct": 83.51,
+   "p50_ms": 61.0,
    "p90_ms": 105.0,
-   "p99_ms": 129.0
+   "p99_ms": 150.0
   },
   "rolagem_historico": {
-   "quadros": 138.0,
-   "lentos_pct": 91.3,
-   "p50_ms": 65.0,
-   "p90_ms": 101.0,
-   "p99_ms": 133.0
+   "quadros": 140.0,
+   "lentos_pct": 82.86,
+   "p50_ms": 57.0,
+   "p90_ms": 97.0,
+   "p99_ms": 150.0
   },
-  "memoria_depois_das_abas_kb": 86179,
-  "partida_fria_com_municipio_ms": 1142,
+  "memoria_depois_das_abas_kb": 83255,
+  "partida_fria_com_municipio_ms": 1105,
   "monkey": {
    "eventos": 3000,
    "falhas": 0,

@@ -150,4 +150,15 @@ class TempoCalculoTest {
         // Pau D'Arco fica no sul do Pará; a tabela de origem a punha no nordeste.
         assertTrue(SEDES_MUNICIPAIS.getValue("Pau D'Arco").lat < -7.5)
     }
+
+    @Test
+    fun avisosDoMesmoEventoEntramUmaVezNoResumo() {
+        val tempestade = AvisoMeteorologico(id = "1", evento = "Tempestade", severidade = "Perigo Potencial")
+        val outraTempestade = AvisoMeteorologico(id = "2", evento = "Tempestade", severidade = "Perigo")
+        val chuva = AvisoMeteorologico(id = "3", evento = "Chuvas Intensas")
+        assertEquals("1 aviso do INMET: tempestade", resumoDosAvisos(listOf(tempestade)))
+        assertEquals("2 avisos do INMET: tempestade", resumoDosAvisos(listOf(tempestade, outraTempestade)))
+        assertEquals("3 avisos do INMET: tempestade, chuvas intensas",
+                     resumoDosAvisos(listOf(tempestade, outraTempestade, chuva)))
+    }
 }

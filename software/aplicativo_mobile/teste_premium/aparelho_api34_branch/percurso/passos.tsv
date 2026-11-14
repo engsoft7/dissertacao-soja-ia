@@ -1,5 +1,12 @@
 3s	abriu	boas-vindas
-9s	lista	chegou da API
-12s	resumo	safra 2027 carregada
-12s	ok	Resumo mostra a última safra do IBGE, 2025
-17s	FALHA	AssertionError: Failed: performScrollToIndex(3)
+10s	lista	chegou da API
+13s	resumo	safra 2027 carregada
+13s	ok	Resumo mostra a última safra do IBGE, 2025
+22s	ok	a tela do Tempo mostra a previsão ou explica que não a baixou
+22s	tempo	previsão carregada
+34s	ok	Histórico começa na projeção mais distante ou na safra em curso
+49s	ok	sem internet, o Resumo abre com os dados guardados
+49s	ok	sem internet, o app avisa
+49s	ok	sem internet, o Mapa explica
+54s	ok	sem internet, a Estimativa no campo abre
+54s	fim	percurso completo

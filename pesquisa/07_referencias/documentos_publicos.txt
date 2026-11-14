@@ -136,3 +136,6 @@ navegador https://tinyurl.com/VSimposioNDAE2026
 https://sol.sbc.org.br/index.php/erad-eramia-no2
 https://www.sbc.org.br/
 https://jems3.sbc.org.br/
+# A API em produção, depois do merge do PR 184 (13/11/2026): os cinco estados carregados?
+https://agrointeligencia-api.onrender.com/api/estados
+https://agrointeligencia-api.onrender.com/api/previsao/Sorriso?uf=MT

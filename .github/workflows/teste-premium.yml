@@ -95,6 +95,8 @@ jobs:
         working-directory: software/api_backend
         run: |
           pip install --quiet -r requirements.txt
+          # Como a build do Render (render.yaml): os estados prontos antes de subir.
+          python prepara_estados.py
           nohup python -m uvicorn api:app --host 127.0.0.1 --port 8000 > "$RUNNER_TEMP/api.log" 2>&1 &
           python - <<'PY'
           import json, time, urllib.request
@@ -161,6 +163,13 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 900
           script: bash software/automacao_github/teste_premium_emulador.sh saida/aparelho_api${{ matrix.api }}_${{ matrix.apk }} /tmp/teste.apk ${{ matrix.apk == 'branch' && '1' || '0' }}
+
+      # O que a API do runner fez (de onde vieram os estados, o que não
+      # conseguiu baixar) fica no relatório. Em .txt: o .gitignore deixa os
+      # *.log de fora, e o da run 43551339779 não chegou à branch.
+      - name: Guarda o log da API desta branch
+        if: always() && matrix.apk == 'branch'
+        run: cp "$RUNNER_TEMP/api.log" "saida/aparelho_api${{ matrix.api }}_branch/api_da_branch.txt" 2>/dev/null || true
 
       - uses: actions/upload-artifact@v4
         if: always()

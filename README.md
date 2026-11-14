@@ -39,6 +39,11 @@ municipal da soja, em dois recortes:
 | Nacional | **SVR** (ajustado) | **461 kg/ha** | 0,425 | **17,1%** |
 | Pará (com máscara) | MLP | 416 kg/ha | 0,216 | 13,9% |
 
+O Pará é o recorte da dissertação. Desde a v2.5.0 (13/11/2026) o painel, a API
+e o aplicativo atendem também, como extensão, Mato Grosso, Maranhão, Tocantins
+e Rondônia, com a mesma conta e uma base por estado
+(`pesquisa/dados/estados/`, `software/api_backend/estados.py`).
+
 No recorte nacional os números acima são os da **busca de hiperparâmetros**
 (`03_busca_hiperparametros.py` → `04_avalia_ajustado.py`). Depois do ajuste o
 SVR passa a ser o melhor modelo, à frente do XGBoost, que liderava na versão
@@ -196,12 +201,13 @@ pesquisa/dados/
   rios_para.json                          principais rios (contexto do mapa)
   eventos_enso.json                       períodos históricos de El Niño/La Niña
   metricas_validacao.json                 métricas pré-calculadas para o painel
-  estados/                                Mato Grosso e Maranhão no produto: base, série
-                                          oficial, sedes e contorno de cada estado
-                                          (monta_base_estados.py; ainda não publicado)
+  estados/                                Mato Grosso, Maranhão, Tocantins e Rondônia no
+                                          produto: base, série oficial, sedes e contorno de
+                                          cada estado (monta_base_estados.py)
 software/api_backend/
   api.py                                  API REST (FastAPI) para clientes
-  estados.py                              Pará, Mato Grosso e Maranhão; ?uf= nas rotas
+  estados.py                              os cinco estados do produto; ?uf= nas rotas
+  prepara_estados.py                      estados prontos na build (modelo e históricos)
   financas.py                             cálculos financeiros (VTN, custos)
   mercado.py, precos.py, precos_para.py   Chicago em reais, cotações por praça, preço estimado do Pará
   tempo.py, avisos_inmet.py               tempo na lavoura, janela de pulverização, avisos
@@ -652,7 +658,7 @@ pip install pytest pandas requests
 python -m pytest software pesquisa/09_contagem_por_imagem/test_ciclo_retreino.py -q
 ```
 
-São 118 testes em Python (13/11/2026), em `software/api_backend/` (preços,
+São 119 testes em Python (14/11/2026), em `software/api_backend/` (preços,
 mercado, tempo, avisos, estados, contador, validação das entradas),
 `software/automacao_github/` (PAM, ENSO, CONAB, municípios, DOI),
 `software/dashboard_web/` e `pesquisa/09_contagem_por_imagem/`. O mesmo

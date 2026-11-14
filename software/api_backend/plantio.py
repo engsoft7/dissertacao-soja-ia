@@ -129,7 +129,9 @@ def para_municipio(uf: str, cod_ibge7: int, pasta: Path = PASTA, lang: str = "pt
         zarc_mun = {
             "portaria": nome_da_portaria(meta["portarias"].get(uf, "")),
             "fonte": meta["fonte"], "url": meta["url"],
-            "ciclos": [{"codigo": int(c), "nome": n} for c, n in meta["ciclos"].items()],
+            # "Grupo II" é o nome da tábua; em inglês, "Group II". AD1 a AD6 valem nos dois.
+            "ciclos": [{"codigo": int(c), "nome": re.sub(r"^Grupo\b", "Group", n) if lang == "en" else n}
+                       for c, n in meta["ciclos"].items()],
             "solos": [{"codigo": int(c), "nome": n} for c, n in meta["solos"].items()],
             "riscos": z["riscos"],
         }

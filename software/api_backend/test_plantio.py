@@ -67,6 +67,8 @@ def test_distritos_que_seguem_outra_regiao_so_aparecem_para_o_municipio_deles(pa
 
 def test_observacao_em_ingles(pasta):
     """O app em inglês (Accept-Language) recebe a mesma frase, com datas em inglês e os nomes da portaria."""
+    assert plantio.para_municipio("PA", 1505502, pasta, lang="en")["zarc"]["ciclos"] == [{"codigo": 21, "nome": "Group II"}]
+    assert plantio.para_municipio("PA", 1505502, pasta)["zarc"]["ciclos"] == [{"codigo": 21, "nome": "Grupo II"}]
     d = plantio.para_municipio("PA", 1500602, pasta, lang="en")
     assert d["calendario"]["observacao"] == (
         "The districts of Cachoeira da Serra and Castelo de Sonhos follow Region I: soybean-free period from "

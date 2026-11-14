@@ -103,6 +103,9 @@ class EstadoCarregado:
         self.pam = historico_oficial.carrega_pam(e.pam)
         self.historicos: dict = {}
         self.sedes = estados.sedes(e)
+        # De onde o estado veio nesta subida, em /api/estados: é o que mostra,
+        # de fora, se o Render rodou prepara_estados.py na build.
+        self.origem = "treinado na subida"
 
     def nome_na_base(self, municipio: str) -> str:
         """O nome como está na base: no Pará, sem acento (do GAUL); nos outros, o oficial."""
@@ -159,6 +162,7 @@ def carrega_estado(e: "estados.Estado") -> "EstadoCarregado":
                 print(f"{e.nome}: pronto, do cache da build.", flush=True)
                 ce = guardado["estado"]
                 ce.estado = e  # os caminhos desta máquina, e não os da build
+                ce.origem = "cache da build"
                 return ce
             print(f"{e.nome}: o cache é de outra base; treinando.", flush=True)
         except Exception as erro:  # arquivo de outra versão das bibliotecas, cortado…
@@ -374,7 +378,8 @@ def list_estados():
     for e in estados.disponiveis():
         ce = AppState.estados.get(e.uf)
         saida.append({"uf": e.uf, "nome": e.nome, "carregado": ce is not None,
-                      "municipios": int(ce.df["municipio"].nunique()) if ce is not None else None})
+                      "municipios": int(ce.df["municipio"].nunique()) if ce is not None else None,
+                      "origem": getattr(ce, "origem", None)})
     return {"estados": saida, "padrao": estados.PADRAO}
 
 

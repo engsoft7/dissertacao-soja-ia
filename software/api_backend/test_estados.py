@@ -54,6 +54,7 @@ def test_tocantins_e_rondonia(cliente):
     mais perto, Sorriso (MT)."""
     e = {x["uf"]: x for x in cliente.get("/api/estados").json()["estados"]}
     assert {"TO", "RO"} <= set(e) and e["TO"]["municipios"] > 50
+    assert all(x["origem"] in ("cache da build", "treinado na subida") for x in e.values())
     to = cliente.get("/api/financas/Porto Nacional", params={"uf": "TO"}).json()
     pa = cliente.get("/api/financas/Paragominas").json()
     assert to["uf"] == "TO" and to["fonte_preco"].startswith("CONAB, Pedro Afonso")
@@ -139,10 +140,12 @@ def test_cache_do_estado(tmp_path, monkeypatch):
     assert len(preparado.historicos) == preparado.df["municipio"].nunique()
 
     carregado = api.carrega_estado(ro)
+    assert carregado.origem == "cache da build"
     assert carregado.metricas == preparado.metricas and carregado.last_year == preparado.last_year
     municipio = next(iter(preparado.historicos))
     assert carregado.historicos[municipio] == preparado.historicos[municipio]
     assert carregado.estimador.estimar(municipio, 2027) == preparado.estimador.estimar(municipio, 2027)
 
     monkeypatch.setattr(api, "CACHE_VERSAO", 999)  # como uma base ou biblioteca diferente
-    assert not api.carrega_estado(ro).historicos  # treinado agora, sem históricos prontos
+    treinado = api.carrega_estado(ro)
+    assert not treinado.historicos and treinado.origem == "treinado na subida"

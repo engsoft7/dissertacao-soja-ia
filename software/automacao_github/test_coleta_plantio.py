@@ -97,3 +97,58 @@ def test_municipio_fora_das_regioes_distingue_omissao_de_leitura_perdida(capsys)
     problemas = cp.fora_das_regioes("PA", ibge, regioes, ["Bannach, Redenção e Trairão"])
     assert problemas == ["PA: Redenção (3) aparece nas notas, mas não entrou em região nenhuma"]
     assert "Belém (1) não está em região nenhuma" in capsys.readouterr().out
+
+
+# ── troca de safra: a portaria mais nova do Diário Oficial e a tábua do ZARC ──
+
+# Um trecho da página de busca do Diário Oficial como ela vem: os atos num JSON
+# dentro de um <script>. O segundo ato é de outra cultura; o terceiro, mais
+# antigo.
+BUSCA = """<html><body><script id="_br_com_seatecnologia_in_buscadou_BuscaDouPortlet_params"
+ type="application/json">{"jsonArray":[
+ {"title":"PORTARIA SDA/MAPA Nº 2.001, DE 7 DE ABRIL DE 2027","urlTitle":"portaria-sda/mapa-n-2.001-de-7-de-abril-de-2027-1",
+  "pubDate":"08/04/2027","content":"Estabelece o <b>calendário de semeadura</b> da soja para a safra 2027/2028"},
+ {"title":"PORTARIA SDA/MAPA Nº 2.002, DE 8 DE ABRIL DE 2027","urlTitle":"portaria-sda/mapa-n-2.002-de-8-de-abril-de-2027-2",
+  "pubDate":"09/04/2027","content":"Estabelece o calendário de semeadura do algodão"},
+ {"title":"PORTARIA SDA/MAPA Nº 1.579, DE 9 DE ABRIL DE 2026","urlTitle":"portaria-sda/mapa-n-1.579-de-9-de-abril-de-2026-698696654",
+  "pubDate":"10/04/2026","content":"calendário de semeadura e vazio sanitário da soja, safra 2026/2027"}
+ ]}</script></body></html>"""
+
+
+def test_busca_do_diario_oficial_acha_as_portarias_da_soja():
+    c = cp.candidatas(cp.resultados_da_busca(BUSCA))
+    assert [x["titulo"][:30] for x in c] == ["PORTARIA SDA/MAPA Nº 2.001, DE", "PORTARIA SDA/MAPA Nº 1.579, DE"]
+    assert c[0]["url"] == "https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-2.001-de-7-de-abril-de-2027-1"
+    assert cp.resultados_da_busca("<html>formato novo</html>") == []
+
+
+def test_nome_da_portaria_e_safra_no_texto():
+    assert cp.nome_da_portaria("PORTARIA SDA/MAPA Nº 1.579, DE 9 DE ABRIL DE 2026") == cp.PORTARIA
+    assert cp.nome_da_portaria("PORTARIA SDA/MAPA Nº 2.001, DE 1º DE MARÇO DE 2027") == \
+        "Portaria SDA/MAPA nº 2.001, de 1 de março de 2027"
+    assert cp.safras_no_texto("para a safra 2027/2028 e a safra 2027/28; safra 2026/2030") == ["2027/2028"]
+
+
+def test_safras_do_catalogo_do_zarc():
+    recursos = [{"name": "Tábua de risco ZARC 2025/2026"}, {"name": "Tábua de risco ZARC 2026/2027"},
+                {"name": "Dicionário de dados"}]
+    assert cp.safras_do_zarc(recursos) == ["2025/2026", "2026/2027"]
+
+
+def test_troca_de_safra_so_com_portaria_e_tabua_novas(capsys):
+    atual = {"safra": "2026/2027", "fonte": cp.PORTARIA, "url": cp.DOU}
+    nova = {"safra": "2027/2028", "fonte": "Portaria SDA/MAPA nº 2.001, de 7 de abril de 2027", "url": "https://x"}
+    assert cp.escolhe_safra(atual, nova, ["2026/2027", "2027/2028"]) is nova
+    # A portaria saiu, a tábua ainda não: fica na safra em uso, e o log diz por quê.
+    assert cp.escolhe_safra(atual, nova, ["2026/2027"]) is atual
+    assert "ainda não saiu" in capsys.readouterr().out
+    # Sem a busca, ou com a mesma safra, nada muda.
+    assert cp.escolhe_safra(atual, None, ["2026/2027", "2027/2028"]) is atual
+    assert cp.escolhe_safra(atual, dict(nova, safra="2026/2027"), ["2026/2027"]) is atual
+
+
+def test_safra_em_uso_vem_da_ultima_coleta(tmp_path):
+    assert cp.safra_em_uso(tmp_path) == {"safra": cp.SAFRA, "fonte": cp.PORTARIA, "url": cp.DOU}
+    (tmp_path / "fontes_plantio.json").write_text(
+        '{"safra": "2027/2028", "calendario": {"fonte": "Portaria nova", "url": "https://x"}}', encoding="utf-8")
+    assert cp.safra_em_uso(tmp_path) == {"safra": "2027/2028", "fonte": "Portaria nova", "url": "https://x"}

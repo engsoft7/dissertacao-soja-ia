@@ -21,9 +21,19 @@ Saída, em pesquisa/dados/plantio/:
   numa sequência de dígitos (0, 2, 3 ou 4, de 0%, 20%, 30% ou 40%);
 - fontes_plantio.json: de onde veio cada coisa e quando foi lida.
 
+A safra troca sozinha. A cada mês a coleta procura no Diário Oficial a portaria
+mais nova da SDA/MAPA com o calendário de semeadura da soja, e no catálogo do
+Ministério as safras da tábua do ZARC. Quando há portaria de uma safra mais nova
+que a em uso e a tábua dessa safra já saiu, a coleta passa para ela; os
+arquivos da safra anterior ficam, e a API usa a mais recente. Sem a busca do
+Diário Oficial (fora do ar ou com formato novo), segue a safra em uso, lida de
+fontes_plantio.json, ou a portaria abaixo. Uma portaria nova que não se deixe
+ler faz a coleta falhar, como qualquer leitura errada, e nada é gravado.
+
 A verificação de certificado fica sempre ligada.
 
-Uso:  python coleta_plantio.py [--saida DIR]
+Uso:  python coleta_plantio.py [--saida DIR] [--descobre]
+      --descobre só mostra a portaria e as safras encontradas, sem gravar.
 """
 import argparse
 import csv
@@ -32,16 +42,23 @@ import json
 import re
 import sys
 import unicodedata
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import requests
 
 UA = {"User-Agent": "AgroInteligencia-Dissertacao/1.0 (UFPA; pesquisa academica)"}
 ESTADOS = ("PA", "MT", "MA", "TO", "RO")
+# A portaria de partida, usada quando ainda não há fontes_plantio.json e a busca
+# no Diário Oficial não responde. A safra em uso fica em fontes_plantio.json.
 SAFRA = "2026/2027"
 DOU = "https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-1.579-de-9-de-abril-de-2026-698696654"
 PORTARIA = "Portaria SDA/MAPA nº 1.579, de 9 de abril de 2026"
+BUSCA_DOU = "https://www.in.gov.br/consulta/-/buscar/dou"
+PAGINA_DOU = "https://www.in.gov.br/web/dou/-/"
+SAFRA_NO_TEXTO = re.compile(r"safra\s+(\d{4})\s*/\s*(\d{4}|\d{2})\b", re.I)
+TITULO_PORTARIA = re.compile(
+    r"PORTARIA\s+SDA\s*/\s*MAPA\s+N[º°ºO.]*\s*([\d.]+)\s*,?\s+DE\s+(\d{1,2})\s*º?\s+DE\s+([A-ZÇÃ]+)\s+DE\s+(\d{4})", re.I)
 CKAN = ("https://dados.agricultura.gov.br/api/3/action/package_show"
         "?id=tabua-de-risco-zoneamento-agricola-de-risco-climatico")
 IBGE = "https://servicodados.ibge.gov.br/api/v1/localidades/estados/{uf}/municipios"
@@ -203,8 +220,107 @@ def municipios_ibge(uf: str) -> dict[str, tuple[int, str]]:
             for row in csv.DictReader(io.StringIO(r.text)) if int(row["codigo_uf"]) == CODIGO_UF[uf]}
 
 
-def calendario() -> dict:
-    r = requests.get(DOU, headers=UA, timeout=120)
+# ── a safra: a portaria mais nova do Diário Oficial e as tábuas do ZARC ──────
+
+def texto_da_pagina(pagina: str) -> str:
+    return html_mod.unescape(re.sub(r"\s+", " ", re.sub(r"(?is)<[^>]+>", " ", pagina)))
+
+
+def safras_no_texto(texto: str) -> list[str]:
+    """'safra 2027/2028' ou 'safra 2027/28' -> ['2027/2028'], sem repetir, em ordem."""
+    vistas = []
+    for a, b in SAFRA_NO_TEXTO.findall(texto):
+        fim = b if len(b) == 4 else a[:2] + b
+        if int(fim) == int(a) + 1 and f"{a}/{fim}" not in vistas:
+            vistas.append(f"{a}/{fim}")
+    return vistas
+
+
+def nome_da_portaria(titulo: str) -> str:
+    """'PORTARIA SDA/MAPA Nº 1.579, DE 9 DE ABRIL DE 2026' -> 'Portaria SDA/MAPA nº 1.579, de 9 de abril de 2026'."""
+    m = TITULO_PORTARIA.search(titulo or "")
+    if not m:
+        return " ".join((titulo or "").split())
+    numero, dia, mes, ano = m.groups()
+    return f"Portaria SDA/MAPA nº {numero}, de {int(dia)} de {mes.lower()} de {ano}"
+
+
+def resultados_da_busca(pagina: str) -> list[dict]:
+    """Os atos que a busca do Diário Oficial devolve, do JSON que a página traz embutido."""
+    m = re.search(r'<script[^>]*id="_br_com_seatecnologia_in_buscadou_BuscaDouPortlet_params"[^>]*>(.*?)</script>',
+                  pagina, re.S)
+    if not m:
+        return []
+    try:
+        return json.loads(m.group(1)).get("jsonArray") or []
+    except json.JSONDecodeError:
+        return []
+
+
+def candidatas(resultados: list[dict]) -> list[dict]:
+    """Portarias da SDA/MAPA sobre o calendário de semeadura da soja, as mais novas primeiro."""
+    saida = []
+    for r in resultados:
+        titulo = r.get("title") or r.get("titulo") or ""
+        resumo = texto_da_pagina(r.get("content") or "").lower()
+        if not TITULO_PORTARIA.search(titulo) or "semeadura" not in resumo or "soja" not in resumo:
+            continue
+        try:
+            publicada = datetime.strptime(r.get("pubDate", ""), "%d/%m/%Y").date()
+        except ValueError:
+            continue
+        saida.append({"titulo": titulo, "url": PAGINA_DOU + r["urlTitle"], "publicada": publicada})
+    return sorted(saida, key=lambda c: c["publicada"], reverse=True)
+
+
+def portaria_mais_nova(hoje: date | None = None) -> dict | None:
+    """A portaria mais nova do calendário de semeadura da soja, com a safra que ela fixa; None se não achar."""
+    hoje = hoje or date.today()
+    r = requests.get(BUSCA_DOU, headers=UA, timeout=120, params={
+        "q": '"calendário de semeadura" soja', "s": "todos", "exactDate": "personalizado", "sortType": "0",
+        "publishFrom": f"01-01-{hoje.year - 1}", "publishTo": hoje.strftime("%d-%m-%Y"), "delta": "50"})
+    r.raise_for_status()
+    for c in candidatas(resultados_da_busca(r.text))[:5]:
+        pagina = requests.get(c["url"], headers=UA, timeout=120)
+        pagina.raise_for_status()
+        texto = texto_da_pagina(pagina.text)
+        safras = safras_no_texto(texto)
+        if safras and "CALENDÁRIO DE SEMEADURA" in texto.upper():
+            return {"safra": max(safras), "fonte": nome_da_portaria(c["titulo"]), "url": c["url"]}
+    return None
+
+
+def safra_em_uso(saida: Path) -> dict:
+    """A safra, a portaria e o endereço da última coleta (fontes_plantio.json), ou os de partida."""
+    try:
+        f = json.loads((saida / "fontes_plantio.json").read_text(encoding="utf-8"))
+        return {"safra": f["safra"], "fonte": f["calendario"]["fonte"], "url": f["calendario"]["url"]}
+    except (OSError, KeyError, TypeError, json.JSONDecodeError):
+        return {"safra": SAFRA, "fonte": PORTARIA, "url": DOU}
+
+
+def safras_do_zarc(recursos: list[dict]) -> list[str]:
+    """As safras das tábuas do ZARC no catálogo ("... 2026/2027 ..." no nome), da mais antiga à mais nova."""
+    safras = set()
+    for x in recursos:
+        for a, b in re.findall(r"\b(\d{4})/(\d{4})\b", x.get("name") or ""):
+            if int(b) == int(a) + 1:
+                safras.add(f"{a}/{b}")
+    return sorted(safras)
+
+
+def escolhe_safra(atual: dict, nova: dict | None, safras_zarc: list[str]) -> dict:
+    """A safra a coletar: a da portaria nova, se for mais nova que a em uso e a tábua dela já saiu."""
+    if nova and nova["safra"] > atual["safra"]:
+        if nova["safra"] in safras_zarc:
+            return nova
+        print(f"::notice::Portaria da safra {nova['safra']} publicada ({nova['fonte']}); a tábua do ZARC "
+              f"dessa safra ainda não saiu, e a coleta segue na {atual['safra']}.")
+    return atual
+
+
+def calendario(url: str = DOU) -> dict:
+    r = requests.get(url, headers=UA, timeout=120)
     r.raise_for_status()
     pagina = r.text
     texto = html_mod.unescape(re.sub(r"\s+", " ", re.sub(r"(?is)<[^>]+>", " ", pagina)))
@@ -282,11 +398,15 @@ def calendario() -> dict:
     return saida
 
 
-def zarc() -> tuple[list[dict], dict]:
+def recursos_do_zarc() -> list[dict]:
+    """Os arquivos da tábua de risco do ZARC no catálogo do Ministério, um por safra."""
     r = requests.get(CKAN, headers=UA, timeout=60)
     r.raise_for_status()
-    recursos = r.json()["result"]["resources"]
-    alvo = next(x for x in recursos if SAFRA in (x.get("name") or ""))
+    return r.json()["result"]["resources"]
+
+
+def zarc(recursos: list[dict], safra: str = SAFRA) -> tuple[list[dict], dict]:
+    alvo = next(x for x in recursos if safra in (x.get("name") or ""))
     linhas, portarias = [], {}
     with requests.get(alvo["url"], headers=UA, timeout=600, stream=True) as resp:
         resp.raise_for_status()
@@ -311,21 +431,45 @@ def zarc() -> tuple[list[dict], dict]:
     return linhas, {"recurso": alvo["url"], "portarias": portarias}
 
 
+def descobre(saida: Path) -> tuple[dict, list[dict]]:
+    """A safra a coletar e os arquivos do ZARC, com o que se achou impresso no log."""
+    atual = safra_em_uso(saida)
+    recursos = recursos_do_zarc()
+    safras_zarc = safras_do_zarc(recursos)
+    try:
+        nova = portaria_mais_nova()
+    except (requests.RequestException, KeyError, ValueError) as e:
+        print(f"::warning::A busca no Diário Oficial falhou ({type(e).__name__}: {e}); a coleta segue na safra em uso.")
+        nova = None
+    print(f"Safra em uso: {atual['safra']} ({atual['fonte']})")
+    print(f"Portaria mais nova no Diário Oficial: "
+          + (f"{nova['fonte']}, safra {nova['safra']}, {nova['url']}" if nova else "não encontrada"))
+    print(f"Tábuas do ZARC no catálogo: {', '.join(safras_zarc) or 'nenhuma'}")
+    escolha = escolhe_safra(atual, nova, safras_zarc)
+    if escolha is not atual:
+        print(f"::notice::Troca de safra: de {atual['safra']} para {escolha['safra']} ({escolha['fonte']}).")
+    return escolha, recursos
+
+
 def grava(saida: Path) -> None:
     saida.mkdir(parents=True, exist_ok=True)
-    tag = SAFRA.replace("/", "_")
-    cal = calendario()
+    escolha, recursos = descobre(saida)
+    safra, portaria, url = escolha["safra"], escolha["fonte"], escolha["url"]
+    tag = safra.replace("/", "_")
+    cal = calendario(url)
+    linhas, meta = zarc(recursos, safra)
+    # Grava só depois de ler as duas fontes: uma falha no meio não deixa o
+    # calendário de uma safra com a tábua de outra.
     (saida / f"calendario_soja_{tag}.json").write_text(json.dumps(
-        {"safra": SAFRA, "fonte": PORTARIA, "url": DOU, "estados": cal},
+        {"safra": safra, "fonte": portaria, "url": url, "estados": cal},
         ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    linhas, meta = zarc()
     with open(saida / f"zarc_soja_{tag}.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["uf", "geocodigo", "municipio", "ciclo", "solo", "riscos"])
         w.writeheader()
         w.writerows(linhas)
     (saida / "fontes_plantio.json").write_text(json.dumps({
-        "safra": SAFRA,
-        "calendario": {"fonte": PORTARIA, "url": DOU},
+        "safra": safra,
+        "calendario": {"fonte": portaria, "url": url},
         "zarc": {"fonte": "Tábua de risco do ZARC, Ministério da Agricultura (dados abertos, "
                           "licença Creative Commons Atribuição)",
                  "url": meta["recurso"], "portarias": meta["portarias"],
@@ -346,7 +490,12 @@ def grava(saida: Path) -> None:
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--saida", type=Path, default=SAIDA)
+    ap.add_argument("--descobre", action="store_true", help="só mostra a portaria e as safras encontradas")
     args = ap.parse_args(argv)
+    if args.descobre:
+        escolha, _ = descobre(args.saida)
+        print(f"Safra que a coleta usaria: {escolha['safra']} ({escolha['fonte']})")
+        return 0
     grava(args.saida)
     return 0
 

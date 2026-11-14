@@ -220,6 +220,50 @@ class CapturasDeTelaTest {
 
     @Test fun aviso_inmet_claro() = captura("aviso_inmet", false) { CartaoAvisos(avisoExemplo) }
 
+    // Janela de plantio: a resposta de /api/plantio/Paragominas gravada pelo
+    // script, ou um exemplo com as datas da Região II do Pará na portaria. O
+    // "hoje" fica fixo para a frase do cartão não mudar de um dia para o outro.
+    private val plantio: PlantioResponse = real("plantio") ?: PlantioResponse(
+        safra = "2026/2027", uf = "PA", municipio = "Paragominas",
+        calendario = CalendarioPlantio(
+            regiao = "II", vazio = listOf("2026-08-01", "2026-10-31"), semeadura = listOf("2026-11-01", "2027-02-28"),
+            fonte = "Portaria SDA/MAPA nº 1.579, de 9 de abril de 2026", url = "https://www.in.gov.br/"),
+        zarc = ZarcPlantio(
+            portaria = "Portaria nº 203, de 03/07/2026", url = "https://dados.agricultura.gov.br/",
+            ciclos = listOf(OpcaoZarc(20, "Grupo I"), OpcaoZarc(21, "Grupo II"), OpcaoZarc(22, "Grupo III")),
+            solos = (11..16).map { OpcaoZarc(it, "AD${it - 10}") },
+            riscos = mapOf("21-13" to buildString {
+                for (i in 1..36) append(when (i) { in 1..3, in 33..36 -> '2'; 4, 32 -> '3'; 5 -> '4'; else -> '0' })
+            })),
+        lido_em = "2026-11-14")
+    private val hojePlantio = java.time.LocalDate.of(2026, 11, 14)
+
+    private fun estadoPlantio(): EstadoPlantio {
+        val prefs = org.robolectric.RuntimeEnvironment.getApplication()
+            .getSharedPreferences("capturas_plantio", android.content.Context.MODE_PRIVATE)
+        prefs.edit().clear().commit()
+        return EstadoPlantio(prefs).also { it.dados = plantio }
+    }
+
+    @Composable
+    private fun telaPlantio(estado: EstadoPlantio) {
+        PlantioResumoCard(estado, hojePlantio) {}
+        Spacer(Modifier.height(16.dp))
+        PlantioTela(estado, plantio.municipio, aoAtualizar = {}, aoVoltar = {}, hoje = hojePlantio)
+    }
+
+    @Config(qualifiers = "w411dp-h1700dp-xxhdpi")
+    @Test fun plantio_claro() {
+        val estado = estadoPlantio()
+        captura("plantio", false) { telaPlantio(estado) }
+    }
+
+    @Config(qualifiers = "w411dp-h1700dp-night-xxhdpi")
+    @Test fun plantio_escuro() {
+        val estado = estadoPlantio()
+        captura("plantio", true) { telaPlantio(estado) }
+    }
+
     // Escolha do município (2.7.0): o cartão da primeira abertura, o seletor
     // com o botão do GPS e a lista com busca, filtrada por "pa".
     @Composable

@@ -149,3 +149,19 @@ def test_cache_do_estado(tmp_path, monkeypatch):
     monkeypatch.setattr(api, "CACHE_VERSAO", 999)  # como uma base ou biblioteca diferente
     treinado = api.carrega_estado(ro)
     assert not treinado.historicos and treinado.origem == "treinado na subida"
+
+
+def test_janela_de_plantio_pela_rota(cliente):
+    """A rota acha o código do IBGE pelo nome e devolve a região certa; sem os
+    arquivos da coleta, responde 503 em vez de inventar datas."""
+    import plantio
+    r = cliente.get("/api/plantio/Sorriso", params={"uf": "MT"})
+    if plantio.carrega() is None:
+        assert r.status_code == 503
+        return
+    d = r.json()
+    assert d["municipio"] == "Sorriso" and d["uf"] == "MT" and d["calendario"]["regiao"] is None
+    assert d["calendario"]["semeadura"] == ["2026-09-07", "2027-01-07"]
+    pa = cliente.get("/api/plantio/Paragominas").json()
+    assert pa["uf"] == "PA" and pa["calendario"]["regiao"] == "II"
+    assert cliente.get("/api/plantio/Atlantida").status_code == 404

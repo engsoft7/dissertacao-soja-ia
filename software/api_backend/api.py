@@ -10,6 +10,7 @@ import historico_oficial
 import mercado
 import precos_para
 import avisos_inmet
+import plantio
 from fastapi import FastAPI, HTTPException
 from functools import lru_cache
 from contextlib import asynccontextmanager
@@ -513,6 +514,30 @@ def get_avisos(lat: float | None = None, lon: float | None = None, geocode: str 
     if (lat is None or lon is None) and not geocode:
         raise HTTPException(status_code=400, detail="informe lat e lon, ou geocode")
     return avisos_inmet.avisos(lat, lon, geocode)
+
+@app.get("/api/plantio/{municipio}")
+def get_plantio(municipio: str, uf: str | None = None):
+    """Janela de plantio da soja no município (plantio.py).
+
+    O calendário de semeadura e o vazio sanitário da Portaria SDA/MAPA nº
+    1.579/2026, na região do estado a que o município pertence, e os riscos do
+    ZARC por grupo de cultivar e classe de água disponível no solo. As contas
+    das janelas ficam no aplicativo e no painel, que trocam grupo e solo sem
+    voltar ao servidor.
+    """
+    if AppState.df is None:
+        raise HTTPException(status_code=503, detail="Modelo não carregado")
+    ce = _estado_carregado(uf)
+    raw_municipio = ce.nome_na_base(municipio)
+    linhas = ce.df[ce.df["municipio"] == raw_municipio]
+    if linhas.empty:
+        raise HTTPException(status_code=404, detail="Município não encontrado")
+    dados = plantio.para_municipio(ce.estado.uf, int(linhas["cod_ibge7"].iloc[0]))
+    if dados is None:
+        raise HTTPException(status_code=503, detail="Janela de plantio indisponível")
+    dados["municipio"] = ce.nome_exibido(raw_municipio)
+    return dados
+
 
 def _historico_do_municipio(raw_municipio: str, df_mun, ce: "EstadoCarregado | None" = None) -> list[dict]:
     """Histórico, safras do IBGE fora da base e projeções de um município.

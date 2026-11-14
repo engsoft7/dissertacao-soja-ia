@@ -1,3 +1,53 @@
-<resources>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Textos do aplicativo. O padrão é o português do Brasil; as traduções ficam em
+     values-<idioma>/strings.xml, e o Android escolhe pelo idioma do aparelho. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="pt">
     <string name="app_name">AgroInteligência</string>
+
+    <!-- Janela de plantio (Plantio.kt) -->
+    <string name="plantio_formato_data">dd/MM/yyyy</string>
+    <string name="plantio_formato_dia">dd/MM</string>
+    <string name="plantio_titulo_cartao">Plantio da safra %1$s</string>
+    <string name="plantio_titulo_tela">Janela de plantio</string>
+    <string name="plantio_subtitulo">%1$s, safra %2$s</string>
+    <string name="plantio_abrir">Abrir a janela de plantio</string>
+    <string name="plantio_voltar">Voltar ao Resumo</string>
+    <string name="plantio_atualizar">Atualizar a janela de plantio</string>
+    <string name="plantio_carregando">Carregando a janela de plantio…</string>
+    <string name="plantio_indisponivel">Janela de plantio indisponível. Toque para abrir e tentar de novo.</string>
+    <string name="plantio_indisponivel_tela">Não foi possível baixar a janela de plantio. Confira a conexão e toque em atualizar.</string>
+    <string name="plantio_sem_conexao">Sem conexão: mostrando a última janela de plantio baixada.</string>
+
+    <string name="plantio_semeadura_ate">Semeadura permitida até %1$s</string>
+    <string name="plantio_vazio_ate">Vazio sanitário até %1$s; a semeadura começa em %2$s</string>
+    <string name="plantio_vazio_comeca">O vazio sanitário começa em %1$s</string>
+    <string name="plantio_semeadura_encerrada">Semeadura encerrada em %1$s</string>
+
+    <string name="plantio_zarc_hoje">ZARC hoje: risco de %1$d%% (%2$s, %3$s)</string>
+    <string name="plantio_zarc_proxima">ZARC (%1$s, %2$s): hoje fora da janela; a próxima começa em %3$s, com risco de %4$d%%</string>
+    <string name="plantio_zarc_encerrado">ZARC (%1$s, %2$s): a janela desta safra já terminou</string>
+    <string name="plantio_zarc_sem_combinacao">ZARC: sem janela indicada para %1$s e %2$s neste município</string>
+    <string name="plantio_zarc_sem_zoneamento">O ZARC desta safra não indica o plantio de soja neste município.</string>
+    <string name="plantio_zarc_sem_janela">Nenhum decêndio indicado para este grupo e este solo.</string>
+
+    <string name="plantio_secao_calendario">Calendário de semeadura</string>
+    <string name="plantio_sem_calendario">Sem calendário de semeadura para este município na portaria.</string>
+    <string name="plantio_regiao">Região %1$s do estado na portaria</string>
+    <string name="plantio_vazio_periodo">Vazio sanitário: %1$s a %2$s</string>
+    <string name="plantio_semeadura_periodo">Semeadura: %1$s a %2$s</string>
+
+    <string name="plantio_secao_zarc">Risco climático (ZARC)</string>
+    <string name="plantio_grupo">Grupo de cultivar</string>
+    <string name="plantio_grupo_ajuda">O grupo vem do ciclo da cultivar: o Grupo I é o mais curto e o Grupo III o mais longo. A portaria do ZARC lista as cultivares de cada grupo.</string>
+    <string name="plantio_solo">Água disponível no solo</string>
+    <string name="plantio_solo_ajuda">AD1 guarda menos água e AD6 guarda mais. A análise de solo ou o técnico dizem a classe da sua lavoura.</string>
+    <string name="plantio_janela">%1$s a %2$s: risco de %3$d%%</string>
+    <string name="plantio_janela_fora">(fora do calendário de semeadura)</string>
+    <string name="plantio_janela_parte_fora">(parte fora do calendário de semeadura)</string>
+    <string name="plantio_risco_explicacao">O risco é a chance de perder parte da lavoura por clima adverso, como seca na floração, segundo o ZARC.</string>
+    <string name="plantio_fonte_zarc">ZARC: %1$s, tábua de risco do Ministério da Agricultura</string>
+    <string name="plantio_linha_do_tempo">Linha do tempo de julho a junho com o vazio sanitário, a semeadura e as janelas do ZARC. A lista abaixo traz as mesmas datas.</string>
+    <string name="plantio_legenda_vazio">Vazio sanitário</string>
+    <string name="plantio_legenda_semeadura">Semeadura</string>
+    <string name="plantio_regras">Fora do calendário de semeadura, plantar soja é proibido. Fora da janela do ZARC, é permitido, mas sem o Proagro e sem boa parte do crédito rural.</string>
 </resources>

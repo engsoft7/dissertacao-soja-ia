@@ -236,6 +236,10 @@ fun AgroDashboard() {
     val lugarTempo = tempo.lugarPara(selectedMunicipio)
     LaunchedEffect(lugarTempo) { lugarTempo?.let { tempo.carrega(it) } }
 
+    // Janela de plantio (Plantio.kt): calendário da portaria e ZARC do município.
+    val plantio = remember { EstadoPlantio(sharedPrefs) }
+    LaunchedEffect(selectedMunicipio, uf) { selectedMunicipio?.let { plantio.carrega(it, uf) } }
+
     // Mensagens curtas na barra de baixo; o TalkBack as lê em voz alta.
     fun avisar(msg: String) {
         coroutineScope.launch {
@@ -425,6 +429,7 @@ fun AgroDashboard() {
         loadData()
         recarga++
         lugarTempo?.let { l -> coroutineScope.launch { tempo.carrega(l, forcar = true) } }
+        selectedMunicipio?.let { m -> coroutineScope.launch { plantio.carrega(m, uf, forcar = true) } }
         coroutineScope.launch {
             kotlinx.coroutines.delay(300)
             kotlinx.coroutines.withTimeoutOrNull(60_000) {
@@ -586,6 +591,11 @@ fun AgroDashboard() {
                     if (currentTab == 0 && lugarTempo != null) {
                         TempoResumoCard(tempo) { currentTab = 6 }
                     }
+                    // A janela de plantio vem de arquivos da API, e não do modelo:
+                    // aparece mesmo quando a previsão de produtividade falha.
+                    if (currentTab == 0 && selectedMunicipio != null) {
+                        PlantioResumoCard(plantio) { currentTab = 7 }
+                    }
                 }
             }
 
@@ -615,6 +625,13 @@ fun AgroDashboard() {
                 }
                 currentTab == 6 -> item {
                     TempoTela(tempo, selectedMunicipio) { currentTab = 0 }
+                }
+                currentTab == 7 -> item {
+                    PlantioTela(
+                        plantio, selectedMunicipio,
+                        aoAtualizar = { selectedMunicipio?.let { m -> coroutineScope.launch { plantio.carrega(m, uf, forcar = true) } } },
+                        aoVoltar = { currentTab = 0 }
+                    )
                 }
                 // O Sobre traz o aviso de não afiliação e as fontes oficiais que
                 // o Google Play exige: abre sempre, com ou sem previsão carregada.

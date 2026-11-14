@@ -34,7 +34,8 @@ import java.io.File
 
 /**
  * O percurso de um produtor pelo app, num Android de verdade (emulador do
- * teste-premium.yml) e com a API em produção: escolhe Pau D'Arco na lista,
+ * teste-premium.yml) e com a API desta branch, que o workflow sobe no runner
+ * (BuildConfig.API_BASE_URL): escolhe Pau D'Arco na lista,
  * confere a safra em curso e a última do IBGE, passa por Resumo, Viabilidade,
  * Tempo, Estimativa no campo, Mapa, Histórico, Mercado e Sobre, e abre de novo
  * sem internet para ver os dados guardados.
@@ -96,7 +97,10 @@ class PercursoNoAparelhoTest {
         regra.waitForIdle()
         val raiz = regra.onAllNodes(isRoot()).onLast()
         try {
-            val bmp = raiz.captureToImage().asAndroidBitmap()
+            // A tela inteira, pelo UiAutomation: a janela de escolha do município
+            // é um Dialog, outra janela, e a captura da raiz trazia só a tela de
+            // trás (run 43460955234, 02_lista). Se falhar, a raiz do Compose.
+            val bmp = instrumentacao.uiAutomation.takeScreenshot() ?: raiz.captureToImage().asAndroidBitmap()
             File(saida, "$nome.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
         } catch (e: Throwable) {
             anota("aviso\t$nome sem captura: ${e.javaClass.simpleName}")
@@ -160,7 +164,13 @@ class PercursoNoAparelhoTest {
             regra.waitUntil(150_000) { regra.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty() }
             regra.onAllNodesWithText("Mato Grosso").onFirst().performClick()
             anota("estado\tMato Grosso escolhido")
-            regra.waitUntil(150_000) { existe("Sorriso") || existe("ainda não está") }
+            // Ao trocar o estado, a lista do Pará some na hora e a de Mato
+            // Grosso chega da API: o campo de busca volta com ela. A lista só
+            // desenha os nomes que cabem na janela, e Sorriso fica longe do
+            // topo: só aparece pela busca (run 43460955234, 29_falha_mt).
+            regra.waitUntil(150_000) {
+                regra.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty() || existe("ainda não está")
+            }
             tela("20_estado_mt")
             if (existe("ainda não está")) {
                 confere("a API publicada ainda não tem Mato Grosso, e o app avisa", true)
@@ -169,6 +179,8 @@ class PercursoNoAparelhoTest {
             }
             regra.onNode(hasSetTextAction()).performTextInput("Sor")
             espera("Sorriso")
+            confere("a lista de Mato Grosso chegou da API, com Sorriso", true)
+            tela("20_busca_mt")
             regra.onAllNodesWithText("Sorriso").onLast().performClick()
             espera("(safra $safra)")
             confere("Resumo de Sorriso com a safra em curso", existe("Sorriso"))
@@ -176,7 +188,8 @@ class PercursoNoAparelhoTest {
             rola("22_resumo_mt", 4)
 
             aba("Histórico")
-            espera("$safra")
+            espera("Evolução histórica")
+            confere("Histórico de Sorriso com o gráfico e os cartões por safra", existe("Ano "))
             tela("23_historico_mt")
 
             aba("Mercado")
@@ -238,7 +251,12 @@ class PercursoNoAparelhoTest {
             tela("07_mapa")
 
             aba("Histórico")
-            espera("$safra")
+            // Os cartões vêm do ano mais distante para o mais antigo, e a
+            // projeção vai além da safra em curso (2028 com a safra 2027): o
+            // cartão da safra em curso não está no alto (run 43460955234).
+            espera("Evolução histórica")
+            confere("Histórico começa na projeção mais distante ou na safra em curso",
+                    existe("Ano ${safra + 1}") || existe("Ano $safra"))
             tela("08_historico")
             rola("09_historico", 3)
 

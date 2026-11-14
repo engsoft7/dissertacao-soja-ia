@@ -383,6 +383,13 @@ object RetrofitClient {
             .connectTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
+            // O idioma em que o app está (Formatos, lido dos recursos): a API
+            // devolve nele as frases que monta, do preço, do custo e do plantio
+            // (api_backend/idioma.py). O mapa, num WebView, manda o do aparelho.
+            .addInterceptor { cadeia ->
+                cadeia.proceed(cadeia.request().newBuilder()
+                    .header("Accept-Language", Formatos.locale.toLanguageTag()).build())
+            }
             .build()
     }
 

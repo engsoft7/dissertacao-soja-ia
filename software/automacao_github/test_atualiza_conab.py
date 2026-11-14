@@ -200,8 +200,7 @@ def test_nenhum_modulo_usado_sem_import():
     import sys as _sys
 
     scripts = sorted((RAIZ / "software" / "automacao_github").glob("*.py"))
-    scripts += [RAIZ / "software" / "api_backend" / "precos.py",
-                RAIZ / "software" / "api_backend" / "financas.py",
+    scripts += [RAIZ / "software" / "api_backend" / "financas.py",
                 RAIZ / "software" / "api_backend" / "api.py"]
     problemas = {}
     for arquivo in scripts:

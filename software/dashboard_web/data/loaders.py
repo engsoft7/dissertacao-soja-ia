@@ -33,22 +33,3 @@ def data_atualizacao() -> str | None:
     except Exception:
         pass
     return None
-
-@st.cache_data(ttl=3600)
-def buscar_preco_soja_online() -> float:
-    preco_padrao = 135.0
-    try:
-        import urllib.request
-        import re
-        url = "https://www.noticiasagricolas.com.br/cotacoes/soja/"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
-        html = urllib.request.urlopen(req, timeout=5).read().decode("utf-8")
-        matches = re.findall(r"Paranaguá.*?<td[^>]*>(.*?)</td>", html, re.IGNORECASE | re.DOTALL)
-        if len(matches) >= 4:
-            val_str = matches[3].replace(".", "").replace(",", ".")
-            val = float(val_str)
-            if val > 50:
-                return val
-    except Exception:
-        pass
-    return preco_padrao

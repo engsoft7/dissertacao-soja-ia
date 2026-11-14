@@ -6,7 +6,6 @@ from pathlib import Path
 
 import requests
 
-import precos
 
 REV_MUNICIPIOS = {
     "Goianesia Do Para": "GOIANESIA DO PARA",
@@ -162,51 +161,12 @@ CUSTO_OPERACIONAL_CONAB_SACA = LEVANTAMENTO["custo_operacional_saca"]
 PRODUTIVIDADE_REFERENCIA_SC = LEVANTAMENTO["produtividade_referencia_sc_ha"]
 
 
-# ── PREÇO FÍSICO DO DIA, PARA O USUÁRIO SE SITUAR ────────────────────────────
-# O levantamento da CONAB é bimestral, e preço de soja é diário. Nenhuma
-# automação resolve isso: um número de levantamento sempre vai chegar velho ao
-# usuário, por melhor que seja a coleta. Custo é grandeza de levantamento;
-# preço é grandeza de mercado, e trocar uma pela outra é o erro de fundo.
-#
-# Então o produto passa a mostrar, ao lado do padrão, uma referência que se
-# move todo dia: o físico em Paranaguá. NÃO é o preço do produtor no Pará — é
-# porto no Paraná, e fica acima do que se recebe aqui, descontados frete e
-# base. Serve para o usuário julgar se o padrão ainda faz sentido e corrigir o
-# campo, que é o caminho certo de qualquer forma.
-#
-# O painel já lia esta fonte; o aplicativo não tinha nada equivalente.
-PARANAGUA_URL = "https://www.noticiasagricolas.com.br/cotacoes/soja/"
-PRECO_SACA_MIN, PRECO_SACA_MAX = 60.0, 400.0
-
-
-def extrair_preco_paranagua(html: str) -> float | None:
-    """Só a cotação de Paranaguá, para quem já dependia deste nome.
-
-    A leitura de verdade mora em precos.py, que procura uma lista de praças
-    com as do corredor do Pará na frente. Esta função continua existindo
-    porque o painel e os testes a chamam pelo nome.
-    """
-    for achado in precos.extrair_precos(html):
-        if achado["praca"] == "Paranaguá":
-            return achado["valor"]
-    return None
-
-
-def buscar_preco_paranagua() -> float | None:
-    """Preço físico em Paranaguá, ou None. Ver extrair_preco_paranagua."""
-    for achado in precos.buscar_precos():
-        if achado["praca"] == "Paranaguá":
-            return achado["valor"]
-    return None
-
-
-def buscar_cotacoes() -> list[dict]:
-    """Todas as praças reconhecidas na fonte, na ordem de preferência.
-
-    A primeira é a mais próxima da realidade de quem usa o produto: o corredor
-    do Pará antes dos portos do Sul. Lista vazia quando a fonte não responde.
-    """
-    return precos.buscar_precos()
+# ── PREÇO FÍSICO DO DIA ──────────────────────────────────────────────────────
+# Até 14/11/2026 o produto lia aqui, como comparação, a cotação física por
+# praça da Notícias Agrícolas. Desde 12/11/2026 o site exige um desafio do
+# Cloudflare e barra acesso automático (issue #187), e a fonte saiu do produto.
+# O preço do dia que o aplicativo e o painel usam vem das praças do Pará na
+# Agrolink (precos_para.py).
 
 
 # ── IDADE DO LEVANTAMENTO ────────────────────────────────────────────────────

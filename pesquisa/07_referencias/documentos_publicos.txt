@@ -109,7 +109,6 @@ https://openlibrary.org/search.json?q=crop+evapotranspiration+guidelines+for+com
 https://www.agrolink.com.br/regional/pa/barcarena/cotacoes
 https://www.agrolink.com.br/regional/pa/parauapebas/cotacoes
 https://www.agrolink.com.br/cotacoes/graos/soja/soja-em-grao-sc-60kg
-https://www.noticiasagricolas.com.br/cotacoes/soja/soja-mercado-fisico-sindicatos-e-cooperativas
 https://www.canalrural.com.br/cotacoes/soja/
 navegador https://www.agrolink.com.br/regional/pa/barcarena/cotacoes
 navegador https://www.agrolink.com.br/regional/pa/parauapebas/cotacoes

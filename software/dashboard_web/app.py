@@ -250,49 +250,6 @@ def data_atualizacao() -> str | None:
         return None
 
 
-# Faixa plausível para a saca de 60 kg. Serve para uma falha de parsing não
-# entrar na simulação disfarçada de cotação.
-PRECO_SACA_MIN, PRECO_SACA_MAX = 60.0, 400.0
-
-
-def extrair_preco_paranagua(html: str) -> float | None:
-    """Tira da página o preço físico da saca em Paranaguá.
-
-    A tabela da fonte muda de formato de tempos em tempos, então em vez de
-    confiar numa posição fixa de coluna, varre as células da linha e aceita
-    o primeiro número que se pareça com preço em reais e caia na faixa
-    plausível. Assim uma coluna de variação ("-2,15") ou um total em
-    milhares não entram no lugar da cotação.
-    """
-    for achado_nome in re.finditer("Paranaguá", html, re.IGNORECASE):
-        linha = html[achado_nome.end():achado_nome.end() + 800].split("</tr>")[0]
-        for celula in re.findall(r"<td[^>]*>(.*?)</td>", linha, re.DOTALL):
-            texto = re.sub(r"<[^>]+>", " ", celula)
-            for numero in re.findall(r"\d{1,3}(?:\.\d{3})*,\d{2}", texto):
-                valor = float(numero.replace(".", "").replace(",", "."))
-                if PRECO_SACA_MIN <= valor <= PRECO_SACA_MAX:
-                    return valor
-    return None
-
-
-@st.cache_data(ttl=3600)  # Atualiza a cotação a cada 1 hora de forma segura
-def buscar_preco_soja_online() -> float | None:
-    """Preço físico da saca em Paranaguá (Notícias Agrícolas).
-
-    Devolve None quando não consegue um número plausível, para quem chama
-    poder recorrer à cotação seguinte em vez de exibir um valor inventado
-    como se fosse cotação do dia.
-    """
-    try:
-        import urllib.request
-        url = "https://www.noticiasagricolas.com.br/cotacoes/soja/"
-        req = urllib.request.Request(
-            url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
-        html = urllib.request.urlopen(req, timeout=5).read().decode("utf-8")
-    except Exception:
-        return None
-    return extrair_preco_paranagua(html)
-
 def injetar_meta_nativas():
     """Injeta as tags 'theme-color' diretamente no index.html do Streamlit para o celular ficar nativo"""
     try:
@@ -1154,26 +1111,9 @@ def brl(v: float, dec: int = 0) -> str:
     return f"{'-' if negativo else ''}R$ {s}"
 
 
-# ── COTAÇÃO FÍSICA DIÁRIA, DA PRAÇA MAIS PRÓXIMA ────────────────────────────
-# Antes era só Paranaguá — porto no Paraná, longe do que o produtor paraense
-# enfrenta. precos.py procura uma lista de praças com as do corredor do Pará
-# na frente e devolve a primeira que a fonte publicar, junto com a praça e o
-# tipo (porto, terminal, interior), porque porto não é preço de porteira.
-#
-# Importado do api_backend, que é onde o módulo vive; o painel cai na leitura
-# antiga se o import falhar, para não deixar de abrir por causa disso.
-@st.cache_data(ttl=3600)
-def buscar_cotacao_fisica() -> dict | None:
-    try:
-        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
-        import precos
-        return precos.preferida(precos.buscar_precos())
-    except Exception as e:  # noqa: BLE001 — abrir o painel vale mais
-        print(f"[painel] cotacoes por praca indisponiveis: "
-              f"{type(e).__name__}: {e}", flush=True)
-        valor = buscar_preco_soja_online()
-        return ({"praca": "Paranaguá", "uf": "PR", "tipo": "porto", "valor": valor}
-                if valor is not None else None)
+# A cotação física por praça da Notícias Agrícolas saiu do painel em 14/11/2026:
+# desde 12/11 o site exige um desafio do Cloudflare e barra acesso automático
+# (issue #187). O preço do dia vem das praças do Pará na Agrolink.
 
 
 # Estimativa do preço no Pará: Chicago do último mês, dia a dia, com a base
@@ -1198,8 +1138,6 @@ def buscar_preco_para():
         return None, None
 
 
-COTACAO_FISICA = buscar_cotacao_fisica()
-PRECO_SACA_ONLINE = COTACAO_FISICA["valor"] if COTACAO_FISICA else None
 
 EIXO_BR = alt.Axis(labelExpr="replace(format(datum.value, ',.0f'), /,/g, '.')")
 
@@ -1667,10 +1605,6 @@ if tela_atual == "💰 Viabilidade Financeira":
     praca_hoje = praca_para_usar(municipio)
     default_preco = float(praca_hoje["valor"]) if praca_hoje else float(preco_referencia)
     comparacoes = []
-    if PRECO_SACA_ONLINE is not None:
-        praca = (f"{COTACAO_FISICA['praca']} ({COTACAO_FISICA['uf']}), "
-                 f"{COTACAO_FISICA['tipo']}") if COTACAO_FISICA else "praça de referência"
-        comparacoes.append(f"físico hoje em {praca}, {brl_md(PRECO_SACA_ONLINE, 2)}")
     if preco_cbot:
         comparacoes.append(f"futuro em Chicago convertido, {brl_md(preco_cbot, 2)}")
     # A frase que situa o preço na série vem do levantamento gerado, não

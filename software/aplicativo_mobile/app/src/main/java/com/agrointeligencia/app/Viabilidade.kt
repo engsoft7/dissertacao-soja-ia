@@ -477,8 +477,7 @@ fun ResumoFinanceiroCard(
                     else -> null
                 },
                 if (padrao.isEmpty()) null
-                else "Padrão: ${juntaComE(padrao)}." + (if (seus.isEmpty()) " Toque num campo para usar os seus números." else ""),
-                kpis.preco_fisico?.takeIf { it.uf == "PA" }?.let { "Físico hoje em ${it.praca}: R$\u00A0${reais(it.valor)}/sc." }
+                else "Padrão: ${juntaComE(padrao)}." + (if (seus.isEmpty()) " Toque num campo para usar os seus números." else "")
             ).joinToString(" ")
             if (legenda.isNotBlank()) {
                 Text(text = legenda, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)

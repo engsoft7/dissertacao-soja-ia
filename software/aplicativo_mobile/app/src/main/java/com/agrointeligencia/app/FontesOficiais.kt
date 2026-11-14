@@ -48,7 +48,6 @@ val OUTRAS_FONTES = listOf(
     Fonte("Clima", "ERA5-Land, Copernicus", "https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land"),
     Fonte("Previsão do tempo", "Open-Meteo", "https://open-meteo.com"),
     Fonte("Preço do Pará", "Agrolink", "https://www.agrolink.com.br/cotacoes/historico/pa/soja-em-grao-sc-60kg"),
-    Fonte("Preço físico do dia", "Notícias Agrícolas", "https://www.noticiasagricolas.com.br/cotacoes/soja/"),
 )
 
 const val AVISO_NAO_GOVERNO =

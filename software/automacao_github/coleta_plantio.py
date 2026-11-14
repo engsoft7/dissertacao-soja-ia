@@ -27,6 +27,7 @@ PORTARIA = [
     "https://www.embrapa.br/documents/1355202/1529289/20-+PORTARIA+SDA_MAPA+N%C2%BA+1579+DE+9+DE+ABRIL+DE+2026.pdf/030865a3-fcf0-a8e3-8047-797aac35c2bb",
     "https://www.abrasem.com.br/wp-content/uploads/2025/10/Portaria-SDA-n-1.579-DE-9-DE-ABRIL-DE-2026-Estabelece-os-periodos-de-vazio-sanitario-e-de-calendario-de-semeadura-de-soja-em-nivel-nacional.pdf",
 ]
+DOU = "https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-1.579-de-9-de-abril-de-2026-698696654"
 NORMAS_ESTADUAIS = {
     "RO": "https://rondonia.ro.gov.br/wp-content/uploads/2026/06/SEI_71685192_Instrucao_Normativa_4.pdf",
 }
@@ -57,11 +58,12 @@ def zarc_diagnostico() -> None:
     print(f"  HTTP {r.status_code}; tamanho {r.headers.get('Content-Length')}")
     cab, sep, n, amostras = None, ";", 0, []
     por_uf, cont = collections.Counter(), collections.defaultdict(collections.Counter)
+    municipios_alvo, valores_dec = [], collections.Counter()
     for bruto in r.iter_lines():
         linha = bruto.decode("utf-8", "replace")
         if cab is None:
             sep = ";" if linha.count(";") > linha.count(",") else ","
-            cab = [c.strip().strip('"') for c in linha.split(sep)]
+            cab = [c.strip().strip('"').lstrip("\ufeff") for c in linha.split(sep)]
             print("  colunas:", cab)
             continue
         n += 1
@@ -75,13 +77,21 @@ def zarc_diagnostico() -> None:
         for k, v in reg.items():
             if not k.lower().startswith("dec"):
                 cont[k][v] += 1
+            else:
+                valores_dec[v] += 1
         if len(amostras) < 6:
             amostras.append(linha)
+        if reg.get("municipio", "").upper() in ("PARAGOMINAS", "SORRISO") and len(municipios_alvo) < 60:
+            municipios_alvo.append(" ".join(f"{k}={v}" for k, v in reg.items() if not k.startswith("dec"))
+                                   + " | " + " ".join(reg.get(f"dec{i}", "") for i in range(1, 37)))
     print(f"  linhas: {n}; soja nos cinco estados por UF: {dict(por_uf)}")
     for a in amostras:
         print("  amostra:", a[:400])
     for k, c in cont.items():
         print(f"  {k}: {len(c)} valores; ex.: {c.most_common(8)}")
+    print("  valores nas colunas dec:", valores_dec.most_common(12))
+    for linha in municipios_alvo:
+        print("  municipio:", linha[:500])
 
 
 def texto_pdf(url: str) -> str:
@@ -97,7 +107,35 @@ def texto_pdf(url: str) -> str:
         return "\n".join(partes)
 
 
+def dou_diagnostico() -> None:
+    import html as html_mod
+    r = requests.get(DOU, headers=UA, timeout=120)
+    print(f"\n== DOU: HTTP {r.status_code}, {len(r.text)} caracteres")
+    corpo = r.text
+    i = corpo.find("ANEXO")
+    corpo = corpo[i:] if i >= 0 else corpo
+    for tr in re.findall(r"(?is)<tr[^>]*>(.*?)</tr>", corpo):
+        celulas = [html_mod.unescape(re.sub(r"<[^>]+>|\s+", " ", c)).strip()
+                   for c in re.findall(r"(?is)<t[dh][^>]*>(.*?)</t[dh]>", tr)]
+        if celulas:
+            print("  linha:", " || ".join(celulas)[:600])
+    texto = html_mod.unescape(re.sub(r"\s+", " ", re.sub(r"(?is)<[^>]+>", " ", corpo)))
+    for nome in ("Pará", "Maranhão", "Mato Grosso", "Tocantins", "Rondônia"):
+        for m in re.finditer(nome, texto):
+            print(f"  [{nome}] …{texto[max(0, m.start()-300):m.start()+300]}…")
+    print("  notas:", texto[texto.find("1Abaíra") - 50:][:200] if "1Abaíra" in texto else "sem notas")
+    j = texto.find("Pará") if False else -1
+    # as notas de rodapé com listas de municípios (Pará e Maranhão têm regiões)
+    for marca in re.finditer(r"(\d)([A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:[ -][A-Za-záéíóúâêôãõçÁÉÍÓÚ]+)*,)", texto):
+        trecho = texto[marca.start():marca.start() + 260]
+        print(f"  nota {marca.group(1)}: {trecho}")
+
+
 def calendario_diagnostico() -> None:
+    try:
+        dou_diagnostico()
+    except Exception as e:  # noqa: BLE001
+        print("DOU falhou:", type(e).__name__, e)
     for url in PORTARIA:
         print(f"\n== portaria: {url[:90]}")
         try:
@@ -106,15 +144,15 @@ def calendario_diagnostico() -> None:
             print("  falhou:", type(e).__name__, e)
             continue
         print(f"  {len(t)} caracteres")
-        print(t[:2500])
-        for uf, nome in NOMES.items():
-            for m in re.finditer(re.escape(nome), t, re.I):
-                print(f"  [{uf}] …{t[max(0, m.start()-200):m.start()+700]}…")
-                break
+        i = t.find("ANEXO")
+        print(t[i:i + 9000])
+        break  # a da Embrapa basta; a da Abrasem só se a primeira falhar
     for uf, url in NORMAS_ESTADUAIS.items():
         print(f"\n== norma estadual {uf}: {url}")
         try:
-            print(texto_pdf(url)[:4000])
+            t = texto_pdf(url)
+            for m in re.finditer(r"(?i)(vazio sanit[áa]rio|calend[áa]rio de semeadura)[^.]{0,400}", t):
+                print("  ", re.sub(r"\s+", " ", m.group(0))[:420])
         except Exception as e:  # noqa: BLE001
             print("  falhou:", type(e).__name__, e)
 

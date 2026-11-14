@@ -355,12 +355,24 @@ jobs:
               echo "> Antes: R² / RMSE / registros = \`$ANTES\`"
               echo "> Depois: \`$DEPOIS\`"
               echo ">"
-              echo "> São os números que a Tabela 6 e a subseção 4.9 da dissertação"
-              echo "> reportam, e que o painel exibe ao usuário. Este PR **não foi"
-              echo "> mergeado automaticamente**: a alteração precisa de conferência"
-              echo "> humana antes de entrar na base publicada."
+              echo "> São os números da base do produto que a subseção 4.9 da"
+              echo "> dissertação e o Anexo 01 citam, e que o painel exibe ao usuário."
+              echo "> O PR entra assim mesmo, para o produto seguir os dados oficiais;"
+              echo "> uma issue lembra de atualizar esses números nos documentos."
             } >> "$RESUMO_MD"
           fi
+
+      # Os testes do repositório, com os dados novos, antes de qualquer merge: o
+      # PR aberto pelo próprio Actions não dispara o workflow de testes, e a base
+      # entra sozinha na main. Os testes que precisam da API inteira ficam de
+      # fora, como no workflow de testes.
+      - name: Testa o repositório com os dados novos
+        id: testes
+        if: ${{ (steps.pam.outputs.csv_alterado == 'true' || steps.gee.outputs.csv_alterado == 'true' || steps.enso.outputs.alterado == 'true' || steps.conab.outputs.csv_alterado == 'true' || steps.estados.outputs.csv_alterado == 'true') && !inputs.simular }}
+        continue-on-error: true
+        run: |
+          pip install --quiet pytest
+          python -m pytest software -q
 
       - name: Abre PR com as mudanças na base
         id: cpr
@@ -382,25 +394,60 @@ jobs:
           body-path: /tmp/resumo_pam.md
           delete-branch: true
 
-      # O PR é mergeado na hora pelo próprio robô, e fica como registro
-      # auditável do que mudou. A exceção é quando a revisão do IBGE move as
-      # métricas de validação: elas são os números que a Tabela 6 e a subseção
-      # 4.9 da dissertação reportam, e um robô não deve alterar sozinho o que
-      # um documento publicado afirma. Nesse caso o PR fica aberto para
-      # conferência humana. A segunda exceção é a CONAB revisar um levantamento
-      # já publicado: levantamento novo entra sozinho, porque o produto declara
-      # qual está usando, mas mudar um valor que ele já exibiu — e que a
-      # subseção 4.9 pode citar — passa por gente.
+      # O PR é mergeado na hora pelo próprio robô, quando os testes passam, e
+      # fica como registro auditável do que mudou: o app é vivo e acompanha os
+      # dados oficiais sem esperar ninguém. Até 14/11/2026 havia duas exceções,
+      # que seguravam o PR para conferência humana: a revisão do IBGE mover as
+      # métricas de validação do produto, que a subseção 4.9 da dissertação
+      # cita, e a CONAB revisar um levantamento já publicado. Elas continuam
+      # sendo detectadas, mas agora viram uma issue, para os documentos serem
+      # atualizados, em vez de deixar o produto parado. A base congelada da
+      # dissertação (Tabela 6) não passa por aqui e não muda.
       - name: Mergeia o PR automaticamente
-        if: steps.cpr.outputs.pull-request-number != ''
-          && steps.metricas.outputs.mudaram != 'true'
-          && steps.conab.outputs.revisao != 'true'
+        if: steps.cpr.outputs.pull-request-number != '' && steps.testes.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh pr merge --squash --delete-branch \
             "${{ steps.cpr.outputs.pull-request-number }}" \
             --repo "${{ github.repository }}"
+
+      - name: Abre issue quando os testes reprovam a atualização
+        if: steps.cpr.outputs.pull-request-number != '' && steps.testes.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "Atualização automática da base reprovada nos testes (PR #$PR)" \
+            --body "Os testes do repositório falharam com os dados novos, e o PR #$PR ficou aberto em vez de entrar na main. Veja o log: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+      # Números que os documentos citam mudaram no produto: a issue fica aberta
+      # até alguém atualizar a subseção 4.9 e o Anexo 01. Uma issue só, com um
+      # comentário a cada mês em que algo muda de novo.
+      - name: Avisa que os documentos citam números que mudaram
+        if: steps.cpr.outputs.pull-request-number != '' && (steps.metricas.outputs.mudaram == 'true' || steps.conab.outputs.revisao == 'true')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.cpr.outputs.pull-request-number }}
+          METRICAS: ${{ steps.metricas.outputs.mudaram }}
+          CONAB: ${{ steps.conab.outputs.revisao }}
+        run: |
+          titulo="Documentos da dissertação citam números que mudaram no produto"
+          {
+            echo "A atualização automática do PR #$PR mudou números que a subseção 4.9 da dissertação e o Anexo 01 citam."
+            echo ""
+            [ "$METRICAS" = "true" ] && echo "- As métricas de validação da base do produto mudaram (detalhes no PR #$PR)."
+            [ "$CONAB" = "true" ] && echo "- A CONAB revisou um levantamento já publicado (detalhes no PR #$PR)."
+            echo ""
+            echo "O produto já está com os números novos. Atualize os documentos antes do depósito e feche esta issue."
+          } > /tmp/aviso_documentos.md
+          aberta=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$titulo\"" --json number -q '.[0].number')
+          if [ -n "$aberta" ]; then
+            gh issue comment "$aberta" --repo "$GITHUB_REPOSITORY" --body-file /tmp/aviso_documentos.md
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$titulo" --body-file /tmp/aviso_documentos.md
+          fi
 
       # Em simulação, o job termina dizendo o que teria mudado. Serve para
       # provar que o ciclo funciona sem tocar na base que a dissertação cita.

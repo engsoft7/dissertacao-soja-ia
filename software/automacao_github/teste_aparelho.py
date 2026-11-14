@@ -379,8 +379,8 @@ def main() -> int:
         time.sleep(2)
         # As medidas mudam antes de procurar: rola() desliza o dedo por elas, e
         # com as da tela cheia o gesto começava abaixo da tela pequena e não
-        # rolava. Bastava enquanto "(safra " aparecia sem rolar; no app 2.9.0, os
-        # cartões do plantio e do caderno o põem mais abaixo.
+        # rolava. Bastava enquanto "(safra " aparecia sem rolar; na 2.9.0, com os
+        # cartões do plantio e do caderno no alto do Resumo, ele ficou mais abaixo.
         w0, h0, d0 = m["largura_px"], m["altura_px"], m["densidade_dpi"]
         m["largura_px"], m["altura_px"] = map(int, tamanho.split("x"))
         m["densidade_dpi"] = dens

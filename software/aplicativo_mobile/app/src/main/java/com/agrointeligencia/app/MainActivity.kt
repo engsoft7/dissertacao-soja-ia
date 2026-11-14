@@ -694,12 +694,19 @@ fun AgroDashboard(abaInicial: Int = 0) {
                     if (currentTab == 0 && lugarTempo != null) {
                         TempoResumoCard(tempo) { currentTab = 6 }
                     }
-                    // A janela de plantio vem de arquivos da API, e não do modelo:
-                    // aparece mesmo quando a previsão de produtividade falha.
-                    if (currentTab == 0 && selectedMunicipio != null) {
-                        PlantioResumoCard(plantio) { currentTab = 7 }
-                    }
-                    if (currentTab == 0) {
+                }
+            }
+
+            // A janela de plantio vem de arquivos da API, e não do modelo, e o
+            // caderno fica no celular: os dois aparecem também quando a previsão
+            // de produtividade demora ou falha. Quando ela chega, vêm depois da
+            // estimativa: no alto, numa tela pequena, empurravam a produtividade
+            // quase uma tela para baixo.
+            fun plantioECaderno() {
+                if (currentTab != 0) return
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (selectedMunicipio != null) PlantioResumoCard(plantio) { currentTab = 7 }
                         CadernoResumoCard(caderno) { currentTab = 9 }
                     }
                 }
@@ -846,28 +853,39 @@ fun AgroDashboard(abaInicial: Int = 0) {
                         }
                     }
                 }
-                isLoading -> item {
-                    CarregandoDados(selectedMunicipio)
+                isLoading -> {
+                    item { CarregandoDados(selectedMunicipio) }
+                    plantioECaderno()
                 }
-                errorMsg != null && avisoDoEstado != null -> item {
-                    AvisoSemDados(titulo = stringResource(R.string.estado_nao_esta, estado.nome), texto = avisoDoEstado!!,
-                                  rotulo = stringResource(R.string.voltar_ao_para)) {
-                        escolherEstado("PA")
+                errorMsg != null && avisoDoEstado != null -> {
+                    item {
+                        AvisoSemDados(titulo = stringResource(R.string.estado_nao_esta, estado.nome), texto = avisoDoEstado!!,
+                                      rotulo = stringResource(R.string.voltar_ao_para)) {
+                            escolherEstado("PA")
+                        }
                     }
+                    plantioECaderno()
                 }
-                errorMsg != null -> item {
-                    AvisoSemDados(
-                        titulo = stringResource(R.string.sem_servidor_titulo),
-                        texto = stringResource(R.string.sem_servidor_texto)
-                    ) { loadData(); recarga++ }
+                errorMsg != null -> {
+                    item {
+                        AvisoSemDados(
+                            titulo = stringResource(R.string.sem_servidor_titulo),
+                            texto = stringResource(R.string.sem_servidor_texto)
+                        ) { loadData(); recarga++ }
+                    }
+                    plantioECaderno()
                 }
-                // Primeira abertura: o cartão de boas-vindas, lá em cima, pergunta o município.
-                selectedMunicipio == null -> {}
-                prev == null -> item {
-                    AvisoSemDados(
-                        titulo = stringResource(R.string.sem_dados_titulo, selectedMunicipio.orEmpty()),
-                        texto = stringResource(R.string.sem_dados_texto)
-                    ) { recarga++ }
+                // Primeira abertura: o cartão de boas-vindas, lá em cima, pergunta o
+                // município; o caderno vem logo abaixo, como antes.
+                selectedMunicipio == null -> plantioECaderno()
+                prev == null -> {
+                    item {
+                        AvisoSemDados(
+                            titulo = stringResource(R.string.sem_dados_titulo, selectedMunicipio.orEmpty()),
+                            texto = stringResource(R.string.sem_dados_texto)
+                        ) { recarga++ }
+                    }
+                    plantioECaderno()
                 }
                 else -> {
                     val historicoOrdenado = prev.historico.sortedByDescending { it.ano }
@@ -895,6 +913,9 @@ fun AgroDashboard(abaInicial: Int = 0) {
                                     }
                                 }
                             }
+                        }
+                        plantioECaderno()
+                        if (projecao != null) {
                             // A Viabilidade antes do Simulador: é a conta que o produtor
                             // faz; o simulador climático é ilustração do modelo.
                             kpis?.let { k ->

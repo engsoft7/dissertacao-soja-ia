@@ -595,9 +595,16 @@ depois da mudança), e o aplicativo do Pará pede e guarda o mesmo de sempre.
   depois do deploy, nenhum estava pronto). A build passou a deixar os cinco estados
   prontos (`prepara_estados.py`, cache lido na subida, válido para a base com
   que foi feito); com ele, os cinco ficam prontos em menos de um segundo, e a
-  API do Teste Premium já sobe assim. Em produção, vale depois do merge.
-- **Feito em 14/11/2026, Teste Premium.** O app de release (2.8.0 publicado e
-  2.8.1) passou nas 19 verificações nos três emuladores, e o percurso no
+  API do Teste Premium já sobe assim. Em produção desde a v2.5.1: na leitura de
+  14/11 publicada às 11h32 UTC, os cinco estados vieram do cache da build (o
+  campo `origem` de `/api/estados`). A leitura anterior pegou o deploy do merge,
+  o primeiro com o código novo, que ainda treinou na subida; o deploy seguinte
+  já usou o cache.
+- **Publicado em 14/11/2026**, na v2.5.1 (DOI 10.5281/zenodo.24218986): o app
+  2.8.1, com os dois achados do Teste Premium corrigidos, e a API com os
+  estados prontos na build.
+- **Feito em 14/11/2026, Teste Premium.** O app de release (2.8.0 e 2.8.1,
+  publicado na v2.5.1) passou nas 19 verificações nos três emuladores, e o percurso no
   emulador passou no Pará e em Mato Grosso, no Android 8 e no 14
   (`software/aplicativo_mobile/teste_premium/RELATORIO_PREMIUM.md`, seção 8).
 - **Falta.** Conferir com quem planta lá se o custo da praça mais perto

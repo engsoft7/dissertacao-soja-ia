@@ -258,6 +258,33 @@ class CapturasDeTelaTest {
         captura("plantio", false) { telaPlantio(estado) }
     }
 
+    // Caderno da safra: uma safra de 120 ha em Paragominas, com custos, colheita
+    // e uma venda; o plantio conferido com a portaria e o ZARC da captura acima.
+    private fun estadoCaderno(): EstadoCaderno {
+        val app = org.robolectric.RuntimeEnvironment.getApplication()
+        gravaCaderno(app, listOf(
+            RegistroCaderno(1, 2027, TipoRegistro.INSUMO, "2026-11-05", "Semente", quantidade = 60.0, unidade = "sc",
+                            valor = 33_600.0),
+            RegistroCaderno(2, 2027, TipoRegistro.INSUMO, "2026-11-05", "Adubo 02-20-20", quantidade = 36.0,
+                            unidade = "t", valor = 129_600.0),
+            RegistroCaderno(3, 2027, TipoRegistro.PLANTIO, "2026-11-12", "BRS 8383", area = 120.0),
+            RegistroCaderno(4, 2027, TipoRegistro.OPERACAO, "2027-01-10", "Fungicida, segunda aplicação", valor = 18_000.0),
+            RegistroCaderno(5, 2027, TipoRegistro.COLHEITA, "2027-03-20", area = 120.0, quantidade = 6_480.0),
+            RegistroCaderno(6, 2027, TipoRegistro.VENDA, "2027-03-25", "Cooperativa", quantidade = 4_000.0, valor = 128.5),
+        ))
+        return EstadoCaderno(app)
+    }
+
+    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Test fun caderno_claro() {
+        val caderno = estadoCaderno()
+        val plantio = estadoPlantio()
+        captura("caderno", false) {
+            CadernoTela(caderno, plantio, estimativaScHa = 52.4, municipio = "Paragominas", aoVoltar = {},
+                        hoje = java.time.LocalDate.of(2027, 4, 2))
+        }
+    }
+
     // Alertas: INMET e preço ligados, com a praça de Paragominas e o alvo de R$ 140.
     private fun prefsDosAlertas() = org.robolectric.RuntimeEnvironment.getApplication()
         .getSharedPreferences("capturas_alertas", android.content.Context.MODE_PRIVATE).also {

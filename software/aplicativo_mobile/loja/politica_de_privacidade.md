@@ -27,6 +27,10 @@ nem de publicidade.
 - **Município escolhido**, para o aplicativo abrir nele da próxima vez.
 - **Grupo de cultivar e classe de solo** escolhidos na janela de plantio, para
   a tela abrir com a mesma escolha.
+- **Caderno da safra:** os lançamentos de plantio, insumos, operações,
+  colheita e vendas. Ficam num arquivo na pasta do aplicativo e só saem do
+  celular se o produtor exportar a planilha (.csv) e escolher para onde
+  enviá-la.
 - **Escolhas dos alertas** (o que avisar, a praça e o preço-alvo), o lugar da
   previsão e o estado, para a conferência em segundo plano, e os avisos já
   mostrados, para não repetir. Com todos os alertas desligados, nada é

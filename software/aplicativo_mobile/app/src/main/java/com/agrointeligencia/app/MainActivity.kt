@@ -248,6 +248,9 @@ fun AgroDashboard(abaInicial: Int = 0) {
         Alertas.atualizaAgenda(context, sharedPrefs)
     }
 
+    // Caderno da safra (Caderno.kt): os lançamentos do produtor, só no celular.
+    val caderno = remember { EstadoCaderno(context.applicationContext) }
+
     // Janela de plantio (Plantio.kt): calendário da portaria e ZARC do município.
     val plantio = remember { EstadoPlantio(sharedPrefs) }
     LaunchedEffect(selectedMunicipio, uf) { selectedMunicipio?.let { plantio.carrega(it, uf) } }
@@ -614,6 +617,9 @@ fun AgroDashboard(abaInicial: Int = 0) {
                     if (currentTab == 0 && selectedMunicipio != null) {
                         PlantioResumoCard(plantio) { currentTab = 7 }
                     }
+                    if (currentTab == 0) {
+                        CadernoResumoCard(caderno) { currentTab = 9 }
+                    }
                 }
             }
 
@@ -643,6 +649,16 @@ fun AgroDashboard(abaInicial: Int = 0) {
                 }
                 currentTab == 6 -> item {
                     TempoTela(tempo, selectedMunicipio) { currentTab = 0 }
+                }
+                currentTab == 9 -> item {
+                    // A estimativa do município para a safra em curso, para comparar com o colhido.
+                    val projecao = prev?.historico?.let { projecaoDaSafra(it) }
+                    CadernoTela(
+                        caderno, plantio,
+                        estimativaScHa = projecao?.rendimento_predito?.div(60.0),  // saca de 60 kg
+                        municipio = prev?.municipio ?: selectedMunicipio,
+                        aoVoltar = { currentTab = 0 }
+                    )
                 }
                 currentTab == 8 -> item {
                     AlertasTela(sharedPrefs, lugarTempo, mercadoHoje?.pracasDoEstado().orEmpty(), pracaHoje) {

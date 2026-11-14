@@ -9,6 +9,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -165,10 +166,17 @@ class PercursoNoAparelhoTest {
         val lista = regra.onAllNodes(
             hasScrollToIndexAction() and SemanticsMatcher.keyIsDefined(SemanticsProperties.VerticalScrollAxisRange)
         ).onFirst()
-        repeat(vezes) { i ->
+        for (i in 1..vezes) {
             fechaAvisoDoSistema()
-            lista.performScrollToIndex(i + 1)
-            tela("${nome}_${i + 1}")
+            try {
+                lista.performScrollToIndex(i)
+            } catch (e: IllegalArgumentException) {
+                // A lista tem menos itens do que se pediu (o Mercado tem dois: o
+                // cabeçalho e o cartão), e isso não é defeito da tela.
+                anota("aviso\t$nome: a lista acabou antes do item $i (${e.message})")
+                break
+            }
+            tela("${nome}_$i")
         }
         // O que sai da tela numa LazyColumn deixa de existir: sem voltar, o
         // cartão do tempo, no alto, não seria achado.
@@ -273,8 +281,17 @@ class PercursoNoAparelhoTest {
 
             espera("Tempo em", 60_000)
             regra.onAllNodesWithText("Tempo em", substring = true).onFirst().performClick()
-            espera("Agora", 90_000)
-            anota("tempo\tprevisão carregada")
+            // A previsão vem do Open-Meteo pela API; no runner ela às vezes não
+            // chega (run 43548652966). Uma segunda tentativa pelo botão da tela;
+            // a falta dela fica registrada, sem parar o percurso.
+            val semPrevisao = "Não foi possível baixar a previsão"
+            regra.waitUntil(90_000) { fechaAvisoDoSistema(); existe("Agora") || existe(semPrevisao) }
+            if (!existe("Agora")) {
+                anota("aviso\ta previsão do tempo não chegou; tentando de novo pelo botão")
+                regra.onNode(hasContentDescription("Atualizar a previsão")).performClick()
+                regra.waitUntil(60_000) { fechaAvisoDoSistema(); existe("Agora") || existe(semPrevisao) }
+            }
+            confere("previsão do tempo carregada (Open-Meteo, pela API)", existe("Agora"))
             tela("05_tempo")
 
             aba("Resumo")
@@ -301,7 +318,7 @@ class PercursoNoAparelhoTest {
             espera("Soja em Chicago")
             espera("R$", 90_000)
             tela("10_mercado")
-            rola("11_mercado", 2)
+            rola("11_mercado", 1) // cabeçalho e o cartão do Mercado: um passo
 
             aba("Sobre")
             tela("12_sobre")

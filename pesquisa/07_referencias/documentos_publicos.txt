@@ -109,7 +109,6 @@ https://openlibrary.org/search.json?q=crop+evapotranspiration+guidelines+for+com
 https://www.agrolink.com.br/regional/pa/barcarena/cotacoes
 https://www.agrolink.com.br/regional/pa/parauapebas/cotacoes
 https://www.agrolink.com.br/cotacoes/graos/soja/soja-em-grao-sc-60kg
-https://www.noticiasagricolas.com.br/cotacoes/soja/soja-mercado-fisico-sindicatos-e-cooperativas
 https://www.canalrural.com.br/cotacoes/soja/
 navegador https://www.agrolink.com.br/regional/pa/barcarena/cotacoes
 navegador https://www.agrolink.com.br/regional/pa/parauapebas/cotacoes
@@ -139,11 +138,3 @@ https://jems3.sbc.org.br/
 # A API em produção, depois do merge do PR 184 (13/11/2026): os cinco estados carregados?
 https://agrointeligencia-api.onrender.com/api/estados
 https://agrointeligencia-api.onrender.com/api/previsao/Sorriso?uf=MT
-
-# Notícias Agrícolas: o monitor das fontes recebe 403 desde 12/11/2026
-# (issue #187). Lida com o urllib, como o produto, e num navegador de verdade;
-# e as finanças da API em produção, que mostram se o Render ainda a lê
-# (precos_fisicos).
-https://www.noticiasagricolas.com.br/cotacoes/soja/
-navegador https://www.noticiasagricolas.com.br/cotacoes/soja/
-https://agrointeligencia-api.onrender.com/api/financas/Paragominas

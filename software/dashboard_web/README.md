@@ -62,9 +62,8 @@ Abre em `http://localhost:8501`.
   workflow mensal atualiza; quando a CONAB publica levantamento novo, as
   legendas acompanham sozinhas. E o painel calcula a idade do levantamento a
   cada carregamento: passada a cadência da CONAB, avisa em tela que o preço
-  pode estar desatualizado, em vez de exibi-lo calado. A cotação física em Paranaguá (Notícias Agrícolas) e o futuro de
-  Chicago são exibidos apenas como comparação: são preços de porto e de bolsa,
-  acima do que se recebe no Pará, e não há série pública de preço ao produtor
+  pode estar desatualizado, em vez de exibi-lo calado. O futuro de Chicago é exibido apenas como comparação: é preço de
+  bolsa, acima do que se recebe no Pará, e não há série pública de preço ao produtor
   paraense. O custo vem do levantamento da CONAB para Pedro Afonso (TO), de
   março de 2026, porque o Pará não integra o MATOPIBA e não tem custo
   publicado; é um custo por hectare fixo, preso à produtividade de referência

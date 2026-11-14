@@ -2,7 +2,7 @@ from financas import (get_financas, get_custos_locais, CUSTO_REFERENCIA_HA,
                       PRECO_RECEBIDO_CONAB_SACA, LEVANTAMENTO,
                       descricao_do_levantamento, nota_sobre_o_preco,
                       aviso_de_defasagem, meses_desde_o_levantamento,
-                      buscar_cotacoes, aviso_sobre_o_custo)
+                      aviso_sobre_o_custo)
 from validacao import metricas_validacao
 import validacao
 import estados
@@ -61,26 +61,10 @@ def _refresh_finance():
     except Exception as e:
         print(f"Finance refresh erro (usando cache): {e}", flush=True)
 
-    # Em bloco próprio: se o Yahoo cair, o físico de Paranaguá ainda deve ser
-    # buscado. Era tudo num try só, e uma fonte fora do ar levava a outra junto.
-    #
-    # Esta é a única cotação DIÁRIA que o produto tem. O padrão vem de um
-    # levantamento bimestral e sempre chegará com semanas de atraso; sem uma
-    # referência que se mova, o usuário não tem como julgar se o padrão ainda
-    # vale. Não substitui o preço de porteira: é porto, no Paraná.
-    cotacoes = buscar_cotacoes()
-    if cotacoes:
-        with _finance_lock:
-            _finance_cache["cotacoes"] = cotacoes
-            # A primeira é a de praça mais próxima do usuário do produto: o
-            # corredor do Pará vem antes dos portos do Sul na lista de busca.
-            _finance_cache["fisico"] = cotacoes[0]
-            # Mantido para o APK já instalado, que só conhece este campo.
-            _finance_cache["paranagua_saca"] = next(
-                (c["valor"] for c in cotacoes if c["praca"] == "Paranaguá"), None)
-            _finance_cache["cotacoes_ts"] = time.time()
-        print("Cotações físicas: " + ", ".join(
-            f"{c['praca']}/{c['uf']} R$ {c['valor']:.2f}" for c in cotacoes), flush=True)
+    # A cotação física por praça vinha da Notícias Agrícolas, que desde
+    # 12/11/2026 barra acesso automático (issue #187) e saiu do produto. Os
+    # campos preco_fisico, precos_fisicos e soja_preco_paranagua_saca seguem
+    # nas respostas, vazios, porque o aplicativo já instalado os conhece.
 
 def _get_cached_finance():
     """Return cached finance data; refresh in background if stale (>15 min)."""

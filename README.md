@@ -517,19 +517,15 @@ Ele consulta a API do SIDRA/IBGE e:
   produto, aberto daqui a dois anos sem ninguém ter mantido nada, de exibir o
   preço de 2026 como se fosse o de hoje.
 - **Cotação física diária, da praça mais próxima.** O padrão vem de
-  levantamento bimestral e nunca chega em dia; a única referência diária do
-  produto é a cotação física, e ela deixou de ser só Paranaguá. O coletor
-  procura uma lista de praças com as do corredor do Pará na frente — Barcarena,
-  Miritituba, Itaituba, Santarém — e devolve a primeira que a fonte publicar,
-  com a praça e o tipo (porto, terminal, interior) junto do valor. Porto e
-  terminal **não são preço de porteira**: entre eles e a fazenda ainda há frete
-  e base, e a interface diz isso em vez de apresentar o número como o preço
-  recebido. A lista procurada é maior do que se espera encontrar de propósito:
-  o diagnóstico em **Actions → Run workflow → "Testar as cotações físicas por
-  praça"** relata todas as praças localizadas, e é assim que se descobre o que a
-  fonte de fato publica.
+  levantamento bimestral e nunca chega em dia. A referência diária do produto
+  é a cotação das praças do Pará na Agrolink: o aplicativo e o painel usam como
+  padrão a da praça mais perto do município, quando há uma em dia, e o preço da
+  CONAB quando não há. Até 14/11/2026 o produto também lia, como comparação, a
+  cotação física por praça da Notícias Agrícolas. Desde 12/11/2026 o site exige
+  um desafio do Cloudflare e barra acesso automático, e a fonte saiu do produto
+  (issue #187).
 
-  O primeiro diagnóstico real, em 04/09/2026, encontrou quatro praças e
+  O primeiro diagnóstico real daquela fonte, em 04/09/2026, encontrou quatro praças e
   **nenhuma do Pará**: Sorriso (MT) a R$ 134,80, Rondonópolis (MT) a R$ 145,30,
   Paranaguá (PR) a R$ 162,00 e Rio Grande (RS) a R$ 161,00. Adotou-se Sorriso,
   a de interior mais bem posicionada na lista. O achado que importa é a
@@ -557,9 +553,8 @@ Ele consulta a API do SIDRA/IBGE e:
   o aplicativo guarda o valor informado com a data e passa a abrir com ele, e o
   padrão da CONAB vira ponto de partida. Passados 45 dias, pede confirmação —
   e o aviso de idade troca de assunto para o custo, que continua vindo do
-  levantamento. Ao lado, o físico em Paranaguá, relido de hora em hora, dá a
-  única referência diária do produto: é preço de porto, no Paraná, e serve para
-  o usuário julgar se o número no campo ainda faz sentido.
+  levantamento. A cotação do dia nas praças do Pará, da Agrolink, serve para o
+  usuário julgar se o número no campo ainda faz sentido.
 
 ### Atualizar o levantamento da CONAB à mão (um comando)
 
@@ -658,7 +653,7 @@ pip install pytest pandas requests
 python -m pytest software pesquisa/09_contagem_por_imagem/test_ciclo_retreino.py -q
 ```
 
-São 119 testes em Python (14/11/2026), em `software/api_backend/` (preços,
+São 113 testes em Python (14/11/2026), em `software/api_backend/` (preços,
 mercado, tempo, avisos, estados, contador, validação das entradas),
 `software/automacao_github/` (PAM, ENSO, CONAB, municípios, DOI),
 `software/dashboard_web/` e `pesquisa/09_contagem_por_imagem/`. O mesmo

@@ -53,7 +53,6 @@ OUTRAS FONTES
 • Clima: ERA5-Land, Copernicus – https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land
 • Previsão do tempo: Open-Meteo – https://open-meteo.com
 • Preço do Pará: Agrolink – https://www.agrolink.com.br/cotacoes/historico/pa/soja-em-grao-sc-60kg
-• Preço físico do dia: Notícias Agrícolas – https://www.noticiasagricolas.com.br/cotacoes/soja/
 
 As estimativas são de apoio à decisão e não substituem a avaliação de um profissional nem a verificação das condições no local. Confira sempre a bula antes de qualquer aplicação.
 

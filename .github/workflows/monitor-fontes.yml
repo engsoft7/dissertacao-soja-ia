@@ -4,8 +4,9 @@
 # ficou vazio até alguém notar. Aqui a falha aparece no dia.
 #
 #   Yahoo Finance (soja na CBOT e dólar), Agrolink (médias mensais do Pará),
-#   Notícias Agrícolas (físico do dia), Open-Meteo (previsão do tempo), INMET
-#   (avisos), SIDRA/IBGE (PAM) e a própria API do produto.
+#   Open-Meteo (previsão do tempo), INMET (avisos), SIDRA/IBGE (PAM) e a
+#   própria API do produto. A Notícias Agrícolas saiu em 14/11/2026: o site
+#   passou a barrar acesso automático (issue #187).
 name: Monitor das fontes
 
 on:
@@ -54,11 +55,6 @@ jobs:
               h = precos_para._baixa_agrolink()
               assert len(h) >= 12, f'só {len(h)} meses lidos'
               return f"{len(h)} meses, último {h[-1]['mes']}: R$ {h[-1]['para']}"
-          def noticias():
-              import precos
-              c = precos.buscar_precos()
-              assert c, 'nenhuma cotação física'
-              return f"{len(c)} praças, ex.: {precos.descricao(precos.preferida(c))}"
           def openmeteo():
               r = requests.get('https://api.open-meteo.com/v1/forecast', timeout=30, params={
                   'latitude': -3.0, 'longitude': -47.35, 'current': 'temperature_2m',
@@ -79,7 +75,7 @@ jobs:
               r.raise_for_status(); d = r.json()
               assert d.get('cotacao'), 'sem cotação'
               return 'mercado respondeu' + (', com Pará estimado' if d.get('para') else ', SEM o Pará estimado')
-          for nome, f in [('Yahoo Finance', yahoo), ('Agrolink', agrolink), ('Notícias Agrícolas', noticias),
+          for nome, f in [('Yahoo Finance', yahoo), ('Agrolink', agrolink),
                           ('Open-Meteo', openmeteo), ('INMET', inmet), ('SIDRA/IBGE', sidra), ('API do produto', api)]:
               confere(nome, f)
           print("\n".join(linhas))

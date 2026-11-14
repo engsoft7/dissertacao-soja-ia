@@ -317,10 +317,10 @@ class PercursoNoAparelhoTest {
 
             espera("Tempo em", 60_000)
             regra.onAllNodesWithText("Tempo em", substring = true).onFirst().performClick()
-            // A previsão vem do Open-Meteo pela API do runner, que às vezes não a
-            // recebe (runs 43548652966 e 43551339779; em produção, na mesma hora,
-            // ela chegou). O app tem de mostrar a previsão ou dizer que não a
-            // baixou; a falta do Open-Meteo fica como aviso, com o log da API.
+            // A previsão vem direto do Open-Meteo, do celular (Tempo.kt), e no
+            // emulador do Actions às vezes não chega (runs 43548652966 e
+            // 43551339779). O app tem de mostrar a previsão ou dizer que não a
+            // baixou; a falta do Open-Meteo fica como aviso.
             val semPrevisao = "Não foi possível baixar a previsão"
             regra.waitUntil(90_000) { fechaAvisoDoSistema(); existe("Agora") || existe(semPrevisao) }
             if (!existe("Agora")) {
@@ -333,7 +333,7 @@ class PercursoNoAparelhoTest {
             confere("a tela do Tempo mostra a previsão ou explica que não a baixou",
                     existe("Agora") || existe(semPrevisao))
             if (existe("Agora")) anota("tempo\tprevisão carregada")
-            else anota("aviso\to Open-Meteo não respondeu à API do runner (api_da_branch.txt)")
+            else anota("aviso\to Open-Meteo não respondeu ao emulador (o app o consulta direto)")
             tela("05_tempo")
 
             aba("Resumo")

@@ -164,9 +164,9 @@ jobs:
           emulator-boot-timeout: 900
           script: bash software/automacao_github/teste_premium_emulador.sh saida/aparelho_api${{ matrix.api }}_${{ matrix.apk }} /tmp/teste.apk ${{ matrix.apk == 'branch' && '1' || '0' }}
 
-      # O que a API do runner respondeu (e o que não conseguiu baixar, como a
-      # previsão do Open-Meteo) fica no relatório. Em .txt: o .gitignore deixa
-      # os *.log de fora, e o da run 43551339779 não chegou à branch.
+      # O que a API do runner fez (de onde vieram os estados, o que não
+      # conseguiu baixar) fica no relatório. Em .txt: o .gitignore deixa os
+      # *.log de fora, e o da run 43551339779 não chegou à branch.
       - name: Guarda o log da API desta branch
         if: always() && matrix.apk == 'branch'
         run: cp "$RUNNER_TEMP/api.log" "saida/aparelho_api${{ matrix.api }}_branch/api_da_branch.txt" 2>/dev/null || true

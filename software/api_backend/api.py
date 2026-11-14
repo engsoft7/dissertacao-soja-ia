@@ -114,12 +114,14 @@ class EstadoCarregado:
 
 # ── Estados prontos na build ───────────────────────────────────────────────
 # Treinar Mato Grosso, Maranhão, Tocantins e Rondônia e preparar os históricos
-# leva uns 90 s numa máquina comum e dezenas de minutos no Render gratuito
-# (0,1 CPU); enquanto isso, até o Pará respondia devagar (Teste Premium de
-# 13/11/2026: a lista de municípios não chegou em 150 s). A build do Render
-# roda prepara_estados.py, que grava cada estado pronto em CACHE_ESTADOS, e a
-# subida só lê o arquivo. O cache vale para a base, o arquivo do IBGE e a lista
-# de sedes com que foi feito (assinatura); com qualquer um diferente, ou sem o
+# leva uns 90 s de CPU numa máquina comum, o que no décimo de CPU do Render
+# gratuito dá na ordem de 15 minutos, a cada deploy ou reinício. Nesse tempo os
+# quatro respondem 503 ("modelo em preparação") e dividem a CPU com as
+# respostas do Pará; na leitura de 13/11/2026 às 16h34 UTC, logo depois do
+# deploy, nenhum dos quatro estava pronto. A build do Render roda
+# prepara_estados.py, que grava cada estado pronto em CACHE_ESTADOS, e a subida
+# só lê o arquivo. O cache vale para a base, o arquivo do IBGE e a lista de
+# sedes com que foi feito (assinatura); com qualquer um diferente, ou sem o
 # arquivo, treina como antes.
 CACHE_ESTADOS = Path(__file__).resolve().parent / "cache"
 CACHE_VERSAO = 1
@@ -155,7 +157,9 @@ def carrega_estado(e: "estados.Estado") -> "EstadoCarregado":
             guardado = joblib.load(arquivo)
             if guardado.get("assinatura") == _assinatura_do_estado(e):
                 print(f"{e.nome}: pronto, do cache da build.", flush=True)
-                return guardado["estado"]
+                ce = guardado["estado"]
+                ce.estado = e  # os caminhos desta máquina, e não os da build
+                return ce
             print(f"{e.nome}: o cache é de outra base; treinando.", flush=True)
         except Exception as erro:  # arquivo de outra versão das bibliotecas, cortado…
             print(f"{e.nome}: cache ilegível ({type(erro).__name__}); treinando.", flush=True)

@@ -138,10 +138,21 @@ fun dataDigitada(texto: String): LocalDate? {
     return runCatching { LocalDate.parse(t) }.getOrNull()
 }
 
-/** Número digitado: "1.234,5" ou "12.5". Null se vazio ou inválido; negativo não vale. */
-fun numeroDigitado(texto: String): Double? {
+private val MILHAR_EM_INGLES = Regex("""\d{1,3}(,\d{3})+""")
+
+/**
+ * Número digitado, no separador decimal do idioma ([decimal]). Em português,
+ * "1.234,5" ou "12.5" (sem vírgula, o ponto é decimal); em inglês, "1,234.5",
+ * "12.5" ou "12,5" (a vírgula só é de milhar quando separa grupos de três,
+ * como em "1,234"). Null se vazio ou inválido; negativo não vale.
+ */
+fun numeroDigitado(texto: String, decimal: Char = Formatos.separadorDecimal): Double? {
     val t = texto.trim()
     if (t.isEmpty()) return null
-    val n = if (',' in t) t.replace(".", "").replace(',', '.') else t
+    val n = when {
+        decimal == '.' && ('.' in t || MILHAR_EM_INGLES.matches(t)) -> t.replace(",", "")
+        ',' in t -> t.replace(".", "").replace(',', '.')
+        else -> t
+    }
     return n.toDoubleOrNull()?.takeIf { it >= 0.0 && it.isFinite() }
 }

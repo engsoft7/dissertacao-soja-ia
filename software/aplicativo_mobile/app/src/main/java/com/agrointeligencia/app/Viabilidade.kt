@@ -284,9 +284,9 @@ fun ResumoFinanceiroCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            val preco = customPreco.replace(',', '.').toDoubleOrNull() ?: precoPadrao
-            val custo = customCusto.replace(',', '.').toDoubleOrNull() ?: kpis.custo_ha
-            val scHa = customProd.replace(',', '.').toDoubleOrNull() ?: prodModelo
+            val preco = numeroDigitado(customPreco) ?: precoPadrao
+            val custo = numeroDigitado(customCusto) ?: kpis.custo_ha
+            val scHa = numeroDigitado(customProd) ?: prodModelo
             val diasDoPrecoProprio =
                 if (temPreco && precoEm > 0L)
                     (System.currentTimeMillis() - precoEm) / 86_400_000L
@@ -342,7 +342,7 @@ fun ResumoFinanceiroCard(
                         customProd = digitado
                         // Guarda assim que o número for válido: o produtor não
                         // deve precisar apertar nada para o app lembrar.
-                        val valor = digitado.replace(',', '.').toDoubleOrNull()
+                        val valor = numeroDigitado(digitado)
                         if (valor != null && valor > 0) {
                             temProd = true
                             prodEm = System.currentTimeMillis()
@@ -364,7 +364,7 @@ fun ResumoFinanceiroCard(
                         customPreco = digitado
                         // Guarda assim que o número for válido: o produtor não
                         // deve precisar apertar nada para o app lembrar.
-                        val valor = digitado.replace(',', '.').toDoubleOrNull()
+                        val valor = numeroDigitado(digitado)
                         if (valor != null && valor > 0) {
                             temPreco = true
                             precoEm = System.currentTimeMillis()
@@ -391,7 +391,7 @@ fun ResumoFinanceiroCard(
                         customCusto = digitado
                         // Guarda assim que o número for válido: o produtor não
                         // deve precisar apertar nada para o app lembrar.
-                        val valor = digitado.replace(',', '.').toDoubleOrNull()
+                        val valor = numeroDigitado(digitado)
                         if (valor != null && valor > 0) {
                             temCusto = true
                             custoEm = System.currentTimeMillis()

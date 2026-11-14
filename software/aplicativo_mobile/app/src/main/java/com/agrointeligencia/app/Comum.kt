@@ -168,6 +168,9 @@ object Formatos {
     var dataHora: String = "dd/MM 'às' HH:mm"
         private set
 
+    /** O separador decimal do idioma: "," em português, "." em inglês. */
+    val separadorDecimal: Char get() = java.text.DecimalFormatSymbols.getInstance(locale).decimalSeparator
+
     fun doIdioma(context: android.content.Context) {
         locale = java.util.Locale.forLanguageTag(context.getString(R.string.formato_numeros))
         diaMes = context.getString(R.string.formato_dia_mes)
@@ -176,6 +179,14 @@ object Formatos {
 }
 
 internal val LOCAL_NUMEROS: java.util.Locale get() = Formatos.locale
+
+/**
+ * Um texto de strings.xml e os seus argumentos: as contas sem Context
+ * (ModoAutomatico.kt, por exemplo) devolvem isto, e a tela escreve no idioma.
+ */
+data class TextoDoApp(val id: Int, val args: List<Any> = emptyList()) {
+    fun em(context: android.content.Context): String = context.getString(id, *args.toTypedArray())
+}
 
 fun milhar(v: Double): String = String.format(LOCAL_NUMEROS, "%,d", v.roundToInt())
 

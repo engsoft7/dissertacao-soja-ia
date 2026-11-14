@@ -84,6 +84,19 @@ class CadernoCalculoTest {
     }
 
     @Test
+    fun numerosDigitadosEmIngles() {
+        // Em inglês o ponto é decimal e a vírgula separa milhares; "12,5" ainda vale como decimal.
+        assertEquals(1234.5, numeroDigitado("1,234.5", '.')!!, 1e-9)
+        assertEquals(1234.0, numeroDigitado("1,234", '.')!!, 1e-9)
+        assertEquals(12345678.0, numeroDigitado("12,345,678", '.')!!, 1e-9)
+        assertEquals(0.45, numeroDigitado("0.45", '.')!!, 1e-9)
+        assertEquals(12.5, numeroDigitado("12,5", '.')!!, 1e-9)
+        assertNull(numeroDigitado("-3", '.'))
+        // Em português a vírgula é decimal: o mesmo "1,234" vale 1,234.
+        assertEquals(1.234, numeroDigitado("1,234", ',')!!, 1e-9)
+    }
+
+    @Test
     fun numerosEDatasDigitados() {
         assertEquals(1234.5, numeroDigitado("1.234,5")!!, 1e-9)
         assertEquals(12.5, numeroDigitado("12.5")!!, 1e-9)

@@ -109,18 +109,16 @@ internal fun motivoParaConferir(
     arrancadas: Int,
     automaticosAntes: Int,
     lim: LimitesAutomatico,
-): String? {
-    if (qualidade != null && qualidade.brilhoP95 < lim.brilho)
-        return "a foto está escura; com pouca luz o contador erra mais"
-    if (qualidade != null && qualidade.nitidez < lim.nitidez)
-        return "a foto está borrada; segure firme ou chegue um pouco mais longe"
+): TextoDoApp? {
+    if (qualidade != null && qualidade.brilhoP95 < lim.brilho) return TextoDoApp(R.string.conferir_escura)
+    if (qualidade != null && qualidade.nitidez < lim.nitidez) return TextoDoApp(R.string.conferir_borrada)
     if (arrancadas > 0) {
         val porPlanta = vagens.toDouble() / arrancadas
         if (porPlanta < lim.minimo || porPlanta > lim.maximo)
-            return "o número dá ${porPlanta.roundToInt()} vagens por planta, fora do comum"
+            return TextoDoApp(R.string.conferir_fora_do_comum, listOf(porPlanta.roundToInt()))
     }
     if (automaticosAntes % lim.aCada == 0)
-        return if (automaticosAntes == 0) "o primeiro ponto de cada talhão é conferido por você"
-               else "um ponto em cada ${lim.aCada} é conferido por você, para medir o erro do contador"
+        return if (automaticosAntes == 0) TextoDoApp(R.string.conferir_primeiro)
+               else TextoDoApp(R.string.conferir_um_em_cada, listOf(lim.aCada))
     return null
 }

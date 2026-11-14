@@ -209,7 +209,8 @@ software/api_backend/
   estados.py                              os cinco estados do produto; ?uf= nas rotas
   prepara_estados.py                      estados prontos na build (modelo e históricos)
   financas.py                             cálculos financeiros (VTN, custos)
-  mercado.py, precos.py, precos_para.py   Chicago em reais, cotações por praça, preço estimado do Pará
+  mercado.py, precos_para.py              Chicago em reais, praças do Pará (Agrolink), preço estimado do Pará
+  plantio.py                              janela de plantio: calendário da portaria e risco do ZARC
   tempo.py, avisos_inmet.py               tempo na lavoura, janela de pulverização, avisos
   historico_oficial.py, validacao.py      série oficial do IBGE e validação das entradas
 software/dashboard_web/

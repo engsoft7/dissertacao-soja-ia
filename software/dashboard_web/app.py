@@ -1173,7 +1173,7 @@ st.sidebar.markdown("### Navegação Principal")
 tela_atual = st.sidebar.radio(
     "Tela",
     ["📍 Inteligência Territorial", "📈 Análise Histórica", "💰 Viabilidade Financeira",
-     "🌦️ Tempo na lavoura"],
+     "🌦️ Tempo na lavoura", "🌱 Janela de plantio"],
     label_visibility="collapsed")
 st.sidebar.divider()
 
@@ -2111,6 +2111,101 @@ if tela_atual == "🌦️ Tempo na lavoura":
                        "observado das safras.")
 
 
+# ==============================================================================
+# ABA 5: JANELA DE PLANTIO
+# ==============================================================================
+# A tela "Janela de plantio" do aplicativo (Plantio.kt), no painel: o
+# calendário de semeadura e o vazio sanitário da Portaria SDA/MAPA nº
+# 1.579/2026, e o risco do ZARC por grupo de cultivar e solo. Os dados e as
+# contas vêm de api_backend/plantio.py, os mesmos da API e do aplicativo.
+if tela_atual == "🌱 Janela de plantio":
+    import importlib
+    import ui.charts as graficos
+    if not hasattr(graficos, "plot_janela_plantio"):
+        graficos = importlib.reload(graficos)
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
+    import plantio as P
+
+    st.markdown(f"### 🌱 Janela de plantio — {disp(municipio)}")
+    _cod = _cod_por_nome.get(municipio)
+    _plantio = P.para_municipio(UF, int(_cod)) if _cod is not None else None
+    if _plantio is None:
+        st.info("A janela de plantio ainda não foi coletada para este estado (pesquisa/dados/plantio/).")
+    else:
+        hoje = date.today()
+        cal, z = _plantio["calendario"], _plantio["zarc"]
+        safra_ini = int(_plantio["safra"].split("/")[0])
+        st.caption(f"Safra {_plantio['safra']}")
+
+        st.markdown("#### Calendário de semeadura")
+        semeadura = P.periodo((cal or {}).get("semeadura"))
+        if cal is None or semeadura is None:
+            st.info("A portaria do calendário de semeadura não põe este município em nenhuma região do "
+                    "estado. Confira as datas com a agência de defesa agropecuária do estado.")
+        else:
+            st.markdown(f"**{P.frase_do_calendario(cal, hoje)}**")
+            if cal.get("regiao"):
+                st.caption(f"Região {cal['regiao']} do estado na portaria")
+            vazio = P.periodo(cal.get("vazio"))
+            if vazio:
+                st.markdown(f"Vazio sanitário: {vazio[0]:%d/%m/%Y} a {vazio[1]:%d/%m/%Y}")
+            st.markdown(f"Semeadura: {semeadura[0]:%d/%m/%Y} a {semeadura[1]:%d/%m/%Y}")
+            if cal.get("observacao"):
+                st.caption(cal["observacao"])
+            st.caption(f"Fonte: [{cal['fonte']}]({cal['url']}), no Diário Oficial da União.")
+
+        st.markdown("#### Risco climático (ZARC)")
+        if z is None:
+            st.info("O ZARC desta safra não indica o plantio de soja neste município.")
+        else:
+            ciclos = {c["codigo"]: c["nome"] for c in z["ciclos"]}
+            solos = {s["codigo"]: s["nome"] for s in z["solos"]}
+            c1, c2 = st.columns(2)
+            ciclo = c1.radio("Grupo de cultivar", list(ciclos), format_func=ciclos.get, horizontal=True,
+                             index=list(ciclos).index(21) if 21 in ciclos else 0, key="plantio_ciclo",
+                             help="O grupo vem do ciclo da cultivar: o Grupo I é o mais curto e o Grupo III o "
+                                  "mais longo. A portaria do ZARC lista as cultivares de cada grupo.")
+            solo = c2.radio("Água disponível no solo", list(solos), format_func=solos.get, horizontal=True,
+                            index=list(solos).index(13) if 13 in solos else 0, key="plantio_solo",
+                            help="AD1 guarda menos água e AD6 guarda mais. A análise de solo ou o técnico "
+                                 "dizem a classe da lavoura.")
+            grupo, classe = ciclos[ciclo], solos[solo]
+            riscos = (z.get("riscos") or {}).get(f"{ciclo}-{solo}")
+            js = P.janelas(riscos, safra_ini) if riscos and len(riscos) == 36 else []
+            risco = P.risco_no_dia(riscos, safra_ini, hoje) if riscos else 0
+            if riscos is None:
+                st.markdown(f"Sem janela indicada para {grupo} e {classe} neste município.")
+            elif risco:
+                cor = graficos.CORES_RISCO_ZARC[risco]
+                st.markdown(f"<b style='color:{cor}'>ZARC hoje: risco de {risco}%</b> ({grupo}, {classe})",
+                            unsafe_allow_html=True)
+            else:
+                prox = P.proxima_janela(js, hoje)
+                st.markdown(f"**{grupo}, {classe}: hoje fora da janela;** a próxima começa em "
+                            f"{date.fromisoformat(prox['inicio']):%d/%m}, com risco de {prox['risco']}%."
+                            if prox else f"**{grupo}, {classe}: a janela desta safra já terminou.**")
+            st.plotly_chart(graficos.plot_janela_plantio(cal, js, safra_ini, hoje, is_dark=is_dark),
+                            use_container_width=True, config={"displayModeBar": False})
+            if js:
+                linhas = []
+                for j in js:
+                    dentro = P.dentro_do_calendario(j, semeadura)
+                    linhas.append({
+                        "De": f"{date.fromisoformat(j['inicio']):%d/%m/%Y}",
+                        "Até": f"{date.fromisoformat(j['fim']):%d/%m/%Y}",
+                        "Risco": f"{j['risco']}%",
+                        "Calendário de semeadura": "dentro" if dentro == j else
+                        ("fora" if dentro is None else "parte fora")})
+                st.dataframe(pd.DataFrame(linhas), hide_index=True, use_container_width=True)
+            else:
+                st.markdown("Nenhum decêndio indicado para este grupo e este solo.")
+            st.caption("O risco é a chance de perder parte da lavoura por clima adverso, como seca na floração, "
+                       f"segundo o ZARC. Fonte: {z.get('portaria') or 'portaria do ZARC'}"
+                       f", [tábua de risco do Ministério da Agricultura]({z['url']}) (dados abertos, CC BY).")
+        st.info("Fora do calendário de semeadura, plantar soja é proibido. Fora da janela do ZARC, é "
+                "permitido, mas sem o Proagro e sem boa parte do crédito rural.")
+
+
 with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
     st.markdown('''
     **Plataforma de AgroInteligência Preditiva** — Solução metodológica baseada em inteligência artificial para previsão de produtividade de soja e monitoramento do agronegócio no Estado do Pará.
@@ -2138,10 +2233,7 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
       workflow mensal. Preço e custo têm de vir do mesmo levantamento — usar a
       mediana da série com o custo de {LEVANTAMENTO_CONAB_EXTENSO} misturaria
       dois momentos e inflaria a margem.
-''' + '''    * **Notícias Agrícolas:** preço físico da saca em Paranaguá, relido a cada
-      hora, exibido como comparação. É preço de porto, no Paraná: o produtor no
-      Pará recebe menos, por causa de frete e base.
-    * **Yahoo Finance (CBOT `ZS=F` e `BRL=X`):** contrato futuro de Chicago
+''' + '''    * **Yahoo Finance (CBOT `ZS=F` e `BRL=X`):** contrato futuro de Chicago
       convertido para reais por saca de 60 kg, também exibido como comparação.
       É cotação de bolsa e fica acima do preço físico brasileiro.
     * **Open-Meteo e INMET (tela Tempo na lavoura):** previsão do tempo do
@@ -2149,6 +2241,11 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
       do INMET. A janela de pulverização segue a Embrapa Soja (Adegas e
       Gazziero, 2020), com as mesmas regras do aplicativo. Não entra na
       estimativa de produtividade.
+    * **Portaria SDA/MAPA nº 1.579/2026 e ZARC (tela Janela de plantio):**
+      calendário de semeadura e vazio sanitário da soja na safra 2026/2027,
+      lidos do Diário Oficial da União, e a tábua de risco do Zoneamento
+      Agrícola de Risco Climático, dado aberto do Ministério da Agricultura
+      (CC BY), relidos todo mês por `coleta_plantio.py`.
 ''' + f'''    * **Custo operacional (CONAB):** levantamento de custos de produção da soja
       no município de {PRACA_CONAB}, de {LEVANTAMENTO_CONAB_EXTENSO} — ponto de coleta da
       CONAB no cerrado do Tocantins. O Pará não integra o MATOPIBA e não tem

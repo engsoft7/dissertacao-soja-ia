@@ -111,14 +111,24 @@ def real():
     plantio.carrega.cache_clear()
 
 
+# Municípios que as listas da portaria não citam (conferido no texto das
+# notas, que o coletor grava no log: run 43610450456, 14/11/2026).
+FORA_DA_PORTARIA = {"PA": {1500800, 1501402, 1502806, 1507706},  # Ananindeua, Belém, Curralinho, S. S. da Boa Vista
+                    "MA": {2101939}}                             # Bernardo do Mearim
+
+
 def test_cada_municipio_do_para_e_do_maranhao_tem_uma_regiao_so(real):
-    """A portaria divide os dois estados em regiões pelas listas das notas; com
-    os "demais municípios", cada município cai em exatamente uma."""
+    """A portaria divide os dois estados em regiões pelas listas das notas: um
+    município não pode cair em duas, e só os que ela não cita ficam fora."""
     totais = {"PA": 144, "MA": 217}
     for uf, total in totais.items():
         regioes = real["calendario"]["estados"][uf]
         listas = [set(r["municipios"]) for r in regioes]
-        assert sum(len(x) for x in listas) == len(set().union(*listas)) == total, uf
+        unidos = set().union(*listas)
+        assert sum(len(x) for x in listas) == len(unidos) == total - len(FORA_DA_PORTARIA[uf]), uf
+        assert not unidos & FORA_DA_PORTARIA[uf], uf
+        for cod in FORA_DA_PORTARIA[uf]:
+            assert plantio.para_municipio(uf, cod)["calendario"] is None
 
 
 def test_datas_da_portaria_nos_municipios_reais(real):
@@ -140,3 +150,41 @@ def test_zarc_real_tem_36_decendios_e_os_tres_grupos(real):
     assert {c["nome"] for c in d["ciclos"]} == {"Grupo I", "Grupo II", "Grupo III"}
     assert d["riscos"] and all(len(r) == 36 and set(r) <= set("0234") for r in d["riscos"].values())
     assert any(set(r) != {"0"} for r in d["riscos"].values())
+
+
+# ── as contas do painel: os mesmos casos de PlantioCalculoTest.kt ─────────────
+
+def test_situacao_e_frase_do_dia_como_no_aplicativo():
+    from datetime import date
+    c = {"vazio": ["2026-06-08", "2026-09-06"], "semeadura": ["2026-09-07", "2027-01-07"]}
+    assert plantio.situacao_no_dia(c, date(2026, 7, 1)) == "vazio"
+    assert plantio.situacao_no_dia(c, date(2026, 11, 14)) == "semeadura"
+    assert plantio.situacao_no_dia(c, date(2027, 1, 7)) == "semeadura"
+    assert plantio.situacao_no_dia(c, date(2027, 1, 8)) == "fora"
+    assert plantio.situacao_no_dia(None, date(2026, 11, 14)) is None
+    assert plantio.frase_do_calendario(c, date(2026, 11, 14)) == "Semeadura permitida até 07/01/2027"
+    assert plantio.frase_do_calendario(c, date(2026, 7, 1)) == (
+        "Vazio sanitário até 06/09/2026; a semeadura começa em 07/09/2026")
+    assert plantio.frase_do_calendario(c, date(2026, 6, 1)) == "O vazio sanitário começa em 08/06/2026"
+    assert plantio.frase_do_calendario(c, date(2027, 2, 1)) == "Semeadura encerrada em 07/01/2027"
+
+
+def test_risco_do_dia_proxima_janela_e_corte_pelo_calendario():
+    from datetime import date
+    r = ["0"] * 36
+    for i in (34, 35, 36, 1, 2):
+        r[i - 1] = "2"
+    r[3 - 1] = "3"
+    r = "".join(r)
+    assert plantio.risco_no_dia(r, 2026, date(2026, 12, 25)) == 20
+    assert plantio.risco_no_dia(r, 2026, date(2027, 1, 25)) == 30
+    assert plantio.risco_no_dia(r, 2026, date(2026, 11, 14)) == 0
+    assert plantio.risco_no_dia("222", 2026, date(2026, 12, 25)) == 0
+    js = [{"inicio": "2026-10-01", "fim": "2026-10-31", "risco": 20},
+          {"inicio": "2026-11-11", "fim": "2026-11-30", "risco": 30}]
+    assert plantio.proxima_janela(js, date(2026, 11, 5)) == js[1]
+    assert plantio.proxima_janela(js, date(2026, 11, 5), risco_maximo=20) is None
+    j = {"inicio": "2026-12-01", "fim": "2027-01-20", "risco": 20}
+    corte = (date(2026, 9, 7), date(2027, 1, 7))
+    assert plantio.dentro_do_calendario(j, corte) == {"inicio": "2026-12-01", "fim": "2027-01-07", "risco": 20}
+    assert plantio.dentro_do_calendario({"inicio": "2027-01-11", "fim": "2027-01-20", "risco": 20}, corte) is None

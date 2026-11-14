@@ -34,6 +34,10 @@ val FONTES_OFICIAIS = listOf(
     Fonte("Avisos meteorológicos", "INMET", "https://portal.inmet.gov.br/"),
     Fonte("Custo de produção e preço de referência", "CONAB",
           "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao"),
+    Fonte("Calendário de semeadura e vazio sanitário", "Ministério da Agricultura, Portaria SDA/MAPA nº 1.579/2026",
+          "https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-1.579-de-9-de-abril-de-2026-698696654"),
+    Fonte("Risco climático do plantio (ZARC)", "Ministério da Agricultura",
+          "https://dados.agricultura.gov.br/dataset/tabua-de-risco-zoneamento-agricola-de-risco-climatico"),
     Fonte("Critérios da janela de pulverização", "Embrapa Soja",
           "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/223209/1/SP-17-2020-online-1.pdf"),
     Fonte("El Niño e La Niña (índice ONI)", "NOAA",
@@ -52,7 +56,8 @@ val OUTRAS_FONTES = listOf(
 
 const val AVISO_NAO_GOVERNO =
     "O AgroInteligência não é um aplicativo do governo e não representa nenhum órgão público. " +
-    "Não tem vínculo com o IBGE, o INMET, a CONAB, a Embrapa, a NOAA ou a NASA: apenas usa dados " +
+    "Não tem vínculo com o IBGE, o INMET, a CONAB, a Embrapa, o Ministério da Agricultura, a NOAA ou a " +
+    "NASA: apenas usa dados " +
     "abertos publicados por essas instituições, nos endereços abaixo."
 
 /** Aviso de não afiliação e as fontes com link, na tela Sobre. Tocar numa fonte abre o endereço. */

@@ -31,7 +31,7 @@
     <string name="plantio_zarc_sem_janela">Nenhum decêndio indicado para este grupo e este solo.</string>
 
     <string name="plantio_secao_calendario">Calendário de semeadura</string>
-    <string name="plantio_sem_calendario">Sem calendário de semeadura para este município na portaria.</string>
+    <string name="plantio_sem_calendario">A portaria do calendário de semeadura não põe este município em nenhuma região do estado. Confira as datas com a agência de defesa agropecuária do estado.</string>
     <string name="plantio_regiao">Região %1$s do estado na portaria</string>
     <string name="plantio_vazio_periodo">Vazio sanitário: %1$s a %2$s</string>
     <string name="plantio_semeadura_periodo">Semeadura: %1$s a %2$s</string>

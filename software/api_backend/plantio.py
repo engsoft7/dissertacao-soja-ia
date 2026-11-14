@@ -156,3 +156,68 @@ def janelas(riscos: str, safra_ini: int) -> list[dict]:
     for j in saida:
         j.pop("_ultimo")
     return saida
+
+
+# ── as mesmas contas de PlantioCalculo.kt, para o painel ──────────────────────
+# O aplicativo faz as contas no celular (trocar grupo e solo não depende de
+# rede); o painel usa estas, que repetem as de lá e os mesmos testes, para os
+# dois mostrarem a mesma frase no mesmo dia.
+
+def periodo(par: list[str] | None) -> tuple[date, date] | None:
+    if not par or len(par) != 2:
+        return None
+    try:
+        return date.fromisoformat(par[0]), date.fromisoformat(par[1])
+    except ValueError:
+        return None
+
+
+def situacao_no_dia(calendario: dict | None, dia: date) -> str | None:
+    """'vazio', 'semeadura' ou 'fora' do calendário da portaria; None sem calendário."""
+    semeadura = periodo((calendario or {}).get("semeadura"))
+    if semeadura is None:
+        return None
+    vazio = periodo(calendario.get("vazio"))
+    if vazio and vazio[0] <= dia <= vazio[1]:
+        return "vazio"
+    if semeadura[0] <= dia <= semeadura[1]:
+        return "semeadura"
+    return "fora"
+
+
+def frase_do_calendario(calendario: dict | None, dia: date) -> str | None:
+    """A frase do cartão do aplicativo (fraseDoCalendario, Plantio.kt)."""
+    situacao = situacao_no_dia(calendario, dia)
+    if situacao is None:
+        return None
+    semeadura = periodo(calendario["semeadura"])
+    vazio = periodo(calendario.get("vazio"))
+    if situacao == "semeadura":
+        return f"Semeadura permitida até {semeadura[1]:%d/%m/%Y}"
+    if situacao == "vazio":
+        return f"Vazio sanitário até {vazio[1]:%d/%m/%Y}; a semeadura começa em {semeadura[0]:%d/%m/%Y}"
+    if vazio and dia < vazio[0]:
+        return f"O vazio sanitário começa em {vazio[0]:%d/%m/%Y}"
+    return f"Semeadura encerrada em {semeadura[1]:%d/%m/%Y}"
+
+
+def risco_no_dia(riscos: str, safra_ini: int, dia: date) -> int:
+    """O risco do ZARC no dia; 0 quando o decêndio não é indicado."""
+    for j in janelas(riscos, safra_ini) if len(riscos) == 36 else []:
+        if date.fromisoformat(j["inicio"]) <= dia <= date.fromisoformat(j["fim"]):
+            return j["risco"]
+    return 0
+
+
+def proxima_janela(js: list[dict], dia: date, risco_maximo: int = 40) -> dict | None:
+    """A primeira janela que ainda não terminou no dia, com risco até risco_maximo."""
+    return next((j for j in js if j["risco"] <= risco_maximo and date.fromisoformat(j["fim"]) >= dia), None)
+
+
+def dentro_do_calendario(j: dict, semeadura: tuple[date, date] | None) -> dict | None:
+    """A parte da janela do ZARC que cai dentro do calendário de semeadura."""
+    if semeadura is None:
+        return j
+    ini = max(date.fromisoformat(j["inicio"]), semeadura[0])
+    fim = min(date.fromisoformat(j["fim"]), semeadura[1])
+    return None if ini > fim else {**j, "inicio": ini.isoformat(), "fim": fim.isoformat()}

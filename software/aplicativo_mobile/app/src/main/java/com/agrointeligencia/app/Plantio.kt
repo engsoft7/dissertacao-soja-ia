@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -316,6 +318,9 @@ private fun CartaoCalendario(c: CalendarioPlantio?, hoje: LocalDate) {
     }
 }
 
+// FlowRow: os seis solos não cabem numa linha de celular, e o AD6 ficava
+// escondido na rolagem lateral.
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CartaoZarc(estado: EstadoPlantio, hoje: LocalDate) {
     val secundaria = MaterialTheme.colorScheme.onSurfaceVariant
@@ -333,7 +338,7 @@ private fun CartaoZarc(estado: EstadoPlantio, hoje: LocalDate) {
              color = if (risco > 0) corDoRisco(risco) else MaterialTheme.colorScheme.onSurface)
 
         Text(stringResource(R.string.plantio_grupo), fontSize = 12.sp, color = secundaria)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             z.ciclos.orEmpty().forEach { o ->
                 FilterChip(selected = o.codigo == estado.ciclo, onClick = { estado.escolherCiclo(o.codigo) },
                            label = { Text(o.nome) }, modifier = Modifier.heightIn(min = 48.dp))
@@ -341,7 +346,7 @@ private fun CartaoZarc(estado: EstadoPlantio, hoje: LocalDate) {
         }
         Text(stringResource(R.string.plantio_grupo_ajuda), fontSize = 12.sp, color = secundaria, lineHeight = 16.sp)
         Text(stringResource(R.string.plantio_solo), fontSize = 12.sp, color = secundaria)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             z.solos.orEmpty().forEach { o ->
                 FilterChip(selected = o.codigo == estado.solo, onClick = { estado.escolherSolo(o.codigo) },
                            label = { Text(o.nome) }, modifier = Modifier.heightIn(min = 48.dp))

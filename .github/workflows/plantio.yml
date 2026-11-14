@@ -1,14 +1,32 @@
-# Janela de plantio da soja: ZARC (tábua de risco, dado aberto do Ministério
-# da Agricultura) e calendário de semeadura e vazio sanitário (Portaria
-# SDA/MAPA nº 1.579/2026 e normas estaduais).
+# Janela de plantio da soja: ZARC (tábua de risco, dado aberto do Ministério da
+# Agricultura) e calendário de semeadura e vazio sanitário (Portaria SDA/MAPA
+# nº 1.579/2026, lida do Diário Oficial). coleta_plantio.py grava os arquivos
+# em pesquisa/dados/plantio/, que a API e o painel leem.
+#
+# - Numa branch de trabalho (push no coletor ou neste workflow): grava os
+#   arquivos na própria branch.
+# - Na main, todo mês e sob demanda: se a fonte mudou, abre um PR e o mergeia,
+#   como o workflow mensal da base. O ZARC e o calendário mudam uma vez por
+#   safra; a conferência mensal pega a portaria da safra seguinte e uma revisão.
 name: Janela de plantio
 
 on:
   push:
+    branches-ignore: [main]
     paths:
       - "software/automacao_github/coleta_plantio.py"
       - ".github/workflows/plantio.yml"
+  schedule:
+    - cron: "41 11 3 * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: plantio-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   coleta:
@@ -18,6 +36,46 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install --quiet requests pypdf pdfplumber
-      - name: Diagnóstico das fontes
-        run: python software/automacao_github/coleta_plantio.py --diagnostico
+      - run: pip install --quiet requests pytest
+      - name: Testa a leitura da portaria
+        run: python -m pytest software/automacao_github/test_coleta_plantio.py -q
+      - name: Coleta o ZARC e o calendário
+        run: python software/automacao_github/coleta_plantio.py
+
+      - name: Grava na branch de trabalho
+        if: github.ref_name != github.event.repository.default_branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pesquisa/dados/plantio
+          if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
+          git commit -m "Janela de plantio: ZARC e calendário de semeadura (${{ github.run_id }})"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 5))
+          done
+          exit 1
+
+      - name: Abre o PR na main
+        id: cpr
+        if: github.ref_name == github.event.repository.default_branch
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automacao/janela-de-plantio
+          add-paths: pesquisa/dados/plantio/*
+          commit-message: "Janela de plantio: ZARC e calendário de semeadura atualizados"
+          title: "Janela de plantio: ZARC e calendário de semeadura atualizados"
+          body: |
+            Gerado pelo workflow `plantio.yml` a partir da tábua de risco do ZARC
+            (dados abertos do Ministério da Agricultura) e da portaria do
+            calendário de semeadura e vazio sanitário, lida do Diário Oficial.
+          delete-branch: true
+
+      - name: Mergeia o PR
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr merge --squash --delete-branch "${{ steps.cpr.outputs.pull-request-number }}" \
+            --repo "${{ github.repository }}"

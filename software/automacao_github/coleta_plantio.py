@@ -45,6 +45,11 @@ PORTARIA = "Portaria SDA/MAPA nº 1.579, de 9 de abril de 2026"
 CKAN = ("https://dados.agricultura.gov.br/api/3/action/package_show"
         "?id=tabua-de-risco-zoneamento-agricola-de-risco-climatico")
 IBGE = "https://servicodados.ibge.gov.br/api/v1/localidades/estados/{uf}/municipios"
+# A mesma lista aberta que gera_municipios.py e monta_base_estados.py usam, com
+# o código do IBGE de cada município: a reserva quando a API do IBGE não
+# responde ao Actions (14/11/2026, tempo esgotado em 60 s).
+KELVINS = "https://raw.githubusercontent.com/kelvins/municipios-brasileiros/main/csv/municipios.csv"
+CODIGO_UF = {"PA": 15, "MT": 51, "MA": 21, "TO": 17, "RO": 11}
 RAIZ = Path(__file__).resolve().parents[2]
 SAIDA = RAIZ / "pesquisa" / "dados" / "plantio"
 
@@ -133,9 +138,19 @@ def municipios_da_nota(nota: str) -> tuple[list[str], str | None]:
 
 
 def municipios_ibge(uf: str) -> dict[str, tuple[int, str]]:
-    r = requests.get(IBGE.format(uf=uf), headers=UA, timeout=60)
+    """Nome normalizado -> (código do IBGE, nome) de todos os municípios do estado."""
+    try:
+        r = requests.get(IBGE.format(uf=uf), headers=UA, timeout=20)
+        r.raise_for_status()
+        return {normaliza(m["nome"]): (int(m["id"]), m["nome"]) for m in r.json()}
+    except requests.RequestException as e:
+        print(f"API do IBGE indisponível ({type(e).__name__}); usando a lista de municípios do kelvins")
+    r = requests.get(KELVINS, headers=UA, timeout=90)
     r.raise_for_status()
-    return {normaliza(m["nome"]): (int(m["id"]), m["nome"]) for m in r.json()}
+    r.encoding = "utf-8"
+    import io
+    return {normaliza(row["nome"]): (int(row["codigo_ibge"]), row["nome"])
+            for row in csv.DictReader(io.StringIO(r.text)) if int(row["codigo_uf"]) == CODIGO_UF[uf]}
 
 
 def calendario() -> dict:

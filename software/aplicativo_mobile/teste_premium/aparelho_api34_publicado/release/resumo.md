@@ -10,7 +10,7 @@
 | abre a aba Histórico | ok |  |
 | abre a aba Mercado | ok |  |
 | abre a aba Sobre | ok |  |
-| fonte 200%: Resumo abre | ok |  |
+| fonte 200%: Resumo abre | **falha** |  |
 | tela pequena: Resumo abre | ok |  |
 | tela tablet: Resumo abre | ok |  |
 | tela deitada: Resumo abre | ok |  |
@@ -32,26 +32,26 @@
  "altura_px": 2400,
  "densidade_dpi": 420,
  "apk_mb": 27.6,
- "partida_fria_primeira_ms": 826,
- "partida_fria_sem_municipio_ms": 983.5,
- "dados_do_municipio_s": 5.3,
- "memoria_resumo_kb": 38652,
+ "partida_fria_primeira_ms": 945,
+ "partida_fria_sem_municipio_ms": 752.0,
+ "dados_do_municipio_s": 5.2,
+ "memoria_resumo_kb": 40371,
  "rolagem_resumo": {
-  "quadros": 188.0,
-  "lentos_pct": 88.3,
-  "p50_ms": 61.0,
-  "p90_ms": 109.0,
-  "p99_ms": 150.0
+  "quadros": 213.0,
+  "lentos_pct": 77.0,
+  "p50_ms": 44.0,
+  "p90_ms": 81.0,
+  "p99_ms": 117.0
  },
  "rolagem_historico": {
-  "quadros": 137.0,
-  "lentos_pct": 86.86,
-  "p50_ms": 65.0,
-  "p90_ms": 109.0,
-  "p99_ms": 129.0
+  "quadros": 177.0,
+  "lentos_pct": 80.23,
+  "p50_ms": 53.0,
+  "p90_ms": 89.0,
+  "p99_ms": 133.0
  },
- "memoria_depois_das_abas_kb": 86467,
- "partida_fria_com_municipio_ms": 1025,
+ "memoria_depois_das_abas_kb": 85774,
+ "partida_fria_com_municipio_ms": 904,
  "monkey": {
   "eventos": 3000,
   "falhas": 0,
@@ -62,8 +62,7 @@
 
 ## Acessibilidade pela árvore do uiautomator
 
-- **r04_resumo_1**: alvos < 48 dp: View (379×42 dp); sem rótulo: nenhum
+- **r04_resumo_1**: alvos < 48 dp: View (379×3 dp); sem rótulo: View em (42,128)
 - **r05_mapa**: alvos < 48 dp: nenhum; sem rótulo: WebView em (45,530)
 - **r08_sobre**: alvos < 48 dp: View (339×44 dp), View (339×46 dp); sem rótulo: nenhum
 - **r09_estimativa_no_campo**: alvos < 48 dp: View (347×31 dp); sem rótulo: nenhum
-- **r14_escuro_resumo**: alvos < 48 dp: 152,50 (166×12 dp), 53,8 (166×12 dp); sem rótulo: nenhum

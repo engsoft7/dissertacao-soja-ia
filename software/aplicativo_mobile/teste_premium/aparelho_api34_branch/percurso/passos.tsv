@@ -1,5 +1,12 @@
-4s	abriu	boas-vindas
-12s	lista	chegou da API
-15s	resumo	safra 2027 carregada
-15s	ok	Resumo mostra a última safra do IBGE, 2025
-113s	FALHA	ComposeTimeoutException: Condition still not satisfied after 90000 ms
+2s	abriu	boas-vindas
+9s	lista	chegou da API
+11s	resumo	safra 2027 carregada
+11s	ok	Resumo mostra a última safra do IBGE, 2025
+30s	aviso	a previsão do tempo não chegou; tentando de novo pelo botão
+50s	FALHA	previsão do tempo carregada (Open-Meteo, pela API)
+61s	ok	Histórico começa na projeção mais distante ou na safra em curso
+71s	ok	sem internet, o Resumo abre com os dados guardados
+71s	ok	sem internet, o app avisa
+72s	ok	sem internet, o Mapa explica
+76s	ok	sem internet, a Estimativa no campo abre
+76s	fim	percurso completo

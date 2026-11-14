@@ -5,4 +5,18 @@
 04_resumo_2	sem achados
 04_resumo_3	sem achados
 04_resumo_4	sem achados
-99_falha	sem achados
+05_tempo	sem achados
+06_estimativa_no_campo	sem achados
+07_mapa	sem achados
+08_historico	sem achados
+09_historico_1	sem achados
+09_historico_2	sem achados
+09_historico_3	sem achados
+10_mercado	sem achados
+11_mercado_1	sem achados
+12_sobre	There were 2 accessibility results:
+12_sobre	View with bounds: [95,1022][985,1143]: This item's height is 46dp. Consider making the height of this touch target 48dp or larger. Reported by com.google.android.apps.common.testing.accessibility.framework.checks.TouchTargetSizeCheck,
+12_sobre	View with bounds: [95,1896][985,2012]: This item's height is 44dp. Consider making the height of this touch target 48dp or larger. Reported by com.google.android.apps.common.testing.accessibility.framework.checks.TouchTargetSizeCheck
+13_sem_internet	sem achados
+14_mapa_sem_internet	sem achados
+15_mercado_sem_internet	sem achados

@@ -42,7 +42,7 @@
   },
   {
    "item": "fonte 200%: Resumo abre",
-   "ok": false,
+   "ok": true,
    "detalhe": ""
   },
   {
@@ -87,7 +87,7 @@
   },
   {
    "item": "a internet do emulador voltou",
-   "ok": false,
+   "ok": true,
    "detalhe": ""
   },
   {
@@ -111,11 +111,9 @@
   },
   "r04_resumo_1": {
    "alvos_pequenos": [
-    "View (379×3 dp)"
+    "View (379×19 dp)"
    ],
-   "sem_rotulo": [
-    "View em (42,128)"
-   ]
+   "sem_rotulo": []
   },
   "r04_resumo_2": {
    "alvos_pequenos": [],
@@ -204,26 +202,26 @@
   "altura_px": 2400,
   "densidade_dpi": 420,
   "apk_mb": 27.6,
-  "partida_fria_primeira_ms": 945,
-  "partida_fria_sem_municipio_ms": 752.0,
-  "dados_do_municipio_s": 5.2,
-  "memoria_resumo_kb": 40371,
+  "partida_fria_primeira_ms": 1827,
+  "partida_fria_sem_municipio_ms": 1456.5,
+  "dados_do_municipio_s": 5.6,
+  "memoria_resumo_kb": 40991,
   "rolagem_resumo": {
-   "quadros": 213.0,
-   "lentos_pct": 77.0,
-   "p50_ms": 44.0,
-   "p90_ms": 81.0,
-   "p99_ms": 117.0
-  },
-  "rolagem_historico": {
-   "quadros": 177.0,
-   "lentos_pct": 80.23,
-   "p50_ms": 53.0,
+   "quadros": 200.0,
+   "lentos_pct": 80.5,
+   "p50_ms": 48.0,
    "p90_ms": 89.0,
    "p99_ms": 133.0
   },
-  "memoria_depois_das_abas_kb": 85774,
-  "partida_fria_com_municipio_ms": 904,
+  "rolagem_historico": {
+   "quadros": 171.0,
+   "lentos_pct": 84.21,
+   "p50_ms": 57.0,
+   "p90_ms": 97.0,
+   "p99_ms": 133.0
+  },
+  "memoria_depois_das_abas_kb": 93989,
+  "partida_fria_com_municipio_ms": 794,
   "monkey": {
    "eventos": 3000,
    "falhas": 0,

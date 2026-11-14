@@ -2,7 +2,7 @@
 
 | Verificação | Resultado | Detalhe |
 |---|---|---|
-| API responde | ok | 200 em 84 ms |
+| API responde | ok | 200 em 221 ms |
 | API serve a correção da main (Pau D'Arco projeta 2026–2028) | ok |  |
 | lista com os 38 municípios | ok | 38 |
 | previsao: sem erro | ok | 0 de 38 |
@@ -32,117 +32,117 @@
 | entrada estranha: simulação de município inexistente | ok | HTTP 404 |
 | entrada estranha: rota inexistente | ok | HTTP 404 |
 | mapa não reflete HTML vindo da URL | ok | 200 |
-| 30 requisições simultâneas sem erro | ok | p95 938 ms |
+| 30 requisições simultâneas sem erro | ok | p95 1113 ms |
 | HTTP sem criptografia redireciona para HTTPS | ok | 301 |
 
 ## Rotas (duas passadas de aquecimento antes)
 
 | Rota | n | erros | p50 (ms) | p95 (ms) | KB | comprimido |
 |---|---|---|---|---|---|---|
-| previsao | 38 | 0 | 34.0 | 63.0 | 2.1 | 38/38 |
-| financas | 38 | 0 | 103.0 | 1198.0 | 1.0 | 38/38 |
-| municipios | 5 | 0 | 30.0 | 33.0 | 0.6 | 5/5 |
-| kpis_economia | 5 | 0 | 33.0 | 36.0 | 0.9 | 5/5 |
-| mercado 1d | 5 | 0 | 35.0 | 36.0 | 7.8 | 5/5 |
-| mercado 1mo | 3 | 0 | 31.0 | 33.0 | 4.4 | 3/3 |
-| contador | 5 | 0 | 29.0 | 57.0 | 1.1 | 5/5 |
-| avisos (geocode) | 3 | 0 | 28.0 | 29.0 | 0.1 | 3/3 |
-| avisos (lat/lon) | 3 | 0 | 29.0 | 29.0 | 0.1 | 3/3 |
-| mapa/render | 5 | 0 | 48.0 | 55.0 | 88.0 | 5/5 |
+| previsao | 38 | 0 | 104.0 | 134.0 | 2.1 | 38/38 |
+| financas | 38 | 0 | 103.0 | 599.0 | 1.0 | 38/38 |
+| municipios | 5 | 0 | 92.0 | 103.0 | 0.6 | 5/5 |
+| kpis_economia | 5 | 0 | 93.0 | 102.0 | 0.9 | 5/5 |
+| mercado 1d | 5 | 0 | 90.0 | 94.0 | 7.8 | 5/5 |
+| mercado 1mo | 3 | 0 | 89.0 | 90.0 | 4.4 | 3/3 |
+| contador | 5 | 0 | 89.0 | 109.0 | 1.1 | 5/5 |
+| avisos (geocode) | 3 | 0 | 89.0 | 90.0 | 0.1 | 3/3 |
+| avisos (lat/lon) | 3 | 0 | 89.0 | 89.0 | 0.1 | 3/3 |
+| mapa/render | 5 | 0 | 110.0 | 111.0 | 88.0 | 5/5 |
 
 ## Outras medidas
 
 ```
 {
- "ping_inicial_ms": 84,
+ "ping_inicial_ms": 221,
  "entradas_estranhas": [
   {
    "caso": "município inexistente",
    "status": "404",
-   "ms": 31
+   "ms": 89
   },
   {
    "caso": "nome com 5.000 letras",
    "status": "404",
-   "ms": 31
+   "ms": 112
   },
   {
    "caso": "aspas e ponto e vírgula",
    "status": "403",
-   "ms": 36
+   "ms": 108
   },
   {
    "caso": "caminho com ../",
    "status": "404",
-   "ms": 33
+   "ms": 145
   },
   {
    "caso": "emoji",
    "status": "404",
-   "ms": 29
+   "ms": 89
   },
   {
    "caso": "finanças de município inexistente",
    "status": "200",
-   "ms": 28
+   "ms": 89
   },
   {
    "caso": "avisos sem parâmetros",
    "status": "400",
-   "ms": 34
+   "ms": 87
   },
   {
    "caso": "avisos com lat não numérica",
    "status": "422",
-   "ms": 32
+   "ms": 87
   },
   {
    "caso": "avisos fora da Terra",
    "status": "200",
-   "ms": 36
+   "ms": 89
   },
   {
    "caso": "avisos com geocode estranho",
    "status": "200",
-   "ms": 30
+   "ms": 89
   },
   {
    "caso": "mercado com período inválido",
    "status": "400",
-   "ms": 30
+   "ms": 88
   },
   {
    "caso": "simulação sem corpo",
    "status": "422",
-   "ms": 30
+   "ms": 88
   },
   {
    "caso": "simulação com tipos errados",
    "status": "422",
-   "ms": 34
+   "ms": 88
   },
   {
    "caso": "simulação com fator enorme",
    "status": "200",
-   "ms": 38
+   "ms": 111
   },
   {
    "caso": "simulação de município inexistente",
    "status": "404",
-   "ms": 31
+   "ms": 91
   },
   {
    "caso": "rota inexistente",
    "status": "404",
-   "ms": 28
+   "ms": 87
   }
  ],
  "simultaneas_30": {
   "erros": 0,
-  "total_ms": 968,
-  "p50_ms": 852.0,
-  "p95_ms": 938.0,
-  "max_ms": 940
+  "total_ms": 1156,
+  "p50_ms": 925.0,
+  "p95_ms": 1113.0,
+  "max_ms": 1139
  },
  "cabecalhos_ping": {
   "access-control-allow-origin": "*",

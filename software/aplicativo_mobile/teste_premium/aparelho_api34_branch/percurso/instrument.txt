@@ -2,23 +2,10 @@
 com.agrointeligencia.app.PercursoNoAparelhoTest:s_glBindAttribLocation: bind attrib 0 name position
 s_glBindAttribLocation: bind attrib 1 name color
 s_glBindAttribLocation: bind attrib 2 name localCoord
-.
-Error in percorreOutroEstado(com.agrointeligencia.app.PercursoNoAparelhoTest):
-androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 150000 ms
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:887)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:482)
-	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreOutroEstado(PercursoNoAparelhoTest.kt:209)
+..
 
+Time: 74.968
 
-Time: 230.808
-There was 1 failure:
-1) percorreOutroEstado(com.agrointeligencia.app.PercursoNoAparelhoTest)
-androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 150000 ms
-	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:887)
-	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:482)
-	at com.agrointeligencia.app.PercursoNoAparelhoTest.percorreOutroEstado(PercursoNoAparelhoTest.kt:209)
-
-FAILURES!!!
-Tests run: 2,  Failures: 1
+OK (2 tests)
 
 

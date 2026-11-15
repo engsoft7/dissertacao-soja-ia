@@ -7,7 +7,10 @@
 #      ganhar uma safra que o último teste não tinha.
 #
 # Roda no dia 20 de cada mês e por disparo manual. Quando algum dos dois tem
-# resultado novo, abre um PR com os arquivos: nada entra na main sem revisão.
+# resultado novo, abre um PR com os arquivos e o mergeia na hora: o PR fica
+# como registro do que mudou, e uma issue lembra de levar os números a
+# TRABALHOS_FUTUROS.md. São resultados novos, em arquivos novos; nada do que a
+# dissertação já reporta é reescrito.
 name: Confere safra nova
 
 on:
@@ -24,6 +27,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
   confere:
@@ -69,5 +73,8 @@ jobs:
           git add pesquisa/08_previsao_futura/confere_projecao_*.json pesquisa/08_previsao_futura/oni_base_produto.json 2>/dev/null || true
           git commit -m "Confere safra nova: projeção${{ steps.projecao.outputs.novos }}; ONI até ${{ steps.oni.outputs.novo }}"
           git push origin "$ramo"
-          gh pr create --base main --head "$ramo" --title "Safra nova conferida: projeção e ONI" \
-            --body "Gerado pelo workflow confere-safra-nova.yml. Projeções conferidas:${{ steps.projecao.outputs.novos }}. ONI repetido na base do produto até a safra ${{ steps.oni.outputs.novo }}. Atualize TRABALHOS_FUTUROS.md com os números."
+          pr=$(gh pr create --base main --head "$ramo" --title "Safra nova conferida: projeção e ONI" \
+            --body "Gerado pelo workflow confere-safra-nova.yml. Projeções conferidas:${{ steps.projecao.outputs.novos }}. ONI repetido na base do produto até a safra ${{ steps.oni.outputs.novo }}. Atualize TRABALHOS_FUTUROS.md com os números.")
+          gh pr merge --squash --delete-branch "$pr"
+          gh issue create --title "Safra nova conferida: levar os números a TRABALHOS_FUTUROS.md" \
+            --body "O PR $pr entrou na main com a conferência da safra nova (projeção${{ steps.projecao.outputs.novos }}; ONI até ${{ steps.oni.outputs.novo }}). Leve os números a pesquisa/08_previsao_futura/TRABALHOS_FUTUROS.md e feche esta issue."

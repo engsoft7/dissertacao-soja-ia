@@ -1,5 +1,6 @@
 package com.agrointeligencia.app
 
+import androidx.compose.ui.res.stringResource
 import android.os.Bundle
 import android.content.Context
 import android.content.SharedPreferences
@@ -90,7 +91,7 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
                 Icon(Icons.Filled.Verified, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Origem dos Dados & IA", 
+                    text = stringResource(R.string.sobre_titulo),
                     fontSize = 16.sp, 
                     fontWeight = FontWeight.Bold, 
                     color = MaterialTheme.colorScheme.onBackground
@@ -112,12 +113,8 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
             // a série de custos de soja de 1997 a 2026 tem 35 praças em 13 UFs e
             // nenhuma no Pará (conferido em 06/11/2026, pesquisa/dados/conab/LEIA-ME.md).
             val estado = estadoDoApp(kpis?.uf)
-            Text(text = "Preço padrão: cotação do dia na praça ${estado.de} mais perto (Agrolink); sem ela, o preço " +
-                        "de porteira da CONAB. Custo: " + (kpis?.fonte_preco ?: "CONAB (levantamento indisponível offline)") +
-                        (if (estado.uf == "PA") ". A CONAB não levanta custo de soja no Pará; Pedro Afonso (TO) é a " +
-                                                "praça mais próxima. "
-                         else ", a praça da CONAB no estado mais perto do município. ") +
-                        "Preço e custo são editáveis na Viabilidade.",
+            Text(text = stringResource(if (estado.uf == "PA") R.string.sobre_preco_custo_pa else R.string.sobre_preco_custo_outro,
+                                       estado.de, estado.nome, kpis?.fonte_preco ?: stringResource(R.string.sobre_custo_offline)),
                  fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
             kpis?.nota_preco?.let {
                 Text(text = it, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -139,35 +136,35 @@ fun MetodologiaCard(kpis: FinancaResponse?, validacao: ValidacaoModelo?) {
             // histórico municipal somado à tendência, e omitir isso superestimaria o
             // que a ferramenta entrega.
             if (validacao != null) {
-                val r2 = String.format("%.3f", validacao.r2).replace('.', ',')
-                val r2Ref = String.format("%.3f", validacao.r2_referencia).replace('.', ',')
-                val rrmse = String.format("%.1f", validacao.rrmse_pct).replace('.', ',')
+                val r2 = String.format(LOCAL_NUMEROS, "%.3f", validacao.r2)
+                val r2Ref = String.format(LOCAL_NUMEROS, "%.3f", validacao.r2_referencia)
+                val rrmse = String.format(LOCAL_NUMEROS, "%.1f", validacao.rrmse_pct)
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Column {
-                        Text(text = "R² do modelo", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = stringResource(R.string.sobre_r2_modelo), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(text = r2, fontSize = 14.sp, color = (if(isDark) Color(0xFFbc8cff) else Color(0xFF7c3aed)), fontWeight = FontWeight.Bold)
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(text = "R² da tendência (referência)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = stringResource(R.string.sobre_r2_tendencia), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(text = r2Ref, fontSize = 14.sp, color = (if(isDark) Color(0xFF8b949e) else Color(0xFF57606a)), fontWeight = FontWeight.Bold)
                     }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "Erro típico de ± ${validacao.rmse_kg_ha.roundToInt()} kg/ha, ou $rrmse% da produtividade média, " +
-                           "sobre ${validacao.registros} registros de ${validacao.municipios} municípios.",
+                    text = stringResource(R.string.sobre_erro, validacao.rmse_kg_ha.roundToInt(), rrmse,
+                                          validacao.registros, validacao.municipios),
                     fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp
                 )
             } else {
                 Text(
-                    text = "Métricas de validação indisponíveis sem conexão com o servidor.",
+                    text = stringResource(R.string.sobre_sem_metricas),
                     fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp
                 )
             }
             
             Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "Aviso Legal: Este é um projeto de pesquisa acadêmica em Inteligência Artificial. As estimativas projetadas pela IA e os valores financeiros não configuram recomendação de investimento ou consultoria agronômica. Consulte profissionais certificados antes de tomar decisões financeiras reais.",
+                text = stringResource(R.string.sobre_aviso_legal),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,

@@ -1,5 +1,6 @@
 package com.agrointeligencia.app
 
+import androidx.compose.ui.res.stringResource
 import android.os.Bundle
 import android.content.Context
 import android.content.SharedPreferences
@@ -105,7 +106,7 @@ fun TituloSecao(icone: ImageVector, texto: String, modifier: Modifier = Modifier
 
 /** Sem dados para mostrar: o que aconteceu, o que ainda funciona e o botão de tentar de novo. */
 @Composable
-fun AvisoSemDados(titulo: String, texto: String, rotulo: String = "Tentar de novo", aoTentar: () -> Unit) {
+fun AvisoSemDados(titulo: String, texto: String, rotulo: String = stringResource(R.string.tentar_de_novo), aoTentar: () -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
@@ -141,21 +142,55 @@ fun CarregandoDados(municipio: String?) {
     ) {
         CircularProgressIndicator()
         Spacer(Modifier.height(12.dp))
-        Text("Carregando os dados" + (municipio?.let { " de $it" } ?: "") + "…", fontSize = 15.sp,
+        Text(municipio?.let { stringResource(R.string.carregando_dados_de, it) } ?: stringResource(R.string.carregando_dados),
+             fontSize = 15.sp,
              fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, textAlign = TextAlign.Center)
-        Text("Na primeira consulta do dia o servidor pode levar até um minuto para responder.",
+        Text(stringResource(R.string.servidor_acorda),
              fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center,
              lineHeight = 16.sp, modifier = Modifier.padding(top = 4.dp))
     }
 }
 
-// Números no formato brasileiro em qualquer aparelho: "3.230", e não "3,230"
-// num celular configurado em inglês.
-internal val PT_BR = java.util.Locale("pt", "BR")
+// Números no formato do idioma em que o app abriu: "3.230" em português (e em
+// qualquer idioma sem tradução, que mostra o app em português) e "3,230" em
+// inglês. MainActivity e AlertasJob leem formato_numeros dos recursos; fora
+// deles (testes de unidade, capturas) vale o português.
+object Formatos {
+    @Volatile
+    var locale: java.util.Locale = java.util.Locale("pt", "BR")
+        private set
+    /** Dia e mês curtos ("26/10"; em inglês, "Oct 26"). */
+    @Volatile
+    var diaMes: String = "dd/MM"
+        private set
+    /** Dia, mês e hora ("26/10 às 00:00"; em inglês, "Oct 26 at 00:00"). */
+    @Volatile
+    var dataHora: String = "dd/MM 'às' HH:mm"
+        private set
 
-fun milhar(v: Double): String = String.format(PT_BR, "%,d", v.roundToInt())
+    /** O separador decimal do idioma: "," em português, "." em inglês. */
+    val separadorDecimal: Char get() = java.text.DecimalFormatSymbols.getInstance(locale).decimalSeparator
 
-fun reais(v: Double): String = String.format(PT_BR, "%,.2f", v)
+    fun doIdioma(context: android.content.Context) {
+        locale = java.util.Locale.forLanguageTag(context.getString(R.string.formato_numeros))
+        diaMes = context.getString(R.string.formato_dia_mes)
+        dataHora = context.getString(R.string.formato_data_hora)
+    }
+}
+
+internal val LOCAL_NUMEROS: java.util.Locale get() = Formatos.locale
+
+/**
+ * Um texto de strings.xml e os seus argumentos: as contas sem Context
+ * (ModoAutomatico.kt, por exemplo) devolvem isto, e a tela escreve no idioma.
+ */
+data class TextoDoApp(val id: Int, val args: List<Any> = emptyList()) {
+    fun em(context: android.content.Context): String = context.getString(id, *args.toTypedArray())
+}
+
+fun milhar(v: Double): String = String.format(LOCAL_NUMEROS, "%,d", v.roundToInt())
+
+fun reais(v: Double): String = String.format(LOCAL_NUMEROS, "%,.2f", v)
 
 /**
  * Reais sem centavos, com o sinal antes do símbolo: "−R$ 86", e não "R$ -86".
@@ -167,10 +202,16 @@ fun reaisInteiros(v: Double): String =
 
 private val MESES_CURTOS = listOf("jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez")
 
-/** "2026-10" -> "out/26"; com ano por extenso, "out/2026". */
+/**
+ * "2026-10" -> "out/26"; com ano por extenso, "out/2026". Em português, as
+ * abreviações sem ponto de MESES_CURTOS; nos outros idiomas, as do idioma
+ * ("Oct/26").
+ */
 fun mesCurto(mes: String, anoCompleto: Boolean = false): String {
     val (ano, m) = mes.split("-").let { it[0] to it[1].toInt() }
-    return MESES_CURTOS[m - 1] + "/" + if (anoCompleto) ano else ano.takeLast(2)
+    val nome = if (LOCAL_NUMEROS.language == "pt") MESES_CURTOS[m - 1]
+               else java.time.Month.of(m).getDisplayName(java.time.format.TextStyle.SHORT, LOCAL_NUMEROS)
+    return nome + "/" + if (anoCompleto) ano else ano.takeLast(2)
 }
 
 /** Amostra de cor e rótulo de uma legenda de gráfico. */

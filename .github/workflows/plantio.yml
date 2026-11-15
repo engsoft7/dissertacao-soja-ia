@@ -1,0 +1,113 @@
+# Janela de plantio da soja: ZARC (tábua de risco, dado aberto do Ministério da
+# Agricultura) e calendário de semeadura e vazio sanitário (portaria da SDA/MAPA,
+# lida do Diário Oficial). coleta_plantio.py grava os arquivos em
+# pesquisa/dados/plantio/, que a API e o painel leem.
+#
+# - Toda semana, na main: a coleta procura a portaria mais nova no Diário
+#   Oficial e a tábua do ZARC no catálogo, e troca de safra sozinha. Se algo
+#   mudou, os testes da API rodam com os dados novos, e o PR é aberto e
+#   mergeado. Uma portaria da mesma safra que não traz o calendário inteiro (uma
+#   alteração, por exemplo) vira issue; uma coleta que falha, também.
+# - Numa branch de trabalho (push no coletor ou neste workflow): grava os
+#   arquivos na própria branch.
+name: Janela de plantio
+
+on:
+  push:
+    branches-ignore: [main]
+    paths:
+      - "software/automacao_github/coleta_plantio.py"
+      - ".github/workflows/plantio.yml"
+  schedule:
+    - cron: "41 11 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: plantio-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  coleta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet requests pytest
+      - name: Testa a leitura da portaria
+        run: python -m pytest software/automacao_github/test_coleta_plantio.py -q
+      - name: Coleta o ZARC e o calendário
+        run: python software/automacao_github/coleta_plantio.py --aviso "$RUNNER_TEMP/aviso_plantio.md"
+      # Os PRs abertos pelo próprio Actions não disparam o workflow de testes:
+      # os da API rodam aqui, com os dados que acabaram de ser gravados.
+      - name: Testa a API com os dados novos
+        run: python -m pytest software/api_backend/test_plantio.py -q
+
+      - name: Grava na branch de trabalho
+        if: github.ref_name != github.event.repository.default_branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pesquisa/dados/plantio
+          if git diff --cached --quiet; then echo "Nada novo."; exit 0; fi
+          git commit -m "Janela de plantio: ZARC e calendário de semeadura (${{ github.run_id }})"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin "$GITHUB_REF_NAME" && git push origin HEAD:"$GITHUB_REF_NAME" && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 5))
+          done
+          exit 1
+
+      - name: Abre o PR na main
+        id: cpr
+        if: github.ref_name == github.event.repository.default_branch
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automacao/janela-de-plantio
+          add-paths: pesquisa/dados/plantio/*
+          commit-message: "Janela de plantio: ZARC e calendário de semeadura atualizados"
+          title: "Janela de plantio: ZARC e calendário de semeadura atualizados"
+          body: |
+            Gerado pelo workflow `plantio.yml` a partir da tábua de risco do ZARC
+            (dados abertos do Ministério da Agricultura) e da portaria do
+            calendário de semeadura e vazio sanitário, lida do Diário Oficial.
+          delete-branch: true
+
+      - name: Mergeia o PR
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr merge --squash --delete-branch "${{ steps.cpr.outputs.pull-request-number }}" \
+            --repo "${{ github.repository }}"
+
+      # Uma portaria da mesma safra que a coleta não conseguiu ler inteira: uma
+      # issue por portaria, que fica fechada se alguém já a conferiu.
+      - name: Abre a issue do aviso
+        if: github.ref_name == github.event.repository.default_branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          f="$RUNNER_TEMP/aviso_plantio.md"
+          [ -s "$f" ] || { echo "Sem aviso."; exit 0; }
+          titulo=$(head -1 "$f")
+          n=$(gh issue list --state all --search "in:title \"$titulo\"" --json number -q '.[0].number')
+          if [ -n "$n" ]; then echo "A issue #$n já trata desta portaria."; exit 0; fi
+          { tail -n +2 "$f"; echo; echo "Execução: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"; } > "$RUNNER_TEMP/corpo.md"
+          gh issue create --title "$titulo" --body-file "$RUNNER_TEMP/corpo.md"
+
+      - name: Abre uma issue se a coleta falhou
+        if: failure() && github.ref_name == github.event.repository.default_branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          titulo="Janela de plantio: a coleta falhou"
+          corpo="A coleta da janela de plantio (\`plantio.yml\`) falhou em $(date -u +%d/%m/%Y): [execução]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID). O produto segue com os dados da última coleta que deu certo. Uma portaria de safra nova que o coletor não consegue ler também cai aqui; o log diz o que não bateu."
+          n=$(gh issue list --state open --search "in:title \"$titulo\"" --json number -q '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$corpo"; else gh issue create --title "$titulo" --body "$corpo"; fi

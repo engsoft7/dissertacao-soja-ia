@@ -27,7 +27,9 @@ class FontesOficiaisTest {
 
     @Test
     fun avisoDeNaoAfiliacao() {
-        assertTrue(AVISO_NAO_GOVERNO.contains("não é um aplicativo do governo"))
+        // O aviso da tela Sobre vem de strings.xml, nos dois idiomas.
+        assertTrue(File("src/main/res/values/strings.xml").readText().contains("não é um aplicativo do governo"))
+        assertTrue(File("src/main/res/values-en/strings.xml").readText().contains("is not a government app"))
         assertTrue(loja.contains("NÃO é um aplicativo do governo"))
     }
 }

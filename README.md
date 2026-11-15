@@ -209,7 +209,8 @@ software/api_backend/
   estados.py                              os cinco estados do produto; ?uf= nas rotas
   prepara_estados.py                      estados prontos na build (modelo e históricos)
   financas.py                             cálculos financeiros (VTN, custos)
-  mercado.py, precos.py, precos_para.py   Chicago em reais, cotações por praça, preço estimado do Pará
+  mercado.py, precos_para.py              Chicago em reais, praças do Pará (Agrolink), preço estimado do Pará
+  plantio.py                              janela de plantio: calendário da portaria e risco do ZARC
   tempo.py, avisos_inmet.py               tempo na lavoura, janela de pulverização, avisos
   historico_oficial.py, validacao.py      série oficial do IBGE e validação das entradas
 software/dashboard_web/
@@ -601,11 +602,37 @@ como registro auditável de cada atualização; para desfazer uma, use
 `git revert` no commit correspondente. Para voltar ao merge manual, remova o
 passo "Mergeia o PR automaticamente" do workflow.
 
-Duas situações escapam do merge automático de propósito, porque mexem em números
-que a dissertação reporta: quando a revisão do IBGE altera as métricas de
-validação (Tabela 6 e subseção 4.9), e quando a CONAB revisa um levantamento já
-publicado. Nesses casos o PR fica aberto para conferência humana. Levantamento
-**novo** da CONAB entra sozinho — o produto declara em tela qual está usando.
+Antes do merge, o próprio workflow roda os testes do repositório com os dados
+novos (o PR aberto pelo Actions não dispara o workflow de testes); se algum
+falhar, o PR fica aberto e uma issue avisa. Desde 14/11/2026 não há mais
+exceções ao merge automático: quando a revisão do IBGE muda as métricas de
+validação da base do produto, ou a CONAB revisa um levantamento já publicado, o
+PR entra do mesmo jeito e uma issue lembra de atualizar os números que a
+subseção 4.9 da dissertação e o Anexo 01 citam. A base congelada da dissertação
+(Tabela 6) não passa por este ciclo e não muda.
+
+### O app vivo: o que roda sozinho
+
+| O quê | Quando | Workflow |
+|---|---|---|
+| Base do IBGE dos cinco estados, satélite da safra nova, El Niño, CONAB | todo dia 15, com merge automático | `atualiza-dados.yml` |
+| Janela de plantio: portaria do calendário de semeadura e tábua do ZARC. O calendário passa sozinho para a safra nova quando o Diário Oficial publica a portaria; a tábua do ZARC, quando o Ministério a publica (até lá, segue a anterior, e o app e o painel dizem isso). Uma portaria da mesma safra que altere o calendário vira issue para conferir | toda segunda-feira, com testes e merge automático; issue quando a coleta falha | `plantio.yml` |
+| Conferência da safra nova (projeção e ONI) | todo dia 20, com merge automático | `confere-safra-nova.yml` |
+| Fontes externas (cotações, Agrolink, Open-Meteo, INMET, IBGE, API) e o certificado do portal da CONAB | todo dia; abre issue quando algo falha ou o portal da CONAB volta | `monitor-fontes.yml` |
+| Release, APK e AAB assinados, DOI no Zenodo e envio à Google Play | a cada merge que sobe a versão do app (`versionName`) | `publica-versao.yml`, `publica-apk.yml`, `registra-doi.yml` |
+| API e painel acordados | a cada 10 min e a cada 4 h | `mantem-api-acordada.yml`, `mantem-painel-acordado.yml` |
+
+A base nova chega ao aplicativo pela API, que o Render publica a cada merge na
+`main`, sem versão nova do app. Versão nova só sai quando o código do app muda
+e a versão sobe.
+
+**Envio à Google Play (configuração única):** no Google Cloud, crie uma conta de
+serviço com uma chave JSON; no Play Console (**Usuários e permissões**), convide
+o e-mail dessa conta com permissão para lançar versões do app; no GitHub
+(**Settings → Secrets and variables → Actions**), crie o segredo
+`PLAY_SERVICE_ACCOUNT_JSON` com o conteúdo do JSON. A faixa padrão é a de
+produção; para outra, crie a variável `PLAY_FAIXA` (`internal`, `alpha` ou
+`beta`). Sem o segredo, o `.aab` fica anexado ao Release para o envio manual.
 
 Para conferir a credencial na hora: **Actions → Atualiza base de dados →
 Run workflow**, marque **"Testar a credencial do Earth Engine"** e rode. O log

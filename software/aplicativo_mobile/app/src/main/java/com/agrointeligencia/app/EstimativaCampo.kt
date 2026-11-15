@@ -54,6 +54,8 @@ import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -95,7 +97,6 @@ private const val PREF_CAMPO = "estimativa_campo"
 // Precisão mínima para aceitar um canto do talhão. Com 20 m de erro em cada
 // canto, um talhão de 10 ha já erra a área em mais de 10%.
 private const val PRECISAO_MAX_M = 20f
-private val BR: Locale = Locale.forLanguageTag("pt-BR")
 
 /** O que a tela guarda entre uma abertura e outra do aplicativo. */
 data class EstadoCampo(
@@ -110,12 +111,13 @@ data class EstadoCampo(
 
 private fun novoTalhao(): String = UUID.randomUUID().toString().replace("-", "").take(12)
 
-private fun String.numero(): Double? = trim().replace(',', '.').toDoubleOrNull()
+/** O número de um campo, no separador decimal do idioma (numeroDigitado, CadernoCalculo.kt). */
+private fun String.numero(): Double? = numeroDigitado(this)
 
-private fun decimal(v: Double, casas: Int = 1): String = String.format(BR, "%,.${casas}f", v)
+private fun decimal(v: Double, casas: Int = 1): String = String.format(LOCAL_NUMEROS, "%,.${casas}f", v)
 
-/** Para pôr de volta num campo: sem ponto de milhar, que numero() leria como decimal. */
-private fun paraCampo(v: Double, casas: Int): String = String.format(BR, "%.${casas}f", v)
+/** Para pôr de volta num campo: sem separador de milhar, que um número sem decimais deixaria ambíguo. */
+private fun paraCampo(v: Double, casas: Int): String = String.format(LOCAL_NUMEROS, "%.${casas}f", v)
 
 @Suppress("SENSELESS_COMPARISON")
 private fun lerEstado(context: Context): EstadoCampo {
@@ -197,15 +199,13 @@ fun EstimativaCampoTela(
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = aoVoltar) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar ao Resumo")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.voltar_ao_resumo))
             }
-            Text("Estimativa no campo", fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
+            Text(stringResource(R.string.campo_titulo), fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
                  color = MaterialTheme.colorScheme.onBackground)
         }
         Text(
-            "Conte plantas e vagens em alguns pontos do talhão e o app calcula a produtividade " +
-            "da sua lavoura, em sacas e em reais. Faça de 5 a 10 pontos espalhados, longe das bordas, " +
-            "a partir do enchimento de grãos (R5–R6), quando as vagens já estão formadas.",
+            stringResource(R.string.campo_intro),
             fontSize = 13.sp, lineHeight = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
@@ -226,22 +226,23 @@ fun EstimativaCampoTela(
         ) { pontos.add(it) }
 
         if (pontos.isNotEmpty()) {
-            CartaoCampo("Pontos guardados", Icons.Filled.DoneAll) {
+            CartaoCampo(stringResource(R.string.campo_pontos_guardados), Icons.Filled.DoneAll) {
                 pontos.forEachIndexed { i, p ->
                     val kg = if (p.valido() && parametros.espacamento > 0)
                         kgPorHectare(plantasPorM2(p, parametros.espacamento), vagensPorPlanta(p),
                                      parametros.graosPorVagem, parametros.pesoMilGraos) else null
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Column(Modifier.weight(1f)) {
-                            Text("Ponto ${i + 1}" + (kg?.let { ": ${decimal(it / 60, 1)} sc/ha" } ?: ""),
+                            Text(kg?.let { stringResource(R.string.campo_ponto_sc, i + 1, decimal(it / 60, 1)) }
+                                     ?: stringResource(R.string.campo_ponto, i + 1),
                                  fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
                                  color = MaterialTheme.colorScheme.onSurface)
-                            Text("${p.plantas} plantas em ${decimal(p.metrosDeLinha, 1)} m · " +
-                                 "${p.vagens} vagens em ${p.arrancadas} plantas",
+                            Text(stringResource(R.string.campo_ponto_detalhe, p.plantas, decimal(p.metrosDeLinha, 1),
+                                                p.vagens, p.arrancadas),
                                  fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         IconButton(onClick = { pontos.removeAt(i) }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Apagar o ponto ${i + 1}",
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.campo_apagar_ponto, i + 1),
                                  tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
@@ -249,20 +250,18 @@ fun EstimativaCampoTela(
             }
         }
 
-        CartaoCampo("Cultivar e espaçamento", Icons.Filled.Tune) {
+        CartaoCampo(stringResource(R.string.campo_cultivar), Icons.Filled.Tune) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                CampoNumero(espacamento, { espacamento = it }, "Entre linhas", Modifier.weight(1f))
-                CampoNumero(graos, { graos = it }, "Grãos/vagem", Modifier.weight(1f))
-                CampoNumero(pesoMil, { pesoMil = it }, "Mil grãos (g)", Modifier.weight(1f), inteiro = true)
+                CampoNumero(espacamento, { espacamento = it }, stringResource(R.string.campo_entre_linhas), Modifier.weight(1f))
+                CampoNumero(graos, { graos = it }, stringResource(R.string.campo_graos_vagem), Modifier.weight(1f))
+                CampoNumero(pesoMil, { pesoMil = it }, stringResource(R.string.campo_mil_graos), Modifier.weight(1f), inteiro = true)
             }
-            Nota("Espaçamento entre linhas em metros (0,45 = 45 cm). " +
-                 "Grãos por vagem e peso de mil grãos mudam com a cultivar e com o ano. Os valores " +
-                 "iniciais são típicos; se você conhece os da sua cultivar, use os seus.")
+            Nota(stringResource(R.string.campo_cultivar_nota))
         }
 
-        CartaoCampo("Área do talhão", Icons.Filled.Straighten) {
+        CartaoCampo(stringResource(R.string.campo_area_talhao), Icons.Filled.Straighten) {
             var medindo by rememberSaveable { mutableStateOf(false) }
-            CampoNumero(area, { area = it }, "Área (ha)", Modifier.fillMaxWidth())
+            CampoNumero(area, { area = it }, stringResource(R.string.campo_area_ha), Modifier.fillMaxWidth())
             if (medindo) {
                 MedicaoGps(
                     aoConcluir = { ha -> area = decimal(ha, 2); medindo = false },
@@ -272,7 +271,7 @@ fun EstimativaCampoTela(
                 OutlinedButton(onClick = { medindo = true }, modifier = Modifier.padding(top = 8.dp)) {
                     Icon(Icons.Filled.MyLocation, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Medir andando com o GPS")
+                    Text(stringResource(R.string.campo_medir_gps))
                 }
             }
         }
@@ -346,27 +345,21 @@ private fun NovoPonto(
     val motivo = if (automatico && contada != null && !conferida && ponto.vagens == contada.vagens)
         motivoParaConferir(qualidade, contada.vagens, ponto.arrancadas, automaticosAntes, limites) else null
 
-    CartaoCampo("Ponto $numero", Icons.Filled.CameraAlt) {
-        Text("1. Plantas na linha", fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
+    CartaoCampo(stringResource(R.string.campo_ponto, numero), Icons.Filled.CameraAlt) {
+        Text(stringResource(R.string.campo_plantas_na_linha), fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
              color = MaterialTheme.colorScheme.onSurface)
-        Nota("Estique uma trena ao lado de uma linha e fotografe de cima. Toque em cada planta " +
-             "para marcar; toque de novo para desmarcar.")
+        Nota(stringResource(R.string.campo_plantas_nota))
         FotoParaContar("linha", fotoLinha, { fotoLinha = it; marcasLinha.clear() }, marcasLinha,
                        Color(0xFF16A34A)) { plantas = it.toString() }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
-            CampoNumero(plantas, { plantas = it }, "Plantas", Modifier.weight(1f), inteiro = true)
-            CampoNumero(metros, { metros = it }, "Em quantos metros", Modifier.weight(1f))
+            CampoNumero(plantas, { plantas = it }, stringResource(R.string.campo_plantas), Modifier.weight(1f), inteiro = true)
+            CampoNumero(metros, { metros = it }, stringResource(R.string.campo_em_metros), Modifier.weight(1f))
         }
 
         Spacer(Modifier.height(16.dp))
-        Text("2. Vagens por planta", fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
+        Text(stringResource(R.string.campo_vagens_por_planta), fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
              color = MaterialTheme.colorScheme.onSurface)
-        Nota("Arranque algumas plantas seguidas da mesma linha, deite sobre um pano escuro, " +
-             "sem sobrepor, e fotografe de cima. " +
-             (if (automatico) "O app conta as vagens sozinho assim que a foto chega; quando ele pedir, " +
-                              "confira tocando na foto. "
-              else "Toque em cada vagem com grão, ou use Contar sozinho e confira; ") +
-             "dois dedos ampliam a foto.")
+        Nota(stringResource(if (automatico) R.string.campo_vagens_nota_auto else R.string.campo_vagens_nota))
         FotoParaContar(
             "vagens", fotoVagens,
             { fotoVagens = it; marcasVagens.clear(); automatica = null; conferida = false; qualidade = null },
@@ -386,21 +379,21 @@ private fun NovoPonto(
             if (automatica == null || conferida) vagens = it.toString()
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
-            CampoNumero(arrancadas, { arrancadas = it }, "Plantas arrancadas", Modifier.weight(1f), inteiro = true)
-            CampoNumero(vagens, { vagens = it }, "Vagens contadas", Modifier.weight(1f), inteiro = true)
+            CampoNumero(arrancadas, { arrancadas = it }, stringResource(R.string.campo_plantas_arrancadas), Modifier.weight(1f),
+                        inteiro = true)
+            CampoNumero(vagens, { vagens = it }, stringResource(R.string.campo_vagens_contadas), Modifier.weight(1f), inteiro = true)
         }
 
         motivo?.let {
-            Text("Confira antes de guardar: $it. Marque as vagens sem marca, tire as erradas e toque em " +
-                 "Usar as marcas.",
+            Text(stringResource(R.string.campo_confira, it.em(context)),
                  fontSize = 13.sp, lineHeight = 18.sp, color = MaterialTheme.colorScheme.error,
                  modifier = Modifier.padding(top = 8.dp))
         }
         if (ponto.valido() && parametros.espacamento > 0) {
             val kg = kgPorHectare(plantasPorM2(ponto, parametros.espacamento), vagensPorPlanta(ponto),
                                   parametros.graosPorVagem, parametros.pesoMilGraos)
-            Text("Este ponto: ${decimal(plantasPorM2(ponto, parametros.espacamento), 1)} plantas/m², " +
-                 "${decimal(vagensPorPlanta(ponto), 1)} vagens/planta, ${decimal(kg / 60, 1)} sc/ha",
+            Text(stringResource(R.string.campo_este_ponto, decimal(plantasPorM2(ponto, parametros.espacamento), 1),
+                                decimal(vagensPorPlanta(ponto), 1), decimal(kg / 60, 1)),
                  fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface,
                  modifier = Modifier.padding(top = 10.dp))
         }
@@ -443,7 +436,7 @@ private fun NovoPonto(
             enabled = ponto.valido() && motivo == null,
             modifier = Modifier.fillMaxWidth().padding(top = 10.dp)
         ) {
-            Text("Guardar ponto e amostrar outro")
+            Text(stringResource(R.string.campo_guardar_ponto))
         }
     }
 }
@@ -498,19 +491,19 @@ private fun FotoParaContar(
             try {
                 camera.launch(uri)
             } catch (_: ActivityNotFoundException) {
-                aviso = "Este celular não tem aplicativo de câmera disponível. Use a galeria."
+                aviso = context.getString(R.string.campo_sem_camera)
             }
         }) {
             Icon(Icons.Filled.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
-            Text(if (foto == null) "Câmera" else "Nova foto")
+            Text(stringResource(if (foto == null) R.string.campo_camera else R.string.campo_nova_foto))
         }
         OutlinedButton(onClick = {
             galeria.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }) {
             Icon(Icons.Filled.PhotoLibrary, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
-            Text("Galeria")
+            Text(stringResource(R.string.campo_galeria))
         }
     }
     aviso?.let { Nota(it) }
@@ -521,7 +514,7 @@ private fun FotoParaContar(
         }
         val img = imagem
         if (img == null) {
-            Nota("Abrindo a foto…")
+            Nota(stringResource(R.string.campo_abrindo_foto))
         } else {
             Spacer(Modifier.height(8.dp))
             if (aoContarSozinho != null) {
@@ -556,52 +549,46 @@ private fun FotoParaContar(
                     if (contando) {
                         CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Contando…")
+                        Text(stringResource(R.string.campo_contando))
                     } else {
                         Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text(when {
-                            automatica != null -> "Contar sozinho de novo"
-                            modoAutomatico -> "Contar sozinho"
-                            else -> "Contar sozinho (teste)"
-                        })
+                        Text(stringResource(when {
+                            automatica != null -> R.string.campo_contar_de_novo
+                            modoAutomatico -> R.string.campo_contar_sozinho
+                            else -> R.string.campo_contar_teste
+                        }))
                     }
                 }
-                if (falhou) Nota("Não foi possível contar sozinho neste celular. Conte tocando nas vagens.")
+                if (falhou) Nota(stringResource(R.string.campo_contar_falhou))
             }
             ContadorNaFoto(img, marcas, cor) { aoContar(marcas.size) }
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text("${marcas.size} marcadas", fontWeight = FontWeight.Bold, fontSize = 14.sp,
+                Text(stringResource(R.string.campo_marcadas, marcas.size), fontWeight = FontWeight.Bold, fontSize = 14.sp,
                      color = cor, modifier = Modifier.weight(1f))
                 TextButton(onClick = { if (marcas.isNotEmpty()) { marcas.removeAt(marcas.lastIndex); aoContar(marcas.size) } },
-                           enabled = marcas.isNotEmpty()) { Text("Desfazer") }
-                TextButton(onClick = { marcas.clear(); aoContar(0) }, enabled = marcas.isNotEmpty()) { Text("Limpar") }
+                           enabled = marcas.isNotEmpty()) { Text(stringResource(R.string.campo_desfazer)) }
+                TextButton(onClick = { marcas.clear(); aoContar(0) }, enabled = marcas.isNotEmpty()) {
+                    Text(stringResource(R.string.campo_limpar))
+                }
             }
             automatica?.let { a ->
                 // Um modelo baixado traz a própria frase sobre de onde aprendeu e quanto erra.
                 val baixado = remember { modeloBaixado(context)?.takeIf { it.versao > VERSAO_EMBUTIDA } }
-                val origem = baixado?.nota
-                    ?: ("Ele aprendeu com fotos de plantas da China, onde erra em média 6%, e ainda não foi " +
-                        "conferido em lavouras do Pará.")
+                // A nota do modelo baixado vem do anúncio, em português, como foi publicada.
+                val origem = baixado?.nota ?: stringResource(R.string.campo_origem_embutido, 6)
                 if (!conferida) {
-                    Nota(if (modoAutomatico)
-                             "O contador contou ${a.vagens} vagens. $origem As marcas mostram onde viu algumas " +
-                             "delas. Para conferir, marque as vagens sem marca, tire as erradas e toque em " +
-                             "Usar as marcas."
-                         else
-                             "O contador estimou ${a.vagens} vagens; as marcas mostram onde viu algumas delas " +
-                             "(ele marca cerca de 6 em cada 10). $origem O número fica o do contador. Para contar " +
-                             "você mesmo, marque as vagens sem marca, tire as erradas e toque em Usar as marcas.")
+                    Nota(stringResource(if (modoAutomatico) R.string.campo_contou_auto else R.string.campo_contou_teste,
+                                        a.vagens, origem))
                     aoUsarMarcas?.let { usar ->
                         OutlinedButton(onClick = usar, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                            Text("Usar as marcas (${marcas.size} vagens)")
+                            Text(stringResource(R.string.campo_usar_marcas, marcas.size))
                         }
                     }
                 } else {
-                    Nota("Contagem conferida por você, pelas marcas (o contador estimou ${a.vagens}).")
+                    Nota(stringResource(R.string.campo_conferida, a.vagens))
                 }
-                Nota("Contador versão ${baixado?.versao ?: VERSAO_EMBUTIDA}, treinado com a base YOLO POD " +
-                     "(Xiang et al., 2023, Plant Methods), licença CC BY 4.0.")
+                Nota(stringResource(R.string.campo_versao_contador, baixado?.versao ?: VERSAO_EMBUTIDA))
             }
         }
     }
@@ -673,7 +660,7 @@ private fun ContadorNaFoto(foto: ImageBitmap, marcas: SnapshotStateList<Offset>,
     ) {
         Image(
             bitmap = foto,
-            contentDescription = "Foto para contar; toque para marcar",
+            contentDescription = stringResource(R.string.campo_foto_descricao),
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.fillMaxSize().graphicsLayer {
                 scaleX = escala; scaleY = escala
@@ -745,12 +732,12 @@ private fun MedicaoGps(aoConcluir: (Double) -> Unit, aoCancelar: () -> Unit) {
     val cantos = remember { mutableStateListOf<Pair<Double, Double>>() }
 
     if (!permitido) {
-        Nota("Para medir a área o app precisa da sua localização precisa, só enquanto esta tela está aberta.")
+        Nota(stringResource(R.string.campo_gps_permissao))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = {
                 pedir.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
-            }) { Text("Permitir localização") }
-            TextButton(onClick = aoCancelar) { Text("Cancelar") }
+            }) { Text(stringResource(R.string.campo_permitir_localizacao)) }
+            TextButton(onClick = aoCancelar) { Text(stringResource(R.string.campo_cancelar)) }
         }
         return
     }
@@ -779,31 +766,33 @@ private fun MedicaoGps(aoConcluir: (Double) -> Unit, aoCancelar: () -> Unit) {
     val loc = atual
     val precisao = loc?.takeIf { it.hasAccuracy() }?.accuracy
     Column(Modifier.padding(top = 8.dp)) {
-        Nota("Vá até cada canto do talhão, na ordem do contorno, espere o sinal firmar e marque.")
+        Nota(stringResource(R.string.campo_gps_instrucao))
         Text(
             when {
-                semGps -> "O GPS está desligado. Ligue a localização do celular."
-                loc == null -> "Procurando o GPS… a céu aberto leva alguns segundos."
-                precisao == null -> "GPS sem estimativa de precisão."
-                else -> "Precisão agora: ±${precisao.toInt()} m" +
-                        if (precisao > PRECISAO_MAX_M) " (espere melhorar)" else ""
+                semGps -> stringResource(R.string.campo_gps_desligado)
+                loc == null -> stringResource(R.string.campo_gps_procurando)
+                precisao == null -> stringResource(R.string.campo_gps_sem_precisao)
+                else -> stringResource(R.string.campo_gps_precisao, precisao.toInt()) +
+                        if (precisao > PRECISAO_MAX_M) " " + stringResource(R.string.campo_gps_espere) else ""
             },
             fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface
         )
-        Text("Cantos marcados: ${cantos.size}" +
-             if (cantos.size >= 3) " · área ${decimal(areaHectares(cantos), 2)} ha" else "",
+        Text(stringResource(R.string.campo_cantos, cantos.size) +
+             if (cantos.size >= 3) " · " + stringResource(R.string.campo_cantos_area, decimal(areaHectares(cantos), 2)) else "",
              fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 6.dp)) {
             Button(
                 onClick = { loc?.let { cantos.add(it.latitude to it.longitude) } },
                 enabled = loc != null && precisao != null && precisao <= PRECISAO_MAX_M
-            ) { Text("Marcar canto") }
+            ) { Text(stringResource(R.string.campo_marcar_canto)) }
             TextButton(onClick = { if (cantos.isNotEmpty()) cantos.removeAt(cantos.lastIndex) },
-                       enabled = cantos.isNotEmpty()) { Text("Desfazer") }
+                       enabled = cantos.isNotEmpty()) { Text(stringResource(R.string.campo_desfazer)) }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { aoConcluir(areaHectares(cantos)) }, enabled = cantos.size >= 3) { Text("Usar esta área") }
-            TextButton(onClick = aoCancelar) { Text("Cancelar") }
+            Button(onClick = { aoConcluir(areaHectares(cantos)) }, enabled = cantos.size >= 3) {
+                Text(stringResource(R.string.campo_usar_area))
+            }
+            TextButton(onClick = aoCancelar) { Text(stringResource(R.string.campo_cancelar)) }
         }
     }
 }
@@ -820,45 +809,39 @@ private fun FotosParaTreino(quantas: Int, colheitas: Int, aoMudar: (Int) -> Unit
     var confirmarApagar by remember { mutableStateOf(false) }
     var aviso by remember { mutableStateOf<String?>(null) }
 
-    CartaoCampo("Fotos para treinar a contagem automática", Icons.Filled.School) {
+    CartaoCampo(stringResource(R.string.campo_fotos_titulo), Icons.Filled.School) {
         Nota(
-            if (quantas == 0)
-                "Cada foto em que você marca plantas ou vagens fica guardada no celular, com as marcações, " +
-                "quando você guarda o ponto. Elas servem para treinar um modelo que conte sozinho. " +
-                "Marque todas as plantas ou vagens da foto, não só algumas."
-            else
-                "$quantas ${if (quantas == 1) "foto marcada guardada" else "fotos marcadas guardadas"} " +
-                "no celular (${decimal(tamanhoAmostrasMb(context), 1)} MB). Ficam só aqui até você exportar."
+            if (quantas == 0) stringResource(R.string.campo_fotos_nenhuma)
+            else pluralStringResource(R.plurals.campo_fotos_guardadas, quantas, quantas, decimal(tamanhoAmostrasMb(context), 1))
         )
         if (colheitas > 0) {
-            Nota("${if (colheitas == 1) "1 talhão" else "$colheitas talhões"} com a colheita informada vão " +
-                 "junto: com eles se confere a estimativa e o contador com o que foi pesado.")
+            Nota(pluralStringResource(R.plurals.campo_talhoes_colheita, colheitas, colheitas))
         }
         if (quantas > 0 || colheitas > 0) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
                 Button(onClick = {
                     escopo.launch {
                         val zip = withContext(Dispatchers.IO) { empacotaAmostras(context) }
-                        if (zip == null) { aviso = "Não há fotos para exportar."; return@launch }
+                        if (zip == null) { aviso = context.getString(R.string.campo_sem_fotos); return@launch }
                         val uri = FileProvider.getUriForFile(context, context.packageName + ".fotos", zip)
                         val envio = Intent(Intent.ACTION_SEND).apply {
                             type = "application/zip"
                             putExtra(Intent.EXTRA_STREAM, uri)
-                            putExtra(Intent.EXTRA_SUBJECT, "Fotos marcadas de soja (AgroInteligência)")
+                            putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.campo_zip_assunto))
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
                         try {
-                            context.startActivity(Intent.createChooser(envio, "Enviar as fotos marcadas"))
+                            context.startActivity(Intent.createChooser(envio, context.getString(R.string.campo_zip_enviar)))
                         } catch (_: ActivityNotFoundException) {
-                            aviso = "Nenhum aplicativo para compartilhar o arquivo."
+                            aviso = context.getString(R.string.campo_sem_app_compartilhar)
                         }
                     }
                 }) {
                     Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Exportar (.zip)")
+                    Text(stringResource(R.string.campo_exportar_zip))
                 }
-                TextButton(onClick = { confirmarApagar = true }) { Text("Apagar") }
+                TextButton(onClick = { confirmarApagar = true }) { Text(stringResource(R.string.campo_apagar)) }
             }
         }
         aviso?.let { Nota(it) }
@@ -867,9 +850,8 @@ private fun FotosParaTreino(quantas: Int, colheitas: Int, aoMudar: (Int) -> Unit
     if (confirmarApagar) {
         AlertDialog(
             onDismissRequest = { confirmarApagar = false },
-            title = { Text("Apagar as fotos marcadas?") },
-            text = { Text("As fotos, as marcações e as colheitas informadas saem do celular. Exporte antes " +
-                          "se quiser guardá-las.") },
+            title = { Text(stringResource(R.string.campo_apagar_titulo)) },
+            text = { Text(stringResource(R.string.campo_apagar_texto)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmarApagar = false
@@ -877,9 +859,9 @@ private fun FotosParaTreino(quantas: Int, colheitas: Int, aoMudar: (Int) -> Unit
                         withContext(Dispatchers.IO) { apagaAmostras(context) }
                         aoMudar(0)
                     }
-                }) { Text("Apagar") }
+                }) { Text(stringResource(R.string.campo_apagar)) }
             },
-            dismissButton = { TextButton(onClick = { confirmarApagar = false }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { confirmarApagar = false }) { Text(stringResource(R.string.campo_cancelar)) } }
         )
     }
 }
@@ -898,44 +880,42 @@ private fun ColheitaDoTalhao(
     aoNovoTalhao: () -> Unit,
 ) {
     var confirmar by remember { mutableStateOf(false) }
-    CartaoCampo("Depois da colheita", Icons.Filled.CheckCircle) {
-        Nota("Quando colher este talhão, informe as sacas de 60 kg do romaneio, já descontadas umidade e " +
-             "impureza. O app compara com a estimativa.")
-        CampoNumero(colhido, aoMudar, "Colhido no talhão (sacas)", Modifier.fillMaxWidth().padding(top = 4.dp))
+    CartaoCampo(stringResource(R.string.campo_depois_colheita), Icons.Filled.CheckCircle) {
+        Nota(stringResource(R.string.campo_colheita_nota))
+        CampoNumero(colhido, aoMudar, stringResource(R.string.campo_colhido), Modifier.fillMaxWidth().padding(top = 4.dp))
         val kg = colheitaKgHa(colhido.numero(), areaHa)
         when {
             colhido.numero() == null -> {}
-            areaHa == null -> Nota("Informe a área do talhão, acima, para ver as sacas por hectare.")
+            areaHa == null -> Nota(stringResource(R.string.campo_informe_area))
             kg != null -> {
-                Text("Colheita: ${decimal(kg / 60, 1)} sc/ha", fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
+                Text(stringResource(R.string.campo_colheita_sc, decimal(kg / 60, 1)), fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
                      color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(top = 8.dp))
                 // 3.456 digitado como milhar vira três sacas e meia: o número absurdo avisa.
                 if (kg / 60 < 5 || kg / 60 > 150) {
-                    Nota("Confira o número: ${decimal(kg / 60, 1)} sc/ha está fora do comum. Digite as sacas sem " +
-                         "ponto de milhar.")
+                    Nota(stringResource(R.string.campo_confira_numero, decimal(kg / 60, 1)))
                 }
                 if (estimativa != null) {
                     val dif = (estimativa.kgHa / kg - 1) * 100
-                    Nota("A estimativa no pé foi de ${decimal(estimativa.scHa, 1)} sc/ha, " +
-                         "${decimal(kotlin.math.abs(dif), 0)}% ${if (dif >= 0) "acima" else "abaixo"} do colhido. " +
-                         "Parte da diferença é perda na colheita, que a estimativa não desconta.")
+                    Nota(stringResource(if (dif >= 0) R.string.campo_estimativa_acima else R.string.campo_estimativa_abaixo,
+                                        decimal(estimativa.scHa, 1), decimal(kotlin.math.abs(dif), 0)))
                 }
             }
         }
         if (temAlgo) {
             OutlinedButton(onClick = { confirmar = true }, modifier = Modifier.padding(top = 8.dp)) {
-                Text("Começar outro talhão")
+                Text(stringResource(R.string.campo_outro_talhao))
             }
         }
     }
     if (confirmar) {
         AlertDialog(
             onDismissRequest = { confirmar = false },
-            title = { Text("Começar outro talhão?") },
-            text = { Text("Os pontos, a área e a colheita deste talhão saem da tela e ficam guardados com as " +
-                          "fotos marcadas, para exportar.") },
-            confirmButton = { TextButton(onClick = { confirmar = false; aoNovoTalhao() }) { Text("Começar") } },
-            dismissButton = { TextButton(onClick = { confirmar = false }) { Text("Cancelar") } }
+            title = { Text(stringResource(R.string.campo_outro_talhao_titulo)) },
+            text = { Text(stringResource(R.string.campo_outro_talhao_texto)) },
+            confirmButton = {
+                TextButton(onClick = { confirmar = false; aoNovoTalhao() }) { Text(stringResource(R.string.campo_comecar)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmar = false }) { Text(stringResource(R.string.campo_cancelar)) } }
         )
     }
 }
@@ -950,55 +930,52 @@ private fun ResultadoCampo(
     referenciaKgHa: Double?,
     rotuloReferencia: String?,
 ) {
-    CartaoCampo("Sua lavoura", Icons.Filled.Agriculture) {
+    CartaoCampo(stringResource(R.string.campo_sua_lavoura), Icons.Filled.Agriculture) {
         if (estimativa == null) {
-            Nota("Guarde ao menos um ponto, com plantas e vagens, para ver a estimativa.")
+            Nota(stringResource(R.string.campo_guarde_ponto))
             return@CartaoCampo
         }
-        Text("${decimal(estimativa.scHa, 1)} sc/ha", fontSize = 28.sp, fontWeight = FontWeight.Bold,
+        Text(stringResource(R.string.campo_sc_ha, decimal(estimativa.scHa, 1)), fontSize = 28.sp, fontWeight = FontWeight.Bold,
              color = MaterialTheme.colorScheme.primary)
-        Text("${milhar(estimativa.kgHa)} kg/ha · ${decimal(estimativa.plantasPorM2, 1)} plantas/m² · " +
-             "${decimal(estimativa.vagensPorPlanta, 1)} vagens/planta",
+        Text(stringResource(R.string.campo_resultado_detalhe, milhar(estimativa.kgHa), decimal(estimativa.plantasPorM2, 1),
+                            decimal(estimativa.vagensPorPlanta, 1)),
              fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface)
-        val pontos = if (estimativa.pontos == 1) "1 ponto" else "${estimativa.pontos} pontos"
         Text(
-            if (estimativa.pontos == 1) "Com $pontos só. Amostre mais pontos para a média valer para o talhão."
-            else "Média de $pontos, que variaram de ${decimal(estimativa.kgHaMin / 60, 1)} a " +
-                 "${decimal(estimativa.kgHaMax / 60, 1)} sc/ha.",
+            if (estimativa.pontos == 1) stringResource(R.string.campo_um_ponto)
+            else stringResource(R.string.campo_media_pontos, estimativa.pontos, decimal(estimativa.kgHaMin / 60, 1),
+                                decimal(estimativa.kgHaMax / 60, 1)),
             fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         val valorPreco = preco.numero()?.takeIf { it > 0 }
         Spacer(Modifier.height(10.dp))
-        CampoNumero(preco, aoMudarPreco, "Preço da saca (R$)", Modifier.fillMaxWidth())
+        CampoNumero(preco, aoMudarPreco, stringResource(R.string.campo_preco_saca), Modifier.fillMaxWidth())
         if (fontePreco != null) Nota(fontePreco)
 
         Spacer(Modifier.height(8.dp))
         if (areaHa != null) {
             val sacas = estimativa.scHa * areaHa
-            Text("${milhar(sacas)} sacas em ${decimal(areaHa, 2)} ha", fontSize = 16.sp,
+            Text(stringResource(R.string.campo_sacas_em, milhar(sacas), decimal(areaHa, 2)), fontSize = 16.sp,
                  fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
             if (valorPreco != null) {
                 // Total sem centavos: a estimativa não tem essa precisão.
-                Text("R$ ${milhar(sacas * valorPreco)} no talhão · R$ ${reais(estimativa.scHa * valorPreco)}/ha",
+                Text(stringResource(R.string.campo_total_talhao, milhar(sacas * valorPreco), reais(estimativa.scHa * valorPreco)),
                      fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
             }
         } else if (valorPreco != null) {
-            Text("R$ ${reais(estimativa.scHa * valorPreco)} por hectare. Informe a área para ver o total.",
+            Text(stringResource(R.string.campo_por_hectare, reais(estimativa.scHa * valorPreco)),
                  fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
         }
 
         if (referenciaKgHa != null && referenciaKgHa > 0 && rotuloReferencia != null) {
             val dif = (estimativa.kgHa / referenciaKgHa - 1) * 100
             Spacer(Modifier.height(8.dp))
-            Text("Modelo do app para $rotuloReferencia: ${decimal(referenciaKgHa / 60, 1)} sc/ha, média do " +
-                 "município. Sua lavoura está ${decimal(kotlin.math.abs(dif), 0)}% " +
-                 (if (dif >= 0) "acima." else "abaixo."),
+            Text(stringResource(if (dif >= 0) R.string.campo_modelo_acima else R.string.campo_modelo_abaixo,
+                                rotuloReferencia, decimal(referenciaKgHa / 60, 1), decimal(kotlin.math.abs(dif), 0)),
                  fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
         }
         Spacer(Modifier.height(8.dp))
-        Nota("É o que a lavoura tem no pé, antes das perdas na colheita e com o peso de grão informado. " +
-             "A precisão depende de quantos pontos e de quão bem eles representam o talhão.")
+        Nota(stringResource(R.string.campo_nota_final))
     }
 }
 

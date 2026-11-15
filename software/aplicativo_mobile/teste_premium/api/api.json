@@ -4,7 +4,7 @@
   {
    "item": "API responde",
    "ok": true,
-   "detalhe": "200 em 221 ms"
+   "detalhe": "200 em 208 ms"
   },
   {
    "item": "API serve a correção da main (Pau D'Arco projeta 2026–2028)",
@@ -154,7 +154,7 @@
   {
    "item": "30 requisições simultâneas sem erro",
    "ok": true,
-   "detalhe": "p95 1113 ms"
+   "detalhe": "p95 1524 ms"
   },
   {
    "item": "HTTP sem criptografia redireciona para HTTPS",
@@ -163,69 +163,69 @@
   }
  ],
  "medidas": {
-  "ping_inicial_ms": 221,
+  "ping_inicial_ms": 208,
   "rotas": {
    "previsao": {
     "n": 38,
     "erros": 0,
-    "p50_ms": 104.0,
-    "p95_ms": 134.0,
+    "p50_ms": 103.0,
+    "p95_ms": 245.0,
     "kb_medio": 2.1,
     "comprimido": "38/38"
    },
    "financas": {
     "n": 38,
     "erros": 0,
-    "p50_ms": 103.0,
-    "p95_ms": 599.0,
+    "p50_ms": 92.0,
+    "p95_ms": 118.0,
     "kb_medio": 1.0,
     "comprimido": "38/38"
    },
    "municipios": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 92.0,
-    "p95_ms": 103.0,
+    "p50_ms": 85.0,
+    "p95_ms": 110.0,
     "kb_medio": 0.6,
     "comprimido": "5/5"
    },
    "kpis_economia": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 93.0,
-    "p95_ms": 102.0,
+    "p50_ms": 89.0,
+    "p95_ms": 98.0,
     "kb_medio": 0.9,
     "comprimido": "5/5"
    },
    "mercado 1d": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 90.0,
-    "p95_ms": 94.0,
+    "p50_ms": 91.0,
+    "p95_ms": 96.0,
     "kb_medio": 7.8,
     "comprimido": "5/5"
    },
    "mercado 1mo": {
     "n": 3,
     "erros": 0,
-    "p50_ms": 89.0,
-    "p95_ms": 90.0,
+    "p50_ms": 102.0,
+    "p95_ms": 107.0,
     "kb_medio": 4.4,
     "comprimido": "3/3"
    },
    "contador": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 89.0,
-    "p95_ms": 109.0,
+    "p50_ms": 100.0,
+    "p95_ms": 119.0,
     "kb_medio": 1.1,
     "comprimido": "5/5"
    },
    "avisos (geocode)": {
     "n": 3,
     "erros": 0,
-    "p50_ms": 89.0,
-    "p95_ms": 90.0,
+    "p50_ms": 117.0,
+    "p95_ms": 131.0,
     "kb_medio": 0.1,
     "comprimido": "3/3"
    },
@@ -233,15 +233,15 @@
     "n": 3,
     "erros": 0,
     "p50_ms": 89.0,
-    "p95_ms": 89.0,
+    "p95_ms": 96.0,
     "kb_medio": 0.1,
     "comprimido": "3/3"
    },
    "mapa/render": {
     "n": 5,
     "erros": 0,
-    "p50_ms": 110.0,
-    "p95_ms": 111.0,
+    "p50_ms": 105.0,
+    "p95_ms": 105.0,
     "kb_medio": 88.0,
     "comprimido": "5/5"
    }
@@ -250,37 +250,37 @@
    {
     "caso": "município inexistente",
     "status": "404",
-    "ms": 89
+    "ms": 88
    },
    {
     "caso": "nome com 5.000 letras",
     "status": "404",
-    "ms": 112
+    "ms": 95
    },
    {
     "caso": "aspas e ponto e vírgula",
     "status": "403",
-    "ms": 108
+    "ms": 89
    },
    {
     "caso": "caminho com ../",
     "status": "404",
-    "ms": 145
+    "ms": 87
    },
    {
     "caso": "emoji",
     "status": "404",
-    "ms": 89
+    "ms": 88
    },
    {
     "caso": "finanças de município inexistente",
     "status": "200",
-    "ms": 89
+    "ms": 81
    },
    {
     "caso": "avisos sem parâmetros",
     "status": "400",
-    "ms": 87
+    "ms": 86
    },
    {
     "caso": "avisos com lat não numérica",
@@ -290,37 +290,37 @@
    {
     "caso": "avisos fora da Terra",
     "status": "200",
-    "ms": 89
+    "ms": 93
    },
    {
     "caso": "avisos com geocode estranho",
     "status": "200",
-    "ms": 89
+    "ms": 83
    },
    {
     "caso": "mercado com período inválido",
     "status": "400",
-    "ms": 88
+    "ms": 86
    },
    {
     "caso": "simulação sem corpo",
     "status": "422",
-    "ms": 88
+    "ms": 87
    },
    {
     "caso": "simulação com tipos errados",
     "status": "422",
-    "ms": 88
+    "ms": 87
    },
    {
     "caso": "simulação com fator enorme",
     "status": "200",
-    "ms": 111
+    "ms": 101
    },
    {
     "caso": "simulação de município inexistente",
     "status": "404",
-    "ms": 91
+    "ms": 100
    },
    {
     "caso": "rota inexistente",
@@ -330,10 +330,10 @@
   ],
   "simultaneas_30": {
    "erros": 0,
-   "total_ms": 1156,
-   "p50_ms": 925.0,
-   "p95_ms": 1113.0,
-   "max_ms": 1139
+   "total_ms": 1543,
+   "p50_ms": 1413.0,
+   "p95_ms": 1524.0,
+   "max_ms": 1527
   },
   "cabecalhos_ping": {
    "access-control-allow-origin": "*",

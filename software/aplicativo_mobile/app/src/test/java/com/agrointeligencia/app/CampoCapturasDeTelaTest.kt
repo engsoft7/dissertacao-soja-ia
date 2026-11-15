@@ -32,7 +32,7 @@ import org.robolectric.annotation.GraphicsMode
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(sdk = [35])
+@Config(sdk = [35], qualifiers = "pt-rBR")
 class CampoCapturasDeTelaTest {
 
     @get:Rule
@@ -78,9 +78,9 @@ class CampoCapturasDeTelaTest {
         compose.onRoot().captureRoboImage("build/capturas/estimativa_campo_${if (escuro) "escuro" else "claro"}.png")
     }
 
-    @Config(qualifiers = "w411dp-h2300dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2300dp-xxhdpi")
     @Test fun estimativa_campo_claro() = captura(false)
 
-    @Config(qualifiers = "w411dp-h2300dp-night-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2300dp-night-xxhdpi")
     @Test fun estimativa_campo_escuro() = captura(true)
 }

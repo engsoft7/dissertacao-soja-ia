@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import java.net.URLEncoder
 import android.annotation.SuppressLint
 import android.webkit.WebView
@@ -88,9 +89,9 @@ fun AtalhoEstimativaCampo(aoAbrir: () -> Unit) {
                  modifier = Modifier.size(28.dp))
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("Estimativa no campo", fontWeight = FontWeight.SemiBold, fontSize = 16.sp,
+                Text(stringResource(R.string.campo_atalho_titulo), fontWeight = FontWeight.SemiBold, fontSize = 16.sp,
                      color = MaterialTheme.colorScheme.onSurface)
-                Text("Fotografe, conte plantas e vagens e veja a produtividade da sua lavoura.",
+                Text(stringResource(R.string.campo_atalho_texto),
                      fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp)
             }
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -109,7 +110,7 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             val projYield = projecao.rendimento_predito
-            Text(text = "Produtividade esperada na safra ${projecao.ano}", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = stringResource(R.string.resumo_esperada, projecao.ano), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = "${milhar(projYield)} kg/ha", 
@@ -117,18 +118,18 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Text(text = " (~ ${(projYield / 60).roundToInt()} sc/ha)", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
+                Text(text = " " + stringResource(R.string.resumo_sacas_ha, (projYield / 60).roundToInt()), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
             }
             // O erro típico vai junto do número: é uma estimativa, e a loja
             // promete a margem de erro sempre ao lado dela.
             if (projecao.margem_erro > 0) {
-                Text(text = "Estimativa do modelo, com erro típico de ± ${milhar(projecao.margem_erro)} kg/ha.",
+                Text(text = stringResource(R.string.resumo_erro_tipico, milhar(projecao.margem_erro)),
                      fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             
             if (ultimoReal != null) {
                 val pastYield = if (ultimoReal.rendimento_real > 0) ultimoReal.rendimento_real else ultimoReal.rendimento_predito
-                val typeStr = if (ultimoReal.rendimento_real > 0) "IBGE" else "estimada"
+                val typeStr = stringResource(if (ultimoReal.rendimento_real > 0) R.string.resumo_tipo_ibge else R.string.resumo_tipo_estimada)
                 val diff = projYield - pastYield
                 val diffPct = if (pastYield > 0) (diff / pastYield) * 100 else 0.0
                 val color = if (diff >= 0) (if(isDark) Color(0xFF3fb950) else Color(0xFF16a34a)) else (if(isDark) Color(0xFFf85149) else Color(0xFFdc2626))
@@ -142,13 +143,13 @@ fun ResumoAgronomicoCard(projecao: PrevisaoHistorico, ultimoReal: PrevisaoHistor
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Column(Modifier.weight(1f)) {
-                        Text(text = "Safra ${ultimoReal.ano}, $typeStr", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = stringResource(R.string.resumo_safra_tipo, ultimoReal.ano, typeStr), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(text = "${milhar(pastYield)} kg/ha", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                     }
                     Column(Modifier.weight(1f), horizontalAlignment = Alignment.End) {
                         // Entre a safra esperada e a última divulgada pode haver
                         // mais de um ano: "variação anual" dizia outra coisa.
-                        Text(text = "Em relação a ${ultimoReal.ano}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        Text(text = stringResource(R.string.resumo_em_relacao, ultimoReal.ano), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
                              textAlign = androidx.compose.ui.text.style.TextAlign.End)
                         Text(text = "$sign${diffPct.roundToInt()}%", fontSize = 16.sp, color = color, fontWeight = FontWeight.Bold)
                     }
@@ -204,7 +205,8 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 // A mesma safra do Resumo, que vai também para a API.
-                Text(text = "Projeção com o cenário" + (ano?.let { ", safra $it" } ?: ""),
+                Text(text = ano?.let { stringResource(R.string.cenario_projecao_safra, it) }
+                         ?: stringResource(R.string.cenario_projecao),
                      fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (isSimulating) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
@@ -229,12 +231,14 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
             
             // O leitor de tela anunciava a posição do controle ("50 por cento"
             // no meio da faixa), e não o valor: a descrição diz o cenário.
-            val chuva = "${precipFactor.roundToInt()}% da chuva média"
-            val temperatura = if (kotlin.math.abs(tempOffset) < 0.05f) "temperatura média"
-                              else String.format(PT_BR, "%+.1f °C na temperatura média", tempOffset)
-            Text(text = "Chuva: $chuva", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            val chuva = stringResource(R.string.cenario_chuva_media, precipFactor.roundToInt())
+            val temperatura = if (kotlin.math.abs(tempOffset) < 0.05f) stringResource(R.string.cenario_temperatura_media)
+                              else stringResource(R.string.cenario_temperatura_desvio, String.format(LOCAL_NUMEROS, "%+.1f", tempOffset))
+            val descricaoChuva = stringResource(R.string.cenario_chuva_descricao)
+            val descricaoTemperatura = stringResource(R.string.cenario_temperatura_descricao)
+            Text(text = stringResource(R.string.cenario_chuva_rotulo, chuva), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Slider(
-                modifier = Modifier.semantics { contentDescription = "Chuva da safra"; stateDescription = chuva },
+                modifier = Modifier.semantics { contentDescription = descricaoChuva; stateDescription = chuva },
                 value = precipFactor,
                 onValueChange = { precipFactor = it },
                 onValueChangeFinished = { simular() },
@@ -242,9 +246,9 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
                 steps = 19
             )
             
-            Text(text = "Temperatura: $temperatura", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = stringResource(R.string.cenario_temperatura_rotulo, temperatura), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Slider(
-                modifier = Modifier.semantics { contentDescription = "Temperatura da safra"; stateDescription = temperatura },
+                modifier = Modifier.semantics { contentDescription = descricaoTemperatura; stateDescription = temperatura },
                 value = tempOffset,
                 onValueChange = { tempOffset = it },
                 onValueChangeFinished = { simular() },
@@ -254,7 +258,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
 
             if (falhou) {
                 Text(
-                    text = "Não foi possível simular agora. Confira a internet e mova o controle de novo.",
+                    text = stringResource(R.string.cenario_falhou),
                     fontSize = 12.sp, color = corAtencao(isDark), fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(top = 8.dp).semantics { liveRegion = LiveRegionMode.Polite }
                 )
@@ -269,12 +273,11 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
                     // Com a API nova, o efeito que o cenário de fato usou
                     // (fraseDaAssociacao); com a antiga, a conclusão do teste da
                     // chuva, cujos números (r, p, n) estão na dissertação.
-                    text = (resposta?.associacao?.let { fraseDaAssociacao(it) }
-                            ?: if (sens.p >= 0.05) "Nesta base, a chuva não mostrou efeito claro na produtividade."
-                               else "Nesta base, a chuva tem efeito pequeno na produtividade.") +
+                    text = (resposta?.associacao?.let { fraseDaAssociacao(LocalContext.current, it) }
+                            ?: stringResource(if (sens.p >= 0.05) R.string.cenario_chuva_sem_efeito else R.string.cenario_chuva_pequeno)) +
                            (resposta?.margem_kg_ha?.let {
-                               if (kotlin.math.abs(delta) <= it) " A variação acima cabe na margem de erro do modelo (± ${milhar(it)} kg/ha)."
-                               else " A variação acima passa da margem de erro do modelo (± ${milhar(it)} kg/ha)."
+                               " " + stringResource(if (kotlin.math.abs(delta) <= it) R.string.cenario_cabe_margem
+                                                    else R.string.cenario_passa_margem, milhar(it))
                            } ?: ""),
                     fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 16.sp
                 )
@@ -282,8 +285,7 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
             resposta?.fora_da_faixa?.takeIf { it.isNotEmpty() }?.let {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Cenário fora da faixa observada na base; o resultado foi " +
-                           "preso ao limite do que o modelo viu.",
+                    text = stringResource(R.string.cenario_fora_faixa),
                     fontSize = 12.sp,
                     color = if (isDark) Color(0xFFd29922) else Color(0xFF9a6700),
                     lineHeight = 16.sp
@@ -299,24 +301,23 @@ fun CenarioClimaticoCard(municipio: String, baselineRendimento: Double, ano: Int
  * exemplo, nem a chuva nem a temperatura passam nesse teste, e o cenário não
  * move a projeção; no Maranhão, a chuva passa.
  */
-fun fraseDaAssociacao(a: AssociacaoClimatica): String {
+fun fraseDaAssociacao(context: Context, a: AssociacaoClimatica): String {
     val claros = mutableListOf<String>()
     val semEfeito = mutableListOf<String>()
     a.chuva?.let { c ->
-        if (c.vale) claros += "cada 10% ${if (c.kg_ha > 0) "a menos" else "a mais"} de chuva tirou, em média, " +
-                              "${milhar(kotlin.math.abs(c.kg_ha) * 10)} kg/ha"
-        else semEfeito += "a chuva"
+        if (c.vale) claros += context.getString(
+            if (c.kg_ha > 0) R.string.assoc_chuva_menos else R.string.assoc_chuva_mais, milhar(kotlin.math.abs(c.kg_ha) * 10))
+        else semEfeito += context.getString(R.string.assoc_a_chuva)
     }
     a.temperatura?.let { t ->
-        if (t.vale) claros += "cada 1 °C acima do normal ${if (t.kg_ha < 0) "tirou" else "somou"}, em média, " +
-                              "${milhar(kotlin.math.abs(t.kg_ha))} kg/ha"
-        else semEfeito += "a temperatura"
+        if (t.vale) claros += context.getString(
+            if (t.kg_ha < 0) R.string.assoc_temp_tirou else R.string.assoc_temp_somou, milhar(kotlin.math.abs(t.kg_ha)))
+        else semEfeito += context.getString(R.string.assoc_a_temperatura)
     }
+    val e = " " + context.getString(R.string.assoc_e) + " "
     return when {
-        claros.isEmpty() -> "Nesta base, nem a chuva nem a temperatura mostraram efeito claro na produtividade: " +
-                            "o cenário não muda a projeção."
-        semEfeito.isEmpty() -> "Nesta base, " + claros.joinToString(" e ") + "."
-        else -> "Nesta base, " + claros.joinToString(" e ") + "; " + semEfeito.joinToString(" e ") +
-                " não mostrou efeito claro."
+        claros.isEmpty() -> context.getString(R.string.assoc_nenhum)
+        semEfeito.isEmpty() -> context.getString(R.string.assoc_claros, claros.joinToString(e))
+        else -> context.getString(R.string.assoc_claros_sem_efeito, claros.joinToString(e), semEfeito.joinToString(e))
     }
 }

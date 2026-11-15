@@ -286,6 +286,42 @@ data class AvisosResponse(
     val avisos: List<AvisoMeteorologico>? = null
 )
 
+/**
+ * Janela de plantio do município (api/plantio): o calendário de semeadura e o
+ * vazio sanitário da portaria, na região do estado a que ele pertence, e os
+ * riscos do ZARC por grupo de cultivar e classe de solo. As contas estão em
+ * PlantioCalculo.kt.
+ */
+data class CalendarioPlantio(
+    val regiao: String? = null,
+    val vazio: List<String>? = null,
+    val semeadura: List<String>? = null,
+    val observacao: String? = null,
+    val fonte: String? = null,
+    val url: String? = null
+)
+
+data class OpcaoZarc(val codigo: Int = 0, val nome: String = "")
+
+/** riscos: "ciclo-solo" -> 36 dígitos, um por decêndio (0, 2, 3 ou 4). */
+data class ZarcPlantio(
+    val portaria: String? = null,
+    val fonte: String? = null,
+    val url: String? = null,
+    val ciclos: List<OpcaoZarc>? = null,
+    val solos: List<OpcaoZarc>? = null,
+    val riscos: Map<String, String>? = null
+)
+
+data class PlantioResponse(
+    val safra: String? = null,
+    val uf: String? = null,
+    val municipio: String? = null,
+    val calendario: CalendarioPlantio? = null,
+    val zarc: ZarcPlantio? = null,
+    val lido_em: String? = null
+)
+
 interface AgroApiService {
     @retrofit2.http.POST("api/simulacao")
     suspend fun simularCenario(@retrofit2.http.Body request: SimulacaoRequest): SimulacaoResponse
@@ -324,6 +360,12 @@ interface AgroApiService {
     @GET("api/contador")
     suspend fun getContador(): ManifestoContador
 
+    @GET("api/plantio/{municipio}")
+    suspend fun getPlantio(
+        @Path("municipio") municipio: String,
+        @retrofit2.http.Query("uf") uf: String? = null
+    ): PlantioResponse
+
     @GET("api/avisos")
     suspend fun getAvisos(
         @retrofit2.http.Query("lat") lat: Double?,
@@ -341,6 +383,13 @@ object RetrofitClient {
             .connectTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
+            // O idioma em que o app está (Formatos, lido dos recursos): a API
+            // devolve nele as frases que monta, do preço, do custo e do plantio
+            // (api_backend/idioma.py). O mapa, num WebView, manda o do aparelho.
+            .addInterceptor { cadeia ->
+                cadeia.proceed(cadeia.request().newBuilder()
+                    .header("Accept-Language", Formatos.locale.toLanguageTag()).build())
+            }
             .build()
     }
 

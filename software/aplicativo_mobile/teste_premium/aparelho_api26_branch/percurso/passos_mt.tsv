@@ -1,6 +1,6 @@
-0s	api	http://10.0.2.2:8000/
-0s	estado	Mato Grosso escolhido
-2s	ok	a lista de Mato Grosso chegou da API, com Sorriso
-2s	ok	Resumo de Sorriso com a safra em curso
-4s	ok	Histórico de Sorriso com o gráfico e os cartões por safra
-5s	fim	percurso em Mato Grosso completo
+2s	api	http://10.0.2.2:8000/
+2s	estado	Mato Grosso escolhido
+3s	ok	a lista de Mato Grosso chegou da API, com Sorriso
+4s	ok	Resumo de Sorriso com a safra em curso
+5s	ok	Histórico de Sorriso com o gráfico e os cartões por safra
+6s	fim	percurso em Mato Grosso completo

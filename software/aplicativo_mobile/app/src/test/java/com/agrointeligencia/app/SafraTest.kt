@@ -39,9 +39,9 @@ class SafraTest {
     @Test
     fun anoSemDadoDoIbge() {
         val hoje = LocalDate.of(2026, 11, 6)
-        assertEquals("IBGE ainda não divulgou", situacaoSemDado(2026, hoje))
-        assertEquals("a colher", situacaoSemDado(2027, hoje))
-        assertEquals("a colher", situacaoSemDado(2028, hoje))
+        assertEquals(R.string.safra_sem_ibge, situacaoSemDado(2026, hoje))
+        assertEquals(R.string.safra_a_colher, situacaoSemDado(2027, hoje))
+        assertEquals(R.string.safra_a_colher, situacaoSemDado(2028, hoje))
     }
 
     @Test

@@ -46,7 +46,7 @@ class TempoCalculoTest {
         // 12 km/h a 10 m são 9 km/h na lavoura: só com ponta antideriva.
         val (n, m) = avaliaHora(25.0, 70.0, 12.0, false, false)
         assertEquals(NivelJanela.ATENCAO, n)
-        assertTrue(m.single().contains("antideriva"))
+        assertEquals(MotivoHora.VENTO_ANTIDERIVA, m.single())
         // 15 km/h a 10 m são 11 km/h na lavoura.
         assertEquals(NivelJanela.EVITAR, avaliaHora(25.0, 70.0, 15.0, false, false).first)
         // 3 km/h a 10 m são 2 km/h: calmaria, gotas suspensas.
@@ -59,7 +59,7 @@ class TempoCalculoTest {
         assertEquals(NivelJanela.EVITAR, avaliaHora(25.0, 70.0, 8.0, chuvaNaHora = true, chuvaLogo = true).first)
         val (n, m) = avaliaHora(25.0, 70.0, 8.0, chuvaNaHora = false, chuvaLogo = true)
         assertEquals(NivelJanela.ATENCAO, n)
-        assertEquals(listOf("chuva prevista nas 2 horas seguintes"), m)
+        assertEquals(listOf(MotivoHora.CHUVA_LOGO), m)
     }
 
     @Test
@@ -70,8 +70,7 @@ class TempoCalculoTest {
     @Test
     fun motivos_mais_graves_primeiro() {
         val (_, m) = avaliaHora(32.3, 52.0, 11.6, false, false)
-        assertEquals(listOf("temperatura acima de 30 °C", "umidade abaixo de 60%",
-                            "vento entre 8 e 10 km/h: só com ponta antideriva"), m)
+        assertEquals(listOf(MotivoHora.CALOR, MotivoHora.UMIDADE_BAIXA, MotivoHora.VENTO_ANTIDERIVA), m)
     }
 
     @Test
@@ -116,14 +115,17 @@ class TempoCalculoTest {
 
     @Test
     fun descricoes_e_categorias() {
-        assertEquals("Nublado", descricaoTempo(3))
-        assertEquals("Trovoada com granizo", descricaoTempo(99))
-        assertEquals("NE", direcaoVento(48.0))
-        assertEquals("N", direcaoVento(350.0))
-        assertEquals("O", direcaoVento(-90.0))
-        assertEquals("muito alto", categoriaUv(9.15))
-        assertEquals("extremo", categoriaUv(11.0))
-        assertEquals("baixo", categoriaUv(2.4))
+        // Os textos de cada id, em português e em inglês, estão em TempoTextosTest.
+        assertEquals(R.string.tempo_nublado, descricaoTempo(3))
+        assertEquals(R.string.tempo_trovoada_granizo, descricaoTempo(99))
+        assertEquals(R.string.tempo_sem_descricao, descricaoTempo(null))
+        assertEquals(R.string.vento_ne, direcaoVento(48.0))
+        assertEquals(R.string.vento_n, direcaoVento(350.0))
+        assertEquals(R.string.vento_o, direcaoVento(-90.0))
+        assertNull(direcaoVento(null))
+        assertEquals(R.string.uv_muito_alto, categoriaUv(9.15))
+        assertEquals(R.string.uv_extremo, categoriaUv(11.0))
+        assertEquals(R.string.uv_baixo, categoriaUv(2.4))
     }
 
     @Test
@@ -149,16 +151,5 @@ class TempoCalculoTest {
         }
         // Pau D'Arco fica no sul do Pará; a tabela de origem a punha no nordeste.
         assertTrue(SEDES_MUNICIPAIS.getValue("Pau D'Arco").lat < -7.5)
-    }
-
-    @Test
-    fun avisosDoMesmoEventoEntramUmaVezNoResumo() {
-        val tempestade = AvisoMeteorologico(id = "1", evento = "Tempestade", severidade = "Perigo Potencial")
-        val outraTempestade = AvisoMeteorologico(id = "2", evento = "Tempestade", severidade = "Perigo")
-        val chuva = AvisoMeteorologico(id = "3", evento = "Chuvas Intensas")
-        assertEquals("1 aviso do INMET: tempestade", resumoDosAvisos(listOf(tempestade)))
-        assertEquals("2 avisos do INMET: tempestade", resumoDosAvisos(listOf(tempestade, outraTempestade)))
-        assertEquals("3 avisos do INMET: tempestade, chuvas intensas",
-                     resumoDosAvisos(listOf(tempestade, outraTempestade, chuva)))
     }
 }

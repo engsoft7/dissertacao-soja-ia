@@ -31,27 +31,27 @@
  "largura_px": 1080,
  "altura_px": 2400,
  "densidade_dpi": 420,
- "apk_mb": 27.6,
- "partida_fria_primeira_ms": 1086,
- "partida_fria_sem_municipio_ms": 946.5,
+ "apk_mb": 28.0,
+ "partida_fria_primeira_ms": 1176,
+ "partida_fria_sem_municipio_ms": 1028.5,
  "dados_do_municipio_s": 5.3,
- "memoria_resumo_kb": 40350,
+ "memoria_resumo_kb": 38277,
  "rolagem_resumo": {
-  "quadros": 188.0,
-  "lentos_pct": 83.51,
-  "p50_ms": 61.0,
+  "quadros": 200.0,
+  "lentos_pct": 92.0,
+  "p50_ms": 57.0,
   "p90_ms": 105.0,
   "p99_ms": 150.0
  },
  "rolagem_historico": {
-  "quadros": 140.0,
-  "lentos_pct": 82.86,
-  "p50_ms": 57.0,
-  "p90_ms": 97.0,
+  "quadros": 156.0,
+  "lentos_pct": 91.03,
+  "p50_ms": 73.0,
+  "p90_ms": 113.0,
   "p99_ms": 150.0
  },
- "memoria_depois_das_abas_kb": 83255,
- "partida_fria_com_municipio_ms": 1105,
+ "memoria_depois_das_abas_kb": 89714,
+ "partida_fria_com_municipio_ms": 1189,
  "monkey": {
   "eventos": 3000,
   "falhas": 0,
@@ -62,7 +62,10 @@
 
 ## Acessibilidade pela árvore do uiautomator
 
-- **r04_resumo_1**: alvos < 48 dp: View (379×36 dp); sem rótulo: nenhum
+- **r03_resumo**: alvos < 48 dp: View (379×36 dp); sem rótulo: nenhum
+- **r04_resumo_1**: alvos < 48 dp: View (379×40 dp); sem rótulo: nenhum
 - **r05_mapa**: alvos < 48 dp: nenhum; sem rótulo: WebView em (45,530)
-- **r08_sobre**: alvos < 48 dp: View (339×34 dp); sem rótulo: nenhum
-- **r09_estimativa_no_campo**: alvos < 48 dp: View (347×31 dp); sem rótulo: nenhum
+- **r09_estimativa_no_campo**: alvos < 48 dp: View (347×11 dp); sem rótulo: View em (84,2097)
+- **r10_tempo**: alvos < 48 dp: View (102×13 dp); sem rótulo: View em (123,2094)
+- **r14_escuro_resumo**: alvos < 48 dp: View (379×36 dp); sem rótulo: nenhum
+- **r18_sem_internet**: alvos < 48 dp: View (154×44 dp), View (167×44 dp); sem rótulo: nenhum

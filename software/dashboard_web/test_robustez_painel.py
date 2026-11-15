@@ -274,8 +274,7 @@ def test_requisitos_declaram_o_que_financas_importa():
             continue
         for m in modulos:
             # Módulo vizinho no mesmo diretório não é dependência a declarar:
-            # viaja junto com o próprio arquivo. É o caso de precos.py, que
-            # financas.py importa.
+            # viaja junto com o próprio arquivo.
             local = (FINANCAS.parent / f"{m}.py").exists()
             if (m not in sys.stdlib_module_names and not local
                     and m.lower() not in declarados):

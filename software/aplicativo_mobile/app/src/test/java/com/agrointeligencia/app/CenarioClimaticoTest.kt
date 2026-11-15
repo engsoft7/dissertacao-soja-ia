@@ -1,25 +1,32 @@
 package com.agrointeligencia.app
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.gson.Gson
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
-/** A frase do simulador diz só o efeito que o cenário usou. */
+/** A frase do simulador diz só o efeito que o cenário usou (textos de strings.xml, em pt-BR). */
+@RunWith(AndroidJUnit4::class)
+@Config(sdk = [35], qualifiers = "pt-rBR")
 class CenarioClimaticoTest {
+    private val app = RuntimeEnvironment.getApplication()
 
     @Test
     fun semEfeitoClaroOCenarioNaoMove() {
         val a = AssociacaoClimatica(EfeitoClimatico(-2.1, vale = false), EfeitoClimatico(-163.0, vale = false))
         assertEquals("Nesta base, nem a chuva nem a temperatura mostraram efeito claro na produtividade: " +
-                     "o cenário não muda a projeção.", fraseDaAssociacao(a))
+                     "o cenário não muda a projeção.", fraseDaAssociacao(app, a))
     }
 
     @Test
     fun chuvaComEfeitoNoMaranhao() {
         val a = AssociacaoClimatica(EfeitoClimatico(4.5, vale = true), EfeitoClimatico(-153.0, vale = false))
         assertEquals("Nesta base, cada 10% a menos de chuva tirou, em média, 45 kg/ha; " +
-                     "a temperatura não mostrou efeito claro.", fraseDaAssociacao(a))
+                     "a temperatura não mostrou efeito claro.", fraseDaAssociacao(app, a))
     }
 
     @Test

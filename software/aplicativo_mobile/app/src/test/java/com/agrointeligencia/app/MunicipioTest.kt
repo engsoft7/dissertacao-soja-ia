@@ -1,12 +1,22 @@
 package com.agrointeligencia.app
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
-/** Escolha do município: o guardado, o mais próximo pelo GPS e a busca da lista. */
+/**
+ * Escolha do município: o guardado, o mais próximo pelo GPS e a busca da lista.
+ * Com Robolectric em pt-BR: a frase do mais próximo vem de strings.xml.
+ */
+@RunWith(AndroidJUnit4::class)
+@Config(sdk = [35], qualifiers = "pt-rBR")
 class MunicipioTest {
+    private val app = RuntimeEnvironment.getApplication()
 
     private val todos = SEDES_MUNICIPAIS.keys.sorted()
 
@@ -40,11 +50,11 @@ class MunicipioTest {
 
     @Test
     fun fraseDizQuandoEstaLonge() {
-        val perto = fraseDoMaisProximo(MunicipioProximo("Paragominas", 12.4), 38)
+        val perto = fraseDoMaisProximo(app, MunicipioProximo("Paragominas", 12.4), 38)
         assertTrue(perto, perto.contains("Paragominas, a 12 km da sede"))
         // Belém fica a uns 114 km de Tomé-Açu, a sede mais próxima da lista.
         val b = municipioMaisProximo(-1.4558, -48.5039, todos)!!
-        val longe = fraseDoMaisProximo(b, 38)
+        val longe = fraseDoMaisProximo(app, b, 38)
         assertTrue(longe, longe.startsWith("O mais próximo de você é"))
         assertTrue(longe, longe.contains("38 municípios"))
     }

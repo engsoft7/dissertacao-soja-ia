@@ -94,3 +94,24 @@ jobs:
           Conferência de $(date -u +%d/%m/%Y) pelo workflow monitor-fontes.yml ([execução]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID))."
           n=$(gh issue list --state open --search "in:title \"$titulo\"" --json number -q '.[0].number')
           if [ -n "$n" ]; then gh issue comment "$n" --body "$corpo"; else gh issue create --title "$titulo" --body "$corpo"; fi
+
+      # Os preços semanais da soja por município, da CONAB, seriam a reserva
+      # oficial da Agrolink, mas o Portal de Informações da CONAB serve um
+      # certificado emitido para outro nome (14/11/2026), e baixar sem conferir
+      # o certificado não garante que o arquivo é dela. Aqui se confere todo
+      # dia, com a verificação ligada: enquanto falhar, só fica no log; no dia
+      # em que o certificado valer, abre uma issue (uma vez só) para ligar a
+      # coleta.
+      - name: Confere o certificado do portal da CONAB
+        if: github.event_name != 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if python -c "import requests; requests.get('https://portaldeinformacoes.conab.gov.br/', timeout=60).raise_for_status()" 2>/tmp/conab.err; then
+            titulo="Portal de Informações da CONAB com certificado válido: ligar os preços da CONAB"
+            n=$(gh issue list --state all --search "in:title \"$titulo\"" --json number -q '.[0].number')
+            [ -n "$n" ] || gh issue create --title "$titulo" --body "O monitor das fontes abriu o Portal de Informações da CONAB com a verificação de certificado ligada em $(date -u +%d/%m/%Y). Os preços semanais da soja por município podem entrar no produto como reserva oficial da Agrolink."
+            echo "Portal da CONAB: certificado válido."
+          else
+            echo "Portal da CONAB: ainda sem certificado válido ($(tail -1 /tmp/conab.err | cut -c1-200))."
+          fi

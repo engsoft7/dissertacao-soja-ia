@@ -5,34 +5,38 @@ BREVE DESCRIÇÃO
 Produtividade, preço e tempo da soja para os municípios do Pará
 
 DESCRIÇÃO COMPLETA
-O AgroInteligência reúne, num só aplicativo, o que o produtor de soja do Pará precisa acompanhar ao longo da safra: a produtividade esperada do município, o preço da saca, o tempo na lavoura e a viabilidade financeira.
+O AgroInteligência reúne o que o produtor de soja do Pará acompanha na safra: a produtividade esperada do município, o preço da saca, o tempo na lavoura, a janela de plantio e a viabilidade financeira.
 
-AVISO: o AgroInteligência NÃO é um aplicativo do governo e não representa nenhum órgão público. Não tem vínculo com o IBGE, o INMET, a CONAB, a Embrapa, a NOAA ou a NASA: apenas usa dados abertos publicados por essas instituições, com os links oficiais listados em "Fontes oficiais", no fim desta descrição. É um produto técnico de pesquisa do Programa de Pós-Graduação em Computação Aplicada da Universidade Federal do Pará (UFPA).
+AVISO: o AgroInteligência NÃO é um aplicativo do governo e não representa nenhum órgão público. Não tem vínculo com o IBGE, o INMET, a CONAB, a Embrapa, o Ministério da Agricultura, a NOAA ou a NASA: apenas usa dados abertos publicados por essas instituições, com os links em "Fontes oficiais", no fim desta descrição. É um produto técnico de pesquisa do Programa de Pós-Graduação em Computação Aplicada da Universidade Federal do Pará (UFPA).
 
 PRODUTIVIDADE DO SEU MUNICÍPIO
 • Estimativa da produtividade da próxima safra para 38 municípios paraenses, sempre com a margem de erro.
-• Histórico de produtividade do IBGE desde 2001, com as safras de El Niño e La Niña destacadas.
-• O app lembra o seu município e pode achar o mais próximo pela localização do celular.
+• Histórico do IBGE desde 2001, com as safras de El Niño e La Niña destacadas.
+• O app lembra o seu município e acha o mais próximo pelo GPS.
 
 TEMPO NA LAVOURA
-• Condições de agora e previsão para os próximos 7 dias, na sede do município ou na sua localização.
-• Janela de pulverização hora a hora, pelos critérios da Embrapa Soja: temperatura, umidade, vento e chuva.
+• Tempo agora e previsão de 7 dias, na sede do município ou onde você está.
+• Janela de pulverização hora a hora, pelos critérios da Embrapa Soja.
 • Avisos meteorológicos do INMET para o lugar.
 • Chuva dos últimos dias comparada com a evapotranspiração.
 
+JANELA DE PLANTIO
+• Calendário de semeadura e vazio sanitário da região do seu município.
+• Risco climático do ZARC por grupo de cultivar e solo, e se hoje está na janela.
+
 ESTIMATIVA NO CAMPO
-• Fotografe um metro de linha e algumas plantas, conte plantas e vagens tocando na foto e veja a estimativa em sacas por hectare e em reais para o talhão.
+• Fotografe um metro de linha e algumas plantas, conte plantas e vagens na foto e veja sacas por hectare e reais no talhão.
 • Área do talhão medida pelo GPS do celular.
-• Contador automático de vagens, em teste, que roda no próprio celular, sem internet. Você confere e corrige as marcas.
+• Contador automático de vagens (em teste), no celular e sem internet; você confere as marcas.
 
 PREÇO DA SOJA
 • Cotação do dia nas praças do Pará, com a data de cada uma.
-• Cotação de Chicago convertida em reais por saca, com gráfico de velas de 1 dia a 6 meses.
-• Média do Pará estimada a cada momento, com a diferença (base) entre o mercado paraense e a bolsa.
+• Chicago em reais por saca, com gráfico de 1 dia a 6 meses.
+• Média estimada do Pará e a base entre o mercado paraense e a bolsa.
 
 VIABILIDADE DA SAFRA
-• Receita, custo, margem e ponto de equilíbrio por hectare, com os seus números de produtividade, preço e custeio.
-• Parte da cotação do dia na praça mais perto do seu município e do custo da CONAB aberto por item, com aviso quando o levantamento estiver desatualizado.
+• Receita, custo, margem e ponto de equilíbrio por hectare, com os seus números.
+• Parte da cotação da praça mais perto e do custo da CONAB, com aviso se o levantamento estiver desatualizado.
 
 FEITO PARA O CAMPO
 • Funciona sem internet com os últimos dados carregados.
@@ -43,11 +47,13 @@ FONTES OFICIAIS (órgãos públicos)
 • Produtividade municipal: IBGE, Produção Agrícola Municipal – https://sidra.ibge.gov.br/tabela/1612
 • Avisos meteorológicos: INMET – https://portal.inmet.gov.br/
 • Custo de produção e preço de referência: CONAB – https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao
-• Critérios da janela de pulverização: Embrapa Soja, Tecnologias de produção de soja – https://ainfo.cnptia.embrapa.br/digital/bitstream/item/223209/1/SP-17-2020-online-1.pdf
+• Calendário de semeadura: Ministério da Agricultura – https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-1.579-de-9-de-abril-de-2026-698696654
+• Risco climático (ZARC): Ministério da Agricultura – https://dados.agricultura.gov.br/dataset/tabua-de-risco-zoneamento-agricola-de-risco-climatico
+• Janela de pulverização: Embrapa Soja – https://ainfo.cnptia.embrapa.br/digital/bitstream/item/223209/1/SP-17-2020-online-1.pdf
 • El Niño e La Niña (índice ONI): NOAA – https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php
 
 OUTRAS FONTES
-• Vegetação por satélite: MODIS (NASA), pelo Google Earth Engine – https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MOD13Q1
+• Vegetação: MODIS (NASA), Google Earth Engine – https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MOD13Q1
 • Máscara de soja: MapBiomas – https://brasil.mapbiomas.org
 • Chuva: CHIRPS – https://www.chc.ucsb.edu/data/chirps
 • Clima: ERA5-Land, Copernicus – https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land

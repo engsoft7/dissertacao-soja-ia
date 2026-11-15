@@ -82,7 +82,7 @@ fun rememberLeitorDePosicao(
             delay(ESPERA_POSICAO_MS)
             gerente.removeUpdates(ouvinte)
             leitor.procurando = false
-            falhar("Não foi possível achar sua posição. Tente ao ar livre ou perto de uma janela.")
+            falhar(context.getString(R.string.local_nao_achou))
         }
     }
 
@@ -98,7 +98,7 @@ fun rememberLeitorDePosicao(
         val provedor = listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER)
             .firstOrNull { runCatching { gerente.isProviderEnabled(it) }.getOrDefault(false) }
         if (provedor == null) {
-            falhar("A localização do celular está desligada. Ligue-a e toque de novo.")
+            falhar(context.getString(R.string.local_desligada))
             return
         }
         leitor.procurando = true
@@ -106,7 +106,7 @@ fun rememberLeitorDePosicao(
             gerente.requestLocationUpdates(provedor, 0L, 0f, ouvinte, Looper.getMainLooper())
         } catch (_: Exception) {
             leitor.procurando = false
-            falhar("Não foi possível ler a posição do celular.")
+            falhar(context.getString(R.string.local_erro))
         }
     }
 

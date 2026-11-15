@@ -46,7 +46,7 @@ import kotlin.math.sin
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(sdk = [35], qualifiers = "w411dp-h891dp-xxhdpi")
+@Config(sdk = [35], qualifiers = "pt-rBR-w411dp-h891dp-xxhdpi")
 class CapturasDeTelaTest {
 
     @get:Rule
@@ -180,10 +180,10 @@ class CapturasDeTelaTest {
     // A tela Mercado passa da altura do celular: no aplicativo ela rola, mas a
     // captura só pega o que cabe na tela, e o fim saía espremido. Estas duas
     // são desenhadas num celular mais alto.
-    @Config(qualifiers = "w411dp-h1400dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h1400dp-xxhdpi")
     @Test fun mercado_claro() = captura("mercado", false) { MercadoConteudo(mercado, false, periodoMercado) {} }
 
-    @Config(qualifiers = "w411dp-h1400dp-night-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h1400dp-night-xxhdpi")
     @Test fun mercado_escuro() = captura("mercado", true) { MercadoConteudo(mercado, false, periodoMercado) {} }
 
     @Test fun resumo_claro() = captura("resumo", false) { ResumoAgronomicoCard(projecao, ultimoReal) }
@@ -208,17 +208,124 @@ class CapturasDeTelaTest {
     @Test fun sobre_escuro() = captura("sobre", true) { MetodologiaCard(financas, previsao.validacao) }
 
     // A tela Tempo é longa: desenhada num celular alto, como a do Mercado.
-    @Config(qualifiers = "w411dp-h2100dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2100dp-xxhdpi")
     @Test fun tempo_claro() = captura("tempo", false) {
         TempoConteudo(tempo, avisos, SEDES_MUNICIPAIS["Paragominas"], agoraTempo, null, false, false)
     }
 
-    @Config(qualifiers = "w411dp-h2100dp-night-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2100dp-night-xxhdpi")
     @Test fun tempo_escuro() = captura("tempo", true) {
         TempoConteudo(tempo, avisos, SEDES_MUNICIPAIS["Paragominas"], agoraTempo, null, false, false)
     }
 
     @Test fun aviso_inmet_claro() = captura("aviso_inmet", false) { CartaoAvisos(avisoExemplo) }
+
+    // Janela de plantio: a resposta de /api/plantio/Paragominas gravada pelo
+    // script, ou um exemplo com as datas da Região II do Pará na portaria. O
+    // "hoje" fica fixo para a frase do cartão não mudar de um dia para o outro.
+    private val plantio: PlantioResponse = real("plantio") ?: PlantioResponse(
+        safra = "2026/2027", uf = "PA", municipio = "Paragominas",
+        calendario = CalendarioPlantio(
+            regiao = "II", vazio = listOf("2026-08-01", "2026-10-31"), semeadura = listOf("2026-11-01", "2027-02-28"),
+            fonte = "Portaria SDA/MAPA nº 1.579, de 9 de abril de 2026", url = "https://www.in.gov.br/"),
+        zarc = ZarcPlantio(
+            portaria = "Portaria nº 203, de 03/07/2026", url = "https://dados.agricultura.gov.br/",
+            ciclos = listOf(OpcaoZarc(20, "Grupo I"), OpcaoZarc(21, "Grupo II"), OpcaoZarc(22, "Grupo III")),
+            solos = (11..16).map { OpcaoZarc(it, "AD${it - 10}") },
+            riscos = mapOf("21-13" to buildString {
+                for (i in 1..36) append(when (i) { in 1..3, in 33..36 -> '2'; 4, 32 -> '3'; 5 -> '4'; else -> '0' })
+            })),
+        lido_em = "2026-11-14")
+    private val hojePlantio = java.time.LocalDate.of(2026, 11, 14)
+
+    private fun estadoPlantio(): EstadoPlantio {
+        val prefs = org.robolectric.RuntimeEnvironment.getApplication()
+            .getSharedPreferences("capturas_plantio", android.content.Context.MODE_PRIVATE)
+        prefs.edit().clear().commit()
+        return EstadoPlantio(prefs).also { it.dados = plantio }
+    }
+
+    @Composable
+    private fun telaPlantio(estado: EstadoPlantio) {
+        PlantioResumoCard(estado, hojePlantio) {}
+        Spacer(Modifier.height(16.dp))
+        PlantioTela(estado, plantio.municipio, aoAtualizar = {}, aoVoltar = {}, hoje = hojePlantio)
+    }
+
+    @Config(qualifiers = "pt-rBR-w411dp-h1700dp-xxhdpi")
+    @Test fun plantio_claro() {
+        val estado = estadoPlantio()
+        captura("plantio", false) { telaPlantio(estado) }
+    }
+
+    // Caderno da safra: uma safra de 120 ha em Paragominas, com custos, colheita
+    // e uma venda; o plantio conferido com a portaria e o ZARC da captura acima.
+    private fun estadoCaderno(): EstadoCaderno {
+        val app = org.robolectric.RuntimeEnvironment.getApplication()
+        gravaCaderno(app, listOf(
+            RegistroCaderno(1, 2027, TipoRegistro.INSUMO, "2026-11-05", "Semente", quantidade = 60.0, unidade = "sc",
+                            valor = 33_600.0),
+            RegistroCaderno(2, 2027, TipoRegistro.INSUMO, "2026-11-05", "Adubo 02-20-20", quantidade = 36.0,
+                            unidade = "t", valor = 129_600.0),
+            RegistroCaderno(3, 2027, TipoRegistro.PLANTIO, "2026-11-12", "BRS 8383", area = 120.0),
+            RegistroCaderno(4, 2027, TipoRegistro.OPERACAO, "2027-01-10", "Fungicida, segunda aplicação", valor = 18_000.0),
+            RegistroCaderno(5, 2027, TipoRegistro.COLHEITA, "2027-03-20", area = 120.0, quantidade = 6_480.0),
+            RegistroCaderno(6, 2027, TipoRegistro.VENDA, "2027-03-25", "Cooperativa", quantidade = 4_000.0, valor = 128.5),
+        ))
+        return EstadoCaderno(app)
+    }
+
+    @Config(qualifiers = "pt-rBR-w411dp-h2600dp-xxhdpi")
+    @Test fun caderno_claro() {
+        val caderno = estadoCaderno()
+        val plantio = estadoPlantio()
+        captura("caderno", false) {
+            CadernoTela(caderno, plantio, estimativaScHa = 52.4, municipio = "Paragominas", aoVoltar = {},
+                        hoje = java.time.LocalDate.of(2027, 4, 2))
+        }
+    }
+
+    // O resumo para compartilhar, como imagem: os dados desta classe (reais, quando
+    // o script os gravou), a janela de plantio e o caderno de exemplo acima.
+    @Test fun relatorio_imagem() {
+        val app = org.robolectric.RuntimeEnvironment.getApplication()
+        val projecao = projecaoDaSafra(previsao.historico)
+        val praca = pracaParaUsar("Paragominas", mercado.pracas_para.orEmpty())
+        val estado = estadoPlantio()
+        val r = montaRelatorio(app, DadosDoRelatorio(
+            municipio = previsao.municipio, uf = "PA", hoje = hojePlantio,
+            projecao = projecao, ultimoReal = ultimoObservado(previsao.historico),
+            praca = praca, precoUsado = praca?.valor,
+            plantioCalendario = textoDoCalendario(app, plantio.calendario, hojePlantio),
+            plantioZarc = textoDoZarc(app, estado, hojePlantio).first,
+            plantioRegiao = plantio.calendario?.regiao,
+            caderno = resumoDoCaderno(estadoCaderno().registros), safraDoCaderno = 2027,
+        ))
+        File("build/capturas").mkdirs()
+        geraImagem(app, r).copyTo(File("build/capturas/relatorio_imagem.png"), overwrite = true)
+    }
+
+    // Alertas: INMET e preço ligados, com a praça de Paragominas e o alvo de R$ 140.
+    private fun prefsDosAlertas() = org.robolectric.RuntimeEnvironment.getApplication()
+        .getSharedPreferences("capturas_alertas", android.content.Context.MODE_PRIVATE).also {
+            it.edit().clear().putBoolean(PREF_ALERTA_INMET, true).putBoolean(PREF_ALERTA_PRECO, true)
+                .putString(PREF_ALERTA_PRECO_PRACA, "Paragominas").putFloat(PREF_ALERTA_PRECO_ALVO, 140f).commit()
+        }
+
+    @Config(qualifiers = "pt-rBR-w411dp-h1500dp-xxhdpi")
+    @Test fun alertas_claro() {
+        val prefs = prefsDosAlertas()
+        captura("alertas", false) {
+            AlertasTela(prefs, SEDES_MUNICIPAIS["Paragominas"], mercado.pracas_para.orEmpty(),
+                        mercado.pracas_para?.firstOrNull()) {}
+        }
+    }
+
+    @Config(qualifiers = "pt-rBR-w411dp-h1700dp-night-xxhdpi")
+    @Test fun plantio_escuro() {
+        val estado = estadoPlantio()
+        captura("plantio", true) { telaPlantio(estado) }
+    }
 
     // Escolha do município (2.7.0): o cartão da primeira abertura, o seletor
     // com o botão do GPS e a lista com busca, filtrada por "pa".
@@ -232,10 +339,10 @@ class CapturasDeTelaTest {
         ListaDeMunicipios(lista, atual = "Paragominas", busca = "pa", aoBuscar = {}, aoEscolher = {})
     }
 
-    @Config(qualifiers = "w411dp-h1100dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h1100dp-xxhdpi")
     @Test fun municipio_claro() = captura("municipio", false) { telaMunicipio() }
 
-    @Config(qualifiers = "w411dp-h1100dp-night-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h1100dp-night-xxhdpi")
     @Test fun municipio_escuro() = captura("municipio", true) { telaMunicipio() }
 
     // ── outros estados (Estados.kt) ───────────────────────────────────────────
@@ -259,16 +366,16 @@ class CapturasDeTelaTest {
         MetodologiaCard(f, p.validacao)
     }
 
-    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2600dp-xxhdpi")
     @Test fun estado_mt_claro() = captura("estado_mt", false) { telasDoEstado("MT", "Sorriso") }
 
-    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2600dp-xxhdpi")
     @Test fun estado_ma_claro() = captura("estado_ma", false) { telasDoEstado("MA", "Balsas") }
 
-    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2600dp-xxhdpi")
     @Test fun estado_to_claro() = captura("estado_to", false) { telasDoEstado("TO", "Porto Nacional") }
 
-    @Config(qualifiers = "w411dp-h2600dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h2600dp-xxhdpi")
     @Test fun estado_ro_claro() = captura("estado_ro", false) { telasDoEstado("RO", "Vilhena") }
 
     // A escolha do estado na janela do município: os cinco estados e a lista do escolhido.
@@ -282,14 +389,55 @@ class CapturasDeTelaTest {
                           aoBuscar = {}, aoEscolher = {}, estado = estado)
     }
 
-    @Config(qualifiers = "w411dp-h900dp-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h900dp-xxhdpi")
     @Test fun municipio_estados_claro() = captura("municipio_estados", false) { telaEstados() }
 
-    @Config(qualifiers = "w411dp-h900dp-night-xxhdpi")
+    @Config(qualifiers = "pt-rBR-w411dp-h900dp-night-xxhdpi")
     @Test fun municipio_estados_escuro() = captura("municipio_estados", true) { telaEstados() }
 
     // O ícone do launcher, montado pelo próprio Android a partir do
     // adaptive-icon: confere que as três camadas compilam e se encaixam.
+    // O app em inglês (2.9.0): as mesmas telas num aparelho em inglês, com os
+    // números no formato do idioma. Formatos volta ao português no fim, para
+    // não valer nos testes seguintes.
+    private fun emIngles(bloco: () -> Unit) {
+        val app = org.robolectric.RuntimeEnvironment.getApplication()
+        Formatos.doIdioma(app)
+        try {
+            bloco()
+        } finally {
+            val pt = android.content.res.Configuration(app.resources.configuration).apply {
+                setLocale(java.util.Locale("pt", "BR"))
+            }
+            Formatos.doIdioma(app.createConfigurationContext(pt))
+        }
+    }
+
+    @Config(qualifiers = "en-w411dp-h1800dp-xxhdpi")
+    @Test fun ingles_resumo_claro() = emIngles {
+        captura("ingles_resumo", false) {
+            ResumoAgronomicoCard(projecao, ultimoReal)
+            Spacer(Modifier.height(16.dp))
+            val preco = pracaParaUsar("Paragominas", mercado.pracas_para.orEmpty())?.valor
+            PrevisaoCard(projecao, financas, preco)
+            Spacer(Modifier.height(16.dp))
+            financas?.let { ResumoFinanceiroCard(projecao, it, mercado.para, mercado.pracas_para.orEmpty(), "Paragominas") }
+        }
+    }
+
+    @Config(qualifiers = "en-w411dp-h2100dp-xxhdpi")
+    @Test fun ingles_tempo_claro() = emIngles {
+        captura("ingles_tempo", false) {
+            TempoConteudo(tempo, avisos, SEDES_MUNICIPAIS["Paragominas"], agoraTempo, null, false, false)
+        }
+    }
+
+    @Config(qualifiers = "en-w411dp-h1700dp-xxhdpi")
+    @Test fun ingles_plantio_claro() = emIngles {
+        val estado = estadoPlantio()
+        captura("ingles_plantio", false) { telaPlantio(estado) }
+    }
+
     @Test fun icone() = captura("icone", false) {
         AndroidView(
             factory = { ImageView(it).apply { setImageResource(R.mipmap.ic_launcher) } },

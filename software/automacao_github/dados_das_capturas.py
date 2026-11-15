@@ -62,6 +62,8 @@ def main(municipio: str = "Paragominas") -> None:
             "previsao": f"/api/previsao/{municipio}",
             "financas": f"/api/financas/{municipio}",
             "mercado": "/api/mercado?periodo=1mo",
+            # janela de plantio: os arquivos de pesquisa/dados/plantio/ da branch
+            "plantio": f"/api/plantio/{municipio}",
         }
         # Avisos do INMET para a sede de Paragominas (os outros municípios
         # usariam o próprio geocódigo; a tela das capturas é a de Paragominas).

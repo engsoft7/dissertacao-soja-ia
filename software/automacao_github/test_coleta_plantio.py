@@ -102,27 +102,66 @@ def test_municipio_fora_das_regioes_distingue_omissao_de_leitura_perdida(capsys)
 # ── troca de safra: a portaria mais nova do Diário Oficial e a tábua do ZARC ──
 
 # Um trecho da página de busca do Diário Oficial como ela vem: os atos num JSON
-# dentro de um <script>. O segundo ato é de outra cultura; o terceiro, mais
-# antigo.
+# dentro de um <script>. O segundo é de outra cultura; o terceiro, do ZARC (da
+# SPA/MAPA, que também usa a frase); o quarto, mais antigo, vem com o destaque
+# da busca no título.
 BUSCA = """<html><body><script id="_br_com_seatecnologia_in_buscadou_BuscaDouPortlet_params"
  type="application/json">{"jsonArray":[
  {"title":"PORTARIA SDA/MAPA Nº 2.001, DE 7 DE ABRIL DE 2027","urlTitle":"portaria-sda/mapa-n-2.001-de-7-de-abril-de-2027-1",
   "pubDate":"08/04/2027","content":"Estabelece o <b>calendário de semeadura</b> da soja para a safra 2027/2028"},
  {"title":"PORTARIA SDA/MAPA Nº 2.002, DE 8 DE ABRIL DE 2027","urlTitle":"portaria-sda/mapa-n-2.002-de-8-de-abril-de-2027-2",
   "pubDate":"09/04/2027","content":"Estabelece o calendário de semeadura do algodão"},
- {"title":"PORTARIA SDA/MAPA Nº 1.579, DE 9 DE ABRIL DE 2026","urlTitle":"portaria-sda/mapa-n-1.579-de-9-de-abril-de-2026-698696654",
+ {"title":"PORTARIA SPA/MAPA Nº 391, DE 5 DE NOVEMBRO DE 2026","urlTitle":"portaria-spa/mapa-n-391-de-5-de-novembro-de-2026-3",
+  "pubDate":"11/11/2026","content":"pode ser melhorada pela assistência técnica local"},
+ {"title":"PORTARIA <span class='highlight' style='background:#FFA;'>SDA</span>/MAPA Nº 1.579, DE 9 DE ABRIL DE 2026",
+  "urlTitle":"portaria-sda/mapa-n-1.579-de-9-de-abril-de-2026-698696654",
   "pubDate":"10/04/2026","content":"calendário de semeadura e vazio sanitário da soja, safra 2026/2027"}
  ]}</script></body></html>"""
 
 
-def test_busca_do_diario_oficial_poe_as_portarias_da_soja_na_frente():
+def test_busca_do_diario_oficial_fica_com_as_portarias_da_sda():
     c = cp.candidatas(cp.resultados_da_busca(BUSCA))
-    # As que o resumo diz ser do calendário da soja vêm antes, as mais novas
-    # primeiro; a do algodão fica por último (a página inteira decide).
-    assert [x["titulo"][:30] for x in c] == ["PORTARIA SDA/MAPA Nº 2.001, DE", "PORTARIA SDA/MAPA Nº 1.579, DE",
-                                             "PORTARIA SDA/MAPA Nº 2.002, DE"]
-    assert c[0]["url"] == "https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-2.001-de-7-de-abril-de-2027-1"
+    # Só as da SDA/MAPA, as mais novas primeiro: a do ZARC sai, e a do algodão
+    # fica (a página inteira decide). O destaque da busca sai do título.
+    assert [x["titulo"] for x in c] == ["PORTARIA SDA/MAPA Nº 2.002, DE 8 DE ABRIL DE 2027",
+                                        "PORTARIA SDA/MAPA Nº 2.001, DE 7 DE ABRIL DE 2027",
+                                        "PORTARIA SDA/MAPA Nº 1.579, DE 9 DE ABRIL DE 2026"]
+    assert c[1]["url"] == "https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-2.001-de-7-de-abril-de-2027-1"
+    assert c[2]["url"] == cp.DOU
     assert cp.resultados_da_busca("<html>formato novo</html>") == []
+
+
+class _Resposta:
+    def __init__(self, atos):
+        self.text = ('<script id="_br_com_seatecnologia_in_buscadou_BuscaDouPortlet_params">'
+                     + __import__("json").dumps({"jsonArray": atos}) + "</script>")
+
+    def raise_for_status(self):
+        pass
+
+
+def test_busca_no_dou_le_pagina_a_pagina(monkeypatch):
+    """A página seguinte começa depois do último ato da anterior, e a busca para quando nada novo chega."""
+    from datetime import date
+    atos = [{"urlTitle": f"ato-{i}", "score": 0, "classPK": str(900 - i), "displayDateSortable": str(5000 - i)}
+            for i in range(70)]
+    pedidos = []
+
+    def get(url, headers=None, timeout=None, params=None):
+        pedidos.append(dict(params))
+        if "id" not in params:
+            return _Resposta(atos[:50])
+        if params["id"] == "851":                      # depois do ato-49
+            return _Resposta(atos[50:])
+        return _Resposta(atos[50:])                     # a busca repetiu: nada novo
+    monkeypatch.setattr(cp.requests, "get", get)
+    lidos = cp.busca_no_dou(cp.FRASE_DOU, date(2025, 11, 16), date(2026, 11, 15))
+    assert [a["urlTitle"] for a in lidos] == [f"ato-{i}" for i in range(70)]
+    assert pedidos[0]["q"] == '"calendário de semeadura"' and pedidos[0]["delta"] == "50"
+    assert (pedidos[0]["publishFrom"], pedidos[0]["publishTo"]) == ("16-11-2025", "15-11-2026")
+    assert {k: pedidos[1][k] for k in ("currentPage", "newPage", "id", "displayDate")} == \
+        {"currentPage": "1", "newPage": "2", "id": "851", "displayDate": "4951"}
+    assert len(pedidos) == 3
 
 
 def test_nome_da_portaria_e_safra_no_texto():
@@ -138,16 +177,114 @@ def test_safras_do_catalogo_do_zarc():
     assert cp.safras_do_zarc(recursos) == ["2025/2026", "2026/2027"]
 
 
-def test_troca_de_safra_so_com_portaria_e_tabua_novas(capsys):
-    atual = {"safra": "2026/2027", "fonte": cp.PORTARIA, "url": cp.DOU}
+def test_data_da_portaria():
+    from datetime import date
+    assert cp.data_da_portaria(cp.PORTARIA) == date(2026, 4, 9)
+    assert cp.data_da_portaria("Portaria SDA/MAPA nº 2.001, de 1 de março de 2027") == date(2027, 3, 1)
+    assert cp.data_da_portaria("Portaria nova") is None
+
+
+ATUAL = {"safra": "2026/2027", "fonte": cp.PORTARIA, "url": cp.DOU}
+
+
+def test_calendario_de_safra_nova_vale_logo():
     nova = {"safra": "2027/2028", "fonte": "Portaria SDA/MAPA nº 2.001, de 7 de abril de 2027", "url": "https://x"}
-    assert cp.escolhe_safra(atual, nova, ["2026/2027", "2027/2028"]) is nova
-    # A portaria saiu, a tábua ainda não: fica na safra em uso, e o log diz por quê.
-    assert cp.escolhe_safra(atual, nova, ["2026/2027"]) is atual
+    assert cp.escolhe_calendario(ATUAL, nova) == (nova, False)
+    # Sem a busca, ou com a mesma portaria, nada muda.
+    assert cp.escolhe_calendario(ATUAL, None) == (ATUAL, False)
+    assert cp.escolhe_calendario(ATUAL, dict(ATUAL)) == (ATUAL, False)
+    # Uma portaria de safra mais velha (a busca não achou a em uso) não volta a safra.
+    assert cp.escolhe_calendario(ATUAL, dict(nova, safra="2025/2026"))[0] is ATUAL
+
+
+def test_portaria_posterior_da_mesma_safra_e_tentada():
+    depois = {"safra": "2026/2027", "fonte": "Portaria SDA/MAPA nº 1.700, de 2 de setembro de 2026", "url": "https://y"}
+    assert cp.escolhe_calendario(ATUAL, depois) == (depois, True)
+    antes = dict(depois, fonte="Portaria SDA/MAPA nº 1.200, de 2 de janeiro de 2026")
+    assert cp.escolhe_calendario(ATUAL, antes) == (ATUAL, False)
+
+
+def test_tabua_do_zarc_acompanha_o_calendario(capsys):
+    assert cp.tabua_para("2026/2027", ["2025/2026", "2026/2027"]) == "2026/2027"
+    # A portaria da safra nova saiu e a tábua dela ainda não: fica a anterior, e o log diz.
+    assert cp.tabua_para("2027/2028", ["2025/2026", "2026/2027"]) == "2026/2027"
     assert "ainda não saiu" in capsys.readouterr().out
-    # Sem a busca, ou com a mesma safra, nada muda.
-    assert cp.escolhe_safra(atual, None, ["2026/2027", "2027/2028"]) is atual
-    assert cp.escolhe_safra(atual, dict(nova, safra="2026/2027"), ["2026/2027"]) is atual
+    # Tábua de safra mais nova que o calendário não entra: as datas seriam de outra safra.
+    assert cp.tabua_para("2026/2027", ["2026/2027", "2027/2028"]) == "2026/2027"
+    import pytest
+    with pytest.raises(SystemExit):
+        cp.tabua_para("2026/2027", ["2027/2028"])
+
+
+CAL = {"MT": [{"regiao": None, "vazio": ["2026-06-08", "2026-09-06"], "semeadura": ["2026-09-07", "2027-01-07"],
+               "municipios": None, "excecoes": {}, "distritos": []}]}
+LINHAS = [{"uf": "MT", "geocodigo": 5107925, "municipio": "Sorriso", "ciclo": 21, "solo": 13, "riscos": "0" * 36}]
+
+
+def _coleta_fixa(monkeypatch, alvo=ATUAL, mesma_safra=False, tabua="2026/2027", cal=CAL, problemas=()):
+    monkeypatch.setattr(cp, "descobre", lambda saida: {"atual": ATUAL, "alvo": alvo, "mesma_safra": mesma_safra,
+                                                       "tabua": tabua, "recursos": []})
+    lidas = []
+    monkeypatch.setattr(cp, "calendario", lambda url: lidas.append(url) or cal)
+    monkeypatch.setattr(cp, "le_calendario", lambda url: (cal, list(problemas)))
+    monkeypatch.setattr(cp, "zarc", lambda recursos, safra: (LINHAS, {"recurso": "https://dados",
+                                                                       "portarias": {"MT": "Port.202_de_03-07-2026"}}))
+    return lidas
+
+
+def test_coleta_sem_mudanca_nao_muda_a_data(monkeypatch, tmp_path):
+    import json
+    _coleta_fixa(monkeypatch)
+    cp.grava(tmp_path)
+    fontes = json.loads((tmp_path / "fontes_plantio.json").read_text(encoding="utf-8"))
+    assert fontes["zarc"]["safra"] == "2026/2027"
+    fontes["lido_em"] = "2026-11-01"
+    (tmp_path / "fontes_plantio.json").write_text(json.dumps(fontes, ensure_ascii=False, indent=1) + "\n",
+                                                   encoding="utf-8")
+    cp.grava(tmp_path)
+    assert json.loads((tmp_path / "fontes_plantio.json").read_text(encoding="utf-8"))["lido_em"] == "2026-11-01"
+    # Com uma data mudada na portaria, a data da leitura muda também.
+    _coleta_fixa(monkeypatch, cal={"MT": [dict(CAL["MT"][0], semeadura=["2026-09-10", "2027-01-07"])]})
+    cp.grava(tmp_path)
+    assert json.loads((tmp_path / "fontes_plantio.json").read_text(encoding="utf-8"))["lido_em"] != "2026-11-01"
+
+
+def test_safra_nova_sem_tabua_grava_o_calendario_novo_com_a_tabua_anterior(monkeypatch, tmp_path):
+    import json
+    nova = {"safra": "2027/2028", "fonte": "Portaria SDA/MAPA nº 2.001, de 7 de abril de 2027", "url": "https://x"}
+    _coleta_fixa(monkeypatch, alvo=nova, tabua="2026/2027")
+    cp.grava(tmp_path)
+    assert (tmp_path / "calendario_soja_2027_2028.json").exists()
+    assert (tmp_path / "zarc_soja_2026_2027.csv").exists()
+    fontes = json.loads((tmp_path / "fontes_plantio.json").read_text(encoding="utf-8"))
+    assert (fontes["safra"], fontes["zarc"]["safra"]) == ("2027/2028", "2026/2027")
+    assert fontes["calendario"] == {"fonte": nova["fonte"], "url": "https://x"}
+
+
+def test_portaria_da_mesma_safra_que_nao_se_le_vira_aviso(monkeypatch, tmp_path):
+    import json
+    depois = {"safra": "2026/2027", "fonte": "Portaria SDA/MAPA nº 1.700, de 2 de setembro de 2026", "url": "https://y"}
+    lidas = _coleta_fixa(monkeypatch, alvo=depois, mesma_safra=True, problemas=["PA: sem linha na tabela"])
+    aviso = tmp_path / "aviso.md"
+    cp.grava(tmp_path / "plantio", aviso)
+    # Segue na portaria em uso, e o aviso tem o título da issue e o que não bateu.
+    assert lidas == [cp.DOU]
+    fontes = json.loads((tmp_path / "plantio" / "fontes_plantio.json").read_text(encoding="utf-8"))
+    assert fontes["calendario"]["fonte"] == cp.PORTARIA
+    titulo, *corpo = aviso.read_text(encoding="utf-8").splitlines()
+    assert titulo == "Calendário de semeadura: conferir a Portaria SDA/MAPA nº 1.700, de 2 de setembro de 2026"
+    assert "- PA: sem linha na tabela" in corpo and any("https://y" in x for x in corpo)
+
+
+def test_portaria_da_mesma_safra_com_o_calendario_inteiro_passa_a_valer(monkeypatch, tmp_path):
+    import json
+    depois = {"safra": "2026/2027", "fonte": "Portaria SDA/MAPA nº 1.700, de 2 de setembro de 2026", "url": "https://y"}
+    _coleta_fixa(monkeypatch, alvo=depois, mesma_safra=True)
+    aviso = tmp_path / "aviso.md"
+    cp.grava(tmp_path / "plantio", aviso)
+    assert not aviso.exists()
+    fontes = json.loads((tmp_path / "plantio" / "fontes_plantio.json").read_text(encoding="utf-8"))
+    assert fontes["calendario"] == {"fonte": depois["fonte"], "url": "https://y"}
 
 
 def test_safra_em_uso_vem_da_ultima_coleta(tmp_path):

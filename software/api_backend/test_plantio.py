@@ -82,6 +82,27 @@ def test_observacao_em_ingles(pasta):
         "A portaria põe o município nesta região, exceto os distritos de Cachoeira Grande e Castelo de Sonhos.")
 
 
+def test_calendario_da_safra_nova_com_a_tabua_anterior(pasta):
+    """A portaria da safra nova sai meses antes da tábua do ZARC: o calendário já é
+    o novo, e a fonte do ZARC diz de que safra são os riscos."""
+    cal = json.loads((pasta / "calendario_soja_2026_2027.json").read_text(encoding="utf-8"))
+    cal["safra"] = "2027/2028"
+    (pasta / "calendario_soja_2027_2028.json").write_text(json.dumps(cal), encoding="utf-8")
+    fontes = json.loads((pasta / "fontes_plantio.json").read_text(encoding="utf-8"))
+    fontes["safra"], fontes["zarc"]["safra"] = "2027/2028", "2026/2027"
+    (pasta / "fontes_plantio.json").write_text(json.dumps(fontes), encoding="utf-8")
+    plantio.carrega.cache_clear()
+    d = plantio.para_municipio("PA", 1505502, pasta)
+    assert d["safra"] == "2027/2028" and d["zarc"]["safra"] == "2026/2027"
+    assert d["zarc"]["portaria"] == ("Portaria nº 203, de 03/07/2026, da safra 2026/2027 "
+                                     "(a tábua da safra 2027/2028 ainda não saiu)")
+    assert d["zarc"]["riscos"]["21-13"].endswith("222233")
+    en = plantio.para_municipio("PA", 1505502, pasta, lang="en")["zarc"]["portaria"]
+    assert en.endswith(", 2026/2027 season (the 2027/2028 table is not out yet)")
+    # Com a tábua da mesma safra, o nome da portaria vem sozinho.
+    assert plantio.aviso_da_tabua("2027/2028", "2027/2028") == ""
+
+
 def test_estado_sem_regioes_vale_para_todos(pasta):
     d = plantio.para_municipio("MT", 5107925, pasta)
     assert d["calendario"]["regiao"] is None and d["calendario"]["vazio"] == ["2026-06-08", "2026-09-06"]
@@ -134,21 +155,47 @@ FORA_DA_PORTARIA = {"PA": {1500800, 1501402, 1502806, 1507706},  # Ananindeua, B
                     "MA": {2101939}}                             # Bernardo do Mearim
 
 
+def _da_portaria_1579(real) -> bool:
+    """Os casos conferidos à mão valem para a Portaria nº 1.579/2026; a coleta troca de portaria sozinha."""
+    return real["calendario"]["fonte"].startswith("Portaria SDA/MAPA nº 1.579,")
+
+
+def test_calendario_real_tem_datas_da_safra_e_vazio_antes_da_semeadura(real):
+    """Para qualquer portaria que a coleta grave: cada estado do produto tem
+    calendário, o vazio sanitário acaba antes de a semeadura começar, e as datas
+    caem na safra (de julho de um ano a junho do seguinte)."""
+    from datetime import date
+    ini = int(real["calendario"]["safra"].split("/")[0])
+    assert set(real["calendario"]["estados"]) == {"PA", "MT", "MA", "TO", "RO"}
+    for uf, regioes in real["calendario"]["estados"].items():
+        for r in regioes:
+            v0, v1 = (date.fromisoformat(x) for x in r["vazio"])
+            s0, s1 = (date.fromisoformat(x) for x in r["semeadura"])
+            assert v0 < v1 < s0 < s1, (uf, r["regiao"])
+            assert date(ini, 1, 1) <= v0 and s1 <= date(ini + 1, 6, 30), (uf, r["regiao"])
+
+
 def test_cada_municipio_do_para_e_do_maranhao_tem_uma_regiao_so(real):
     """A portaria divide os dois estados em regiões pelas listas das notas: um
     município não pode cair em duas, e só os que ela não cita ficam fora."""
     totais = {"PA": 144, "MA": 217}
     for uf, total in totais.items():
         regioes = real["calendario"]["estados"][uf]
-        listas = [set(r["municipios"]) for r in regioes]
+        listas = [set(r["municipios"]) for r in regioes if isinstance(r["municipios"], list)]
         unidos = set().union(*listas)
-        assert sum(len(x) for x in listas) == len(unidos) == total - len(FORA_DA_PORTARIA[uf]), uf
+        assert sum(len(x) for x in listas) == len(unidos) <= total, uf
+        if not _da_portaria_1579(real):
+            continue
+        assert len(unidos) == total - len(FORA_DA_PORTARIA[uf]), uf
         assert not unidos & FORA_DA_PORTARIA[uf], uf
         for cod in FORA_DA_PORTARIA[uf]:
             assert plantio.para_municipio(uf, cod)["calendario"] is None
 
 
 def test_datas_da_portaria_nos_municipios_reais(real):
+    if not _da_portaria_1579(real):
+        pytest.skip("datas conferidas à mão na Portaria nº 1.579/2026, que não é mais a em uso")
+
     def cal(uf, cod):
         return plantio.para_municipio(uf, cod)["calendario"]
     assert cal("MT", 5107925)["semeadura"] == ["2026-09-07", "2027-01-07"]            # Sorriso

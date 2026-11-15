@@ -1,13 +1,15 @@
 # Janela de plantio da soja: ZARC (tábua de risco, dado aberto do Ministério da
-# Agricultura) e calendário de semeadura e vazio sanitário (Portaria SDA/MAPA
-# nº 1.579/2026, lida do Diário Oficial). coleta_plantio.py grava os arquivos
-# em pesquisa/dados/plantio/, que a API e o painel leem.
+# Agricultura) e calendário de semeadura e vazio sanitário (portaria da SDA/MAPA,
+# lida do Diário Oficial). coleta_plantio.py grava os arquivos em
+# pesquisa/dados/plantio/, que a API e o painel leem.
 #
+# - Toda semana, na main: a coleta procura a portaria mais nova no Diário
+#   Oficial e a tábua do ZARC no catálogo, e troca de safra sozinha. Se algo
+#   mudou, os testes da API rodam com os dados novos, e o PR é aberto e
+#   mergeado. Uma portaria da mesma safra que não traz o calendário inteiro (uma
+#   alteração, por exemplo) vira issue; uma coleta que falha, também.
 # - Numa branch de trabalho (push no coletor ou neste workflow): grava os
 #   arquivos na própria branch.
-# - Na main, todo mês e sob demanda: se a fonte mudou, abre um PR e o mergeia,
-#   como o workflow mensal da base. O ZARC e o calendário mudam uma vez por
-#   safra; a conferência mensal pega a portaria da safra seguinte e uma revisão.
 name: Janela de plantio
 
 on:
@@ -17,12 +19,13 @@ on:
       - "software/automacao_github/coleta_plantio.py"
       - ".github/workflows/plantio.yml"
   schedule:
-    - cron: "41 11 3 * *"
+    - cron: "41 11 * * 1"
   workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 concurrency:
   group: plantio-${{ github.ref }}
@@ -39,68 +42,12 @@ jobs:
       - run: pip install --quiet requests pytest
       - name: Testa a leitura da portaria
         run: python -m pytest software/automacao_github/test_coleta_plantio.py -q
-      # TEMPORÁRIO: compara formas de consulta à busca do Diário Oficial.
-      - name: Diagnóstico da busca do DOU
-        if: github.ref_name != github.event.repository.default_branch
-        continue-on-error: true
-        run: |
-          python - <<'PY'
-          import json, re, requests
-          URL = "https://www.in.gov.br/consulta/-/buscar/dou"
-          UA = {"User-Agent": "AgroInteligencia-Dissertacao/1.0 (UFPA; pesquisa academica)"}
-          F = '"calendário de semeadura"'
-          ANO = {"exactDate": "personalizado", "publishFrom": "15-11-2025", "publishTo": "14-11-2026"}
-          def busca(p):
-              r = requests.get(URL, headers=UA, params={"s": "todos", "sortType": "0", **p}, timeout=90)
-              m = re.search(r'id="_br_com_seatecnologia_in_buscadou_BuscaDouPortlet_params"[^>]*>(.*?)</script>', r.text, re.S)
-              return r, ((json.loads(m.group(1)).get("jsonArray") or []) if m else None)
-          def mostra(nome, p, todos=False):
-              try:
-                  r, hits = busca(p)
-              except Exception as e:
-                  print(f"== {nome}: {type(e).__name__}: {e}"); return []
-              hits = hits or []
-              sda = [h for h in hits if "SDA/MAPA" in (h.get("title") or "")]
-              datas = sorted({h.get("pubDate", "") for h in hits}, key=lambda d: d[6:] + d[3:5] + d[:2])
-              print(f"== {nome}: {r.status_code}, atos={len(hits)}, SDA/MAPA={len(sda)}, datas {datas[:1]}..{datas[-1:]}")
-              print("   ", r.url)
-              for h in (hits if todos else (sda or hits)[:3]):
-                  print("    -", h.get("pubDate"), "|", (h.get("title") or "")[:70], "|", texto(h.get("content"))[:90])
-              return hits
-          def texto(c):
-              return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", c or ""))
-          h1 = mostra("frase, 364 dias, página 1 (todos)", {"q": F, **ANO}, todos=True)
-          if h1:
-              print("chaves de um ato:", sorted(h1[-1].keys()))
-              u = h1[-1]
-              print("último ato:", {k: u.get(k) for k in ("classPK", "displayDateSortable", "score", "id", "pubOrder")})
-          mostra("frase, 364 dias, delta 50", {"q": F, **ANO, "delta": "50"})
-          mostra("frase, 22 meses", {"q": F, "exactDate": "personalizado", "publishFrom": "01-01-2025", "publishTo": "14-11-2026"})
-          mostra("frase + soja, 364 dias", {"q": F + " soja", **ANO})
-          mostra("+frase +vazio", {"q": '+' + F + ' +"vazio sanitário"', **ANO})
-          mostra("frase AND vazio", {"q": F + ' AND "vazio sanitário"', **ANO})
-          mostra("duas frases", {"q": F + ' "vazio sanitário"', **ANO})
-          mostra("só vazio sanitário", {"q": '"vazio sanitário"', **ANO})
-          mostra("órgão SDA", {"q": F, **ANO, "orgPrin": "Ministério da Agricultura e Pecuária",
-                               "orgSub": "Secretaria de Defesa Agropecuária"})
-          mostra("ementa", {"q": 'ddm__text__21040__ementa_pt_BR-' + F, **ANO})
-          mostra("conteúdo", {"q": 'ddm__text__21040__texto_pt_BR-' + F, **ANO})
-          mostra("título SDA/MAPA", {"q": 'title_pt_BR-"SDA/MAPA"', **ANO})
-          mostra("relevância (sortType 1)", {"q": F, **ANO, "sortType": "1"})
-          mostra("artType Portaria", {"q": F, **ANO, "artType": "Portaria"})
-          if h1:
-              u = h1[-1]
-              for nome, extra in [
-                  ("página 2, search_after", {"currentPage": "1", "newPage": "2", "score": str(u.get("score", 0)),
-                                              "id": str(u.get("classPK", "")), "displayDate": str(u.get("displayDateSortable", ""))}),
-                  ("página 2, start", {"start": "20"}),
-                  ("página 2, cur", {"cur": "2"}),
-              ]:
-                  h2 = mostra(nome, {"q": F, **ANO, **extra})
-                  print("    mesma primeira?", bool(h2) and h2[0].get("urlTitle") == h1[0].get("urlTitle"))
-          PY
       - name: Coleta o ZARC e o calendário
-        run: python software/automacao_github/coleta_plantio.py
+        run: python software/automacao_github/coleta_plantio.py --aviso "$RUNNER_TEMP/aviso_plantio.md"
+      # Os PRs abertos pelo próprio Actions não disparam o workflow de testes:
+      # os da API rodam aqui, com os dados que acabaram de ser gravados.
+      - name: Testa a API com os dados novos
+        run: python -m pytest software/api_backend/test_plantio.py -q
 
       - name: Grava na branch de trabalho
         if: github.ref_name != github.event.repository.default_branch
@@ -139,3 +86,28 @@ jobs:
         run: |
           gh pr merge --squash --delete-branch "${{ steps.cpr.outputs.pull-request-number }}" \
             --repo "${{ github.repository }}"
+
+      # Uma portaria da mesma safra que a coleta não conseguiu ler inteira: uma
+      # issue por portaria, que fica fechada se alguém já a conferiu.
+      - name: Abre a issue do aviso
+        if: github.ref_name == github.event.repository.default_branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          f="$RUNNER_TEMP/aviso_plantio.md"
+          [ -s "$f" ] || { echo "Sem aviso."; exit 0; }
+          titulo=$(head -1 "$f")
+          n=$(gh issue list --state all --search "in:title \"$titulo\"" --json number -q '.[0].number')
+          if [ -n "$n" ]; then echo "A issue #$n já trata desta portaria."; exit 0; fi
+          { tail -n +2 "$f"; echo; echo "Execução: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"; } > "$RUNNER_TEMP/corpo.md"
+          gh issue create --title "$titulo" --body-file "$RUNNER_TEMP/corpo.md"
+
+      - name: Abre uma issue se a coleta falhou
+        if: failure() && github.ref_name == github.event.repository.default_branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          titulo="Janela de plantio: a coleta falhou"
+          corpo="A coleta da janela de plantio (\`plantio.yml\`) falhou em $(date -u +%d/%m/%Y): [execução]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID). O produto segue com os dados da última coleta que deu certo. Uma portaria de safra nova que o coletor não consegue ler também cai aqui; o log diz o que não bateu."
+          n=$(gh issue list --state open --search "in:title \"$titulo\"" --json number -q '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$corpo"; else gh issue create --title "$titulo" --body "$corpo"; fi

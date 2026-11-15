@@ -43,8 +43,12 @@ def carrega(pasta: Path = PASTA) -> dict | None:
         return None
     cal = json.loads((pasta / f"calendario_soja_{tag}.json").read_text(encoding="utf-8"))
     fontes = json.loads((pasta / "fontes_plantio.json").read_text(encoding="utf-8"))
+    # A tábua do ZARC pode ser da safra anterior à do calendário: a portaria do
+    # calendário sai antes (em 2026, em abril; a tábua, em julho), e a coleta
+    # passa o calendário para a safra nova sem esperar a tábua.
+    tag_zarc = (fontes.get("zarc", {}).get("safra") or cal["safra"]).replace("/", "_")
     zarc: dict[int, dict] = {}
-    with open(pasta / f"zarc_soja_{tag}.csv", encoding="utf-8") as f:
+    with open(pasta / f"zarc_soja_{tag_zarc}.csv", encoding="utf-8") as f:
         for r in csv.DictReader(f):
             m = zarc.setdefault(int(r["geocodigo"]), {"uf": r["uf"], "municipio": r["municipio"], "riscos": {}})
             m["riscos"][f"{r['ciclo']}-{r['solo']}"] = r["riscos"]
@@ -55,6 +59,19 @@ def nome_da_portaria(codigo: str) -> str:
     """'Port.203_de_03-07-2026' -> 'Portaria nº 203, de 03/07/2026'."""
     m = re.fullmatch(r"Port\.?(\d+)_de_(\d{2})-(\d{2})-(\d{4})", codigo or "")
     return f"Portaria nº {m.group(1)}, de {m.group(2)}/{m.group(3)}/{m.group(4)}" if m else (codigo or "")
+
+
+def aviso_da_tabua(safra_zarc: str, safra: str, lang: str = "pt") -> str:
+    """O que vai junto do nome da portaria do ZARC quando a tábua é de outra safra que a do calendário.
+
+    Vai no mesmo texto da fonte, que o aplicativo e o painel já mostram: os dois
+    avisam sem mudar de versão.
+    """
+    if safra_zarc == safra:
+        return ""
+    if lang == "en":
+        return f", {safra_zarc} season (the {safra} table is not out yet)"
+    return f", da safra {safra_zarc} (a tábua da safra {safra} ainda não saiu)"
 
 
 def regiao_do_municipio(regioes: list[dict], cod_ibge7: int) -> dict | None:
@@ -126,8 +143,10 @@ def para_municipio(uf: str, cod_ibge7: int, pasta: Path = PASTA, lang: str = "pt
     zarc_mun = None
     if z is not None and z["uf"] == uf:
         meta = fontes["zarc"]
+        safra_zarc = meta.get("safra") or cal["safra"]
         zarc_mun = {
-            "portaria": nome_da_portaria(meta["portarias"].get(uf, "")),
+            "portaria": nome_da_portaria(meta["portarias"].get(uf, "")) + aviso_da_tabua(safra_zarc, cal["safra"], lang),
+            "safra": safra_zarc,
             "fonte": meta["fonte"], "url": meta["url"],
             # "Grupo II" é o nome da tábua; em inglês, "Group II". AD1 a AD6 valem nos dois.
             "ciclos": [{"codigo": int(c), "nome": re.sub(r"^Grupo\b", "Group", n) if lang == "en" else n}

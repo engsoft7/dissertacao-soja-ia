@@ -616,7 +616,7 @@ subseção 4.9 da dissertação e o Anexo 01 citam. A base congelada da disserta
 | O quê | Quando | Workflow |
 |---|---|---|
 | Base do IBGE dos cinco estados, satélite da safra nova, El Niño, CONAB | todo dia 15, com merge automático | `atualiza-dados.yml` |
-| Janela de plantio: portaria do calendário de semeadura e tábua do ZARC; passa sozinha para a safra nova quando o Diário Oficial publica a portaria e o Ministério, a tábua | todo dia 3, com merge automático | `plantio.yml` |
+| Janela de plantio: portaria do calendário de semeadura e tábua do ZARC. O calendário passa sozinho para a safra nova quando o Diário Oficial publica a portaria; a tábua do ZARC, quando o Ministério a publica (até lá, segue a anterior, e o app e o painel dizem isso). Uma portaria da mesma safra que altere o calendário vira issue para conferir | toda segunda-feira, com testes e merge automático; issue quando a coleta falha | `plantio.yml` |
 | Conferência da safra nova (projeção e ONI) | todo dia 20, com merge automático | `confere-safra-nova.yml` |
 | Fontes externas (cotações, Agrolink, Open-Meteo, INMET, IBGE, API) e o certificado do portal da CONAB | todo dia; abre issue quando algo falha ou o portal da CONAB volta | `monitor-fontes.yml` |
 | Release, APK e AAB assinados, DOI no Zenodo e envio à Google Play | a cada merge que sobe a versão do app (`versionName`) | `publica-versao.yml`, `publica-apk.yml`, `registra-doi.yml` |

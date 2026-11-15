@@ -161,10 +161,15 @@ def test_janela_de_plantio_pela_rota(cliente):
         return
     d = r.json()
     assert d["municipio"] == "Sorriso" and d["uf"] == "MT" and d["calendario"]["regiao"] is None
+    assert d["calendario"]["semeadura"] == plantio.carrega()["calendario"]["estados"]["MT"][0]["semeadura"]
+    assert cliente.get("/api/plantio/Atlantida").status_code == 404
+    # As datas e as regiões da Portaria nº 1.579/2026, enquanto ela é a em uso; a
+    # coleta troca de portaria sozinha, e estes testes não podem travar a troca.
+    if not d["calendario"]["fonte"].startswith("Portaria SDA/MAPA nº 1.579,"):
+        return
     assert d["calendario"]["semeadura"] == ["2026-09-07", "2027-01-07"]
     pa = cliente.get("/api/plantio/Paragominas").json()
     assert pa["uf"] == "PA" and pa["calendario"]["regiao"] == "II"
-    assert cliente.get("/api/plantio/Atlantida").status_code == 404
     altamira = cliente.get("/api/plantio/Altamira", headers={"Accept-Language": "en-US,en;q=0.9"}).json()
     assert altamira["calendario"]["observacao"].startswith("The districts of")
     assert cliente.get("/api/plantio/Altamira").json()["calendario"]["observacao"].startswith("Os distritos de")

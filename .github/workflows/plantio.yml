@@ -42,6 +42,30 @@ jobs:
       - run: pip install --quiet requests pytest
       - name: Testa a leitura da portaria
         run: python -m pytest software/automacao_github/test_coleta_plantio.py -q
+      # TEMPORÁRIO: a ementa e os dados de publicação da portaria, para a referência da dissertação.
+      - name: Lê a ementa da portaria
+        if: github.ref_name != github.event.repository.default_branch
+        continue-on-error: true
+        run: |
+          python - <<'PY'
+          import html, re, sys, requests
+          sys.path.insert(0, "software/automacao_github")
+          import coleta_plantio as cp
+          r = requests.get(cp.DOU, headers=cp.UA, timeout=120)
+          print(r.status_code, len(r.text))
+          for classe in ("publicado-dou-data", "edicao-dou-data", "secao-dou", "secao-dou-data", "orgao-dou-data", "identifica", "ementa"):
+              achados = re.findall(r'<(?:span|p|h\d)[^>]*class="[^"]*\b%s\b[^"]*"[^>]*>(.*?)</(?:span|p|h\d)>' % classe, r.text, re.S)
+              print(f"[{classe}]", [html.unescape(re.sub(r"<[^>]+>", " ", a)).strip()[:500] for a in achados[:3]])
+          t = cp.texto_da_pagina(r.text)
+          i = t.find("Publicado em")
+          print("== cabeçalho:", t[i:i + 400] if i >= 0 else "(sem 'Publicado em')")
+          j = t.upper().find("PORTARIA SDA/MAPA N", max(i, 0))
+          k = t.find("ANEXO", j)
+          corpo = t[j:k if k > j else j + 6000]
+          print("== da portaria ao anexo (%d caracteres):" % len(corpo))
+          for a in range(0, min(len(corpo), 9000), 1500):
+              print(corpo[a:a + 1500])
+          PY
       - name: Coleta o ZARC e o calendário
         run: python software/automacao_github/coleta_plantio.py --aviso "$RUNNER_TEMP/aviso_plantio.md"
       # Os PRs abertos pelo próprio Actions não disparam o workflow de testes:

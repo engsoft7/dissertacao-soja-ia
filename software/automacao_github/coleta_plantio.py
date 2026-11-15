@@ -329,7 +329,7 @@ def portaria_mais_nova(hoje: date | None = None) -> dict | None:
     cands = candidatas(atos)
     # O que a busca achou fica no log: é por aqui que se vê um formato novo do DOU.
     print(f"::group::busca no Diário Oficial: {len(atos)} atos com {FRASE_DOU} no último ano, "
-          f"{len(cands)} portarias da SDA/MAPA")
+          f"{len(cands)} {'portaria' if len(cands) == 1 else 'portarias'} da SDA/MAPA")
     for c in cands:
         print(f"- {c['publicada']:%d/%m/%Y} {c['titulo']}: {c['url']}")
     achada = None

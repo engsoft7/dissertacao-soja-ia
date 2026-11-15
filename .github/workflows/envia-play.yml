@@ -10,7 +10,8 @@
 #   Actions > "Envia à Google Play" > Run workflow
 #     tag:   a etiqueta do Release (ex.: v2.6.0); vazio só lista as faixas
 #     faixa: internal (teste interno), alpha (teste fechado), beta (teste
-#            aberto) ou production; vazio usa a variável PLAY_FAIXA
+#            aberto) ou production; vazio usa a variável PLAY_FAIXA ou, sem
+#            ela, a faixa mais alta em que o app já tem versão
 #
 # Listar as faixas só lê: a edição aberta para isso é descartada.
 name: Envia à Google Play
@@ -23,7 +24,7 @@ on:
         required: false
         default: ""
       faixa:
-        description: "Faixa: internal, alpha (teste fechado), beta ou production; vazio usa a variável PLAY_FAIXA"
+        description: "Faixa: internal, alpha (teste fechado), beta ou production; vazio usa a mais alta em que o app já tem versão"
         required: false
         default: ""
   # Também quando o workflow ou o script mudam numa branch: só lista as faixas.
@@ -67,7 +68,7 @@ jobs:
       - name: Faixas do app na loja
         if: steps.cliente.outputs.pronto == 'sim'
         run: |
-          echo "Faixa de envio: ${PLAY_FAIXA:-production (o padrão: a variável PLAY_FAIXA está vazia)}"
+          echo "Faixa pedida: ${PLAY_FAIXA:-nenhuma (vale a mais alta em que o app já tem versão)}"
           /tmp/play/bin/python software/automacao_github/envia_play.py --faixas
 
       - name: Envia o .aab do Release

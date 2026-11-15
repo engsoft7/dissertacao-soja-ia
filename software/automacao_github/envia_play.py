@@ -12,11 +12,14 @@ O que o autor configura uma vez:
   2. No Play Console (Usuários e permissões), essa conta convidada com permissão
      para lançar versões do AgroInteligência.
   3. No GitHub (Settings > Secrets and variables > Actions), o segredo
-     PLAY_SERVICE_ACCOUNT_JSON com o conteúdo do JSON e, se quiser outra faixa
-     que não a de produção, a variável PLAY_FAIXA (internal, alpha, beta).
+     PLAY_SERVICE_ACCOUNT_JSON com o conteúdo do JSON.
 
-Conta pessoal nova não lança em produção antes de um teste fechado com 12
-testadores por 14 dias: até lá, a faixa é a do teste fechado (alpha).
+A faixa de envio é a mais alta em que o app já tem versão lançada: quem está no
+teste fechado recebe ali as versões novas, e quem já lançou em produção, em
+produção. O envio nunca sobe de faixa sozinho: conta pessoal nova não lança em
+produção antes de um teste fechado com 12 testadores por 14 dias, e a primeira
+versão de produção é lançada pelo Play Console; as seguintes vão por aqui. A
+variável PLAY_FAIXA (internal, alpha, beta, production), se existir, manda.
 
 A API segue o roteiro do Play Console: abre uma edição, envia o pacote, põe a
 versão na faixa com as notas da versão e confirma a edição. Uma falha em
@@ -24,7 +27,7 @@ qualquer passo deixa a edição sem confirmar, e nada muda na loja. Quando a loj
 recusa o pacote ou a faixa, o log diz o que ela respondeu, quais faixas o app
 tem e o que fazer.
 
-Uso:  python envia_play.py ARQUIVO.aab "Notas da versão" [--faixa production]
+Uso:  python envia_play.py ARQUIVO.aab "Notas da versão" [--faixa alpha]
       python envia_play.py --faixas      só lista as faixas do app; não envia nada
 """
 import argparse
@@ -37,6 +40,8 @@ ESCOPO = "https://www.googleapis.com/auth/androidpublisher"
 # O Play aceita até 500 caracteres de notas por idioma.
 LIMITE_NOTAS = 500
 NOMES = {"production": "produção", "beta": "teste aberto", "alpha": "teste fechado", "internal": "teste interno"}
+# Da faixa mais restrita à mais aberta. Uma faixa de nome próprio é um teste fechado.
+ORDEM = ["internal", "alpha", "beta", "production"]
 
 
 def notas_da_versao(texto: str) -> str:
@@ -94,6 +99,23 @@ def faixas_do_app(api, edicao: str | None = None) -> list[dict]:
             api.edits().delete(packageName=PACOTE, editId=edicao).execute()
 
 
+def faixa_em_uso(faixas: list[dict]) -> str | None:
+    """A faixa mais alta em que o app já tem versão lançada; None se não tem em nenhuma.
+
+    Rascunho e lançamento interrompido não contam: o envio não pode levar o app
+    a um público maior do que o autor já escolheu no Play Console.
+    """
+    lancadas = [f.get("track", "") for f in faixas
+                if any(r.get("versionCodes") and r.get("status") in ("completed", "inProgress")
+                       for r in f.get("releases") or [])]
+    if not lancadas:
+        return None
+
+    def altura(nome: str) -> tuple[int, bool]:
+        return (ORDEM.index(nome) if nome in ORDEM else ORDEM.index("alpha"), nome in ORDEM)
+    return max(lancadas, key=altura)
+
+
 def orientacao(faixa: str, resposta: str) -> str:
     """O que fazer, pelo que a loja respondeu."""
     if "draft" in resposta.lower():
@@ -101,9 +123,9 @@ def orientacao(faixa: str, resposta: str) -> str:
                 "e as seguintes passam a ir por aqui.")
     if faixa == "production":
         return ("A conta ainda não pode lançar em produção (conta pessoal nova precisa antes do teste fechado com 12 "
-                "testadores por 14 dias) ou há uma versão em revisão. Para mandar a uma faixa de teste, crie no "
-                "GitHub a variável PLAY_FAIXA (alpha é o teste fechado; internal, o teste interno) ou dispare o "
-                "workflow \"Envia à Google Play\" com a faixa.")
+                "testadores por 14 dias) ou há uma versão em revisão. Sem a variável PLAY_FAIXA, o envio vai sozinho "
+                "para a faixa mais alta em que o app já tem versão; para reenviar esta, dispare o workflow "
+                "\"Envia à Google Play\" com a etiqueta do Release.")
     return "Confira no Play Console se a faixa existe e se a conta de serviço pode lançar nela."
 
 
@@ -146,7 +168,8 @@ def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("aab", nargs="?")
     ap.add_argument("notas", nargs="?", default="")
-    ap.add_argument("--faixa", default=os.environ.get("PLAY_FAIXA") or "production")
+    ap.add_argument("--faixa", default=os.environ.get("PLAY_FAIXA") or None,
+                    help="a faixa de envio; sem ela, a mais alta em que o app já tem versão")
     ap.add_argument("--faixas", action="store_true", help="só lista as faixas do app na loja")
     args = ap.parse_args(argv)
     credencial = os.environ.get("PLAY_SERVICE_ACCOUNT_JSON", "")
@@ -160,7 +183,16 @@ def main(argv: list[str]) -> int:
         return 0
     if not args.aab:
         ap.error("falta o arquivo .aab")
-    return envia(api, args.aab, args.notas, args.faixa)
+    faixa = args.faixa
+    if not faixa:
+        faixa = faixa_em_uso(faixas_do_app(api))
+        if faixa is None:
+            print("::error::O app ainda não tem versão lançada em nenhuma faixa da Google Play: a primeira é lançada "
+                  "pelo Play Console, e as seguintes passam a ir por aqui.")
+            return 1
+        print(f"Faixa de envio: {faixa} ({NOMES.get(faixa, 'faixa de teste própria')}), "
+              "a mais alta em que o app já tem versão.")
+    return envia(api, args.aab, args.notas, faixa)
 
 
 if __name__ == "__main__":

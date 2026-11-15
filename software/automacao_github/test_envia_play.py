@@ -117,6 +117,51 @@ def test_erro_que_nao_e_da_loja_nao_e_engolido(monkeypatch):
         envia_play.envia(api, "app.aab", "notas", "alpha")
 
 
+def test_faixa_em_uso_e_a_mais_alta_com_versao_lancada():
+    """As faixas do app em 15/11/2026: produção e teste aberto vazios, teste fechado na 28 e interno na 22."""
+    def faixa(nome, *versoes):
+        return {"track": nome, "releases": [{"versionCodes": [v], "status": s} for v, s in versoes]}
+    hoje = [faixa("production"), faixa("beta"), faixa("alpha", ("28", "completed")), faixa("internal", ("22", "completed"))]
+    assert envia_play.faixa_em_uso(hoje) == "alpha"
+    # Depois da primeira versão de produção, lançada pelo Play Console, as novas vão para lá.
+    assert envia_play.faixa_em_uso(hoje[1:] + [faixa("production", ("33", "inProgress"))]) == "production"
+    # Um rascunho em produção não puxa o envio para a produção.
+    assert envia_play.faixa_em_uso([faixa("production", ("33", "draft")), faixa("alpha", ("28", "completed"))]) == "alpha"
+    # Faixa de nome próprio é teste fechado: empata com a alpha, e a alpha leva; ganha do teste interno.
+    assert envia_play.faixa_em_uso([faixa("Testadores", ("30", "completed")), faixa("alpha", ("28", "completed"))]) == "alpha"
+    assert envia_play.faixa_em_uso([faixa("Testadores", ("30", "completed")), faixa("internal", ("22", "completed"))]) == "Testadores"
+    assert envia_play.faixa_em_uso([faixa("production"), {"track": "internal"}]) is None
+
+
+def test_sem_faixa_pedida_o_envio_vai_para_a_faixa_em_uso(monkeypatch, capsys):
+    api = Api()
+    monkeypatch.setenv("PLAY_SERVICE_ACCOUNT_JSON", "{}")
+    monkeypatch.delenv("PLAY_FAIXA", raising=False)
+    monkeypatch.setattr(envia_play, "cliente", lambda credencial: api)
+    monkeypatch.setattr(envia_play, "_arquivo", lambda aab: aab)
+    assert envia_play.main(["app.aab", "App 2.9.0"]) == 0
+    assert api.feitas == ["insert", "list", "delete", "insert", "upload", "update:alpha", "commit"]
+    saida = capsys.readouterr().out
+    assert "Faixa de envio: alpha (teste fechado), a mais alta em que o app já tem versão." in saida
+    # A variável PLAY_FAIXA, quando existe, manda.
+    api = Api()
+    monkeypatch.setattr(envia_play, "cliente", lambda credencial: api)
+    monkeypatch.setenv("PLAY_FAIXA", "internal")
+    assert envia_play.main(["app.aab", "App 2.9.0"]) == 0
+    assert api.feitas == ["insert", "upload", "update:internal", "commit"]
+
+
+def test_app_sem_versao_em_faixa_nenhuma_nao_envia(monkeypatch, capsys):
+    api = Api()
+    api.FAIXAS = [{"track": "production"}, {"track": "internal", "releases": [{"versionCodes": ["1"], "status": "draft"}]}]
+    monkeypatch.setenv("PLAY_SERVICE_ACCOUNT_JSON", "{}")
+    monkeypatch.delenv("PLAY_FAIXA", raising=False)
+    monkeypatch.setattr(envia_play, "cliente", lambda credencial: api)
+    assert envia_play.main(["app.aab", "notas"]) == 1
+    assert "upload" not in api.feitas
+    assert "a primeira é lançada pelo Play Console" in capsys.readouterr().out
+
+
 def test_listar_as_faixas_nao_muda_nada(monkeypatch, capsys):
     api = Api()
     monkeypatch.setenv("PLAY_SERVICE_ACCOUNT_JSON", "{}")

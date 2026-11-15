@@ -630,11 +630,16 @@ e a versão sobe.
 serviço com uma chave JSON; no Play Console (**Usuários e permissões**), convide
 o e-mail dessa conta com permissão para lançar versões do app; no GitHub
 (**Settings → Secrets and variables → Actions**), crie o segredo
-`PLAY_SERVICE_ACCOUNT_JSON` com o conteúdo do JSON. A faixa padrão é a de
-produção; para outra, crie a variável `PLAY_FAIXA` (`internal`, `alpha` ou
-`beta`). Conta pessoal nova não lança em produção antes de um teste fechado com
-12 testadores por 14 dias: até lá, use `alpha`, a faixa do teste fechado. Sem o
-segredo, o `.aab` fica anexado ao Release para o envio manual.
+`PLAY_SERVICE_ACCOUNT_JSON` com o conteúdo do JSON. Sem o segredo, o `.aab` fica
+anexado ao Release para o envio manual.
+
+A versão nova vai para a faixa mais alta em que o app já tem versão lançada: no
+teste fechado, enquanto o app está no teste fechado; em produção, depois da
+primeira versão de produção. O envio nunca sobe de faixa sozinho: conta pessoal
+nova não lança em produção antes de um teste fechado com 12 testadores por 14
+dias, e a primeira versão de produção é lançada pelo Play Console. Para fixar
+uma faixa, crie a variável `PLAY_FAIXA` (`internal`, `alpha`, `beta` ou
+`production`).
 
 Quando a loja recusa um envio, o log diz o que ela respondeu, quais faixas o app
 tem e o que fazer. Para reenviar o `.aab` de um Release já publicado, sem

@@ -224,6 +224,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.4.19` (06/11/2026) — app 2.7.4: app mais leve com R8, fonte grande sem quebras, simulador na safra do Resumo, sem backup na nuvem e API mais rápida | 175 | 32.451 | `05d8d35c2f47f961d9d8b610ad7ee652ea234c2a2bfb7ca4eb3aa2fdab387f34` |
 | Tag `v2.5.0` (13/11/2026) — app 2.8.0: colheita do talhão, Mato Grosso, Maranhão, Tocantins e Rondônia no painel, na API e no app, simulador pelo efeito medido | 193 | 35.982 | `fc31913a3cfd678c4e780d7583fe29655d85013f9e59422c54be85b9a0add6ef` |
 | Tag `v2.5.1` (14/11/2026) — app 2.8.1: alvos de toque de 48 dp no Sobre, avisos do INMET sem repetição e API com os cinco estados prontos na subida | 194 | 36.269 | `9006b2be7c0707661288454802f845e2e91a29c72b0de0a3443004c3af2d9867` |
+| Tag `v2.6.0` (15/11/2026) — app 2.9.0: janela de plantio, alertas, caderno da safra, resumo para compartilhar, leitura em voz alta e inglês | 216 | 41.180 | `edc8fe1b7092fb09c7ca1b1242b3ba96db0f32daad511e01449c334b045e64b9` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -841,6 +842,73 @@ arquivos e 36.269 linhas. O DOI de versão desta etiqueta é
 10.5281/zenodo.24218986, atribuído pelo Zenodo no depósito disparado pela
 publicação do Release em 14/11/2026.
 
+A `v2.6.0` foi registrada pelo workflow `registra-doi.yml` na publicação do
+Release, em 15/11/2026, com o título “v2.6.0 — App 2.9.0: janela de plantio,
+alertas, caderno da safra, resumo para compartilhar, leitura em voz alta e
+inglês”. Em relação à `v2.5.1`, entram 23 arquivos-fonte
+(`software/api_backend/idioma.py`, `software/api_backend/plantio.py`,
+`software/api_backend/test_idioma.py`, `software/api_backend/test_plantio.py`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Alertas.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/AlertasCalculo.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Caderno.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/CadernoCalculo.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Fala.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Plantio.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/PlantioCalculo.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Relatorio.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/AlertasCalculoTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/AlertasTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/CadernoCalculoTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/FalaTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/PlantioCalculoTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/RelatorioTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/TempoTextosTest.kt`,
+`software/automacao_github/coleta_plantio.py`,
+`software/automacao_github/envia_play.py`,
+`software/automacao_github/test_coleta_plantio.py` e
+`software/automacao_github/test_envia_play.py`); mudam 37
+(`software/api_backend/api.py`, `software/api_backend/financas.py`,
+`software/api_backend/test_estados.py`, `software/api_backend/test_precos.py`,
+`software/aplicativo_mobile/app/build.gradle.kts`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/ApiService.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Comum.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/EstimativaCampo.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/FontesOficiais.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Historico.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Localizacao.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/MainActivity.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Mercado.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/ModoAutomatico.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Municipio.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Pracas.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Resumo.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Safra.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Sobre.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Tempo.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/TempoCalculo.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Viabilidade.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/CampoCapturasDeTelaTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/CapturasDeTelaTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/CenarioClimaticoTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/FontesOficiaisTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/MunicipioTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/SafraTest.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/TempoCalculoTest.kt`,
+`software/automacao_github/dados_das_capturas.py`,
+`software/automacao_github/test_atualiza_conab.py`,
+`software/automacao_github/teste_aparelho.py`, `software/dashboard_web/app.py`,
+`software/dashboard_web/capturas_do_painel.py`,
+`software/dashboard_web/data/loaders.py`,
+`software/dashboard_web/test_robustez_painel.py` e
+`software/dashboard_web/ui/charts.py`); sai 1
+(`software/api_backend/precos.py`).
+
+O resumo criptográfico da `v2.6.0` foi calculado pelo mesmo workflow sobre uma
+cópia limpa da etiqueta (commit `ca63583`), com o critério do comando acima: 216
+arquivos e 41.180 linhas. O DOI de versão desta etiqueta é
+10.5281/zenodo.24238117, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 15/11/2026.
+
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
 calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
@@ -1093,6 +1161,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.18`:** 10.5281/zenodo.24013809
 - **DOI da `v2.4.19`:** 10.5281/zenodo.24022243
 - **DOI da `v2.5.0`:** 10.5281/zenodo.24201917
-- **DOI da versão mais recente (`v2.5.1`):** 10.5281/zenodo.24218986
+- **DOI da `v2.5.1`:** 10.5281/zenodo.24218986
+- **DOI da versão mais recente (`v2.6.0`):** 10.5281/zenodo.24238117
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

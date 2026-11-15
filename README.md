@@ -632,7 +632,15 @@ o e-mail dessa conta com permissão para lançar versões do app; no GitHub
 (**Settings → Secrets and variables → Actions**), crie o segredo
 `PLAY_SERVICE_ACCOUNT_JSON` com o conteúdo do JSON. A faixa padrão é a de
 produção; para outra, crie a variável `PLAY_FAIXA` (`internal`, `alpha` ou
-`beta`). Sem o segredo, o `.aab` fica anexado ao Release para o envio manual.
+`beta`). Conta pessoal nova não lança em produção antes de um teste fechado com
+12 testadores por 14 dias: até lá, use `alpha`, a faixa do teste fechado. Sem o
+segredo, o `.aab` fica anexado ao Release para o envio manual.
+
+Quando a loja recusa um envio, o log diz o que ela respondeu, quais faixas o app
+tem e o que fazer. Para reenviar o `.aab` de um Release já publicado, sem
+compilar de novo: **Actions → Envia à Google Play → Run workflow**, com a
+etiqueta (por exemplo, `v2.6.0`) e, se quiser, a faixa. Sem a etiqueta, o
+workflow só lista as faixas do app na loja.
 
 Para conferir a credencial na hora: **Actions → Atualiza base de dados →
 Run workflow**, marque **"Testar a credencial do Earth Engine"** e rode. O log

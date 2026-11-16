@@ -190,6 +190,43 @@ def aviso_de_defasagem(hoje: date | None = None) -> str | None:
             f"e edite o campo com o preço que você recebe hoje.")
 
 
+# ── FONTES DA JANELA DE PLANTIO ──────────────────────────────────────────────
+# O "Sobre" citava a portaria do calendário de semeadura e a safra por extenso.
+# A coleta troca de portaria e de tábua do ZARC sozinha (coleta_plantio.py,
+# toda semana), e o texto envelheceria em silêncio na virada da safra. Ele sai
+# agora do arquivo que a coleta grava, o mesmo que a tela Janela de plantio lê.
+#
+# Lê o arquivo direto, sem importar plantio.py, pela mesma razão do
+# levantamento da CONAB: um texto do rodapé não pode impedir o painel de abrir.
+FONTES_PLANTIO_JSON = DADOS.parent / "plantio" / "fontes_plantio.json"
+
+
+def fontes_do_plantio_md(arquivo: Path | None = None) -> str:
+    """O que o "Sobre" diz das fontes da Janela de plantio: Markdown, numa linha só.
+
+    Com o arquivo da coleta, cita a portaria e a safra em uso, e diz quando a
+    tábua do ZARC ainda é a da safra anterior. Sem ele, descreve as fontes sem
+    citar portaria nem safra. Nunca levanta exceção.
+    """
+    coleta = ("`coleta_plantio.py` confere os dois toda semana e passa para a portaria e a tábua "
+              "novas quando elas saem.")
+    try:
+        lido = json.loads((arquivo or FONTES_PLANTIO_JSON).read_text(encoding="utf-8"))
+        safra = str(lido["safra"])
+        portaria = f"[{lido['calendario']['fonte']}]({lido['calendario']['url']})"
+        safra_zarc = str(lido.get("zarc", {}).get("safra") or safra)
+    except Exception as e:  # noqa: BLE001 — abrir o painel vale mais
+        print(f"[painel] fontes da janela de plantio indisponiveis ({type(e).__name__}: {e})", flush=True)
+        return ("calendário de semeadura e vazio sanitário da soja, da portaria da SDA/MAPA em vigor, "
+                "lidos do Diário Oficial da União, e tábua de risco do Zoneamento Agrícola de Risco "
+                "Climático (ZARC), dado aberto (CC BY). " + coleta)
+    tabua = ("da mesma safra" if safra_zarc == safra
+             else f"da safra {safra_zarc} (a da safra {safra} ainda não saiu)")
+    return (f"calendário de semeadura e vazio sanitário da soja na safra {safra}, da {portaria}, lidos "
+            f"do Diário Oficial da União, e tábua de risco do Zoneamento Agrícola de Risco Climático "
+            f"(ZARC) {tabua}, dado aberto (CC BY). " + coleta)
+
+
 
 # Os caminhos entram como argumento: o cache do Streamlit guarda um resultado
 # por argumento, e sem ele o contorno do Pará voltaria no mapa de outro estado.
@@ -2115,9 +2152,9 @@ if tela_atual == "🌦️ Tempo na lavoura":
 # ABA 5: JANELA DE PLANTIO
 # ==============================================================================
 # A tela "Janela de plantio" do aplicativo (Plantio.kt), no painel: o
-# calendário de semeadura e o vazio sanitário da Portaria SDA/MAPA nº
-# 1.579/2026, e o risco do ZARC por grupo de cultivar e solo. Os dados e as
-# contas vêm de api_backend/plantio.py, os mesmos da API e do aplicativo.
+# calendário de semeadura e o vazio sanitário da portaria da SDA/MAPA em uso,
+# e o risco do ZARC por grupo de cultivar e solo. Os dados e as contas vêm de
+# api_backend/plantio.py, os mesmos da API e do aplicativo.
 if tela_atual == "🌱 Janela de plantio":
     import importlib
     import ui.charts as graficos
@@ -2241,12 +2278,9 @@ with st.expander("Sobre a tecnologia e as fontes de dados", expanded=False):
       do INMET. A janela de pulverização segue a Embrapa Soja (Adegas e
       Gazziero, 2020), com as mesmas regras do aplicativo. Não entra na
       estimativa de produtividade.
-    * **Portaria SDA/MAPA nº 1.579/2026 e ZARC (tela Janela de plantio):**
-      calendário de semeadura e vazio sanitário da soja na safra 2026/2027,
-      lidos do Diário Oficial da União, e a tábua de risco do Zoneamento
-      Agrícola de Risco Climático, dado aberto do Ministério da Agricultura
-      (CC BY), relidos todo mês por `coleta_plantio.py`.
-''' + f'''    * **Custo operacional (CONAB):** levantamento de custos de produção da soja
+''' + f'''    * **Ministério da Agricultura (tela Janela de plantio):**
+      {fontes_do_plantio_md()}
+    * **Custo operacional (CONAB):** levantamento de custos de produção da soja
       no município de {PRACA_CONAB}, de {LEVANTAMENTO_CONAB_EXTENSO} — ponto de coleta da
       CONAB no cerrado do Tocantins. O Pará não integra o MATOPIBA e não tem
       custo de soja levantado, por isso adota-se o cerrado vizinho.

@@ -4,8 +4,9 @@
 Lê o que software/automacao_github/coleta_plantio.py grava em
 pesquisa/dados/plantio/ (a safra mais recente que houver):
 
-- o calendário de semeadura e o vazio sanitário da Portaria SDA/MAPA nº 1.579/2026,
-  por estado e, no Pará e no Maranhão, por região;
+- o calendário de semeadura e o vazio sanitário da portaria da SDA/MAPA em uso
+  (em novembro de 2026, a nº 1.579/2026), por estado e, no Pará e no Maranhão,
+  por região;
 - a tábua de risco do ZARC: para cada município, grupo de cultivar e classe de
   água disponível no solo, o risco de plantar em cada decêndio (20, 30 ou 40%,
   ou não indicado).

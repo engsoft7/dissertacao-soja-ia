@@ -656,7 +656,10 @@ def get_previsao(municipio: str, uf: str | None = None):
     try:
         resultado = _historico_do_municipio(raw_municipio, df_mun, ce)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # O detalhe do erro (que pode trazer caminhos do servidor) fica no log;
+        # ao cliente vai só o aviso.
+        print(f"[previsao] {raw_municipio} ({ce.estado.uf}): {type(e).__name__}: {e}", flush=True)
+        raise HTTPException(status_code=500, detail="Erro ao montar a previsão do município")
         
     el_ninos, la_ninas = _get_eventos_enso()
     resposta = {
@@ -672,14 +675,16 @@ def get_previsao(municipio: str, uf: str | None = None):
         resposta["uf"] = ce.estado.uf
     return resposta
 
+GEO_PARA = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "para_geo.json"
+
+
 @app.get("/api/mapa/geo")
 def get_mapa_geo():
-    geo_path = Path(__file__).resolve().parents[2] / "pesquisa" / "dados" / "para_geo.json"
     try:
-        geo = json.loads(geo_path.read_text(encoding="utf-8"))
-        return geo
+        return json.loads(GEO_PARA.read_text(encoding="utf-8"))
     except Exception as e:
-         raise HTTPException(status_code=500, detail=f"Erro ao carregar mapa: {str(e)}")
+        print(f"[mapa/geo] {type(e).__name__}: {e}", flush=True)
+        raise HTTPException(status_code=500, detail="Erro ao carregar o mapa")
 
 @lru_cache(maxsize=256)
 def _generate_map_html_cached(municipio: str, theme: str, uf: str = "PA", lang: str = "pt") -> str:
@@ -842,7 +847,8 @@ def render_mapa(municipio: str = None, theme: str = "dark", uf: str | None = Non
         html = _generate_map_html_cached(municipio, theme, ce.estado.uf, idioma_do_pedido(lang, accept_language))
         return HTMLResponse(content=html)
     except Exception as e:
-        return HTMLResponse(f"Erro ao gerar mapa: {str(e)}", status_code=500)
+        print(f"[mapa/render] {municipio} ({ce.estado.uf}): {type(e).__name__}: {e}", flush=True)
+        return HTMLResponse("Erro ao gerar o mapa", status_code=500)
 
 
 class SimulacaoRequest(BaseModel):

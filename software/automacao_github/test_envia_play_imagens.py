@@ -11,11 +11,11 @@ import pytest
 import envia_play
 
 
-def png(caminho: Path, largura: int, altura: int) -> Path:
-    """Um PNG mínimo, com o cabeçalho que dimensoes_png lê."""
+def png(caminho: Path, largura: int, altura: int, cor: int = 2) -> Path:
+    """Um PNG mínimo, com o cabeçalho que dimensoes_png lê; cor 2 é RGB, e 6, RGB com transparência."""
     def bloco(tipo: bytes, dados: bytes) -> bytes:
         return struct.pack(">I", len(dados)) + tipo + dados + struct.pack(">I", zlib.crc32(tipo + dados))
-    ihdr = struct.pack(">IIBBBBB", largura, altura, 8, 2, 0, 0, 0)
+    ihdr = struct.pack(">IIBBBBB", largura, altura, 8, cor, 0, 0, 0)
     caminho.write_bytes(b"\x89PNG\r\n\x1a\n" + bloco(b"IHDR", ihdr) + bloco(b"IEND", b"") + caminho.name.encode())
     return caminho
 
@@ -195,3 +195,67 @@ def test_linha_de_comando(tmp_path, monkeypatch, capsys):
     sem_destaque.mkdir()
     with pytest.raises(ValueError, match="falta loja_destaque.png"):
         envia_play.main(["--imagens", str(pasta_da_loja(sem_destaque, destaque=None))])
+
+
+def test_png_com_transparencia_e_recusado(tmp_path):
+    pasta = pasta_da_loja(tmp_path)
+    png(pasta / "loja_destaque.png", 1024, 500, cor=6)
+    with pytest.raises(ValueError, match="loja_destaque.png: PNG com transparência"):
+        envia_play.imagens_da_pasta(pasta)
+
+
+def test_baixa_as_imagens_da_ficha(tmp_path, monkeypatch, capsys):
+    """Cada imagem vai para a pasta no tamanho original ("=s0"), com a extensão do formato; sem o
+    tamanho original, o endereço puro; o vídeo vai para video.txt."""
+    respostas = {
+        "https://a=s0": b"\x89PNG\r\n\x1a\n" + b"0" * 30,
+        "https://b=s0": None,  # recusado: vale o endereço puro
+        "https://b": b"\xff\xd8\xff\xe0" + b"0" * 30,
+    }
+
+    class Resposta:
+        def __init__(self, dados): self.dados = dados
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def read(self): return self.dados
+
+    def abre(url, timeout):
+        if respostas.get(url) is None:
+            raise OSError("400")
+        return Resposta(respostas[url])
+
+    monkeypatch.setattr("urllib.request.urlopen", abre)
+    m = {"video": "https://youtu.be/x", "imagens": {"phoneScreenshots": ["https://a"], "featureGraphic": ["https://b"]}}
+    salvas = envia_play.baixa_imagens(m, tmp_path / "antes")
+    assert [s.name for s in salvas] == ["phoneScreenshots_1.png", "featureGraphic_1.jpg"]
+    assert (tmp_path / "antes" / "video.txt").read_text(encoding="utf-8") == "https://youtu.be/x\n"
+
+
+# ── o vídeo da ficha, pela seção VÍDEO de textos_da_loja.txt ─────────────────
+
+def _textos_com_video(tmp_path, video):
+    real = Path(envia_play.__file__).resolve().parents[1] / "aplicativo_mobile" / "loja" / "textos_da_loja.txt"
+    arquivo = tmp_path / "textos.txt"
+    arquivo.write_text(f"VÍDEO\n{video}\n\n" + real.read_text(encoding="utf-8"), encoding="utf-8")
+    return arquivo
+
+
+def test_video_da_secao_entra_na_ficha_sem_mudar_os_textos(tmp_path):
+    sem = envia_play.ficha_do_arquivo(Path(envia_play.__file__).resolve().parents[1] / "aplicativo_mobile" / "loja"
+                                      / "textos_da_loja.txt")
+    com = envia_play.ficha_do_arquivo(_textos_com_video(tmp_path, "https://youtu.be/AbCdEfGhIj0"))
+    assert com["video"] == "https://youtu.be/AbCdEfGhIj0"
+    assert {k: v for k, v in com.items() if k != "video"} == sem
+    assert "video" not in sem
+
+
+def test_video_que_nao_e_do_youtube_e_recusado(tmp_path):
+    with pytest.raises(ValueError, match="endereço do YouTube"):
+        envia_play.ficha_do_arquivo(_textos_com_video(tmp_path, "https://exemplo.com/video.mp4"))
+
+
+def test_diferenca_do_video_so_com_a_secao():
+    na_loja = {"title": "A", "shortDescription": "B", "fullDescription": "C", "video": "https://youtu.be/AbCdEfGhIj0"}
+    assert envia_play.diferencas(na_loja, {"title": "A", "shortDescription": "B", "fullDescription": "C"}) == []
+    novo = {**na_loja, "video": "https://youtu.be/ZyXwVuTsRq9"}
+    assert any("ZyXwVuTsRq9" in linha for linha in envia_play.diferencas(na_loja, novo))

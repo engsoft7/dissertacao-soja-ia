@@ -42,12 +42,14 @@ Uso:  python envia_play.py ARQUIVO.aab "Notas da versão" [--faixa alpha]
       python envia_play.py --faixas      só lista as faixas do app; não envia nada
       python envia_play.py --ficha textos_da_loja.txt [--aplica]
       python envia_play.py --midia       só mostra o vídeo e as imagens da ficha
+      python envia_play.py --baixa-imagens PASTA   baixa as imagens que a ficha tem hoje
       python envia_play.py --imagens PASTA [--aplica]
 """
 import argparse
 import difflib
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -63,6 +65,11 @@ ORDEM = ["internal", "alpha", "beta", "production"]
 SECOES_DA_FICHA = {"NOME DO APP": ("title", 30), "BREVE DESCRIÇÃO": ("shortDescription", 80),
                    "DESCRIÇÃO COMPLETA": ("fullDescription", 4000)}
 IDIOMA_DA_FICHA = "pt-BR"
+# O vídeo da ficha, opcional, numa seção VÍDEO no começo de textos_da_loja.txt,
+# antes de NOME DO APP (o confere_textos_da_loja.py só lê as três seções acima).
+# Sem a seção, o vídeo da loja fica como está.
+SECAO_VIDEO = "VÍDEO"
+VIDEO_DO_YOUTUBE = re.compile(r"^https://(www\.youtube\.com/watch\?v=|youtu\.be/)[A-Za-z0-9_-]{11}$")
 
 
 def notas_da_versao(texto: str) -> str:
@@ -189,6 +196,7 @@ def ficha_do_arquivo(caminho: str | Path) -> dict:
     """Nome, breve descrição e descrição completa de textos_da_loja.txt, com os nomes da API.
 
     Recusa o arquivo sem uma das três seções ou com texto acima do limite do Play.
+    Com a seção VÍDEO, traz também o endereço do vídeo, que precisa ser do YouTube.
     """
     partes: dict[str, list[str]] = {}
     atual = None
@@ -196,9 +204,14 @@ def ficha_do_arquivo(caminho: str | Path) -> dict:
         if linha.strip() in SECOES_DA_FICHA:
             atual = SECOES_DA_FICHA[linha.strip()][0]
             partes[atual] = []
+        elif linha.strip() == SECAO_VIDEO:
+            atual = "video"
+            partes[atual] = []
         elif atual:
             partes[atual].append(linha)
     ficha = {campo: "\n".join(linhas).strip() for campo, linhas in partes.items()}
+    if "video" in ficha and not VIDEO_DO_YOUTUBE.match(ficha["video"]):
+        raise ValueError(f"textos da loja: o vídeo precisa ser um endereço do YouTube, e não {ficha['video']!r}")
     faltando = [secao for secao, (campo, _) in SECOES_DA_FICHA.items() if not ficha.get(campo)]
     if faltando:
         raise ValueError("textos da loja sem " + ", ".join(faltando))
@@ -212,7 +225,9 @@ def ficha_do_arquivo(caminho: str | Path) -> dict:
 def diferencas(na_loja: dict, no_arquivo: dict) -> list[str]:
     """O que muda de um para o outro, campo a campo, em linhas de diff."""
     linhas: list[str] = []
-    for campo in ("title", "shortDescription", "fullDescription"):
+    for campo in ("title", "shortDescription", "fullDescription", "video"):
+        if campo == "video" and "video" not in no_arquivo:
+            continue  # sem a seção VÍDEO no arquivo, o vídeo da loja fica como está
         antes = (na_loja.get(campo) or "").splitlines()
         depois = (no_arquivo.get(campo) or "").splitlines()
         if antes != depois:
@@ -224,7 +239,8 @@ def diferencas(na_loja: dict, no_arquivo: dict) -> list[str]:
 def ficha(api, arquivo: str | Path, aplica: bool = False) -> int:
     """Compara a ficha em português da loja com textos_da_loja.txt e, com aplica, a atualiza.
 
-    Só mexe no nome e nas duas descrições: o vídeo e as imagens ficam como estão.
+    Só mexe no nome, nas duas descrições e, quando o arquivo tem a seção VÍDEO, no
+    vídeo; as imagens ficam como estão.
     Sem aplica, ou sem diferença, a edição aberta para ler é descartada.
     """
     nova = ficha_do_arquivo(arquivo)
@@ -322,6 +338,11 @@ def dimensoes_png(caminho: str | Path) -> tuple[int, int]:
     return int.from_bytes(cabecalho[16:20], "big"), int.from_bytes(cabecalho[20:24], "big")
 
 
+def png_com_transparencia(caminho: str | Path) -> bool:
+    """Se o PNG tem canal de transparência (tipos de cor 4 e 6), que o Play recusa nas imagens da ficha."""
+    return Path(caminho).read_bytes()[25] in (4, 6)
+
+
 def imagens_da_pasta(pasta: str | Path) -> dict[str, list[Path]]:
     """As capturas de celular e a imagem de destaque da pasta, conferidas contra os limites do Play."""
     pasta = Path(pasta)
@@ -342,9 +363,46 @@ def imagens_da_pasta(pasta: str | Path) -> dict[str, list[Path]]:
         problemas.append("falta loja_destaque.png")
     elif dimensoes_png(destaque) != DESTAQUE:
         problemas.append("loja_destaque.png: {} x {} px, e não 1024 x 500".format(*dimensoes_png(destaque)))
+    # O Play só aceita JPEG ou PNG de 24 bits, sem canal de transparência.
+    problemas += [f"{a.name}: PNG com transparência" for a in [*capturas, destaque]
+                  if a.exists() and png_com_transparencia(a)]
     if problemas:
         raise ValueError("imagens da loja recusadas: " + "; ".join(problemas))
     return {"phoneScreenshots": capturas, "featureGraphic": [destaque]}
+
+
+def baixa_imagens(m: dict, pasta: str | Path) -> list[Path]:
+    """Baixa as imagens da ficha (os endereços públicos que midia() devolve) para a pasta.
+
+    Cada uma vira <tipo>_<n>.<png|jpg|webp>, no tamanho original (o "=s0" no
+    fim do endereço; sem ele, o servidor manda uma versão reduzida). Grava
+    também video.txt com o endereço do vídeo. Serve para guardar o que a ficha
+    tinha antes de uma troca.
+    """
+    import urllib.request
+
+    pasta = Path(pasta)
+    pasta.mkdir(parents=True, exist_ok=True)
+    salvas = []
+    for tipo, urls in m["imagens"].items():
+        for i, url in enumerate(urls, 1):
+            dados = None
+            for endereco in (url + "=s0", url):
+                try:
+                    with urllib.request.urlopen(endereco, timeout=60) as r:
+                        dados = r.read()
+                    break
+                except Exception as e:  # o "=s0" recusado: tenta o endereço puro
+                    print(f"{tipo} {i}: {type(e).__name__} em {endereco}")
+            if dados is None:
+                continue
+            ext = (".png" if dados[:8] == b"\x89PNG\r\n\x1a\n" else ".jpg" if dados[:2] == b"\xff\xd8"
+                   else ".webp" if dados[8:12] == b"WEBP" else ".bin")
+            alvo = pasta / f"{tipo}_{i}{ext}"
+            alvo.write_bytes(dados)
+            salvas.append(alvo)
+    (pasta / "video.txt").write_text((m.get("video") or "nenhum") + "\n", encoding="utf-8")
+    return salvas
 
 
 def _sha256(caminho: Path) -> str:
@@ -419,6 +477,7 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--ficha", metavar="TEXTOS", help="compara a ficha da loja com textos_da_loja.txt")
     ap.add_argument("--aplica", action="store_true", help="com --ficha ou --imagens: grava na loja")
     ap.add_argument("--midia", action="store_true", help="só mostra o vídeo e as imagens da ficha")
+    ap.add_argument("--baixa-imagens", metavar="PASTA", help="baixa as imagens que a ficha tem hoje para a pasta")
     ap.add_argument("--imagens", metavar="PASTA",
                     help="compara as capturas de celular e a imagem de destaque da ficha com as da pasta")
     args = ap.parse_args(argv)
@@ -431,9 +490,13 @@ def main(argv: list[str]) -> int:
     api = cliente(credencial)
     if args.ficha:
         return ficha(api, args.ficha, args.aplica)
-    if args.midia:
-        for linha in descreve_midia(midia(api)):
+    if args.midia or args.baixa_imagens:
+        m = midia(api)
+        for linha in descreve_midia(m):
             print(linha)
+        if args.baixa_imagens:
+            salvas = baixa_imagens(m, args.baixa_imagens)
+            print(f"{len(salvas)} imagens da ficha baixadas em {args.baixa_imagens}.")
         return 0
     if args.imagens:
         return envia_imagens(api, args.imagens, args.aplica)

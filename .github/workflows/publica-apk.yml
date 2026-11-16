@@ -237,10 +237,14 @@ jobs:
           zip -q "$RUNNER_TEMP/imagens-da-loja.zip" loja_*.png
           gh release upload "$ETIQUETA" "$RUNNER_TEMP/imagens-da-loja.zip" --clobber --repo "$GITHUB_REPOSITORY"
 
-      - name: Envia à ficha da Google Play
+      # Antes de trocar, as imagens que a ficha tinha (as feitas à mão
+      # também) vão para o Release, em imagens-da-loja-anteriores.zip, com o
+      # endereço do vídeo: nada do que estava na loja se perde.
+      - name: Guarda as imagens de antes e envia as novas à ficha da Google Play
         if: env.ETIQUETA != ''
         env:
           PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]; then
             echo "::notice::PLAY_SERVICE_ACCOUNT_JSON não configurado: as imagens ficam no Release."
@@ -248,5 +252,8 @@ jobs:
           fi
           python3 -m venv /tmp/play
           /tmp/play/bin/pip install --quiet google-api-python-client google-auth
+          /tmp/play/bin/python software/automacao_github/envia_play.py --baixa-imagens "$RUNNER_TEMP/antes"
+          (cd "$RUNNER_TEMP/antes" && zip -q "$RUNNER_TEMP/imagens-da-loja-anteriores.zip" ./*)
+          gh release upload "$ETIQUETA" "$RUNNER_TEMP/imagens-da-loja-anteriores.zip" --clobber --repo "$GITHUB_REPOSITORY"
           /tmp/play/bin/python software/automacao_github/envia_play.py \
             --imagens software/aplicativo_mobile/app/build/capturas --aplica

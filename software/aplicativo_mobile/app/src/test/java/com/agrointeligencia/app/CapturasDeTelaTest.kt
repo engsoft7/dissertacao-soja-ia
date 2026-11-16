@@ -498,6 +498,25 @@ class CapturasDeTelaTest {
             }
         }
         compose.onRoot().captureRoboImage("build/capturas/$arquivo.png")
+        semTransparencia("build/capturas/$arquivo.png")
+    }
+
+    /**
+     * O Play só aceita, nas imagens da ficha, JPEG ou PNG de 24 bits, sem canal
+     * de transparência, e o Roborazzi grava com ele: a imagem é regravada em
+     * RGB, sobre fundo branco (o envia_play.py recusa a que vier com ele).
+     */
+    private fun semTransparencia(caminho: String) {
+        val arquivo = File(caminho)
+        val original = javax.imageio.ImageIO.read(arquivo)
+        val rgb = java.awt.image.BufferedImage(original.width, original.height, java.awt.image.BufferedImage.TYPE_INT_RGB)
+        rgb.createGraphics().apply {
+            color = java.awt.Color.WHITE
+            fillRect(0, 0, original.width, original.height)
+            drawImage(original, 0, 0, null)
+            dispose()
+        }
+        javax.imageio.ImageIO.write(rgb, "png", arquivo)
     }
 
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
@@ -649,5 +668,6 @@ class CapturasDeTelaTest {
             }
         }
         compose.onRoot().captureRoboImage("build/capturas/loja_destaque.png")
+        semTransparencia("build/capturas/loja_destaque.png")
     }
 }

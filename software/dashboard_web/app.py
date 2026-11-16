@@ -16,6 +16,7 @@ if getattr(M, "VERSAO_DO_MODULO", 0) < 3:
 import json
 import math
 import re
+from html import escape as escapa_html
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -2245,7 +2246,10 @@ if tela_atual == "🌱 Janela de plantio":
                 st.markdown(f"Sem janela indicada para {grupo} e {classe} neste município.")
             elif risco:
                 cor = graficos.CORES_RISCO_ZARC[risco]
-                st.markdown(f"<b style='color:{cor}'>ZARC hoje: risco de {risco}%</b> ({grupo}, {classe})",
+                # Os nomes vêm da tábua do ZARC, de fora do repositório: escapados
+                # antes de entrar no HTML, como qualquer texto de fonte externa.
+                st.markdown(f"<b style='color:{cor}'>ZARC hoje: risco de {risco}%</b> "
+                            f"({escapa_html(grupo)}, {escapa_html(classe)})",
                             unsafe_allow_html=True)
             else:
                 prox = P.proxima_janela(js, hoje)

@@ -1,19 +1,28 @@
 # Reenvia à Google Play o .aab de um Release já publicado, sem compilar de novo,
-# e mostra as faixas que o app tem na loja.
+# mostra as faixas que o app tem na loja e mantém a ficha da loja igual a
+# software/aplicativo_mobile/loja/textos_da_loja.txt.
 #
 # O envio de cada versão nova é feito por publica-apk.yml, logo depois de
 # assinar o pacote. Este workflow existe para o que sobra: a loja recusou o
 # envio (conta ainda sem acesso à produção, por exemplo), ou a versão deve ir a
 # outra faixa. Ele baixa o mesmo .aab anexado ao Release, e por isso o pacote
-# que vai à loja é o que está publicado, byte a byte.
+# que vai à loja é o publicado, byte a byte.
 #
 #   Actions > "Envia à Google Play" > Run workflow
 #     tag:   a etiqueta do Release (ex.: v2.6.0); vazio só lista as faixas
 #     faixa: internal (teste interno), alpha (teste fechado), beta (teste
 #            aberto) ou production; vazio usa a variável PLAY_FAIXA ou, sem
 #            ela, a faixa mais alta em que o app já tem versão
+#     ficha: conferir mostra o que mudaria na ficha da loja (nome e
+#            descrições em português); atualizar grava
 #
-# Listar as faixas só lê: a edição aberta para isso é descartada.
+# A ficha também anda sozinha: num push que muda textos_da_loja.txt, a
+# diferença aparece no log (numa branch, só a conferência), e o merge na main
+# atualiza a loja. Uma ficha editada só no Play Console é sobrescrita: a fonte
+# é o arquivo.
+#
+# Listar as faixas e conferir a ficha só leem: a edição aberta para isso é
+# descartada.
 name: Envia à Google Play
 
 on:
@@ -27,12 +36,18 @@ on:
         description: "Faixa: internal, alpha (teste fechado), beta ou production; vazio usa a mais alta em que o app já tem versão"
         required: false
         default: ""
-  # Também quando o workflow ou o script mudam numa branch: só lista as faixas.
+      ficha:
+        description: "Ficha da loja a partir de textos_da_loja.txt: conferir mostra o que mudaria; atualizar grava"
+        type: choice
+        options: [nao, conferir, atualizar]
+        default: nao
+  # Quando o workflow, o script ou os textos da loja mudam: lista as faixas e
+  # confere a ficha; na main, um merge que muda os textos atualiza a ficha.
   push:
-    branches-ignore: [main]
     paths:
       - ".github/workflows/envia-play.yml"
       - "software/automacao_github/envia_play.py"
+      - "software/aplicativo_mobile/loja/textos_da_loja.txt"
 
 permissions:
   contents: read
@@ -70,6 +85,28 @@ jobs:
         run: |
           echo "Faixa pedida: ${PLAY_FAIXA:-nenhuma (vale a mais alta em que o app já tem versão)}"
           /tmp/play/bin/python software/automacao_github/envia_play.py --faixas
+
+      - name: Ficha da loja
+        if: steps.cliente.outputs.pronto == 'sim' && (github.event_name == 'push' || inputs.ficha != 'nao')
+        env:
+          MODO: ${{ inputs.ficha }}
+          ANTES: ${{ github.event.before }}
+        run: |
+          textos=software/aplicativo_mobile/loja/textos_da_loja.txt
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            MODO=conferir
+            # Na main, só o merge que muda os textos da loja grava a ficha.
+            if [ "$GITHUB_REF_NAME" = "main" ] && gh api "repos/$GITHUB_REPOSITORY/compare/$ANTES...$GITHUB_SHA" \
+                 --jq '.files[].filename' | grep -qx "$textos"; then
+              MODO=atualizar
+            fi
+          fi
+          echo "Ficha da loja: $MODO"
+          if [ "$MODO" = "atualizar" ]; then
+            /tmp/play/bin/python software/automacao_github/envia_play.py --ficha "$textos" --aplica
+          else
+            /tmp/play/bin/python software/automacao_github/envia_play.py --ficha "$textos"
+          fi
 
       - name: Envia o .aab do Release
         if: steps.cliente.outputs.pronto == 'sim' && github.event_name == 'workflow_dispatch' && inputs.tag != ''

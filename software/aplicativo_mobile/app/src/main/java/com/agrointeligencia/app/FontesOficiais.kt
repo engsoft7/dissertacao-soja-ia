@@ -42,8 +42,10 @@ val FONTES_OFICIAIS = listOf(
     fonte(R.string.fonte_avisos, "INMET", "https://portal.inmet.gov.br/"),
     fonte(R.string.fonte_custo, "CONAB",
           "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao"),
+    // A página do Ministério sobre a ferrugem asiática traz a portaria do
+    // calendário em vigor: o link não envelhece quando sai a portaria nova.
     Fonte(R.string.fonte_calendario, R.string.fonte_calendario_inst,
-          "https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-1.579-de-9-de-abril-de-2026-698696654"),
+          "https://www.gov.br/agricultura/pt-br/assuntos/sanidade-animal-e-vegetal/sanidade-vegetal/Ferrugem_Asiatica_da_Soja"),
     Fonte(R.string.fonte_zarc, R.string.fonte_ministerio,
           "https://dados.agricultura.gov.br/dataset/tabua-de-risco-zoneamento-agricola-de-risco-climatico"),
     fonte(R.string.fonte_pulverizacao, "Embrapa Soja",

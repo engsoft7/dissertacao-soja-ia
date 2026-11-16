@@ -10,7 +10,7 @@ O AgroInteligência reúne o que o produtor de soja do Pará acompanha na safra:
 AVISO: o AgroInteligência NÃO é um aplicativo do governo e não representa nenhum órgão público. Não tem vínculo com o IBGE, o INMET, a CONAB, a Embrapa, o Ministério da Agricultura, a NOAA ou a NASA: apenas usa dados abertos publicados por essas instituições, com os links em "Fontes oficiais", no fim desta descrição. É um produto técnico de pesquisa do Programa de Pós-Graduação em Computação Aplicada da Universidade Federal do Pará (UFPA).
 
 PRODUTIVIDADE DO SEU MUNICÍPIO
-• Estimativa da produtividade da próxima safra para 38 municípios paraenses, sempre com a margem de erro.
+• Estimativa da produtividade da próxima safra para 38 municípios do Pará, com a margem de erro.
 • Histórico do IBGE desde 2001, com as safras de El Niño e La Niña destacadas.
 • O app lembra o seu município e acha o mais próximo pelo GPS.
 
@@ -47,7 +47,7 @@ FONTES OFICIAIS (órgãos públicos)
 • Produtividade municipal: IBGE, Produção Agrícola Municipal – https://sidra.ibge.gov.br/tabela/1612
 • Avisos meteorológicos: INMET – https://portal.inmet.gov.br/
 • Custo de produção e preço de referência: CONAB – https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao
-• Calendário de semeadura: Ministério da Agricultura – https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-1.579-de-9-de-abril-de-2026-698696654
+• Calendário de semeadura: Ministério da Agricultura – https://www.gov.br/agricultura/pt-br/assuntos/sanidade-animal-e-vegetal/sanidade-vegetal/Ferrugem_Asiatica_da_Soja
 • Risco climático (ZARC): Ministério da Agricultura – https://dados.agricultura.gov.br/dataset/tabua-de-risco-zoneamento-agricola-de-risco-climatico
 • Janela de pulverização: Embrapa Soja – https://ainfo.cnptia.embrapa.br/digital/bitstream/item/223209/1/SP-17-2020-online-1.pdf
 • El Niño e La Niña (índice ONI): NOAA – https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php
@@ -60,7 +60,7 @@ OUTRAS FONTES
 • Previsão do tempo: Open-Meteo – https://open-meteo.com
 • Preço do Pará: Agrolink – https://www.agrolink.com.br/cotacoes/historico/pa/soja-em-grao-sc-60kg
 
-As estimativas são de apoio à decisão e não substituem a avaliação de um profissional nem a verificação das condições no local. Confira sempre a bula antes de qualquer aplicação.
+As estimativas são de apoio à decisão e não substituem a avaliação de um profissional nem a verificação no local. Confira sempre a bula antes de qualquer aplicação.
 
 Código aberto: https://github.com/engsoft7/dissertacao-soja-ia
 Política de privacidade: https://engsoft7.github.io/dissertacao-soja-ia/politica-de-privacidade/

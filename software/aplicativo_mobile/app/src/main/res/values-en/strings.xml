@@ -404,7 +404,7 @@
     <string name="fonte_avisos">Weather warnings</string>
     <string name="fonte_custo">Production cost and reference price</string>
     <string name="fonte_calendario">Sowing calendar and soybean-free period</string>
-    <string name="fonte_calendario_inst">Ministry of Agriculture, Ordinance SDA/MAPA No. 1,579/2026</string>
+    <string name="fonte_calendario_inst">Ministry of Agriculture, SDA/MAPA ordinance in force</string>
     <string name="fonte_zarc">Planting climate risk (ZARC)</string>
     <string name="fonte_ministerio">Ministry of Agriculture</string>
     <string name="fonte_pulverizacao">Spraying window criteria</string>

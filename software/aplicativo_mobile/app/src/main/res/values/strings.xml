@@ -402,7 +402,7 @@
     <string name="fonte_avisos">Avisos meteorológicos</string>
     <string name="fonte_custo">Custo de produção e preço de referência</string>
     <string name="fonte_calendario">Calendário de semeadura e vazio sanitário</string>
-    <string name="fonte_calendario_inst">Ministério da Agricultura, Portaria SDA/MAPA nº 1.579/2026</string>
+    <string name="fonte_calendario_inst">Ministério da Agricultura, portaria da SDA/MAPA em vigor</string>
     <string name="fonte_zarc">Risco climático do plantio (ZARC)</string>
     <string name="fonte_ministerio">Ministério da Agricultura</string>
     <string name="fonte_pulverizacao">Critérios da janela de pulverização</string>

@@ -655,6 +655,14 @@ compilar de novo: **Actions → Envia à Google Play → Run workflow**, com a
 etiqueta (por exemplo, `v2.6.0`) e, se quiser, a faixa. Sem a etiqueta, o
 workflow só lista as faixas do app na loja.
 
+A ficha da loja (nome, breve descrição e descrição completa em português) vem
+de `software/aplicativo_mobile/loja/textos_da_loja.txt`. O merge na `main` que
+muda esse arquivo atualiza a ficha sozinho; numa branch, o log do workflow
+**Envia à Google Play** mostra o que mudaria. Edite a ficha no arquivo, não no
+Play Console: uma edição feita só no Console é sobrescrita na próxima
+atualização. Para conferir ou gravar na hora: o mesmo workflow, com a opção
+**ficha** (`conferir` ou `atualizar`).
+
 Para conferir a credencial na hora: **Actions → Atualiza base de dados →
 Run workflow**, marque **"Testar a credencial do Earth Engine"** e rode. O log
 deve terminar com "credencial e ativos do Earth Engine OK", sem alterar nada —

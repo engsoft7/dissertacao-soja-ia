@@ -30,7 +30,7 @@ jobs:
     outputs:
       pedidos: ${{ steps.p.outputs.pedidos }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: p
         env:
           MENSAGEM: ${{ github.event.head_commit.message }}
@@ -64,8 +64,8 @@ jobs:
       matrix:
         pedido: ${{ fromJSON(needs.plano.outputs.pedidos) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - name: Roda ${{ matrix.pedido.nome }}

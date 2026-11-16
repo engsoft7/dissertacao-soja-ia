@@ -84,8 +84,8 @@ jobs:
       GEE_SERVICE_ACCOUNT_JSON: ${{ secrets.GEE_SERVICE_ACCOUNT_JSON }}
       GEE_PROJECT: ${{ vars.GEE_PROJECT }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - run: pip install --quiet pandas requests earthengine-api
@@ -106,7 +106,7 @@ jobs:
             amazonia) python coleta_amazonia_legal.py "$2" ${3:+--anos "$3"} ;;
             fases_nacional) python coleta_fases_nacional.py ;;
           esac
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: dados-${{ strategy.job-index }}
@@ -118,8 +118,8 @@ jobs:
     if: always() && github.ref_name != github.event.repository.default_branch && needs.plano.outputs.tarefas != '[]' 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: dados-*
           path: pesquisa/10_trabalhos_futuros/dados/

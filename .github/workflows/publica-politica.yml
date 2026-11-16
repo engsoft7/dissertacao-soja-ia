@@ -32,7 +32,7 @@ jobs:
   gera:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Confere se o texto está pronto
         run: |
           f=software/aplicativo_mobile/loja/politica_de_privacidade.md
@@ -43,7 +43,7 @@ jobs:
             echo "::error::A política ainda não está pronta para publicar. Falta tirar ou preencher:$falta"
             exit 1
           fi
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Gera a página
@@ -71,7 +71,7 @@ jobs:
               '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=politica-de-privacidade/">'
               '<a href="politica-de-privacidade/">Política de privacidade do AgroInteligência</a>')
           EOF
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
@@ -83,4 +83,4 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}politica-de-privacidade/
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

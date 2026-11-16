@@ -27,13 +27,21 @@ qualquer passo deixa a edição sem confirmar, e nada muda na loja. Quando a loj
 recusa o pacote ou a faixa, o log diz o que ela respondeu, quais faixas o app
 tem e o que fazer.
 
+A ficha da loja (nome, breve descrição e descrição completa em português) vem
+de software/aplicativo_mobile/loja/textos_da_loja.txt: com --ficha, o script
+mostra o que mudaria na loja; com --ficha e --aplica, grava. Uma ficha editada
+só no Play Console é sobrescrita na próxima atualização: a fonte é o arquivo.
+
 Uso:  python envia_play.py ARQUIVO.aab "Notas da versão" [--faixa alpha]
       python envia_play.py --faixas      só lista as faixas do app; não envia nada
+      python envia_play.py --ficha textos_da_loja.txt [--aplica]
 """
 import argparse
+import difflib
 import json
 import os
 import sys
+from pathlib import Path
 
 PACOTE = "com.agrointeligencia.app"
 ESCOPO = "https://www.googleapis.com/auth/androidpublisher"
@@ -42,6 +50,11 @@ LIMITE_NOTAS = 500
 NOMES = {"production": "produção", "beta": "teste aberto", "alpha": "teste fechado", "internal": "teste interno"}
 # Da faixa mais restrita à mais aberta. Uma faixa de nome próprio é um teste fechado.
 ORDEM = ["internal", "alpha", "beta", "production"]
+# As seções de textos_da_loja.txt, o campo de cada uma na API e o limite do Play
+# (os mesmos de confere_textos_da_loja.py). A descrição completa vai até o fim.
+SECOES_DA_FICHA = {"NOME DO APP": ("title", 30), "BREVE DESCRIÇÃO": ("shortDescription", 80),
+                   "DESCRIÇÃO COMPLETA": ("fullDescription", 4000)}
+IDIOMA_DA_FICHA = "pt-BR"
 
 
 def notas_da_versao(texto: str) -> str:
@@ -164,6 +177,86 @@ def envia(api, aab: str, notas: str, faixa: str) -> int:
     return 0
 
 
+def ficha_do_arquivo(caminho: str | Path) -> dict:
+    """Nome, breve descrição e descrição completa de textos_da_loja.txt, com os nomes da API.
+
+    Recusa o arquivo sem uma das três seções ou com texto acima do limite do Play.
+    """
+    partes: dict[str, list[str]] = {}
+    atual = None
+    for linha in Path(caminho).read_text(encoding="utf-8").splitlines():
+        if linha.strip() in SECOES_DA_FICHA:
+            atual = SECOES_DA_FICHA[linha.strip()][0]
+            partes[atual] = []
+        elif atual:
+            partes[atual].append(linha)
+    ficha = {campo: "\n".join(linhas).strip() for campo, linhas in partes.items()}
+    faltando = [secao for secao, (campo, _) in SECOES_DA_FICHA.items() if not ficha.get(campo)]
+    if faltando:
+        raise ValueError("textos da loja sem " + ", ".join(faltando))
+    longos = [f"{secao} ({len(ficha[campo])} de {limite})" for secao, (campo, limite) in SECOES_DA_FICHA.items()
+              if len(ficha[campo]) > limite]
+    if longos:
+        raise ValueError("textos da loja acima do limite do Play: " + ", ".join(longos))
+    return ficha
+
+
+def diferencas(na_loja: dict, no_arquivo: dict) -> list[str]:
+    """O que muda de um para o outro, campo a campo, em linhas de diff."""
+    linhas: list[str] = []
+    for campo in ("title", "shortDescription", "fullDescription"):
+        antes = (na_loja.get(campo) or "").splitlines()
+        depois = (no_arquivo.get(campo) or "").splitlines()
+        if antes != depois:
+            linhas += difflib.unified_diff(antes, depois, f"loja/{campo}", f"textos_da_loja.txt/{campo}",
+                                           n=0, lineterm="")
+    return linhas
+
+
+def ficha(api, arquivo: str | Path, aplica: bool = False) -> int:
+    """Compara a ficha em português da loja com textos_da_loja.txt e, com aplica, a atualiza.
+
+    Só mexe no nome e nas duas descrições: o vídeo e as imagens ficam como estão.
+    Sem aplica, ou sem diferença, a edição aberta para ler é descartada.
+    """
+    nova = ficha_do_arquivo(arquivo)
+    edicao = api.edits().insert(packageName=PACOTE, body={}).execute()["id"]
+    confirmada = False
+    try:
+        fichas = api.edits().listings().list(packageName=PACOTE, editId=edicao).execute().get("listings") or []
+        print("Idiomas da ficha na loja:", ", ".join(f.get("language", "?") for f in fichas) or "nenhum")
+        na_loja = next((f for f in fichas if f.get("language") == IDIOMA_DA_FICHA), None)
+        if na_loja is None:
+            print(f"::error::A loja não tem ficha em {IDIOMA_DA_FICHA}: crie-a pelo Play Console.")
+            return 1
+        mudancas = diferencas(na_loja, nova)
+        if not mudancas:
+            print(f"A ficha da loja ({IDIOMA_DA_FICHA}) já está igual a textos_da_loja.txt.")
+            return 0
+        print("\n".join(mudancas))
+        if not aplica:
+            print("Só a conferência: nada mudou na loja.")
+            return 0
+        api.edits().listings().patch(packageName=PACOTE, editId=edicao, language=IDIOMA_DA_FICHA,
+                                     body={**nova, "language": IDIOMA_DA_FICHA}).execute()
+        api.edits().commit(packageName=PACOTE, editId=edicao).execute()
+        confirmada = True
+        print(f"Ficha da loja ({IDIOMA_DA_FICHA}) atualizada a partir de textos_da_loja.txt.")
+        return 0
+    except Exception as e:
+        resposta = recusa(e)
+        if resposta is None:
+            raise
+        print(f"::error::A Google Play recusou a ficha ({resposta}). Nada mudou na loja.")
+        return 1
+    finally:
+        if not confirmada:
+            try:
+                api.edits().delete(packageName=PACOTE, editId=edicao).execute()
+            except Exception:  # a edição sem confirmar expira sozinha
+                pass
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("aab", nargs="?")
@@ -171,12 +264,16 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--faixa", default=os.environ.get("PLAY_FAIXA") or None,
                     help="a faixa de envio; sem ela, a mais alta em que o app já tem versão")
     ap.add_argument("--faixas", action="store_true", help="só lista as faixas do app na loja")
+    ap.add_argument("--ficha", metavar="TEXTOS", help="compara a ficha da loja com textos_da_loja.txt")
+    ap.add_argument("--aplica", action="store_true", help="com --ficha: grava a ficha na loja")
     args = ap.parse_args(argv)
     credencial = os.environ.get("PLAY_SERVICE_ACCOUNT_JSON", "")
     if not credencial.strip():
         print("::notice::PLAY_SERVICE_ACCOUNT_JSON não configurado: o .aab fica no Release para o envio manual.")
         return 0
     api = cliente(credencial)
+    if args.ficha:
+        return ficha(api, args.ficha, args.aplica)
     if args.faixas:
         for linha in descreve(faixas_do_app(api)) or ["(o app não tem faixas com versão)"]:
             print("Faixa do app na loja:", linha)

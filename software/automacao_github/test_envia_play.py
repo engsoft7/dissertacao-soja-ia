@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """envia_play.py: as notas cabem no limite do Play, sem a chave nada é enviado, e
-uma recusa da loja vira uma explicação no log, sem confirmar a edição."""
+uma recusa da loja vira uma explicação no log, sem confirmar a edição. A ficha da
+loja sai de textos_da_loja.txt e só é gravada quando pedido."""
+from pathlib import Path
+
 import envia_play
 
 
@@ -45,13 +48,24 @@ class Api:
               {"track": "alpha", "releases": [{"versionCodes": ["31"], "status": "completed"}]},
               {"track": "internal"}]
 
-    def __init__(self, faixas_recusadas=(), pacote_recusado=None):
+    FICHAS = [{"language": "pt-BR", "title": "AgroInteligência", "shortDescription": "Curta",
+               "fullDescription": "Linha 1\nLinha 2", "video": "https://youtu.be/x"}]
+
+    def __init__(self, faixas_recusadas=(), pacote_recusado=None, ficha_recusada=None):
         self.faixas_recusadas, self.pacote_recusado = dict(faixas_recusadas), pacote_recusado
-        self.feitas, self.corpo = [], None
+        self.ficha_recusada = ficha_recusada
+        self.feitas, self.corpo, self.recurso = [], None, None
 
     def edits(self): return self
     def bundles(self): return self
-    def tracks(self): return self
+
+    def tracks(self):
+        self.recurso = "tracks"
+        return self
+
+    def listings(self):
+        self.recurso = "listings"
+        return self
 
     def _faz(self, nome, resultado=None, erro=None):
         def f():
@@ -64,7 +78,14 @@ class Api:
     def insert(self, **k): return self._faz("insert", {"id": "e1"})
     def delete(self, **k): return self._faz("delete")
     def commit(self, **k): return self._faz("commit")
-    def list(self, **k): return self._faz("list", {"tracks": self.FAIXAS})
+    def list(self, **k):
+        if self.recurso == "listings":
+            return self._faz("listings.list", {"listings": self.FICHAS})
+        return self._faz("list", {"tracks": self.FAIXAS})
+
+    def patch(self, **k):
+        self.corpo = k["body"]
+        return self._faz("listings.patch:" + k["language"], erro=self.ficha_recusada)
 
     def upload(self, **k):
         return self._faz("upload", {"versionCode": 32}, self.pacote_recusado)
@@ -170,3 +191,83 @@ def test_listar_as_faixas_nao_muda_nada(monkeypatch, capsys):
     assert api.feitas == ["insert", "list", "delete"]
     saida = capsys.readouterr().out
     assert "production (produção): sem versão" in saida and "alpha (teste fechado): versão 31 (completed)" in saida
+
+
+# ── a ficha da loja, que vem de textos_da_loja.txt ──────────────────────────
+
+TEXTOS = Path(__file__).resolve().parents[1] / "aplicativo_mobile" / "loja" / "textos_da_loja.txt"
+
+
+def _textos(tmp_path, nome="AgroInteligência", curta="Curta", completa="Linha 1\nLinha 2"):
+    arquivo = tmp_path / "textos.txt"
+    arquivo.write_text(f"NOME DO APP\n{nome}\n\nBREVE DESCRIÇÃO\n{curta}\n\nDESCRIÇÃO COMPLETA\n{completa}\n",
+                       encoding="utf-8")
+    return arquivo
+
+
+def test_ficha_do_arquivo_de_verdade():
+    ficha = envia_play.ficha_do_arquivo(TEXTOS)
+    assert ficha["title"] == "AgroInteligência"
+    assert 0 < len(ficha["shortDescription"]) <= 80
+    # A descrição completa vai até o fim do arquivo, com as fontes e o aviso de não afiliação.
+    assert "NÃO é um aplicativo do governo" in ficha["fullDescription"]
+    assert "FONTES OFICIAIS" in ficha["fullDescription"]
+    assert ficha["fullDescription"].endswith("politica-de-privacidade/")
+    assert len(ficha["fullDescription"]) <= 4000
+
+
+def test_ficha_do_arquivo_recusa_secao_faltando_ou_longa(tmp_path):
+    import pytest
+    arquivo = tmp_path / "sem_curta.txt"
+    arquivo.write_text("NOME DO APP\nAgro\n\nDESCRIÇÃO COMPLETA\nTexto\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="BREVE DESCRIÇÃO"):
+        envia_play.ficha_do_arquivo(arquivo)
+    with pytest.raises(ValueError, match="NOME DO APP"):
+        envia_play.ficha_do_arquivo(_textos(tmp_path, nome="x" * 31))
+
+
+def test_ficha_igual_nao_muda_nada(tmp_path, capsys):
+    api = Api()
+    assert envia_play.ficha(api, _textos(tmp_path), aplica=True) == 0
+    assert api.feitas == ["insert", "listings.list", "delete"]
+    assert "já está igual" in capsys.readouterr().out
+
+
+def test_ficha_conferida_mostra_o_que_muda_e_nao_grava(tmp_path, capsys):
+    api = Api()
+    assert envia_play.ficha(api, _textos(tmp_path, completa="Linha 1\nLinha nova")) == 0
+    assert api.feitas == ["insert", "listings.list", "delete"]
+    saida = capsys.readouterr().out
+    assert "-Linha 2" in saida and "+Linha nova" in saida and "Linha 1" not in saida.split("@@")[-1]
+    assert "nada mudou na loja" in saida
+
+
+def test_ficha_aplicada_grava_so_os_textos(tmp_path, capsys):
+    api = Api()
+    assert envia_play.ficha(api, _textos(tmp_path, curta="Nova curta"), aplica=True) == 0
+    assert api.feitas == ["insert", "listings.list", "listings.patch:pt-BR", "commit"]
+    # Só o nome e as descrições: o vídeo não vai no corpo e fica como está.
+    assert api.corpo == {"title": "AgroInteligência", "shortDescription": "Nova curta",
+                         "fullDescription": "Linha 1\nLinha 2", "language": "pt-BR"}
+    assert "atualizada" in capsys.readouterr().out
+
+
+def test_ficha_recusada_ou_sem_portugues(tmp_path, capsys):
+    api = Api(ficha_recusada=Recusa(403, "The caller does not have permission"))
+    assert envia_play.ficha(api, _textos(tmp_path, curta="Nova"), aplica=True) == 1
+    assert "commit" not in api.feitas and api.feitas[-1] == "delete"
+    assert "recusou a ficha (403: The caller does not have permission)" in capsys.readouterr().out
+    api = Api()
+    api.FICHAS = [{"language": "en-US", "title": "AgroIntelligence"}]
+    assert envia_play.ficha(api, _textos(tmp_path), aplica=True) == 1
+    assert "não tem ficha em pt-BR" in capsys.readouterr().out
+
+
+def test_ficha_pela_linha_de_comando(tmp_path, monkeypatch):
+    api = Api()
+    monkeypatch.setenv("PLAY_SERVICE_ACCOUNT_JSON", "{}")
+    monkeypatch.setattr(envia_play, "cliente", lambda credencial: api)
+    assert envia_play.main(["--ficha", str(_textos(tmp_path, curta="Outra"))]) == 0
+    assert "commit" not in api.feitas
+    assert envia_play.main(["--ficha", str(_textos(tmp_path, curta="Outra")), "--aplica"]) == 0
+    assert api.feitas[-1] == "commit"

@@ -631,6 +631,8 @@ subseção 4.9 da dissertação e o Anexo 01 citam. A base congelada da disserta
 | Preço da soja recebido pelo produtor, da CONAB: média do mês por estado e semana a semana por município, nos cinco estados | todo dia, com testes e merge automático quando há dado novo; issue quando a coleta falha | `precos-conab.yml` |
 | Fontes externas (cotações, Agrolink, Open-Meteo, INMET, IBGE, API) e o certificado do portal da CONAB | todo dia; abre issue quando algo falha | `monitor-fontes.yml` |
 | Release, APK e AAB assinados, DOI no Zenodo e envio à Google Play | a cada merge que sobe a versão do app (`versionName`) | `publica-versao.yml`, `publica-apk.yml`, `registra-doi.yml` |
+| Imagens da ficha da loja: oito capturas de celular e a imagem de destaque, desenhadas com as telas reais da versão e as respostas da API do dia (testes `loja_*` de `CapturasDeTelaTest`), anexadas ao Release e enviadas à ficha da Google Play | a cada versão nova, logo depois do envio do pacote | `publica-apk.yml` (job `imagens-da-loja`) |
+| Análise de segurança do código (CodeQL), do Python e dos workflows | em cada pull request, num push na `main` e toda semana; os alertas ficam em Security → Code scanning | `codeql.yml` |
 | Vigia da API e do painel: mede em quanto tempo a API responde e visita o painel, acordando-o se estiver dormindo; deixa um aviso quando encontra um dos dois dormindo | pedidas a cada 10 min e a cada 4 h; na prática, 3 a 4 vezes por dia cada uma (ver abaixo) | `mantem-api-acordada.yml`, `mantem-painel-acordado.yml` |
 
 A base nova chega ao aplicativo pela API, que o Render publica a cada merge na
@@ -776,6 +778,10 @@ coleta dos dados e a interpretação dos resultados são de responsabilidade do
 autor, que revisou e validou todo o material aqui publicado.
 
 ---
+
+## Segurança
+
+Como avisar de uma falha e como o projeto se protege estão em [`SECURITY.md`](SECURITY.md): os segredos (chave de assinatura, conta de serviço da Google Play, token do Zenodo) ficam nos segredos do GitHub Actions, cada workflow declara as permissões de que precisa, toda conexão confere o certificado do servidor, e o CodeQL (`codeql.yml`) analisa o Python e os workflows em cada pull request e toda semana.
 
 ## Licença
 

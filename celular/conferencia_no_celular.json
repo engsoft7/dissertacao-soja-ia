@@ -25,7 +25,7 @@
         96
       ],
       "limiar_picos": 0.05,
-      "diferenca_maxima_para_o_pytorch": 5.200505256652832e-06,
+      "diferenca_maxima_para_o_pytorch": 6.4373016357421875e-06,
       "teste_publicado": {
         "imagens": 218,
         "vagens": 10768,
@@ -63,7 +63,7 @@
         256
       ],
       "limiar_picos": 0.02,
-      "diferenca_maxima_para_o_pytorch": 2.6464462280273438e-05,
+      "diferenca_maxima_para_o_pytorch": 2.5033950805664062e-05,
       "teste_publicado": {
         "imagens": 218,
         "vagens": 10768,
@@ -120,7 +120,7 @@
     }
   },
   "segundos_por_foto_neste_computador": {
-    "v1": 0.026522397994995117,
-    "v2": 0.07091474533081055
+    "v1": 0.02819216251373291,
+    "v2": 0.07409381866455078
   }
 }

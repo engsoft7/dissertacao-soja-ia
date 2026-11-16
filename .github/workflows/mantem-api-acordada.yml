@@ -1,20 +1,29 @@
-# Consulta a API e registra em quanto tempo ela responde.
+# Vigia a API e o painel publicados: consulta a API, registra em quanto tempo
+# ela responde e faz a visita que mantém o painel acordado.
 #
-# No plano gratuito do Render, um serviço sem acesso por 15 minutos é desligado,
-# e a consulta seguinte espera de 30 a 60 segundos ele subir de novo. Acordada,
-# a API responde em menos de 1 segundo. Cada execução mostra o tempo da resposta
-# e avisa quando ele indica que a API estava dormindo.
+# A API. No plano gratuito do Render, um serviço sem acesso por 15 minutos é
+# desligado, e a consulta seguinte espera de 30 a 60 segundos ele subir de
+# novo. Acordada, a API responde em menos de 1 segundo. Cada execução mostra o
+# tempo da resposta e deixa um aviso quando ele indica que a API estava
+# dormindo.
 #
-# O agendamento pede uma consulta a cada 10 minutos, mas o GitHub não garante o
-# horário das rotinas agendadas: neste repositório, de 6 a 16/11/2026, foram 41
-# execuções em 10 dias, com 3 a 10 horas entre uma e outra. Sozinha, portanto,
-# esta rotina não mantém a API acordada; ela serve de sentinela.
+# Esta rotina nasceu para manter a API acordada com uma consulta a cada 10
+# minutos, mas o GitHub não garante o horário das rotinas agendadas: de 6 a
+# 16/11/2026 foram 41 execuções em 10 dias, com 3 a 11 horas entre uma e outra.
+# Ainda assim, a API respondeu em segundos em todas elas, e no teste de sono de
+# 16/11/2026 continuou acordada depois de 25 minutos sem consulta: hoje ela não
+# dorme, e a rotina serve de sentinela. O agendamento continua pedindo uma
+# execução a cada 10 minutos, porque foi com ele que se mediu quantas
+# execuções o GitHub entrega.
+#
+# O painel. A visita de mantem-painel-acordado.yml também é feita aqui: são
+# dois agendamentos independentes, e juntos deixam menos tempo entre as visitas.
 #
 # Teste de sono, para saber se a API dorme:
-#   Actions > "Mantém a API acordada" > Run workflow > espera: 25
+#   Actions > "Vigia a API e o painel" > Run workflow > espera: 25
 # A rotina consulta, fica esse tempo sem consultar e consulta de novo. Se a
 # segunda resposta demora, a API dormiu no intervalo.
-name: Mantém a API acordada
+name: Vigia a API e o painel
 
 on:
   schedule:
@@ -26,7 +35,8 @@ on:
         required: false
         default: "0"
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   ping:
@@ -81,3 +91,7 @@ jobs:
           esac
           echo "$resultado"
           echo "$resultado" >> "$GITHUB_STEP_SUMMARY"
+
+  # A mesma visita de mantem-painel-acordado.yml, também neste agendamento.
+  painel:
+    uses: ./.github/workflows/mantem-painel-acordado.yml

@@ -175,6 +175,10 @@ fechar o aviso sozinho. As rodadas sem o travamento passaram em tudo.
 - **No ar.** `confere-painel.yml` abre o painel num navegador e confere o mapa;
   `mantem-painel-acordado.yml` o visita a cada 4 horas, abaixo das 12 horas sem
   visita que fazem o Streamlit Community Cloud pôr o app para dormir.
+  Medido depois, de 7 a 15/11/2026: o GitHub atrasou as visitas agendadas (26
+  em 9 dias, com até 16 horas entre duas feitas), e em 11 e 13/11 a visita
+  encontrou o painel dormindo. A rotina que consulta a API passou a fazer
+  também a visita, no agendamento dela.
 - **Falta**: o painel em largura de celular e as verificações automáticas de
   acessibilidade no navegador.
 

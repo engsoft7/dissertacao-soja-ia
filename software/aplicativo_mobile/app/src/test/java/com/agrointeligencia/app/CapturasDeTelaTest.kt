@@ -536,7 +536,7 @@ class CapturasDeTelaTest {
                     GraficoVelas(cot.velas, false, periodoMercado)
                 }
             }
-            mercado.pracasDoEstado().takeIf { it.isNotEmpty() }?.let {
+            mercadoReal!!.pracasDoEstado().takeIf { it.isNotEmpty() }?.let {
                 Spacer(Modifier.height(16.dp))
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp)) { CotacoesPracasPara(it) }
@@ -564,7 +564,8 @@ class CapturasDeTelaTest {
 
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     @Test fun loja_6_campo() {
-        val praca = pracaParaUsar("Paragominas", mercado.pracas_para.orEmpty())
+        // Só a cotação real da praça: o exemplo da classe não vai à loja.
+        val praca = pracaParaUsar("Paragominas", mercadoReal?.pracas_para.orEmpty())
         Assume.assumeTrue(praca != null)
         val exemplo = EstadoCampo(
             pontos = listOf(PontoAmostra(13, 1.0, 5, 196), PontoAmostra(12, 1.0, 5, 171), PontoAmostra(14, 1.0, 5, 205),
@@ -586,10 +587,10 @@ class CapturasDeTelaTest {
 
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     @Test fun loja_7_viabilidade() {
-        Assume.assumeTrue(financas != null)
+        Assume.assumeTrue(financas != null && mercadoReal != null)
         capturaDaLoja("loja_7_viabilidade", "Viabilidade da safra",
                       "Receita, custo, margem e ponto de equilíbrio por hectare, com os seus números") {
-            ResumoFinanceiroCard(projecao, financas!!, mercado.para, mercado.pracas_para.orEmpty(), "Paragominas")
+            ResumoFinanceiroCard(projecao, financas!!, mercadoReal!!.para, mercadoReal.pracas_para.orEmpty(), "Paragominas")
         }
     }
 

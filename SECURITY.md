@@ -6,7 +6,8 @@ Encontrou uma falha de segurança no aplicativo, na API, no painel ou nos
 workflows deste repositório? Avise pela aba **Security → Report a
 vulnerability** do GitHub, que abre uma conversa privada com o autor. Não
 abra issue pública com os detalhes: até a correção, a falha fica sem
-divulgação.
+divulgação. Se o botão não aparecer, abra uma issue só pedindo contato, sem
+descrever a falha.
 
 Diga o que encontrou, como reproduzir e o que alguém conseguiria fazer com
 ela. A resposta vem em até 7 dias, e a correção sai numa versão nova do

@@ -227,6 +227,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.6.0` (15/11/2026) — app 2.9.0: janela de plantio, alertas, caderno da safra, resumo para compartilhar, leitura em voz alta e inglês | 216 | 41.180 | `edc8fe1b7092fb09c7ca1b1242b3ba96db0f32daad511e01449c334b045e64b9` |
 | Tag `v2.6.1` (16/11/2026) — app 2.9.1: fonte do calendário de semeadura sem a portaria fixa e ficha da loja pelo repositório | 216 | 41.758 | `1967eb82de8860f6ef5e9e4711019b67c2440a73d43e11cd9f4dfe12d80b08bb` |
 | Tag `v2.6.2` (16/11/2026) — preços da CONAB: coleta diária e média do mês no Mercado (app 2.9.2) | 220 | 42.558 | `9ffe45280252a4b93d14ed15d0b25ad972b324c3f6d7096b599d67afbd3ec329` |
+| Tag `v2.7.0` (16/11/2026) — app 2.10.0: gráfico de velas de trader, imagens da loja a cada versão, ficha com os cinco estados e segurança | 224 | 43.811 | `90bb3debc72dbe46d2904be54bc96d7e8095f6ecf404cf88fd04b4730aa7dd08` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -951,6 +952,27 @@ arquivos e 42.558 linhas. O DOI de versão desta etiqueta é
 10.5281/zenodo.24281916, atribuído pelo Zenodo no depósito disparado pela
 publicação do Release em 16/11/2026.
 
+A `v2.7.0` foi registrada pelo workflow `registra-doi.yml` na publicação do
+Release, em 16/11/2026, com o título “v2.7.0 — App 2.10.0: gráfico de velas de
+trader, imagens da loja a cada versão, ficha com os cinco estados e segurança”.
+Em relação à `v2.6.2`, entram 4 arquivos-fonte
+(`software/api_backend/test_erros_internos.py`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/GraficoVelasCalculo.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/GraficoVelasCalculoTest.kt`
+e `software/automacao_github/test_envia_play_imagens.py`); mudam 7
+(`software/api_backend/api.py`,
+`software/aplicativo_mobile/app/build.gradle.kts`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/EstimativaCampo.kt`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/Mercado.kt`,
+`software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/CapturasDeTelaTest.kt`,
+`software/automacao_github/envia_play.py` e `software/dashboard_web/app.py`).
+
+O resumo criptográfico da `v2.7.0` foi calculado pelo mesmo workflow sobre uma
+cópia limpa da etiqueta (commit `e3bbdf2`), com o critério do comando acima: 224
+arquivos e 43.811 linhas. O DOI de versão desta etiqueta é
+10.5281/zenodo.24288687, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 16/11/2026.
+
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
 calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
@@ -1206,6 +1228,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.5.1`:** 10.5281/zenodo.24218986
 - **DOI da `v2.6.0`:** 10.5281/zenodo.24238117
 - **DOI da `v2.6.1`:** 10.5281/zenodo.24278703
-- **DOI da versão mais recente (`v2.6.2`):** 10.5281/zenodo.24281916
+- **DOI da `v2.6.2`:** 10.5281/zenodo.24281916
+- **DOI da versão mais recente (`v2.7.0`):** 10.5281/zenodo.24288687
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

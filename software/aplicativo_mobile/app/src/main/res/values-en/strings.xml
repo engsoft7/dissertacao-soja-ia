@@ -320,10 +320,20 @@
     <string name="velas_descricao">Candlestick chart of soybean in reais per bag, from R$ %1$s to R$ %2$s; high R$ %3$s, low R$ %4$s.</string>
     <string name="velas_tocada">%1$s · open %2$s · high %3$s · low %4$s · close %5$s</string>
     <string name="velas_para_estimado">Pará estimated %1$s</string>
-    <string name="velas_toque">Tap a candle to see the values.</string>
+    <string name="velas_toque">Tap or hold a candle to see its values. Pinch to zoom in and out, drag to move through the period, and double-tap to see the whole period.</string>
     <string name="velas_alta">Closed above the open</string>
     <string name="velas_baixa">Closed below</string>
     <string name="velas_para">Pará estimated (Chicago + month\'s basis)</string>
+    <string name="velas_medias">Moving averages</string>
+    <string name="velas_media">%1$d-candle average: %2$s</string>
+    <string name="velas_legenda_media">%1$d-candle moving average</string>
+    <string name="velas_periodo_inteiro">Whole period</string>
+    <string name="velas_estado_zoom">Showing %1$d of %2$d candles, from %3$s to %4$s</string>
+    <string name="velas_acao_aproximar">Zoom in</string>
+    <string name="velas_acao_afastar">Zoom out</string>
+    <string name="velas_acao_inteiro">Show the whole period</string>
+    <string name="velas_acao_anterior">Previous candle</string>
+    <string name="velas_acao_seguinte">Next candle</string>
 
     <!-- Viabilidade (Viabilidade.kt) -->
     <string name="conjuncao_e">and</string>
@@ -645,7 +655,10 @@
     <string name="campo_cantos_area">area %1$s ha</string>
     <string name="campo_marcar_canto">Mark corner</string>
     <string name="campo_usar_area">Use this area</string>
-    <string name="campo_fotos_titulo">Photos to train the automatic count</string>
+    <string name="campo_fotos_titulo">Help improve the counter</string>
+    <string name="campo_ajudar_resumo">Optional: send the photos you marked to train the automatic pod count.</string>
+    <string name="campo_ajudar_abrir">Show how to help</string>
+    <string name="campo_ajudar_fechar">Hide</string>
     <string name="campo_fotos_nenhuma">Each photo in which you mark plants or pods is kept on the phone, with the marks, when you save the point. They are used to train a model that counts by itself. Mark all the plants or pods in the photo, not just some.</string>
     <string name="campo_sem_fotos">There are no photos to export.</string>
     <string name="campo_zip_assunto">Marked soybean photos (AgroInteligência)</string>

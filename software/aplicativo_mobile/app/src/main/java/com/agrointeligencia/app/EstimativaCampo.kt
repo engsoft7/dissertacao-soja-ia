@@ -276,8 +276,6 @@ fun EstimativaCampoTela(
             }
         }
 
-        FotosParaTreino(fotosGuardadas, colheitas) { fotosGuardadas = it; colheitas = 0 }
-
         val estimativa = estimaLavoura(pontos, parametros)
         ResultadoCampo(
             estimativa = estimativa,
@@ -302,6 +300,10 @@ fun EstimativaCampoTela(
             colhido = ""
             talhao = novoTalhao()
         }
+
+        // Por último e fechado: exportar as fotos marcadas ajuda a treinar o
+        // contador, mas não é o que o produtor veio fazer nesta tela.
+        FotosParaTreino(fotosGuardadas, colheitas) { fotosGuardadas = it; colheitas = 0 }
     }
 }
 
@@ -801,6 +803,10 @@ private fun MedicaoGps(aoConcluir: (Double) -> Unit, aoCancelar: () -> Unit) {
  * As fotos marcadas guardadas no celular, para treinar a contagem automática.
  * Exportar gera um .zip e abre o compartilhamento do Android: o produtor
  * escolhe para onde mandar (Drive, e-mail, WhatsApp).
+ *
+ * Fica no fim da tela e fechado ("Ajudar a melhorar o contador"): a função
+ * serve mais a quem desenvolve o contador do que ao produtor, que vê só uma
+ * linha dizendo para que serve e abre se quiser.
  */
 @Composable
 private fun FotosParaTreino(quantas: Int, colheitas: Int, aoMudar: (Int) -> Unit) {
@@ -808,8 +814,18 @@ private fun FotosParaTreino(quantas: Int, colheitas: Int, aoMudar: (Int) -> Unit
     val escopo = rememberCoroutineScope()
     var confirmarApagar by remember { mutableStateOf(false) }
     var aviso by remember { mutableStateOf<String?>(null) }
+    var aberto by rememberSaveable { mutableStateOf(false) }
 
     CartaoCampo(stringResource(R.string.campo_fotos_titulo), Icons.Filled.School) {
+        if (!aberto) {
+            Nota(stringResource(R.string.campo_ajudar_resumo))
+            TextButton(onClick = { aberto = true }, modifier = Modifier.padding(top = 4.dp)) {
+                Text(stringResource(R.string.campo_ajudar_abrir))
+                Spacer(Modifier.width(4.dp))
+                Icon(Icons.Filled.ExpandMore, contentDescription = null, modifier = Modifier.size(18.dp))
+            }
+            return@CartaoCampo
+        }
         Nota(
             if (quantas == 0) stringResource(R.string.campo_fotos_nenhuma)
             else pluralStringResource(R.plurals.campo_fotos_guardadas, quantas, quantas, decimal(tamanhoAmostrasMb(context), 1))
@@ -845,6 +861,11 @@ private fun FotosParaTreino(quantas: Int, colheitas: Int, aoMudar: (Int) -> Unit
             }
         }
         aviso?.let { Nota(it) }
+        TextButton(onClick = { aberto = false }) {
+            Text(stringResource(R.string.campo_ajudar_fechar))
+            Spacer(Modifier.width(4.dp))
+            Icon(Icons.Filled.ExpandLess, contentDescription = null, modifier = Modifier.size(18.dp))
+        }
     }
 
     if (confirmarApagar) {

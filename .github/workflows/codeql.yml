@@ -1,0 +1,50 @@
+# Análise de segurança do código pelo CodeQL, do próprio GitHub: o Python
+# (API, painel, automação e pesquisa) e os workflows deste repositório (a
+# análise de "actions" procura injeção de texto de fora nos comandos,
+# permissões largas e ações de terceiros mal usadas). Roda em cada pull
+# request, num push na main e toda semana. Os alertas ficam em Security >
+# Code scanning; nenhum deles bloqueia o merge sozinho.
+#
+# O Kotlin do aplicativo fica de fora: a análise dele exige compilar o app
+# dentro do CodeQL. As regras de segurança do Android (manifesto, rede,
+# backup) estão conferidas no SECURITY.md e no relatório do teste premium.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "37 9 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analisa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        linguagem: [python, actions]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.linguagem }}
+          build-mode: none
+
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.linguagem }}

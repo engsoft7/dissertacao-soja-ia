@@ -187,3 +187,73 @@ jobs:
         if: always()
         working-directory: software/aplicativo_mobile
         run: rm -f agro_playstore.jks keystore.properties
+
+  # As imagens da ficha da loja (as capturas de celular e a imagem de destaque)
+  # saem das telas reais desta versão, desenhadas por CapturasDeTelaTest (os
+  # testes loja_*) com as respostas da API de hoje, como as de capturas.yml.
+  # Vão num .zip para o Release e, com o segredo da conta de serviço, para a
+  # ficha da Google Play. Roda num job à parte, sem a chave de assinatura, e
+  # depois do envio do pacote: a loja trabalha com uma edição de cada vez. Uma
+  # falha aqui não desfaz a versão: o pacote já foi à loja, e a ficha continua
+  # com as imagens de antes.
+  imagens-da-loja:
+    needs: assina
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ETIQUETA: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag || github.ref }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Grava as respostas reais da API
+        run: |
+          pip install --quiet -r software/api_backend/requirements.txt httpx
+          python software/automacao_github/dados_das_capturas.py
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Desenha as imagens da loja
+        working-directory: software/aplicativo_mobile
+        run: ./gradlew --no-daemon testDebugUnitTest --tests "com.agrointeligencia.app.CapturasDeTelaTest.loja*"
+
+      - name: Anexa ao Release
+        if: env.ETIQUETA != ''
+        working-directory: software/aplicativo_mobile/app/build/capturas
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -la loja_*.png
+          zip -q "$RUNNER_TEMP/imagens-da-loja.zip" loja_*.png
+          gh release upload "$ETIQUETA" "$RUNNER_TEMP/imagens-da-loja.zip" --clobber --repo "$GITHUB_REPOSITORY"
+
+      # Antes de trocar, as imagens que a ficha tinha (as feitas à mão
+      # também) vão para o Release, em imagens-da-loja-anteriores.zip, com o
+      # endereço do vídeo: nada do que estava na loja se perde.
+      - name: Guarda as imagens de antes e envia as novas à ficha da Google Play
+        if: env.ETIQUETA != ''
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::notice::PLAY_SERVICE_ACCOUNT_JSON não configurado: as imagens ficam no Release."
+            exit 0
+          fi
+          python3 -m venv /tmp/play
+          /tmp/play/bin/pip install --quiet google-api-python-client google-auth
+          /tmp/play/bin/python software/automacao_github/envia_play.py --baixa-imagens "$RUNNER_TEMP/antes"
+          (cd "$RUNNER_TEMP/antes" && zip -q "$RUNNER_TEMP/imagens-da-loja-anteriores.zip" ./*)
+          gh release upload "$ETIQUETA" "$RUNNER_TEMP/imagens-da-loja-anteriores.zip" --clobber --repo "$GITHUB_REPOSITORY"
+          /tmp/play/bin/python software/automacao_github/envia_play.py \
+            --imagens software/aplicativo_mobile/app/build/capturas --aplica

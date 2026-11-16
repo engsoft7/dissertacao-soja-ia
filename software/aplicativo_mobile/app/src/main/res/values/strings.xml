@@ -318,10 +318,20 @@
     <string name="velas_descricao">Gráfico de velas da soja em reais por saca, de R$ %1$s a R$ %2$s; máxima R$ %3$s, mínima R$ %4$s.</string>
     <string name="velas_tocada">%1$s · abertura %2$s · máxima %3$s · mínima %4$s · fechamento %5$s</string>
     <string name="velas_para_estimado">Pará estimado %1$s</string>
-    <string name="velas_toque">Toque numa vela para ver os valores.</string>
+    <string name="velas_toque">Toque ou segure numa vela para ver os valores. Dois dedos aproximam e afastam, arrastar anda pelo período, e dois toques voltam ao período inteiro.</string>
     <string name="velas_alta">Fechou acima da abertura</string>
     <string name="velas_baixa">Fechou abaixo</string>
     <string name="velas_para">Pará estimado (Chicago + base do mês)</string>
+    <string name="velas_medias">Médias móveis</string>
+    <string name="velas_media">média de %1$d: %2$s</string>
+    <string name="velas_legenda_media">Média móvel de %1$d velas</string>
+    <string name="velas_periodo_inteiro">Período inteiro</string>
+    <string name="velas_estado_zoom">Mostrando %1$d de %2$d velas, de %3$s a %4$s</string>
+    <string name="velas_acao_aproximar">Aproximar o gráfico</string>
+    <string name="velas_acao_afastar">Afastar o gráfico</string>
+    <string name="velas_acao_inteiro">Ver o período inteiro</string>
+    <string name="velas_acao_anterior">Vela anterior</string>
+    <string name="velas_acao_seguinte">Vela seguinte</string>
 
     <!-- Viabilidade (Viabilidade.kt) -->
     <string name="conjuncao_e">e</string>
@@ -643,7 +653,10 @@
     <string name="campo_cantos_area">área %1$s ha</string>
     <string name="campo_marcar_canto">Marcar canto</string>
     <string name="campo_usar_area">Usar esta área</string>
-    <string name="campo_fotos_titulo">Fotos para treinar a contagem automática</string>
+    <string name="campo_fotos_titulo">Ajudar a melhorar o contador</string>
+    <string name="campo_ajudar_resumo">Opcional: mande as fotos que você marcou para treinar a contagem automática de vagens.</string>
+    <string name="campo_ajudar_abrir">Mostrar como ajudar</string>
+    <string name="campo_ajudar_fechar">Esconder</string>
     <string name="campo_fotos_nenhuma">Cada foto em que você marca plantas ou vagens fica guardada no celular, com as marcações, quando você guarda o ponto. Elas servem para treinar um modelo que conte sozinho. Marque todas as plantas ou vagens da foto, não só algumas.</string>
     <string name="campo_sem_fotos">Não há fotos para exportar.</string>
     <string name="campo_zip_assunto">Fotos marcadas de soja (AgroInteligência)</string>

@@ -86,6 +86,12 @@ jobs:
           echo "Faixa pedida: ${PLAY_FAIXA:-nenhuma (vale a mais alta em que o app já tem versão)}"
           /tmp/play/bin/python software/automacao_github/envia_play.py --faixas
 
+      # Só lê: o vídeo e as imagens que a ficha tem hoje. As imagens são
+      # trocadas a cada versão nova pelo publica-apk.yml.
+      - name: Vídeo e imagens da ficha
+        if: steps.cliente.outputs.pronto == 'sim'
+        run: /tmp/play/bin/python software/automacao_github/envia_play.py --midia
+
       - name: Ficha da loja
         if: steps.cliente.outputs.pronto == 'sim' && (github.event_name == 'push' || inputs.ficha != 'nao')
         env:

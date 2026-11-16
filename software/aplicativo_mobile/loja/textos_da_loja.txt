@@ -2,17 +2,17 @@ NOME DO APP
 AgroInteligência
 
 BREVE DESCRIÇÃO
-Produtividade, preço e tempo da soja para os municípios do Pará
+Produtividade, preço e tempo da soja no PA, MT, MA, TO e RO
 
 DESCRIÇÃO COMPLETA
-O AgroInteligência reúne o que o produtor de soja do Pará acompanha na safra: a produtividade esperada do município, o preço da saca, o tempo na lavoura, a janela de plantio e a viabilidade financeira.
+O AgroInteligência reúne o que o produtor de soja acompanha na safra, no Pará, em Mato Grosso, no Maranhão, no Tocantins e em Rondônia: a produtividade esperada do município, o preço da saca, o tempo na lavoura, a janela de plantio e a viabilidade financeira.
 
-AVISO: o AgroInteligência NÃO é um aplicativo do governo e não representa nenhum órgão público. Não tem vínculo com o IBGE, o INMET, a CONAB, a Embrapa, o Ministério da Agricultura, a NOAA ou a NASA: só usa os dados abertos que elas publicam, com os links em "Fontes oficiais", abaixo. É um produto técnico de pesquisa do Programa de Pós-Graduação em Computação Aplicada da Universidade Federal do Pará (UFPA).
+AVISO: o AgroInteligência NÃO é um aplicativo do governo e não representa nenhum órgão público. Não tem vínculo com o IBGE, o INMET, a CONAB, a Embrapa, o Ministério da Agricultura, a NOAA ou a NASA: só usa os dados abertos que elas publicam, com os links em "Fontes oficiais", abaixo. É um produto técnico de pesquisa da Universidade Federal do Pará (UFPA).
 
 PRODUTIVIDADE DO SEU MUNICÍPIO
-• Estimativa da produtividade da próxima safra para 38 municípios do Pará, com a margem de erro.
+• Estimativa da próxima safra em 388 municípios dos cinco estados, com a margem de erro.
 • Histórico do IBGE desde 2001, com as safras de El Niño e La Niña destacadas.
-• O app lembra o seu município e acha o mais próximo pelo GPS.
+• O app lembra o estado e o município e acha o mais próximo pelo GPS.
 
 TEMPO NA LAVOURA
 • Tempo agora e previsão de 7 dias, na sede do município ou onde você está.
@@ -25,18 +25,18 @@ JANELA DE PLANTIO
 • Risco climático do ZARC por grupo de cultivar e solo, e se hoje está na janela.
 
 ESTIMATIVA NO CAMPO
-• Fotografe um metro de linha e algumas plantas, conte plantas e vagens e veja sacas por hectare e reais no talhão.
+• Conte plantas e vagens nas fotos de um metro de linha e veja sacas por hectare e reais no talhão.
 • Área do talhão medida pelo GPS do celular.
 • Contador automático de vagens (em teste), no celular e sem internet; você confere as marcas.
 
 PREÇO DA SOJA
-• Cotação do dia nas praças do Pará, com a data de cada uma.
-• Chicago em reais por saca, com gráfico de 1 dia a 6 meses.
-• Média estimada do Pará e a base entre o mercado paraense e a bolsa.
+• Cotação do dia nas praças do seu estado, com a data, e a média do mês da CONAB.
+• Chicago em reais por saca, em velas de 1 dia a 6 meses, com zoom e médias móveis.
+• No Pará, a média estimada e a base em relação a Chicago.
 
 VIABILIDADE DA SAFRA
 • Receita, custo, margem e ponto de equilíbrio por hectare, com os seus números.
-• Parte da cotação da praça mais perto e do custo da CONAB, com aviso se o levantamento estiver desatualizado.
+• Parte da cotação da praça mais perto e do custo da CONAB, com aviso quando o levantamento é antigo.
 
 FEITO PARA O CAMPO
 • Funciona sem internet com os últimos dados carregados.
@@ -58,9 +58,9 @@ OUTRAS FONTES
 • Chuva: CHIRPS – https://www.chc.ucsb.edu/data/chirps
 • Clima: ERA5-Land, Copernicus – https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land
 • Previsão do tempo: Open-Meteo – https://open-meteo.com
-• Preço do Pará: Agrolink – https://www.agrolink.com.br/cotacoes/historico/pa/soja-em-grao-sc-60kg
+• Preço nas praças: Agrolink – https://www.agrolink.com.br/cotacoes/historico/pa/soja-em-grao-sc-60kg
 
-As estimativas são de apoio à decisão e não substituem a avaliação de um profissional nem a verificação no local. Confira sempre a bula antes de qualquer aplicação.
+As estimativas apoiam a decisão e não substituem um profissional nem a verificação no local. Confira sempre a bula antes de aplicar.
 
 Código aberto: https://github.com/engsoft7/dissertacao-soja-ia
 Política de privacidade: https://engsoft7.github.io/dissertacao-soja-ia/politica-de-privacidade/

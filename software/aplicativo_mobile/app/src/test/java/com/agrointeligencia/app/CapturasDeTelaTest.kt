@@ -1,6 +1,19 @@
 package com.agrointeligencia.app
 
 import android.widget.ImageView
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import org.junit.Assume
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -443,5 +456,181 @@ class CapturasDeTelaTest {
             factory = { ImageView(it).apply { setImageResource(R.mipmap.ic_launcher) } },
             modifier = Modifier.size(192.dp)
         )
+    }
+
+    // ── imagens da ficha da loja ──────────────────────────────────────────────
+    // As capturas de celular da Google Play saem das telas reais, com as
+    // respostas da API gravadas por dados_das_capturas.py: um título curto em
+    // cima, na cor do app, e a tela embaixo, num celular de 360 x 640 dp a
+    // 480 dpi, ou seja, 1080 x 1920 px (9:16, o formato do Play). O
+    // publica-apk.yml desenha só estas (filtro "CapturasDeTelaTest.loja*") e o
+    // envia_play.py as manda à ficha a cada versão nova; o número no nome dá a
+    // ordem na loja. Sem a resposta real de uma tela (a cotação do Yahoo que
+    // não veio, por exemplo), a captura dela fica de fora, em vez de ir à loja
+    // com dados de exemplo.
+
+    private fun capturaDaLoja(arquivo: String, titulo: String, subtitulo: String, conteudo: @Composable () -> Unit) {
+        compose.setContent {
+            MaterialTheme(colorScheme = esquemaAgro(false)) {
+                val cores = MaterialTheme.colorScheme
+                Column(Modifier.fillMaxSize().background(cores.primary)) {
+                    Column(Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 28.dp, bottom = 22.dp)) {
+                        Text(titulo, color = cores.onPrimary, fontSize = 26.sp, lineHeight = 31.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(6.dp))
+                        Text(subtitulo, color = cores.onPrimary.copy(alpha = 0.92f), fontSize = 15.sp, lineHeight = 20.sp)
+                    }
+                    Surface(color = cores.background, shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                            modifier = Modifier.fillMaxSize()) {
+                        // A tela tem a altura que teria no celular, e o que passa
+                        // do quadro fica cortado, como na tela de verdade.
+                        Column(Modifier.fillMaxWidth().wrapContentHeight(Alignment.Top, unbounded = true).padding(16.dp)) {
+                            conteudo()
+                        }
+                    }
+                }
+            }
+        }
+        compose.onRoot().captureRoboImage("build/capturas/$arquivo.png")
+    }
+
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    @Test fun loja_1_produtividade() {
+        Assume.assumeTrue(real<PrevisaoResponse>("previsao") != null)
+        capturaDaLoja("loja_1_produtividade", "Produtividade da soja no seu município",
+                      "A estimativa da próxima safra, com a margem de erro, e o histórico do IBGE desde 2001") {
+            ResumoAgronomicoCard(projecao, ultimoReal)
+            Spacer(Modifier.height(16.dp))
+            HistoricoProdutividadeChart(historico, previsao)
+        }
+    }
+
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    @Test fun loja_2_estados() {
+        val p: PrevisaoResponse? = real("previsao_MT")
+        Assume.assumeTrue(p != null && real<MunicipioResponse>("municipios_MT") != null)
+        capturaDaLoja("loja_2_estados", "Pará, Mato Grosso, Maranhão, Tocantins e Rondônia",
+                      "Escolha o estado e o município, ou deixe o GPS achar o mais perto") {
+            telaEstados()
+            Spacer(Modifier.height(16.dp))
+            Text("Sorriso (Mato Grosso)", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            ResumoAgronomicoCard(projecaoDaSafra(p!!.historico) ?: p.historico.maxByOrNull { it.ano }!!,
+                                 ultimoObservado(p.historico))
+        }
+    }
+
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    @Test fun loja_3_preco() {
+        val cot = mercadoReal?.cotacao
+        Assume.assumeTrue(cot != null)
+        // As médias móveis ligadas, para a loja mostrar o gráfico completo.
+        org.robolectric.RuntimeEnvironment.getApplication()
+            .getSharedPreferences("AgroAppCache", android.content.Context.MODE_PRIVATE)
+            .edit().putBoolean(PREF_MEDIAS_MOVEIS, true).commit()
+        capturaDaLoja("loja_3_preco", "Preço da soja nas praças e em Chicago",
+                      "Gráfico de velas com zoom e médias móveis, e a cotação do dia em cada praça") {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp)) {
+                    Text("Chicago em reais por saca", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text("R$ ${reais(cot!!.ultimo_brl_saca)}", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                    GraficoVelas(cot.velas, false, periodoMercado)
+                }
+            }
+            mercado.pracasDoEstado().takeIf { it.isNotEmpty() }?.let {
+                Spacer(Modifier.height(16.dp))
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp)) { CotacoesPracasPara(it) }
+                }
+            }
+        }
+    }
+
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    @Test fun loja_4_tempo() {
+        Assume.assumeTrue(real<PrevisaoTempo>("tempo") != null)
+        capturaDaLoja("loja_4_tempo", "Tempo e janela de pulverização",
+                      "Previsão hora a hora pelos critérios da Embrapa Soja, e os avisos do INMET") {
+            TempoConteudo(tempo, avisos, SEDES_MUNICIPAIS["Paragominas"], agoraTempo, null, false, false)
+        }
+    }
+
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    @Test fun loja_5_plantio() {
+        Assume.assumeTrue(real<PlantioResponse>("plantio") != null)
+        val estado = estadoPlantio()
+        capturaDaLoja("loja_5_plantio", "Janela de plantio",
+                      "O calendário de semeadura, o vazio sanitário e o risco climático do ZARC") { telaPlantio(estado) }
+    }
+
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    @Test fun loja_6_campo() {
+        val praca = pracaParaUsar("Paragominas", mercado.pracas_para.orEmpty())
+        Assume.assumeTrue(praca != null)
+        val exemplo = EstadoCampo(
+            pontos = listOf(PontoAmostra(13, 1.0, 5, 196), PontoAmostra(12, 1.0, 5, 171), PontoAmostra(14, 1.0, 5, 205),
+                            PontoAmostra(11, 1.0, 5, 188), PontoAmostra(13, 1.0, 5, 179)),
+            areaHa = 48.5,
+        )
+        capturaDaLoja("loja_6_campo", "Estimativa no campo",
+                      "Conte plantas e vagens na lavoura e veja as sacas por hectare e os reais do talhão") {
+            EstimativaCampoTela(
+                precoPadrao = praca!!.valor,
+                fontePreco = "Cotação de ${praca.praca} em ${dataCurta(praca.data)} (Agrolink).",
+                referenciaKgHa = projecao.rendimento_predito,
+                rotuloReferencia = "Paragominas em ${projecao.ano}",
+                aoVoltar = {},
+                inicial = exemplo,
+            )
+        }
+    }
+
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    @Test fun loja_7_viabilidade() {
+        Assume.assumeTrue(financas != null)
+        capturaDaLoja("loja_7_viabilidade", "Viabilidade da safra",
+                      "Receita, custo, margem e ponto de equilíbrio por hectare, com os seus números") {
+            ResumoFinanceiroCard(projecao, financas!!, mercado.para, mercado.pracas_para.orEmpty(), "Paragominas")
+        }
+    }
+
+    @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
+    @Test fun loja_8_caderno() {
+        val caderno = estadoCaderno()
+        val plantio = estadoPlantio()
+        capturaDaLoja("loja_8_caderno", "Caderno da safra",
+                      "Insumos, operações, colheita e vendas, guardados só no seu celular") {
+            CadernoTela(caderno, plantio, estimativaScHa = 52.4, municipio = "Paragominas", aoVoltar = {},
+                        hoje = java.time.LocalDate.of(2027, 4, 2))
+        }
+    }
+
+    // A imagem de destaque da ficha: 1024 x 500 px, com o ícone, o nome e os estados.
+    @Config(qualifiers = "pt-rBR-w1024dp-h500dp-mdpi")
+    @Test fun loja_destaque() {
+        compose.setContent {
+            MaterialTheme(colorScheme = esquemaAgro(false)) {
+                Row(
+                    Modifier.fillMaxSize()
+                        .background(Brush.linearGradient(listOf(Color(0xFF047857), Color(0xFF064E3B))))
+                        .padding(horizontal = 56.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AndroidView(
+                        factory = { ImageView(it).apply { setImageResource(R.mipmap.ic_launcher) } },
+                        modifier = Modifier.size(200.dp)
+                    )
+                    Spacer(Modifier.width(40.dp))
+                    Column {
+                        Text("AgroInteligência", color = Color.White, fontSize = 52.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(8.dp))
+                        Text("Produtividade, preço e tempo da soja", color = Color.White, fontSize = 26.sp)
+                        Spacer(Modifier.height(18.dp))
+                        Text("Pará · Mato Grosso · Maranhão · Tocantins · Rondônia",
+                             color = Color.White.copy(alpha = 0.9f), fontSize = 19.sp)
+                    }
+                }
+            }
+        }
+        compose.onRoot().captureRoboImage("build/capturas/loja_destaque.png")
     }
 }

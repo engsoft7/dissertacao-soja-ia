@@ -1,7 +1,14 @@
 package com.agrointeligencia.app
 
 import android.widget.ImageView
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
@@ -509,13 +516,15 @@ class CapturasDeTelaTest {
         val p: PrevisaoResponse? = real("previsao_MT")
         Assume.assumeTrue(p != null && real<MunicipioResponse>("municipios_MT") != null)
         capturaDaLoja("loja_2_estados", "Pará, Mato Grosso, Maranhão, Tocantins e Rondônia",
-                      "Escolha o estado e o município, ou deixe o GPS achar o mais perto") {
-            telaEstados()
+                      "388 municípios: escolha o estado e o município, ou deixe o GPS achar o mais perto") {
+            SeletorEstado(estadoDoApp("MT")) {}
             Spacer(Modifier.height(16.dp))
             Text("Sorriso (Mato Grosso)", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             ResumoAgronomicoCard(projecaoDaSafra(p!!.historico) ?: p.historico.maxByOrNull { it.ano }!!,
                                  ultimoObservado(p.historico))
+            Spacer(Modifier.height(16.dp))
+            HistoricoProdutividadeChart(p.historico.sortedByDescending { it.ano }, p)
         }
     }
 
@@ -529,7 +538,8 @@ class CapturasDeTelaTest {
             .edit().putBoolean(PREF_MEDIAS_MOVEIS, true).commit()
         capturaDaLoja("loja_3_preco", "Preço da soja nas praças e em Chicago",
                       "Gráfico de velas com zoom e médias móveis, e a cotação do dia em cada praça") {
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(modifier = Modifier.fillMaxWidth(),
+                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(Modifier.padding(16.dp)) {
                     Text("Chicago em reais por saca", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Text("R$ ${reais(cot!!.ultimo_brl_saca)}", fontSize = 28.sp, fontWeight = FontWeight.Bold)
@@ -538,7 +548,8 @@ class CapturasDeTelaTest {
             }
             mercadoReal!!.pracasDoEstado().takeIf { it.isNotEmpty() }?.let {
                 Spacer(Modifier.height(16.dp))
-                Card(modifier = Modifier.fillMaxWidth()) {
+                Card(modifier = Modifier.fillMaxWidth(),
+                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                     Column(Modifier.padding(16.dp)) { CotacoesPracasPara(it) }
                 }
             }
@@ -548,8 +559,8 @@ class CapturasDeTelaTest {
     @Config(qualifiers = "pt-rBR-w360dp-h640dp-xxhdpi")
     @Test fun loja_4_tempo() {
         Assume.assumeTrue(real<PrevisaoTempo>("tempo") != null)
-        capturaDaLoja("loja_4_tempo", "Tempo e janela de pulverização",
-                      "Previsão hora a hora pelos critérios da Embrapa Soja, e os avisos do INMET") {
+        capturaDaLoja("loja_4_tempo", "Tempo na lavoura",
+                      "O tempo agora e em 7 dias, a janela de pulverização hora a hora e os avisos do INMET") {
             TempoConteudo(tempo, avisos, SEDES_MUNICIPAIS["Paragominas"], agoraTempo, null, false, false)
         }
     }
@@ -616,10 +627,15 @@ class CapturasDeTelaTest {
                         .padding(horizontal = 56.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AndroidView(
-                        factory = { ImageView(it).apply { setImageResource(R.mipmap.ic_launcher) } },
-                        modifier = Modifier.size(200.dp)
-                    )
+                    // As duas camadas do ícone adaptativo, que são vetores: o
+                    // mipmap ampliado a 200 px saía serrilhado. A folha fica na
+                    // zona segura de 72 dos 108 dp, por isso a escala de 1,5.
+                    Box(Modifier.size(200.dp).clip(RoundedCornerShape(44.dp))) {
+                        Image(painterResource(R.drawable.ic_launcher_background), contentDescription = null,
+                              modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                        Image(painterResource(R.drawable.ic_launcher_foreground), contentDescription = null,
+                              modifier = Modifier.fillMaxSize().graphicsLayer(scaleX = 1.5f, scaleY = 1.5f))
+                    }
                     Spacer(Modifier.width(40.dp))
                     Column {
                         Text("AgroInteligência", color = Color.White, fontSize = 52.sp, fontWeight = FontWeight.Bold)

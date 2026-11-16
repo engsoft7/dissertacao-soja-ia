@@ -620,19 +620,40 @@ subseção 4.9 da dissertação e o Anexo 01 citam. A base congelada da disserta
 | Conferência da safra nova (projeção e ONI) | todo dia 20, com merge automático | `confere-safra-nova.yml` |
 | Fontes externas (cotações, Agrolink, Open-Meteo, INMET, IBGE, API) e o certificado do portal da CONAB | todo dia; abre issue quando algo falha ou o portal da CONAB volta | `monitor-fontes.yml` |
 | Release, APK e AAB assinados, DOI no Zenodo e envio à Google Play | a cada merge que sobe a versão do app (`versionName`) | `publica-versao.yml`, `publica-apk.yml`, `registra-doi.yml` |
-| API e painel acordados | a cada 10 min e a cada 4 h | `mantem-api-acordada.yml`, `mantem-painel-acordado.yml` |
+| Vigia da API e do painel: mede em quanto tempo a API responde e visita o painel, acordando-o se estiver dormindo; deixa um aviso quando encontra um dos dois dormindo | pedidas a cada 10 min e a cada 4 h; na prática, 3 a 4 vezes por dia cada uma (ver abaixo) | `mantem-api-acordada.yml`, `mantem-painel-acordado.yml` |
 
 A base nova chega ao aplicativo pela API, que o Render publica a cada merge na
 `main`, sem versão nova do app. Versão nova só sai quando o código do app muda
 e a versão sobe.
 
+O GitHub não garante o horário das rotinas agendadas, e neste repositório elas
+atrasam horas: de 6 a 16/11/2026, a rotina pedida a cada 10 minutos rodou 41
+vezes em 10 dias, e a pedida a cada 4 horas, 3 vezes por dia. Para as coletas o horário não
+importa. Para o painel importa, porque o Streamlit o põe para dormir depois de
+horas sem visita: por isso as duas rotinas de vigia fazem a visita, cada uma no
+seu agendamento, e antes de uma apresentação vale disparar à mão **Actions →
+Mantém o painel acordado → Run workflow**.
+
 **Envio à Google Play (configuração única):** no Google Cloud, crie uma conta de
 serviço com uma chave JSON; no Play Console (**Usuários e permissões**), convide
 o e-mail dessa conta com permissão para lançar versões do app; no GitHub
 (**Settings → Secrets and variables → Actions**), crie o segredo
-`PLAY_SERVICE_ACCOUNT_JSON` com o conteúdo do JSON. A faixa padrão é a de
-produção; para outra, crie a variável `PLAY_FAIXA` (`internal`, `alpha` ou
-`beta`). Sem o segredo, o `.aab` fica anexado ao Release para o envio manual.
+`PLAY_SERVICE_ACCOUNT_JSON` com o conteúdo do JSON. Sem o segredo, o `.aab` fica
+anexado ao Release para o envio manual.
+
+A versão nova vai para a faixa mais alta em que o app já tem versão lançada: no
+teste fechado, enquanto o app está no teste fechado; em produção, depois da
+primeira versão de produção. O envio nunca sobe de faixa sozinho: conta pessoal
+nova não lança em produção antes de um teste fechado com 12 testadores por 14
+dias, e a primeira versão de produção é lançada pelo Play Console. Para fixar
+uma faixa, crie a variável `PLAY_FAIXA` (`internal`, `alpha`, `beta` ou
+`production`).
+
+Quando a loja recusa um envio, o log diz o que ela respondeu, quais faixas o app
+tem e o que fazer. Para reenviar o `.aab` de um Release já publicado, sem
+compilar de novo: **Actions → Envia à Google Play → Run workflow**, com a
+etiqueta (por exemplo, `v2.6.0`) e, se quiser, a faixa. Sem a etiqueta, o
+workflow só lista as faixas do app na loja.
 
 Para conferir a credencial na hora: **Actions → Atualiza base de dados →
 Run workflow**, marque **"Testar a credencial do Earth Engine"** e rode. O log

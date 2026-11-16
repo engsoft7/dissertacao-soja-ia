@@ -16,6 +16,7 @@ Sai com 1 se o painel não desenhar em 6 minutos.
 """
 from __future__ import annotations
 
+import os
 import re
 import sys
 
@@ -43,7 +44,10 @@ def main() -> int:
         pagina.wait_for_timeout(8_000)
         botao = pagina.get_by_role("button", name=re.compile("get this app back up", re.I))
         if botao.count():
-            print("O painel estava dormindo; acordando.", flush=True)
+            # No Actions, vira um aviso na página da execução: é assim que se
+            # fica sabendo que o painel chegou a dormir entre duas visitas.
+            aviso = "::warning::" if os.environ.get("GITHUB_ACTIONS") else ""
+            print(f"{aviso}O painel estava dormindo; acordando.", flush=True)
             botao.first.click()
         else:
             print("O painel já estava acordado.", flush=True)

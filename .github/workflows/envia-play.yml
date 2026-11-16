@@ -1,0 +1,80 @@
+# Reenvia à Google Play o .aab de um Release já publicado, sem compilar de novo,
+# e mostra as faixas que o app tem na loja.
+#
+# O envio de cada versão nova é feito por publica-apk.yml, logo depois de
+# assinar o pacote. Este workflow existe para o que sobra: a loja recusou o
+# envio (conta ainda sem acesso à produção, por exemplo), ou a versão deve ir a
+# outra faixa. Ele baixa o mesmo .aab anexado ao Release, e por isso o pacote
+# que vai à loja é o que está publicado, byte a byte.
+#
+#   Actions > "Envia à Google Play" > Run workflow
+#     tag:   a etiqueta do Release (ex.: v2.6.0); vazio só lista as faixas
+#     faixa: internal (teste interno), alpha (teste fechado), beta (teste
+#            aberto) ou production; vazio usa a variável PLAY_FAIXA ou, sem
+#            ela, a faixa mais alta em que o app já tem versão
+#
+# Listar as faixas só lê: a edição aberta para isso é descartada.
+name: Envia à Google Play
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Etiqueta do Release cujo .aab vai à Play (ex.: v2.6.0); vazio só lista as faixas"
+        required: false
+        default: ""
+      faixa:
+        description: "Faixa: internal, alpha (teste fechado), beta ou production; vazio usa a mais alta em que o app já tem versão"
+        required: false
+        default: ""
+  # Também quando o workflow ou o script mudam numa branch: só lista as faixas.
+  push:
+    branches-ignore: [main]
+    paths:
+      - ".github/workflows/envia-play.yml"
+      - "software/automacao_github/envia_play.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: envia-play
+  cancel-in-progress: false
+
+jobs:
+  play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+      PLAY_FAIXA: ${{ inputs.faixa || vars.PLAY_FAIXA }}
+      ETIQUETA: ${{ inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepara o cliente da Play
+        id: cliente
+        run: |
+          if [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::notice::PLAY_SERVICE_ACCOUNT_JSON não configurado: nada a fazer."
+            echo "pronto=nao" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          python3 -m venv /tmp/play
+          /tmp/play/bin/pip install --quiet google-api-python-client google-auth
+          echo "pronto=sim" >> "$GITHUB_OUTPUT"
+
+      - name: Faixas do app na loja
+        if: steps.cliente.outputs.pronto == 'sim'
+        run: |
+          echo "Faixa pedida: ${PLAY_FAIXA:-nenhuma (vale a mais alta em que o app já tem versão)}"
+          /tmp/play/bin/python software/automacao_github/envia_play.py --faixas
+
+      - name: Envia o .aab do Release
+        if: steps.cliente.outputs.pronto == 'sim' && github.event_name == 'workflow_dispatch' && inputs.tag != ''
+        run: |
+          gh release download "$ETIQUETA" --repo "$GITHUB_REPOSITORY" -p app-release.aab -D "$RUNNER_TEMP/aab"
+          sha256sum "$RUNNER_TEMP/aab/app-release.aab"
+          notas=$(gh release view "$ETIQUETA" --repo "$GITHUB_REPOSITORY" --json name -q .name)
+          /tmp/play/bin/python software/automacao_github/envia_play.py "$RUNNER_TEMP/aab/app-release.aab" "$notas"

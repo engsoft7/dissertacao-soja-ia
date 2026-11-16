@@ -281,6 +281,66 @@ def test_requisitos_declaram_o_que_financas_importa():
                 faltando.append(m)
     assert not faltando, f"ausentes em dashboard_web/requirements.txt: {faltando}"
 
+
+def test_sobre_do_painel_segue_a_portaria_em_uso(tmp_path):
+    """O "Sobre" citava a Portaria SDA/MAPA nº 1.579/2026 e a safra 2026/2027
+    por extenso, e a descrição da rota da API, a mesma portaria.
+
+    A coleta troca de portaria e de tábua do ZARC sozinha. Um texto escrito à
+    mão passaria a citar a portaria vencida sem que nada falhasse. O do painel
+    tem que sair do arquivo que a coleta grava, e o painel tem que abrir sem
+    esse arquivo.
+    """
+    import re
+
+    painel = _funcoes_do_painel(
+        nomes=("fontes_do_plantio_md",), constantes=("DADOS", "FONTES_PLANTIO_JSON"),
+        extras={"json": json, "Path": Path, "__file__": str(APP)})
+    texto = painel["fontes_do_plantio_md"]
+
+    # Com o arquivo da coleta, a portaria, o endereço e a safra são os dele.
+    real = json.loads((RAIZ / "pesquisa" / "dados" / "plantio" /
+                       "fontes_plantio.json").read_text(encoding="utf-8"))
+    hoje = texto()
+    assert f"da [{real['calendario']['fonte']}]({real['calendario']['url']})" in hoje
+    assert f"na safra {real['safra']}" in hoje and "toda semana" in hoje
+    # Uma linha só: o texto entra no meio de uma lista em Markdown.
+    assert "\n" not in hoje
+
+    # Na virada da safra, entra a portaria nova, e o texto diz que a tábua do
+    # ZARC ainda é a da safra anterior.
+    virada = tmp_path / "fontes_plantio.json"
+    virada.write_text(json.dumps({
+        "safra": "2027/2028",
+        "calendario": {"fonte": "Portaria SDA/MAPA nº 2.001, de 6 de abril de 2027",
+                       "url": "https://dou/2001"},
+        "zarc": {"safra": "2026/2027"}}), encoding="utf-8")
+    depois = texto(virada)
+    assert "da [Portaria SDA/MAPA nº 2.001, de 6 de abril de 2027](https://dou/2001)" in depois
+    assert "na safra 2027/2028" in depois
+    assert "da safra 2026/2027 (a da safra 2027/2028 ainda não saiu)" in depois
+    assert "da mesma safra" in hoje and "da mesma safra" not in depois
+
+    # Sem o arquivo, ou com ele estragado, o painel abre e não cita portaria
+    # nem safra nenhuma.
+    estragado = tmp_path / "estragado.json"
+    estragado.write_text('{"safra": "2027/2028"', encoding="utf-8")
+    sem_calendario = tmp_path / "sem_calendario.json"
+    sem_calendario.write_text('{"safra": "2027/2028"}', encoding="utf-8")
+    for ruim in (tmp_path / "nao_existe.json", estragado, sem_calendario):
+        generico = texto(ruim)
+        assert "da portaria da SDA/MAPA em vigor" in generico and "toda semana" in generico
+        assert not re.search(r"\d", generico), generico
+
+    # E o texto fixo não volta: nem o painel nem a API escrevem a portaria ou
+    # a safra à mão.
+    for arquivo in (APP, RAIZ / "software" / "api_backend" / "api.py"):
+        fonte = arquivo.read_text(encoding="utf-8")
+        fixos = re.findall(r"Portaria SDA/MAPA nº\s*\d[\d.]*|safra 20\d\d/20\d\d", fonte)
+        assert not fixos, (f"{arquivo.name} escreve {fixos} à mão; a portaria e a safra em uso "
+                           "saem de pesquisa/dados/plantio/fontes_plantio.json")
+
+
 def test_sinal_do_resultado_avisa_quando_depende_do_rateio():
     """Sem o custo aberto por item, os dois rateios possíveis do custo variável
     discordam sobre lucro ou prejuízo acima da produtividade de referência, e o

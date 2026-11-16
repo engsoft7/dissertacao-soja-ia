@@ -161,7 +161,8 @@ jobs:
       # O mesmo .aab vai à Google Play, pela API oficial (envia_play.py), quando
       # o segredo da conta de serviço do Play Console está configurado. Sem ele,
       # o passo só avisa, e o envio continua manual, pelo .aab do Release. As
-      # notas da versão na loja são o título do Release.
+      # notas da versão na loja são o título do Release. A faixa é a da variável
+      # PLAY_FAIXA ou, sem ela, a mais alta em que o app já tem versão.
       - name: Envia à Google Play
         if: steps.chave.outputs.presente == 'sim' && env.ETIQUETA != ''
         working-directory: software/aplicativo_mobile

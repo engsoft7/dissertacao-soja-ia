@@ -447,9 +447,16 @@ Play App Signing, em que a chave do workflow é a de envio e pode ser trocada.
 
 ## 9. Produto: manutenção e conferências
 
-- **API acordada** (`mantem-api-acordada.yml`): consulta `/api/ping` a cada
-  10 minutos, para o plano gratuito do Render não adormecer (750 horas por
-  mês bastam para um serviço).
+- **Vigia da API e do painel** (`mantem-api-acordada.yml` e
+  `mantem-painel-acordado.yml`): a primeira consulta `/api/ping`, mostra em
+  quanto tempo a API respondeu e avisa quando o tempo indica que ela estava
+  dormindo; as duas visitam o painel com um navegador e o acordam se preciso.
+  O GitHub atrasa as rotinas agendadas em horas (a consulta pedida a cada 10
+  minutos rodou 41 vezes em 10 dias, de 6 a 16/11/2026), e por isso elas são
+  sentinela e visita frequente, não garantia: em 11 e 13/11/2026 o painel
+  dormiu entre duas visitas. A API respondeu em segundos nas 41 consultas e,
+  no teste de sono de 16/11/2026, continuou acordada depois de 25 minutos sem
+  consulta.
 - **Monitor das fontes** (`monitor-fontes.yml`): todo dia confere Yahoo,
   Agrolink, Notícias Agrícolas, Open-Meteo, INMET, SIDRA e a própria API, e
   abre uma issue quando alguma falha. Na primeira execução, as sete

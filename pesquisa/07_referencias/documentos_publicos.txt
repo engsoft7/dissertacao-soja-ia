@@ -138,3 +138,8 @@ https://jems3.sbc.org.br/
 # A API em produção, depois do merge do PR 184 (13/11/2026): os cinco estados carregados?
 https://agrointeligencia-api.onrender.com/api/estados
 https://agrointeligencia-api.onrender.com/api/previsao/Sorriso?uf=MT
+# Portaria do calendário de semeadura e tábua do ZARC, citadas na dissertação (15/11/2026)
+https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-1.579-de-9-de-abril-de-2026-698696654
+https://dados.agricultura.gov.br/dataset/tabua-de-risco-zoneamento-agricola-de-risco-climatico
+# A API em produção depois do merge do PR 194 (15/11/2026): a janela de plantio no ar?
+https://agrointeligencia-api.onrender.com/api/plantio/Paragominas

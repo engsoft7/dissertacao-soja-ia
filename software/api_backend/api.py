@@ -529,9 +529,11 @@ def get_plantio(municipio: str, uf: str | None = None, lang: str | None = None,
                 accept_language: str | None = Header(default=None)):
     """Janela de plantio da soja no município (plantio.py).
 
-    O calendário de semeadura e o vazio sanitário da Portaria SDA/MAPA nº
-    1.579/2026, na região do estado a que o município pertence, e os riscos do
-    ZARC por grupo de cultivar e classe de água disponível no solo. As contas
+    O calendário de semeadura e o vazio sanitário da portaria da SDA/MAPA em
+    uso, na região do estado a que o município pertence, e os riscos do ZARC
+    por grupo de cultivar e classe de água disponível no solo. A resposta traz
+    o nome da portaria, o endereço dela no Diário Oficial e a safra: a coleta
+    semanal passa para a portaria e a tábua novas quando elas saem. As contas
     das janelas ficam no aplicativo e no painel, que trocam grupo e solo sem
     voltar ao servidor.
     """

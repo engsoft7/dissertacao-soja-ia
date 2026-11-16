@@ -2,12 +2,27 @@
 #
 # O Streamlit põe para dormir o app que fica horas sem visita, e quem abre o
 # painel depois disso (a banca, um produtor) vê a tela de "app dormindo" e
-# espera ele subir de novo. A cada 4 horas um navegador sem tela abre o painel,
-# toca em "Yes, get this app back up!" se precisar e espera o título desenhar
+# espera ele subir de novo. Um navegador sem tela abre o painel, toca em "Yes,
+# get this app back up!" se precisar e espera o título desenhar
 # (acorda_painel.py). Uma consulta HTTP simples não serviria: só conta como
 # visita uma sessão com o JavaScript do Streamlit rodando.
 #
-# Faz para o painel o que mantem-api-acordada.yml faz para a API do Render.
+# O agendamento pede uma visita a cada 4 horas, mas o GitHub não garante o
+# horário das rotinas agendadas. De 7 a 15/11/2026 foram 26 execuções em 9 dias,
+# com até 12 horas entre uma e outra, e duas delas encontraram o painel
+# dormindo: em 11/11, 16 horas depois da visita anterior (a execução do meio
+# falhou ao instalar o navegador), e em 13/11, 11 horas depois. Por isso:
+# - mantem-api-acordada.yml, que tem outro agendamento, também faz esta visita
+#   (chama este workflow); com os horários em que as duas rotinas rodaram
+#   naqueles dias, o maior intervalo entre visitas teria caído de 16 para
+#   menos de 9 horas;
+# - a instalação do navegador tem limite de tempo, é repetida se falhar e,
+#   se o apt não responder, é feita sem as dependências do sistema;
+# - a execução que encontra o painel dormindo deixa um aviso.
+#
+# Antes de uma apresentação, vale disparar à mão: Actions > "Mantém o painel
+# acordado" > Run workflow.
+#
 # O gatilho por caminho existe para a primeira execução, porque o disparo
 # manual só alcança workflows que já estão no branch padrão.
 name: Mantém o painel acordado
@@ -16,19 +31,23 @@ on:
   schedule:
     - cron: "23 */4 * * *"
   workflow_dispatch:
+  workflow_call:
   push:
     paths:
       - "software/automacao_github/acorda_painel.py"
       - ".github/workflows/mantem-painel-acordado.yml"
 
-concurrency:
-  group: mantem-painel-acordado
-  cancel-in-progress: false
+permissions:
+  contents: read
 
 jobs:
   visita:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
+    # Uma visita de cada vez, venha deste agendamento ou do outro.
+    concurrency:
+      group: mantem-painel-acordado
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -37,7 +56,22 @@ jobs:
       - name: Instala o navegador
         run: |
           pip install --quiet playwright
-          python -m playwright install --with-deps chromium
+          # Em 11/11/2026 o apt passou 10 minutos sem resolver
+          # security.ubuntu.com, de onde vêm as fontes que o Playwright pede,
+          # e a visita não aconteceu. Agora são duas tentativas de 4 minutos
+          # com as dependências do sistema e, se as duas falharem, o navegador
+          # sem elas: a imagem do runner já traz o Chrome e as bibliotecas
+          # de que ele precisa.
+          for tentativa in 1 2; do
+            if timeout 240 python -m playwright install --with-deps chromium; then exit 0; fi
+            echo "::notice::A instalação com as dependências do sistema falhou ou passou de 4 minutos (tentativa $tentativa de 2)."
+          done
+          if timeout 240 python -m playwright install chromium; then
+            echo "::notice::Navegador instalado sem as dependências do sistema."
+            exit 0
+          fi
+          echo "::error::Não foi possível instalar o navegador; o painel não foi visitado."
+          exit 1
       - name: Abre o painel
         run: |
           python software/automacao_github/acorda_painel.py || {

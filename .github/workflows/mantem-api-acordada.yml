@@ -1,29 +1,97 @@
-# Mantém a API acordada no plano gratuito do Render.
+# Vigia a API e o painel publicados: consulta a API, registra em quanto tempo
+# ela responde e faz a visita que mantém o painel acordado.
 #
-# Sem acesso por 15 minutos, o Render desliga o serviço gratuito, e a próxima
-# consulta espera de 30 a 60 segundos ele subir de novo: o aplicativo abria a
-# previsão, o mercado e os avisos do INMET com essa espera. Uma consulta leve
-# (/api/ping) a cada 10 minutos evita isso. O serviço passa a ficar ligado o
-# mês inteiro (cerca de 744 horas), dentro das 750 horas mensais gratuitas do
-# Render para um serviço; um segundo serviço gratuito na mesma conta passaria
-# do limite. O agendamento do GitHub pode atrasar alguns minutos em horários
-# de pico, o que só torna mais raras as consultas.
-name: Mantém a API acordada
+# A API. No plano gratuito do Render, um serviço sem acesso por 15 minutos é
+# desligado, e a consulta seguinte espera de 30 a 60 segundos ele subir de
+# novo. Acordada, a API responde em menos de 1 segundo. Cada execução mostra o
+# tempo da resposta e deixa um aviso quando ele indica que a API estava
+# dormindo.
+#
+# Esta rotina nasceu para manter a API acordada com uma consulta a cada 10
+# minutos, mas o GitHub não garante o horário das rotinas agendadas: de 6 a
+# 16/11/2026 foram 41 execuções em 10 dias, com 3 a 11 horas entre uma e outra.
+# Ainda assim, a API respondeu em segundos em todas elas, e no teste de sono de
+# 16/11/2026 continuou acordada depois de 25 minutos sem consulta: hoje ela não
+# dorme, e a rotina serve de sentinela. O agendamento continua pedindo uma
+# execução a cada 10 minutos, porque foi com ele que se mediu quantas
+# execuções o GitHub entrega.
+#
+# O painel. A visita de mantem-painel-acordado.yml também é feita aqui: são
+# dois agendamentos independentes, e juntos deixam menos tempo entre as visitas.
+#
+# Teste de sono, para saber se a API dorme:
+#   Actions > "Vigia a API e o painel" > Run workflow > espera: 25
+# A rotina consulta, fica esse tempo sem consultar e consulta de novo. Se a
+# segunda resposta demora, a API dormiu no intervalo.
+name: Vigia a API e o painel
 
 on:
   schedule:
     - cron: "*/10 * * * *"
   workflow_dispatch:
+    inputs:
+      espera:
+        description: "Teste de sono: minutos sem consultar antes de uma segunda consulta (0 = uma consulta só; até 40)"
+        required: false
+        default: "0"
+
+permissions:
+  contents: read
 
 jobs:
   ping:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 50
+    env:
+      API: https://agrointeligencia-api.onrender.com/api/ping
+      ESPERA: ${{ inputs.espera || '0' }}
+      # A partir deste tempo de resposta, em segundos, a API estava dormindo.
+      LIMITE: "10"
     steps:
       - name: Consulta /api/ping
         run: |
-          for i in 1 2 3; do
-            if curl -fsS --max-time 90 https://agrointeligencia-api.onrender.com/api/ping; then echo; exit 0; fi
-            sleep 20
-          done
-          echo "::warning::A API não respondeu em três tentativas."
+          # Uma consulta, com até três tentativas. Diz o tempo da resposta e
+          # guarda em $dormia se ele passou do limite; uma resposta que só veio
+          # numa tentativa seguinte também conta como API dormindo.
+          consulta() {
+            dormia=nao
+            inicio=$SECONDS
+            for i in 1 2 3; do
+              if t=$(curl -fsS --max-time 90 -D "$RUNNER_TEMP/cabecalhos" -o "$RUNNER_TEMP/resposta" \
+                          -w '%{time_total}' "$API"); then
+                if [ "$i" -gt 1 ]; then t=$((SECONDS - inicio)); fi
+                echo "$1: resposta em $t s: $(cat "$RUNNER_TEMP/resposta")"
+                if awk -v t="$t" -v limite="$LIMITE" 'BEGIN { exit !(t >= limite) }'; then
+                  dormia=sim
+                  echo "::warning::$1: a API estava dormindo e levou $t s para responder."
+                fi
+                return 0
+              fi
+              sleep 20
+            done
+            dormia=sem-resposta
+            echo "::warning::$1: a API não respondeu em três tentativas."
+          }
+
+          case "$ESPERA" in ''|*[!0-9]*) ESPERA=0 ;; esac
+          if [ "$ESPERA" -gt 40 ]; then ESPERA=40; fi
+
+          consulta "Consulta"
+          if [ "$ESPERA" -eq 0 ]; then exit 0; fi
+
+          # Teste de sono: o que respondeu, a espera e a segunda consulta.
+          grep -iE '^(server|x-render[a-z-]*|cf-cache-status):' "$RUNNER_TEMP/cabecalhos" || true
+          echo "Teste de sono: $ESPERA minutos sem consultar."
+          sleep $((ESPERA * 60))
+          consulta "Depois de $ESPERA minutos"
+          case "$dormia" in
+            sim) resultado="A API dormiu: depois de $ESPERA minutos sem consulta desta rotina, a resposta levou $t s. Nada mais a mantém acordada." ;;
+            nao) resultado="A API continuou acordada: depois de $ESPERA minutos sem consulta desta rotina, a resposta levou $t s. Ou o plano do Render não desliga o serviço, ou outro acesso o manteve ligado." ;;
+            *)   resultado="A API não respondeu depois de $ESPERA minutos sem consulta." ;;
+          esac
+          echo "$resultado"
+          echo "$resultado" >> "$GITHUB_STEP_SUMMARY"
+
+  # A mesma visita de mantem-painel-acordado.yml, também neste agendamento.
+  painel:
+    uses: ./.github/workflows/mantem-painel-acordado.yml

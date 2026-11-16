@@ -155,6 +155,10 @@ def test_janela_de_plantio_pela_rota(cliente):
     """A rota acha o código do IBGE pelo nome e devolve a região certa; sem os
     arquivos da coleta, responde 503 em vez de inventar datas."""
     import plantio
+    # A documentação da rota não escreve a portaria pelo número: a coleta troca
+    # de portaria sozinha, e quem diz qual é a em uso é a resposta.
+    descricao = cliente.get("/openapi.json").json()["paths"]["/api/plantio/{municipio}"]["get"]["description"]
+    assert "portaria da SDA/MAPA em uso" in " ".join(descricao.split()) and "nº" not in descricao
     r = cliente.get("/api/plantio/Sorriso", params={"uf": "MT"})
     if plantio.carrega() is None:
         assert r.status_code == 503

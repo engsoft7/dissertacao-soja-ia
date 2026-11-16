@@ -48,9 +48,11 @@ Abre em `http://localhost:8501`.
   previsão de 7 dias e a chuva contra a evapotranspiração dos últimos 7 dias.
   A previsão vem do Open-Meteo e não entra na estimativa de produtividade.
 - Na tela **Janela de plantio**, mostra o calendário de semeadura e o vazio
-  sanitário da Portaria SDA/MAPA nº 1.579/2026 para a região do município e as
-  janelas do ZARC para o grupo de cultivar e o solo escolhidos, com as mesmas
-  contas do aplicativo (`software/api_backend/plantio.py`).
+  sanitário da portaria da SDA/MAPA em uso (em novembro de 2026, a nº
+  1.579/2026) para a região do município e as janelas do ZARC para o grupo de
+  cultivar e o solo escolhidos, com as mesmas contas do aplicativo
+  (`software/api_backend/plantio.py`). A coleta semanal troca de portaria e de
+  tábua quando saem as novas, e o painel acompanha, inclusive no texto das fontes.
 - Traz um **panorama ordenável dos 38 municípios** (produtividade recente, área,
   repetição na PAM) e um bloco **"Sobre este painel"** com metodologia, autoria,
   DOI e instrução de citação.

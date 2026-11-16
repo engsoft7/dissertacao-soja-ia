@@ -14,7 +14,8 @@ name: Roda análise (pesquisa)
 
 on:
   push:
-    branches-ignore: [main]
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: [main, 'dependabot/**']
     paths:
       - "pesquisa/10_trabalhos_futuros/*.py"
       - "pesquisa/03_analise_nacional/1[2-9]_*.py"

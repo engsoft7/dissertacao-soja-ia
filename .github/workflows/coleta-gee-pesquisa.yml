@@ -13,7 +13,8 @@ name: Coletas no Earth Engine (pesquisa)
 
 on:
   push:
-    branches-ignore: [main]
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: [main, 'dependabot/**']
     paths:
       - "pesquisa/10_trabalhos_futuros/coleta/**"
       - ".github/workflows/coleta-gee-pesquisa.yml"

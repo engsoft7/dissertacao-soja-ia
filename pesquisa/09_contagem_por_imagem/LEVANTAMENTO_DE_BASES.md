@@ -87,5 +87,6 @@ Como foi feito:
 Para vagens, a YOLO POD é a única base pública com licença aberta. Para
 plantas na linha, a GrowingSoy. As demais dependem de autorização. Em todos os
 casos, o erro nas fotos do aplicativo, de plantas arrancadas sobre pano no
-Pará, só se mede com fotos marcadas pelo produtor, que o app já guarda e
-exporta.
+Pará, só se mede com fotos marcadas uma a uma. Até a versão 2.10.0, o app
+guardava e exportava as que o produtor marcava; a 2.10.1 tirou essa função, e
+as fotos do Pará passam a depender de uma coleta própria.

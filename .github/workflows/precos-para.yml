@@ -10,6 +10,8 @@ name: Preços da soja no Pará
 
 on:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - "software/api_backend/precos_para.py"
       - "software/api_backend/mercado.py"

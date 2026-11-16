@@ -10,6 +10,8 @@ name: Treina contador de vagens
 
 on:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - 'pesquisa/09_contagem_por_imagem/treina_contador_vagens.py'
       - '.github/workflows/treina-contador-vagens.yml'

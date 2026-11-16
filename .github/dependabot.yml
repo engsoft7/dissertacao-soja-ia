@@ -1,0 +1,21 @@
+# Atualização das actions usadas nos workflows, pelo Dependabot.
+#
+# Uma vez por mês, o Dependabot confere se saiu versão nova de alguma action
+# de .github/workflows (actions/checkout, actions/setup-python etc.) e abre um
+# único pull request com todas elas. O pull request roda os testes e o CodeQL;
+# o merge continua manual.
+#
+# Num push feito pelo Dependabot, o GitHub não entrega os segredos e deixa o
+# token só com leitura. Por isso, os workflows que rodam em push para qualquer
+# branch ignoram as branches dependabot/**: sem essa exceção, o envio à Google
+# Play, as capturas de tela e as coletas falhariam no pull request sem motivo.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    groups:
+      actions:
+        patterns:
+          - "*"

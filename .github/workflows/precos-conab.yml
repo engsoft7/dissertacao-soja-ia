@@ -17,6 +17,8 @@ on:
     - cron: "41 11 * * *"
   workflow_dispatch:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - "software/automacao_github/coleta_precos_conab.py"
       - "software/automacao_github/test_coleta_precos_conab.py"

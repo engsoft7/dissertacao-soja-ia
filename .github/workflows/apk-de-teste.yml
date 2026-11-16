@@ -19,7 +19,8 @@ on:
         required: false
         default: ""
   push:
-    branches-ignore: [main]
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: [main, 'dependabot/**']
     paths:
       - "software/aplicativo_mobile/**"
       - ".github/workflows/apk-de-teste.yml"

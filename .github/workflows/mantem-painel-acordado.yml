@@ -33,6 +33,8 @@ on:
   workflow_dispatch:
   workflow_call:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - "software/automacao_github/acorda_painel.py"
       - ".github/workflows/mantem-painel-acordado.yml"

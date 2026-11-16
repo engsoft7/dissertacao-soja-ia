@@ -12,6 +12,8 @@ name: Verifica referências
 
 on:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - 'pesquisa/07_referencias/**'
       - 'pesquisa/02_revisao_sistematica/04_confere_anos_crossref.py'

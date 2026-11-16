@@ -21,7 +21,8 @@ name: Teste Premium do aplicativo
 on:
   workflow_dispatch:
   push:
-    branches-ignore: [main]
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: [main, 'dependabot/**']
     paths:
       - "software/automacao_github/teste_api.py"
       - "software/automacao_github/teste_aparelho.py"

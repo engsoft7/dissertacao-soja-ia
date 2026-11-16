@@ -44,6 +44,8 @@ on:
   # Quando o workflow, o script ou os textos da loja mudam: lista as faixas e
   # confere a ficha; na main, um merge que muda os textos atualiza a ficha.
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - ".github/workflows/envia-play.yml"
       - "software/automacao_github/envia_play.py"

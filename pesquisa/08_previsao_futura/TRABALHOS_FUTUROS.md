@@ -378,7 +378,13 @@ do modelo atual.
   borrada, com vagens por planta fora de 5 a 150, no primeiro ponto do talhão
   e depois em um a cada cinco. Os limites também vêm no anúncio, para serem
   ajustados com as fotos do Pará.
-- **Falta.** Medir o erro em fotos do Pará marcadas no aplicativo e, depois,
+- **Mudança em 16/11/2026** (aplicativo 2.10.1). O aplicativo deixou de
+  guardar as fotos marcadas e o talhão para exportar: a função servia a quem
+  desenvolve o contador, e não ao produtor, e saiu da tela, que agora apaga o
+  que tinha ficado no celular. `ciclo_retreino.py` continua aceitando `.zip`
+  no mesmo formato (os já exportados, ou montados com outra ferramenta de
+  marcação), e as fotos do Pará passam a depender de uma coleta própria.
+- **Falta.** Medir o erro em fotos do Pará marcadas uma a uma e, depois,
   contra a colheita pesada (o critério acima).
 
 ## 6. Estimativa por drone
@@ -396,7 +402,10 @@ do modelo atual.
 
 Hoje o aprendizado é por versões e passa por uma pessoa. O produtor exporta as
 fotos marcadas, o modelo é treinado de novo no Actions e chega ao celular numa
-versão nova do aplicativo. O plano para torná-lo quase automático:
+versão nova do aplicativo. Desde o aplicativo 2.10.1 (16/11/2026), a primeira
+etapa deixou de existir: o aplicativo não guarda mais as fotos marcadas (ver o
+item 5), e o ciclo depende de fotos do Pará marcadas fora dele. O plano para
+torná-lo quase automático:
 
 1. **Envio opcional, com consentimento.** Um botão "Ajudar a melhorar a
    contagem" envia as fotos marcadas para a API. A imagem já é regravada pelo

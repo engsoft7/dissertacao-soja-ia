@@ -233,20 +233,31 @@ def test_baixa_as_imagens_da_ficha(tmp_path, monkeypatch, capsys):
 
 # ── o vídeo da ficha, pela seção VÍDEO de textos_da_loja.txt ─────────────────
 
-def _textos_com_video(tmp_path, video):
+def _textos_reais_sem_video() -> str:
+    """textos_da_loja.txt sem a seção VÍDEO do começo, se houver."""
     real = Path(envia_play.__file__).resolve().parents[1] / "aplicativo_mobile" / "loja" / "textos_da_loja.txt"
-    arquivo = tmp_path / "textos.txt"
-    arquivo.write_text(f"VÍDEO\n{video}\n\n" + real.read_text(encoding="utf-8"), encoding="utf-8")
+    texto = real.read_text(encoding="utf-8")
+    return texto[texto.index("NOME DO APP"):]
+
+
+def _textos_com_video(tmp_path, video=None):
+    arquivo = tmp_path / ("textos.txt" if video else "textos_sem_video.txt")
+    arquivo.write_text((f"VÍDEO\n{video}\n\n" if video else "") + _textos_reais_sem_video(), encoding="utf-8")
     return arquivo
 
 
 def test_video_da_secao_entra_na_ficha_sem_mudar_os_textos(tmp_path):
-    sem = envia_play.ficha_do_arquivo(Path(envia_play.__file__).resolve().parents[1] / "aplicativo_mobile" / "loja"
-                                      / "textos_da_loja.txt")
+    sem = envia_play.ficha_do_arquivo(_textos_com_video(tmp_path))
     com = envia_play.ficha_do_arquivo(_textos_com_video(tmp_path, "https://youtu.be/AbCdEfGhIj0"))
     assert com["video"] == "https://youtu.be/AbCdEfGhIj0"
     assert {k: v for k, v in com.items() if k != "video"} == sem
     assert "video" not in sem
+
+
+def test_video_do_arquivo_de_verdade_e_do_youtube():
+    real = Path(envia_play.__file__).resolve().parents[1] / "aplicativo_mobile" / "loja" / "textos_da_loja.txt"
+    video = envia_play.ficha_do_arquivo(real).get("video")
+    assert video is None or envia_play.VIDEO_DO_YOUTUBE.match(video)
 
 
 def test_video_que_nao_e_do_youtube_e_recusado(tmp_path):

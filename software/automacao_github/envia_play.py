@@ -32,9 +32,17 @@ de software/aplicativo_mobile/loja/textos_da_loja.txt: com --ficha, o script
 mostra o que mudaria na loja; com --ficha e --aplica, grava. Uma ficha editada
 só no Play Console é sobrescrita na próxima atualização: a fonte é o arquivo.
 
+As imagens da ficha (as capturas de celular e a imagem de destaque) saem das
+telas reais do app, desenhadas por CapturasDeTelaTest (os testes loja_*) com
+as respostas da API do dia: com --imagens PASTA, o script mostra o que mudaria;
+com --aplica, troca. O publica-apk.yml faz isso a cada versão nova. O vídeo e o
+ícone ficam como estão, e --midia só mostra o vídeo e as imagens da ficha.
+
 Uso:  python envia_play.py ARQUIVO.aab "Notas da versão" [--faixa alpha]
       python envia_play.py --faixas      só lista as faixas do app; não envia nada
       python envia_play.py --ficha textos_da_loja.txt [--aplica]
+      python envia_play.py --midia       só mostra o vídeo e as imagens da ficha
+      python envia_play.py --imagens PASTA [--aplica]
 """
 import argparse
 import difflib
@@ -257,6 +265,150 @@ def ficha(api, arquivo: str | Path, aplica: bool = False) -> int:
                 pass
 
 
+# ── vídeo e imagens da ficha ─────────────────────────────────────────────────
+
+# Os tipos de imagem da ficha na API (edits.images), com o nome do Play Console.
+TIPOS_DE_IMAGEM = {"phoneScreenshots": "capturas de celular", "sevenInchScreenshots": "capturas de tablet de 7 pol.",
+                   "tenInchScreenshots": "capturas de tablet de 10 pol.", "featureGraphic": "imagem de destaque",
+                   "icon": "ícone", "tvBanner": "banner de TV", "tvScreenshots": "capturas de TV",
+                   "wearScreenshots": "capturas de relógio"}
+# As imagens que o envio troca, pelo nome que CapturasDeTelaTest dá a elas: as
+# capturas de celular na ordem do número (loja_1_*.png a loja_8_*.png) e a
+# imagem de destaque. Os limites são os do Play: de 2 a 8 capturas, PNG de até
+# 8 MB, lados de 320 a 3840 px e proporção de no máximo 2 para 1; a imagem de
+# destaque tem 1024 x 500 px.
+CAPTURAS_MIN, CAPTURAS_MAX = 2, 8
+LADO_MIN, LADO_MAX, BYTES_MAX = 320, 3840, 8 * 1024 * 1024
+DESTAQUE = (1024, 500)
+
+
+def midia(api, idioma: str = IDIOMA_DA_FICHA) -> dict:
+    """O vídeo e as imagens da ficha na loja. Só lê: a edição aberta para isso é descartada."""
+    edicao = api.edits().insert(packageName=PACOTE, body={}).execute()["id"]
+    try:
+        fichas = api.edits().listings().list(packageName=PACOTE, editId=edicao).execute().get("listings") or []
+        ficha = next((f for f in fichas if f.get("language") == idioma), {})
+        imagens = {}
+        for tipo in TIPOS_DE_IMAGEM:
+            lista = api.edits().images().list(packageName=PACOTE, editId=edicao, language=idioma,
+                                              imageType=tipo).execute().get("images") or []
+            imagens[tipo] = [i.get("url", "") for i in lista]
+        return {"video": ficha.get("video") or "", "imagens": imagens}
+    finally:
+        try:
+            api.edits().delete(packageName=PACOTE, editId=edicao).execute()
+        except Exception:  # a edição sem confirmar expira sozinha
+            pass
+
+
+def descreve_midia(m: dict) -> list[str]:
+    """O vídeo e quantas imagens de cada tipo a ficha tem, com o endereço de cada uma."""
+    linhas = [f"Vídeo da ficha: {m['video'] or 'nenhum'}"]
+    for tipo, nome in TIPOS_DE_IMAGEM.items():
+        urls = m["imagens"].get(tipo) or []
+        if urls:
+            linhas.append(f"{nome} ({tipo}): {len(urls)}")
+            linhas += [f"  {u}" for u in urls]
+    if not any(m["imagens"].values()):
+        linhas.append("Nenhuma imagem na ficha.")
+    return linhas
+
+
+def dimensoes_png(caminho: str | Path) -> tuple[int, int]:
+    """Largura e altura de um PNG, pelo cabeçalho; recusa o que não é PNG."""
+    cabecalho = Path(caminho).read_bytes()[:24]
+    if cabecalho[:8] != b"\x89PNG\r\n\x1a\n" or cabecalho[12:16] != b"IHDR":
+        raise ValueError(f"{Path(caminho).name} não é PNG")
+    return int.from_bytes(cabecalho[16:20], "big"), int.from_bytes(cabecalho[20:24], "big")
+
+
+def imagens_da_pasta(pasta: str | Path) -> dict[str, list[Path]]:
+    """As capturas de celular e a imagem de destaque da pasta, conferidas contra os limites do Play."""
+    pasta = Path(pasta)
+    capturas = sorted(pasta.glob("loja_[1-8]_*.png"))
+    destaque = pasta / "loja_destaque.png"
+    problemas = []
+    if not CAPTURAS_MIN <= len(capturas) <= CAPTURAS_MAX:
+        problemas.append(f"{len(capturas)} capturas de celular (o Play aceita de {CAPTURAS_MIN} a {CAPTURAS_MAX})")
+    for c in capturas:
+        largura, altura = dimensoes_png(c)
+        if not (LADO_MIN <= min(largura, altura) and max(largura, altura) <= LADO_MAX):
+            problemas.append(f"{c.name}: {largura} x {altura} px, fora de {LADO_MIN} a {LADO_MAX} px")
+        elif max(largura, altura) > 2 * min(largura, altura):
+            problemas.append(f"{c.name}: {largura} x {altura} px, mais comprida que 2 para 1")
+        if c.stat().st_size > BYTES_MAX:
+            problemas.append(f"{c.name}: maior que 8 MB")
+    if not destaque.exists():
+        problemas.append("falta loja_destaque.png")
+    elif dimensoes_png(destaque) != DESTAQUE:
+        problemas.append("loja_destaque.png: {} x {} px, e não 1024 x 500".format(*dimensoes_png(destaque)))
+    if problemas:
+        raise ValueError("imagens da loja recusadas: " + "; ".join(problemas))
+    return {"phoneScreenshots": capturas, "featureGraphic": [destaque]}
+
+
+def _sha256(caminho: Path) -> str:
+    import hashlib
+    return hashlib.sha256(caminho.read_bytes()).hexdigest()
+
+
+def _imagem(caminho: Path):
+    from googleapiclient.http import MediaFileUpload
+
+    return MediaFileUpload(str(caminho), mimetype="image/png")
+
+
+def envia_imagens(api, pasta: str | Path, aplica: bool = False, idioma: str = IDIOMA_DA_FICHA) -> int:
+    """Compara as capturas de celular e a imagem de destaque da ficha com as da pasta e, com aplica, troca.
+
+    Um tipo cujas imagens já são as mesmas (pelo SHA-256 que a loja guarda de
+    cada uma) fica como está; o vídeo, o ícone e os textos não mudam. Sem
+    aplica, ou sem diferença, a edição aberta para ler é descartada.
+    """
+    novas = imagens_da_pasta(pasta)
+    edicao = api.edits().insert(packageName=PACOTE, body={}).execute()["id"]
+    confirmada = False
+    try:
+        trocar = []
+        for tipo, arquivos in novas.items():
+            na_loja = api.edits().images().list(packageName=PACOTE, editId=edicao, language=idioma,
+                                                imageType=tipo).execute().get("images") or []
+            if [i.get("sha256") for i in na_loja] == [_sha256(a) for a in arquivos]:
+                print(f"{TIPOS_DE_IMAGEM[tipo]}: as mesmas da loja.")
+                continue
+            print(f"{TIPOS_DE_IMAGEM[tipo]}: {len(na_loja)} na loja, {len(arquivos)} novas "
+                  f"({', '.join(a.name for a in arquivos)}).")
+            trocar.append((tipo, arquivos))
+        if not trocar:
+            print(f"As imagens da ficha ({idioma}) já são as da pasta.")
+            return 0
+        if not aplica:
+            print("Só a conferência: nada mudou na loja.")
+            return 0
+        for tipo, arquivos in trocar:
+            api.edits().images().deleteall(packageName=PACOTE, editId=edicao, language=idioma,
+                                           imageType=tipo).execute()
+            for a in arquivos:
+                api.edits().images().upload(packageName=PACOTE, editId=edicao, language=idioma, imageType=tipo,
+                                            media_body=_imagem(a)).execute()
+        api.edits().commit(packageName=PACOTE, editId=edicao).execute()
+        confirmada = True
+        print(f"Imagens da ficha ({idioma}) atualizadas: " + ", ".join(TIPOS_DE_IMAGEM[t] for t, _ in trocar) + ".")
+        return 0
+    except Exception as e:
+        resposta = recusa(e)
+        if resposta is None:
+            raise
+        print(f"::error::A Google Play recusou as imagens ({resposta}). Nada mudou na loja.")
+        return 1
+    finally:
+        if not confirmada:
+            try:
+                api.edits().delete(packageName=PACOTE, editId=edicao).execute()
+            except Exception:  # a edição sem confirmar expira sozinha
+                pass
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("aab", nargs="?")
@@ -265,8 +417,13 @@ def main(argv: list[str]) -> int:
                     help="a faixa de envio; sem ela, a mais alta em que o app já tem versão")
     ap.add_argument("--faixas", action="store_true", help="só lista as faixas do app na loja")
     ap.add_argument("--ficha", metavar="TEXTOS", help="compara a ficha da loja com textos_da_loja.txt")
-    ap.add_argument("--aplica", action="store_true", help="com --ficha: grava a ficha na loja")
+    ap.add_argument("--aplica", action="store_true", help="com --ficha ou --imagens: grava na loja")
+    ap.add_argument("--midia", action="store_true", help="só mostra o vídeo e as imagens da ficha")
+    ap.add_argument("--imagens", metavar="PASTA",
+                    help="compara as capturas de celular e a imagem de destaque da ficha com as da pasta")
     args = ap.parse_args(argv)
+    if args.imagens:
+        imagens_da_pasta(args.imagens)  # confere a pasta antes de qualquer acesso à loja
     credencial = os.environ.get("PLAY_SERVICE_ACCOUNT_JSON", "")
     if not credencial.strip():
         print("::notice::PLAY_SERVICE_ACCOUNT_JSON não configurado: o .aab fica no Release para o envio manual.")
@@ -274,6 +431,12 @@ def main(argv: list[str]) -> int:
     api = cliente(credencial)
     if args.ficha:
         return ficha(api, args.ficha, args.aplica)
+    if args.midia:
+        for linha in descreve_midia(midia(api)):
+            print(linha)
+        return 0
+    if args.imagens:
+        return envia_imagens(api, args.imagens, args.aplica)
     if args.faixas:
         for linha in descreve(faixas_do_app(api)) or ["(o app não tem faixas com versão)"]:
             print("Faixa do app na loja:", linha)

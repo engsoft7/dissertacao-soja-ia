@@ -19,6 +19,11 @@ on:
       - '.github/workflows/verifica-referencias.yml'
   workflow_dispatch:
 
+# Só lê o repositório: o token do Actions não precisa de mais que isso, e o
+# padrão do repositório não vale aqui.
+permissions:
+  contents: read
+
 jobs:
   obras-classicas:
     runs-on: ubuntu-latest

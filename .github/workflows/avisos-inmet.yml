@@ -15,6 +15,11 @@ on:
     - cron: "23 12 * * 1"
   workflow_dispatch:
 
+# Só lê o repositório: o token do Actions não precisa de mais que isso, e o
+# padrão do repositório não vale aqui.
+permissions:
+  contents: read
+
 jobs:
   confere:
     runs-on: ubuntu-latest

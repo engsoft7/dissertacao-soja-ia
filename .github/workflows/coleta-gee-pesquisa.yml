@@ -38,13 +38,15 @@ jobs:
       - id: p
         env:
           MENSAGEM: ${{ github.event.head_commit.message }}
+          PEDIDO: ${{ inputs.coleta }}
         run: |
           # No push, só coleta o que a mensagem do commit pedir, como "[coleta: solo]",
           # ou várias de uma vez, "[coleta: amazonia_TO fases_nacional]"; sem pedido,
           # nada (cada coleta completa leva horas e gasta cota do Earth Engine).
           # Valem todos os pedidos da mensagem, cada item uma vez: antes só o
           # primeiro valia, e um exemplo no corpo do commit escondia o pedido real.
-          pedido="${{ inputs.coleta }}"
+          # A entrada chega por variável de ambiente, e não escrita no script.
+          pedido="$PEDIDO"
           if [ -z "$pedido" ]; then
             pedido=$(printf '%s' "$MENSAGEM" | { grep -o '\[coleta: *[A-Za-z0-9_ ]*\]' || true; } |
                      sed 's/^\[coleta: *//; s/\]$//' | tr ' ' '\n' | awk 'NF && !v[$0]++' | paste -sd' ' -)

@@ -1,0 +1,122 @@
+# Preço da soja em grão recebido pelo produtor, da CONAB, por semana e
+# município e por mês e estado: a reserva oficial da Agrolink.
+#
+# Todo dia, o coletor (software/automacao_github/coleta_precos_conab.py) baixa
+# os dois arquivos do Portal de Informações Agropecuárias, com a verificação de
+# certificado ligada, e grava em pesquisa/dados/conab/ só a soja em grão dos
+# cinco estados do produto. Quando a CONAB publica semana nova, abre um PR e o
+# mergeia na hora, depois dos testes, como a coleta mensal da base. Quando a
+# coleta falha (certificado, portal fora do ar, formato novo), nada é gravado e
+# abre uma issue, uma só, comentada a cada falha nova.
+#
+# Numa branch só mostra o que mudaria: PR e issue só a partir da main.
+name: Preços da CONAB
+
+on:
+  schedule:
+    - cron: "41 11 * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - "software/automacao_github/coleta_precos_conab.py"
+      - "software/automacao_github/test_coleta_precos_conab.py"
+      - ".github/workflows/precos-conab.yml"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: precos-conab
+  cancel-in-progress: false
+
+jobs:
+  coleta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NA_MAIN: ${{ github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet requests pandas pytest
+
+      - name: Coleta os preços
+        id: coleta
+        run: |
+          set -o pipefail
+          python software/automacao_github/coleta_precos_conab.py --saida pesquisa/dados/conab \
+            --resumo "$RUNNER_TEMP/resumo_precos.md" 2>&1 | tee "$RUNNER_TEMP/coleta.log"
+          if [ -n "$(git status --porcelain -- 'pesquisa/dados/conab/precos_soja_*.csv')" ]; then
+            echo "alterado=true" >> "$GITHUB_OUTPUT"
+            git status --short -- pesquisa/dados/conab/
+          else
+            echo "alterado=false" >> "$GITHUB_OUTPUT"
+          fi
+          printf '\n---\nAberto pelo workflow precos-conab.yml e mergeado por ele quando os testes passam.\n' \
+            >> "$RUNNER_TEMP/resumo_precos.md"
+
+      # Numa branch, os CSVs coletados vão para o log, para conferência.
+      - name: Mostra os CSVs coletados (só numa branch)
+        if: env.NA_MAIN != 'true'
+        run: |
+          for f in pesquisa/dados/conab/precos_soja_*.csv; do
+            echo "=== $f"; cat "$f"; echo "=== fim"
+          done
+
+      # O PR aberto pelo próprio Actions não dispara o workflow de testes: eles
+      # rodam aqui, com os preços novos, antes do merge.
+      - name: Testa o repositório com os preços novos
+        id: testes
+        if: steps.coleta.outputs.alterado == 'true' && env.NA_MAIN == 'true'
+        continue-on-error: true
+        run: python -m pytest software -q
+
+      - name: Abre PR com os preços novos
+        id: cpr
+        if: steps.coleta.outputs.alterado == 'true' && env.NA_MAIN == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automacao/precos-conab
+          add-paths: |
+            pesquisa/dados/conab/precos_soja_semanal_municipio.csv
+            pesquisa/dados/conab/precos_soja_mensal_uf.csv
+          commit-message: "Atualiza os preços da soja da CONAB"
+          title: "Atualização automática dos preços da CONAB"
+          body-path: ${{ runner.temp }}/resumo_precos.md
+          delete-branch: true
+
+      - name: Mergeia o PR automaticamente
+        if: steps.cpr.outputs.pull-request-number != '' && steps.testes.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr merge --squash --delete-branch \
+            "${{ steps.cpr.outputs.pull-request-number }}" --repo "${{ github.repository }}"
+
+      - name: Abre issue quando os testes reprovam os preços novos
+        if: steps.cpr.outputs.pull-request-number != '' && steps.testes.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "Preços da CONAB reprovados nos testes (PR #$PR)" \
+            --body "Os testes do repositório falharam com os preços novos da CONAB, e o PR #$PR ficou aberto em vez de entrar na main. Veja o log: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+      - name: Abre ou comenta a issue quando a coleta falha
+        if: failure() && steps.coleta.outcome == 'failure' && env.NA_MAIN == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          titulo="Coleta dos preços da CONAB falhou"
+          corpo="A coleta diária dos preços da soja da CONAB falhou em $(date -u +%d/%m/%Y) e nada foi gravado: ficam os preços da última coleta boa. Pode ser o certificado do portal, o portal fora do ar ou um formato novo nos arquivos ([execução]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)).
+
+          \`\`\`
+          $(tail -5 "$RUNNER_TEMP/coleta.log" 2>/dev/null | cut -c1-400)
+          \`\`\`"
+          n=$(gh issue list --state open --search "in:title \"$titulo\"" --json number -q '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$corpo"; else gh issue create --title "$titulo" --body "$corpo"; fi

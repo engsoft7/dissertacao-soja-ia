@@ -42,6 +42,9 @@ val FONTES_OFICIAIS = listOf(
     fonte(R.string.fonte_avisos, "INMET", "https://portal.inmet.gov.br/"),
     fonte(R.string.fonte_custo, "CONAB",
           "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao"),
+    // Os preços agropecuários que a CONAB levanta toda semana e publica abertos:
+    // a média do mês no estado aparece no Mercado (precos_conab.py, na API).
+    fonte(R.string.fonte_preco_conab, "CONAB", "https://portaldeinformacoes.conab.gov.br/download-arquivos.html"),
     // A página do Ministério sobre a ferrugem asiática traz a portaria do
     // calendário em vigor: o link não envelhece quando sai a portaria nova.
     Fonte(R.string.fonte_calendario, R.string.fonte_calendario_inst,

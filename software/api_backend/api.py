@@ -9,6 +9,7 @@ import estados
 import historico_oficial
 import mercado
 import precos_para
+import precos_conab
 import avisos_inmet
 import plantio
 from idioma import idioma as idioma_do_pedido, textos_en
@@ -462,6 +463,9 @@ def get_mercado(periodo: str = "1d", uf: str | None = None):
     "para" traz a estimativa do preço no Pará (ver precos_para.py): cada vela
     ganha "pa", a cotação de Chicago daquele instante somada à base do Pará no
     mês, e o bloco traz a série mensal de onde a base sai.
+    "conab_mensal" traz o preço da soja em grão recebido pelo produtor no
+    estado, média do mês mais recente da CONAB, com o mês (ver
+    precos_conab.py); nulo quando a coleta ainda não tem o estado.
     """
     if periodo not in mercado.PERIODOS:
         raise HTTPException(status_code=400,
@@ -481,6 +485,7 @@ def get_mercado(periodo: str = "1d", uf: str | None = None):
             "pracas_fonte": precos_para.FONTE_PRACAS,
             "fisico": fin.get("fisico"),
             "conab_saca": lev["preco_recebido_saca"], "conab_fonte": lev["textos"]["descricao"],
+            "conab_mensal": precos_conab.mensal(ce.estado.uf),
         }
     para = precos_para.estima(cotacao, precos_para.serie_mensal())
     if para is not None:
@@ -497,6 +502,8 @@ def get_mercado(periodo: str = "1d", uf: str | None = None):
         "fisico": fin.get("fisico"),
         "conab_saca": PRECO_RECEBIDO_CONAB_SACA,
         "conab_fonte": descricao_do_levantamento(),
+        # Referência oficial ao lado da Agrolink: média do mês, de porteira.
+        "conab_mensal": precos_conab.mensal("PA"),
     }
 
 @app.get("/api/contador")

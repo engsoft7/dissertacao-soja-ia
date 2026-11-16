@@ -210,6 +210,7 @@ software/api_backend/
   prepara_estados.py                      estados prontos na build (modelo e históricos)
   financas.py                             cálculos financeiros (VTN, custos)
   mercado.py, precos_para.py              Chicago em reais, praças do Pará (Agrolink), preço estimado do Pará
+  precos_conab.py                         média do mês da CONAB no estado (preço recebido pelo produtor)
   plantio.py                              janela de plantio: calendário da portaria e risco do ZARC
   tempo.py, avisos_inmet.py               tempo na lavoura, janela de pulverização, avisos
   historico_oficial.py, validacao.py      série oficial do IBGE e validação das entradas
@@ -526,6 +527,15 @@ Ele consulta a API do SIDRA/IBGE e:
   um desafio do Cloudflare e barra acesso automático, e a fonte saiu do produto
   (issue #187).
 
+  Desde o app 2.9.2 (16/11/2026), a tela Mercado e a legenda do preço no painel
+  trazem também a referência oficial: o preço da soja em grão recebido pelo
+  produtor no estado, média do mês, dos preços agropecuários que a CONAB
+  levanta toda semana e publica abertos, sempre com o mês à vista. A coleta é
+  diária (`precos-conab.yml`), com a verificação de certificado ligada, e
+  grava em `pesquisa/dados/conab/` a soja dos cinco estados; a API só lê o
+  arquivo (`precos_conab.py`). O preço padrão da simulação continua o do
+  levantamento de custos, da mesma praça do custo.
+
   O primeiro diagnóstico real daquela fonte, em 04/09/2026, encontrou quatro praças e
   **nenhuma do Pará**: Sorriso (MT) a R$ 134,80, Rondonópolis (MT) a R$ 145,30,
   Paranaguá (PR) a R$ 162,00 e Rio Grande (RS) a R$ 161,00. Adotou-se Sorriso,
@@ -618,7 +628,8 @@ subseção 4.9 da dissertação e o Anexo 01 citam. A base congelada da disserta
 | Base do IBGE dos cinco estados, satélite da safra nova, El Niño, CONAB | todo dia 15, com merge automático | `atualiza-dados.yml` |
 | Janela de plantio: portaria do calendário de semeadura e tábua do ZARC. O calendário passa sozinho para a safra nova quando o Diário Oficial publica a portaria; a tábua do ZARC, quando o Ministério a publica (até lá, segue a anterior, e o app e o painel dizem isso). Uma portaria da mesma safra que altere o calendário vira issue para conferir | toda segunda-feira, com testes e merge automático; issue quando a coleta falha | `plantio.yml` |
 | Conferência da safra nova (projeção e ONI) | todo dia 20, com merge automático | `confere-safra-nova.yml` |
-| Fontes externas (cotações, Agrolink, Open-Meteo, INMET, IBGE, API) e o certificado do portal da CONAB | todo dia; abre issue quando algo falha ou o portal da CONAB volta | `monitor-fontes.yml` |
+| Preço da soja recebido pelo produtor, da CONAB: média do mês por estado e semana a semana por município, nos cinco estados | todo dia, com testes e merge automático quando há dado novo; issue quando a coleta falha | `precos-conab.yml` |
+| Fontes externas (cotações, Agrolink, Open-Meteo, INMET, IBGE, API) e o certificado do portal da CONAB | todo dia; abre issue quando algo falha | `monitor-fontes.yml` |
 | Release, APK e AAB assinados, DOI no Zenodo e envio à Google Play | a cada merge que sobe a versão do app (`versionName`) | `publica-versao.yml`, `publica-apk.yml`, `registra-doi.yml` |
 | Vigia da API e do painel: mede em quanto tempo a API responde e visita o painel, acordando-o se estiver dormindo; deixa um aviso quando encontra um dos dois dormindo | pedidas a cada 10 min e a cada 4 h; na prática, 3 a 4 vezes por dia cada uma (ver abaixo) | `mantem-api-acordada.yml`, `mantem-painel-acordado.yml` |
 

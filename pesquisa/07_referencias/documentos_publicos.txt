@@ -152,3 +152,6 @@ navegador https://www.in.gov.br/web/dou/-/portaria-sda/mapa-n-1.579-de-9-de-abri
 # calendário em vigor: o link novo da lista de fontes do app e da loja
 https://www.gov.br/agricultura/pt-br/assuntos/sanidade-animal-e-vegetal/sanidade-vegetal/Ferrugem_Asiatica_da_Soja
 navegador https://www.gov.br/agricultura/pt-br/assuntos/sanidade-animal-e-vegetal/sanidade-vegetal/Ferrugem_Asiatica_da_Soja
+# Os preços agropecuários da CONAB (soja em grão, preço recebido pelo produtor):
+# a página de downloads que a lista de fontes do app e a loja citam
+https://portaldeinformacoes.conab.gov.br/download-arquivos.html

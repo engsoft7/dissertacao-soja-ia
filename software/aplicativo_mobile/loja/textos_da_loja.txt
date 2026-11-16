@@ -7,7 +7,7 @@ Produtividade, preço e tempo da soja para os municípios do Pará
 DESCRIÇÃO COMPLETA
 O AgroInteligência reúne o que o produtor de soja do Pará acompanha na safra: a produtividade esperada do município, o preço da saca, o tempo na lavoura, a janela de plantio e a viabilidade financeira.
 
-AVISO: o AgroInteligência NÃO é um aplicativo do governo e não representa nenhum órgão público. Não tem vínculo com o IBGE, o INMET, a CONAB, a Embrapa, o Ministério da Agricultura, a NOAA ou a NASA: apenas usa dados abertos publicados por essas instituições, com os links em "Fontes oficiais", no fim desta descrição. É um produto técnico de pesquisa do Programa de Pós-Graduação em Computação Aplicada da Universidade Federal do Pará (UFPA).
+AVISO: o AgroInteligência NÃO é um aplicativo do governo e não representa nenhum órgão público. Não tem vínculo com o IBGE, o INMET, a CONAB, a Embrapa, o Ministério da Agricultura, a NOAA ou a NASA: só usa os dados abertos que elas publicam, com os links em "Fontes oficiais", abaixo. É um produto técnico de pesquisa do Programa de Pós-Graduação em Computação Aplicada da Universidade Federal do Pará (UFPA).
 
 PRODUTIVIDADE DO SEU MUNICÍPIO
 • Estimativa da produtividade da próxima safra para 38 municípios do Pará, com a margem de erro.
@@ -25,7 +25,7 @@ JANELA DE PLANTIO
 • Risco climático do ZARC por grupo de cultivar e solo, e se hoje está na janela.
 
 ESTIMATIVA NO CAMPO
-• Fotografe um metro de linha e algumas plantas, conte plantas e vagens na foto e veja sacas por hectare e reais no talhão.
+• Fotografe um metro de linha e algumas plantas, conte plantas e vagens e veja sacas por hectare e reais no talhão.
 • Área do talhão medida pelo GPS do celular.
 • Contador automático de vagens (em teste), no celular e sem internet; você confere as marcas.
 
@@ -46,7 +46,7 @@ FEITO PARA O CAMPO
 FONTES OFICIAIS (órgãos públicos)
 • Produtividade municipal: IBGE, Produção Agrícola Municipal – https://sidra.ibge.gov.br/tabela/1612
 • Avisos meteorológicos: INMET – https://portal.inmet.gov.br/
-• Custo de produção e preço de referência: CONAB – https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao
+• Custos e preços: CONAB – https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao e https://portaldeinformacoes.conab.gov.br/download-arquivos.html
 • Calendário de semeadura: Ministério da Agricultura – https://www.gov.br/agricultura/pt-br/assuntos/sanidade-animal-e-vegetal/sanidade-vegetal/Ferrugem_Asiatica_da_Soja
 • Risco climático (ZARC): Ministério da Agricultura – https://dados.agricultura.gov.br/dataset/tabua-de-risco-zoneamento-agricola-de-risco-climatico
 • Janela de pulverização: Embrapa Soja – https://ainfo.cnptia.embrapa.br/digital/bitstream/item/223209/1/SP-17-2020-online-1.pdf

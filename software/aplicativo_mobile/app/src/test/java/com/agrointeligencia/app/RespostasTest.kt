@@ -1,6 +1,7 @@
 package com.agrointeligencia.app
 
 import com.google.gson.Gson
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -28,5 +29,15 @@ class RespostasTest {
     fun mercadoGuardadoSemPracasNaoQuebra() {
         val m = gson.fromJson("""{"cotacao":null}""", MercadoResponse::class.java)
         assertNull(pracaParaUsar("Marabá", m.pracas_para.orEmpty()))
+    }
+
+    @Test
+    fun mercadoComMediaMensalDaConab() {
+        val m = gson.fromJson("""{"cotacao":null,"conab_mensal":{"uf":"PA","mes":"2026-10","preco_saca":133.8,
+            "fonte":"CONAB"}}""", MercadoResponse::class.java)
+        assertEquals("2026-10", m.conab_mensal?.mes)
+        assertEquals(133.8, m.conab_mensal!!.preco_saca, 1e-9)
+        // A API antiga não manda o campo: a tela omite a linha.
+        assertNull(gson.fromJson("""{"cotacao":null}""", MercadoResponse::class.java).conab_mensal)
     }
 }

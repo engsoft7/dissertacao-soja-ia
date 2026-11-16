@@ -282,6 +282,20 @@ def test_requisitos_declaram_o_que_financas_importa():
     assert not faltando, f"ausentes em dashboard_web/requirements.txt: {faltando}"
 
 
+def test_referencia_da_conab_na_legenda_do_preco():
+    """A média do mês da CONAB no estado entra na legenda do preço com o mês à
+    vista; sem a coleta (ou com o dado estragado), a legenda fica como era."""
+    painel = _funcoes_do_painel(nomes=("referencia_conab_md", "brl_md", "brl"), constantes=(), extras={})
+    frase = painel["referencia_conab_md"]
+    assert frase({"uf": "PA", "mes": "2026-10", "preco_saca": 133.8}, "no Pará") == (
+        " **Referência oficial:** CONAB, preço recebido pelo produtor no Pará, "
+        "média de 10/2026: R\\$ 133,80/sc.")
+    assert "em Mato Grosso" in frase({"uf": "MT", "mes": "2026-10", "preco_saca": 137.4}, "em Mato Grosso")
+    assert frase(None, "no Pará") == ""
+    assert frase({"mes": "outubro", "preco_saca": 133.8}, "no Pará") == ""
+    assert frase({"mes": "2026-10", "preco_saca": None}, "no Pará") == ""
+
+
 def test_sobre_do_painel_segue_a_portaria_em_uso(tmp_path):
     """O "Sobre" citava a Portaria SDA/MAPA nº 1.579/2026 e a safra 2026/2027
     por extenso, e a descrição da rota da API, a mesma portaria.

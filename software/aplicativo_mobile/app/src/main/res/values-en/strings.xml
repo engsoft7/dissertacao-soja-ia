@@ -298,6 +298,7 @@
     <string name="mercado_fisico">%1$s (%2$s), %3$s: R$ %4$s/bag, today\'s quote</string>
     <string name="mercado_outro_estado">, in another state</string>
     <string name="mercado_porteira">Farm gate, %1$s: R$ %2$s/bag, simulation default</string>
+    <string name="mercado_conab_mensal">CONAB, price received by farmers in %2$s, %3$s average: R$ %4$s/bag</string>
     <string name="mercado_aviso">Market information, not a buy or sell recommendation.</string>
     <string name="pracas_titulo">Soybean in %2$s, today\'s quote</string>
     <string name="pracas_fonte">Agrolink, by market. On the farm the price can be lower, due to freight.</string>
@@ -403,6 +404,7 @@
     <string name="fonte_produtividade_inst">IBGE, Municipal Agricultural Production</string>
     <string name="fonte_avisos">Weather warnings</string>
     <string name="fonte_custo">Production cost and reference price</string>
+    <string name="fonte_preco_conab">Price received by farmers, monthly state average</string>
     <string name="fonte_calendario">Sowing calendar and soybean-free period</string>
     <string name="fonte_calendario_inst">Ministry of Agriculture, SDA/MAPA ordinance in force</string>
     <string name="fonte_zarc">Planting climate risk (ZARC)</string>

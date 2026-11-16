@@ -296,6 +296,7 @@
     <string name="mercado_fisico">%1$s (%2$s), %3$s: R$ %4$s/sc, cotação do dia</string>
     <string name="mercado_outro_estado">, em outro estado</string>
     <string name="mercado_porteira">Porteira, %1$s: R$ %2$s/sc, padrão da simulação</string>
+    <string name="mercado_conab_mensal">CONAB, preço recebido pelo produtor %1$s, média de %3$s: R$ %4$s/sc</string>
     <string name="mercado_aviso">Informação de mercado, não recomendação de compra ou venda.</string>
     <string name="pracas_titulo">Soja %1$s, cotação do dia</string>
     <string name="pracas_fonte">Agrolink, por praça. Na fazenda o preço pode ser menor, pelo frete.</string>
@@ -401,6 +402,7 @@
     <string name="fonte_produtividade_inst">IBGE, Produção Agrícola Municipal</string>
     <string name="fonte_avisos">Avisos meteorológicos</string>
     <string name="fonte_custo">Custo de produção e preço de referência</string>
+    <string name="fonte_preco_conab">Preço recebido pelo produtor, média do mês no estado</string>
     <string name="fonte_calendario">Calendário de semeadura e vazio sanitário</string>
     <string name="fonte_calendario_inst">Ministério da Agricultura, portaria da SDA/MAPA em vigor</string>
     <string name="fonte_zarc">Risco climático do plantio (ZARC)</string>

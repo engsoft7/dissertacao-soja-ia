@@ -95,23 +95,27 @@ jobs:
           n=$(gh issue list --state open --search "in:title \"$titulo\"" --json number -q '.[0].number')
           if [ -n "$n" ]; then gh issue comment "$n" --body "$corpo"; else gh issue create --title "$titulo" --body "$corpo"; fi
 
-      # Os preços semanais da soja por município, da CONAB, seriam a reserva
-      # oficial da Agrolink, mas o Portal de Informações da CONAB serve um
-      # certificado emitido para outro nome (14/11/2026), e baixar sem conferir
-      # o certificado não garante que o arquivo é dela. Aqui se confere todo
-      # dia, com a verificação ligada: enquanto falhar, só fica no log; no dia
-      # em que o certificado valer, abre uma issue (uma vez só) para ligar a
-      # coleta.
+      # O Portal de Informações da CONAB, de onde vêm os preços semanais da
+      # soja (precos-conab.yml), serviu um certificado emitido para outro nome
+      # de 23/10 a 15/11/2026, e a coleta esperou: baixar sem conferir o
+      # certificado não garante que o arquivo é dela. Aqui se confere todo dia,
+      # com a verificação ligada, o portal, o Pentaho por trás dos painéis dele
+      # e o site antigo da CONAB. Quando um falha, o log mostra o certificado
+      # que o servidor apresentou (nome, emissor e validade): só o certificado
+      # é lido, nenhum dado é baixado sem a verificação. Quem avisa por issue é
+      # a própria coleta, quando falha.
       - name: Confere o certificado do portal da CONAB
-        if: github.event_name != 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          if python -c "import requests; requests.get('https://portaldeinformacoes.conab.gov.br/', timeout=60).raise_for_status()" 2>/tmp/conab.err; then
-            titulo="Portal de Informações da CONAB com certificado válido: ligar os preços da CONAB"
-            n=$(gh issue list --state all --search "in:title \"$titulo\"" --json number -q '.[0].number')
-            [ -n "$n" ] || gh issue create --title "$titulo" --body "O monitor das fontes abriu o Portal de Informações da CONAB com a verificação de certificado ligada em $(date -u +%d/%m/%Y). Os preços semanais da soja por município podem entrar no produto como reserva oficial da Agrolink."
-            echo "Portal da CONAB: certificado válido."
-          else
-            echo "Portal da CONAB: ainda sem certificado válido ($(tail -1 /tmp/conab.err | cut -c1-200))."
-          fi
+          for host in portaldeinformacoes.conab.gov.br pentahoportaldeinformacoes.conab.gov.br www.conab.gov.br; do
+            ips=$(getent ahosts "$host" | awk '{print $1}' | sort -u | tr '\n' ' ')
+            if python -c "import sys, requests; print(requests.get('https://' + sys.argv[1] + '/', timeout=60).status_code)" "$host" >/tmp/conab.out 2>/tmp/conab.err; then
+              echo "$host: certificado válido (HTTP $(cat /tmp/conab.out); IPs: ${ips:-?})."
+            else
+              motivo=$(grep -o 'certificate verify failed: [^(]*' /tmp/conab.err | head -1)
+              echo "$host: sem certificado válido (${motivo:-$(tail -1 /tmp/conab.err | cut -c1-300)}; IPs: ${ips:-?})."
+              cert=$(echo | timeout 30 openssl s_client -connect "$host:443" -servername "$host" 2>/dev/null \
+                | openssl x509 -noout -subject -issuer -dates -ext subjectAltName 2>/dev/null)
+              echo "  certificado apresentado:"
+              echo "${cert:-(não deu para ler)}" | sed 's/^/    /'
+            fi
+          done

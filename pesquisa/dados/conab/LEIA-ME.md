@@ -15,6 +15,8 @@ Fonte: <https://portaldeinformacoes.conab.gov.br/custos-de-producao.html>
 | `serie_pedro_afonso_to.csv` | Série histórica de Pedro Afonso (TO), de março de 2023 a março de 2026 |
 | `custo_itens_pedro_afonso_to.csv` | Custo aberto por item (sementes, fertilizantes, defensivos, máquinas, transporte, CESSR, juros, depreciações), por hectare e por saca, de 2015 a 2026; extraído da série histórica em planilha por `software/automacao_github/extrai_itens_conab.py` |
 | `levantamento_atual.json` | **Gerado.** Consolidação legível por máquina do levantamento em vigor — é o que o produto lê em tempo de execução |
+| `precos_soja_semanal_municipio.csv` | **Coletado todo dia.** Preço da soja em grão recebido pelo produtor, por semana e município levantado, nos cinco estados do produto (PA, MT, MA, TO, RO), em R$/kg e R$/saca de 60 kg; ver abaixo |
+| `precos_soja_mensal_uf.csv` | **Coletado todo dia.** O mesmo preço, média do mês por estado |
 
 ## Como o número do painel é obtido
 
@@ -153,3 +155,23 @@ Por isso o preço da CONAB é tratado como ponto de partida, e não como respost
   ao lado como a única referência diária do produto — é porto, no Paraná, acima
   do que se recebe no Pará;
 - o custo segue vindo daqui, que é onde a CONAB é a fonte certa.
+
+## Preços semanais da soja
+
+Os dois arquivos `precos_soja_*.csv` não vêm dos custos de produção: vêm dos
+**preços agropecuários** que a CONAB levanta toda semana e publica abertos no
+Portal de Informações Agropecuárias (`PrecosSemanalMunicipio.txt` e
+`PrecosMensalUF.txt`, em <https://portaldeinformacoes.conab.gov.br/download-arquivos.html>).
+Os arquivos da CONAB trazem todos os produtos e níveis de comercialização; aqui
+fica só a soja em grão no **preço recebido pelo produtor**, que é preço de
+porteira, sem frete até o porto. A CONAB publica em R$/kg; a coluna
+`preco_saca` é o mesmo valor vezes 60.
+
+O workflow `precos-conab.yml` roda o coletor
+(`software/automacao_github/coleta_precos_conab.py`) todo dia, com a
+verificação de certificado ligada, e, quando há semana nova, abre um PR que
+ele mesmo mergeia depois dos testes. O histórico fica: uma semana que saia do
+arquivo da CONAB continua aqui. A coleta começou em 16/11/2026, quando o
+portal voltou a apresentar certificado válido depois de servir, de 23/10 a
+15/11/2026, um certificado emitido para outro nome.
+

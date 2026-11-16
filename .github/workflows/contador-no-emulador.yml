@@ -8,6 +8,8 @@ name: Contador de vagens no emulador
 
 on:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - 'software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/ContadorVagens.kt'
       - 'software/aplicativo_mobile/app/src/main/assets/**'

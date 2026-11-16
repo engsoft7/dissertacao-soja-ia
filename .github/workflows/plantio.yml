@@ -14,7 +14,8 @@ name: Janela de plantio
 
 on:
   push:
-    branches-ignore: [main]
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: [main, 'dependabot/**']
     paths:
       - "software/automacao_github/coleta_plantio.py"
       - ".github/workflows/plantio.yml"

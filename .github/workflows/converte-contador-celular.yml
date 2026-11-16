@@ -10,6 +10,8 @@ name: Converte contador de vagens para o celular
 
 on:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - 'pesquisa/09_contagem_por_imagem/converte_para_celular.py'
       - '.github/workflows/converte-contador-celular.yml'

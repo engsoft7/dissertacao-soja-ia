@@ -7,6 +7,8 @@ name: Lê documentos públicos
 
 on:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - 'pesquisa/07_referencias/documentos_publicos.txt'
       - '.github/workflows/le-documentos-publicos.yml'

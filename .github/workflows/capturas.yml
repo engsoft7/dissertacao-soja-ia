@@ -11,6 +11,8 @@ name: Capturas de tela do aplicativo
 
 on:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - "software/aplicativo_mobile/**"
       - "software/api_backend/**"

@@ -8,6 +8,8 @@ name: Avisos do INMET
 
 on:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - "software/api_backend/avisos_inmet.py"
       - ".github/workflows/avisos-inmet.yml"

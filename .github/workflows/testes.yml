@@ -8,6 +8,8 @@ name: Testes
 
 on:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
   pull_request:
   workflow_dispatch:
 

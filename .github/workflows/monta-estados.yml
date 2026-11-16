@@ -12,7 +12,8 @@ name: Monta os outros estados
 on:
   workflow_dispatch:
   push:
-    branches-ignore: [main]
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: [main, 'dependabot/**']
     paths:
       - "software/automacao_github/monta_base_estados.py"
       - ".github/workflows/monta-estados.yml"

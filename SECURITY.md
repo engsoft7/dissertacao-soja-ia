@@ -42,3 +42,6 @@ Streamlit. Versões antigas não recebem correção à parte.
 - **Análise automática.** O CodeQL (`codeql.yml`) analisa o Python e os
   workflows em cada pull request, num push na `main` e toda semana. Os
   alertas ficam em **Security → Code scanning**.
+- **Actions em dia.** O Dependabot (`.github/dependabot.yml`) abre, uma vez
+  por mês, um pull request com as versões novas das actions dos workflows.
+  O pull request roda os testes e o CodeQL, e o merge é manual.

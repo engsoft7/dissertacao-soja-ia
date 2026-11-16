@@ -26,7 +26,8 @@ on:
         type: boolean
         default: false
   push:
-    branches-ignore: [main]
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: [main, 'dependabot/**']
     paths:
       - "software/automacao_github/auditoria_numeros.py"
       - "software/aplicativo_mobile/app/src/test/java/com/agrointeligencia/app/AuditoriaTest.kt"

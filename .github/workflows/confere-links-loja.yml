@@ -5,6 +5,8 @@ name: Confere textos da loja
 
 on:
   push:
+    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
+    branches-ignore: ['dependabot/**']
     paths:
       - "software/aplicativo_mobile/loja/textos_da_loja.txt"
       - "software/aplicativo_mobile/loja/confere_textos_da_loja.py"

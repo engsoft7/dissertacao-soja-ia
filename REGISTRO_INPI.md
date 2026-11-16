@@ -225,6 +225,7 @@ cd /tmp/conferencia && <comando acima>
 | Tag `v2.5.0` (13/11/2026) — app 2.8.0: colheita do talhão, Mato Grosso, Maranhão, Tocantins e Rondônia no painel, na API e no app, simulador pelo efeito medido | 193 | 35.982 | `fc31913a3cfd678c4e780d7583fe29655d85013f9e59422c54be85b9a0add6ef` |
 | Tag `v2.5.1` (14/11/2026) — app 2.8.1: alvos de toque de 48 dp no Sobre, avisos do INMET sem repetição e API com os cinco estados prontos na subida | 194 | 36.269 | `9006b2be7c0707661288454802f845e2e91a29c72b0de0a3443004c3af2d9867` |
 | Tag `v2.6.0` (15/11/2026) — app 2.9.0: janela de plantio, alertas, caderno da safra, resumo para compartilhar, leitura em voz alta e inglês | 216 | 41.180 | `edc8fe1b7092fb09c7ca1b1242b3ba96db0f32daad511e01449c334b045e64b9` |
+| Tag `v2.6.1` (16/11/2026) — app 2.9.1: fonte do calendário de semeadura sem a portaria fixa e ficha da loja pelo repositório | 216 | 41.758 | `1967eb82de8860f6ef5e9e4711019b67c2440a73d43e11cd9f4dfe12d80b08bb` |
 
 A `v2.3.8` (DOI 10.5281/zenodo.22348036) acrescenta os três geradores do
 manuscrito submetido à CEA em `pesquisa/05_artigo/` — são os primeiros
@@ -909,6 +910,24 @@ arquivos e 41.180 linhas. O DOI de versão desta etiqueta é
 10.5281/zenodo.24238117, atribuído pelo Zenodo no depósito disparado pela
 publicação do Release em 15/11/2026.
 
+A `v2.6.1` foi registrada pelo workflow `registra-doi.yml` na publicação do
+Release, em 16/11/2026, com o título “v2.6.1 — App 2.9.1: fonte do calendário de
+semeadura sem a portaria fixa e ficha da loja pelo repositório”. Em relação à
+`v2.6.0`, mudam 10 arquivos-fonte (`software/api_backend/api.py`,
+`software/api_backend/plantio.py`, `software/api_backend/test_estados.py`,
+`software/aplicativo_mobile/app/build.gradle.kts`,
+`software/aplicativo_mobile/app/src/main/java/com/agrointeligencia/app/FontesOficiais.kt`,
+`software/automacao_github/acorda_painel.py`,
+`software/automacao_github/envia_play.py`,
+`software/automacao_github/test_envia_play.py`, `software/dashboard_web/app.py`
+e `software/dashboard_web/test_robustez_painel.py`).
+
+O resumo criptográfico da `v2.6.1` foi calculado pelo mesmo workflow sobre uma
+cópia limpa da etiqueta (commit `b212767`), com o critério do comando acima: 216
+arquivos e 41.758 linhas. O DOI de versão desta etiqueta é
+10.5281/zenodo.24278703, atribuído pelo Zenodo no depósito disparado pela
+publicação do Release em 16/11/2026.
+
 Os treze valores registrados antes da `v2.4.2` foram recalculados em 22/10/2026
 a partir de cópias limpas dos respectivos commits, e conferem; o da `v2.4.2` foi
 calculado pela primeira vez na mesma data. A tag da defesa é a `v2.3.7`, e é do
@@ -1162,6 +1181,7 @@ O software está atualmente publicado sob **Licença MIT** (permissiva).
 - **DOI da `v2.4.19`:** 10.5281/zenodo.24022243
 - **DOI da `v2.5.0`:** 10.5281/zenodo.24201917
 - **DOI da `v2.5.1`:** 10.5281/zenodo.24218986
-- **DOI da versão mais recente (`v2.6.0`):** 10.5281/zenodo.24238117
+- **DOI da `v2.6.0`:** 10.5281/zenodo.24238117
+- **DOI da versão mais recente (`v2.6.1`):** 10.5281/zenodo.24278703
 - **Painel Web:** https://soja-para.streamlit.app
 - **API Render:** https://agrointeligencia-api.onrender.com

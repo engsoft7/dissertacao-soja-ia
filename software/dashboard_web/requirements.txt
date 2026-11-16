@@ -19,10 +19,10 @@ st-theme>=1.2.3
 # 4.14.1 -> 4.14.2 (anyio é o runtime assíncrono do servidor). O folium NÃO
 # depende de anyio, então este pin mantém o mapa interativo funcionando sem
 # reintroduzir o crash. NÃO remover.
-anyio==4.14.1
+anyio==4.14.2
 # 'requests' é dependência transitiva do streamlit, mas o painel importa
 # software/api_backend/financas.py, que usa requests diretamente. Declarado
 # aqui para o painel não depender do que o streamlit resolve por baixo.
 requests>=2.31,<3
-gitpython==3.1.50
+gitpython==3.2.1
 plotly>=5.0

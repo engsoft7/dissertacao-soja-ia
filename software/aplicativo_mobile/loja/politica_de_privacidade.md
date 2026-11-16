@@ -1,6 +1,6 @@
 # Política de privacidade do aplicativo AgroInteligência
 
-Última atualização: 14 de novembro de 2026 (versão 2.9.0 do aplicativo).
+Última atualização: 16 de novembro de 2026 (versão 2.10.1 do aplicativo).
 
 O AgroInteligência é um aplicativo gratuito, sem anúncios e sem cadastro,
 desenvolvido como produto técnico de dissertação do Programa de Pós-Graduação
@@ -15,13 +15,17 @@ nem de publicidade.
   cotações, previsão do tempo). Ficam na memória do aplicativo e saem quando
   ele é desinstalado ou quando os dados dele são apagados nas configurações
   do Android.
-- **Fotos e marcações da Estimativa no campo.** As fotos são tiradas com a
-  câmera do próprio celular e guardadas na pasta do aplicativo, regravadas sem
-  os metadados de localização da câmera, com as marcas das plantas e vagens. A contagem automática de vagens roda no próprio
-  aparelho, sem Internet. Junto delas ficam os talhões contados: os pontos, a
-  área e, se o produtor informar, as sacas colhidas, sem a posição do talhão.
-  Nada disso sai do celular, a não ser que o produtor toque em exportar e
-  escolha para onde enviar o arquivo .zip.
+- **Fotos e marcações da Estimativa no campo.** A foto tirada com a câmera
+  fica só na pasta temporária do aplicativo, que ele mesmo limpa depois de
+  dois dias; a escolhida na galeria continua só na galeria, e o aplicativo
+  apenas a lê. As marcas das plantas e vagens servem só à contagem e não ficam
+  guardadas depois que o ponto é guardado. A contagem automática de vagens
+  roda no próprio aparelho, sem Internet. Ficam guardados os números de cada
+  ponto, a área e, se o produtor informar, as sacas colhidas, sem a posição do
+  talhão, para a tela abrir com eles da próxima vez. Nada disso sai do
+  celular. Até a versão 2.10.0, o aplicativo guardava uma cópia das fotos
+  marcadas para o produtor exportar num arquivo .zip; a versão 2.10.1 deixou
+  de guardar e apaga as que tinham ficado, na primeira vez que a tela abre.
 - **Posição do GPS para medir a área do talhão.** Usada só com a tela aberta,
   para calcular a área; não é enviada.
 - **Município escolhido**, para o aplicativo abrir nele da próxima vez.

@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -54,7 +53,6 @@ import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -67,10 +65,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.UUID
 
 // ESTIMATIVA NO CAMPO: A LAVOURA DO PRODUTOR, E NÃO A MÉDIA DO MUNICÍPIO.
 //
@@ -84,14 +78,14 @@ import java.util.UUID
 // só soma. Nas vagens, o contador automático (ContadorVagens.kt) pode
 // preencher o número e sugerir as marcas, mas foi treinado com fotos da China
 // e ainda não foi conferido em lavouras do Pará: a tela diz isso, e o
-// produtor confere tocando na foto. Foto com marcas só do contador, sem
-// conferência, não vai para o material de treino. O modo automático
-// (ModoAutomatico.kt), em que o número entra sem conferência, fica desligado
-// até um modelo medido no Pará ser anunciado pela API.
+// produtor confere tocando na foto. O modo automático (ModoAutomatico.kt), em
+// que o número entra sem conferência, fica desligado até um modelo medido no
+// Pará ser anunciado pela API.
 //
 // Depois da colheita, o produtor informa quantas sacas saíram do talhão, e o
-// app compara com a estimativa. O talhão, com os pontos e a colheita, vai no
-// .zip das fotos (AmostrasTreino.kt) para conferir a estimativa e o contador.
+// app compara com a estimativa. As fotos e as marcas servem só à conta: o app
+// não guarda cópia delas. Até o 2.10.0 guardava, para treinar o contador, e a
+// tela apaga o que ficou dessa época (AmostrasTreino.kt).
 
 private const val PREF_CAMPO = "estimativa_campo"
 // Precisão mínima para aceitar um canto do talhão. Com 20 m de erro em cada
@@ -103,13 +97,9 @@ data class EstadoCampo(
     val pontos: List<PontoAmostra> = emptyList(),
     val parametros: ParametrosCampo = ParametrosCampo(),
     val areaHa: Double? = null,
-    /** Identificação do talhão em que se está contando; null nos estados guardados antes dela. */
-    val talhao: String? = null,
     /** Sacas de 60 kg que saíram do talhão, quando o produtor informa. */
     val colhidoSacas: Double? = null,
 )
-
-private fun novoTalhao(): String = UUID.randomUUID().toString().replace("-", "").take(12)
 
 /** O número de um campo, no separador decimal do idioma (numeroDigitado, CadernoCalculo.kt). */
 private fun String.numero(): Double? = numeroDigitado(this)
@@ -163,7 +153,6 @@ fun EstimativaCampoTela(
     var pesoMil by rememberSaveable { mutableStateOf(decimal(guardado.parametros.pesoMilGraos, 0)) }
     var area by rememberSaveable { mutableStateOf(guardado.areaHa?.let { decimal(it, 2) } ?: "") }
     var preco by rememberSaveable { mutableStateOf(precoPadrao?.let { decimal(it, 2) } ?: "") }
-    var talhao by rememberSaveable { mutableStateOf(guardado.talhao ?: novoTalhao()) }
     var colhido by rememberSaveable {
         mutableStateOf(guardado.colhidoSacas?.let { paraCampo(it, if (it % 1.0 == 0.0) 0 else 1) } ?: "")
     }
@@ -178,21 +167,18 @@ fun EstimativaCampoTela(
     val limites = limitesDe(baixado)
 
     // Guarda a cada mudança: contar trinta vagens e perder ao fechar o app é defeito.
-    LaunchedEffect(pontos.toList(), parametros, areaHa, talhao, colhidoSacas) {
+    LaunchedEffect(pontos.toList(), parametros, areaHa, colhidoSacas) {
         if (inicial != null) return@LaunchedEffect
-        val estado = EstadoCampo(pontos.toList(), parametros, areaHa, talhao, colhidoSacas)
-        gravarEstado(context, estado)
-        withContext(Dispatchers.IO) {
-            val agora = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US).format(Date())
-            registroDoTalhao(estado, agora, BuildConfig.VERSION_NAME, versaoContador(context), automatico)
-                ?.let { gravaTalhao(context, it) }
-        }
+        gravarEstado(context, EstadoCampo(pontos.toList(), parametros, areaHa, colhidoSacas = colhidoSacas))
     }
-    // Fotos de amostragem antigas não servem para nada depois de contadas.
+    // Fotos de amostragem antigas não servem para nada depois de contadas. As
+    // fotos marcadas que as versões até o 2.10.0 guardavam para treinar o
+    // contador também saem (AmostrasTreino.kt); sem elas, não há o que apagar.
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             val limite = System.currentTimeMillis() - 2 * 86_400_000L
             File(context.cacheDir, "fotos").listFiles()?.filter { it.lastModified() < limite }?.forEach { it.delete() }
+            apagaAmostrasAntigas(context)
         }
     }
 
@@ -209,20 +195,12 @@ fun EstimativaCampoTela(
             fontSize = 13.sp, lineHeight = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        var fotosGuardadas by remember { mutableIntStateOf(0) }
-        var colheitas by remember { mutableIntStateOf(0) }
-        LaunchedEffect(Unit) { fotosGuardadas = withContext(Dispatchers.IO) { contaAmostras(context) } }
-        LaunchedEffect(colhidoSacas, areaHa) {
-            if (inicial == null) colheitas = withContext(Dispatchers.IO) { talhoesComColheita(context) }
-        }
-
         NovoPonto(
             numero = pontos.size + 1,
             parametros = parametros,
             automatico = automatico,
             limites = limites,
             automaticosAntes = pontos.count { it.vagensDoContador != null },
-            aoGuardarFotos = { fotosGuardadas = contaAmostras(context) },
         ) { pontos.add(it) }
 
         if (pontos.isNotEmpty()) {
@@ -294,16 +272,10 @@ fun EstimativaCampoTela(
             aoMudar = { colhido = it },
             temAlgo = pontos.isNotEmpty() || colhidoSacas != null,
         ) {
-            // O talhão que fica para trás continua em talhoes.json, com a colheita.
             pontos.clear()
             area = ""
             colhido = ""
-            talhao = novoTalhao()
         }
-
-        // Por último e fechado: exportar as fotos marcadas ajuda a treinar o
-        // contador, mas não é o que o produtor veio fazer nesta tela.
-        FotosParaTreino(fotosGuardadas, colheitas) { fotosGuardadas = it; colheitas = 0 }
     }
 }
 
@@ -315,11 +287,9 @@ private fun NovoPonto(
     automatico: Boolean,
     limites: LimitesAutomatico,
     automaticosAntes: Int,
-    aoGuardarFotos: () -> Unit,
     aoGuardar: (PontoAmostra) -> Unit,
 ) {
     val context = LocalContext.current
-    val escopo = rememberCoroutineScope()
     var fotoLinha by rememberSaveable { mutableStateOf<String?>(null) }
     var fotoVagens by rememberSaveable { mutableStateOf<String?>(null) }
     val marcasLinha = remember { mutableStateListOf<Offset>() }
@@ -402,34 +372,6 @@ private fun NovoPonto(
         Button(
             onClick = {
                 aoGuardar(ponto.copy(vagensDoContador = automatica?.vagens, conferido = automatica?.let { conferida }))
-                // As fotos marcadas vão para o material de treino da contagem
-                // automática. Copia tudo antes de limpar a tela.
-                val contexto = mapOf(
-                    "metros_de_linha" to ponto.metrosDeLinha,
-                    "plantas_arrancadas" to ponto.arrancadas.toDouble(),
-                    "espacamento_m" to parametros.espacamento,
-                )
-                // Marcas só do contador, que o produtor não conferiu, ensinariam
-                // o modelo com os próprios erros: essa foto fica de fora.
-                val auto = automatica
-                val origemVagens = if (auto == null) MarcasDe.PRODUTOR else MarcasDe.CONTADOR_CONFERIDO
-                val fotos = listOfNotNull(
-                    fotoLinha?.let { Triple(it, "planta", marcasLinha.map { m -> m.x to m.y }) to (ponto.plantas to MarcasDe.PRODUTOR) },
-                    fotoVagens?.takeIf { auto == null || conferida }
-                        ?.let { Triple(it, "vagem", marcasVagens.map { m -> m.x to m.y }) to (ponto.vagens to origemVagens) },
-                ).filter { it.first.third.isNotEmpty() }
-                if (fotos.isNotEmpty()) {
-                    escopo.launch {
-                        withContext(Dispatchers.IO) {
-                            for ((foto, contagem) in fotos) {
-                                val (informada, origem) = contagem
-                                guardaAmostra(context, Uri.parse(foto.first), foto.second, foto.third, informada, contexto,
-                                              origem, if (origem == MarcasDe.CONTADOR_CONFERIDO) auto else null)
-                            }
-                        }
-                        aoGuardarFotos()
-                    }
-                }
                 fotoLinha = null; fotoVagens = null
                 marcasLinha.clear(); marcasVagens.clear()
                 plantas = ""; vagens = ""
@@ -796,94 +738,6 @@ private fun MedicaoGps(aoConcluir: (Double) -> Unit, aoCancelar: () -> Unit) {
             }
             TextButton(onClick = aoCancelar) { Text(stringResource(R.string.campo_cancelar)) }
         }
-    }
-}
-
-/**
- * As fotos marcadas guardadas no celular, para treinar a contagem automática.
- * Exportar gera um .zip e abre o compartilhamento do Android: o produtor
- * escolhe para onde mandar (Drive, e-mail, WhatsApp).
- *
- * Fica no fim da tela e fechado ("Ajudar a melhorar o contador"): a função
- * serve mais a quem desenvolve o contador do que ao produtor, que vê só uma
- * linha dizendo para que serve e abre se quiser.
- */
-@Composable
-private fun FotosParaTreino(quantas: Int, colheitas: Int, aoMudar: (Int) -> Unit) {
-    val context = LocalContext.current
-    val escopo = rememberCoroutineScope()
-    var confirmarApagar by remember { mutableStateOf(false) }
-    var aviso by remember { mutableStateOf<String?>(null) }
-    var aberto by rememberSaveable { mutableStateOf(false) }
-
-    CartaoCampo(stringResource(R.string.campo_fotos_titulo), Icons.Filled.School) {
-        if (!aberto) {
-            Nota(stringResource(R.string.campo_ajudar_resumo))
-            TextButton(onClick = { aberto = true }, modifier = Modifier.padding(top = 4.dp)) {
-                Text(stringResource(R.string.campo_ajudar_abrir))
-                Spacer(Modifier.width(4.dp))
-                Icon(Icons.Filled.ExpandMore, contentDescription = null, modifier = Modifier.size(18.dp))
-            }
-            return@CartaoCampo
-        }
-        Nota(
-            if (quantas == 0) stringResource(R.string.campo_fotos_nenhuma)
-            else pluralStringResource(R.plurals.campo_fotos_guardadas, quantas, quantas, decimal(tamanhoAmostrasMb(context), 1))
-        )
-        if (colheitas > 0) {
-            Nota(pluralStringResource(R.plurals.campo_talhoes_colheita, colheitas, colheitas))
-        }
-        if (quantas > 0 || colheitas > 0) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
-                Button(onClick = {
-                    escopo.launch {
-                        val zip = withContext(Dispatchers.IO) { empacotaAmostras(context) }
-                        if (zip == null) { aviso = context.getString(R.string.campo_sem_fotos); return@launch }
-                        val uri = FileProvider.getUriForFile(context, context.packageName + ".fotos", zip)
-                        val envio = Intent(Intent.ACTION_SEND).apply {
-                            type = "application/zip"
-                            putExtra(Intent.EXTRA_STREAM, uri)
-                            putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.campo_zip_assunto))
-                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        }
-                        try {
-                            context.startActivity(Intent.createChooser(envio, context.getString(R.string.campo_zip_enviar)))
-                        } catch (_: ActivityNotFoundException) {
-                            aviso = context.getString(R.string.campo_sem_app_compartilhar)
-                        }
-                    }
-                }) {
-                    Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.campo_exportar_zip))
-                }
-                TextButton(onClick = { confirmarApagar = true }) { Text(stringResource(R.string.campo_apagar)) }
-            }
-        }
-        aviso?.let { Nota(it) }
-        TextButton(onClick = { aberto = false }) {
-            Text(stringResource(R.string.campo_ajudar_fechar))
-            Spacer(Modifier.width(4.dp))
-            Icon(Icons.Filled.ExpandLess, contentDescription = null, modifier = Modifier.size(18.dp))
-        }
-    }
-
-    if (confirmarApagar) {
-        AlertDialog(
-            onDismissRequest = { confirmarApagar = false },
-            title = { Text(stringResource(R.string.campo_apagar_titulo)) },
-            text = { Text(stringResource(R.string.campo_apagar_texto)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirmarApagar = false
-                    escopo.launch {
-                        withContext(Dispatchers.IO) { apagaAmostras(context) }
-                        aoMudar(0)
-                    }
-                }) { Text(stringResource(R.string.campo_apagar)) }
-            },
-            dismissButton = { TextButton(onClick = { confirmarApagar = false }) { Text(stringResource(R.string.campo_cancelar)) } }
-        )
     }
 }
 

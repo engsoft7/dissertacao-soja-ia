@@ -641,7 +641,7 @@
     <string name="campo_versao_contador">Counter version %1$d, trained on the YOLO POD dataset (Xiang et al., 2023, Plant Methods), CC BY 4.0 license.</string>
     <string name="campo_foto_descricao">Photo for counting; tap to mark</string>
 
-    <!-- Estimativa no campo: medição pelo GPS, fotos de treino, colheita e resultado (EstimativaCampo.kt) -->
+    <!-- Estimativa no campo: medição pelo GPS, colheita e resultado (EstimativaCampo.kt) -->
     <string name="campo_gps_permissao">To measure the area the app needs your precise location, only while this screen is open.</string>
     <string name="campo_permitir_localizacao">Allow location</string>
     <string name="campo_cancelar">Cancel</string>
@@ -655,19 +655,6 @@
     <string name="campo_cantos_area">area %1$s ha</string>
     <string name="campo_marcar_canto">Mark corner</string>
     <string name="campo_usar_area">Use this area</string>
-    <string name="campo_fotos_titulo">Help improve the counter</string>
-    <string name="campo_ajudar_resumo">Optional: send the photos you marked to train the automatic pod count.</string>
-    <string name="campo_ajudar_abrir">Show how to help</string>
-    <string name="campo_ajudar_fechar">Hide</string>
-    <string name="campo_fotos_nenhuma">Each photo in which you mark plants or pods is kept on the phone, with the marks, when you save the point. They are used to train a model that counts by itself. Mark all the plants or pods in the photo, not just some.</string>
-    <string name="campo_sem_fotos">There are no photos to export.</string>
-    <string name="campo_zip_assunto">Marked soybean photos (AgroInteligência)</string>
-    <string name="campo_zip_enviar">Send the marked photos</string>
-    <string name="campo_sem_app_compartilhar">No app to share the file.</string>
-    <string name="campo_exportar_zip">Export (.zip)</string>
-    <string name="campo_apagar">Delete</string>
-    <string name="campo_apagar_titulo">Delete the marked photos?</string>
-    <string name="campo_apagar_texto">The photos, the marks and the harvests entered are removed from the phone. Export first if you want to keep them.</string>
     <string name="campo_depois_colheita">After harvest</string>
     <string name="campo_colheita_nota">When you harvest this field, enter the 60 kg bags from the weighing ticket, already discounted for moisture and impurities. The app compares them with the estimate.</string>
     <string name="campo_colhido">Harvested in the field (bags)</string>
@@ -678,7 +665,7 @@
     <string name="campo_estimativa_abaixo">The estimate on the plant was %1$s bags/ha, %2$s%% below the harvest. Part of the difference is harvest loss, which the estimate does not discount.</string>
     <string name="campo_outro_talhao">Start another field</string>
     <string name="campo_outro_talhao_titulo">Start another field?</string>
-    <string name="campo_outro_talhao_texto">The points, the area and the harvest of this field leave the screen and are kept with the marked photos, for export.</string>
+    <string name="campo_outro_talhao_texto">The points, the area and the harvest of this field leave the screen and are not kept.</string>
     <string name="campo_comecar">Start</string>
     <string name="campo_sua_lavoura">Your crop</string>
     <string name="campo_guarde_ponto">Save at least one point, with plants and pods, to see the estimate.</string>
@@ -693,14 +680,6 @@
     <string name="campo_modelo_acima">App model for %1$s: %2$s bags/ha, municipal average. Your crop is %3$s%% above it.</string>
     <string name="campo_modelo_abaixo">App model for %1$s: %2$s bags/ha, municipal average. Your crop is %3$s%% below it.</string>
     <string name="campo_nota_final">This is what the crop has on the plant, before harvest losses and with the seed weight entered. The accuracy depends on how many points there are and how well they represent the field.</string>
-    <plurals name="campo_fotos_guardadas">
-        <item quantity="one">%1$d marked photo saved on the phone (%2$s MB). Photos stay only here until you export them.</item>
-        <item quantity="other">%1$d marked photos saved on the phone (%2$s MB). They stay only here until you export them.</item>
-    </plurals>
-    <plurals name="campo_talhoes_colheita">
-        <item quantity="one">%1$d field with the harvest entered goes along: it is used to check the estimate and the counter against what was weighed.</item>
-        <item quantity="other">%1$d fields with the harvest entered go along: they are used to check the estimate and the counter against what was weighed.</item>
-    </plurals>
 
     <!-- Modo automático do contador: por que conferir (ModoAutomatico.kt) -->
     <string name="conferir_escura">the photo is dark; in low light the counter errs more</string>

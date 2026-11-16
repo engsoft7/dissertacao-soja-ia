@@ -639,7 +639,7 @@
     <string name="campo_versao_contador">Contador versão %1$d, treinado com a base YOLO POD (Xiang et al., 2023, Plant Methods), licença CC BY 4.0.</string>
     <string name="campo_foto_descricao">Foto para contar; toque para marcar</string>
 
-    <!-- Estimativa no campo: medição pelo GPS, fotos de treino, colheita e resultado (EstimativaCampo.kt) -->
+    <!-- Estimativa no campo: medição pelo GPS, colheita e resultado (EstimativaCampo.kt) -->
     <string name="campo_gps_permissao">Para medir a área o app precisa da sua localização precisa, só enquanto esta tela está aberta.</string>
     <string name="campo_permitir_localizacao">Permitir localização</string>
     <string name="campo_cancelar">Cancelar</string>
@@ -653,19 +653,6 @@
     <string name="campo_cantos_area">área %1$s ha</string>
     <string name="campo_marcar_canto">Marcar canto</string>
     <string name="campo_usar_area">Usar esta área</string>
-    <string name="campo_fotos_titulo">Ajudar a melhorar o contador</string>
-    <string name="campo_ajudar_resumo">Opcional: mande as fotos que você marcou para treinar a contagem automática de vagens.</string>
-    <string name="campo_ajudar_abrir">Mostrar como ajudar</string>
-    <string name="campo_ajudar_fechar">Esconder</string>
-    <string name="campo_fotos_nenhuma">Cada foto em que você marca plantas ou vagens fica guardada no celular, com as marcações, quando você guarda o ponto. Elas servem para treinar um modelo que conte sozinho. Marque todas as plantas ou vagens da foto, não só algumas.</string>
-    <string name="campo_sem_fotos">Não há fotos para exportar.</string>
-    <string name="campo_zip_assunto">Fotos marcadas de soja (AgroInteligência)</string>
-    <string name="campo_zip_enviar">Enviar as fotos marcadas</string>
-    <string name="campo_sem_app_compartilhar">Nenhum aplicativo para compartilhar o arquivo.</string>
-    <string name="campo_exportar_zip">Exportar (.zip)</string>
-    <string name="campo_apagar">Apagar</string>
-    <string name="campo_apagar_titulo">Apagar as fotos marcadas?</string>
-    <string name="campo_apagar_texto">As fotos, as marcações e as colheitas informadas saem do celular. Exporte antes se quiser guardá-las.</string>
     <string name="campo_depois_colheita">Depois da colheita</string>
     <string name="campo_colheita_nota">Quando colher este talhão, informe as sacas de 60 kg do romaneio, já descontadas umidade e impureza. O app compara com a estimativa.</string>
     <string name="campo_colhido">Colhido no talhão (sacas)</string>
@@ -676,7 +663,7 @@
     <string name="campo_estimativa_abaixo">A estimativa no pé foi de %1$s sc/ha, %2$s%% abaixo do colhido. Parte da diferença é perda na colheita, que a estimativa não desconta.</string>
     <string name="campo_outro_talhao">Começar outro talhão</string>
     <string name="campo_outro_talhao_titulo">Começar outro talhão?</string>
-    <string name="campo_outro_talhao_texto">Os pontos, a área e a colheita deste talhão saem da tela e ficam guardados com as fotos marcadas, para exportar.</string>
+    <string name="campo_outro_talhao_texto">Os pontos, a área e a colheita deste talhão saem da tela e não ficam guardados.</string>
     <string name="campo_comecar">Começar</string>
     <string name="campo_sua_lavoura">Sua lavoura</string>
     <string name="campo_guarde_ponto">Guarde ao menos um ponto, com plantas e vagens, para ver a estimativa.</string>
@@ -691,14 +678,6 @@
     <string name="campo_modelo_acima">Modelo do app para %1$s: %2$s sc/ha, média do município. Sua lavoura está %3$s%% acima.</string>
     <string name="campo_modelo_abaixo">Modelo do app para %1$s: %2$s sc/ha, média do município. Sua lavoura está %3$s%% abaixo.</string>
     <string name="campo_nota_final">É o que a lavoura tem no pé, antes das perdas na colheita e com o peso de grão informado. A precisão depende de quantos pontos e de quão bem eles representam o talhão.</string>
-    <plurals name="campo_fotos_guardadas">
-        <item quantity="one">%1$d foto marcada guardada no celular (%2$s MB). Ficam só aqui até você exportar.</item>
-        <item quantity="other">%1$d fotos marcadas guardadas no celular (%2$s MB). Ficam só aqui até você exportar.</item>
-    </plurals>
-    <plurals name="campo_talhoes_colheita">
-        <item quantity="one">%1$d talhão com a colheita informada vai junto: com ele se confere a estimativa e o contador com o que foi pesado.</item>
-        <item quantity="other">%1$d talhões com a colheita informada vão junto: com eles se confere a estimativa e o contador com o que foi pesado.</item>
-    </plurals>
 
     <!-- Modo automático do contador: por que conferir (ModoAutomatico.kt) -->
     <string name="conferir_escura">a foto está escura; com pouca luz o contador erra mais</string>

@@ -241,6 +241,13 @@ fun MercadoConteudo(
                 Text(stringResource(R.string.mercado_porteira, mercado?.conab_fonte ?: "CONAB", reais(it)),
                      fontSize = 13.sp, color = secundaria)
             }
+            // Média do mês da CONAB no estado: referência oficial de porteira, com o mês à vista.
+            mercado?.conab_mensal?.let { c ->
+                val e = estadoDoApp(c.uf)
+                Text(stringResource(R.string.mercado_conab_mensal, e.no, e.nome, mesCurto(c.mes, anoCompleto = true),
+                                    reais(c.preco_saca)),
+                     fontSize = 13.sp, color = secundaria)
+            }
             Spacer(Modifier.height(8.dp))
             Text(stringResource(R.string.mercado_aviso),
                  fontSize = 12.sp, color = secundaria, lineHeight = 16.sp,

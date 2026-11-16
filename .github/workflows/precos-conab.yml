@@ -59,6 +59,14 @@ jobs:
           printf '\n---\nAberto pelo workflow precos-conab.yml e mergeado por ele quando os testes passam.\n' \
             >> "$RUNNER_TEMP/resumo_precos.md"
 
+      # Numa branch, os CSVs coletados vão para o log, para conferência.
+      - name: Mostra os CSVs coletados (só numa branch)
+        if: env.NA_MAIN != 'true'
+        run: |
+          for f in pesquisa/dados/conab/precos_soja_*.csv; do
+            echo "=== $f"; cat "$f"; echo "=== fim"
+          done
+
       # O PR aberto pelo próprio Actions não dispara o workflow de testes: eles
       # rodam aqui, com os preços novos, antes do merge.
       - name: Testa o repositório com os preços novos

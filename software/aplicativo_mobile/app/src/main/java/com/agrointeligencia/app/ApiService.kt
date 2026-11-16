@@ -244,6 +244,12 @@ data class CotacaoBolsa(
  */
 data class PracaPara(val praca: String, val uf: String? = "PA", val valor: Double, val data: String)
 
+/**
+ * Preço da soja em grão recebido pelo produtor no estado, média do mês mais
+ * recente da CONAB (precos_conab.py na API). "mes" vem como "2026-10".
+ */
+data class PrecoConabMensal(val uf: String, val mes: String, val preco_saca: Double, val fonte: String? = null)
+
 data class MercadoResponse(
     // Nulo quando a fonte não respondeu: a tela diz que a cotação está
     // indisponível em vez de exibir um número inventado.
@@ -251,6 +257,9 @@ data class MercadoResponse(
     val fisico: CotacaoFisica? = null,
     val conab_saca: Double? = null,
     val conab_fonte: String? = null,
+    // Nulo com a API antiga ou enquanto a coleta da CONAB não tem o estado: a
+    // tela omite a linha.
+    val conab_mensal: PrecoConabMensal? = null,
     // Nulo quando a API é mais antiga ou a fonte da base não respondeu: a tela
     // omite a estimativa do Pará em vez de inventar uma base.
     val para: EstimativaPara? = null,

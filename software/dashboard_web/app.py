@@ -868,6 +868,35 @@ def _pracas_do_estado(uf: str = "PA") -> list:
         return []
 
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def _conab_mensal(uf: str = "PA") -> dict | None:
+    """Média do mês da CONAB no estado (precos_conab.py, no api_backend), ou None."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "api_backend"))
+        import precos_conab
+        return precos_conab.mensal(uf)
+    except Exception as e:  # noqa: BLE001 — sem o arquivo da coleta, a página abre igual
+        print(f"[painel] média mensal da CONAB indisponível: {type(e).__name__}: {e}", flush=True)
+        return None
+
+
+def referencia_conab_md(conab: dict | None, no_estado: str) -> str:
+    """A frase da média do mês da CONAB para a legenda do preço, ou "" sem dado.
+
+    É preço de porteira e média do mês: o mês vai junto, para não passar por
+    preço de hoje. A mesma linha que o aplicativo mostra no Mercado.
+    """
+    if not conab:
+        return ""
+    try:
+        ano, mes = conab["mes"].split("-")
+        preco = float(conab["preco_saca"])
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return ""
+    return (f" **Referência oficial:** CONAB, preço recebido pelo produtor {no_estado}, "
+            f"média de {mes}/{ano}: {brl_md(preco, 2)}/sc.")
+
+
 def _sem_acento(texto: str) -> str:
     import unicodedata
     return "".join(c for c in unicodedata.normalize("NFD", texto.lower())
@@ -1665,6 +1694,8 @@ if tela_atual == "💰 Viabilidade Financeira":
         fonte_preco += (" Para comparação: " + "; ".join(comparacoes) +
                         ". São preços de porto e de bolsa, acima do que se "
                         f"recebe na porteira {ESTADO.no}.")
+    # A média do mês da CONAB no estado, coletada todo dia (precos-conab.yml).
+    fonte_preco += referencia_conab_md(_conab_mensal(UF), ESTADO.no)
 
 
     # O aviso vem antes dos campos, e não como nota de rodapé: se o preço está

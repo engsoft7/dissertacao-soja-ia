@@ -94,6 +94,10 @@ def test_previsao_financas_simulacao_e_mapa(cliente):
     assert "leaflet" in html.lower() and "Sorriso" in html
     m = cliente.get("/api/mercado", params={"uf": "MA"}).json()
     assert m["uf"] == "MA" and m["para"] is None and m["conab_fonte"].startswith("CONAB, Balsas")
+    # A média do mês da CONAB é a do próprio estado (nula enquanto a coleta não a tiver).
+    assert m["conab_mensal"] is None or m["conab_mensal"]["uf"] == "MA"
+    pa = cliente.get("/api/mercado").json()
+    assert pa["conab_mensal"] is None or pa["conab_mensal"]["uf"] == "PA"
 
 
 def test_textos_da_praca_em_reais():

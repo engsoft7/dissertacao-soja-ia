@@ -36,6 +36,10 @@ on:
         description: "Etiqueta do Release a que anexar (ex.: v2.4.4); vazio só compila"
         required: false
         default: ""
+      so_imagens:
+        description: "Só refaz as imagens da loja, sem compilar nem enviar o pacote (quando uma fonte não respondeu na versão)"
+        type: boolean
+        default: false
   # Chamado por publica-versao.yml logo depois de criar o Release: um Release
   # criado pelo próprio Actions não dispara o evento "release" acima.
   workflow_call:
@@ -49,6 +53,8 @@ permissions:
 
 jobs:
   assina:
+    # Com "só as imagens", o pacote da versão já está na loja e não se refaz.
+    if: ${{ !inputs.so_imagens }}
     runs-on: ubuntu-latest
     env:
       ETIQUETA: ${{ github.event.release.tag_name || inputs.tag }}
@@ -198,6 +204,7 @@ jobs:
   # com as imagens de antes.
   imagens-da-loja:
     needs: assina
+    if: ${{ !cancelled() && (needs.assina.result == 'success' || needs.assina.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -211,10 +218,22 @@ jobs:
         with:
           python-version: "3.11"
 
+      # Uma fonte que não responde (o Open-Meteo ou a cotação do Yahoo) deixa
+      # a tela dela de fora das imagens. Antes de desistir, mais tentativas: a
+      # previsão, até três vezes, e a coleta inteira, mais uma vez, quando falta
+      # a cotação.
       - name: Grava as respostas reais da API
         run: |
           pip install --quiet -r software/api_backend/requirements.txt httpx
           python software/automacao_github/dados_das_capturas.py
+          dados=software/aplicativo_mobile/app/build/dados_capturas
+          [ -f "$dados/mercado.json" ] || { sleep 30; python software/automacao_github/dados_das_capturas.py; }
+          for i in 1 2 3; do
+            [ -f "$dados/tempo.json" ] && break
+            sleep 20
+            python -c "import sys; sys.path.insert(0, 'software/automacao_github'); import dados_das_capturas as d; d.grava_tempo()"
+          done
+          ls "$dados"
 
       - uses: actions/setup-java@v4
         with:
@@ -238,8 +257,10 @@ jobs:
           gh release upload "$ETIQUETA" "$RUNNER_TEMP/imagens-da-loja.zip" --clobber --repo "$GITHUB_REPOSITORY"
 
       # Antes de trocar, as imagens que a ficha tinha (as feitas à mão
-      # também) vão para o Release, em imagens-da-loja-anteriores.zip, com o
-      # endereço do vídeo: nada do que estava na loja se perde.
+      # também) vão para o Release, num .zip com a data e a hora no nome, com o
+      # endereço do vídeo: nada do que estava na loja se perde, nem quando as
+      # imagens de uma versão são refeitas. Sem as 8 telas (uma fonte não
+      # respondeu), a ficha fica com as imagens de antes, em vez de perder uma.
       - name: Guarda as imagens de antes e envia as novas à ficha da Google Play
         if: env.ETIQUETA != ''
         env:
@@ -250,10 +271,16 @@ jobs:
             echo "::notice::PLAY_SERVICE_ACCOUNT_JSON não configurado: as imagens ficam no Release."
             exit 0
           fi
+          n=$(ls software/aplicativo_mobile/app/build/capturas/loja_[1-8]_*.png 2>/dev/null | wc -l)
+          if [ "$n" -lt 8 ]; then
+            echo "::warning::Só $n das 8 capturas da loja saíram, porque uma fonte não respondeu: a ficha fica com as imagens de antes. Para refazer: Actions > Publica APK assinado > Run workflow, com a etiqueta e \"só as imagens\"."
+            exit 0
+          fi
           python3 -m venv /tmp/play
           /tmp/play/bin/pip install --quiet google-api-python-client google-auth
           /tmp/play/bin/python software/automacao_github/envia_play.py --baixa-imagens "$RUNNER_TEMP/antes"
-          (cd "$RUNNER_TEMP/antes" && zip -q "$RUNNER_TEMP/imagens-da-loja-anteriores.zip" ./*)
-          gh release upload "$ETIQUETA" "$RUNNER_TEMP/imagens-da-loja-anteriores.zip" --clobber --repo "$GITHUB_REPOSITORY"
+          anteriores="$RUNNER_TEMP/imagens-da-loja-anteriores-$(date -u +%Y%m%d-%H%M).zip"
+          (cd "$RUNNER_TEMP/antes" && zip -q "$anteriores" ./*)
+          gh release upload "$ETIQUETA" "$anteriores" --repo "$GITHUB_REPOSITORY"
           /tmp/play/bin/python software/automacao_github/envia_play.py \
             --imagens software/aplicativo_mobile/app/build/capturas --aplica

@@ -1,6 +1,6 @@
 # Contador de vagens de soja (YOLO POD)
 
-Gerado por `pesquisa/09_contagem_por_imagem/treina_contador_vagens.py` em 25/10/2026:
+Gerado por `pesquisa/09_contagem_por_imagem/treina_contador_vagens.py` em 17/11/2026:
 lado 1024 px, mapa 1/4, sigma 6 px, 36 épocas.
 
 ## Base
@@ -15,14 +15,14 @@ mantém a atribuição.
 
 | Métrica | Modelo | Prever a média do treino |
 |---|---|---|
-| Erro absoluto médio (vagens por foto) | 3.1 | 20.8 |
-| Erro relativo médio | 6.4% | 54.1% |
-| R² | 0.961 | 0 |
-| Viés (vagens por foto) | -0.8 | |
-| Erro na soma de todas as fotos | 1.7% | |
-| Vagens localizadas: precisão / revocação | 63.8% / 68.0% | |
+| Erro absoluto médio (vagens por foto) | 3.7 | 20.8 |
+| Erro relativo médio | 7.7% | 54.1% |
+| R² | 0.950 | 0 |
+| Viés (vagens por foto) | -1.7 | |
+| Erro na soma de todas as fotos | 3.4% | |
+| Vagens localizadas: precisão / revocação | 63.5% / 67.4% | |
 
-Por localidade: {"chongzhou": {"imagens": 86, "mae": 2.02008392644483, "erro_relativo_medio": 0.07044151975256842}, "renshou": {"imagens": 132, "mae": 3.81087944724343, "erro_relativo_medio": 0.05964111018996809}}
+Por localidade: {"chongzhou": {"imagens": 86, "mae": 2.3827192173447718, "erro_relativo_medio": 0.08893879582768713}, "renshou": {"imagens": 132, "mae": 4.543561227393873, "erro_relativo_medio": 0.06842096818800465}}
 
 ## Limites
 

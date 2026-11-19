@@ -1,6 +1,6 @@
 # Contador de vagens de soja (YOLO POD)
 
-Gerado por `pesquisa/09_contagem_por_imagem/treina_contador_vagens.py` em 17/11/2026:
+Gerado por `pesquisa/09_contagem_por_imagem/treina_contador_vagens.py` em 19/11/2026:
 lado 1024 px, mapa 1/4, sigma 6 px, 36 épocas.
 
 ## Base

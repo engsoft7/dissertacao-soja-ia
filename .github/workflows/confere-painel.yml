@@ -15,8 +15,7 @@ name: Confere painel
 
 on:
   push:
-    # Pushes do Dependabot rodam sem segredos e com o token só de leitura (ver .github/dependabot.yml).
-    branches-ignore: ['dependabot/**']
+    # Roda também nas branches do Dependabot: não usa segredos e testa o painel com as dependências novas.
     paths:
       - 'software/dashboard_web/**'
       - '.github/workflows/confere-painel.yml'

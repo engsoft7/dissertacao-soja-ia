@@ -9,6 +9,8 @@
 # token só com leitura. Por isso, os workflows que rodam em push para qualquer
 # branch ignoram as branches dependabot/**: sem essa exceção, o envio à Google
 # Play, as capturas de tela e as coletas falhariam no pull request sem motivo.
+# A conferência do painel (confere-painel.yml) é a exceção: não usa segredos e
+# testa o painel no navegador com as dependências novas.
 version: 2
 updates:
   - package-ecosystem: "github-actions"

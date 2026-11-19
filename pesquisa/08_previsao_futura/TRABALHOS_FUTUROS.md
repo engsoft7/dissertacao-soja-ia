@@ -625,3 +625,37 @@ depois da mudança), e o aplicativo do Pará pede e guarda o mesmo de sempre.
   (`software/aplicativo_mobile/teste_premium/RELATORIO_PREMIUM.md`, seção 8).
 - **Falta.** Conferir com quem planta lá se o custo da praça mais perto
   representa o município.
+
+## 11. Vigor do talhão por satélite, no aplicativo
+
+Proposta de 19/11/2026, ainda não feita. O produtor quer saber se a própria
+lavoura está acima ou abaixo do normal na safra em curso, seja ela grande ou
+pequena. A estimativa do produto é municipal, porque a PAM só existe por
+município: aplicada a um talhão, daria um número sem base e sem como conferir.
+O que o satélite mostra com segurança no talhão é o vigor relativo.
+
+- **O que mostrar.** Para o contorno do talhão que o produtor já mede pelos
+  cantos no GPS (Estimativa no campo): a curva do índice de vegetação (NDVI ou
+  EVI) da safra em curso, a cada passagem sem nuvem, contra a faixa das safras
+  anteriores da mesma área; a área de soja pela máscara do MapBiomas (30 m); e
+  a estimativa do município ao lado, como referência. Sem kg/ha.
+- **Dado.** Sentinel-2 (10 m, a cada 5 dias), com máscara de nuvem, pelo Earth
+  Engine, que o projeto já usa nas coletas. Serve a partir de 1 a 2 hectares;
+  abaixo disso, a borda pesa demais. No Pará, a safra coincide com as chuvas e
+  as nuvens; o radar do Sentinel-1, que atravessa nuvem, entra numa segunda
+  etapa.
+- **Como.** Uma rota nova da API recebe o contorno, consulta o Earth Engine
+  com a mesma conta de serviço das coletas (`GEE_SERVICE_ACCOUNT_JSON`, que
+  precisa ser cadastrada também no Render) e devolve a série, sem guardar nada.
+- **Privacidade.** Hoje o contorno medido pelo GPS não sai do celular, e a
+  política de privacidade diz isso. A consulta só aconteceria com um toque do
+  produtor, numa tela que diz o que vai e para onde, e a política mudaria
+  junto.
+- **Arquivos.** Mudam o `api.py` (a rota) e o `EstimativaCampo.kt` (guardar o
+  contorno e o cartão do vigor), os dois listados no `REGISTRO_INPI.md`; o
+  resto fica em arquivos novos.
+- **Para chegar a kg/ha.** Calibrar o índice contra colheitas pesadas de
+  talhões (romaneio ou monitor de colheita), com treino e teste separados por
+  fazenda e por safra, como no item 5. Com drone, o caminho é o do item 6.
+- **Decisão de 19/11/2026.** Fica para depois: por ora não se mexe nos
+  arquivos do registro no INPI nem na política de privacidade.

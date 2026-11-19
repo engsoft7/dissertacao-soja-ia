@@ -25,13 +25,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Busca os modelos treinados
         run: git fetch -q --depth 1 origin modelo-contagem-vagens && git worktree add -q "$RUNNER_TEMP/modelos" FETCH_HEAD
 
       # As mesmas versões com que a conversão foi ensaiada. PyTorch só de CPU.
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
 
@@ -41,7 +41,7 @@ jobs:
           pip install --quiet litert-torch==0.10.0 ai-edge-litert==2.3.0 scipy pillow huggingface_hub
 
       - name: Guarda a base entre execuções
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: dados_yolopod
           key: yolopod-v1
@@ -53,7 +53,7 @@ jobs:
 
       - name: Guarda os arquivos da conversão
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: contador-vagens-celular
           path: ${{ runner.temp }}/celular

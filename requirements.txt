@@ -17,8 +17,8 @@ streamlit-folium>=0.20
 # anyio FIXADO: o bump 4.14.1->4.14.2 (trazido pela instalação do folium)
 # coincidiu com o Segmentation fault no Streamlit Cloud. O folium não depende de
 # anyio, então este pin mantém o mapa interativo sem reintroduzir o crash.
-anyio==4.14.1
-gitpython==3.1.50
+anyio==4.14.2
+gitpython==3.2.1
 # apenas para os scripts de coleta (Google Colab):
 # earthengine-api
 # sidrapy

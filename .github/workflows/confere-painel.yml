@@ -30,9 +30,9 @@ jobs:
   mapa-no-navegador:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
@@ -52,7 +52,7 @@ jobs:
       # A foto é o produto deste job: se reprovar, é nela que se vê o que houve.
       - name: Guarda a foto
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: painel-no-navegador
           path: mapa_no_navegador.png

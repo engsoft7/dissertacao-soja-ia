@@ -44,9 +44,9 @@ jobs:
     env:
       API_DA_BRANCH: ${{ (github.event_name == 'workflow_dispatch' && inputs.api_da_branch) || contains(github.event.head_commit.message, '[auditoria-branch]') }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
@@ -71,12 +71,12 @@ jobs:
           pip install --quiet requests
           python software/automacao_github/auditoria_numeros.py software/aplicativo_mobile/app/build/auditoria
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "17"
 
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Telas do app com as mesmas respostas
         working-directory: software/aplicativo_mobile
@@ -97,7 +97,7 @@ jobs:
           [ -f "$r" ] && cp "$r" "$d/AuditoriaTest.xml" || true
           ls -la "$d"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: auditoria

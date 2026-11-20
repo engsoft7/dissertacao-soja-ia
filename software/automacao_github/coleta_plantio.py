@@ -523,7 +523,10 @@ def zarc(recursos: list[dict], safra: str = SAFRA) -> tuple[list[dict], dict]:
     linhas.sort(key=lambda x: (x["uf"], x["geocodigo"], x["ciclo"], x["solo"]))
     if not linhas or set(portarias) != set(ESTADOS):
         raise SystemExit(f"ZARC sem soja em todos os estados: {sorted(portarias)}")
-    return linhas, {"recurso": alvo["url"], "portarias": portarias}
+    # As portarias vão na ordem de ESTADOS, e não na das linhas da tábua, que
+    # muda de um download para outro: a mesma tábua grava sempre o mesmo
+    # fontes_plantio.json, sem commit que só troca a ordem.
+    return linhas, {"recurso": alvo["url"], "portarias": {uf: portarias[uf] for uf in ESTADOS}}
 
 
 def descobre(saida: Path) -> dict:

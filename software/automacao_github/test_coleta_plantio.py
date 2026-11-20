@@ -177,6 +177,42 @@ def test_safras_do_catalogo_do_zarc():
     assert cp.safras_do_zarc(recursos) == ["2025/2026", "2026/2027"]
 
 
+def test_portarias_do_zarc_saem_na_ordem_dos_estados(monkeypatch):
+    """As linhas da tábua chegam em ordens diferentes de um download para outro; as portarias saem
+    sempre na ordem de ESTADOS, para a coleta não abrir commit que só troca a ordem delas."""
+    cab = ["Nome_cultura", "UF", "Cod_Outros_Manejos", "geocodigo", "municipio", "Cod_Ciclo", "Cod_Solo",
+           "Portaria"] + [f"dec{i}" for i in range(1, 37)]
+
+    class Resposta:
+        def __init__(self, linhas):
+            self.linhas = linhas
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def raise_for_status(self):
+            pass
+
+        def iter_lines(self):
+            return (";".join(campos).encode("utf-8") for campos in self.linhas)
+
+    recursos = [{"name": "Tábua de risco ZARC 2026/2027", "url": "https://dados"}]
+    estados = list(cp.ESTADOS)
+    for ordem in (estados, estados[::-1]):
+        corpo = [["Soja", uf, "1", str(1500000 + i), f"M{i}", "21", "12", f"Port.{uf}"] + ["20"] * 36
+                 for i, uf in enumerate(ordem)]
+
+        def get(url, headers=None, timeout=None, stream=None):
+            return Resposta([cab] + corpo)
+        monkeypatch.setattr(cp.requests, "get", get)
+        _, meta = cp.zarc(recursos, "2026/2027")
+        assert list(meta["portarias"]) == estados
+        assert meta["portarias"] == {uf: f"Port.{uf}" for uf in estados}
+
+
 def test_data_da_portaria():
     from datetime import date
     assert cp.data_da_portaria(cp.PORTARIA) == date(2026, 4, 9)

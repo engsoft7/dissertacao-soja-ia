@@ -9,10 +9,10 @@
   "fonte": "Tábua de risco do ZARC, Ministério da Agricultura (dados abertos, licença Creative Commons Atribuição)",
   "url": "https://dados.agricultura.gov.br/dataset/6d3d141c-885e-41a4-ab7f-dc8ff323b96f/resource/139e5a60-1f43-4cc8-aeab-a35dbbf816c0/download/dados-abertos-tabua-de-risco-safra-2026-2027.csv",
   "portarias": {
+   "PA": "Port.203_de_03-07-2026",
    "MT": "Port.202_de_03-07-2026",
    "MA": "Port.199_de_03-07-2026",
    "TO": "Port.212_de_03-07-2026",
-   "PA": "Port.203_de_03-07-2026",
    "RO": "Port.207_de_03-07-2026"
   },
   "ciclos": {

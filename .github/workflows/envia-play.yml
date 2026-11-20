@@ -68,7 +68,7 @@ jobs:
       ETIQUETA: ${{ inputs.tag }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Prepara o cliente da Play
         id: cliente

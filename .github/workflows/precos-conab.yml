@@ -40,8 +40,8 @@ jobs:
     env:
       NA_MAIN: ${{ github.ref == 'refs/heads/main' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - run: pip install --quiet requests pandas pytest
@@ -80,7 +80,7 @@ jobs:
       - name: Abre PR com os preços novos
         id: cpr
         if: steps.coleta.outputs.alterado == 'true' && env.NA_MAIN == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: automacao/precos-conab
           add-paths: |

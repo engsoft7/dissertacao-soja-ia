@@ -3,8 +3,12 @@
 Ciclo de retreino do contador de vagens com as fotos marcadas no Pará.
 
 O contador do aplicativo foi treinado só com a YOLO POD (plantas chinesas
-sobre pano escuro), e o erro nas lavouras do Pará nunca foi medido. O app já
-guarda cada foto que o produtor marca e a exporta num .zip (AmostrasTreino.kt).
+sobre pano escuro), e o erro nas lavouras do Pará nunca foi medido. Até a
+versão 2.10.0, o app guardava cada foto que o produtor marcava, com o talhão
+(talhoes.json), e a exportava num .zip; a 2.10.1 tirou essa função
+(AmostrasTreino.kt). O script continua aceitando .zip nesse formato, os já
+exportados ou montados com outra ferramenta de marcação, e as fotos do Pará
+passam a depender de uma coleta própria.
 Este script fecha o ciclo em três passos, sem mexer nos scripts de treino e
 de conversão, de que só importa as rotinas:
 

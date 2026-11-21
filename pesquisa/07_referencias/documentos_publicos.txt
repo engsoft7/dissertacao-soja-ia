@@ -159,7 +159,11 @@ https://portaldeinformacoes.conab.gov.br/download-arquivos.html
 # ERAD e ERAMIA-NO2 2026: chamada, versão final, inscrição no ECOS e termo de autorização de publicação da SBC
 https://www2.sbc.org.br/erad_eramia-no2/2026/
 https://www2.sbc.org.br/erad_eramia-no2/2026/chamada-erad_no2/
-https://ecos.sbc.org.br/
+https://www2.sbc.org.br/erad_eramia-no2/2026/chamada-eramia_no2/
+https://www2.sbc.org.br/erad_eramia-no2/2026/datas-importantes/
+https://www2.sbc.org.br/erad_eramia-no2/2026/inscricoes/
+https://www2.sbc.org.br/erad_eramia-no2/2026/programa/
+https://centraldesistemas.sbc.org.br/ecos/eradeeramiaNO2-2026
+navegador https://centraldesistemas.sbc.org.br/ecos/eradeeramiaNO2-2026
+navegador https://www2.sbc.org.br/erad_eramia-no2/2026/inscricoes/
 https://share.google/kbhkLL1pr9r3mesGh
-navegador https://www2.sbc.org.br/erad_eramia-no2/2026/chamada-erad_no2/
-navegador https://ecos.sbc.org.br/

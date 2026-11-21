@@ -164,6 +164,6 @@ https://www2.sbc.org.br/erad_eramia-no2/2026/datas-importantes/
 https://www2.sbc.org.br/erad_eramia-no2/2026/inscricoes/
 https://www2.sbc.org.br/erad_eramia-no2/2026/programa/
 https://centraldesistemas.sbc.org.br/ecos/eradeeramiaNO2-2026
-navegador https://centraldesistemas.sbc.org.br/ecos/eradeeramiaNO2-2026
-navegador https://www2.sbc.org.br/erad_eramia-no2/2026/inscricoes/
+# a tabela de valores da página de inscrições é uma imagem
+https://www2.sbc.org.br/erad_eramia-no2/2026/assets/images/tabela-inscricoes-erad.png
 https://share.google/kbhkLL1pr9r3mesGh

@@ -155,3 +155,11 @@ navegador https://www.gov.br/agricultura/pt-br/assuntos/sanidade-animal-e-vegeta
 # Os preços agropecuários da CONAB (soja em grão, preço recebido pelo produtor):
 # a página de downloads que a lista de fontes do app e a loja citam
 https://portaldeinformacoes.conab.gov.br/download-arquivos.html
+#
+# ERAD e ERAMIA-NO2 2026: chamada, versão final, inscrição no ECOS e termo de autorização de publicação da SBC
+https://www2.sbc.org.br/erad_eramia-no2/2026/
+https://www2.sbc.org.br/erad_eramia-no2/2026/chamada-erad_no2/
+https://ecos.sbc.org.br/
+https://share.google/kbhkLL1pr9r3mesGh
+navegador https://www2.sbc.org.br/erad_eramia-no2/2026/chamada-erad_no2/
+navegador https://ecos.sbc.org.br/

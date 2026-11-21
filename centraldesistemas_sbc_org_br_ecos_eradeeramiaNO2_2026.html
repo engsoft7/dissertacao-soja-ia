@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>SBC Systems Home - SBC Sistemas</title>
+	<link href="/favicon.ico" type="image/x-icon" rel="shortcut icon" />
+	<meta name="viewport" content="width=device-width">
+	<link rel="stylesheet" type="text/css" href="/ccss/home.css" />
+	<link rel="stylesheet" type="text/css" href="/ccss/accounts.css" />
+
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/cjs/utils.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+var _gaq = _gaq || [];_gaq.push(['_setAccount', 'UA-9047434-8'], ['_trackPageview']); doGoogleAnalytics();var pathbase = '/';jQuery(function($) {formatFields(); $('input:visible:first').focus();});
+//]]>
+</script>
+
+</head>
+<body>
+<div id="container">
+<div id="header">
+<div class="sbc-header"><img src="/img/logo-sbc.png" alt="" /></div>
+<ul class="top-menu"><li><a href="/"><img src="/img/action-home.png" title="Voltar ao Início" class="action-btn" alt="Voltar ao Início" /></a></li><li><b>Login/Criar Nova Conta: </b><a href="/login" class="loginpop"><img src="/img/action-login.png" title="Login/Criar Nova Conta" class="action-btn" alt="Login/Criar Nova Conta" /></a></li><li><b>Idioma: </b><a href="/pt-br"><img src="/img/flag-pt-br.png" class="action-btn flag-btn" title="Portuguese (Brazil)" alt="Portuguese (Brazil)" /></a><a href="/en-us"><img src="/img/flag-en-us.png" class="action-btn flag-btn" title="English (United States)" alt="English (United States)" /></a></li></ul><div class="flash-messages"></div></div>
+<div id="content"><div class="systems-home">
+<div class="systems-link" onclick="location.assign(&#039;/register&#039;)" onmouseover="$(this).addClass(&#039;systems-link-accounts&#039;)" onmouseout="$(this).removeClass(&#039;systems-link-accounts&#039;)"><span><a href="/register">Contas &raquo;</a><br/>Editar/Criar um Perfil para os Sistemas da SBC</span></div><div class="systems-link" onclick="location.assign(&#039;/ecos&#039;)" onmouseover="$(this).addClass(&#039;systems-link-events&#039;)" onmouseout="$(this).removeClass(&#039;systems-link-events&#039;)"><span><a href="/ecos">ECOS &raquo;</a><br/>Acesso ao Sistema de Inscrições e Coordenação de Eventos</span></div><div class="systems-link" onclick="location.assign(&#039;/mom&#039;)" onmouseover="$(this).addClass(&#039;systems-link-members&#039;)" onmouseout="$(this).removeClass(&#039;systems-link-members&#039;)"><span><a href="/mom">MoM &raquo;</a><br/>Acesso ao Sistema de Associados à SBC</span></div><div class="systems-link" onclick="location.assign(&#039;/ros&#039;)" onmouseover="$(this).addClass(&#039;systems-link-offices&#039;)" onmouseout="$(this).removeClass(&#039;systems-link-offices&#039;)"><span><a href="/ros">ROS &raquo;</a><br/>Acesso ao Sistema de Secretarias Regionais</span></div><div class="systems-link" onclick="window.open(&#039;https://jems3.sbc.org.br/&#039;)" onmouseover="$(this).addClass(&#039;systems-link-default&#039;)" onmouseout="$(this).removeClass(&#039;systems-link-default&#039;)"><span><a href="#">JEMS &raquo;</a><br/>Sistema de Gerenciamento de Periódicos e Eventos (submissão de artigos)</span></div><div class="systems-link" onclick="window.open(&#039;http://www.sbc.org.br/&#039;)" onmouseover="$(this).addClass(&#039;systems-link-default&#039;)" onmouseout="$(this).removeClass(&#039;systems-link-default&#039;)"><span><a href="#">Portal &raquo;</a><br/>Portal Institucional da SBC</span></div></div>
+</div>
+<div id="footer">
+<div class="sbc-footer"></div>
+<div class="footer-left">
+	
+	<h4>Sociedade Brasileira de Computação (SBC)</h4>
+<b>Portal:</b> <a href="http://www.sbc.org.br/" target="_blank">http://www.sbc.org.br/</a>
+</div>
+<div class="footer-right">
+	<h4>Contato do Suporte</h4>
+<b>Telefone:</b> +55 (51) 3308-6835<br/><b>E-mail:</b> <a href="mailto:sbc@sbc.org.br">sbc@sbc.org.br</a></div>
+</div>
+</div>
+    <div id="login-form" style="display:none;position:absolute;background:white;padding:4px;z-index:3;top:105px;right:5px;">
+    
+    <div class="login box">
+        <h3><span>Já é um Usuário?</span></h3>
+        <div class="content">
+            <form action="/login" method="post" accept-charset="utf-8"><div style="display:none;"><input type="hidden" name="_method" value="POST" /></div><div class="input text"><label for="UserUsername">Email</label><br><input name="data[User][username]" type="text" size="20" tabindex="1" id="UserUsername" /></div><div class="input password"><label for="UserPassword">Senha</label><a href="/forgot" class="float-right" tabindex="5">(Esqueceu sua Senha?)</a><input type="password" name="data[User][password]" size="20" tabindex="2" id="UserPassword" /></div><input type="hidden" name="data[User][redirect]" id="UserRedirect" /><div class="submit"><input type="submit" value="Login" tabindex="3">ou&nbsp<a href="/register" tabindex="4">Nova Conta &raquo;</a></div></form>        </div>
+    </div>
+
+        </div>
+    <div id="login-form-background" style="display:none;position:fixed;_position:absolute;top:0;left:0;background:#000000;border:1px solid #cecece;z-index:1;height:100%;width:100%;opacity:0.7;"> </div>
+    <script type="text/javascript">
+        var a_redirect;
+              
+        $(function() {
+            var button = $('.loginpop');
+            var box = $('#login-form');
+            button.click(function() {
+                box.css('top', $('.sbc-header').offset().top+$('.sbc-header').outerHeight()).toggle().find('input[type=text]').first().focus();
+                button.toggleClass('active');
+                return false;
+            });
+            $('#login-form').mouseup(function() { 
+                return false;
+            });
+            $(this).mouseup(function(login) {
+                if(!$(login.target).parent('#login-form').length) {
+                    button.removeClass('active');
+                    box.hide();
+                }
+            });
+        });
+            
+    </script>
+<!-- Cached in 21.11.2026 09:55:28 --></body>
+</html>

@@ -1,0 +1,363 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Table of Contents</title>
+<link REL="stylesheet" TYPE="text/css" HREF="fao.css">
+</head>
+
+<body bgcolor="#FFFFFF">
+<H1>Crop evapotranspiration - Guidelines for computing crop water requirements - FAO Irrigation and drainage paper 56</H1>
+<hr><img src="x0490e.jpg" hspace="10" align="left">
+<br><br><br><br><br><br><br><br><br><br><br>
+<p align="right"><b><a href="#Contents">Table of Contents</a></b>
+<hr>
+<p><B>by</B>
+<p><B>Richard G. Allen</B><BR>Utah State University<BR>Logan, Utah, USA
+<p><B>Luis S. Pereira</B><BR>Instituto Superior de Agronomia<BR>Lisbon, Portugal
+<p><B>Dirk Raes</B><BR>Katholieke Universiteit Leuven<BR>Leuven, Belgium
+<p><B>Martin Smith</B><BR>Water Resources, Development and Management Service<BR>FAO
+<p><B>FAO - Food and Agriculture Organization of the United Nations</B><BR><B>Rome, 1998</B>
+<p><TABLE BORDER><TR VALIGN="TOP"><TD COLSPAN=1 ROWSPAN=1 VALIGN=TOP>
+<p>The designations employed and the presentation of material in this publication do not imply the expression of any opinion whatsoever on the part of the Food and Agriculture Organization of the United Nations concerning the legal status of any country, territory, city or area or of its authorities, or concerning the delimitation of its frontiers or boundaries.</TD></TR></TABLE>
+<p>M-56<BR>ISBN 92-5-104219-5
+<p>All rights reserved. No part of this publication may be reproduced, stored in a retrieval system, or transmitted in any form or by any means, electronic, mechanical, photocopying or otherwise. without the prior permission of the copyright owner. Applications for such permission, with a statement of the purpose and extent of the reproduction, should be addressed to the Director, Information Division, Food and Agriculture Organization of the United Nations, Viale delle Terme di Caracalla, 00100 Rome, Italy.
+<p><B>&#169; FAO 1998</B>
+<p><I>This electronic document has been scanned using optical character recognition (OCR) software and careful manual recorrection. Even if the quality of digitalisation is high, the FAO declines all responsibility for any discrepancies that may exist between the present document and its original printed version.</I>
+<hr><h2><a name="Contents">Table of Contents</a></h2>
+<hr><p><a href="x0490e01.htm#preface"><b>Preface</b></a><p><a href="x0490e02.htm#acknowledgements"><b>Acknowledgements</b></a><p><a href="x0490e03.htm#list of principal symbols and acronyms"><b>List of principal symbols and acronyms</b></a><p><a href="x0490e04.htm#chapter 1   introduction to evapotranspiration"><b>Chapter 1 - Introduction to evapotranspiration</b></a><p>
+<blockquote> 
+  <p><a href="x0490e04.htm#evapotranspiration process">Evapotranspiration process</a></p>
+  <blockquote>
+    <p> <a href="x0490e04.htm#evaporation">Evaporation</a><br>
+      <a href="x0490e04.htm#transpiration">Transpiration</a><br>
+      <a href="x0490e04.htm#evapotranspiration (et)">Evapotranspiration (ET)</a></p>
+  </blockquote>
+  <p><a href="x0490e04.htm#units">Units</a><br>
+    <a href="x0490e04.htm#factors affecting evapotranspiration">Factors affecting 
+    evapotranspiration</a></p>
+  <blockquote> 
+    <p><a href="x0490e04.htm#weather parameters">Weather parameters</a><br>
+      <a href="x0490e04.htm#crop factors">Crop factors</a><br>
+      <a href="x0490e04.htm#management and environmental conditions">Management and 
+      environmental conditions</a></p>
+  </blockquote>
+  <p><a href="x0490e04.htm#evapotranspiration concepts">Evapotranspiration concepts</a></p>
+  <blockquote> 
+    <p><a href="x0490e04.htm#reference crop evapotranspiration (eto)">Reference crop 
+      evapotranspiration (ET<sub>o</sub>)</a><br>
+      <a href="x0490e04.htm#crop evapotranspiration under standard conditions (etc)">Crop 
+      evapotranspiration under standard conditions (ET<sub>c</sub>)</a><br>
+      <a href="x0490e04.htm#crop evapotranspiration under non standard conditions (etc adj)">Crop 
+      evapotranspiration under non-standard conditions (ET<sub>c adj</sub>)</a></p>
+  </blockquote>
+  <p><a href="x0490e04.htm#determining evapotranspiration">Determining evapotranspiration</a></p>
+  <blockquote> 
+    <p><a href="x0490e04.htm#et measurement">ET measurement</a><br>
+      <a href="x0490e04.htm#et computed from meteorological data">ET computed from 
+      meteorological data</a><br>
+      <a href="x0490e04.htm#et estimated from pan evaporation">ET estimated from pan 
+      evaporation</a> </p>
+  </blockquote>
+</blockquote>
+<p><a href="x0490e05.htm#part a   reference evapotranspiration (eto)"><b>Part A - Reference evapotranspiration (ET<sub>o</sub>)</b></a>
+<blockquote> 
+  <p><a href="x0490e06.htm#chapter 2   fao penman monteith equation"><b>Chapter 2 
+    - FAO Penman-Monteith equation</b></a> </p>
+  <blockquote> 
+    <p><a href="x0490e06.htm#need for a standard eto method">Need for a standard ET<sub>o</sub> 
+      method</a><br>
+      <a href="x0490e06.htm#formulation of the penman monteith equation">Formulation 
+      of the Penman-Monteith equation</a></p>
+    <blockquote> 
+      <p> <a href="x0490e06.htm#penman monteith equation">Penman-Monteith equation</a><br>
+        <a href="x0490e06.htm#aerodynamic resistance (ra)">Aerodynamic resistance 
+        (r<sub>a</sub>)</a><br>
+        <a href="x0490e06.htm#(bulk) surface resistance (rs)">(Bulk) surface resistance 
+        (r<sub>s</sub>)</a></p>
+    </blockquote>
+    <p><a href="x0490e06.htm#reference surface">Reference surface</a><br>
+      <a href="x0490e06.htm#fao penman monteith equation">FAO Penman-Monteith equation</a></p>
+    <blockquote> 
+      <p><a href="x0490e06.htm#equation">Equation</a><br>
+        <a href="x0490e06.htm#data">Data</a><br>
+        <a href="x0490e06.htm#missing climatic data">Missing climatic data</a> </p>
+    </blockquote>
+  </blockquote>
+  <p><a href="x0490e07.htm#chapter 3   meteorological data"><b>Chapter 3 - Meteorological 
+    data</b></a> </p>
+  <blockquote> 
+    <p><a href="x0490e07.htm#meteorological factors determining et">Meteorological 
+      factors determining ET</a></p>
+    <blockquote> 
+      <p><a href="x0490e07.htm#solar radiation">Solar radiation</a><br>
+        <a href="x0490e07.htm#air temperature">Air temperature</a><br>
+        <a href="x0490e07.htm#air humidity">Air humidity</a><br>
+        <a href="x0490e07.htm#wind speed">Wind speed</a></p>
+    </blockquote>
+    <p><a href="x0490e07.htm#atmospheric parameters">Atmospheric parameters</a></p>
+    <blockquote> 
+      <p><a href="x0490e07.htm#atmospheric pressure (p)">Atmospheric pressure (P)</a><br>
+        <a href="x0490e07.htm#latent heat of vaporization (&#108;)">Latent heat of 
+        vaporization (<font FACE="Symbol">&#108;</font>)</a><br>
+        <a href="x0490e07.htm#psychrometric constant (&#103;)">Psychrometric constant 
+        (<font FACE="Symbol">&#103;</font>)</a></p>
+    </blockquote>
+    <p><a href="x0490e07.htm#air temperature">Air temperature</a><br>
+      <a href="x0490e07.htm#air humidity">Air humidity</a></p>
+    <blockquote> 
+      <p><a href="x0490e07.htm#concepts">Concepts</a><br>
+        <a href="x0490e07.htm#measurement">Measurement</a><br>
+        <a href="x0490e07.htm#calculation procedures">Calculation procedures</a></p>
+    </blockquote>
+    <p><a href="x0490e07.htm#radiation">Radiation</a></p>
+    <blockquote> 
+      <p><a href="x0490e07.htm#concepts">Concepts</a><br>
+        <a href="x0490e07.htm#units">Units</a><br>
+        <a href="x0490e07.htm#measurement">Measurement</a><br>
+        <a href="x0490e07.htm#calculation procedures">Calculation procedures</a></p>
+    </blockquote>
+    <p><a href="x0490e07.htm#wind speed">Wind speed</a></p>
+    <blockquote> 
+      <p><a href="x0490e07.htm#measurement">Measurement</a><br>
+        <a href="x0490e07.htm#wind profile relationship">Wind profile relationship</a></p>
+    </blockquote>
+    <p><a href="x0490e07.htm#climatic data acquisition">Climatic data acquisition</a></p>
+    <blockquote> 
+      <p><a href="x0490e07.htm#weather stations">Weather stations</a><br>
+        <a href="x0490e07.htm#agroclimatic monthly databases">Agroclimatic monthly 
+        databases</a></p>
+    </blockquote>
+    <p><a href="x0490e07.htm#estimating missing climatic data">Estimating missing 
+      climatic data</a></p>
+    <blockquote> 
+      <p><a href="x0490e07.htm#estimating missing humidity data">Estimating missing 
+        humidity data</a><br>
+        <a href="x0490e07.htm#estimating missing radiation data">Estimating missing 
+        radiation data</a><br>
+        <a href="x0490e07.htm#missing wind speed data">Missing wind speed data</a></p>
+    </blockquote>
+    <p><a href="x0490e07.htm#minimum data requirements">Minimum data requirements</a></p>
+    <blockquote> 
+      <p><a href="x0490e07.htm#an alternative equation for eto when weather data are missing">An 
+        alternative equation for ET<sub>o</sub> when weather data are missing</a> </p>
+    </blockquote>
+  </blockquote>
+  <p><a href="x0490e08.htm#chapter 4   determination of eto"><b>Chapter 4 - Determination 
+    of ET<sub>o</sub></b></a> </p>
+  <blockquote> 
+    <p><a href="x0490e08.htm#penman monteith equation">Penman-Monteith equation</a></p>
+    <blockquote> 
+      <p><a href="x0490e08.htm#calculation procedure">Calculation procedure</a><br>
+        <a href="x0490e08.htm#eto calculated with different time steps">ET<sub>o</sub> calculated 
+        with different time steps</a></p>
+    </blockquote>
+    <p><a href="x0490e08.htm#calculation procedures with missing data">Calculation 
+      procedures with missing data</a><br>
+      <a href="x0490e08.htm#pan evaporation method">Pan evaporation method</a></p>
+    <blockquote>
+      <p><a href="x0490e08.htm#pan evaporation">Pan evaporation</a><br>
+        <a href="x0490e08.htm#pan coefficient (kp)">Pan coefficient (K<sub>p</sub>)</a> </p>
+    </blockquote>
+  </blockquote>
+</blockquote>
+<p><a href="x0490e09.htm#part b   crop evapotranspiration under standard conditions"><b>Part B - Crop evapotranspiration under standard conditions</b></a>
+<blockquote> 
+  <p><a href="x0490e0a.htm#chapter 5   introduction to crop evapotranspiration (etc)"><b>Chapter 
+    5 - Introduction to crop evapotranspiration (ET<sub>c</sub>)</b></a> </p>
+  <blockquote> 
+    <p><a href="x0490e0a.htm#calculation procedures">Calculation procedures</a></p>
+    <blockquote> 
+      <p><a href="x0490e0a.htm#direct calculation">Direct calculation</a><br>
+        <a href="x0490e0a.htm#crop coefficient approach">Crop coefficient approach</a></p>
+    </blockquote>
+    <p><a href="x0490e0a.htm#factors determining the crop coefficient">Factors determining 
+      the crop coefficient</a></p>
+    <blockquote> 
+      <p><a href="x0490e0a.htm#crop type">Crop type</a><br>
+        <a href="x0490e0a.htm#climate">Climate</a><br>
+        <a href="x0490e0a.htm#soil evaporation">Soil evaporation</a><br>
+        <a href="x0490e0a.htm#crop growth stages">Crop growth stages</a></p>
+    </blockquote>
+    <p><a href="x0490e0a.htm#crop evapotranspiration (etc)">Crop evapotranspiration 
+      (ET<sub>c</sub>)</a></p>
+    <blockquote> 
+      <p><a href="x0490e0a.htm#single and dual crop coefficient approaches">Single 
+        and dual crop coefficient approaches</a><br>
+        <a href="x0490e0a.htm#crop coefficient curve">Crop coefficient curve</a></p>
+    </blockquote>
+    <p> <a href="x0490e0a.htm#flow chart of the calculations">Flow chart of the calculations</a> 
+    </p>
+  </blockquote>
+  <p><a href="x0490e0b.htm#chapter 6   etc   single crop coefficient (kc)"><b>Chapter 
+    6 - ET<sub>c</sub> - Single crop coefficient (K<sub>c</sub>)</b></a> </p>
+  <blockquote> 
+    <p><a href="x0490e0b.htm#length of growth stages">Length of growth stages</a><br>
+      <a href="x0490e0b.htm#crop coefficients">Crop coefficients</a></p>
+    <blockquote> 
+      <p> <a href="x0490e0b.htm#tabulated kc values">Tabulated K<sub>c</sub> values</a><br>
+        <a href="x0490e0b.htm#crop coefficient for the initial stage (kc ini)">Crop 
+        coefficient for the initial stage (K<sub>c ini</sub>)</a><br>
+        <a href="x0490e0b.htm#crop coefficient for the mid season stage (kc mid)">Crop 
+        coefficient for the mid-season stage (K<sub>c mid</sub>)</a><br>
+        <a href="x0490e0b.htm#crop coefficient for the end of the late season stage (kc end)">Crop 
+        coefficient for the end of the late season stage (K<sub>c end</sub>)</a></p>
+    </blockquote>
+    <p><a href="x0490e0b.htm#construction of the kc curve">Construction of the K<sub>c</sub> 
+      curve</a></p>
+    <blockquote> 
+      <p><a href="x0490e0b.htm#annual crops">Annual crops</a><br>
+        <a href="x0490e0b.htm#kc curves for forage crops">K<sub>c</sub> curves for forage crops</a><br>
+        <a href="x0490e0b.htm#fruit trees">Fruit trees</a></p>
+    </blockquote>
+    <p><a href="x0490e0b.htm#calculating etc">Calculating ET<sub>c</sub></a></p>
+    <blockquote> 
+      <p><a href="x0490e0b.htm#graphical determination of kc">Graphical determination 
+        of K<sub>c</sub></a><br>
+        <a href="x0490e0b.htm#numerical determination of kc">Numerical determination 
+        of K<sub>c</sub></a></p>
+    </blockquote>
+    <p><a href="x0490e0b.htm#alfalfa based crop coefficients">Alfalfa-based crop coefficients</a><br>
+      <a href="x0490e0b.htm#transferability of previous kc values">Transferability 
+      of previous K<sub>c</sub> values</a> </p>
+  </blockquote>
+  <p><a href="x0490e0c.htm#chapter 7   etc   dual crop coefficient (kc = kcb + ke)"><b>Chapter 
+    7 - ET<sub>c</sub> - Dual crop coefficient (K<sub>c</sub> = K<sub>cb</sub> 
+    + K<sub>e</sub>)</b></a> </p>
+  <blockquote> 
+    <p><a href="x0490e0c.htm#transpiration component (kcb eto)">Transpiration component 
+      (K<sub>cb</sub> ET<sub>o</sub>)</a></p>
+    <blockquote> 
+      <p><a href="x0490e0c.htm#basal crop coefficient (kcb)">Basal crop coefficient 
+        (K<sub>cb</sub>)</a><br>
+        <a href="x0490e0c.htm#determination of daily kcb values">Determination of 
+        daily K<sub>cb</sub> values</a></p>
+    </blockquote>
+    <p><a href="x0490e0c.htm#evaporation component (ke eto)">Evaporation component 
+      (K<sub>e</sub> ET<sub>o</sub>)</a></p>
+    <blockquote>
+      <p><a href="x0490e0c.htm#calculation procedure">Calculation procedure</a><br>
+        <a href="x0490e0c.htm#upper limit kc max">Upper limit K<sub>c max</sub></a><br>
+        <a href="x0490e0c.htm#soil evaporation reduction coefficient (kr)">Soil evaporation 
+        reduction coefficient (K<sub>r</sub>)</a><br>
+        <a href="x0490e0c.htm#exposed and wetted soil fraction (few)">Exposed and 
+        wetted soil fraction (f<sub>ew</sub>)</a><br>
+        <a href="x0490e0c.htm#daily calculation of ke">Daily calculation of K<sub>e</sub></a></p>
+    </blockquote>
+    <p><a href="x0490e0c.htm#calculating etc">Calculating ET<sub>c</sub></a> </p>
+  </blockquote>
+</blockquote>
+<p><a href="x0490e0d.htm#part c   crop evapotranspiration under non standard conditions"><b>Part 
+  C - Crop evapotranspiration under non-standard conditions</b></a></p>
+<blockquote> 
+  <p><a href="x0490e0e.htm#chapter 8   etc under soil water stress conditions"><b>Chapter 
+    8 - ET<sub>c</sub> under soil water stress conditions</b></a> </p>
+  <blockquote> 
+    <p><a href="x0490e0e.htm#soil water availability">Soil water availability</a></p>
+    <blockquote> 
+      <p><a href="x0490e0e.htm#total available water (taw)">Total available water 
+        (TAW)</a><br>
+        <a href="x0490e0e.htm#readily available water (raw)">Readily available water 
+        (RAW)</a></p>
+    </blockquote>
+    <p><a href="x0490e0e.htm#water stress coefficient (ks)">Water stress coefficient 
+      (K<sub>s</sub>)</a><br>
+      <a href="x0490e0e.htm#soil water balance">Soil water balance</a><br>
+      <a href="x0490e0e.htm#forecasting or allocating irrigations">Forecasting or 
+      allocating irrigations</a><br>
+      <a href="x0490e0e.htm#effects of soil salinity">Effects of soil salinity</a><br>
+      <a href="x0490e0e.htm#yield salinity relationship">Yield-salinity relationship</a><br>
+      <a href="x0490e0e.htm#yield moisture stress relationship">Yield-moisture stress 
+      relationship</a><br>
+      <a href="x0490e0e.htm#combined salinity et reduction relationship">Combined 
+      salinity-ET reduction relationship</a></p>
+    <blockquote> 
+      <p><a href="x0490e0e.htm#no water stress (dr &lt; raw)">No water stress (D<sub>r</sub> 
+        &lt; RAW)</a><br>
+        <a href="x0490e0e.htm#with water stress (dr &gt; raw)">With water stress (D<sub>r</sub> 
+        &gt; RAW)</a></p>
+    </blockquote>
+    <p><a href="x0490e0e.htm#application">Application</a> </p>
+  </blockquote>
+  <p><a href="x0490e0f.htm#chapter 9   etc for natural, non typical and non pristine vegetation"><b>Chapter 
+    9 - ET<sub>c</sub> for natural, non-typical and non-pristine vegetation</b></a> </p>
+  <blockquote> 
+    <p><a href="x0490e0f.htm#calculation approach">Calculation approach</a></p>
+    <blockquote> 
+      <p><a href="x0490e0f.htm#initial growth stage">Initial growth stage</a><br>
+        <a href="x0490e0f.htm#mid and late season stages">Mid and late season stages</a><br>
+        <a href="x0490e0f.htm#water stress conditions">Water stress conditions</a></p>
+    </blockquote>
+    <p><a href="x0490e0f.htm#mid season stage   adjustment for sparse vegetation">Mid-season 
+      stage - Adjustment for sparse vegetation</a></p>
+    <blockquote> 
+      <p><a href="x0490e0f.htm#adjustment from simple field observations">Adjustment 
+        from simple field observations</a><br>
+        <a href="x0490e0f.htm#estimation of kcb mid from leaf area index (lai)">Estimation 
+        of K<sub>cb mid</sub> from Leaf Area Index (LAI)</a><br>
+        <a href="x0490e0f.htm#estimation of kcb mid from effective ground cover (fc eff)">Estimation 
+        of K<sub>cb mid</sub> from effective ground cover (f<sub>c eff</sub>)</a><br>
+        <a href="x0490e0f.htm#estimation of kcb full">Estimation of K<sub>cb full</sub></a><br>
+        <a href="x0490e0f.htm#conclusion">Conclusion</a></p>
+    </blockquote>
+    <p><a href="x0490e0f.htm#mid season stage   adjustment for stomatal control">Mid-season 
+      stage - Adjustment for stomatal control</a><br>
+      <a href="x0490e0f.htm#late season stage">Late season stage</a><br>
+      <a href="x0490e0f.htm#estimating etc adj using crop yields">Estimating ET<sub>c adj</sub> 
+      using crop yields</a> </p>
+  </blockquote>
+  <p><a href="x0490e0g.htm#chapter 10   etc under various management practices"><b>Chapter 
+    10 - ET<sub>c</sub> under various management practices</b></a> </p>
+  <blockquote> 
+    <p><a href="x0490e0g.htm#effects of surface mulches">Effects of surface mulches</a></p>
+    <blockquote> 
+      <p><a href="x0490e0g.htm#plastic mulches">Plastic mulches</a><br>
+        <a href="x0490e0g.htm#organic mulches">Organic mulches</a></p>
+    </blockquote>
+    <p><a href="x0490e0g.htm#intercropping">Intercropping</a></p>
+    <blockquote> 
+      <p><a href="x0490e0g.htm#contiguous vegetation">Contiguous vegetation</a><br>
+        <a href="x0490e0g.htm#overlapping vegetation">Overlapping vegetation</a><br>
+        <a href="x0490e0g.htm#border crops">Border crops</a></p>
+    </blockquote>
+    <p><a href="x0490e0g.htm#small areas of vegetation">Small areas of vegetation</a></p>
+    <blockquote> 
+      <p><a href="x0490e0g.htm#areas surrounded by vegetation having similar roughness and moisture conditions">Areas 
+        surrounded by vegetation having similar roughness and moisture conditions</a><br>
+        <a href="x0490e0g.htm#clothesline and oasis effects">Clothesline and oasis 
+        effects</a></p>
+    </blockquote>
+    <p><a href="x0490e0g.htm#management induced environmental stress">Management induced 
+      environmental stress</a></p>
+    <blockquote> 
+      <p><a href="x0490e0g.htm#alfalfa seed">Alfalfa seed</a><br>
+        <a href="x0490e0g.htm#cotton">Cotton</a><br>
+        <a href="x0490e0g.htm#sugar beets">Sugar beets</a><br>
+        <a href="x0490e0g.htm#coffee">Coffee</a><br>
+        <a href="x0490e0g.htm#tea">Tea</a><br>
+        <a href="x0490e0g.htm#olives">Olives</a> </p>
+    </blockquote>
+  </blockquote>
+  <p><a href="x0490e0h.htm#chapter 11   etc during non growing periods"><b>Chapter 
+    11 - ET<sub>c</sub> during non-growing periods</b></a> </p>
+  <blockquote> 
+    <p><a href="x0490e0h.htm#types of surface conditions">Types of surface conditions</a></p>
+    <blockquote>
+      <p><a href="x0490e0h.htm#bare soil">Bare soil</a><br>
+        <a href="x0490e0h.htm#surface covered with dead vegetation">Surface covered 
+        with dead vegetation</a><br>
+        <a href="x0490e0h.htm#surface covered with live vegetation">Surface covered 
+        with live vegetation</a><br>
+        <a href="x0490e0h.htm#frozen or snow covered surfaces">Frozen or snow covered 
+        surfaces</a> </p>
+    </blockquote>
+  </blockquote>
+</blockquote>
+<p><a href="x0490e0i.htm#annex 1. units and symbols"><b>Annex 1. Units and symbols</b></a><p><a href="x0490e0j.htm#annex 2. meteorological tables"><b>Annex 2. Meteorological tables</b></a><p><a href="x0490e0k.htm#annex 3. background on physical parameters used in evapotranspiration computatio"><b>Annex 3. Background on physical parameters used in evapotranspiration computations</b></a>
+<p><a href="x0490e0l.htm#annex 4. statistical analysis of weather data sets 1"><b>Annex 
+  4. Statistical analysis of weather data sets</b></a>
+<p><a href="x0490e0m.htm#annex 5. measuring and assessing integrity of weather data"><b>Annex 5. Measuring and assessing integrity of weather data</b></a><p><a href="x0490e0n.htm#annex 6. correction of weather data observed in non reference weather sites to c"><b>Annex 6. Correction of weather data observed in non-reference weather sites to compute ET<sub>o</sub></b></a><p><a href="x0490e0o.htm#annex 7. background and computations for kc for the initial stage for annual cro"><b>Annex 7. Background and computations for K<sub>c</sub> for the initial stage for annual crops</b></a><p><a href="x0490e0p.htm#annex 8. calculation example for applying the dual kc procedure in irrigation sc"><b>Annex 8. Calculation example for applying the dual K<sub>c</sub> procedure in irrigation scheduling</b></a><p><a href="x0490e0q.htm#bibliography"><b>Bibliography</b></a><p>
+<blockquote><a href="x0490e0q.htm#a. basic concepts and definitions">A. Basic concepts and definitions</a><br><a href="x0490e0q.htm#b. et equations">B. ET equations</a><br><a href="x0490e0q.htm#c. et and weather measurement">C. ET and weather measurement</a><br><a href="x0490e0q.htm#d. parameters in et equations">D. Parameters in ET equations</a><br><a href="x0490e0q.htm#e. crop parameters in pm equation">E. Crop parameters in PM equation</a><br><a href="x0490e0q.htm#f. analysis of weather and et data">F. Analysis of weather and ET data</a><br><a href="x0490e0q.htm#g. crop evapotranspiration">G. Crop evapotranspiration</a><br><a href="x0490e0q.htm#h. crop coefficients">H. Crop coefficients</a><br><a href="x0490e0q.htm#i. lengths of crop growth stages">I. Lengths of crop growth stages</a><br><a href="x0490e0q.htm#j. effects of soil mulches">J. Effects of soil mulches</a><br><a href="x0490e0q.htm#k. non growing season evapotranspiration">K. Non-growing season evapotranspiration</a><br><a href="x0490e0q.htm#l. soil water holding characteristics">L. Soil water holding characteristics</a><br><a href="x0490e0q.htm#m. rooting depths">M. Rooting depths</a><br><a href="x0490e0q.htm#n. salinity impacts on evapotranspiration">N. Salinity impacts on evapotranspiration</a><br><a href="x0490e0q.htm#o. soil evaporation">O. Soil evaporation</a><br><a href="x0490e0q.htm#p. factors affecting etc">P. Factors affecting ET<sub>c</sub></a><br><a href="x0490e0q.htm#q. soil water balance and irrigation scheduling">Q. Soil water balance and irrigation scheduling</a><br><a href="x0490e0q.htm#r. general">R. General</a>
+</blockquote><p><a href="x0490e0r.htm#fao technical papers"><b>FAO technical papers</b></a>
+</body>
+</html>
